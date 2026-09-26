@@ -861,6 +861,77 @@ in case+ fd_r of
   | ~$R.err(_) => let val () = $A.free<byte>(content_arr) in ~1 end
 end
 
+(* Appends the lock text a[0, len) to out, keeping only the first line
+   for each package. A lock line is "<name> <version> <n>"; two lines
+   are for the same package when their names (up to the first space)
+   are equal. Indices are proven against the array size; len only says
+   where the text stops. *)
+#pub fn dedupe_lock {l:agz}
+  (a: !$A.arr(byte, l, 524288), len: int,
+   out: !$B.builder_v >> $B.builder_v): void
+
+(* First newline at or after i, or where the text stops. *)
+fun _lock_line_end {l:agz}{i:nat | i <= 524288} .<524288 - i>.
+  (a: !$A.arr(byte, l, 524288), i: int i, len: int): [r:int | i <= r; r <= 524288] int r =
+  if i >= 524288 then i
+  else if i >= len then i
+  else if byte2int0($A.get<byte>(a, i)) = 10 then i
+  else _lock_line_end(a, i + 1, len)
+
+(* First space in [s, e), or e. *)
+fun _lock_name_end {l:agz}{s,e:nat | s <= e; e <= 524288} .<e - s>.
+  (a: !$A.arr(byte, l, 524288), s: int s, e: int e): [r:int | s <= r; r <= e] int r =
+  if s >= e then e
+  else if byte2int0($A.get<byte>(a, s)) = 32 then s
+  else _lock_name_end(a, s + 1, e)
+
+(* a[s1, s1 + n) = a[s2, s2 + n] *)
+fun _lock_same {l:agz}{s1,s2,n:nat | s1 + n <= 524288; s2 + n <= 524288}{k:nat | k <= n} .<n - k>.
+  (a: !$A.arr(byte, l, 524288), s1: int s1, s2: int s2, n: int n, k: int k): bool =
+  if k >= n then true
+  else if byte2int0($A.get<byte>(a, s1 + k)) = byte2int0($A.get<byte>(a, s2 + k)) then
+    _lock_same(a, s1, s2, n, k + 1)
+  else false
+
+(* Whether a line before position s names the package a[s, s + n). *)
+fun _lock_seen {l:agz}{s,n:nat | s + n <= 524288}{p:nat | p <= s + 1} .<s + 1 - p>.
+  (a: !$A.arr(byte, l, 524288), s: int s, n: int n, p: int p, len: int): bool =
+  if p >= s then false
+  else let
+    val e = _lock_line_end(a, p, len)
+    val ne = _lock_name_end(a, p, e)
+  in
+    if ne - p = n then
+      if _lock_same(a, p, s, n, 0) then true
+      else _lock_seen(a, s, n, min(e + 1, s), len)
+    else _lock_seen(a, s, n, min(e + 1, s), len)
+  end
+
+implement dedupe_lock(a, len, out) = let
+  fun copy {l:agz}{i,e:nat | i <= e; e <= 524288}{n:nat | n <= $B.BUILDER_CAP} .<e - i>.
+    (a: !$A.arr(byte, l, 524288), i: int i, e: int e,
+     out: !$B.builder(n) >> $B.builder_v): void =
+    if i >= e then ()
+    else let
+      val () = put_char_v(out, byte2int0($A.get<byte>(a, i)))
+    in copy(a, i + 1, e, out) end
+  fun lines {l:agz}{s:nat | s <= 524289}{n:nat | n <= $B.BUILDER_CAP} .<524289 - s>.
+    (a: !$A.arr(byte, l, 524288), s: int s, len: int,
+     out: !$B.builder(n) >> $B.builder_v): void =
+    if s >= 524288 then ()
+    else if s >= len then ()
+    else let
+      val e = _lock_line_end(a, s, len)
+      val ne = _lock_name_end(a, s, e)
+    in
+      if _lock_seen(a, s, ne - s, 0, len) then lines(a, e + 1, len, out)
+      else let
+        val () = copy(a, s, e, out)
+        val () = put_char_v(out, 10)
+      in lines(a, e + 1, len, out) end
+    end
+in lines(a, 0, len, out) end
+
 #pub fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 implement str_to_path_arr(s) = let
