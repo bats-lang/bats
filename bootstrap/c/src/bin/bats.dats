@@ -260,22 +260,11 @@ in
               val repo_len = opt_string_copy(r, h_repository, repo_buf, 4096)
               val @(fz_repo, bv_repo) = $A.freeze<byte>(repo_buf)
               val @(fz_extra, bv_extra) = $A.freeze<byte>(extra_buf)
-              (* Handle --to-c *)
-              val () = (if $AP.is_present(r, h_to_c) then let
-                val tc_buf = $A.alloc<byte>(4096)
-                val tclen = $AP.get_string_copy(r, h_to_c, tc_buf, 4096)
-                val @(fz_tc, bv_tc) = $A.freeze<byte>(tc_buf)
-                var tcb = $B.create()
-                val () = copy_to_builder(bv_tc, 0, tclen, 4096, tcb, 4096)
-                val () = $A.drop<byte>(fz_tc, bv_tc)
-                val () = $A.free<byte>($A.thaw<byte>(fz_tc))
-                val tcp = str_to_path_arr("/tmp/_bpoc_to_c.txt")
-                val @(fz_tcp, bv_tcp) = $A.freeze<byte>(tcp)
-                val _ = write_file_from_builder(bv_tcp, 524288, tcb)
-                val () = $A.drop<byte>(fz_tcp, bv_tcp)
-                val () = $A.free<byte>($A.thaw<byte>(fz_tcp))
-                val () = set_to_c(1)
-              in end else ())
+              (* --to-c: passed to do_build; length 0 when absent *)
+              val tc_buf = $A.alloc<byte>(4096)
+              val tc_len = opt_string_copy(r, h_to_c, tc_buf, 4096)
+              val () = (if tc_len > 0 then set_to_c(1) else ())
+              val @(fz_tc, bv_tc) = $A.freeze<byte>(tc_buf)
               (* Get command *)
               val cmd_buf = $A.alloc<byte>(32)
               val cmd_len = $AP.get_string_copy(r, h_cmd, cmd_buf, 32)
@@ -292,16 +281,16 @@ in
                 val has_wasm = ((only_mask / 8) mod 2)
               in
                 if only_mask = 0 then let
-                  val () = do_build(0, 0)
-                  val () = do_build(1, 0)
-                  val () = do_build(0, 1)
-                in do_build(1, 1) end
+                  val () = do_build(0, 0, bv_tc, tc_len)
+                  val () = do_build(1, 0, bv_tc, tc_len)
+                  val () = do_build(0, 1, bv_tc, tc_len)
+                in do_build(1, 1, bv_tc, tc_len) end
                 else let
                   val bt = (if has_wasm > 0 then 1 else 0): int
-                  val () = (if has_debug > 0 then do_build(0, bt) else ())
-                  val () = (if has_release > 0 then do_build(1, bt) else ())
+                  val () = (if has_debug > 0 then do_build(0, bt, bv_tc, tc_len) else ())
+                  val () = (if has_release > 0 then do_build(1, bt, bv_tc, tc_len) else ())
                   val () = (if has_debug = 0 then
-                    if has_release = 0 then do_build(0, bt)
+                    if has_release = 0 then do_build(0, bt, bv_tc, tc_len)
                     else ()
                   else ())
                   val () = (if has_wasm > 0 then
@@ -312,7 +301,7 @@ in
                 in
                   if has_debug = 0 then
                     if has_release = 0 then
-                      if has_wasm = 0 then do_build(0, 0)
+                      if has_wasm = 0 then do_build(0, 0, bv_tc, tc_len)
                       else ()
                     else ()
                   else ()
@@ -437,6 +426,8 @@ in
               val () = $A.free<byte>($A.thaw<byte>(fz_repo))
               val () = $A.drop<byte>(fz_extra, bv_extra)
               val () = $A.free<byte>($A.thaw<byte>(fz_extra))
+              val () = $A.drop<byte>(fz_tc, bv_tc)
+              val () = $A.free<byte>($A.thaw<byte>(fz_tc))
             in end
             end end
           | ~$R.err(e) => let
