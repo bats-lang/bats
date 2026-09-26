@@ -1676,6 +1676,231 @@ in
   report_config(kind, err)
 end
 
+(* ============================================================
+   Path dependencies at build time (Rust: build::copy_path_dep)
+   ============================================================ *)
+
+(* A NUL-terminated path: a[0, n) + "/" + b[0, bl), and its length *)
+fn child_path {la,lb:agz}
+  (a: !$A.borrow(byte, la, 524288), n: int, b: !$A.borrow(byte, lb, 256), bl: int)
+  : @([l:agz] $A.arr(byte, l, 524288), int) = let
+  var p : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(a, 0, n, 524288, p)
+  val () = put_char_v(p, 47)
+  val () = copy_to_builder_v(b, 0, bl, 256, p)
+  val pl = $B.length(p)
+  val () = put_char_v(p, 0)
+  val @(pa, _) = $B.to_arr(p)
+in @(pa, pl) end
+
+(* Writes buf[0, k) to dst; whether all of it was written; frees buf *)
+fn write_prefix {l:agz}{k:pos | k <= 65536}
+  (dst: !$F.fd, buf: $A.arr(byte, l, 65536), k: int k): bool = let
+  val @(left, right) = $A.split<byte>(buf, k)
+  val @(fz, bv) = $A.freeze<byte>(left)
+  val w = (case+ $F.file_write(dst, bv, k) of | ~$R.ok(x) => x | ~$R.err(_) => ~1): int
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.join<byte>($A.thaw<byte>(fz), right))
+in w = k end
+
+(* Writes the bytes read from src to dst, 64 KiB at a time; false on an
+   error *)
+fun copy_bytes {f:nat} .<f>. (src: !$F.fd, dst: !$F.fd, f: int f): bool =
+  if f <= 0 then true
+  else let
+    val buf = $A.alloc<byte>(65536)
+  in
+    case+ $F.file_read(src, buf, 65536) of
+    | ~$R.err(_) => let
+        val () = $A.free<byte>(buf)
+      in false end
+    | ~$R.ok(k) =>
+      if k <= 0 then let
+        val () = $A.free<byte>(buf)
+      in true end
+      else if write_prefix(dst, buf, k) then copy_bytes(src, dst, f - 1)
+      else false
+  end
+
+(* Copies the file at the NUL-terminated path s to d (Rust: fs::copy);
+   false on an error *)
+fn copy_file {ls,ld:agz}
+  (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
+  case+ $F.file_open(s, 524288, 0, 0) of
+  | ~$R.err(_) => false
+  | ~$R.ok(sf) =>
+    (case+ $F.file_open(d, 524288, 1 + 64 + 512, 420) of
+     | ~$R.err(_) => let
+         val () = $R.discard<int><int>($F.file_close(sf))
+       in false end
+     | ~$R.ok(df) => let
+         val ok = copy_bytes(sf, df, 1048576)
+         val () = $R.discard<int><int>($F.file_close(sf))
+         val () = $R.discard<int><int>($F.file_close(df))
+       in ok end)
+
+(* Whether e[0, el) is ".", "..", or a directory Rust's copy skips:
+   build, dist, docs or bats_modules *)
+fn skipped_name {le:agz} (e: !$A.borrow(byte, le, 256), el: int, is_dir: bool): bool = let
+  var b_c = @[char][5]('b', 'u', 'i', 'l', 'd')
+  var d_c = @[char][4]('d', 'i', 's', 't')
+  var o_c = @[char][4]('d', 'o', 'c', 's')
+  var m_c = @[char][12]('b', 'a', 't', 's', '_', 'm', 'o', 'd', 'u', 'l', 'e', 's')
+in
+  if el = 1 then peek(e, 0, 256) = 46
+  else if el = 2 then (if peek(e, 0, 256) = 46 then peek(e, 1, 256) = 46 else false)
+  else if ~is_dir then false
+  else if el = 5 then lit_at(e, 0, 256, b_c, 5)
+  else if el = 4 then (if lit_at(e, 0, 256, d_c, 4) then true else lit_at(e, 0, 256, o_c, 4))
+  else if el = 12 then lit_at(e, 0, 256, m_c, 12)
+  else false
+end
+
+(* Whether the NUL-terminated path p is a directory *)
+fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
+  case+ $F.dir_open(p, 524288) of
+  | ~$R.ok(d) => let
+      val () = $R.discard<int><int>($F.dir_close(d))
+    in true end
+  | ~$R.err(_) => false
+
+(* Copies the entries of the open directory d, at s[0, sl), into
+   d[0, dl) (Rust: copy_dir_recursive); false on an error *)
+fun copy_entries {ls,ld:agz}{f:nat} .<f, 0>.
+  (dir: !$F.dir, s: !$A.borrow(byte, ls, 524288), sl: int,
+   d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool =
+  if f <= 0 then true
+  else let
+    val e = $A.alloc<byte>(256)
+    val el = dir_name_len($F.dir_next(dir, e, 256))
+  in
+    if el < 0 then let
+      val () = $A.free<byte>(e)
+    in true end
+    else let
+      val @(fz_e, bv_e) = $A.freeze<byte>(e)
+      val @(ca, cl) = child_path(s, sl, bv_e, el)
+      val @(da, dl2) = child_path(d, dl, bv_e, el)
+      val @(fz_c, bv_c) = $A.freeze<byte>(ca)
+      val @(fz_d, bv_d) = $A.freeze<byte>(da)
+      val is_dir = is_directory(bv_c)
+      val ok = (if skipped_name(bv_e, el, is_dir) then true
+                else if is_dir then copy_tree(bv_c, cl, bv_d, dl2, f - 1)
+                else copy_file(bv_c, bv_d)): bool
+      val () = $A.drop<byte>(fz_d, bv_d)
+      val () = $A.free<byte>($A.thaw<byte>(fz_d))
+      val () = $A.drop<byte>(fz_c, bv_c)
+      val () = $A.free<byte>($A.thaw<byte>(fz_c))
+      val () = $A.drop<byte>(fz_e, bv_e)
+      val () = $A.free<byte>($A.thaw<byte>(fz_e))
+    in
+      if ok then copy_entries(dir, s, sl, d, dl, f - 1) else false
+    end
+  end
+
+(* Copies the directory s[0, sl) (NUL-terminated) to d[0, dl), creating
+   it, without its build, dist, docs and bats_modules directories *)
+and copy_tree {ls,ld:agz}{f:nat} .<f, 1>.
+  (s: !$A.borrow(byte, ls, 524288), sl: int,
+   d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool = let
+  var mk : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(d, 0, dl, 524288, mk)
+  val _ = run_mkdir(mk)
+in
+  case+ $F.dir_open(s, 524288) of
+  | ~$R.err(_) => false
+  | ~$R.ok(dir) => let
+      val ok = copy_entries(dir, s, sl, d, dl, f)
+      val () = $R.discard<int><int>($F.dir_close(dir))
+    in ok end
+end
+
+(* rm -rf the path in b; consumes b (Rust: remove_dir_all) *)
+fn remove_tree (b: $B.builder_v): void = let
+  val exec = str_to_path_arr("rm")
+  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  var b1 = $B.create()
+  val () = bput_v(b1, "rm")
+  var b2 = $B.create()
+  val () = bput_v(b2, "-rf")
+  val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+    $L.list_vt_cons(mk_arg(b), $L.list_vt_nil()))))
+  val () = $A.drop<byte>(fz_x, bv_x)
+in $A.free<byte>($A.thaw<byte>(fz_x)) end
+
+(* Rust's "path dependency '<n>': <what> '<p>'<after>" to stderr *)
+fn path_dep_error {la,lp:agz}
+  (a: !$A.arr(byte, la, 256), k: int, what: string, p: !$A.arr(byte, lp, 256), pl: int,
+   after: string): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "error: path dependency '")
+  val () = put_name(a, k, m)
+  val () = bput_v(m, "': ")
+  val () = prerr_builder(m)
+  val () = prerr! (what)
+  var q : $B.builder_v = $B.create()
+  val () = bput_v(q, " '")
+  val () = put_name(p, pl, q)
+  val () = bput_v(q, "'")
+  val () = prerr_builder(q)
+in prerr! (after, "\n") end
+
+(* Copies the path dependency a[0, k) from its directory p[0, pl) into
+   bats_modules/<name>, replacing what is there (Rust: copy_path_dep);
+   false after reporting an error *)
+fn copy_path_dep {la,lp:agz}
+  (a: !$A.arr(byte, la, 256), k: int, p: !$A.arr(byte, lp, 256), pl: int): bool = let
+  var sb : $B.builder_v = $B.create()
+  val () = put_name(p, pl, sb)
+  val sl = $B.length(sb)
+  val () = put_char_v(sb, 0)
+  val @(sa, _) = $B.to_arr(sb)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  var lb : $B.builder_v = $B.create()
+  val () = put_name(p, pl, lb)
+  val () = bput_v(lb, "/src/lib.bats")
+  val () = put_char_v(lb, 0)
+  val @(la2, _) = $B.to_arr(lb)
+  val @(fz_l, bv_l) = $A.freeze<byte>(la2)
+  val has_dir = $F.file_exists(bv_s, 524288)
+  val has_lib = $F.file_exists(bv_l, 524288)
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+  var db : $B.builder_v = $B.create()
+  val () = bput_v(db, "bats_modules/")
+  val () = put_name(a, k, db)
+  val dl = $B.length(db)
+  val () = put_char_v(db, 0)
+  val @(da, _) = $B.to_arr(db)
+  val @(fz_d, bv_d) = $A.freeze<byte>(da)
+  val ok = (if ~has_dir then let
+      val () = path_dep_error(a, k, "directory", p, pl, " does not exist")
+    in false end
+    else if ~has_lib then let
+      val () = path_dep_error(a, k, "no src/lib.bats found in", p, pl, "")
+    in false end
+    else let
+      var rb : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(bv_d, 0, dl, 524288, rb)
+      val () = remove_tree(rb)
+    in copy_tree(bv_s, sl, bv_d, dl, 65536) end): bool
+  val () = $A.drop<byte>(fz_d, bv_d)
+  val () = $A.free<byte>($A.thaw<byte>(fz_d))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in ok end
+
+(* Copies each path dependency of ds into bats_modules, in order; false
+   after the first error *)
+fun copy_path_deps {n:nat} .<n>. (ds: !pdeps(n)): bool =
+  case+ ds of
+  | pd_nil() => true
+  | @pd_cons(a, k, p, pl, rest) => let
+      val ok = copy_path_dep(a, k, p, pl)
+      val r = (if ok then copy_path_deps(rest) else false): bool
+      prval () = fold@(ds)
+    in r end
+
 (* Before build, check or test: every #use package of src/ that is not a
    path dependency must be in bats_modules; the missing ones are fetched
    from the repository repo[0, rplen), or reported when there is none
@@ -1687,12 +1912,18 @@ implement resolve_deps {lr} (repo, rplen) = let
   val () = bput_v(src, "src")
   val pkgs = names_rev(collect_uses(src), names_nil())
   val ds = project_pdeps()
+  (* Path dependencies are copied first, fresh each time *)
+  val copied = copy_path_deps(ds)
   val pn = pdeps_names(ds)
   val () = pdeps_free(ds)
   val missing = names_missing(pkgs, pn)
   val () = names_free(pn)
 in
-  if names_empty(missing) then let
+  if ~copied then let
+    val () = names_free(missing)
+    val () = set_build_err()
+  in false end
+  else if names_empty(missing) then let
     val () = names_free(missing)
   in true end
   else if rplen <= 0 then let
