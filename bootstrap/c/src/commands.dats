@@ -136,6 +136,15 @@ fun copy_prefix {la,lb:agz}{n:pos | n <= 524288}{i:nat | i <= n} .<n - i>.
     val () = $A.set<byte>(dst, i, $A.get<byte>(src, i))
   in copy_prefix(src, dst, n, i + 1) end
 
+(* b[i, len) to stderr. *)
+fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
+  if fuel <= 0 then ()
+  else if i >= len then ()
+  else let
+    val () = prerr_char(int2char0(peek(b, i, m)))
+  in prerr_seg(b, i + 1, len, m, fuel - 1) end
+
 (* Writes "<sha256 of the archive>  <archive filename>\n" to the sidecar,
    as the Rust bats did. arc: the archive read into arc[0, n). *)
 fn write_sidecar_of {la,lz:agz}{n:nat | n <= 524288}
@@ -144,7 +153,7 @@ fn write_sidecar_of {la,lz:agz}{n:nat | n <= 524288}
   if n <= 0 then let
     val () = $A.free<byte>(arc)
     val () = set_build_err()
-  in println! ("error: cannot read the archive to hash it") end
+  in prerr! ("error: cannot read archive for checksum\n") end
   else let
     val data = $A.alloc<byte>(n)
     val () = copy_prefix(arc, data, n, 0)
@@ -183,7 +192,7 @@ fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
     in write_sidecar_of(arc, n, zp, zlen) end
   | ~$R.err(_) => let
       val () = set_build_err()
-    in println! ("error: cannot open the archive to hash it") end
+    in prerr! ("error: cannot read archive for checksum\n") end
 
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
    was not given. *)
@@ -475,7 +484,7 @@ in
                 if drc < 0 then let
                   val () = $A.free<byte>(nbuf)
                   val () = set_build_err()
-                in println! ("error: upload failed") end
+                in prerr! ("error: upload failed\n") end
                 else let
                 val vr = resolve_version()
               in
@@ -532,6 +541,16 @@ in
                 val () = bput_v(za4, "bats.toml")
                 var za5 = $B.create()
                 val () = bput_v(za5, "src/")
+                (* Rust: "uploaded <name> v<version> to <repository>" *)
+                var um: $B.builder_v = $B.create()
+                val () = bput_v(um, "uploaded ")
+                val () = copy_to_builder_v(bv_nb, 0, nlen, 256, um)
+                val () = bput_v(um, " v")
+                val () = copy_to_builder_v(bv_vb, 0, verlen, vmax, um)
+                val () = bput_v(um, " to ")
+                val () = copy_to_builder_v(repo, 0, rplen, 4096, um)
+                val @(uma, umlen) = $B.to_arr(um)
+                val @(fz_um, bv_um) = $A.freeze<byte>(uma)
                 val () = $A.drop<byte>(fz_nb, bv_nb)
                 val () = $A.free<byte>($A.thaw<byte>(fz_nb))
                 val () = $A.drop<byte>(fz_px, bv_px)
@@ -559,7 +578,10 @@ in
                   val () = $A.free<byte>($A.thaw<byte>(fz_zp))
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
-                in println! ("error: upload failed") end
+                  val () = $A.drop<byte>(fz_um, bv_um)
+                  val () = $A.free<byte>($A.thaw<byte>(fz_um))
+                  val () = set_build_err()
+                in prerr! ("error: upload failed\n") end
                 else let
                   (* The sidecar zip_path + ".sha256" *)
                   val () = write_sidecar(bv_zp, zpa_len - 1)
@@ -567,23 +589,35 @@ in
                   val () = $A.free<byte>($A.thaw<byte>(fz_zp))
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
-                in println! ("uploaded successfully") end
+                  val () = (if is_quiet() then () else let
+                      val () = prerr_seg(bv_um, 0, umlen, 524288, 524288)
+                    in prerr_newline() end)
+                  val () = $A.drop<byte>(fz_um, bv_um)
+                  val () = $A.free<byte>($A.thaw<byte>(fz_um))
+                in () end
               end
               end
               end
               else let
                 val () = $A.free<byte>(nbuf)
-              in println! ("error: --repository is required for upload") end
+                val () = set_build_err()
+              in prerr! ("error: 'bats upload' requires --repository <dir>\n") end
             else let
               val () = $A.free<byte>(nbuf)
-            in println! ("error: 'upload' is only for library packages (kind = \"lib\")") end
+              val () = set_build_err()
+            in prerr! ("error: 'bats upload' is only for library packages (kind = \"lib\")\n") end
           | ~$R.none() => let
               val () = $A.free<byte>(nbuf)
-            in println! ("error: package.name not found in bats.toml") end
+              val () = set_build_err()
+            in prerr! ("error: package.name not found in bats.toml\n") end
         end
-      | ~$R.err(_) => println! ("error: could not parse bats.toml")
+      | ~$R.err(_) => let
+          val () = set_build_err()
+        in prerr! ("error: parse error in './bats.toml'\n") end
     end
-  | ~$R.err(_) => println! ("error: could not open bats.toml")
+  | ~$R.err(_) => let
+      val () = set_build_err()
+    in prerr! ("error: cannot read './bats.toml'\n") end
 end
 
 (* ============================================================
@@ -669,15 +703,6 @@ in end
 (* ============================================================
    init: create a new bats project
    ============================================================ *)
-
-(* b[i, len) to stderr. *)
-fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
-  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if i >= len then ()
-  else let
-    val () = prerr_char(int2char0(peek(b, i, m)))
-  in prerr_seg(b, i + 1, len, m, fuel - 1) end
 
 (* a[0, alen) = w[0, n) *)
 fun arg_is {l:agz}{n:pos}{i:nat | i <= n} .<n - i>.
