@@ -238,7 +238,7 @@ end
 #pub fn do_clean(): void
 
 implement do_clean() = let
-  val exec = str_to_path_arr("/bin/rm")
+  val exec = str_to_path_arr("rm")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "rm")
@@ -581,7 +581,7 @@ in
                               val () = bput_v(mb, "bats_modules/")
                               val () = arr_range_to_builder_v(ks, dep_start, dep_end, mb)
                               val _ = run_mkdir(mb)
-                              val uz = str_to_path_arr("/usr/bin/unzip")
+                              val uz = str_to_path_arr("unzip")
                               val @(fz_uz, bv_uz) = $A.freeze<byte>(uz)
                               var ua1 = $B.create()
                               val () = bput_v(ua1, "unzip")
@@ -1019,7 +1019,7 @@ implement write_wasm_stubs() = let
 in r0 end
 
 fn compile_wasm_runtime(): int = let
-  val exec = str_to_path_arr("/usr/bin/clang")
+  val exec = str_to_path_arr("clang")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var wa1 = $B.create() val () = bput_v(wa1, "clang")
   var wa2 = $B.create() val () = bput_v(wa2, "--target=wasm32")
@@ -1059,7 +1059,7 @@ in rc end
 fn run_wasm_cc {li:agz}{lo:agz}
   (in_bv: !$A.borrow(byte, li, 524288), in_len: int,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int): int = let
-  val exec = str_to_path_arr("/usr/bin/clang")
+  val exec = str_to_path_arr("clang")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var wc1 = $B.create() val () = bput_v(wc1, "clang")
   var wc2 = $B.create() val () = bput_v(wc2, "--target=wasm32")
@@ -1538,7 +1538,7 @@ implement do_build_wasm(release) = let
   var mb2 : $B.builder_v = $B.create()
   val () = bput_v(mb2, "dist/wasm")
   val _ = run_mkdir(mb2)
-  val exec_ld = str_to_path_arr("/usr/bin/wasm-ld")
+  val exec_ld = str_to_path_arr("wasm-ld")
   val @(fz_ld, bv_ld) = $A.freeze<byte>(exec_ld)
   val link_argv = split_null_to_list(link_b)
   val lrc = run_cmd(bv_ld, link_argv)
@@ -1709,7 +1709,7 @@ in
         val () = arr_to_builder(buf, 0, plen, mkb, 512)
         val _ = run_mkdir(mkb)
         (* curl -sL <url> -o /tmp/_bpoc_ats2.tgz *)
-        val curl_exec = str_to_path_arr("/usr/bin/curl")
+        val curl_exec = str_to_path_arr("curl")
         val @(fz_ce, bv_ce) = $A.freeze<byte>(curl_exec)
         var ca1 = $B.create() val () = bput_v(ca1, "curl")
         var ca2 = $B.create() val () = bput_v(ca2, "-sL")
@@ -1723,7 +1723,7 @@ in
         val () = $A.drop<byte>(fz_ce, bv_ce)
         val () = $A.free<byte>($A.thaw<byte>(fz_ce))
         (* tar -xzf /tmp/_bpoc_ats2.tgz --strip-components=1 -C <patshome> *)
-        val tar_exec = str_to_path_arr("/usr/bin/tar")
+        val tar_exec = str_to_path_arr("tar")
         val @(fz_te, bv_te) = $A.freeze<byte>(tar_exec)
         var ta1 = $B.create() val () = bput_v(ta1, "tar")
         var ta2 = $B.create() val () = bput_v(ta2, "-xzf")
@@ -1740,7 +1740,7 @@ in
         val () = $A.drop<byte>(fz_te, bv_te)
         val () = $A.free<byte>($A.thaw<byte>(fz_te))
         (* rm /tmp/_bpoc_ats2.tgz *)
-        val rm_exec = str_to_path_arr("/bin/rm")
+        val rm_exec = str_to_path_arr("rm")
         val @(fz_re, bv_re) = $A.freeze<byte>(rm_exec)
         var ra1 = $B.create() val () = bput_v(ra1, "rm")
         var ra2 = $B.create() val () = bput_v(ra2, "/tmp/_bpoc_ats2.tgz")
@@ -1751,7 +1751,7 @@ in
         val () = $A.free<byte>($A.thaw<byte>(fz_re))
         (* make -j4 -C <patshome>/src/CBOOT patsopt PATSHOME=<patshome> *)
         val () = println! ("building ATS2...")
-        val make_exec = str_to_path_arr("/usr/bin/make")
+        val make_exec = str_to_path_arr("make")
         val @(fz_me, bv_me) = $A.freeze<byte>(make_exec)
         var mk1 = $B.create() val () = bput_v(mk1, "make")
         var mk2 = $B.create() val () = bput_v(mk2, "-j4")
@@ -1776,7 +1776,7 @@ in
         val () = bput_v(mkb2, "/bin")
         val _ = run_mkdir(mkb2)
         (* cp <patshome>/src/CBOOT/patsopt <patshome>/bin/patsopt *)
-        val cp_exec = str_to_path_arr("/bin/cp")
+        val cp_exec = str_to_path_arr("cp")
         val @(fz_cpe, bv_cpe) = $A.freeze<byte>(cp_exec)
         var cp1 = $B.create() val () = bput_v(cp1, "cp")
         var cp2 = $B.create()
@@ -1865,7 +1865,7 @@ in
 
       (* When target changed or cache busted, remove stale .o files *)
       val () = if target_changed then let
-        val exec = str_to_path_arr("/bin/sh")
+        val exec = str_to_path_arr("sh")
         val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
         var b1 = $B.create()
         val () = bput_v(b1, "sh")
@@ -1893,7 +1893,7 @@ in
       val _ = write_file_from_builder(bv_nrtp, 524288, nrt_b)
       val () = $A.drop<byte>(fz_nrtp, bv_nrtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_nrtp))
-      val nrt_exec = str_to_path_arr("/usr/bin/clang")
+      val nrt_exec = str_to_path_arr("clang")
       val @(fz_nrt_exec, bv_nrt_exec) = $A.freeze<byte>(nrt_exec)
       var na1 = $B.create() val () = bput_v(na1, "clang")
       var na2 = $B.create() val () = bput_v(na2, "-c")
@@ -3969,7 +3969,7 @@ in
                       val () = bput_v(mb_w2, "dist/wasm")
                       val _ = run_mkdir(mb_w2)
                       val () = println! ("  linking WASM...")
-                      val wld_exec = str_to_path_arr("/usr/bin/wasm-ld")
+                      val wld_exec = str_to_path_arr("wasm-ld")
                       val @(fz_wld, bv_wld) = $A.freeze<byte>(wld_exec)
                       val wl_list = split_null_to_list(wl)
                       val wlr = run_cmd(bv_wld, wl_list)
@@ -4130,7 +4130,7 @@ in
                       else bput_v(link, " -g -O0"))
                     (* Convert space-separated link command to arg_entry list *)
                     val link_argv = split_spaces_to_list(link)
-                    val cc_exec = str_to_path_arr("/usr/bin/clang")
+                    val cc_exec = str_to_path_arr("clang")
                     val @(fz_cce, bv_cce) = $A.freeze<byte>(cc_exec)
                     val lr = run_cmd(bv_cce, link_argv)
                     val () = $A.drop<byte>(fz_cce, bv_cce)
@@ -4162,7 +4162,7 @@ in
                         var mv_n : $B.builder_v = $B.create()
                         val () = bput_v(mv_n, "mv")
                         val a0 = mk_arg(mv_n)
-                        val mv_exec = str_to_path_arr("/bin/mv")
+                        val mv_exec = str_to_path_arr("mv")
                         val @(fz_mve, bv_mve) = $A.freeze<byte>(mv_exec)
                         val mv_argv = $L.list_vt_cons(a0,
                           $L.list_vt_cons(a1,
@@ -4262,7 +4262,7 @@ in
                 val () = copy_to_builder_v(bv_tcb, 0, tcl2, 4096, md)
                 val _ = run_mkdir(md)
                 (* cp -r build/ <target>/ — copy all C files *)
-                val cp_exec = str_to_path_arr("/bin/cp")
+                val cp_exec = str_to_path_arr("cp")
                 val @(fz_cpe, bv_cpe) = $A.freeze<byte>(cp_exec)
                 var cpa1 = $B.create() val () = bput_v(cpa1, "cp")
                 var cpa2 = $B.create() val () = bput_v(cpa2, "-r")

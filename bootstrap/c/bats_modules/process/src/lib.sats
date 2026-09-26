@@ -79,6 +79,8 @@ fn child_pid(c: !child): int
 
 fn pipe_end_close {b:bool} (p: pipe_end(b)): void
 
+
+
 fn spawn
   {sin:bool}{sout:bool}{serr:bool}
   {lp:agz}

@@ -826,7 +826,7 @@ in rev_arg_list(result, $L.list_vt_nil()) end
 
 
 implement run_mkdir(path_b) = let
-  val exec = str_to_path_arr("/bin/mkdir")
+  val exec = str_to_path_arr("mkdir")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "mkdir")
@@ -1078,7 +1078,7 @@ end
 
 
 implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
-  val exec = str_to_path_arr("/usr/bin/clang")
+  val exec = str_to_path_arr("clang")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "clang")
