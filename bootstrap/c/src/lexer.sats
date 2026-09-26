@@ -1009,8 +1009,22 @@ staload "helpers.sats"
 
 
 
-fn do_lex {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn do_lex {l:agz}{n:pos}{m:nat | m <= n}
+  (src: !$A.borrow(byte, l, n), src_len: int m, max: int n
   ): @([ls:agz] $A.arr(byte, ls, 524288), int, int)
 
 

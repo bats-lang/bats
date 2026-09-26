@@ -21,6 +21,17 @@ fn is_ident_byte(b: int): bool =
   (b >= 48 && b <= 57) ||
   $AR.eq_int_int(b, 95)
 
+(* A position in the source. Indexed, so a read at it is proven in
+   bounds by the comparisons in peek, with no cast. *)
+typedef pos_t = [p:int] int p
+
+(* Byte at p, or 0 outside [0, n). *)
+fn peek {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), p: int p, n: int n): int =
+  if p < 0 then 0
+  else if p >= n then 0
+  else byte2int0($A.read<byte>(src, p))
+
 fn is_ident_start(b: int): bool =
   (b >= 97 && b <= 122) ||
   (b >= 65 && b <= 90) ||
@@ -52,7 +63,7 @@ fn put_i32(b: !$B.builder_v >> $B.builder_v, v: int): void = let
 in end
 
 fn put_span(b: !$B.builder_v >> $B.builder_v, kind: int, dest: int,
-            sp_start: int, sp_end: int,
+            sp_start: pos_t, sp_end: pos_t,
             a1: int, a2: int, a3: int, a4: int): void = let
   val () = put_char_v(b, kind)
   val () = put_char_v(b, dest)
@@ -71,175 +82,175 @@ in end
    ============================================================ *)
 
 fn looking_at_2 {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n,
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
    c0: int, c1: int): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), c0) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), c1)
+  $AR.eq_int_int(peek(src, pos, max), c0) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), c1)
 
 fn is_kw_boundary {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   if pos >= max then true
-  else ~(is_ident_byte($S.borrow_byte(src, pos, max)))
+  else ~(is_ident_byte(peek(src, pos, max)))
 
 fn is_kw_boundary_before {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   if pos <= 0 then true
-  else ~(is_ident_byte($S.borrow_byte(src, pos - 1, max)))
+  else ~(is_ident_byte(peek(src, pos - 1, max)))
 
 fn looking_at_pub {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_hash_pub(src, pos, max) &&
   is_kw_boundary(src, pos + 4, max)
 
 fn looking_at_use {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_hash_use(src, pos, max) &&
   is_kw_boundary(src, pos + 4, max)
 
 fn looking_at_target {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_hash_target(src, pos, max) &&
   is_kw_boundary(src, pos + 7, max)
 
 fn looking_at_unsafe {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_dollar_UNSAFE(src, pos, max)
 
 fn looking_at_unittest {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_dollar_UNITTEST(src, pos, max)
 
 fn looking_at_binary {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_binary(src, pos, max) &&
   is_kw_boundary(src, pos + 6, max)
 
 fn looking_at_begin {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_begin(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
 fn looking_at_end {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_end(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max) &&
   is_kw_boundary_before(src, pos, max)
 
 fn looking_at_as {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_as(src, pos, max) &&
   is_kw_boundary(src, pos + 2, max)
 
 (* Unsafe construct detectors use manual byte comparisons to avoid
    the preprocessor's textual keyword scanner triggering on string literals *)
 fn looking_at_cast_fn {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 99) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 115) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 102) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 110) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 99) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 115) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 102) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 110) &&
   is_kw_boundary(src, pos + 6, max)
 
 fn looking_at_prax_i {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 112) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 114) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 120) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 105) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 112) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 114) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 120) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 105) &&
   is_kw_boundary(src, pos + 5, max)
 
 fn looking_at_ext_ern {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 101) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 120) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 101) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 114) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 110) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 101) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 120) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 101) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 114) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 110) &&
   is_kw_boundary(src, pos + 6, max)
 
 fn looking_at_assu_me {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 115) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 115) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 117) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 109) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 101) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 115) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 115) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 117) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 109) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 101) &&
   is_kw_boundary(src, pos + 6, max)
 
 fn looking_at_stld {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   is_kw_boundary_before(src, pos, max) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 115) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 108) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 111) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 6, max), 100) &&
+  $AR.eq_int_int(peek(src, pos, max), 115) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 108) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 111) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 6, max), 100) &&
   is_kw_boundary(src, pos + 7, max)
 
 fn looking_at_extval {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 36) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 101) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 120) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 118) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 6, max), 108) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 36) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 101) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 120) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 118) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 6, max), 108) &&
   is_kw_boundary(src, pos + 7, max)
 
 fn looking_at_extfcall {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 36) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 101) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 120) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 102) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 99) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 6, max), 97) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 7, max), 108) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 8, max), 108) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 36) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 101) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 120) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 102) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 99) &&
+  $AR.eq_int_int(peek(src, pos + 6, max), 97) &&
+  $AR.eq_int_int(peek(src, pos + 7, max), 108) &&
+  $AR.eq_int_int(peek(src, pos + 8, max), 108) &&
   is_kw_boundary(src, pos + 9, max)
 
 fn looking_at_extype {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 36) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 101) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 120) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 121) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 112) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 6, max), 101) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 36) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 101) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 120) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 121) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 112) &&
+  $AR.eq_int_int(peek(src, pos + 6, max), 101) &&
   is_kw_boundary(src, pos + 7, max)
 
 fn looking_at_extkind {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $AR.eq_int_int($S.borrow_byte(src, pos, max), 36) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 101) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 2, max), 120) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 3, max), 116) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 107) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 5, max), 105) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 6, max), 110) &&
-  $AR.eq_int_int($S.borrow_byte(src, pos + 7, max), 100) &&
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  $AR.eq_int_int(peek(src, pos, max), 36) &&
+  $AR.eq_int_int(peek(src, pos + 1, max), 101) &&
+  $AR.eq_int_int(peek(src, pos + 2, max), 120) &&
+  $AR.eq_int_int(peek(src, pos + 3, max), 116) &&
+  $AR.eq_int_int(peek(src, pos + 4, max), 107) &&
+  $AR.eq_int_int(peek(src, pos + 5, max), 105) &&
+  $AR.eq_int_int(peek(src, pos + 6, max), 110) &&
+  $AR.eq_int_int(peek(src, pos + 7, max), 100) &&
   is_kw_boundary(src, pos + 8, max)
 
 fn looking_at_mac_hash {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_machash(src, pos, max)
 
 fn looking_at_ext_hash {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_exthash(src, pos, max)
 
 fn looking_at_fun {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_fun(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max) &&
   is_kw_boundary_before(src, pos, max)
@@ -247,23 +258,23 @@ fn looking_at_fun {l:agz}{n:pos}
 (* Scan forward from pos looking for ".< " before "=" to detect termination metric.
    Returns true if .<...>. is found, meaning the fun IS safe. *)
 fun _has_metric {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n, fuel: int fuel): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, fuel: int fuel): bool =
   if fuel <= 0 then false
   else if pos >= max then false
   else let
-    val b = $S.borrow_byte(src, pos, max)
+    val b = peek(src, pos, max)
   in
     (* Found ".< " — has metric *)
     if $AR.eq_int_int(b, 46) then
-      if $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 60) then true
+      if $AR.eq_int_int(peek(src, pos + 1, max), 60) then true
       else _has_metric(src, pos + 1, max, fuel - 1)
     (* Found standalone "=" — end of signature, no metric *)
     (* Skip <= >= == != by checking the neighbouring bytes: the first
        "=" of "==" is recognised by the next byte, the rest by the
        previous one. *)
     else if $AR.eq_int_int(b, 61) then let
-      val prev = (if pos > 0 then $S.borrow_byte(src, pos - 1, max) else 32): int
-      val next = $S.borrow_byte(src, pos + 1, max)
+      val prev = (if pos > 0 then peek(src, pos - 1, max) else 32): int
+      val next = peek(src, pos + 1, max)
     in
       if $AR.eq_int_int(next, 61) then _has_metric(src, pos + 1, max, fuel - 1)
       else if $AR.eq_int_int(prev, 60) then _has_metric(src, pos + 1, max, fuel - 1)
@@ -274,7 +285,7 @@ fun _has_metric {l:agz}{n:pos}{fuel:nat} .<fuel>.
     end
     (* Found newline followed by non-whitespace — end of declaration *)
     else if $AR.eq_int_int(b, 10) then let
-      val nb = $S.borrow_byte(src, pos + 1, max)
+      val nb = peek(src, pos + 1, max)
     in
       if $AR.eq_int_int(nb, 32) || $AR.eq_int_int(nb, 9) then
         _has_metric(src, pos + 1, max, fuel - 1)
@@ -284,21 +295,21 @@ fun _has_metric {l:agz}{n:pos}{fuel:nat} .<fuel>.
   end
 
 fn _content_starts_prfun {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_prfun(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
 fn _content_starts_prfn {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_prfn(src, pos, max) &&
   is_kw_boundary(src, pos + 4, max)
 
 fn _looking_at_primplement {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_primplement(src, pos, max)
 
 fn looking_at_no_mangle {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_no_mangle(src, pos, max) &&
   is_kw_boundary(src, pos + 9, max)
 
@@ -308,10 +319,10 @@ fn looking_at_no_mangle {l:agz}{n:pos}
 
 (* Skip whitespace (space/tab only, not newlines) *)
 fun skip_ws {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if $AR.eq_int_int(b, 32) || $AR.eq_int_int(b, 9) then
       skip_ws(src, pos + 1, max, fuel - 1)
     else pos
@@ -319,39 +330,39 @@ fun skip_ws {l:agz}{n:pos}{fuel:nat} .<fuel>.
 
 (* Skip to end of line, including the newline *)
 fun skip_to_eol {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos >= src_len then pos
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if $AR.eq_int_int(b, 10) then pos + 1
     else skip_to_eol(src, pos + 1, src_len, max, fuel - 1)
   end
 
 (* Skip ident chars *)
 fun skip_ident {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if is_ident_byte(b) then skip_ident(src, pos + 1, max, fuel - 1)
     else pos
   end
 
 (* Extract the declaration name start position after prfun/prfn keyword *)
 fun _skip_to_name {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n, fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos >= max then pos
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if $AR.eq_int_int(b, 32) || $AR.eq_int_int(b, 9) || $AR.eq_int_int(b, 10) then
       _skip_to_name(src, pos + 1, max, fuel - 1)
     else if $AR.eq_int_int(b, 123) then let (* skip {quantifiers} *)
       fun _skip_brace {l:agz}{n:pos}{f:nat} .<f>.
-        (src: !$A.borrow(byte, l, n), p: int, max: int n, f: int f): int =
+        (src: !$A.borrow(byte, l, n), p: pos_t, max: int n, f: int f): pos_t =
         if f <= 0 then p
         else if p >= max then p
-        else if $AR.eq_int_int($S.borrow_byte(src, p, max), 125) then p + 1
+        else if $AR.eq_int_int(peek(src, p, max), 125) then p + 1
         else _skip_brace(src, p + 1, max, f - 1)
     in _skip_to_name(src, _skip_brace(src, pos + 1, max, fuel - 1), max, fuel - 1) end
     else pos
@@ -359,8 +370,8 @@ fun _skip_to_name {l:agz}{n:pos}{fuel:nat} .<fuel>.
 
 (* Check if primplement exists for a name starting at name_start with length name_len *)
 fun _has_primplement {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   name_start: int, name_len: int, scan_pos: int, fuel: int fuel): bool =
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   name_start: pos_t, name_len: int, scan_pos: pos_t, fuel: int fuel): bool =
   if fuel <= 0 then false
   else if scan_pos >= src_len then false
   else
@@ -368,10 +379,10 @@ fun _has_primplement {l:agz}{n:pos}{fuel:nat} .<fuel>.
       val after = scan_pos + 11
       val p = _skip_to_name(src, after, max, 256)
       fun _names_match {l:agz}{n:pos}{f:nat} .<f>.
-        (src: !$A.borrow(byte, l, n), a: int, b: int, len: int, max: int n, f: int f): bool =
+        (src: !$A.borrow(byte, l, n), a: pos_t, b: pos_t, len: int, max: int n, f: int f): bool =
         if f <= 0 then true
         else if len <= 0 then true
-        else if $AR.eq_int_int($S.borrow_byte(src, a, max), $S.borrow_byte(src, b, max)) then
+        else if $AR.eq_int_int(peek(src, a, max), peek(src, b, max)) then
           _names_match(src, a + 1, b + 1, len - 1, max, f - 1)
         else false
       val nend = skip_ident(src, p, max, 4096)
@@ -386,10 +397,10 @@ fun _has_primplement {l:agz}{n:pos}{fuel:nat} .<fuel>.
 
 (* Skip non-whitespace *)
 fun skip_nonws {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if $AR.eq_int_int(b, 32) || $AR.eq_int_int(b, 9) ||
        $AR.eq_int_int(b, 10) || $AR.eq_int_int(b, 0)
     then pos
@@ -398,10 +409,10 @@ fun skip_nonws {l:agz}{n:pos}{fuel:nat} .<fuel>.
 
 (* Lex // line comment. //// = rest-of-file *)
 fn lex_line_comment {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) =
-  if $AR.eq_int_int($S.borrow_byte(src, start + 2, max), 47) &&
-     $AR.eq_int_int($S.borrow_byte(src, start + 3, max), 47) then let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) =
+  if $AR.eq_int_int(peek(src, start + 2, max), 47) &&
+     $AR.eq_int_int(peek(src, start + 3, max), 47) then let
     val () = put_span(spans, 0, 0, start, src_len, 0, 0, 0, 0)
   in @(src_len, count + 1) end
   else let
@@ -411,32 +422,32 @@ fn lex_line_comment {l:agz}{n:pos}
 
 (* Lex /* ... */ block comment *)
 fun lex_c_comment_inner {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos + 1 >= src_len then src_len
-  else if $AR.eq_int_int($S.borrow_byte(src, pos, max), 42) &&
-          $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 47) then
+  else if $AR.eq_int_int(peek(src, pos, max), 42) &&
+          $AR.eq_int_int(peek(src, pos + 1, max), 47) then
     pos + 2
   else lex_c_comment_inner(src, pos + 1, src_len, max, fuel - 1)
 
 fn lex_c_comment {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val ep = lex_c_comment_inner(src, start + 2, src_len, max, max)
   val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
 in @(ep, count + 1) end
 
 (* Lex (* ... *) ML comment with nesting *)
 fun lex_ml_comment_inner {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   depth: int, fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   depth: int, fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if depth <= 0 then pos
   else if pos + 1 >= src_len then src_len
   else let
-    val b0 = $S.borrow_byte(src, pos, max)
-    val b1 = $S.borrow_byte(src, pos + 1, max)
+    val b0 = peek(src, pos, max)
+    val b1 = peek(src, pos + 1, max)
   in
     if $AR.eq_int_int(b0, 40) && $AR.eq_int_int(b1, 42) then
       lex_ml_comment_inner(src, pos + 2, src_len, max, depth + 1, fuel - 1)
@@ -447,19 +458,19 @@ fun lex_ml_comment_inner {l:agz}{n:pos}{fuel:nat} .<fuel>.
   end
 
 fn lex_ml_comment {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val ep = lex_ml_comment_inner(src, start + 2, src_len, max, 1, max)
   val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
 in @(ep, count + 1) end
 
 (* Lex string literal "..." with \" escapes *)
 fun lex_string_inner {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos >= src_len then pos
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if $AR.eq_int_int(b, 92) then
       lex_string_inner(src, pos + 2, src_len, max, fuel - 1)
     else if $AR.eq_int_int(b, 34) then pos + 1
@@ -467,58 +478,58 @@ fun lex_string_inner {l:agz}{n:pos}{fuel:nat} .<fuel>.
   end
 
 fn lex_string {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val ep = lex_string_inner(src, start + 1, src_len, max, max)
   val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
 in @(ep, count + 1) end
 
 (* Lex char literal '...' *)
 fn lex_char_lit {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val p1 = start + 1
-  val b1 = $S.borrow_byte(src, p1, max)
-  val p2 = (if $AR.eq_int_int(b1, 92) then p1 + 2 else p1 + 1): int
-  val p3 = (if $AR.eq_int_int($S.borrow_byte(src, p2, max), 39) then p2 + 1 else p2): int
+  val b1 = peek(src, p1, max)
+  val p2 = (if $AR.eq_int_int(b1, 92) then p1 + 2 else p1 + 1): pos_t
+  val p3 = (if $AR.eq_int_int(peek(src, p2, max), 39) then p2 + 1 else p2): pos_t
   val () = put_span(spans, 0, 0, start, p3, 0, 0, 0, 0)
 in @(p3, count + 1) end
 
 (* Lex extcode %{ ... %} *)
 fun lex_extcode_inner {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos + 1 >= src_len then src_len
-  else if $AR.eq_int_int($S.borrow_byte(src, pos, max), 37) &&
-          $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 125) then
+  else if $AR.eq_int_int(peek(src, pos, max), 37) &&
+          $AR.eq_int_int(peek(src, pos + 1, max), 125) then
     pos + 2
   else lex_extcode_inner(src, pos + 1, src_len, max, fuel - 1)
 
 fn lex_extcode {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val after_open = start + 2
-  val bk = $S.borrow_byte(src, after_open, max)
+  val bk = peek(src, after_open, max)
   val @(kind, cstart) =
     (if $AR.eq_int_int(bk, 94) then @(1, after_open + 1)
      else if $AR.eq_int_int(bk, 36) then @(2, after_open + 1)
      else if $AR.eq_int_int(bk, 35) then @(3, after_open + 1)
-     else @(0, after_open)): @(int, int)
+     else @(0, after_open)): @(int, pos_t)
   val ep = lex_extcode_inner(src, cstart, src_len, max, max)
-  val cend = (if ep >= 2 then ep - 2 else ep): int
+  val cend = (if ep >= 2 then ep - 2 else ep): pos_t
   val () = put_span(spans, 6, 0, start, ep, cstart, cend, kind, 0)
 in @(ep, count + 1) end
 
 (* Lex #use pkg as Alias [no_mangle] *)
 fn lex_hash_use {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val p0 = skip_ws(src, start + 4, max, 256)
   val pkg_start = p0
   val pkg_end = skip_nonws(src, p0, max, 4096)
   val p1 = skip_ws(src, pkg_end, max, 256)
-  val p2 = (if looking_at_as(src, p1, max) then p1 + 2 else p1): int
+  val p2 = (if looking_at_as(src, p1, max) then p1 + 2 else p1): pos_t
   val p3 = skip_ws(src, p2, max, 256)
   val alias_start = p3
   val alias_end = skip_ident(src, p3, max, 4096)
@@ -531,11 +542,11 @@ in @(ep, count + 1) end
 
 (* Lex $Alias.member qualified access *)
 fn lex_qualified {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int, bool) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int, bool) = let
   val alias_start = start + 1
   val alias_end = skip_ident(src, alias_start, max, 4096)
-  val dot_byte = $S.borrow_byte(src, alias_end, max)
+  val dot_byte = peek(src, alias_end, max)
 in
   if $AR.eq_int_int(dot_byte, 46) then let
     val member_start = alias_end + 1
@@ -552,11 +563,11 @@ end
 
 (* Check if line at pos is blank *)
 fun is_blank_line {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
    fuel: int fuel): bool =
   if fuel <= 0 then true
   else if pos >= src_len then true
-  else let val b = $S.borrow_byte(src, pos, max) in
+  else let val b = peek(src, pos, max) in
     if $AR.eq_int_int(b, 10) then true
     else if $AR.eq_int_int(b, 32) || $AR.eq_int_int(b, 9) then
       is_blank_line(src, pos + 1, src_len, max, fuel - 1)
@@ -565,8 +576,8 @@ fun is_blank_line {l:agz}{n:pos}{fuel:nat} .<fuel>.
 
 (* Lex #pub declaration - find end of block *)
 fun lex_pub_lines {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos >= src_len then pos
   else let
@@ -576,7 +587,7 @@ fun lex_pub_lines {l:agz}{n:pos}{fuel:nat} .<fuel>.
     else if is_blank_line(src, eol, src_len, max, 256) then let
       (* Peek past blank lines: if next non-blank starts with 'and', continue *)
       fun skip_blanks {fb:nat} .<fb>.
-        (s: !$A.borrow(byte, l, n), p: int, sl: int, m: int n, fb: int fb): int =
+        (s: !$A.borrow(byte, l, n), p: pos_t, sl: pos_t, m: int n, fb: int fb): pos_t =
         if fb <= 0 then p
         else if p >= sl then p
         else if is_blank_line(s, p, sl, m, 256) then
@@ -585,9 +596,9 @@ fun lex_pub_lines {l:agz}{n:pos}{fuel:nat} .<fuel>.
       val next = skip_blanks(src, eol, src_len, max, 64)
     in
       if next < src_len &&
-         $AR.eq_int_int($S.borrow_byte(src, next, max), 97) &&
-         $AR.eq_int_int($S.borrow_byte(src, next + 1, max), 110) &&
-         $AR.eq_int_int($S.borrow_byte(src, next + 2, max), 100) &&
+         $AR.eq_int_int(peek(src, next, max), 97) &&
+         $AR.eq_int_int(peek(src, next + 1, max), 110) &&
+         $AR.eq_int_int(peek(src, next + 2, max), 100) &&
          is_kw_boundary(src, next + 3, max)
       then lex_pub_lines(src, eol, src_len, max, fuel - 1)
       else eol
@@ -597,50 +608,50 @@ fun lex_pub_lines {l:agz}{n:pos}{fuel:nat} .<fuel>.
     else if looking_at_target(src, eol, max) then eol
     else if looking_at_unsafe(src, eol, max) then eol
     else if looking_at_unittest(src, eol, max) then eol
-    else let val b = $S.borrow_byte(src, eol, max) in
+    else let val b = peek(src, eol, max) in
       if $AR.eq_int_int(b, 102) &&
-         ($AR.eq_int_int($S.borrow_byte(src, eol + 1, max), 117) &&
-          $AR.eq_int_int($S.borrow_byte(src, eol + 2, max), 110) &&
+         ($AR.eq_int_int(peek(src, eol + 1, max), 117) &&
+          $AR.eq_int_int(peek(src, eol + 2, max), 110) &&
           is_kw_boundary(src, eol + 3, max)) then eol
       else if $AR.eq_int_int(b, 102) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 1, max), 110) &&
+              $AR.eq_int_int(peek(src, eol + 1, max), 110) &&
               is_kw_boundary(src, eol + 2, max) then eol
       else if $AR.eq_int_int(b, 118) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 1, max), 97) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 2, max), 108) &&
+              $AR.eq_int_int(peek(src, eol + 1, max), 97) &&
+              $AR.eq_int_int(peek(src, eol + 2, max), 108) &&
               is_kw_boundary(src, eol + 3, max) then eol
       else if $AR.eq_int_int(b, 105) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 1, max), 109) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 2, max), 112) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 3, max), 108) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 4, max), 101) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 5, max), 109) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 6, max), 101) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 7, max), 110) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 8, max), 116) &&
+              $AR.eq_int_int(peek(src, eol + 1, max), 109) &&
+              $AR.eq_int_int(peek(src, eol + 2, max), 112) &&
+              $AR.eq_int_int(peek(src, eol + 3, max), 108) &&
+              $AR.eq_int_int(peek(src, eol + 4, max), 101) &&
+              $AR.eq_int_int(peek(src, eol + 5, max), 109) &&
+              $AR.eq_int_int(peek(src, eol + 6, max), 101) &&
+              $AR.eq_int_int(peek(src, eol + 7, max), 110) &&
+              $AR.eq_int_int(peek(src, eol + 8, max), 116) &&
               is_kw_boundary(src, eol + 9, max) then eol
       else if $AR.eq_int_int(b, 37) &&
-              $AR.eq_int_int($S.borrow_byte(src, eol + 1, max), 123) then eol
+              $AR.eq_int_int(peek(src, eol + 1, max), 123) then eol
       else lex_pub_lines(src, eol, src_len, max, fuel - 1)
     end
   end
 
 (* Check for "let" *)
 fn looking_at_let {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   is_kw_boundary_before(src, pos, max) &&
   lit_let(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max)
 
 fn looking_at_local {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   is_kw_boundary_before(src, pos, max) &&
   lit_local(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
 fun find_end_kw {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   depth: int, fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   depth: int, fuel: int fuel): pos_t =
   if fuel <= 0 then src_len
   else if pos >= src_len then src_len
   else if looking_at_end(src, pos, max) then
@@ -655,10 +666,10 @@ fun find_end_kw {l:agz}{n:pos}{fuel:nat} .<fuel>.
   else find_end_kw(src, pos + 1, src_len, max, depth, fuel - 1)
 
 fn lex_unsafe_dispatch {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int, bool) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int, bool) = let
   val after = start + 7
-  val next = $S.borrow_byte(src, after, max)
+  val next = peek(src, after, max)
 in
   if $AR.eq_int_int(next, 46) then let
     val ident_end = skip_ident(src, after + 1, max, 4096)
@@ -670,7 +681,7 @@ in
     if looking_at_begin(src, p0, max) then let
       val contents_start = p0 + 5
       val end_pos = find_end_kw(src, contents_start, src_len, max, 1, max)
-      val ep = (if end_pos < src_len then end_pos + 3 else end_pos): int
+      val ep = (if end_pos < src_len then end_pos + 3 else end_pos): pos_t
       val () = put_span(spans, 4, 0, start, ep, contents_start, end_pos, 0, 0)
     in @(ep, count + 1, true) end
     else @(start, count, false)
@@ -678,15 +689,15 @@ in
 end
 
 fn lex_unittest_dispatch {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int, bool) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int, bool) = let
   val after = start + 9
   val p0 = skip_ws(src, after, max, 256)
-  val is_dot = $AR.eq_int_int($S.borrow_byte(src, p0, max), 46)
+  val is_dot = $AR.eq_int_int(peek(src, p0, max), 46)
   val is_run = is_dot &&
-    $AR.eq_int_int($S.borrow_byte(src, p0 + 1, max), 114) &&
-    $AR.eq_int_int($S.borrow_byte(src, p0 + 2, max), 117) &&
-    $AR.eq_int_int($S.borrow_byte(src, p0 + 3, max), 110)
+    $AR.eq_int_int(peek(src, p0 + 1, max), 114) &&
+    $AR.eq_int_int(peek(src, p0 + 2, max), 117) &&
+    $AR.eq_int_int(peek(src, p0 + 3, max), 110)
 in
   if is_run then let
     val p1 = skip_ws(src, p0 + 4, max, 256)
@@ -694,7 +705,7 @@ in
     if looking_at_begin(src, p1, max) then let
       val contents_start = p1 + 5
       val end_pos = find_end_kw(src, contents_start, src_len, max, 1, max)
-      val ep = (if end_pos < src_len then end_pos + 3 else end_pos): int
+      val ep = (if end_pos < src_len then end_pos + 3 else end_pos): pos_t
       val () = put_span(spans, 10, 0, start, ep, contents_start, end_pos, 0, 0)
     in @(ep, count + 1, true) end
     else @(start, count, false)
@@ -702,18 +713,18 @@ in
   else if looking_at_begin(src, p0, max) then let
     val contents_start = p0 + 5
     val end_pos = find_end_kw(src, contents_start, src_len, max, 0, max)
-    val ep = (if end_pos < src_len then end_pos + 3 else end_pos): int
+    val ep = (if end_pos < src_len then end_pos + 3 else end_pos): pos_t
     val () = put_span(spans, 8, 0, start, ep, contents_start, end_pos, 0, 0)
   in @(ep, count + 1, true) end
   else @(start, count, false)
 end
 
 fn lex_target_decl {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int, count: int): @(int, int) = let
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val p0 = skip_ws(src, start + 7, max, 256)
   val ident_end = skip_ident(src, p0, max, 4096)
-  val target = (if $AR.eq_int_int($S.borrow_byte(src, p0, max), 119) then 1 else 0): int
+  val target = (if $AR.eq_int_int(peek(src, p0, max), 119) then 1 else 0): int
   (* Check for block form: #target wasm begin...end *)
   val p1 = skip_ws(src, ident_end, max, 256)
 in
@@ -721,7 +732,7 @@ in
     (* Block form: find matching end, store content range *)
     val contents_start = p1 + 5
     val end_pos = find_end_kw(src, contents_start, src_len, max, 1, max)
-    val ep = (if end_pos < src_len then end_pos + 3 else end_pos): int
+    val ep = (if end_pos < src_len then end_pos + 3 else end_pos): pos_t
     (* kind=11: target_block. aux1=target(0=native,1=wasm), aux2/aux3=content range *)
     val () = put_span(spans, 11, 0, start, ep, target, contents_start, end_pos, 0)
   in @(ep, count + 1) end
@@ -743,13 +754,13 @@ end
    ============================================================ *)
 
 fun lex_passthrough_scan {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), pos: int, src_len: int, max: int n,
-   fuel: int fuel): int =
+  (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
+   fuel: int fuel): pos_t =
   if fuel <= 0 then pos
   else if pos >= src_len then pos
   else let
-    val b = $S.borrow_byte(src, pos, max)
-    val b1 = $S.borrow_byte(src, pos + 1, max)
+    val b = peek(src, pos, max)
+    val b1 = peek(src, pos + 1, max)
   in
     if $AR.eq_int_int(b, 47) && ($AR.eq_int_int(b1, 47) || $AR.eq_int_int(b1, 42))
     then pos
@@ -776,14 +787,14 @@ fun lex_passthrough_scan {l:agz}{n:pos}{fuel:nat} .<fuel>.
    ============================================================ *)
 
 fun lex_main {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), src_len: int, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, pos: int, count: int,
-   fuel: int fuel): @(int, int) =
+  (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
+   spans: !$B.builder_v >> $B.builder_v, pos: pos_t, count: int,
+   fuel: int fuel): @(pos_t, int) =
   if fuel <= 0 then @(pos, count)
   else if pos >= src_len then @(pos, count)
   else let
-    val b0 = $S.borrow_byte(src, pos, max)
-    val b1 = $S.borrow_byte(src, pos + 1, max)
+    val b0 = peek(src, pos, max)
+    val b1 = peek(src, pos + 1, max)
   in
     (* // line comment *)
     if $AR.eq_int_int(b0, 47) && $AR.eq_int_int(b1, 47) then let
@@ -824,8 +835,8 @@ fun lex_main {l:agz}{n:pos}{fuel:nat} .<fuel>.
       val is_prfn = if is_prfun then false else _content_starts_prfn(src, contents_start, max)
       val span_kind =
         if is_prfun || is_prfn then let
-          val kw_len = if is_prfun then 5 else 4
-          val name_pos = _skip_to_name(src, $AR.add_int_int(contents_start, kw_len), max, 256)
+          val kw_len = (if is_prfun then 5 else 4): [k:int | 4 <= k; k <= 5] int k
+          val name_pos = _skip_to_name(src, contents_start + kw_len, max, 256)
           val name_end = skip_ident(src, name_pos, max, 4096)
           val name_len = name_end - name_pos
         in
@@ -947,45 +958,48 @@ fun lex_main {l:agz}{n:pos}{fuel:nat} .<fuel>.
    ============================================================ *)
 
 fn _get_i32 {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), off: int, max: int n): int =
+  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t =
   let
-    val b0 = $S.borrow_byte(bv, off, max)
-    val b1 = $S.borrow_byte(bv, off + 1, max)
-    val b2 = $S.borrow_byte(bv, off + 2, max)
-    val b3 = $S.borrow_byte(bv, off + 3, max)
-  in b0 + b1 * 256 + b2 * 65536 + b3 * 16777216 end
+    val b0 = $AR.low_byte(peek(bv, off, max))
+    val b1 = $AR.low_byte(peek(bv, off + 1, max))
+    val b2 = $AR.low_byte(peek(bv, off + 2, max))
+    val b3 = $AR.low_byte(peek(bv, off + 3, max))
+    (* Two's complement without overflow: the top byte counts as
+       b3 - 256 when its sign bit is set. *)
+    val hi = (if b3 < 128 then b3 else b3 - 256): [h:int | ~128 <= h; h < 128] int h
+  in b0 + b1 * 256 + b2 * 65536 + hi * 16777216 end
 
 (* Check if any kind=11 spans exist *)
 fun _has_target_blocks {l:agz}{n:pos}{fuel:nat} .<fuel>.
   (spans: !$A.borrow(byte, l, n), max: int n,
-   span_count: int, idx: int, fuel: int fuel): bool =
+   span_count: int, idx: pos_t, fuel: int fuel): bool =
   if fuel <= 0 then false
   else if idx >= span_count then false
-  else if $AR.eq_int_int($S.borrow_byte(spans, idx * 28, max), 11) then true
+  else if $AR.eq_int_int(peek(spans, idx * 28, max), 11) then true
   else _has_target_blocks(spans, max, span_count, idx + 1, fuel - 1)
 
 (* Copy one 28-byte span record from borrow to builder *)
 fun _copy_span_bytes {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (spans: !$A.borrow(byte, l, n), base: int, max: int n,
-   out: !$B.builder_v >> $B.builder_v, byte_idx: int, fuel: int fuel): void =
+  (spans: !$A.borrow(byte, l, n), base: pos_t, max: int n,
+   out: !$B.builder_v >> $B.builder_v, byte_idx: pos_t, fuel: int fuel): void =
   if fuel <= 0 then ()
   else if byte_idx >= 28 then ()
   else let
-    val b = $S.borrow_byte(spans, base + byte_idx, max)
+    val b = peek(spans, base + byte_idx, max)
     val () = put_char_v(out, b)
   in _copy_span_bytes(spans, base, max, out, byte_idx + 1, fuel - 1) end
 
 (* Expand target blocks: replace kind=11 with kind=13 + inner spans + kind=14 *)
 fun _expand_target_blocks {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), src_len: int, max: int ns,
+  (src: !$A.borrow(byte, ls, ns), src_len: pos_t, max: int ns,
    spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: int,
+   span_count: int, idx: pos_t,
    out: !$B.builder_v >> $B.builder_v,
    new_count: int, fuel: int fuel): int =
   if fuel <= 0 then new_count
   else if idx >= span_count then new_count
   else let
-    val kind = $S.borrow_byte(spans, idx * 28, span_max)
+    val kind = peek(spans, idx * 28, span_max)
   in
     if $AR.eq_int_int(kind, 11) then let
       val base = idx * 28
