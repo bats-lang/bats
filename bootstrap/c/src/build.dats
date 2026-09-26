@@ -677,6 +677,80 @@ in
                   val new_cnt = (case+ bdr of
                     | ~$R.ok(bd) => let
                         val tk = $A.alloc<byte>(4096)
+                        (* Resolve the [dependencies] of the manifest at path tp
+                           (a NUL-terminated builder). Returns whether the
+                           manifest exists, and the updated lock count. *)
+                        fn resolve_toml {ltk:agz}{lr3:agz}{lel3:agz}
+                          (tp: $B.builder_v, tk: !$A.arr(byte, ltk, 4096),
+                           rb3: !$A.borrow(byte, lr3, 4096), rl3: int,
+                           elb3: !$A.borrow(byte, lel3, 524288), el_len3: int,
+                           lb3: !$B.builder_v >> $B.builder_v, cnt3: int): @(bool, int) = let
+                          val @(tpa, _) = $B.to_arr(tp)
+                          val @(fz_tpa, bv_tpa) = $A.freeze<byte>(tpa)
+                          val tfo = $F.file_open(bv_tpa, 524288, 0, 0)
+                          val () = $A.drop<byte>(fz_tpa, bv_tpa)
+                          val () = $A.free<byte>($A.thaw<byte>(fz_tpa))
+                        in case+ tfo of
+                          | ~$R.ok(tfd) => let
+                              val tb = $A.alloc<byte>(4096)
+                              val tr = $F.file_read(tfd, tb, 4096)
+                              val tl = (case+ tr of | ~$R.ok(n2) => n2 | ~$R.err(_) => 0): int
+                              val tc = $F.file_close(tfd)
+                              val () = $R.discard<int><int>(tc)
+                              val @(fz_tb, bv_tb) = $A.freeze<byte>(tb)
+                              val pr = $T.parse(bv_tb, 4096)
+                              val () = $A.drop<byte>(fz_tb, bv_tb)
+                              val () = $A.free<byte>($A.thaw<byte>(fz_tb))
+                            in case+ pr of
+                              | ~$R.ok(doc2) => let
+                                  val @(dka, dksz) = $S.str_to_borrow("dependencies")
+                                  val @(fz_dka, bv_dka) = $A.freeze<byte>(dka)
+                                  val kr2 = $T.keys(doc2, bv_dka, dksz, tk, 4096)
+                                  val tkl2 = (case+ kr2 of
+                                    | ~$R.some(kl2) => kl2
+                                    | ~$R.none() => 0): int
+                                  val () = $A.drop<byte>(fz_dka, bv_dka)
+                                  val () = $A.free<byte>($A.thaw<byte>(fz_dka))
+                                  val () = $T.toml_free(doc2)
+                                  val n2 = resolve(tk, 0, tkl2, rb3, rl3, elb3, el_len3, lb3, cnt3, 200)
+                                in @(true, n2) end
+                              | ~$R.err(_) => @(true, cnt3)
+                            end
+                          | ~$R.err(_) => @(false, cnt3)
+                        end
+                        (* Resolve the manifest of each package directly inside
+                           namespace directory bats_modules/NS (e.g.
+                           bats_modules/wasm.bats-packages.dev/bridge). *)
+                        fun sdt_ns {lns:agz}{ltk:agz}{lr3:agz}{lel3:agz}{f4:nat} .<f4>.
+                          (nd: !$F.dir, ns: !$A.borrow(byte, lns, 256), ns_len: int,
+                           tk: !$A.arr(byte, ltk, 4096),
+                           rb3: !$A.borrow(byte, lr3, 4096), rl3: int,
+                           elb3: !$A.borrow(byte, lel3, 524288), el_len3: int,
+                           lb3: !$B.builder_v >> $B.builder_v, cnt3: int, f4: int f4): int =
+                          if f4 <= 0 then cnt3
+                          else let
+                            val ce = $A.alloc<byte>(256)
+                            val cnr = $F.dir_next(nd, ce, 256)
+                            val cel = $R.option_unwrap_or<int>(cnr, ~1)
+                          in if cel < 0 then let val () = $A.free<byte>(ce) in cnt3 end
+                            else let val cdd = is_dot_or_dotdot(ce, cel, 256) in
+                              if cdd then let val () = $A.free<byte>(ce)
+                              in sdt_ns(nd, ns, ns_len, tk, rb3, rl3, elb3, el_len3, lb3, cnt3, f4-1) end
+                              else let
+                                var ctp : $B.builder_v = $B.create()
+                                val () = bput_v(ctp, "bats_modules/")
+                                val () = copy_to_builder_v(ns, 0, ns_len, 256, ctp)
+                                val () = bput_v(ctp, "/")
+                                val @(fz_ce, bv_ce) = $A.freeze<byte>(ce)
+                                val () = copy_to_builder_v(bv_ce, 0, cel, 256, ctp)
+                                val () = $A.drop<byte>(fz_ce, bv_ce)
+                                val () = $A.free<byte>($A.thaw<byte>(fz_ce))
+                                val () = bput_v(ctp, "/bats.toml")
+                                val () = put_char_v(ctp, 0)
+                                val @(_, cnt5) = resolve_toml(ctp, tk, rb3, rl3, elb3, el_len3, lb3, cnt3)
+                              in sdt_ns(nd, ns, ns_len, tk, rb3, rl3, elb3, el_len3, lb3, cnt5, f4-1) end
+                            end
+                          end
                         (* Scan each package in bats_modules, resolve its deps immediately *)
                         fun sdt {ltk:agz}{lr3:agz}{lel3:agz}{f3:nat} .<f3>.
                           (bd: !$F.dir, tk: !$A.arr(byte, ltk, 4096),
@@ -692,47 +766,36 @@ in
                             else let val dd = is_dot_or_dotdot(de, del, 256) in
                               if dd then let val () = $A.free<byte>(de) in sdt(bd, tk, rb3, rl3, elb3, el_len3, lb3, cnt3, f3-1) end
                               else let
+                                val @(fz_de, bv_de) = $A.freeze<byte>(de)
                                 var tp : $B.builder_v = $B.create()
                                 val () = bput_v(tp, "bats_modules/")
-                                val @(fz_de, bv_de) = $A.freeze<byte>(de)
                                 val () = copy_to_builder_v(bv_de, 0, del, 256, tp)
-                                val () = $A.drop<byte>(fz_de, bv_de)
-                                val () = $A.free<byte>($A.thaw<byte>(fz_de))
                                 val () = bput_v(tp, "/bats.toml")
                                 val () = put_char_v(tp, 0)
-                                val @(tpa, _) = $B.to_arr(tp)
-                                val @(fz_tpa, bv_tpa) = $A.freeze<byte>(tpa)
-                                val tfo = $F.file_open(bv_tpa, 524288, 0, 0)
-                                val () = $A.drop<byte>(fz_tpa, bv_tpa)
-                                val () = $A.free<byte>($A.thaw<byte>(fz_tpa))
-                                val cnt4 = (case+ tfo of
-                                  | ~$R.ok(tfd) => let
-                                      val tb = $A.alloc<byte>(4096)
-                                      val tr = $F.file_read(tfd, tb, 4096)
-                                      val tl = (case+ tr of | ~$R.ok(n2) => n2 | ~$R.err(_) => 0): int
-                                      val tc = $F.file_close(tfd)
-                                      val () = $R.discard<int><int>(tc)
-                                      val @(fz_tb, bv_tb) = $A.freeze<byte>(tb)
-                                      val pr = $T.parse(bv_tb, 4096)
-                                      val () = $A.drop<byte>(fz_tb, bv_tb)
-                                      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
-                                    in case+ pr of
-                                      | ~$R.ok(doc2) => let
-                                          val @(dka, dksz) = $S.str_to_borrow("dependencies")
-                                          val @(fz_dka, bv_dka) = $A.freeze<byte>(dka)
-                                          val kr2 = $T.keys(doc2, bv_dka, dksz, tk, 4096)
-                                          val tkl2 = (case+ kr2 of
-                                            | ~$R.some(kl2) => kl2
-                                            | ~$R.none() => 0): int
-                                          val () = $A.drop<byte>(fz_dka, bv_dka)
-                                          val () = $A.free<byte>($A.thaw<byte>(fz_dka))
-                                          val () = $T.toml_free(doc2)
-                                          val n2 = resolve(tk, 0, tkl2, rb3, rl3, elb3, el_len3, lb3, cnt3, 200)
-                                        in n2 end
-                                      | ~$R.err(_) => cnt3
-                                    end
-                                  | ~$R.err(_) => cnt3): int
-                              in sdt(bd, tk, rb3, rl3, elb3, el_len3, lb3, cnt4, f3-1) end
+                                val @(found, cnt4) = resolve_toml(tp, tk, rb3, rl3, elb3, el_len3, lb3, cnt3)
+                                (* No manifest: a namespace directory, whose
+                                   packages sit one level down. *)
+                                val cnt6 = (if found then cnt4 else let
+                                    var np : $B.builder_v = $B.create()
+                                    val () = bput_v(np, "bats_modules/")
+                                    val () = copy_to_builder_v(bv_de, 0, del, 256, np)
+                                    val () = put_char_v(np, 0)
+                                    val @(npa, _) = $B.to_arr(np)
+                                    val @(fz_npa, bv_npa) = $A.freeze<byte>(npa)
+                                    val ndr = $F.dir_open(bv_npa, 524288)
+                                    val () = $A.drop<byte>(fz_npa, bv_npa)
+                                    val () = $A.free<byte>($A.thaw<byte>(fz_npa))
+                                  in case+ ndr of
+                                    | ~$R.ok(nd) => let
+                                        val c = sdt_ns(nd, bv_de, del, tk, rb3, rl3, elb3, el_len3, lb3, cnt4, 200)
+                                        val ndc = $F.dir_close(nd)
+                                        val () = $R.discard<int><int>(ndc)
+                                      in c end
+                                    | ~$R.err(_) => cnt4
+                                  end): int
+                                val () = $A.drop<byte>(fz_de, bv_de)
+                                val () = $A.free<byte>($A.thaw<byte>(fz_de))
+                              in sdt(bd, tk, rb3, rl3, elb3, el_len3, lb3, cnt6, f3-1) end
                             end
                           end
                         val cnt_out = sdt(bd, tk, rb2, rl2, elb2, el_len2, lb2, prev_cnt, 200)

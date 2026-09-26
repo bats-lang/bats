@@ -51,6 +51,9 @@ jobs:
           export PATH=~/bats-bin:$PATH
           bats build --repository ~/repository
 
+      - name: Test lock resolves namespaced transitive deps
+        run: tests/lock-namespace/check.sh dist/debug/bats ~/repository
+
       - name: Verify bootstrap/c matches sources
         run: |
           scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen

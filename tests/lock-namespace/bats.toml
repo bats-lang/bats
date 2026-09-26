@@ -1,0 +1,6 @@
+[package]
+name = "lock-namespace-test"
+kind = "lib"
+
+[dependencies]
+"wasm.bats-packages.dev/bridge" = ""
