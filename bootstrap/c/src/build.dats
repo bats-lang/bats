@@ -276,30 +276,15 @@ end
 (* ============================================================
    lock: read bats.lock and verify it exists
    ============================================================ *)
+(* repo: the --repository path in repo[0, rplen); rplen is 0 when it
+   was not given. *)
 
 
-implement do_lock(dev, dry_run) = let
-  (* Check if --repository was specified (stored in /tmp/_bpoc_repo.txt) *)
-  val repo_path = str_to_path_arr("/tmp/_bpoc_repo.txt")
-  val @(fz_rp2, bv_rp2) = $A.freeze<byte>(repo_path)
-  val repo_or = $F.file_open(bv_rp2, 524288, 0, 0)
-  val () = $A.drop<byte>(fz_rp2, bv_rp2)
-  val () = $A.free<byte>($A.thaw<byte>(fz_rp2))
-  val @(repo_buf, rplen) = (case+ repo_or of
-    | ~$R.ok(rfd) => let
-        val rb = $A.alloc<byte>(4096)
-        val rr2 = $F.file_read(rfd, rb, 4096)
-        val rl = (case+ rr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
-        val rcr = $F.file_close(rfd)
-        val () = $R.discard<int><int>(rcr)
-        (* strip trailing newline *)
-        val rlen2 = strip_newline_arr(rb, rl)
-      in @(rb, rlen2) end
-    | ~$R.err(_) => let val rb = $A.alloc<byte>(4096) in @(rb, 0) end): [lrb:agz] @($A.arr(byte, lrb, 4096), int)
+
+implement do_lock {lr} (dev, dry_run, bv_rb3, rplen) = let
 in
   if rplen > 0 then let
     (* Native lock resolution: read bats.toml deps, find in repo, unzip, write lock *)
-    val @(fz_rb3, bv_rb3) = $A.freeze<byte>(repo_buf)
     val bt = str_to_path_arr("bats.toml")
     val @(fz_bt, bv_bt) = $A.freeze<byte>(bt)
     val bt_or = $F.file_open(bv_bt, 524288, 0, 0)
@@ -878,12 +863,9 @@ in
           | ~$R.err(e) => println! ("error: cannot parse bats.toml: ", e)
         end
       | ~$R.err(_) => println! ("error: cannot open bats.toml"))
-    val () = $A.drop<byte>(fz_rb3, bv_rb3)
-    val () = $A.free<byte>($A.thaw<byte>(fz_rb3))
   in end
   else let
     (* No repository - just read existing lockfile *)
-    val () = $A.free<byte>(repo_buf)
     val la = str_to_path_arr("bats.lock")
     val @(fz_la, bv_la) = $A.freeze<byte>(la)
     val lock_or = $F.file_open(bv_la, 524288, 0, 0)
