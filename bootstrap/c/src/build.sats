@@ -275,28 +275,10 @@ fn do_clean(): void
 
 
 
-fn do_lock(dev: int, dry_run: int): void
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn do_lock {lr:agz}
+  (dev: int, dry_run: int, repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 
 

@@ -212,9 +212,11 @@ implement do_generate_docs(pkg_name_len, kind_is_lib) =
    upload: package library for repository
    ============================================================ *)
 
+(* repo: the --repository path in repo[0, rplen); rplen is 0 when it
+   was not given. *)
 
 
-implement do_upload() = let
+implement do_upload {lr} (repo, rplen) = let
   (* Read bats.toml for package name and verify kind = "lib" *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
@@ -271,22 +273,6 @@ in
               in $AR.eq_int_int(k0, 108) end
               else let val () = $A.free<byte>(kbuf) in false end): bool
             | ~$R.none() => let val () = $A.free<byte>(kbuf) in false end): bool
-          (* Get repository path (stored in /tmp/_bpoc_repo.txt by main0) *)
-          val upl_rp = str_to_path_arr("/tmp/_bpoc_repo.txt")
-          val @(fz_urp, bv_urp) = $A.freeze<byte>(upl_rp)
-          val upl_ror = $F.file_open(bv_urp, 524288, 0, 0)
-          val () = $A.drop<byte>(fz_urp, bv_urp)
-          val () = $A.free<byte>($A.thaw<byte>(fz_urp))
-          val @(repo, rplen) = (case+ upl_ror of
-            | ~$R.ok(urfd) => let
-                val repo_b2 = $A.alloc<byte>(524288)
-                val urr = $F.file_read(urfd, repo_b2, 524288)
-                val url = (case+ urr of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
-                val urcr = $F.file_close(urfd)
-                val () = $R.discard<int><int>(urcr)
-                val url2 = strip_newline_arr524288(repo_b2, url)
-              in @(repo_b2, url2) end
-            | ~$R.err(_) => let val repo_b2 = $A.alloc<byte>(524288) in @(repo_b2, 0) end): [lurb:agz] @($A.arr(byte, lurb, 524288), int)
         in
           case+ nr of
           | ~$R.some(nlen) =>
@@ -356,8 +342,7 @@ in
                 val @(fz_vb, bv_vb) = $A.freeze<byte>(verbuf)
                 (* Build output zip path: repo/pkg/prefix_ver.bats *)
                 var zip_path: $B.builder_v = $B.create()
-                val @(fz_rp, bv_rp) = $A.freeze<byte>(repo)
-                val () = copy_to_builder_v(bv_rp, 0, rplen, 524288, zip_path)
+                val () = copy_to_builder_v(repo, 0, rplen, 4096, zip_path)
                 val () = bput_v(zip_path, "/")
                 val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, zip_path)
@@ -384,7 +369,7 @@ in
                 val @(fz_zp, bv_zp) = $A.freeze<byte>(zpa)
                 (* mkdir + zip *)
                 var mkd: $B.builder_v = $B.create()
-                val () = copy_to_builder_v(bv_rp, 0, rplen, 524288, mkd)
+                val () = copy_to_builder_v(repo, 0, rplen, 4096, mkd)
                 val () = bput_v(mkd, "/")
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, mkd)
                 val _ = run_mkdir(mkd)
@@ -402,8 +387,6 @@ in
                 val () = bput_v(za5, "src/")
                 val () = $A.drop<byte>(fz_nb, bv_nb)
                 val () = $A.free<byte>($A.thaw<byte>(fz_nb))
-                val () = $A.drop<byte>(fz_rp, bv_rp)
-                val () = $A.free<byte>($A.thaw<byte>(fz_rp))
                 val () = $A.drop<byte>(fz_px, bv_px)
                 val () = $A.free<byte>($A.thaw<byte>(fz_px))
                 val zip_argv = $L.list_vt_cons(mk_arg(za1),
@@ -497,16 +480,13 @@ in
                 in println! ("uploaded successfully") end
               end
               else let
-                val () = $A.free<byte>(repo)
                 val () = $A.free<byte>(nbuf)
               in println! ("error: --repository is required for upload") end
             else let
               val () = $A.free<byte>(nbuf)
-              val () = $A.free<byte>(repo)
             in println! ("error: 'upload' is only for library packages (kind = \"lib\")") end
           | ~$R.none() => let
               val () = $A.free<byte>(nbuf)
-              val () = $A.free<byte>(repo)
             in println! ("error: package.name not found in bats.toml") end
         end
       | ~$R.err(_) => println! ("error: could not parse bats.toml")

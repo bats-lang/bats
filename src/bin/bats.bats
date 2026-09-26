@@ -128,6 +128,12 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     else scan_only(buf, next + 1, len, mask)
   end
 
+(* The value of a string option copied to buf, and its length; 0 when
+   the option was not given. *)
+fn opt_string_copy {l:agz}
+  (r: !$AP.parse_result, h: $AP.arg($AP.string_val), buf: !$A.arr(byte, l, 4096)): int =
+  if $AP.is_present(r, h) then $AP.get_string_copy(r, h, buf, 4096) else 0
+
 (* ============================================================
    Main: read argv (args_read: NUL-separated), dispatch
    ============================================================ *)
@@ -223,22 +229,11 @@ in
                 val () = $A.drop<byte>(fz_ri, bv_ri)
                 val () = $A.free<byte>($A.thaw<byte>(fz_ri))
               in end else ())
-              (* Handle --repository *)
-              val () = (if $AP.is_present(r, h_repository) then let
-                val repo_buf = $A.alloc<byte>(4096)
-                val rlen = $AP.get_string_copy(r, h_repository, repo_buf, 4096)
-                val @(fz_rb2, bv_rb2) = $A.freeze<byte>(repo_buf)
-                var rb2 = $B.create()
-                val () = copy_to_builder(bv_rb2, 0, rlen, 4096, rb2, 4096)
-                val () = $B.put_char(rb2, 10)
-                val () = $A.drop<byte>(fz_rb2, bv_rb2)
-                val () = $A.free<byte>($A.thaw<byte>(fz_rb2))
-                val rtp = str_to_path_arr("/tmp/_bpoc_repo.txt")
-                val @(fz_rtp, bv_rtp) = $A.freeze<byte>(rtp)
-                val _ = write_file_from_builder(bv_rtp, 524288, rb2)
-                val () = $A.drop<byte>(fz_rtp, bv_rtp)
-                val () = $A.free<byte>($A.thaw<byte>(fz_rtp))
-              in end else ())
+              (* --repository: passed to the commands that use it; length 0
+                 when absent *)
+              val repo_buf = $A.alloc<byte>(4096)
+              val repo_len = opt_string_copy(r, h_repository, repo_buf)
+              val @(fz_repo, bv_repo) = $A.freeze<byte>(repo_buf)
               (* Handle --to-c *)
               val () = (if $AP.is_present(r, h_to_c) then let
                 val tc_buf = $A.alloc<byte>(4096)
@@ -262,7 +257,7 @@ in
               val () = $A.free<byte>(cmd_buf)
               val arg_buf = $A.alloc<byte>(4096)
               val arg_len = $AP.get_string_copy(r, h_arg, arg_buf, 4096)
-            in
+            in let val () = (
               if cmd_code = 0 then let (* build *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
@@ -310,7 +305,7 @@ in
                 val lk_dry = (if $AP.is_present(r, h_dry_run) then 1 else 0): int
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in do_lock(lk_dev, lk_dry) end
+              in do_lock(lk_dev, lk_dry, bv_repo, repo_len) end
               else if cmd_code = 4 then let (* run *)
                 val () = (if $AP.is_present(r, h_bin) then let
                   val bin_buf = $A.alloc<byte>(256)
@@ -370,7 +365,7 @@ in
               else if cmd_code = 8 then let (* upload *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in do_upload() end
+              in do_upload(bv_repo, repo_len) end
               else if cmd_code = 9 then let (* add *)
                 val () = $AP.parse_result_free(r)
               in
@@ -421,7 +416,10 @@ in
               else let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|completions> [--only debug|release]") end
+              in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|completions> [--only debug|release]") end)
+              val () = $A.drop<byte>(fz_repo, bv_repo)
+              val () = $A.free<byte>($A.thaw<byte>(fz_repo))
+            in end
             end end
           | ~$R.err(e) => let
               val () = $AP.parse_error_free(e)

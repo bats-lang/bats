@@ -211,29 +211,9 @@ fn do_generate_docs(pkg_name_len: int, kind_is_lib: int): void
 
 
 
-fn do_upload(): void
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 
 
