@@ -1,8 +1,7 @@
 #!/bin/sh
 # `bats run -- <args>` passes <args> to the program, empty ones
 # included; they used to be dropped. The program exits 0 only when its
-# arguments are exactly x, "" and "y z" (bats run says "run failed" for
-# a non-zero exit).
+# arguments are exactly x, "" and "y z"; bats run exits with its status.
 # usage: tests/run-args/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -44,9 +43,7 @@ in if ok then () else exit_void (1) end
 B
 cd "$TMP/p"
 "$BATS" lock --repository "$REPO" > lock.log 2>&1 || { echo "FAIL: lock"; cat lock.log; exit 1; }
-"$BATS" run --repository "$REPO" -- x "" "y z" > run.log 2>&1 || true
+rc=0; "$BATS" run --repository "$REPO" -- x "" "y z" > run.log 2>&1 || rc=$?
 grep -q "built: dist/debug/runargs" run.log || { echo "FAIL: build"; cat run.log; exit 1; }
-if grep -q "run failed" run.log; then
-  echo "FAIL: the program did not get x, \"\", \"y z\""; cat run.log; exit 1
-fi
+[ "$rc" = 0 ] || { echo "FAIL: the program did not get x, \"\", \"y z\""; cat run.log; exit 1; }
 echo "run-args: ok"

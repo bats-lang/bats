@@ -47,6 +47,8 @@ typedef struct {
   int stderr_parent_fd;
 } _spawn_result_t;
 
+extern char **environ;
+
 /* Global to pass result back (avoids returning struct by value issues) */
 static _spawn_result_t _spawn_res;
 
@@ -116,24 +118,26 @@ static int _proc_spawn(
       dup2(stdin_pipe[0], 0); close(stdin_pipe[0]); close(stdin_pipe[1]);
     } else if (stdin_mode == 1) {
       if (stdin_fd != 0) { dup2(stdin_fd, 0); close(stdin_fd); }
-    } else {
+    } else if (stdin_mode == 2) {
       int dn = open("/dev/null", O_RDONLY); if (dn >= 0) { dup2(dn, 0); close(dn); }
     }
     if (stdout_mode == 0) {
       dup2(stdout_pipe[1], 1); close(stdout_pipe[0]); close(stdout_pipe[1]);
     } else if (stdout_mode == 1) {
       if (stdout_fd != 1) { dup2(stdout_fd, 1); close(stdout_fd); }
-    } else {
+    } else if (stdout_mode == 2) {
       int dn = open("/dev/null", O_WRONLY); if (dn >= 0) { dup2(dn, 1); close(dn); }
     }
     if (stderr_mode == 0) {
       dup2(stderr_pipe[1], 2); close(stderr_pipe[0]); close(stderr_pipe[1]);
     } else if (stderr_mode == 1) {
       if (stderr_fd != 2) { dup2(stderr_fd, 2); close(stderr_fd); }
-    } else {
+    } else if (stderr_mode == 2) {
       int dn = open("/dev/null", O_WRONLY); if (dn >= 0) { dup2(dn, 2); close(dn); }
     }
-    execve(path, (char *const *)argv_ptrs, (char *const *)envp_ptrs);
+    /* envp_count < 0: the parent's environment */
+    execve(path, (char *const *)argv_ptrs,
+           envp_count < 0 ? environ : (char *const *)envp_ptrs);
     _exit(127);
   }
 
@@ -182,7 +186,12 @@ static int _proc_try_wait(int pid) {
 
 
 
-(* Stream config indexed by bool — pipe_new proves b=true *)
+(* Stream config indexed by bool — pipe_new proves b=true.
+   pipe_new: a new pipe, whose other end the parent gets.
+   inherit_fd: the given fd, which the parent gives up.
+   dev_null: /dev/null.
+   inherit: the parent's own stream, shared and left open. *)
+
 
 
 
@@ -223,6 +232,17 @@ static int _proc_try_wait(int pid) {
 
 
 
+(* As spawn, with the parent's environment instead of an envp list. *)
+
+
+
+
+
+
+
+
+
+
 (* ============================================================
    Internal helpers
    ============================================================ *)
@@ -235,12 +255,14 @@ fn _build_pipe_end {b:bool}
   | pipe_new() => pipe_fd($F.fd_mk(rawfd))
   | inherit_fd(_) => pipe_none()
   | dev_null() => pipe_none()
+  | inherit() => pipe_none()
 
 fn _cfg_mode {b:bool} (cfg: !stream_config(b)): int =
   case+ cfg of
   | pipe_new() => 0
   | inherit_fd(_) => 1
   | dev_null() => 2
+  | inherit() => 3
 
 fn _cfg_fd {b:bool} (cfg: !stream_config(b)): int =
   case+ cfg of
@@ -251,12 +273,14 @@ fn _cfg_fd {b:bool} (cfg: !stream_config(b)): int =
       prval () = fold@(f)
     in r end
   | dev_null() => ~1
+  | inherit() => ~1
 
 fn _consume_cfg {b:bool} (cfg: stream_config(b)): void =
   case+ cfg of
   | ~pipe_new() => ()
   | ~inherit_fd(f) => let val+ ~$F.fd_mk(_) = f in end
   | ~dev_null() => ()
+  | ~inherit() => ()
 
 fn _build_from_list(xs: $L.listv(arg_entry)): @($B.builder_v, int) = let
   fun loop {n:nat} .<n>.
@@ -372,6 +396,22 @@ implement spawn {sin}{sout}{serr}{lp}
   val @(envp_arr, _) = $B.to_arr(envp_b)
   val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
   val r = _spawn_raw(path, bv_a, argc, bv_e, envp_c,
+    stdin_cfg, stdout_cfg, stderr_cfg)
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+  val () = $A.drop<byte>(fz_e, bv_e)
+  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+in r end
+
+implement spawn_inherit_env {sin}{sout}{serr}{lp}
+  (path, argv, stdin_cfg, stdout_cfg, stderr_cfg) = let
+  val @(argv_b, argc) = _build_from_list(argv)
+  val @(argv_arr, _) = $B.to_arr(argv_b)
+  val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
+  val @(envp_b, _) = _build_from_list($L.list_vt_nil())
+  val @(envp_arr, _) = $B.to_arr(envp_b)
+  val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
+  val r = _spawn_raw(path, bv_a, argc, bv_e, ~1,
     stdin_cfg, stdout_cfg, stderr_cfg)
   val () = $A.drop<byte>(fz_a, bv_a)
   val () = $A.free<byte>($A.thaw<byte>(fz_a))

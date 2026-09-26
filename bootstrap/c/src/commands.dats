@@ -977,13 +977,16 @@ in
               val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
               val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil(), 4096), $L.list_vt_nil())
               val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
-              val rc = run_cmd(bv_ea, run_argv)
+              val rc = run_program(bv_ea, run_argv)
+              val () = (if rc < 0 then let
+                val () = print! ("error: cannot run '")
+                val () = print_borrow(bv_ea, 0, exec_len - 1, 524288, 524288)
+                val () = println! ("'")
+              in set_exit_code(1) end
+              else set_exit_code(rc))
               val () = $A.drop<byte>(fz_ea, bv_ea)
               val () = $A.free<byte>($A.thaw<byte>(fz_ea))
-            in
-              if rc <> 0 then println! ("error: run failed")
-              else ()
-            end
+            in end
           | ~$R.none() => let
               val () = $A.free<byte>(nbuf)
             in println! ("error: package.name not found in bats.toml") end

@@ -106,6 +106,7 @@ fn span_i32 {l:agz}{n:pos}
 
 
 
+
 fn is_verbose(): bool
 
 fn is_quiet(): bool
@@ -149,6 +150,14 @@ fn set_build_err(): void
 fn has_build_err(): bool
 
 fn clear_build_err(): void
+
+
+
+fn set_exit_code(v: int): void
+
+fn get_exit_code(): int
+
+
 
 
 
@@ -819,6 +828,25 @@ fn run_mkdir
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn run_program {le:agz}
+  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): int
 
 
 

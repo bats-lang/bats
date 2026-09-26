@@ -94,6 +94,7 @@ val g_to_c = ref<int>(0)
 val g_to_c_done = ref<int>(0)
 val g_self_path: ref(string) = ref("")
 val g_build_err = ref<bool>(false)
+val g_exit_code = ref<int>(0)
 
 #pub fn is_verbose(): bool
 
@@ -139,6 +140,12 @@ val g_build_err = ref<bool>(false)
 
 #pub fn clear_build_err(): void
 
+(* The status bats exits with when no error was recorded (bats run
+   passes on its program's). *)
+#pub fn set_exit_code(v: int): void
+
+#pub fn get_exit_code(): int
+
 implement is_verbose() = !g_verbose
 implement is_quiet() = !g_quiet
 implement is_test_mode() = !g_test_mode
@@ -161,6 +168,8 @@ implement get_self_path() = !g_self_path
 implement set_build_err() = !g_build_err := true
 implement has_build_err() = !g_build_err
 implement clear_build_err() = !g_build_err := false
+implement set_exit_code(v) = !g_exit_code := v
+implement get_exit_code() = !g_exit_code
 
 (* ============================================================
    String builder helpers
@@ -820,6 +829,25 @@ implement run_mkdir(path_b) = let
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
 in rc end
+
+(* Runs exec with argv, sharing this process's stdin, stdout, stderr and
+   environment, as the Rust bats's Command::status did. The exit status
+   (1 if the program did not exit normally), or ~1 if it could not be
+   started. *)
+#pub fn run_program {le:agz}
+  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): int
+
+implement run_program (exec_bv, argv) =
+  case+ $P.spawn_inherit_env(exec_bv, argv, $P.inherit(), $P.inherit(), $P.inherit()) of
+  | ~$R.ok(sp) => let
+      val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
+      val () = $P.pipe_end_close(sin_p)
+      val () = $P.pipe_end_close(sout_p)
+      val () = $P.pipe_end_close(serr_p)
+      val ec = (case+ $P.child_wait(child) of
+        | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+    in if ec >= 0 then ec else 1 end
+  | ~$R.err(_) => ~1
 
 #pub fn run_cmd {le:agz}
   (exec_bv: !$A.borrow(byte, le, 524288),
