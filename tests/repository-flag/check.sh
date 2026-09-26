@@ -16,7 +16,7 @@ git init -q . && git add -A && git -c user.name=t -c user.email=t@t commit -qm t
 "$BATS" upload --repository "$TMP/repo" > "$TMP/up1.log" 2>&1 || { echo "FAIL: first upload"; cat "$TMP/up1.log"; exit 1; }
 n1=$(ls "$TMP/repo/repoflag" | wc -l)
 "$BATS" upload > "$TMP/up2.log" 2>&1 || true
-grep -q -- "--repository is required" "$TMP/up2.log" || {
+grep -q -- "requires --repository" "$TMP/up2.log" || {
   echo "FAIL: upload without --repository did not ask for it"; cat "$TMP/up2.log"; exit 1; }
 n2=$(ls "$TMP/repo/repoflag" | wc -l)
 [ "$n1" = "$n2" ] || { echo "FAIL: upload without --repository wrote into the previous repository"; exit 1; }
