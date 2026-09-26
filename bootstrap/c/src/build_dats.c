@@ -332,7 +332,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -343,8 +343,20 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs
 #include <dirent.h>
 #include <string.h>
 
+/* flags are file's own values (the O_* stadefs below); the host's
+   O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
+   macOS and the BSDs), so they are translated here. */
 static int _file_open(const char *path, int flags, int mode) {
-  return open(path, flags, mode);
+  int f;
+  switch (flags & 3) {
+    case 0: f = O_RDONLY; break;
+    case 1: f = O_WRONLY; break;
+    default: f = O_RDWR; break;
+  }
+  if (flags & 64) f |= O_CREAT;
+  if (flags & 512) f |= O_TRUNC;
+  if (flags & 1024) f |= O_APPEND;
+  return open(path, f, mode);
 }
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
@@ -592,7 +604,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -603,8 +615,20 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs
 #include <dirent.h>
 #include <string.h>
 
+/* flags are file's own values (the O_* stadefs below); the host's
+   O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
+   macOS and the BSDs), so they are translated here. */
 static int _file_open(const char *path, int flags, int mode) {
-  return open(path, flags, mode);
+  int f;
+  switch (flags & 3) {
+    case 0: f = O_RDONLY; break;
+    case 1: f = O_WRONLY; break;
+    default: f = O_RDWR; break;
+  }
+  if (flags & 64) f |= O_CREAT;
+  if (flags & 512) f |= O_TRUNC;
+  if (flags & 1024) f |= O_APPEND;
+  return open(path, f, mode);
 }
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
@@ -30978,8 +31002,8 @@ build/src/build.dats: 63075(line=1036, offs=6) -- 63454(line=1044, offs=12)
 /*
 local: 
 global: write_stub_337$0(level=1)
-local: stub$6162(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
-global: stub$6162(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
+local: stub$6166(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
+global: stub$6166(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
@@ -57645,8 +57669,8 @@ build/src/build.dats: 110701(line=1948, offs=17) -- 138954(line=2354, offs=18)
 /*
 local: scan_deps_678$0(level=1)
 global: scan_deps_678$0(level=1)
-local: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -59443,8 +59467,8 @@ build/src/build.dats: 113213(line=1995, offs=33) -- 129086(line=2198, offs=34)
 /*
 local: scan_ns_693$0(level=2)
 global: scan_ns_693$0(level=2)
-local: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -61739,8 +61763,8 @@ build/src/build.dats: 121541(line=2109, offs=47) -- 128373(line=2187, offs=48)
 /*
 local: scan_ns_extra_724$0(level=3)
 global: scan_ns_extra_724$0(level=3)
-local: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -64004,8 +64028,8 @@ build/src/build.dats: 132841(line=2263, offs=31) -- 138071(line=2337, offs=32)
 /*
 local: scan_extra_bats_764$0(level=2)
 global: scan_extra_bats_764$0(level=2)
-local: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -66306,8 +66330,8 @@ build/src/build.dats: 139568(line=2370, offs=17) -- 143265(line=2436, offs=18)
 /*
 local: scan_src_modules_806$0(level=1)
 global: scan_src_modules_806$0(level=1)
-local: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6464(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6464(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6468(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6468(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -75989,8 +76013,8 @@ build/src/build.dats: 163030(line=2824, offs=17) -- 258784(line=4220, offs=18)
 /*
 local: patsopt_dir_extra_35$0(level=0), cc_dir_extra_66$0(level=0), compile_wasm_runtime_342$0(level=0), wasm_cc_file_352$0(level=0), arr_entry_len_845$0(level=1), copy_arr_to_bld_854$0(level=1), scan_staload_deps_857$0(level=1), collect_trans_deps_866$0(level=1), emit_closure_dynloads_879$0(level=1), scan_shared_module_deps_898$0(level=1), link_closure_deps_924$0(level=1), scan_bins_943$0(level=1)
 global: patsopt_dir_extra_35$0(level=0), cc_dir_extra_66$0(level=0), compile_wasm_runtime_342$0(level=0), wasm_cc_file_352$0(level=0), skip_to_nl_835$0(level=1), find_dquote_838$0(level=1), borrow_eq_arr_841$0(level=1), arr_entry_len_845$0(level=1), is_dep_seen_848$0(level=1), copy_borrow_to_arr_851$0(level=1), copy_arr_to_bld_854$0(level=1), scan_staload_deps_857$0(level=1), collect_trans_deps_866$0(level=1), emit_closure_dynloads_879$0(level=1), scan_shared_module_deps_898$0(level=1), link_closure_deps_924$0(level=1), scan_bins_943$0(level=1)
-local: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6464(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6463(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6464(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6574(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6468(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6467(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6468(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6578(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
