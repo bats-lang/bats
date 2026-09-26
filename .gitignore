@@ -2,3 +2,4 @@ build/
 dist/
 bats_modules/
 !/bootstrap/c/bats_modules/
+tests/*/bats.lock
