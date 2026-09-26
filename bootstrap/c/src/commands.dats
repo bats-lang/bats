@@ -850,8 +850,7 @@ implement run_process_demo() = let
   val () = bput_v(ba2, "check passed")
   val argv = $L.list_vt_cons(mk_arg(ba1),
     $L.list_vt_cons(mk_arg(ba2), $L.list_vt_nil()))
-  val envp: $L.listv($P.arg_entry) = $L.list_vt_nil()
-  val spawn_r = $P.spawn(bv_exec, argv, envp,
+  val spawn_r = $P.spawn_inherit_env(bv_exec, argv,
     $P.dev_null(), $P.pipe_new(), $P.dev_null())
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))

@@ -854,10 +854,7 @@ implement run_program (exec_bv, argv) =
    argv: $L.listv($P.arg_entry)): int
 
 implement run_cmd (exec_bv, argv) = let
-  var envp_b = $B.create()
-  val () = bput_v(envp_b, "PATH=/usr/bin:/usr/local/bin:/bin")
-  val envp = $L.list_vt_cons(mk_arg(envp_b), $L.list_vt_nil())
-  val sr = $P.spawn(exec_bv, argv, envp,
+  val sr = $P.spawn_inherit_env(exec_bv, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
 in
   case+ sr of
@@ -937,10 +934,7 @@ in @(y2, m, d, secs_of_day) end
    outbuf: !$A.arr(byte, lo, 4096)): @(int, int)
 
 implement run_cmd_capture (exec_bv, argv, outbuf) = let
-  var envp_b = $B.create()
-  val () = bput_v(envp_b, "PATH=/usr/bin:/usr/local/bin:/bin")
-  val envp = $L.list_vt_cons(mk_arg(envp_b), $L.list_vt_nil())
-  val sr = $P.spawn(exec_bv, argv, envp,
+  val sr = $P.spawn_inherit_env(exec_bv, argv,
     $P.dev_null(), $P.pipe_new(), $P.pipe_new())
 in
   case+ sr of
@@ -1023,7 +1017,7 @@ implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) = let
     val () = print_borrow(in_bv, 0, in_len, 524288,
       4096)
   in print_newline() end else ())
-  val sr = $P.spawn(bv_exec, argv, envp,
+  val sr = $P.spawn_inherit_env_with(bv_exec, argv, envp,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
@@ -1110,9 +1104,6 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(b5), append_vt(opt_args, tail))))))
-  var envp_b = $B.create()
-  val () = bput_v(envp_b, "PATH=/usr/bin:/usr/local/bin:/bin")
-  val envp = $L.list_vt_cons(mk_arg(envp_b), $L.list_vt_nil())
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
     val () = print! ("  + cc -c -o ")
@@ -1122,7 +1113,7 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
     val () = print_borrow(in_bv, 0, in_len, 524288,
       4096)
   in print_newline() end else ())
-  val sr = $P.spawn(bv_exec, argv, envp,
+  val sr = $P.spawn_inherit_env(bv_exec, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))

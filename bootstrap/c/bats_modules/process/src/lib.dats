@@ -122,17 +122,46 @@ static int _proc_spawn(
   }
   argv_ptrs[ai] = (const char *)0;
 
+  /* envp_count >= 0: exactly the envp_count entries of envp_buf.
+     envp_count = -(k + 1): the parent's environment, with the k
+     NAME=VALUE entries of envp_buf added or replacing. */
+  int inherit = envp_count < 0;
+  int nlist = inherit ? -envp_count - 1 : envp_count;
   const char *envp_ptrs[256];
   int ei = 0;
   p = envp_buf;
-  for (i = 0; i < envp_count && ei < 255; i++) {
+  for (i = 0; i < nlist && ei < 255; i++) {
     envp_ptrs[ei++] = p;
     p += strlen(p) + 1;
   }
   envp_ptrs[ei] = (const char *)0;
 
+  char **envv = (char **)0;
+  if (inherit) {
+    size_t n = 0, k = 0, j;
+    int e;
+    while (environ[n]) n++;
+    envv = (char **)malloc((n + (size_t)ei + 1) * sizeof(char *));
+    if (!envv) {
+      if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
+      if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
+      if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
+      return -1;
+    }
+    for (j = 0; j < n; j++) {
+      size_t len = strcspn(environ[j], "=");
+      int replaced = 0;
+      for (e = 0; e < ei; e++)
+        if (strncmp(envp_ptrs[e], environ[j], len) == 0 && envp_ptrs[e][len] == '=') replaced = 1;
+      if (!replaced) envv[k++] = environ[j];
+    }
+    for (e = 0; e < ei; e++) envv[k++] = (char *)envp_ptrs[e];
+    envv[k] = (char *)0;
+  }
+
   int pid = fork();
   if (pid < 0) {
+    free(envv);
     if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
     if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
     if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
@@ -161,12 +190,12 @@ static int _proc_spawn(
     } else if (stderr_mode == 2) {
       int dn = open("/dev/null", O_WRONLY); if (dn >= 0) { dup2(dn, 2); close(dn); }
     }
-    /* envp_count < 0: the parent's environment */
     _exec_search(path, (char *const *)argv_ptrs,
-           envp_count < 0 ? environ : (char *const *)envp_ptrs);
+           inherit ? envv : (char *const *)envp_ptrs);
     _exit(127);
   }
 
+  free(envv);
   if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); _spawn_res.stdin_parent_fd = stdin_pipe[1]; }
   if (stdout_pipe[1] >= 0) { close(stdout_pipe[1]); _spawn_res.stdout_parent_fd = stdout_pipe[0]; }
   if (stderr_pipe[1] >= 0) { close(stderr_pipe[1]); _spawn_res.stderr_parent_fd = stderr_pipe[0]; }
@@ -249,6 +278,19 @@ static int _proc_try_wait(int pid) {
 
 (* path: an executable's path, or a command name without '/', looked up
    on this process's PATH as execvp does. *)
+
+
+
+
+
+
+
+
+
+
+
+(* As spawn, with the parent's environment plus the NAME=VALUE entries
+   of extra, each added or replacing that variable. *)
 
 
 
@@ -432,14 +474,18 @@ implement spawn {sin}{sout}{serr}{lp}
 in r end
 
 implement spawn_inherit_env {sin}{sout}{serr}{lp}
-  (path, argv, stdin_cfg, stdout_cfg, stderr_cfg) = let
+  (path, argv, stdin_cfg, stdout_cfg, stderr_cfg) =
+  spawn_inherit_env_with(path, argv, $L.list_vt_nil(), stdin_cfg, stdout_cfg, stderr_cfg)
+
+implement spawn_inherit_env_with {sin}{sout}{serr}{lp}
+  (path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
   val @(argv_b, argc) = _build_from_list(argv)
   val @(argv_arr, _) = $B.to_arr(argv_b)
   val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
-  val @(envp_b, _) = _build_from_list($L.list_vt_nil())
+  val @(envp_b, extra_c) = _build_from_list(extra)
   val @(envp_arr, _) = $B.to_arr(envp_b)
   val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
-  val r = _spawn_raw(path, bv_a, argc, bv_e, ~1,
+  val r = _spawn_raw(path, bv_a, argc, bv_e, ~(extra_c + 1),
     stdin_cfg, stdout_cfg, stderr_cfg)
   val () = $A.drop<byte>(fz_a, bv_a)
   val () = $A.free<byte>($A.thaw<byte>(fz_a))
