@@ -35,6 +35,8 @@ staload F = "file/src/lib.sats"
 %{#
 #ifndef _PROCESS_RUNTIME_DEFINED
 #define _PROCESS_RUNTIME_DEFINED
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -48,6 +50,30 @@ typedef struct {
 } _spawn_result_t;
 
 extern char **environ;
+
+/* execve, or, when file has no '/', execve of each PATH entry joined
+   with file in turn, as execvp does: the Rust bats ran its tools by
+   name through Command. Returns only if nothing could be executed. */
+static void _exec_search(const char *file, char *const argv[], char *const envp[]) {
+  const char *path;
+  char buf[4096];
+  size_t flen = strlen(file);
+  if (strchr(file, '/')) { execve(file, argv, envp); return; }
+  path = getenv("PATH");
+  if (!path || !*path) path = "/usr/bin:/bin";
+  for (;;) {
+    const char *colon = strchr(path, ':');
+    size_t len = colon ? (size_t)(colon - path) : strlen(path);
+    if (len == 0) {
+      if (flen + 1 <= sizeof buf) { memcpy(buf, file, flen + 1); execve(buf, argv, envp); }
+    } else if (len + 1 + flen + 1 <= sizeof buf) {
+      memcpy(buf, path, len); buf[len] = '/'; memcpy(buf + len + 1, file, flen + 1);
+      execve(buf, argv, envp);
+    }
+    if (!colon) break;
+    path = colon + 1;
+  }
+}
 
 /* Global to pass result back (avoids returning struct by value issues) */
 static _spawn_result_t _spawn_res;
@@ -136,7 +162,7 @@ static int _proc_spawn(
       int dn = open("/dev/null", O_WRONLY); if (dn >= 0) { dup2(dn, 2); close(dn); }
     }
     /* envp_count < 0: the parent's environment */
-    execve(path, (char *const *)argv_ptrs,
+    _exec_search(path, (char *const *)argv_ptrs,
            envp_count < 0 ? environ : (char *const *)envp_ptrs);
     _exit(127);
   }
@@ -221,6 +247,8 @@ static int _proc_try_wait(int pid) {
 
 
 
+(* path: an executable's path, or a command name without '/', looked up
+   on this process's PATH as execvp does. *)
 
 
 

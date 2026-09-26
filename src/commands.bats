@@ -325,7 +325,7 @@ in
             if is_lib then
               if rplen > 0 then let
                 (* Get version from git commit timestamp *)
-                val git_exec = str_to_path_arr("/usr/bin/git")
+                val git_exec = str_to_path_arr("git")
                 val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
                 (* Get commit timestamp *)
                 var ts_b1 = $B.create()
@@ -419,7 +419,7 @@ in
                 val () = bput_v(mkd, "/")
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, mkd)
                 val _ = run_mkdir(mkd)
-                val zip_exec = str_to_path_arr("/usr/bin/zip")
+                val zip_exec = str_to_path_arr("zip")
                 val @(fz_ze, bv_ze) = $A.freeze<byte>(zip_exec)
                 var za1 = $B.create()
                 val () = bput_v(za1, "zip")
@@ -572,7 +572,7 @@ in
   (* Get current directory name via readlink /proc/self/cwd *)
   val @(cwd_buf, cwd_len) = (let
     (* Get CWD via pwd *)
-    val pwd_exec = str_to_path_arr("/bin/pwd")
+    val pwd_exec = str_to_path_arr("pwd")
     val @(fz_pwd, bv_pwd) = $A.freeze<byte>(pwd_exec)
     var pwd_b1 = $B.create()
     val () = bput_v(pwd_b1, "pwd")
@@ -792,7 +792,7 @@ in
       val tcr = $F.file_close(tfd)
       val () = $R.discard<int><int>(tcr)
       val () = $A.free<byte>(tbuf)
-      val sed_exec = str_to_path_arr("/usr/bin/sed")
+      val sed_exec = str_to_path_arr("sed")
       val @(fz_se, bv_se) = $A.freeze<byte>(sed_exec)
       var sb1 = $B.create()
       val () = bput_v(sb1, "sed")
@@ -831,7 +831,7 @@ end
 #pub fn run_process_demo(): void
 
 implement run_process_demo() = let
-  val exec = str_to_path_arr("/bin/echo")
+  val exec = str_to_path_arr("echo")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var ba1 = $B.create()
   val () = bput_v(ba1, "echo")
