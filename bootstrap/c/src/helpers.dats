@@ -1002,12 +1002,200 @@ in
   | ~$R.err(e) => @(0 - e, 0)
 end
 
+(* b's bytes to stderr; consumes b *)
+
+
+implement prerr_builder (b) = let
+  val @(ba, bl) = $B.to_arr(b)
+  fun loop {lb:agz}{f:nat} .<f>.
+    (a: !$A.arr(byte, lb, 524288), i: pos_t, n: int, f: int f): void =
+    if f <= 0 then ()
+    else if i >= n then ()
+    else if i < 0 then ()
+    else if i >= 524288 then ()
+    else let
+      val () = prerr_char(int2char0(byte2int0($A.get<byte>(a, i))))
+    in loop(a, i + 1, n, f - 1) end
+  val () = loop(ba, 0, bl, 524288)
+in $A.free<byte>(ba) end
+
+(* The prelude line count in <in>.pre, written next to the .dats
+   in[0, il) by preprocess_one; 0 when there is none *)
+fun digits_val {lb:agz}{f:nat} .<f>.
+  (b: !$A.borrow(byte, lb, 16), i: pos_t, k: int, v: int, f: int f): int =
+  if f <= 0 then v
+  else if i >= k then v
+  else let val c = peek(b, i, 16) in
+    if c < 48 then v else if c > 57 then v
+    else digits_val(b, i + 1, k, v * 10 + (c - 48), f - 1)
+  end
+
+fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = let
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(in_bv, 0, il, 524288, pb)
+  val () = bput_v(pb, ".pre")
+  val () = put_char_v(pb, 0)
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val n = (case+ $F.file_open(bv_p, 524288, 0, 0) of
+    | ~$R.err(_) => 0
+    | ~$R.ok(fd) => let
+        val buf = $A.alloc<byte>(16)
+        val k = (case+ $F.file_read(fd, buf, 16) of
+          | ~$R.ok(k) => k | ~$R.err(_) => 0): int
+        val () = $R.discard<int><int>($F.file_close(fd))
+        val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+        val v = digits_val(bv_b, 0, k, 0, 9)
+        val () = $A.drop<byte>(fz_b, bv_b)
+        val () = $A.free<byte>($A.thaw<byte>(fz_b))
+      in v end): int
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in n end
+
+(* Everything left to read from fd appended to out, up to about 500000
+   bytes (Rust reads patsopt's whole stderr) *)
+fun drain_fd {f:nat} .<f>.
+  (fd: !$F.fd, out: !$B.builder_v >> $B.builder_v, total: int, f: int f): void =
+  if f <= 0 then ()
+  else if total > 500000 then ()
+  else let
+    val buf = $A.alloc<byte>(4096)
+    val k = (case+ $F.file_read(fd, buf, 4096) of
+      | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
+    val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+    val () = copy_to_builder_v(bv_b, 0, k, 4096, out)
+    val () = $A.drop<byte>(fz_b, bv_b)
+    val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  in if k <= 0 then () else drain_fd(fd, out, total + k, f - 1) end
+
+(* The end of the line holding e[i] (its newline, or n) *)
+fun line_end_at {le:agz}{f:nat} .<f>.
+  (e: !$A.borrow(byte, le, 524288), i: pos_t, n: int, f: int f): pos_t =
+  if f <= 0 then i
+  else if i >= n then i
+  else if peek(e, i, 524288) = 10 then i
+  else line_end_at(e, i + 1, n, f - 1)
+
+(* Whether e[i, j) holds the k bytes of lit somewhere *)
+fun has_lit {le:agz}{m:pos | m <= 16}{f:nat} .<f>.
+  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int,
+   lit: &(@[char][m]), k: int m, f: int f): bool =
+  if f <= 0 then false
+  else if i + k > j then false
+  else if lit_at(e, i, 524288, lit, k) then true
+  else has_lit(e, i + 1, j, lit, k, f - 1)
+
+(* The digits at e[i, j): their end, and their value *)
+fun num_at {le:agz}{f:nat} .<f>.
+  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int, v: int, f: int f): @(pos_t, int) =
+  if f <= 0 then @(i, v)
+  else if i >= j then @(i, v)
+  else let val c = peek(e, i, 524288) in
+    if c < 48 then @(i, v) else if c > 57 then @(i, v)
+    else num_at(e, i + 1, j, v * 10 + (c - 48), f - 1)
+  end
+
+(* v - off (at least 0) when there were digits *)
+fn put_line_num (out: !$B.builder_v >> $B.builder_v, has: bool, v: int, off: int): void =
+  if ~has then bput_v(out, "")
+  else if v > off then bput_int_v(out, v - off)
+  else bput_int_v(out, 0)
+
+(* e[i, j) with .sats and .dats as .bats and build/ dropped, and, when
+   adj, each line=N as line=N-off (at least 0) *)
+fun remap_line {le:agz}{f:nat} .<f>.
+  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int, adj: bool, off: int,
+   out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if i >= j then ()
+  else let
+    var s_c = @[char][5]('.', 's', 'a', 't', 's')
+    var d_c = @[char][5]('.', 'd', 'a', 't', 's')
+    var b_c = @[char][6]('b', 'u', 'i', 'l', 'd', '/')
+    var l_c = @[char][5]('l', 'i', 'n', 'e', '=')
+    val ext = (if i + 5 > j then false
+               else if lit_at(e, i, 524288, s_c, 5) then true
+               else lit_at(e, i, 524288, d_c, 5)): bool
+    val bld = (if i + 6 > j then false else lit_at(e, i, 524288, b_c, 6)): bool
+    val lin = (if ~adj then false else if i + 5 > j then false
+               else lit_at(e, i, 524288, l_c, 5)): bool
+  in
+    if ext then let
+      val () = bput_v(out, ".bats")
+    in remap_line(e, i + 5, j, adj, off, out, f - 1) end
+    else if bld then let
+      val () = bput_v(out, "")
+    in remap_line(e, i + 6, j, adj, off, out, f - 1) end
+    else if lin then let
+      val () = bput_v(out, "line=")
+      val @(ne, v) = num_at(e, i + 5, j, 0, 9)
+      val () = put_line_num(out, ne > i + 5, v, off)
+    in remap_line(e, ne, j, adj, off, out, f - 1) end
+    else let
+      val () = put_char_v(out, peek(e, i, 524288))
+    in remap_line(e, i + 1, j, adj, off, out, f - 1) end
+  end
+
+(* The line e[i, j): as is when keep, else remapped *)
+fn emit_line {le:agz}
+  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int, keep: bool, adj: bool, off: int,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if keep then copy_to_builder_v(e, i, j, 524288, out)
+  else remap_line(e, i, j, adj, off, out, 524288)
+
+(* Rust's remap_errors of patsopt's stderr e[i, n), line by line *)
+fun remap_errors {le:agz}{f:nat} .<f>.
+  (e: !$A.borrow(byte, le, 524288), i: pos_t, n: int, off: int,
+   out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if i >= n then ()
+  else let
+    val j = line_end_at(e, i, n, 524288)
+    var t_c = @[char][11]('_', 'b', 'a', 't', 's', '_', 'e', 'n', 't', 'r', 'y')
+    var d_c = @[char][5]('.', 'd', 'a', 't', 's')
+    val keep = has_lit(e, i, j, t_c, 11, 524288)
+    val adj = has_lit(e, i, j, d_c, 5, 524288)
+    val () = emit_line(e, i, j, keep, adj, off, out)
+    val () = put_char_v(out, 10)
+  in remap_errors(e, j + 1, n, off, out, f - 1) end
+
+(* A failed patsopt of in[0, il): its stderr as Rust prints it,
+   "error: patsopt error:" and the lines remapped to the .bats *)
+fn report_patsopt {li:agz}
+  (in_bv: !$A.borrow(byte, li, 524288), il: int, err: $B.builder_v): void = let
+  val off = read_prelude(in_bv, il)
+  val @(ea, en) = $B.to_arr(err)
+  val @(fz_e, bv_e) = $A.freeze<byte>(ea)
+  var out : $B.builder_v = $B.create()
+  val () = bput_v(out, "error: patsopt error:\n")
+  val () = remap_errors(bv_e, 0, en, off, out, 524288)
+  val () = put_char_v(out, 10)
+  val () = $A.drop<byte>(fz_e, bv_e)
+  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+in prerr_builder(out) end
+
+(* patsopt's exit code ec, reported as Rust reports a failure; consumes
+   its stderr err *)
+fn finish_patsopt {li:agz}
+  (ec: int, in_bv: !$A.borrow(byte, li, 524288), il: int, err: $B.builder_v): int =
+  if ec <> 0 then let
+    val () = report_patsopt(in_bv, il, err)
+    val () = set_build_err()
+  in ec end
+  else let
+    val () = $B.builder_free(err)
+  in 0 end
 
 
 
 
 
-implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) = let
+
+(* After a failure, as Rust's build stops at its first error, nothing
+   more runs *)
+implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) =
+  if has_build_err() then 1 else let
   var exec_b = $B.create()
   val () = copy_to_builder(ph, 0, phlen, 512, exec_b, 512)
   val () = $B.bput(exec_b, "/bin/patsopt")
@@ -1071,26 +1259,14 @@ in
       val+ ~$P.pipe_fd(err_fd) = serr_p
       (* Read stderr BEFORE waiting — prevents deadlock if child
          writes more than PIPE_BUF (64KB) to stderr *)
-      val eb = $A.alloc<byte>(65536)
-      val err_r = $F.file_read(err_fd, eb, 65536)
-      val elen = (case+ err_r of
-        | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+      var eb : $B.builder_v = $B.create()
+      val () = drain_fd(err_fd, eb, 0, 1000)
       val ecr = $F.file_close(err_fd)
       val () = $R.discard<int><int>(ecr)
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-    in
-      if ec <> 0 then let
-        val @(fz_eb2, bv_eb2) = $A.freeze<byte>(eb)
-        val () = print_borrow(bv_eb2, 0, elen, 65536, 65536)
-        val () = $A.drop<byte>(fz_eb2, bv_eb2)
-        val () = $A.free<byte>($A.thaw<byte>(fz_eb2))
-      in ec end
-      else let
-        val () = $A.free<byte>(eb)
-      in 0 end
-    end
+    in finish_patsopt(ec, in_bv, in_len - 1, eb) end
   | ~$R.err(_) => ~1
 end
 

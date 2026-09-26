@@ -58,7 +58,7 @@ in
       val @(fz_src, bv_src) = $A.freeze<byte>(buf)
       val @(span_arr, _span_len, span_count) = do_lex(bv_src, nbytes, 524288)
       val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
-      val @(sats_arr, sats_len, dats_arr, dats_len, _pre, safety_errors) =
+      val @(sats_arr, sats_len, dats_arr, dats_len, pre_lines, safety_errors) =
         do_emit(bv_src, nbytes, 524288, bv_sp, 524288, span_count, build_target, is_unsafe)
       val () = $A.drop<byte>(fz_sp, bv_sp)
       val () = $A.free<byte>($A.thaw<byte>(fz_sp))
@@ -83,6 +83,20 @@ in
       val () = $A.drop<byte>(fz_d, bv_d)
       val () = $A.free<byte>($A.thaw<byte>(fz_d))
       val r2 = write_file_from_builder(dats_bv, 524288, db)
+      (* <dats>.pre: its prelude line count, for mapping patsopt's line
+         numbers back to the .bats (Rust: DatsFile.prelude_offset) *)
+      var pb : $B.builder_v = $B.create()
+      val de = find_null_bv_from(dats_bv, 0, 524288)
+      val () = copy_to_builder_v(dats_bv, 0, de, 524288, pb)
+      val () = bput_v(pb, ".pre")
+      val () = put_char_v(pb, 0)
+      val @(pa, _) = $B.to_arr(pb)
+      val @(fz_pa, bv_pa) = $A.freeze<byte>(pa)
+      var nb : $B.builder_v = $B.create()
+      val () = bput_int_v(nb, pre_lines)
+      val _ = write_file_from_builder(bv_pa, 524288, nb)
+      val () = $A.drop<byte>(fz_pa, bv_pa)
+      val () = $A.free<byte>($A.thaw<byte>(fz_pa))
     in
       if safety_errors > 0 then safety_errors
       else if r1 = 0 then (if r2 = 0 then 0 else ~1) else ~1
@@ -154,12 +168,7 @@ in case+ dr of
                 val () = put_char_v(fi, 0)
               in freshness_check_bv(fo, fi) end
               val rc = (if fresh then 0 else run_patsopt(ph, phlen, bv_o, ol, bv_i, il)): int
-              val () = (if rc <> 0 then let
-                val () = set_build_err()
-                val () = print! ("error: patsopt failed for ")
-                val () = print_borrow(bv_i, 0, il - 1, 524288, 524288)
-              in print_newline() end
-              else ())
+              val () = ()
               val () = $A.drop<byte>(fz_o, bv_o)
               val () = $A.free<byte>($A.thaw<byte>(fz_o))
               val () = $A.drop<byte>(fz_i, bv_i)
@@ -607,7 +616,10 @@ implement do_build_plain(release, build_target) = let
   val () = $A.drop<byte>(fz_n, bv_n)
 in $A.free<byte>($A.thaw<byte>(fz_n)) end
 
-implement do_build {lt} (release, build_target, to_c, tclen) = let
+(* After an error nothing more is built: Rust's build stops at its first
+   error *)
+implement do_build {lt} (release, build_target, to_c, tclen) =
+  if has_build_err() then () else let
   val is_unsafe = read_unsafe_flag()
   (* Step 1: mkdir build directories *)
   var mb1 : $B.builder_v = $B.create()
@@ -1997,14 +2009,7 @@ in
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_po))
                                                   val () = $A.drop<byte>(fz_pi, bv_pi)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_pi))
-                                                  val () = (if rc_ns <> 0 then let
-                                                    val () = set_build_err()
-                                                    val () = print! ("error: patsopt failed for dep ")
-                                                    val () = print_borrow(ns_name, 0, ns_len, 256, 256)
-                                                    val () = print! ("/")
-                                                    val () = print_borrow(bv_sde, 0, sel, 256, 256)
-                                                  in print_newline() end
-                                                  else ())
+                                                  val () = ()
                                                   (* patsopt extra .dats in this sub-package *)
                                                   var peb : $B.builder_v = $B.create()
                                                   val () = bput_v(peb, "build/bats_modules/")
@@ -2065,12 +2070,7 @@ in
                                   val () = $A.free<byte>($A.thaw<byte>(fz_po))
                                   val () = $A.drop<byte>(fz_pi, bv_pi)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pi))
-                                  in (if rc <> 0 then let
-                                    val () = set_build_err()
-                                    val () = print! ("error: patsopt failed for dep ")
-                                    val () = print_borrow(bv_de, 0, dlen, 256, 256)
-                                  in print_newline() end
-                                  else ()) end)
+                                  in () end)
                                   (* patsopt extra .dats files for this dep *)
                                   var pats_src_b : $B.builder_v = $B.create()
                                   val () = bput_v(pats_src_b, "build/bats_modules/")
@@ -2148,12 +2148,7 @@ in
                                                     val () = $A.free<byte>($A.thaw<byte>(fz_eo))
                                                     val () = $A.drop<byte>(fz_ei, bv_ei)
                                                     val () = $A.free<byte>($A.thaw<byte>(fz_ei))
-                                                  in (if rc3 <> 0 then let
-                                                    val () = set_build_err()
-                                                    val () = print! ("error: patsopt failed for extra ")
-                                                    val () = print_borrow(bv_d3, 0, dl3, 256, 256)
-                                                  in print_newline() end
-                                                  else ()) end)
+                                                  in () end)
                                                   val () = $A.drop<byte>(fz_d3, bv_d3)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_d3))
                                                 in patsopt_extra(d_pt, ph2, ph2len, dep3, dep3_len, fuel_p - 1) end
@@ -2236,12 +2231,7 @@ in
                                     val () = $A.free<byte>($A.thaw<byte>(fz_eosm))
                                     val () = $A.drop<byte>(fz_eism, bv_eism)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_eism))
-                                  in (if rc_sm <> 0 then let
-                                    val () = set_build_err()
-                                    val () = print! ("error: patsopt failed for src module ")
-                                    val () = print_borrow(bv_dpsm, 0, dl_psm, 256, 256)
-                                  in print_newline() end
-                                  else ()) end)
+                                  in () end)
                                   val () = $A.drop<byte>(fz_dpsm, bv_dpsm)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_dpsm))
                                 in patsopt_src_modules(d_psm, ph_sm, ph_sm_len, fuel_psm - 1) end
@@ -2290,10 +2280,7 @@ in
                     val () = $A.free<byte>($A.thaw<byte>(fz_po))
                     val () = $A.drop<byte>(fz_pi, bv_pi)
                     val () = $A.free<byte>($A.thaw<byte>(fz_pi))
-                    in (if rbp <> 0 then let
-                      val () = set_build_err()
-                    in println! ("error: patsopt failed for binary") end
-                      else ()) end)
+                    in () end)
 
                     (* patsopt for synthetic entry *)
                     val ent_pats_fresh = let
@@ -2329,13 +2316,10 @@ in
                     val () = $A.free<byte>($A.thaw<byte>(fz_eo))
                     val () = $A.drop<byte>(fz_ei, bv_ei)
                     val () = $A.free<byte>($A.thaw<byte>(fz_ei))
-                    in (if rep <> 0 then let
-                      val () = set_build_err()
-                    in println! ("error: patsopt failed for entry") end
-                      else ()) end)
+                    in () end)
 
                     (* Step 7: clang compile all _dats.c -- skip when --to-c *)
-                    val rl = (if is_to_c() then 0 else let
+                    val rl = (if is_to_c() then 0 else if has_build_err() then 1 else let
                     (* Compile deps *)
                     val bm4_arr = str_to_path_arr("bats_modules")
                     val @(fz_bm4, bv_bm4) = $A.freeze<byte>(bm4_arr)
@@ -3112,6 +3096,7 @@ in
                       in end else ()
                     else ())
                     val () = (if is_to_c() then ()
+                    else if has_build_err() then ()
                     else if rl = 0 then
                       if ~is_quiet() then
                         if bin_bt > 0 then let
@@ -3170,10 +3155,7 @@ in
           val () = $A.free<byte>($A.thaw<byte>(fz_lc))
           val () = $A.drop<byte>(fz_ld, bv_ld)
           val () = $A.free<byte>($A.thaw<byte>(fz_ld))
-          val () = (if lrc <> 0 then let
-            val () = set_build_err()
-          in println! ("error: patsopt failed for src/lib.bats") end
-          else ())
+          val () = ()
           (* The library's other modules: type-check them too, or an
              error in one only shows up in some consumer's build. *)
           val src_dir = str_to_path_arr("build/src")
