@@ -2167,6 +2167,61 @@ and add_construct {lp,ls:agz}
     val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
   in add_error(cnt, fy, errs) end
 
+(* Whether src[a, a + k) and src[b, b + k) hold the same bytes *)
+fun same_bytes {ls:agz}{f:nat} .<f>.
+  (src: !$A.borrow(byte, ls, VMAX), a: pos_t, b: pos_t, k: int, f: int f): bool =
+  if f <= 0 then false
+  else if k <= 0 then true
+  else if peek(src, a, VMAX) <> peek(src, b, VMAX) then false
+  else same_bytes(src, a + 1, b + 1, k - 1, f - 1)
+
+(* Whether a #use span of spans[idx, count) names the alias src[as, ae) *)
+fun alias_known {ls,lsp:agz}{f:nat} .<f>.
+  (src: !$A.borrow(byte, ls, VMAX), spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
+   as0: pos_t, ae: pos_t, f: int f): bool =
+  if f <= 0 then false
+  else if idx >= count then false
+  else if span_kind(spans, idx) <> 1 then alias_known(src, spans, idx + 1, count, as0, ae, f - 1)
+  else let
+    val us = span_i32(spans, idx * 28 + 18, VMAX)
+    val ue = span_i32(spans, idx * 28 + 22, VMAX)
+  in
+    if (if ue - us = ae - as0 then same_bytes(src, us, as0, ae - as0, VMAX) else false) then true
+    else alias_known(src, spans, idx + 1, count, as0, ae, f - 1)
+  end
+
+(* Rust's "unknown alias '<a>' in qualified access" for each $a.member
+   whose a no #use names, labeled with the file's name p[b0, pl)
+   (emit::validate) *)
+fun pass_aliases {lp,ls,lsp:agz}{f:nat} .<f>.
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
+  if f <= 0 then cnt
+  else if idx >= count then cnt
+  else let
+    val is_q = (span_kind(spans, idx) = 3): bool
+    val @(ss, _) = span_range(spans, idx)
+    val as0 = span_i32(spans, idx * 28 + 10, VMAX)
+    val ae = span_i32(spans, idx * 28 + 14, VMAX)
+    val bad = (if is_q then ~alias_known(src, spans, 0, count, as0, ae, VMAX) else false): bool
+    val cnt2 = add_alias_error(bad, p, b0, pl, src, n, ss, as0, ae, cnt, errs)
+  in pass_aliases(p, b0, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+
+and add_alias_error {lp,ls:agz}
+  (bad: bool, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
+   src: !$A.borrow(byte, ls, VMAX), n: pos_t, ss: pos_t, as0: pos_t, ae: pos_t,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if ~bad then cnt
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "unknown alias '")
+    val () = copy_to_builder_v(src, as0, ae, VMAX, m)
+    val () = bput_v(m, "' in qualified access")
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
+  in add_error(cnt, fy, errs) end
+
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its
    order), when wanted *)
@@ -2188,7 +2243,8 @@ fn check_file {lp:agz}
       val c1 = pass_uses(p, pl, bv_s, n, bv_sp, 0, count, cnt, errs, VMAX)
       val c2 = pass_unsafe_blocks(p, pl, bv_s, n, bv_sp, 0, (if is_unsafe then 0 else count): int, c1, errs, VMAX)
       val c3 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, false, c2, errs, VMAX)
-      val c4 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, true, c3, errs, VMAX)
+      val c3a = pass_aliases(p, b0, pl, bv_s, n, bv_sp, 0, count, c3, errs, VMAX)
+      val c4 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, true, c3a, errs, VMAX)
       val () = $A.drop<byte>(fz_sp, bv_sp)
       val () = $A.free<byte>($A.thaw<byte>(fz_sp))
       val () = $A.drop<byte>(fz_s, bv_s)
