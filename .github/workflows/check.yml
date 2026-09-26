@@ -51,11 +51,11 @@ jobs:
           export PATH=~/bats-bin:$PATH
           bats build --repository ~/repository
 
-      - name: Test lock resolves namespaced transitive deps
-        run: tests/lock-namespace/check.sh dist/debug/bats ~/repository
-
-      - name: Test check exits non-zero on type errors
-        run: tests/check-fails/check.sh dist/debug/bats
+      - name: Fixture tests
+        run: |
+          for t in tests/*/check.sh; do
+            "$t" dist/debug/bats ~/repository
+          done
 
       - name: Verify bootstrap/c matches sources
         run: |
