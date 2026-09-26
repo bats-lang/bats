@@ -175,6 +175,25 @@ fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
 
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
    was not given. *)
+(* Whether git status --porcelain lists anything (Rust: resolve_version) *)
+fn git_tree_dirty (): bool = let
+  val git_exec = str_to_path_arr("git")
+  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  var b1 = $B.create()
+  val () = bput_v(b1, "git")
+  var b2 = $B.create()
+  val () = bput_v(b2, "status")
+  var b3 = $B.create()
+  val () = bput_v(b3, "--porcelain")
+  val argv = $L.list_vt_cons(mk_arg(b1),
+    $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
+  val out = $A.alloc<byte>(4096)
+  val @(_, olen) = run_cmd_capture(bv_ge, argv, out)
+  val () = $A.free<byte>(out)
+  val () = $A.drop<byte>(fz_ge, bv_ge)
+  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+in olen > 0 end
+
 #pub fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 implement do_upload {lr} (repo, rplen) = let
@@ -249,6 +268,10 @@ in
                   val () = $A.free<byte>(nbuf)
                   val () = set_build_err()
                 in println! ("error: upload failed") end
+                else if git_tree_dirty() then let
+                  val () = $A.free<byte>(nbuf)
+                  val () = set_build_err()
+                in prerr! ("error: working tree is dirty (commit or stash changes before upload)\n") end
                 else let
                 (* Get version from git commit timestamp *)
                 val git_exec = str_to_path_arr("git")
