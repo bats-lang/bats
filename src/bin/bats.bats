@@ -74,6 +74,17 @@ fn print_usage(): void = let
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
 in end
 
+(* Copies src[s + i, e) to dst[i..], for bats run's arguments after
+   "--"; returns the byte count. *)
+fun copy_extra {l1,l2:agz}{i:nat | i <= 4096} .<4096 - i>.
+  (src: !$A.arr(byte, l1, 4096), dst: !$A.arr(byte, l2, 4096),
+   s: pos_t, e: int, i: int i): int =
+  if i >= 4096 then i
+  else if s + i >= e then i
+  else let
+    val () = $A.set<byte>(dst, i, int2byte0(peek_arr(src, s + i, 4096)))
+  in copy_extra(src, dst, s, e, i + 1) end
+
 (* Find the position of "--" separator in the argument buffer. *)
 fun find_dashdash {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   (buf: !$A.arr(byte, l, 4096), pos: int p, len: int): pos_t =
@@ -145,7 +156,10 @@ in
       case+ cl_read of
       | ~$R.some(cl_n) => let
           val dd_pos = find_dashdash(cl_buf, 0, cl_n)
-          val () = save_extra_args(cl_buf, dd_pos, cl_n)
+          (* The arguments after "--\0", NUL-terminated, for bats run *)
+          val extra_buf = $A.alloc<byte>(4096)
+          val extra_end = (if dd_pos >= 0 then cl_n else 0): int
+          val extra_len = copy_extra(cl_buf, extra_buf, dd_pos + 3, extra_end, 0)
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
           val argc = count_argc(cl_buf, effective_len)
           val only_mask = scan_only(cl_buf, 0, effective_len, 0)
@@ -215,6 +229,7 @@ in
             in
               if want_help then let
                 val () = $AP.parse_result_free(r)
+                val () = $A.free<byte>(extra_buf)
               in print_usage() end
               else let
               val () = (if $AP.get_bool(r, h_verbose) then set_verbose(true) else ())
@@ -234,6 +249,7 @@ in
               val repo_buf = $A.alloc<byte>(4096)
               val repo_len = opt_string_copy(r, h_repository, repo_buf, 4096)
               val @(fz_repo, bv_repo) = $A.freeze<byte>(repo_buf)
+              val @(fz_extra, bv_extra) = $A.freeze<byte>(extra_buf)
               (* Handle --to-c *)
               val () = (if $AP.is_present(r, h_to_c) then let
                 val tc_buf = $A.alloc<byte>(4096)
@@ -324,7 +340,7 @@ in
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
-                val () = do_run(run_release, bv_bin, bin_len)
+                val () = do_run(run_release, bv_bin, bin_len, bv_extra, extra_len)
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
               else if cmd_code = 5 then let (* init *)
@@ -409,10 +425,13 @@ in
               in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|completions> [--only debug|release]") end)
               val () = $A.drop<byte>(fz_repo, bv_repo)
               val () = $A.free<byte>($A.thaw<byte>(fz_repo))
+              val () = $A.drop<byte>(fz_extra, bv_extra)
+              val () = $A.free<byte>($A.thaw<byte>(fz_extra))
             in end
             end end
           | ~$R.err(e) => let
               val () = $AP.parse_error_free(e)
+              val () = $A.free<byte>(extra_buf)
             in print_usage() end
         end
       | ~$R.none() => let

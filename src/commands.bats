@@ -880,101 +880,33 @@ in
       println! ("  spawn failed: ", e)
 end
 
-(* Save extra arguments (after --) to /tmp/_bpoc_extra.txt *)
-
-#pub fun save_extra_args {l:agz}
-  (buf: !$A.arr(byte, l, 4096), dd_pos: pos_t, len: int): void
-
-implement save_extra_args(buf, dd_pos, len) = let
-  (* dd_pos points to the "--" token; skip "--\0" to get to first extra arg *)
-  (* If dd_pos < 0, no -- was found, so do nothing *)
-  val start = dd_pos + 3
-in
-  if dd_pos < 0 then ()
-  else if start < len then let
-    var out: $B.builder_v = $B.create()
-    fun copy_extras {l2:agz}{fuel:nat} .<fuel>.
-      (buf: !$A.arr(byte, l2, 4096), out: !$B.builder_v >> $B.builder_v,
-       pos: pos_t, len: int, fuel: int fuel): void =
-      if fuel <= 0 then ()
-      else if pos >= len then ()
-      else if pos < 0 then ()
-      else if pos >= 4096 then ()
-      else let
-        val b = peek_arr(buf, pos, 4096)
-      in
-        if $AR.eq_int_int(b, 0) then let
-          val () = put_char_v(out, 10) (* newline separator *)
-        in copy_extras(buf, out, pos + 1, len, fuel - 1) end
-        else let
-          val () = put_char_v(out, b)
-        in copy_extras(buf, out, pos + 1, len, fuel - 1) end
-      end
-    val () = copy_extras(buf, out, start, len, 4096)
-    val ep = str_to_path_arr("/tmp/_bpoc_extra.txt")
-    val @(fz_ep, bv_ep) = $A.freeze<byte>(ep)
-    val _ = write_file_from_builder(bv_ep, 524288, out)
-    val () = $A.drop<byte>(fz_ep, bv_ep)
-    val () = $A.free<byte>($A.thaw<byte>(fz_ep))
-  in end
-  else ()
-end
-
-(* Append saved extra args to a builder (for do_run) *)
-
-#pub fun append_run_args(cmd: !$B.builder_v >> $B.builder_v): void
-
-implement append_run_args(cmd) = let
-  val ep = str_to_path_arr("/tmp/_bpoc_extra.txt")
-  val @(fz_ep, bv_ep) = $A.freeze<byte>(ep)
-  val eor = $F.file_open(bv_ep, 524288, 0, 0)
-  val () = $A.drop<byte>(fz_ep, bv_ep)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ep))
-in
-  case+ eor of
-  | ~$R.ok(efd) => let
-      val ebuf = $A.alloc<byte>(4096)
-      val era_r = $F.file_read(efd, ebuf, 4096)
-      val elen = (case+ era_r of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-      val ecr = $F.file_close(efd)
-      val () = $R.discard<int><int>(ecr)
-    in
-      if elen > 0 then let
-        val @(fz_eb, bv_eb) = $A.freeze<byte>(ebuf)
-        fun append_lines {l2:agz}{fuel:nat} .<fuel>.
-          (bv: !$A.borrow(byte, l2, 4096), cmd: !$B.builder_v >> $B.builder_v,
-           pos: pos_t, len: int, fuel: int fuel): void =
-          if fuel <= 0 then ()
-          else if pos >= len then ()
-          else let
-            val b = peek(bv, pos, 4096)
-          in
-            if $AR.eq_int_int(b, 10) then let
-              val () = put_char_v(cmd, 32) (* space *)
-            in append_lines(bv, cmd, pos + 1, len, fuel - 1) end
-            else let
-              val () = put_char_v(cmd, b)
-            in append_lines(bv, cmd, pos + 1, len, fuel - 1) end
-          end
-        val () = put_char_v(cmd, 32) (* space *)
-        val () = append_lines(bv_eb, cmd, 0, elen, 4096)
-        val () = $A.drop<byte>(fz_eb, bv_eb)
-        val () = $A.free<byte>($A.thaw<byte>(fz_eb))
-      in end
-      else $A.free<byte>(ebuf)
-    end
-  | ~$R.err(_) => ()
-end
 
 (* ============================================================
    run: build then execute the binary
    ============================================================ *)
 
-(* bin: the --bin name in bin[0, blen); blen is 0 when it was not
-   given, and the package name is run instead. *)
-#pub fn do_run {lb:agz} (release: int, bin: !$A.borrow(byte, lb, 256), blen: int): void
+(* The NUL-terminated strings in bv[start, total) as argv entries,
+   empty ones included, reversed onto acc. *)
+fun extra_arg_list {l:agz}{fuel:nat} .<fuel>.
+  (bv: !$A.borrow(byte, l, 4096), start: pos_t, total: int,
+   acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
+  if fuel <= 0 then acc
+  else if start >= total then acc
+  else let
+    val np = find_null_bv_from(bv, start, 4096)
+    val e = (if np < total then np else total): int
+    var wb = $B.create()
+    val () = copy_to_builder_v(bv, start, e, 4096, wb)
+  in extra_arg_list(bv, np + 1, total, $L.list_vt_cons(mk_arg(wb), acc), fuel - 1) end
 
-implement do_run {lb} (release, bin, blen) = let
+(* bin: the --bin name in bin[0, blen); blen is 0 when it was not
+   given, and the package name is run instead. extra: the arguments
+   after "--", NUL-terminated, in extra[0, elen). *)
+#pub fn do_run {lb,le:agz}
+  (release: int, bin: !$A.borrow(byte, lb, 256), blen: int,
+   extra: !$A.borrow(byte, le, 4096), elen: int): void
+
+implement do_run {lb,le} (release, bin, blen, extra, elen) = let
   val () = do_build(release, 0)
   (* Read bats.toml to find the package name *)
   val tp = str_to_path_arr("bats.toml")
@@ -1032,7 +964,8 @@ in
               val @(fz_ea, bv_ea) = $A.freeze<byte>(exec_a)
               var run_b1 = $B.create()
               val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
-              val run_argv = $L.list_vt_cons(mk_arg(run_b1), $L.list_vt_nil())
+              val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil(), 4096), $L.list_vt_nil())
+              val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
               val rc = run_cmd(bv_ea, run_argv)
               val () = $A.drop<byte>(fz_ea, bv_ea)
               val () = $A.free<byte>($A.thaw<byte>(fz_ea))

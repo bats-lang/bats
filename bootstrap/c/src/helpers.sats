@@ -704,6 +704,18 @@ fn mk_arg(b: $B.builder_v): $P.arg_entry
 
 
 
+
+
+
+
+
+
+fn rev_arg_list
+  (xs: $L.listv($P.arg_entry), acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry)
+
+
+
+
 fn split_null_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
 
 
@@ -748,19 +760,7 @@ fn split_null_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
 
 
 
-
-
-
-
-
-
 fn split_spaces_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
-
-
-
-
-
-
 
 
 
