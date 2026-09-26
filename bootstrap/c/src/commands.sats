@@ -29,6 +29,7 @@ staload "helpers.sats"
 staload "build.sats"
 staload "lexer.sats"
 staload "emitter.sats"
+staload "docs.sats"
 
 
 
@@ -40,93 +41,6 @@ fn do_test(): void
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn do_generate_docs(pkg_name_len: int, kind_is_lib: int): void
 
 
 
@@ -273,6 +187,27 @@ fn do_generate_docs(pkg_name_len: int, kind_is_lib: int): void
 
 
 fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1093,6 +1028,9 @@ fn do_run {lb,le:agz}
 
 
 fn do_check(): void
+
+
+
 
 
 

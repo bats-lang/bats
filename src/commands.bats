@@ -18,6 +18,7 @@ staload "helpers.sats"
 staload "build.sats"
 staload "lexer.sats"
 staload "emitter.sats"
+staload "docs.sats"
 
 (* ============================================================
    do_test: build and run tests
@@ -110,93 +111,6 @@ in
       println! ("no tests found")
     end
 end
-
-(* ============================================================
-   generate docs: scan lib.bats for #pub and write docs/
-   ============================================================ *)
-
-#pub fn do_generate_docs(pkg_name_len: int, kind_is_lib: int): void
-
-implement do_generate_docs(pkg_name_len, kind_is_lib) =
-  if kind_is_lib = 0 then ()
-  else let
-    var cmd = $B.create()
-    val () = $B.bput(cmd, "docs")
-    val _ = run_mkdir(cmd)
-    val lp = str_to_path_arr("src/lib.bats")
-    val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-    val lib_or = $F.file_open(bv_lp, 524288, 0, 0)
-    val () = $A.drop<byte>(fz_lp, bv_lp)
-    val () = $A.free<byte>($A.thaw<byte>(fz_lp))
-  in
-    case+ lib_or of
-    | ~$R.ok(lfd) => let
-        val lbuf = $A.alloc<byte>(524288)
-        val lrr = $F.file_read(lfd, lbuf, 524288)
-        val llen = (case+ lrr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-        val lcr = $F.file_close(lfd)
-        val () = $R.discard<int><int>(lcr)
-        var doc_b: $B.builder_v = $B.create()
-        val () = bput_v(doc_b, "# API Reference\n\n")
-        (* Scan for #pub lines: 35,112,117,98,32 *)
-        (* The rest of the line from q, up to and including its newline,
-           copied to doc without the newline. Returns the position after it. *)
-        fun copy_line {l3:agz}{q:nat | q <= 524288} .<524288 - q>.
-          (buf: !$A.arr(byte, l3, 524288), doc: !$B.builder_v >> $B.builder_v,
-           pos: int q): [r:int | q <= r; r <= 524288] int r =
-          if pos >= 524288 then pos
-          else let
-            val b = peek_arr(buf, pos, 524288)
-          in
-            if $AR.eq_int_int(b, 10) then pos + 1
-            else let
-              val () = put_char_v(doc, b)
-            in copy_line(buf, doc, pos + 1) end
-          end
-        fun skip_line {l4:agz}{q:nat | q < 524288} .<524288 - q>.
-          (buf: !$A.arr(byte, l4, 524288), pos: int q): [r:int | q < r; r <= 524288] int r =
-          if $AR.eq_int_int(peek_arr(buf, pos, 524288), 10) then pos + 1
-          else if pos + 1 >= 524288 then 524288
-          else skip_line(buf, pos + 1)
-        fun scan_pub {l2:agz}{q:nat | q <= 524288} .<524288 - q>.
-          (buf: !$A.arr(byte, l2, 524288), doc: !$B.builder_v >> $B.builder_v,
-           pos: int q, len: int): void =
-          if pos >= len then ()
-          else if pos + 4 >= 524288 then ()
-          (* "#pub " : 35,112,117,98,32 *)
-          else if peek_arr(buf, pos, 524288) = 35 && peek_arr(buf, pos + 1, 524288) = 112
-                  && peek_arr(buf, pos + 2, 524288) = 117 && peek_arr(buf, pos + 3, 524288) = 98
-                  && peek_arr(buf, pos + 4, 524288) = 32 then let
-            val () = bput_v(doc, "```\n")
-            val np = copy_line(buf, doc, pos + 5)
-            val () = bput_v(doc, "\n```\n\n")
-          in scan_pub(buf, doc, np, len) end
-          (* Any other line starting with '#' skips to the next NUL byte. *)
-          else if peek_arr(buf, pos, 524288) = 35 then let
-            val np = $S.find_null_at(buf, pos, 524288)
-          in
-            if np >= 524288 then ()
-            else scan_pub(buf, doc, np + 1, len)
-          end
-          else scan_pub(buf, doc, skip_line(buf, pos), len)
-        val () = scan_pub(lbuf, doc_b, 0, llen)
-        val () = $A.free<byte>(lbuf)
-        val dp = str_to_path_arr("docs/lib.md")
-        val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
-        val _ = write_file_from_builder(bv_dp, 524288, doc_b)
-        val () = $A.drop<byte>(fz_dp, bv_dp)
-        val () = $A.free<byte>($A.thaw<byte>(fz_dp))
-        (* Write docs/index.md *)
-        var idx_b = $B.create()
-        val () = $B.bput(idx_b, "# Documentation\n\n- [API Reference](lib.md)\n")
-        val ip = str_to_path_arr("docs/index.md")
-        val @(fz_ip, bv_ip) = $A.freeze<byte>(ip)
-        val _ = write_file_from_builder(bv_ip, 524288, idx_b)
-        val () = $A.drop<byte>(fz_ip, bv_ip)
-        val () = $A.free<byte>($A.thaw<byte>(fz_ip))
-      in end
-    | ~$R.err(_) => ()
-  end
 
 (* ============================================================
    upload: package library for repository
@@ -325,6 +239,17 @@ in
           | ~$R.some(nlen) =>
             if is_lib then
               if rplen > 0 then let
+                (* Docs first, so the archive carries them (Rust: build::upload) *)
+                val @(fz_dn, bv_dn) = $A.freeze<byte>(nbuf)
+                val drc = generate_docs(bv_dn, nlen, 256)
+                val () = $A.drop<byte>(fz_dn, bv_dn)
+                val nbuf = $A.thaw<byte>(fz_dn)
+              in
+                if drc < 0 then let
+                  val () = $A.free<byte>(nbuf)
+                  val () = set_build_err()
+                in println! ("error: upload failed") end
+                else let
                 (* Get version from git commit timestamp *)
                 val git_exec = str_to_path_arr("git")
                 val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
@@ -436,10 +361,20 @@ in
                 val () = $A.free<byte>($A.thaw<byte>(fz_nb))
                 val () = $A.drop<byte>(fz_px, bv_px)
                 val () = $A.free<byte>($A.thaw<byte>(fz_px))
+                val dp = str_to_path_arr("docs")
+                val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
+                val has_docs = $F.file_exists(bv_dp, 524288)
+                val () = $A.drop<byte>(fz_dp, bv_dp)
+                val () = $A.free<byte>($A.thaw<byte>(fz_dp))
+                val zip_docs = (if has_docs then let
+                    var za6 = $B.create()
+                    val () = bput_v(za6, "docs/")
+                  in $L.list_vt_cons(mk_arg(za6), $L.list_vt_nil()) end
+                  else $L.list_vt_nil()): $L.listv($P.arg_entry)
                 val zip_argv = $L.list_vt_cons(mk_arg(za1),
                   $L.list_vt_cons(mk_arg(za2), $L.list_vt_cons(mk_arg(za3),
                   $L.list_vt_cons(mk_arg(za4), $L.list_vt_cons(mk_arg(za5),
-                  $L.list_vt_nil())))))
+                  zip_docs)))))
                 val rc = run_cmd(bv_ze, zip_argv)
                 val () = $A.drop<byte>(fz_ze, bv_ze)
                 val () = $A.free<byte>($A.thaw<byte>(fz_ze))
@@ -457,8 +392,8 @@ in
                   val () = $A.free<byte>($A.thaw<byte>(fz_zp))
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
-                  val () = do_generate_docs(0, 1)
                 in println! ("uploaded successfully") end
+              end
               end
               else let
                 val () = $A.free<byte>(nbuf)
@@ -1090,6 +1025,9 @@ implement do_check() = let
 in
   if has_build_err() then
     println! ("check failed")
+  else if generate_lib_docs() < 0 then let
+    val () = set_build_err()
+  in println! ("check failed") end
   else let
     val () = println! ("  process: check passed")
     val () = println! ("  exit code: 0")
