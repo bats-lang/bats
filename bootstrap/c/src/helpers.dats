@@ -704,6 +704,18 @@ implement mk_arg(b) = let
   val @(arr, len) = $B.to_arr(b)
 in @(arr, len) end
 
+fun _rev_arg_list {n:nat} .<n>.
+  (xs: $L.list_vt($P.arg_entry, n), acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
+  case+ xs of
+  | ~$L.list_vt_nil() => acc
+  | ~$L.list_vt_cons(x, tl) => _rev_arg_list(tl, $L.list_vt_cons(x, acc))
+
+(* xs reversed onto acc *)
+
+
+
+implement rev_arg_list (xs, acc) = _rev_arg_list(xs, acc)
+
 (* Split a null-separated builder into a list of arg_entries *)
 
 
@@ -727,12 +739,6 @@ implement split_null_to_list(b) = let
       val c = peek(bv, soff + di, 524288)
       val () = put_char_v(dst, c)
     in copy_word(bv, dst, soff, di + 1, seg_len, fuel - 1) end
-  fun rev_args {n:nat} .<n>.
-    (xs: $L.list_vt($P.arg_entry, n),
-     acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
-    case+ xs of
-    | ~$L.list_vt_nil() => acc
-    | ~$L.list_vt_cons(x, tl) => rev_args(tl, $L.list_vt_cons(x, acc))
   fun loop {lb:agz}{fuel:nat} .<fuel>.
     (bv: !$A.borrow(byte, lb, 524288), start: pos_t, total: int,
      acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
@@ -752,7 +758,7 @@ implement split_null_to_list(b) = let
   val result = loop(bv, 0, total_len, $L.list_vt_nil(), 524288)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
-in rev_args(result, $L.list_vt_nil()) end
+in rev_arg_list(result, $L.list_vt_nil()) end
 
 (* Split a space-separated builder into a list of arg_entries *)
 
@@ -784,12 +790,6 @@ implement split_spaces_to_list(b) = let
       val c = peek(bv, soff + di, 524288)
       val () = put_char_v(dst, c)
     in copy_word(bv, dst, soff, di + 1, seg_len, fuel - 1) end
-  fun rev_args {n:nat} .<n>.
-    (xs: $L.list_vt($P.arg_entry, n),
-     acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
-    case+ xs of
-    | ~$L.list_vt_nil() => acc
-    | ~$L.list_vt_cons(x, tl) => rev_args(tl, $L.list_vt_cons(x, acc))
   fun loop {lb:agz}{fuel:nat} .<fuel>.
     (bv: !$A.borrow(byte, lb, 524288), start: pos_t, total: int,
      acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
@@ -810,7 +810,7 @@ implement split_spaces_to_list(b) = let
   val result = loop(bv, 0, total_len, $L.list_vt_nil(), 524288)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
-in rev_args(result, $L.list_vt_nil()) end
+in rev_arg_list(result, $L.list_vt_nil()) end
 
 (* Run mkdir -p <path>. path_b is consumed. Returns exit code. *)
 

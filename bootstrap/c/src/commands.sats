@@ -892,8 +892,6 @@ fn run_process_demo(): void
 
 
 
-fun save_extra_args {l:agz}
-  (buf: !$A.arr(byte, l, 4096), dd_pos: pos_t, len: int): void
 
 
 
@@ -914,75 +912,10 @@ fun save_extra_args {l:agz}
 
 
 
+fn do_run {lb,le:agz}
+  (release: int, bin: !$A.borrow(byte, lb, 256), blen: int,
+   extra: !$A.borrow(byte, le, 4096), elen: int): void
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fun append_run_args(cmd: !$B.builder_v >> $B.builder_v): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn do_run {lb:agz} (release: int, bin: !$A.borrow(byte, lb, 256), blen: int): void
 
 
 
