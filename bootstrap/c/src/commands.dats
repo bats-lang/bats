@@ -187,6 +187,26 @@ fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
 
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
    was not given. *)
+(* git rev-parse --git-dir's exit code: 0 in a repository, > 0 outside
+   one, < 0 when git could not be run (Rust: resolve_version) *)
+fn git_dir_rc (): int = let
+  val git_exec = str_to_path_arr("git")
+  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  var b1 = $B.create()
+  val () = bput_v(b1, "git")
+  var b2 = $B.create()
+  val () = bput_v(b2, "rev-parse")
+  var b3 = $B.create()
+  val () = bput_v(b3, "--git-dir")
+  val argv = $L.list_vt_cons(mk_arg(b1),
+    $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
+  val out = $A.alloc<byte>(4096)
+  val @(rc, _) = run_cmd_capture(bv_ge, argv, out)
+  val () = $A.free<byte>(out)
+  val () = $A.drop<byte>(fz_ge, bv_ge)
+  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+in rc end
+
 (* Whether git status --porcelain lists anything (Rust: resolve_version) *)
 fn git_tree_dirty (): bool = let
   val git_exec = str_to_path_arr("git")
@@ -280,6 +300,10 @@ in
                   val () = $A.free<byte>(nbuf)
                   val () = set_build_err()
                 in println! ("error: upload failed") end
+                else if git_dir_rc() > 0 then let
+                  val () = $A.free<byte>(nbuf)
+                  val () = set_build_err()
+                in prerr! ("error: not a git repository (required for auto-versioning)\n") end
                 else if git_tree_dirty() then let
                   val () = $A.free<byte>(nbuf)
                   val () = set_build_err()
