@@ -58,7 +58,7 @@ fun get
   (doc: !toml_doc,
    section: !$A.borrow(byte, lb, nb), slen: int nb,
    key: !$A.borrow(byte, lk, nk), klen: int nk,
-   buf: !$A.arr(byte, lo, mo), max: int mo): $R.option(int)
+   buf: !$A.arr(byte, lo, mo), max: int mo): $R.option([k:nat | k <= mo] int k)
 
 fun keys
   {lb:agz}{nb:pos}{lo:agz}{mo:pos}
@@ -68,6 +68,18 @@ fun keys
 
 fun toml_free
   (doc: toml_doc): void
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
