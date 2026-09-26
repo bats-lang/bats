@@ -618,21 +618,21 @@ in
   in @(~1, cons_nil()) end
 end
 
-(* The TOML file at the NUL-terminated path pa, parsed; none when it
-   cannot be read *)
-fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.option($T.toml_doc) = let
+(* The TOML file at the NUL-terminated path pa, parsed, or the errno
+   of why it could not be read *)
+fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.result($T.toml_doc, int) = let
   val @(fz, bv) = $A.freeze<byte>(pa)
   val fr = $F.file_open(bv, 524288, 0, 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
   case+ fr of
-  | ~$R.err(_) => $R.none()
+  | ~$R.err(e) => $R.err(e)
   | ~$R.ok(fd) => let
       val tb = $A.alloc<byte>(65536)
       val rr = $F.file_read(fd, tb, 65536)
       val () = $R.discard<int><int>($F.file_close(fd))
-      val ok = (case+ rr of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+      val e = (case+ rr of | ~$R.ok(_) => 0 | ~$R.err(e) => e): int
       val @(fz_t, bv_t) = $A.freeze<byte>(tb)
       val pr = $T.parse(bv_t, 65536)
       val () = $A.drop<byte>(fz_t, bv_t)
@@ -640,21 +640,37 @@ in
     in
       case+ pr of
       | ~$R.ok(doc) =>
-        if ok then $R.some(doc)
+        if e = 0 then $R.ok(doc)
         else let
           val () = $T.toml_free(doc)
-        in $R.none() end
-      | ~$R.err(_) => $R.none()
+        in $R.err(e) end
+      | ~$R.err(_) => $R.err(e)
     end
 end
 
+(* Rust's "cannot read './bats.toml': <text> (os error <e>)" appended
+   to err (config::load, io::Error's Display) *)
+fn put_cannot_read (e: int, err: !$B.builder_v >> $B.builder_v): void = let
+  val buf = $A.alloc<byte>(256)
+  val k = $P.os_error_text(e, buf, 256)
+  val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+  val () = bput_v(err, "cannot read './bats.toml': ")
+  val () = copy_to_builder_v(bv_b, 0, k, 256, err)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  val () = bput_v(err, " (os error ")
+  val () = bput_int_v(err, e)
+in bput_v(err, ")") end
+
 (* The constraints of the project's bats.toml, from its [package] name:
-   @(1, them), @(0, none) when there is no bats.toml, or @(~1, none)
-   after writing Rust's message to err *)
+   @(1, them), or @(~1, none) after writing Rust's message to err, as
+   when bats.toml cannot be read (Rust: cmd_lock's config::load) *)
 fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
   case+ read_toml(str_to_path_arr("bats.toml")) of
-  | ~$R.none() => @(0, cons_nil())
-  | ~$R.some(doc) => let
+  | ~$R.err(e) => let
+      val () = put_cannot_read(e, err)
+    in @(~1, cons_nil()) end
+  | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
       val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
       var key_c = @[char][4]('n', 'a', 'm', 'e')
@@ -684,8 +700,8 @@ fn dep_cons {la:agz} (a: !$A.arr(byte, la, 256), k: int): [n:nat] cons(n) = let
   val @(pa, _) = $B.to_arr(p)
 in
   case+ read_toml(pa) of
-  | ~$R.none() => cons_nil()
-  | ~$R.some(doc) => let
+  | ~$R.err(_) => cons_nil()
+  | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
       val @(st, cs) = doc_cons(doc, a, k, err)
       val () = $B.builder_free(err)
