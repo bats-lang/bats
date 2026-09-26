@@ -516,16 +516,17 @@ implement print_borrow(buf, i, len, max, fuel) =
    Build pipeline helpers
    ============================================================ *)
 
-#pub fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, len: int, max: int n,
+(* src[start, stop) appended to dst *)
+#pub fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
    dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void
 
-implement copy_to_builder(src, start, len, max, dst, fuel) =
+implement copy_to_builder(src, start, stop, max, dst, fuel) =
   if fuel <= 0 then ()
-  else if start >= len then ()
+  else if start >= stop then ()
   else let
     val b = peek(src, start, max)
     val () = $B.put_char(dst, b)
-  in copy_to_builder(src, start + 1, len, max, dst, fuel - 1) end
+  in copy_to_builder(src, start + 1, stop, max, dst, fuel - 1) end
 
 (* Builder_v wrappers: compute fuel from remaining capacity *)
 
@@ -586,12 +587,13 @@ implement put_int_v(out, v) = bput_int_v(out, v)
 
 implement put_newline_v(out) = put_char_v(out, 10)
 
+(* src[start, stop) appended to dst *)
 #pub fn copy_to_builder_v {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), start: pos_t, len: int, max: int n,
+  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
    dst: !$B.builder_v >> $B.builder_v): void
 
-implement copy_to_builder_v(src, start, len, max, dst) =
-  copy_to_builder(src, start, len, max, dst, 524288 - $B.length(dst))
+implement copy_to_builder_v(src, start, stop, max, dst) =
+  copy_to_builder(src, start, stop, max, dst, 524288 - $B.length(dst))
 
 #pub fun find_basename_start {l:agz}{n:pos}{fuel:nat}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
    last: pos_t, fuel: int fuel): pos_t

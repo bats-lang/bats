@@ -529,16 +529,17 @@ implement print_borrow(buf, i, len, max, fuel) =
    Build pipeline helpers
    ============================================================ *)
 
+(* src[start, stop) appended to dst *)
 
 
 
-implement copy_to_builder(src, start, len, max, dst, fuel) =
+implement copy_to_builder(src, start, stop, max, dst, fuel) =
   if fuel <= 0 then ()
-  else if start >= len then ()
+  else if start >= stop then ()
   else let
     val b = peek(src, start, max)
     val () = $B.put_char(dst, b)
-  in copy_to_builder(src, start + 1, len, max, dst, fuel - 1) end
+  in copy_to_builder(src, start + 1, stop, max, dst, fuel - 1) end
 
 (* Builder_v wrappers: compute fuel from remaining capacity *)
 
@@ -599,12 +600,13 @@ implement put_int_v(out, v) = bput_int_v(out, v)
 
 implement put_newline_v(out) = put_char_v(out, 10)
 
+(* src[start, stop) appended to dst *)
 
 
 
 
-implement copy_to_builder_v(src, start, len, max, dst) =
-  copy_to_builder(src, start, len, max, dst, 524288 - $B.length(dst))
+implement copy_to_builder_v(src, start, stop, max, dst) =
+  copy_to_builder(src, start, stop, max, dst, 524288 - $B.length(dst))
 
 
 
