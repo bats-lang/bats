@@ -315,8 +315,8 @@ implement get {lb}{nb}{lk}{nk}{lo}{mo}
              val () = $A.set<byte>(dst, j, $A.get<byte>(src, voff + j))
            in copy_val(dst, src, voff, vlen, j + 1) end
          val () = copy_val(buf, doc_buf, voff, vlen, 0)
-       in $R.some(g0ofg1(vlen)) end
-     end): $R.option(int)
+       in $R.some(vlen) end
+     end): $R.option([k:nat | k <= mo] int k)
   prval () = fold@(doc)
 in res end
 
@@ -439,3 +439,15 @@ in
   | ~$R.ok(doc) => toml_free(doc)
   | ~$R.err(_) => ()
 end
+
+(* Static test: the length get returns indexes the caller's buffer *)
+fn _test_get_len_indexes_buf {lb:agz}{nb:pos}{lk:agz}{nk:pos}{lo:agz}{mo:pos}
+  (doc: !toml_doc,
+   section: !$A.borrow(byte, lb, nb), slen: int nb,
+   key: !$A.borrow(byte, lk, nk), klen: int nk,
+   buf: !$A.arr(byte, lo, mo), max: int mo): void =
+  case+ get(doc, section, slen, key, klen, buf, max) of
+  | ~$R.some(k) => if k > 0 then let
+      val _ = $A.get<byte>(buf, k - 1)
+    in () end else ()
+  | ~$R.none() => ()

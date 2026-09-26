@@ -226,6 +226,87 @@ fn git_tree_dirty (): bool = let
   val () = $A.free<byte>($A.thaw<byte>(fz_ge))
 in olen > 0 end
 
+(* Whether a[0, t) and b[0, t) hold the same bytes *)
+fun same_bytes {la,lb:agz}{na,nb:pos}{t:nat | t <= na; t <= nb}{i:nat | i <= t} .<t - i>.
+  (a: !$A.arr(byte, la, na), b: !$A.arr(byte, lb, nb), t: int t, i: int i): bool =
+  if i >= t then true
+  else if $AR.eq_int_int(byte2int0($A.get<byte>(a, i)), byte2int0($A.get<byte>(b, i)))
+  then same_bytes(a, b, t, i + 1)
+  else false
+
+(* A byte array with its size and the length of its contents *)
+vtypedef filled_arr = [l:agz][n:pos][t:nat | t <= n] @($A.arr(byte, l, n), int n, int t)
+
+(* The trunk when bats.toml sets none (Rust: config::load) *)
+fn default_trunk (): filled_arr = let
+  var main_c = @[char][4]('m', 'a', 'i', 'n')
+  val a = $S.from_char_array(main_c, 4)
+in @(a, 4, 4) end
+
+(* [package] trunk from bats.toml with its length *)
+fn read_trunk (): filled_arr = let
+  val tp = str_to_path_arr("bats.toml")
+  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
+  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val () = $A.drop<byte>(fz_tp, bv_tp)
+  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+in
+  (case+ tor of
+  | ~$R.ok(tfd) => let
+      val tbuf = $A.alloc<byte>(8192)
+      val trr = $F.file_read(tfd, tbuf, 8192)
+      val tcr = $F.file_close(tfd)
+      val () = $R.discard<int><int>(tcr)
+      val () = (case+ trr of | ~$R.ok(_) => () | ~$R.err(_) => ())
+      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
+      val pr = $T.parse(bv_tb, 8192)
+      val () = $A.drop<byte>(fz_tb, bv_tb)
+      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
+    in
+      (case+ pr of
+      | ~$R.ok(doc) => let
+          var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+          val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+          var key_c = @[char][5]('t', 'r', 'u', 'n', 'k')
+          val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 5))
+          val vbuf = $A.alloc<byte>(256)
+          val vr = $T.get(doc, bv_s, 7, bv_k, 5, vbuf, 256)
+          val () = $A.drop<byte>(fz_k, bv_k)
+          val () = $A.free<byte>($A.thaw<byte>(fz_k))
+          val () = $A.drop<byte>(fz_s, bv_s)
+          val () = $A.free<byte>($A.thaw<byte>(fz_s))
+          val () = $T.toml_free(doc)
+        in
+          (case+ vr of
+          | ~$R.some(k) => @(vbuf, 256, k)
+          | ~$R.none() => let
+              val () = $A.free<byte>(vbuf)
+            in default_trunk() end): filled_arr
+        end
+      | ~$R.err(_) => default_trunk()): filled_arr
+    end
+  | ~$R.err(_) => default_trunk()): filled_arr
+end
+
+(* Whether git rev-parse --abbrev-ref HEAD's output out[0, olen) names
+   the trunk: the name and a newline. Detached HEAD never does.
+   (Rust: resolve_version) *)
+fn on_trunk {lo:agz}{b:nat | b <= 4096}{lt:agz}{n:pos}{t:nat | t <= n}
+  (out: !$A.arr(byte, lo, 4096), olen: int b,
+   trunk: !$A.arr(byte, lt, n), t: int t): bool = let
+  var head_c = @[char][4]('H', 'E', 'A', 'D')
+  val head = $S.from_char_array(head_c, 4)
+  val head_match = same_bytes(out, head, 4, 0)
+  val () = $A.free<byte>(head)
+  val detached = (if t = 4 then head_match else false): bool
+in
+  if detached then false
+  else if olen <> t + 1 then false
+  else if $AR.eq_int_int(byte2int0($A.get<byte>(out, t)), 10) (* \n *)
+  then same_bytes(out, trunk, t, 0)
+  else false
+end
+
 
 
 implement do_upload {lr} (repo, rplen) = let
@@ -343,19 +424,9 @@ in
                   $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
                 val br_out = $A.alloc<byte>(4096)
                 val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
-                (* Check if branch is exactly "main\n" (109,97,105,110,10) *)
-                val b0 = byte2int0($A.get<byte>(br_out, 0))
-                val b1 = byte2int0($A.get<byte>(br_out, 1))
-                val b2 = byte2int0($A.get<byte>(br_out, 2))
-                val b3 = byte2int0($A.get<byte>(br_out, 3))
-                val b4 = byte2int0($A.get<byte>(br_out, 4))
-                val is_main = (if br_len = 5 then
-                  $AR.eq_int_int(b0, 109) &&
-                  $AR.eq_int_int(b1, 97) &&
-                  $AR.eq_int_int(b2, 105) &&
-                  $AR.eq_int_int(b3, 110) &&
-                  $AR.eq_int_int(b4, 10)
-                else false): bool
+                val @(trunk, _, tlen) = read_trunk()
+                val is_main = on_trunk(br_out, br_len, trunk, tlen)
+                val () = $A.free<byte>(trunk)
                 val () = $A.free<byte>(br_out)
                 val () = $A.drop<byte>(fz_ge, bv_ge)
                 val () = $A.free<byte>($A.thaw<byte>(fz_ge))

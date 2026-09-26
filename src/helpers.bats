@@ -950,7 +950,7 @@ in @(y2, m, d, secs_of_day) end
 #pub fn run_cmd_capture {le:agz}{lo:agz}
   (exec_bv: !$A.borrow(byte, le, 524288),
    argv: $L.listv($P.arg_entry),
-   outbuf: !$A.arr(byte, lo, 4096)): @(int, int)
+   outbuf: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k)
 
 implement run_cmd_capture (exec_bv, argv, outbuf) = let
   val sr = $P.spawn_inherit_env(exec_bv, argv,
@@ -963,7 +963,7 @@ in
       val+ ~$P.pipe_fd(out_fd) = sout_p
       val out_r = $F.file_read(out_fd, outbuf, 4096)
       val olen = (case+ out_r of
-        | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+        | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
       val ocr = $F.file_close(out_fd)
       val () = $R.discard<int><int>(ocr)
       val+ ~$P.pipe_fd(err_fd) = serr_p

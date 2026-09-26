@@ -961,7 +961,7 @@ fn timestamp_to_calver(ts: int): @(int, int, int, int)
 fn run_cmd_capture {le:agz}{lo:agz}
   (exec_bv: !$A.borrow(byte, le, 524288),
    argv: $L.listv($P.arg_entry),
-   outbuf: !$A.arr(byte, lo, 4096)): @(int, int)
+   outbuf: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k)
 
 
 
