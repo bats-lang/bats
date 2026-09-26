@@ -1991,11 +1991,11 @@ in @(pa, pl) end
 (* Writes buf[0, k) to dst; whether all of it was written; frees buf *)
 fn write_prefix {l:agz}{k:pos | k <= 65536}
   (dst: !$F.fd, buf: $A.arr(byte, l, 65536), k: int k): bool = let
-  val @(left, right) = $A.split<byte>(buf, k)
-  val @(fz, bv) = $A.freeze<byte>(left)
-  val w = (case+ $F.file_write(dst, bv, k) of | ~$R.ok(x) => x | ~$R.err(_) => ~1): int
-  val () = $A.drop<byte>(fz, bv)
-  val () = $A.free<byte>($A.join<byte>($A.thaw<byte>(fz), right))
+  val @(fz, bv) = $A.freeze<byte>(buf)
+  val @(left, right) = $A.borrow_split<byte>(fz, bv, k)
+  val w = (case+ $F.file_write(dst, left, k) of | ~$R.ok(x) => x | ~$R.err(_) => ~1): int
+  val () = $A.drop<byte>(fz, $A.borrow_join<byte>(fz, left, right))
+  val () = $A.free<byte>($A.thaw<byte>(fz))
 in w = k end
 
 (* Writes the bytes read from src to dst, 64 KiB at a time; false on an
