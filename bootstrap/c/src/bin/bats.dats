@@ -83,93 +83,57 @@ fn print_usage(): void = let
 in end
 
 (* Find the position of "--" separator in /proc/self/cmdline buffer. *)
-fun find_dashdash {l:agz}{fuel:nat} .<fuel>.
-  (buf: !$A.arr(byte, l, 4096), pos: int, len: int,
-   fuel: int fuel): int =
-  if fuel <= 0 then ~1
-  else if pos >= len then ~1
+fun find_dashdash {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int): pos_t =
+  if pos >= len then ~1
+  else if pos >= 4096 then ~1
+  else if peek_arr(buf, pos, 4096) = 45 && peek_arr(buf, pos + 1, 4096) = 45
+          && peek_arr(buf, pos + 2, 4096) = 0 then pos
   else let
-    val b0 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, 4096)))
-    val b1 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos + 1, 4096)))
-    val b2 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos + 2, 4096)))
+    val next = $S.find_null_at(buf, pos, 4096)
   in
-    if $AR.eq_int_int(b0, 45) then
-      if $AR.eq_int_int(b1, 45) then
-        if $AR.eq_int_int(b2, 0) then pos
-        else let
-          val next = $S.find_null(buf, pos, 4096, 4096)
-        in find_dashdash(buf, next + 1, len, fuel - 1) end
-      else let
-        val next = $S.find_null(buf, pos, 4096, 4096)
-      in find_dashdash(buf, next + 1, len, fuel - 1) end
-    else let
-      val next = $S.find_null(buf, pos, 4096, 4096)
-    in find_dashdash(buf, next + 1, len, fuel - 1) end
+    if next >= 4096 then ~1
+    else find_dashdash(buf, next + 1, len)
   end
 
 (* Scan --only values: read all repeated --only tokens from cmdline.
    Returns bitmask: bit0=debug bit1=release bit2=native bit3=wasm *)
-fun scan_only {l:agz}{fuel:nat} .<fuel>.
-  (buf: !$A.arr(byte, l, 4096), pos: int, len: int, mask: int,
-   fuel: int fuel): int =
-  if fuel <= 0 then mask
-  else if pos >= len then mask
+fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int, mask: int): int =
+  if pos >= len then mask
+  else if pos >= 4096 then mask
+  (* "--only" : 45,45,111,110,108,121 *)
+  else if peek_arr(buf, pos, 4096) = 45 && peek_arr(buf, pos + 1, 4096) = 45
+          && peek_arr(buf, pos + 2, 4096) = 111 && peek_arr(buf, pos + 3, 4096) = 110
+          && peek_arr(buf, pos + 4, 4096) = 108 && peek_arr(buf, pos + 5, 4096) = 121 then let
+    val next = $S.find_null_at(buf, min(pos + 6, 4096), 4096)
+    val val_start = next + 1
+  in
+    if val_start >= len then mask
+    else if val_start >= 4096 then mask
+    else let
+      val v0 = peek_arr(buf, val_start, 4096)
+      val vend = $S.find_null_at(buf, val_start, 4096)
+      val new_mask = (
+        if $AR.eq_int_int(v0, 100) then
+          (if (mask mod 2) = 0 then mask + 1 else mask)
+        else if $AR.eq_int_int(v0, 114) then
+          (if ((mask / 2) mod 2) = 0 then mask + 2 else mask)
+        else if $AR.eq_int_int(v0, 110) then
+          (if ((mask / 4) mod 2) = 0 then mask + 4 else mask)
+        else if $AR.eq_int_int(v0, 119) then
+          (if ((mask / 8) mod 2) = 0 then mask + 8 else mask)
+        else mask): int
+    in
+      if vend >= 4096 then new_mask
+      else scan_only(buf, vend + 1, len, new_mask)
+    end
+  end
   else let
-    val p = pos
-  in let
-        (* Check if this token is "--only" : 45,45,111,110,108,121,0 *)
-        val b0 = byte2int0($A.get<byte>(buf, $AR.checked_idx(p, 4096)))
-        val b1 = byte2int0($A.get<byte>(buf, $AR.checked_idx(p + 1, 4096)))
-        val b2 = byte2int0($A.get<byte>(buf, $AR.checked_idx(p + 2, 4096)))
-        val b3 = byte2int0($A.get<byte>(buf, $AR.checked_idx(p + 3, 4096)))
-        val b4 = byte2int0($A.get<byte>(buf, $AR.checked_idx(p + 4, 4096)))
-        val b5 = byte2int0($A.get<byte>(buf, $AR.checked_idx(p + 5, 4096)))
-      in
-        if $AR.eq_int_int(b0, 45) then
-          if $AR.eq_int_int(b1, 45) then
-            if $AR.eq_int_int(b2, 111) then
-              if $AR.eq_int_int(b3, 110) then
-                if $AR.eq_int_int(b4, 108) then
-                  if $AR.eq_int_int(b5, 121) then let
-                    val next = $S.find_null(buf, p + 6, 4096, 4096)
-                    val val_start = next + 1
-                  in
-                    if val_start < len then let
-                          val v0 = byte2int0($A.get<byte>(buf, $AR.checked_idx(val_start, 4096)))
-                          val vend = $S.find_null(buf, val_start, 4096, 4096)
-                          val vlen = vend - val_start
-                          val new_mask = (
-                            if $AR.eq_int_int(v0, 100) then
-                              (if (mask mod 2) = 0 then mask + 1 else mask)
-                            else if $AR.eq_int_int(v0, 114) then
-                              (if ((mask / 2) mod 2) = 0 then mask + 2 else mask)
-                            else if $AR.eq_int_int(v0, 110) then
-                              (if ((mask / 4) mod 2) = 0 then mask + 4 else mask)
-                            else if $AR.eq_int_int(v0, 119) then
-                              (if ((mask / 8) mod 2) = 0 then mask + 8 else mask)
-                            else mask): int
-                        in scan_only(buf, vend + 1, len, new_mask, fuel - 1) end
-                    else mask
-                  end
-                  else let
-                    val next = $S.find_null(buf, p, 4096, 4096)
-                  in scan_only(buf, next + 1, len, mask, fuel - 1) end
-                else let
-                  val next = $S.find_null(buf, p, 4096, 4096)
-                in scan_only(buf, next + 1, len, mask, fuel - 1) end
-              else let
-                val next = $S.find_null(buf, p, 4096, 4096)
-              in scan_only(buf, next + 1, len, mask, fuel - 1) end
-            else let
-              val next = $S.find_null(buf, p, 4096, 4096)
-            in scan_only(buf, next + 1, len, mask, fuel - 1) end
-          else let
-            val next = $S.find_null(buf, p, 4096, 4096)
-          in scan_only(buf, next + 1, len, mask, fuel - 1) end
-        else let
-          val next = $S.find_null(buf, p, 4096, 4096)
-        in scan_only(buf, next + 1, len, mask, fuel - 1) end
-      end
+    val next = $S.find_null_at(buf, pos, 4096)
+  in
+    if next >= 4096 then mask
+    else scan_only(buf, next + 1, len, mask)
   end
 
 (* ============================================================
@@ -193,11 +157,11 @@ in
       | ~$R.ok(cl_n) => let
           val cr = $F.file_close(cl_fd)
           val () = $R.discard<int><int>(cr)
-          val dd_pos = find_dashdash(cl_buf, 0, cl_n, 4096)
+          val dd_pos = find_dashdash(cl_buf, 0, cl_n)
           val () = save_extra_args(cl_buf, dd_pos, cl_n)
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
           val argc = count_argc(cl_buf, effective_len)
-          val only_mask = scan_only(cl_buf, 0, effective_len, 0, 4096)
+          val only_mask = scan_only(cl_buf, 0, effective_len, 0)
           val @(fz_cb, bv_cb) = $A.freeze<byte>(cl_buf)
           var pna_c = @[char][4]('b', 'a', 't', 's')
           val pna = $S.from_char_array(pna_c, 4)

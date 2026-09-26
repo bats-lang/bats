@@ -31,6 +31,72 @@ staload S = "str/src/lib.sats"
 
 
 
+typedef pos_t = [p:int] int p
+
+
+fn peek {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), p: int p, n: int n): int
+
+
+
+
+
+
+
+fn peek_arr {l:agz}{n:pos}{p:int}
+  (buf: !$A.arr(byte, l, n), p: int p, n: int n): int
+
+
+
+
+
+
+
+fn poke_arr {l:agz}{n:pos}{p:int}
+  (buf: !$A.arr(byte, l, n), p: int p, n: int n, v: int): void
+
+
+
+
+
+
+
+fn find_null_from {l:agz}{n:pos}{p:int}
+  (buf: !$A.arr(byte, l, n), p: int p, n: int n): pos_t
+
+
+
+
+
+
+fn find_null_bv_from {l:agz}{n:pos}{p:int}
+  (bv: !$A.borrow(byte, l, n), p: int p, n: int n): pos_t
+
+
+
+
+
+
+
+
+
+fn span_i32 {l:agz}{n:pos}
+  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -111,7 +177,7 @@ fn clear_build_err(): void
 
 
 
-fun print_arr {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), i: int, len: int, max: int n,
+fun print_arr {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), i: pos_t, len: int, max: int n,
    fuel: int fuel): void
 
 
@@ -124,37 +190,6 @@ fun print_arr {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), i: int, len: 
 
 fn is_dot_or_dotdot {l:agz}{n:pos}
   (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-typedef pos_t = [p:int] int p
-
-
-fn peek {l:agz}{n:pos}{p:int}
-  (src: !$A.borrow(byte, l, n), p: int p, n: int n): int
-
-
-
-
-
-
-
-
-
-fn span_i32 {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t
 
 
 
@@ -201,7 +236,7 @@ fn ent_name_eq {l:agz}{n:pos}{k:nat | k <= n}{m:pos | m <= 1048576}
 
 
 fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n, lit: &(@[char][m]), m: int m): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
 
 
 
@@ -290,154 +325,154 @@ fn is_lib_dats_o {l:agz}{n:pos}{k:nat | k <= n}
 
 
 fn lit_as {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_begin {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_binary {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_dollar_UNITTEST {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_dollar_UNSAFE {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_dot_slash {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_end {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_exthash {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_fun {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_hash_pub {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_hash_target {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_hash_use {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_let {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_local {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_machash {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_no_mangle {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_prfn {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_prfun {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_primplement {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_slash_srcslash_libdot_dats {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_staload_dq {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
 
 
 fn lit_target_wasm_binary {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 
 
 
@@ -448,7 +483,7 @@ fn lit_target_wasm_binary {l:agz}{n:pos}
 
 
 
-fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: int, len: int, max: int n,
+fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int n,
    fuel: int fuel): void
 
 
@@ -463,7 +498,7 @@ fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: int,
 
 
 
-fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: int, len: int, max: int n,
+fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, len: int, max: int n,
    dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void
 
 
@@ -534,14 +569,14 @@ fn put_newline_v(out: !$B.builder_v >> $B.builder_v): void
 
 
 fn copy_to_builder_v {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), start: int, len: int, max: int n,
+  (src: !$A.borrow(byte, l, n), start: pos_t, len: int, max: int n,
    dst: !$B.builder_v >> $B.builder_v): void
 
 
 
 
-fun find_basename_start {l:agz}{n:pos}{fuel:nat}  (bv: !$A.borrow(byte, l, n), pos: int, max: int n,
-   last: int, fuel: int fuel): int
+fun find_basename_start {l:agz}{n:pos}{fuel:nat}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
+   last: pos_t, fuel: int fuel): pos_t
 
 
 
@@ -555,7 +590,7 @@ fun find_basename_start {l:agz}{n:pos}{fuel:nat}  (bv: !$A.borrow(byte, l, n), p
 
 
 fun wbw_loop {l:agz}{fuel:nat}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
-   i: int, lim: int, fuel: int fuel): void
+   i: pos_t, lim: int, fuel: int fuel): void
 
 
 
@@ -591,8 +626,8 @@ fn freshness_check_bv
 
 
 
-fun token_eq_arr {l:agz}{ls:agz}{fuel:nat}  (buf: !$A.arr(byte, l, 4096), tstart: int, tend: int,
-   sarr: !$A.arr(byte, ls, 4096), si: int, fuel: int fuel): bool
+fun token_eq_arr {l:agz}{ls:agz}{fuel:nat}  (buf: !$A.arr(byte, l, 4096), tstart: pos_t, tend: int,
+   sarr: !$A.arr(byte, ls, 4096), si: pos_t, fuel: int fuel): bool
 
 
 
@@ -614,7 +649,7 @@ fun token_eq_arr {l:agz}{ls:agz}{fuel:nat}  (buf: !$A.arr(byte, l, 4096), tstart
 
 
 
-fun arr_range_to_builder {l:agz}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.arr(byte, l, 4096), i: int, lim: int,
+fun arr_range_to_builder {l:agz}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.arr(byte, l, 4096), i: pos_t, lim: int,
    dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void
 
 
@@ -628,7 +663,7 @@ fun arr_range_to_builder {l:agz}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}
 
 
 fn arr_range_to_builder_v {l:agz}
-  (src: !$A.arr(byte, l, 4096), i: int, lim: int,
+  (src: !$A.arr(byte, l, 4096), i: pos_t, lim: int,
    dst: !$B.builder_v >> $B.builder_v): void
 
 
@@ -1211,7 +1246,7 @@ fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr
 
 
 fn strip_newline_arr {l:agz}
-  (buf: !$A.arr(byte, l, 4096), len: int): int
+  (buf: !$A.arr(byte, l, 4096), len: pos_t): pos_t
 
 
 
@@ -1219,7 +1254,7 @@ fn strip_newline_arr {l:agz}
 
 
 fn strip_newline_arr524288 {l:agz}
-  (buf: !$A.arr(byte, l, 524288), len: int): int
+  (buf: !$A.arr(byte, l, 524288), len: pos_t): pos_t
 
 
 
@@ -1227,7 +1262,7 @@ fn strip_newline_arr524288 {l:agz}
 
 
 fn strip_newline_arr256 {l:agz}
-  (buf: !$A.arr(byte, l, 256), len: int): int
+  (buf: !$A.arr(byte, l, 256), len: pos_t): pos_t
 
 
 
@@ -1333,7 +1368,7 @@ fn make_proc_cmdline {l:agz}{n:pos | n >= 18}
 
 
 
-fun count_argc_loop {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), pos: int, len: int, max: int n,
+fun count_argc_loop {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), pos: pos_t, len: int, max: int n,
    count: int, fuel: int fuel): int
 
 

@@ -23,13 +23,15 @@ fn get
   {l:agz}{n:pos}
   (name: !$A.borrow(byte, ln, nn), name_len: int nn,
    buf: !$A.arr(byte, l, n), max_len: int n)
-  : $R.option(int)
+  : $R.option([k:nat | k <= n] int k)
+
+
 
 fn get_cstr
   {ln:agz}{nn:pos}
   {l:agz}{n:pos}
   (name: !$A.arr(byte, ln, nn), buf: !$A.arr(byte, l, n), max_len: int n)
-  : $R.option(int)
+  : $R.option([k:nat | k <= n] int k)
 
 
 

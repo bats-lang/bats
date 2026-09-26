@@ -149,74 +149,47 @@ implement do_generate_docs(pkg_name_len, kind_is_lib) =
         var doc_b: $B.builder_v = $B.create()
         val () = bput_v(doc_b, "# API Reference\n\n")
         (* Scan for #pub lines: 35,112,117,98,32 *)
-        fun scan_pub {l2:agz}{fuel:nat} .<fuel>.
-          (buf: !$A.arr(byte, l2, 524288), doc: !$B.builder_v >> $B.builder_v,
-           pos: int, len: int, fuel: int fuel): void =
-          if fuel <= 0 then ()
-          else if pos >= len then ()
-          else if pos < 0 then ()
-          else if pos + 4 >= 524288 then ()
+        (* The rest of the line from q, up to and including its newline,
+           copied to doc without the newline. Returns the position after it. *)
+        fun copy_line {l3:agz}{q:nat | q <= 524288} .<524288 - q>.
+          (buf: !$A.arr(byte, l3, 524288), doc: !$B.builder_v >> $B.builder_v,
+           pos: int q): [r:int | q <= r; r <= 524288] int r =
+          if pos >= 524288 then pos
           else let
-            val b0 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, 524288)))
-            val b1 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos + 1, 524288)))
-            val b2 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos + 2, 524288)))
-            val b3 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos + 3, 524288)))
-            val b4 = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos + 4, 524288)))
+            val b = peek_arr(buf, pos, 524288)
           in
-            if $AR.eq_int_int(b0, 35) then
-              if $AR.eq_int_int(b1, 112) then
-                if $AR.eq_int_int(b2, 117) then
-                  if $AR.eq_int_int(b3, 98) then
-                    if $AR.eq_int_int(b4, 32) then let
-                      (* Found #pub , copy rest of line *)
-                      val () = bput_v(doc, "```\n")
-                      fun copy_line {l3:agz}{fuel2:nat} .<fuel2>.
-                        (buf: !$A.arr(byte, l3, 524288), doc: !$B.builder_v >> $B.builder_v,
-                         pos: int, fuel2: int fuel2): int =
-                        if fuel2 <= 0 then pos
-                        else if pos < 0 then pos
-                        else if pos >= 524288 then pos
-                        else let
-                          val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, 524288)))
-                        in
-                          if $AR.eq_int_int(b, 10) then (pos + 1)
-                          else let
-                            val () = put_char_v(doc, b)
-                          in copy_line(buf, doc, pos + 1, fuel2 - 1) end
-                        end
-                      val np = copy_line(buf, doc, pos + 5, 524288)
-                      val () = bput_v(doc, "\n```\n\n")
-                    in scan_pub(buf, doc, np, len, fuel - 1) end
-                    else let
-                      val np = $S.find_null(buf, pos, 524288, 524288)
-                    in scan_pub(buf, doc, np + 1, len, fuel - 1) end
-                  else let
-                    val np = $S.find_null(buf, pos, 524288, 524288)
-                  in scan_pub(buf, doc, np + 1, len, fuel - 1) end
-                else let
-                  val np = $S.find_null(buf, pos, 524288, 524288)
-                in scan_pub(buf, doc, np + 1, len, fuel - 1) end
-              else let
-                val np = $S.find_null(buf, pos, 524288, 524288)
-              in scan_pub(buf, doc, np + 1, len, fuel - 1) end
+            if $AR.eq_int_int(b, 10) then pos + 1
             else let
-              (* Skip to next newline *)
-              fun skip_line {l4:agz}{fuel3:nat} .<fuel3>.
-                (buf: !$A.arr(byte, l4, 524288), pos: int, len: int,
-                 fuel3: int fuel3): int =
-                if fuel3 <= 0 then pos
-                else if pos < 0 then pos
-                else if pos >= 524288 then pos
-                else let
-                  val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, 524288)))
-                in
-                  if $AR.eq_int_int(b, 10) then pos + 1
-                  else skip_line(buf, pos + 1, len, fuel3 - 1)
-                end
-              val np = skip_line(buf, pos, len, 524288)
-            in scan_pub(buf, doc, np, len, fuel - 1) end
+              val () = put_char_v(doc, b)
+            in copy_line(buf, doc, pos + 1) end
           end
-        val () = scan_pub(lbuf, doc_b, 0, llen, 524288)
+        fun skip_line {l4:agz}{q:nat | q < 524288} .<524288 - q>.
+          (buf: !$A.arr(byte, l4, 524288), pos: int q): [r:int | q < r; r <= 524288] int r =
+          if $AR.eq_int_int(peek_arr(buf, pos, 524288), 10) then pos + 1
+          else if pos + 1 >= 524288 then 524288
+          else skip_line(buf, pos + 1)
+        fun scan_pub {l2:agz}{q:nat | q <= 524288} .<524288 - q>.
+          (buf: !$A.arr(byte, l2, 524288), doc: !$B.builder_v >> $B.builder_v,
+           pos: int q, len: int): void =
+          if pos >= len then ()
+          else if pos + 4 >= 524288 then ()
+          (* "#pub " : 35,112,117,98,32 *)
+          else if peek_arr(buf, pos, 524288) = 35 && peek_arr(buf, pos + 1, 524288) = 112
+                  && peek_arr(buf, pos + 2, 524288) = 117 && peek_arr(buf, pos + 3, 524288) = 98
+                  && peek_arr(buf, pos + 4, 524288) = 32 then let
+            val () = bput_v(doc, "```\n")
+            val np = copy_line(buf, doc, pos + 5)
+            val () = bput_v(doc, "\n```\n\n")
+          in scan_pub(buf, doc, np, len) end
+          (* Any other line starting with '#' skips to the next NUL byte. *)
+          else if peek_arr(buf, pos, 524288) = 35 then let
+            val np = $S.find_null_at(buf, pos, 524288)
+          in
+            if np >= 524288 then ()
+            else scan_pub(buf, doc, np + 1, len)
+          end
+          else scan_pub(buf, doc, skip_line(buf, pos), len)
+        val () = scan_pub(lbuf, doc_b, 0, llen)
         val () = $A.free<byte>(lbuf)
         val dp = str_to_path_arr("docs/lib.md")
         val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
@@ -308,7 +281,7 @@ in
             | ~$R.ok(urfd) => let
                 val repo_b2 = $A.alloc<byte>(524288)
                 val urr = $F.file_read(urfd, repo_b2, 524288)
-                val url = (case+ urr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+                val url = (case+ urr of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
                 val urcr = $F.file_close(urfd)
                 val () = $R.discard<int><int>(urcr)
                 val url2 = strip_newline_arr524288(repo_b2, url)
@@ -392,11 +365,11 @@ in
                 (* Build prefix: replace '/' with '_' in name *)
                 var pfx: $B.builder_v = $B.create()
                 fun copy_replace_slash {l:agz}{fuel:nat} .<fuel>.
-                  (bv: !$A.borrow(byte, l, 256), i: int, len: int,
+                  (bv: !$A.borrow(byte, l, 256), i: pos_t, len: int,
                    b: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
                   if fuel <= 0 then () else if i >= len then ()
                   else let
-                    val byte_val = byte2int0($A.read<byte>(bv, $AR.checked_idx(i, 256)))
+                    val byte_val = peek(bv, i, 256)
                     val () = put_char_v(b, (if $AR.eq_int_int(byte_val, 47) then 95 else byte_val): int)
                   in copy_replace_slash(bv, i + 1, len, b, fuel - 1) end
                 val () = copy_replace_slash(bv_nb, 0, nlen, pfx, 256)
@@ -665,7 +638,7 @@ in
     | ~$R.ok(cfd) => let
         val cb = $A.alloc<byte>(4096)
         val cr2 = $F.file_read(cfd, cb, 4096)
-        val clen = (case+ cr2 of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): int
+        val clen = (case+ cr2 of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): pos_t
         val ccr = $F.file_close(cfd)
         val () = $R.discard<int><int>(ccr)
         (* strip trailing newline *)
@@ -676,12 +649,12 @@ in
   val @(fz_cwd, bv_cwd) = $A.freeze<byte>(cwd_buf)
   (* Find last '/' in cwd path to extract basename *)
   fun find_last_slash {l2:agz}{fuel2:nat} .<fuel2>.
-    (bv: !$A.borrow(byte, l2, 4096), pos: int, len: int,
-     last: int, fuel2: int fuel2): int =
+    (bv: !$A.borrow(byte, l2, 4096), pos: pos_t, len: int,
+     last: pos_t, fuel2: int fuel2): pos_t =
     if fuel2 <= 0 then last
     else if pos >= len then last
     else let
-      val b = $S.borrow_byte(bv, pos, 4096)
+      val b = peek(bv, pos, 4096)
     in
       if b = 47 then find_last_slash(bv, pos + 1, len, pos, fuel2 - 1)
       else find_last_slash(bv, pos + 1, len, last, fuel2 - 1)
@@ -953,13 +926,13 @@ in
     var out: $B.builder_v = $B.create()
     fun copy_extras {l2:agz}{fuel:nat} .<fuel>.
       (buf: !$A.arr(byte, l2, 4096), out: !$B.builder_v >> $B.builder_v,
-       pos: int, len: int, fuel: int fuel): void =
+       pos: pos_t, len: int, fuel: int fuel): void =
       if fuel <= 0 then ()
       else if pos >= len then ()
       else if pos < 0 then ()
       else if pos >= 4096 then ()
       else let
-        val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, 4096)))
+        val b = peek_arr(buf, pos, 4096)
       in
         if $AR.eq_int_int(b, 0) then let
           val () = put_char_v(out, 10) (* newline separator *)
@@ -1001,11 +974,11 @@ in
         val @(fz_eb, bv_eb) = $A.freeze<byte>(ebuf)
         fun append_lines {l2:agz}{fuel:nat} .<fuel>.
           (bv: !$A.borrow(byte, l2, 4096), cmd: !$B.builder_v >> $B.builder_v,
-           pos: int, len: int, fuel: int fuel): void =
+           pos: pos_t, len: int, fuel: int fuel): void =
           if fuel <= 0 then ()
           else if pos >= len then ()
           else let
-            val b = $S.borrow_byte(bv, pos, 4096)
+            val b = peek(bv, pos, 4096)
           in
             if $AR.eq_int_int(b, 10) then let
               val () = put_char_v(cmd, 32) (* space *)
@@ -1080,7 +1053,7 @@ in
                 | ~$R.ok(bfd2) => let
                     val bbn = $A.alloc<byte>(256)
                     val brr = $F.file_read(bfd2, bbn, 256)
-                    val brl = (case+ brr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+                    val brl = (case+ brr of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
                     val bcr = $F.file_close(bfd2)
                     val () = $R.discard<int><int>(bcr)
                     val brl2 = strip_newline_arr256(bbn, brl)

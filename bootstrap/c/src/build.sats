@@ -898,6 +898,7 @@ fn do_lock(dev: int, dry_run: int): void
 
 
 
+
 fn write_wasm_runtime_h(): int
 
 
@@ -1633,16 +1634,6 @@ fn check_wasm_binary {l:agz}
 
 
 fn do_build(release: int, build_target: int): void
-
-
-
-
-
-
-
-
-
-
 
 
 
