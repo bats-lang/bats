@@ -52,7 +52,7 @@ in
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(524288)
       val rr = $F.file_read(fd, buf, 524288)
-      val nbytes = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+      val nbytes = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
       val cr = $F.file_close(fd)
       val () = $R.discard<int><int>(cr)
       val @(fz_src, bv_src) = $A.freeze<byte>(buf)
