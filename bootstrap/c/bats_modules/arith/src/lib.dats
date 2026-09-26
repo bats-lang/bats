@@ -70,13 +70,7 @@ staload "./lib.sats"
 
 
 
-(* ========== Type Coercion ========== *)
-
-
-
-
-
-
+(* ========== Bytes ========== *)
 
 (* The low 8 bits of x as an int proven in [0, 256). Rebuilt from its
    bits: each term is a literal or 0, so the bound needs no cast. *)
@@ -93,10 +87,4 @@ end
 
 
 implement byte_of_char(c) = low_byte(char2int0(c))
-
-
-
-
-
-
 

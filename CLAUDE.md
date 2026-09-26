@@ -53,6 +53,8 @@ Never ask permission to keep going. Keep going until the success criterion is me
 
 bats uses `--only <value>` (repeatable) instead of the old Rust bats' `--release` flag and `--only native|wasm`. Values: `debug`, `release`, `native`, `wasm`. Multiple `--only` flags narrow the build matrix. Default (no `--only`): build all. Example: `--only debug --only native` builds only debug native. The entry point rename (`implement main0` → `implement __BATS_main0`) applies to code only. The Rust bats renamed the first occurrence anywhere in the emitted text, including inside a string literal or a comment, which broke the build (`tests/main0-string`).
 
+`castfn`, `praxi`, `extern` and `assume` at the start of a `#pub` declaration are rejected as unsafe constructs; the Rust bats let a `#pub` declaration through unchecked (`tests/restricted-keywords`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement

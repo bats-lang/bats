@@ -284,6 +284,12 @@ fn _content_starts_prfun {l:agz}{n:pos}
   lit_prfun(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
+(* #pub castfn, praxi, extern or assume: unsafe as a declaration too *)
+fn _content_starts_restricted {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  looking_at_cast_fn(src, pos, max) || looking_at_prax_i(src, pos, max) ||
+  looking_at_ext_ern(src, pos, max) || looking_at_assu_me(src, pos, max)
+
 fn _content_starts_prfn {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_prfn(src, pos, max) &&
@@ -830,7 +836,8 @@ fun lex_main {l:agz}{n:pos}{fuel:nat} .<fuel>.
       val is_prfun = _content_starts_prfun(src, contents_start, max)
       val is_prfn = if is_prfun then false else _content_starts_prfn(src, contents_start, max)
       val span_kind =
-        if is_prfun || is_prfn then let
+        if _content_starts_restricted(src, contents_start, max) then 5
+        else if is_prfun || is_prfn then let
           val kw_len = (if is_prfun then 5 else 4): [k:int | 4 <= k; k <= 5] int k
           val name_pos = _skip_to_name(src, contents_start + kw_len, max, 256)
           val name_end = skip_ident(src, name_pos, max, 4096)

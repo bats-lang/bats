@@ -2,7 +2,9 @@
 # mac#, ext#, while (but not while*), castfn, praxi, extern and assume are
 # unsafe outside $UNSAFE begin...end, as in the Rust bats; they used to be
 # accepted except castfn and friends, which were also wrongly flagged inside
-# longer identifiers. Comments, strings and while* stay allowed.
+# longer identifiers. #pub castfn/praxi/extern/assume are rejected too
+# (the Rust bats let them through). Comments, strings and while* stay
+# allowed.
 # usage: tests/restricted-keywords/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -32,6 +34,8 @@ reject 'fn f (): void = while (false) ()'
 reject 'castfn to_int (x: uint): int'
 reject 'praxi lemma (): void'
 reject 'extern fn foo (): void'
+reject '#pub castfn to_int (x: uint): int'
+reject '#pub praxi lemma (): void'
 accept false 'fn count (): void = let
   var i: int = 3
   val () = while* {k:nat} .<k>. (i: int(k)) => (i > 0) (i := i - 1)
@@ -41,7 +45,9 @@ accept false '(* mac#foo ext#bar while castfn *)
 val s = "mac#foo while castfn"
 val mycastfn = 1
 val the_while = 2
-val my_extern = 3'
+val my_extern = 3
+#pub fn castfn_like (): int
+implement castfn_like () = 1'
 accept true '$UNSAFE begin
 val x = while (false) ()
 end'

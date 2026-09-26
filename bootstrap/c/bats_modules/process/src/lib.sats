@@ -3,9 +3,7 @@ staload AR = "arith/src/lib.sats"
 staload B = "builder/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload R = "result/src/lib.sats"
-staload S = "str/src/lib.sats"
 staload F = "file/src/lib.sats"
-
 
 
 
@@ -115,6 +113,7 @@ fn spawn_inherit_env
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
 
 
 

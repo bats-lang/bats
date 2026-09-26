@@ -4,7 +4,6 @@ staload "arith/src/lib.dats"
 staload "builder/src/lib.dats"
 staload "list/src/lib.dats"
 staload "result/src/lib.dats"
-staload "str/src/lib.dats"
 staload "file/src/lib.dats"
 (* process -- safe process spawning with linear child handles *)
 (* Linear child must be waited on. Pipes are linear fds from file package. *)
@@ -24,7 +23,6 @@ staload AR = "arith/src/lib.sats"
 staload B = "builder/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload R = "result/src/lib.sats"
-staload S = "str/src/lib.sats"
 staload F = "file/src/lib.sats"
 
 (* ============================================================
@@ -360,18 +358,19 @@ fn _build_from_list(xs: $L.listv(arg_entry)): @($B.builder_v, int) = let
     | ~$L.list_vt_nil() => count
     | ~$L.list_vt_cons(@(arr, len), tl) => let
         val @(fz, bv) = $A.freeze<byte>(arr)
-        fun copy {lb:agz}{fuel:nat} .<fuel>.
+        (* bv[i, len) into b; i < 524288 proves each read *)
+        fun copy {lb:agz}{i:nat | i <= 524288} .<524288 - i>.
           (bv: !$A.borrow(byte, lb, 524288),
            b: !$B.builder_v >> $B.builder_v,
-           i: int, len: int, fuel: int fuel): void =
-          if fuel <= 0 then ()
+           i: int i, len: int): void =
+          if i >= 524288 then ()
           else if i >= len then ()
           else let
-            val c = $S.borrow_byte(bv, i, 524288)
+            val c = byte2int0($A.read<byte>(bv, i))
             val n = $B.length(b)
             val () = (if n < 524288 - 1 then $B.put_char(b, c) else ())
-          in copy(bv, b, i + 1, len, fuel - 1) end
-        val () = copy(bv, b, 0, len, 524288)
+          in copy(bv, b, i + 1, len) end
+        val () = copy(bv, b, 0, len)
         val n2 = $B.length(b)
         val () = (if n2 < 524288 - 1 then $B.put_char(b, 0) else ())
         val () = $A.drop<byte>(fz, bv)
