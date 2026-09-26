@@ -378,9 +378,9 @@ in
       val trr = $F.file_read(tfd, tbuf, 8192)
       val tcr = $F.file_close(tfd)
       val () = $R.discard<int><int>(tcr)
-      val () = (case+ trr of | ~$R.ok(_) => () | ~$R.err(_) => ())
+      val tn = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, 8192)
+      val pr = $T.parse(bv_tb, tn)
       val () = $A.drop<byte>(fz_tb, bv_tb)
       val () = $A.free<byte>($A.thaw<byte>(fz_tb))
     in
@@ -583,11 +583,11 @@ in
   | ~$R.ok(tfd) => let
       val tbuf = $A.alloc<byte>(8192)
       val trr = $F.file_read(tfd, tbuf, 8192)
-      val tlen = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+      val tlen = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
       val tcr = $F.file_close(tfd)
       val () = $R.discard<int><int>(tcr)
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, 8192)
+      val pr = $T.parse(bv_tb, tlen)
       val () = $A.drop<byte>(fz_tb, bv_tb)
       val () = $A.free<byte>($A.thaw<byte>(fz_tb))
     in

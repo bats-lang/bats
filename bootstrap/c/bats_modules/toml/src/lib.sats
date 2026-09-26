@@ -17,10 +17,12 @@ staload R = "result/src/lib.sats"
 
 
 
+
 stadef TOML_MAX_BUF = 65536
 stadef TOML_MAX_ENTRIES = 256
 (* Six 16-bit fields per entry, two bytes each. *)
 stadef TOML_ENTRY_BYTES = 3072
+
 
 
 
@@ -49,9 +51,10 @@ datavtype toml_doc =
 
 
 
+
 fun parse
-  {lb:agz}{n:pos}
-  (input: !$A.borrow(byte, lb, n), len: int n): $R.result(toml_doc, int)
+  {lb:agz}{n:pos}{l:nat | l <= n}
+  (input: !$A.borrow(byte, lb, n), len: int l): $R.result(toml_doc, int)
 
 fun get
   {lb:agz}{nb:pos}{lk:agz}{nk:pos}{lo:agz}{mo:pos}
@@ -68,6 +71,96 @@ fun keys
 
 fun toml_free
   (doc: toml_doc): void
+
+
+
+
+
+
+fun section_at
+  {lb:agz}{nb:pos}
+  (doc: !toml_doc, section: !$A.borrow(byte, lb, nb), slen: int nb): @([s:int] int s, [e:int] int e)
+
+
+
+fun value_at
+  {lb:agz}{nb:pos}{lk:agz}{nk:pos}
+  (doc: !toml_doc,
+   section: !$A.borrow(byte, lb, nb), slen: int nb,
+   key: !$A.borrow(byte, lk, nk), klen: int nk): @([s:int] int s, [e:int] int e, bool)
+
+
+fun has_root_keys (doc: !toml_doc): bool
+
+
+fun byte_at {i:int} (doc: !toml_doc, i: int i): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -649,14 +649,308 @@ fn doc_kind (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): int = let
   val () = $A.free<byte>($A.thaw<byte>(fz_v))
 in kind end
 
+#define VMAX 524288
+
+(* b's bytes appended to out; consumes b *)
+fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void = let
+  val @(ba, bl) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(ba)
+  val () = copy_to_builder_v(bv, 0, bl, VMAX, out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+(* The number of decimal digits of n > 0 *)
+fun digits {f:nat} .<f>. (n: int, f: int f): int =
+  if f <= 0 then 1 else if n < 10 then 1 else 1 + digits(n / 10, f - 1)
+
+(* Whether errors are colored, as Rust's display_fancy decides: standard
+   error is a terminal and NO_COLOR is not set *)
+fn use_color (): bool =
+  if ~$E.stderr_is_terminal() then false
+  else let
+    var k_c = @[char][8]('N', 'O', '_', 'C', 'O', 'L', 'O', 'R')
+    val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(k_c, 8))
+    val vb = $A.alloc<byte>(16)
+    val set = (case+ $E.get(bv_k, 8, vb, 16) of | ~$R.some(_) => true | ~$R.none() => false): bool
+    val () = $A.free<byte>(vb)
+    val () = $A.drop<byte>(fz_k, bv_k)
+    val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  in ~set end
+
+(* Rust's ANSI escapes, or nothing when c is false *)
+fn put_red (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[1;31m") else bput_v(out, "")
+fn put_blue (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[1;34m") else bput_v(out, "")
+fn put_reset (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[0m") else bput_v(out, "")
+
+(* " |" with the bar in blue *)
+fn put_bar (out: !$B.builder_v >> $B.builder_v, c: bool): void = let
+  val () = put_char_v(out, 32)
+  val () = put_blue(out, c)
+  val () = put_char_v(out, 124)
+in put_reset(out, c) end
+
+(* ============================================================
+   bats.toml read as Rust's serde reads it into Package (config::load):
+   the first field of the wrong type, else a missing name or package,
+   as the toml crate reports them
+   ============================================================ *)
+
+(* 1-based line and column of offset off in doc's text, with the offset
+   its line starts at *)
+fun doc_line_col {f:nat} .<f>.
+  (doc: !$T.toml_doc, i: pos_t, off: int, line: int, col: int, ls: pos_t, f: int f): @(int, int, pos_t) =
+  if f <= 0 then @(line, col, ls)
+  else if i >= off then @(line, col, ls)
+  else if $T.byte_at(doc, i) = 10 then doc_line_col(doc, i + 1, off, line + 1, 1, i + 1, f - 1)
+  else doc_line_col(doc, i + 1, off, line, col + 1, ls, f - 1)
+
+(* The end of the line starting at or holding i: its newline, or the end
+   of the text *)
+fun doc_line_end {f:nat} .<f>. (doc: !$T.toml_doc, i: pos_t, f: int f): pos_t =
+  if f <= 0 then i
+  else let val c = $T.byte_at(doc, i) in
+    if c < 0 then i else if c = 10 then i else doc_line_end(doc, i + 1, f - 1)
+  end
+
+(* doc's text [i, e) appended to out *)
+fun put_doc {f:nat} .<f>.
+  (doc: !$T.toml_doc, i: pos_t, e: int, out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if i >= e then ()
+  else let
+    val () = put_char_v(out, $T.byte_at(doc, i))
+  in put_doc(doc, i + 1, e, out, f - 1) end
+
+fun put_n {f:nat} .<f>. (c: int, k: int, out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if k <= 0 then ()
+  else let val () = put_char_v(out, c) in put_n(c, k - 1, out, f - 1) end
+
+(* The toml crate's error for the span [s, e) of doc, with the message
+   msg, after "parse error in './bats.toml': " (config::load) *)
+fn put_toml_error (doc: !$T.toml_doc, s: pos_t, e: int, msg: $B.builder_v,
+   err: !$B.builder_v >> $B.builder_v): void = let
+  val @(line, col, ls) = doc_line_col(doc, 0, s, 1, 1, 0, 65536)
+  val le = doc_line_end(doc, ls, 65536)
+  val stop = (if e < le then e else le): int
+  val carets = (if stop - s > 0 then stop - s else 1): int
+  val pad = digits(line, 16)
+  val () = bput_v(err, "parse error in './bats.toml': TOML parse error at line ")
+  val () = bput_int_v(err, line)
+  val () = bput_v(err, ", column ")
+  val () = bput_int_v(err, col)
+  val () = put_char_v(err, 10)
+  val () = put_n(32, pad + 1, err, 16)
+  val () = bput_v(err, "|\n")
+  val () = bput_int_v(err, line)
+  val () = bput_v(err, " | ")
+  val () = put_doc(doc, ls, le, err, 65536)
+  val () = put_char_v(err, 10)
+  val () = put_n(32, pad + 1, err, 16)
+  val () = bput_v(err, "| ")
+  val () = put_n(32, col - 1, err, 65536)
+  val () = put_n(94, carets, err, 65536)
+  val () = put_char_v(err, 10)
+  val () = append_builder(err, msg)
+in put_char_v(err, 10) end
+
+(* Whether doc's text at [s, e) spells the k characters of lit *)
+fun doc_is {m:pos}{f:nat} .<f>.
+  (doc: !$T.toml_doc, s: pos_t, e: int, lit: &(@[char][m]), j: natLt(m+1), m: int m, f: int f): bool =
+  if f <= 0 then false
+  else if j >= m then s + j = e
+  else if s + j >= e then false
+  else if $T.byte_at(doc, s + j) <> char2int0(lit[j]) then false
+  else doc_is(doc, s, e, lit, j + 1, m, f - 1)
+
+(* Whether doc's text [i, e) is an integer: a sign, then digits and _ *)
+fun doc_int {f:nat} .<f>. (doc: !$T.toml_doc, i: pos_t, e: int, seen: bool, f: int f): bool =
+  if f <= 0 then false
+  else if i >= e then seen
+  else let val c = $T.byte_at(doc, i) in
+    if c = 95 then doc_int(doc, i + 1, e, seen, f - 1)
+    else if c >= 48 then (if c <= 57 then doc_int(doc, i + 1, e, true, f - 1) else false)
+    else false
+  end
+
+(* doc's digits in [i, e), without the _ that TOML allows between them *)
+fun put_digits {f:nat} .<f>.
+  (doc: !$T.toml_doc, i: pos_t, e: int, out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if i >= e then ()
+  else let
+    val c = $T.byte_at(doc, i)
+    val () = put_digit(c, out)
+  in put_digits(doc, i + 1, e, out, f - 1) end
+
+and put_digit (c: int, out: !$B.builder_v >> $B.builder_v): void =
+  if c = 95 then bput_v(out, "") else put_char_v(out, c)
+
+(* What the bare value doc[s, e) is to serde: 1 true, 2 false, 3 a
+   sequence, 4 a map, 5 an integer, 6 a float, 0 none of them (the toml
+   crate rejects it as an invalid string) *)
+fn value_class (doc: !$T.toml_doc, s: pos_t, e: int): int = let
+  var t_c = @[char][4]('t', 'r', 'u', 'e')
+  var f_c = @[char][5]('f', 'a', 'l', 's', 'e')
+  val c = $T.byte_at(doc, s)
+  val sgn = (if c = 43 then 1 else if c = 45 then 1 else 0): pos_t
+  val d = $T.byte_at(doc, s + sgn)
+in
+  if doc_is(doc, s, e, t_c, 0, 4, 8) then 1
+  else if doc_is(doc, s, e, f_c, 0, 5, 8) then 2
+  else if c = 91 then 3
+  else if c = 123 then 4
+  else if doc_int(doc, s + sgn, e, false, 65536) then 5
+  else if d >= 48 then (if d <= 57 then 6 else 0)
+  else 0
+end
+
+(* serde's words for a value of class cls at doc[s, e) *)
+fn put_class (cls: int, doc: !$T.toml_doc, s: pos_t, e: int, out: !$B.builder_v >> $B.builder_v): void =
+  if cls = 1 then bput_v(out, "boolean `true`")
+  else if cls = 2 then bput_v(out, "boolean `false`")
+  else if cls = 3 then bput_v(out, "sequence")
+  else if cls = 4 then bput_v(out, "map")
+  else if cls = 5 then let
+    val c = $T.byte_at(doc, s)
+    val () = bput_v(out, "integer `")
+    val () = put_digit((if c = 45 then 45 else 95): int, out)
+    val () = put_digits(doc, (if c = 43 then s + 1 else if c = 45 then s + 1 else s): pos_t, e, out, 65536)
+  in put_char_v(out, 96) end
+  else let
+    val () = bput_v(out, "floating point `")
+    val () = put_doc(doc, s, e, out, 65536)
+  in put_char_v(out, 96) end
+
+(* The span of [package] key's value and what is wrong with it: 0
+   nothing (or no such key), 1 a value of the wrong type, 2 a bare value
+   that is no TOML value *)
+fn field_problem {kk:pos | kk <= 1048576}
+  (doc: !$T.toml_doc, kc: &(@[char][kk]), kk: int kk, want_bool: bool): @(pos_t, pos_t, int) = let
+  var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+  val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(kc, kk))
+  val @(s, e, quoted) = $T.value_at(doc, bv_s, 7, bv_k, kk)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val s1 = (if s < 0 then 0 else s): pos_t
+  val e1 = (if e < 0 then 0 else e): pos_t
+  val cls = (if s < 0 then ~1 else if quoted then 7 else value_class(doc, s1, e1)): int
+  val bad = (if cls < 0 then 0
+             else if cls = 0 then 2
+             else if want_bool then (if cls = 1 then 0 else if cls = 2 then 0 else 1)
+             else (if cls = 7 then 0 else 1)): int
+in @(s1, e1, bad) end
+
+(* serde's words for the value at doc[s, e): a string's, quoted, or a
+   bare value's class *)
+fn put_type (quoted: bool, doc: !$T.toml_doc, s: pos_t, e: pos_t, m: !$B.builder_v >> $B.builder_v): void =
+  if quoted then let
+    val () = bput_v(m, "string \"")
+    val () = put_doc(doc, s + 1, e - 1, m, 65536)
+  in put_char_v(m, 34) end
+  else put_class(value_class(doc, s, e), doc, s, e, m)
+
+(* The message for problem bad of the value at doc[s, e), appended to m;
+   want_bool says which type serde expected *)
+fn problem_msg (doc: !$T.toml_doc, s: pos_t, e: pos_t, bad: int, want_bool: bool,
+   m: !$B.builder_v >> $B.builder_v): void =
+  if bad = 2 then bput_v(m, "invalid string\nexpected `\"`, `'`")
+  else let
+    val q = $T.byte_at(doc, s)
+    val quoted = (if q = 34 then true else q = 39): bool
+    val () = bput_v(m, "invalid type: ")
+    val () = put_type(quoted, doc, s, e, m)
+  in
+    if want_bool then bput_v(m, ", expected a boolean") else bput_v(m, ", expected a string")
+  end
+
+(* Whether [package] has key *)
+fn has_field {kk:pos | kk <= 1048576} (doc: !$T.toml_doc, kc: &(@[char][kk]), kk: int kk): bool = let
+  var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+  val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(kc, kk))
+  val @(s, _, _) = $T.value_at(doc, bv_s, 7, bv_k, kk)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in s >= 0 end
+
+(* The earlier of two problems @(start, end, bad, want_bool) *)
+fn first_problem (a: @(pos_t, pos_t, int, bool), b: @(pos_t, pos_t, int, bool)): @(pos_t, pos_t, int, bool) =
+  if a.2 <= 0 then b
+  else if b.2 <= 0 then a
+  else if b.0 < a.0 then b
+  else a
+
+(* The message for a check's outcome kind: 1 the problem p, 2 no
+   [package], 3 no name *)
+fn put_problem (kind: int, doc: !$T.toml_doc, p: @(pos_t, pos_t, int, bool),
+   m: !$B.builder_v >> $B.builder_v): void =
+  if kind = 1 then problem_msg(doc, p.0, p.1, p.2, p.3, m)
+  else if kind = 2 then bput_v(m, "missing field `package`")
+  else if kind = 3 then bput_v(m, "missing field `name`")
+  else bput_v(m, "")
+
+(* Whether a check found nothing; else its error, the message m at
+   doc[s, e), goes to err. Consumes m *)
+fn finish_check (kind: int, doc: !$T.toml_doc, s: pos_t, e: int, m: $B.builder_v,
+   err: !$B.builder_v >> $B.builder_v): bool =
+  if kind = 0 then let val () = $B.builder_free(m) in true end
+  else let val () = put_toml_error(doc, s, e, m, err) in false end
+
+(* Rust's config::load of doc as serde reads it into TomlConfig: the
+   first [package] field of the wrong type, in the file's order, else a
+   missing [package], else a missing name, written to err as the toml
+   crate reports it; whether there was none *)
+fn serde_check (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): bool = let
+  var n_c = @[char][4]('n', 'a', 'm', 'e')
+  var k_c = @[char][4]('k', 'i', 'n', 'd')
+  var v_c = @[char][7]('v', 'e', 'r', 's', 'i', 'o', 'n')
+  var t_c = @[char][5]('t', 'r', 'u', 'n', 'k')
+  var u_c = @[char][6]('u', 'n', 's', 'a', 'f', 'e')
+  var a_c = @[char][4]('a', 't', 's', '2')
+  val @(s1, e1, b1) = field_problem(doc, n_c, 4, false)
+  val @(s2, e2, b2) = field_problem(doc, k_c, 4, false)
+  val @(s3, e3, b3) = field_problem(doc, v_c, 7, false)
+  val @(s4, e4, b4) = field_problem(doc, t_c, 5, false)
+  val @(s5, e5, b5) = field_problem(doc, u_c, 6, true)
+  val @(s6, e6, b6) = field_problem(doc, a_c, 4, false)
+  val p = first_problem(@(s1, e1, b1, false), @(s2, e2, b2, false))
+  val p = first_problem(p, @(s3, e3, b3, false))
+  val p = first_problem(p, @(s4, e4, b4, false))
+  val p = first_problem(p, @(s5, e5, b5, true))
+  val p = first_problem(p, @(s6, e6, b6, false))
+  var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+  val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+  val @(hs, he) = $T.section_at(doc, bv_s, 7)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val named = has_field(doc, n_c, 4)
+  var m : $B.builder_v = $B.create()
+  val kind = (if p.2 > 0 then 1 else if hs < 0 then 2 else if ~named then 3 else 0): int
+  val () = put_problem(kind, doc, p, m)
+  val sp = (if kind = 1 then p.0 else if kind = 3 then (if hs < 0 then 0 else hs) else 0): pos_t
+  val ep = (if kind = 1 then (if p.2 = 2 then p.0 else p.1)
+            else if kind = 3 then he
+            else if $T.has_root_keys(doc) then 65536 else 0): int
+in finish_check(kind, doc, sp, ep, m, err) end
+
 (* The constraints of doc (Rust: config::load), from src[0, sk):
-   @(1, them), or @(~1, none) after writing Rust's message to err: an
-   unknown kind, a constraint that does not parse, or a path dependency
+   @(1, them), or @(~1, none) after writing Rust's message to err: a
+   field of the wrong type or a missing one, an unknown kind, a constraint that does not parse, or a path dependency
    in a lib package, in that order *)
 fn config_cons {ls:agz}
   (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: int,
    err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
-  val kind = doc_kind(doc, err)
+  val ok = serde_check(doc, err)
+  val kind = (if ok then doc_kind(doc, err) else ~1): int
 in
   if kind < 0 then @(~1, cons_nil())
   else let
@@ -687,9 +981,9 @@ in
       val tb = $A.alloc<byte>(65536)
       val rr = $F.file_read(fd, tb, 65536)
       val () = $R.discard<int><int>($F.file_close(fd))
-      val e = (case+ rr of | ~$R.ok(_) => 0 | ~$R.err(e) => e): int
+      val @(tn, e) = (case+ rr of | ~$R.ok(k) => @(k, 0) | ~$R.err(e) => @(0, e)): @([k:nat | k <= 65536] int k, int)
       val @(fz_t, bv_t) = $A.freeze<byte>(tb)
-      val pr = $T.parse(bv_t, 65536)
+      val pr = $T.parse(bv_t, tn)
       val () = $A.drop<byte>(fz_t, bv_t)
       val () = $A.free<byte>($A.thaw<byte>(fz_t))
     in
@@ -1892,8 +2186,6 @@ fun copy_path_deps {n:nat} .<n>. (ds: !pdeps(n)): bool =
    preprocess_one, emit::validate, BatsError::display_fancy)
    ============================================================ *)
 
-#define VMAX 524288
-
 (* Rust's offset_to_line_col: 1-based line and column (in bytes) of
    offset off in src *)
 fun line_col {ls:agz}{f:nat} .<f>.
@@ -1916,47 +2208,6 @@ fun put_spaces {f:nat} .<f>. (k: int, out: !$B.builder_v >> $B.builder_v, f: int
   else let
     val () = put_char_v(out, 32)
   in put_spaces(k - 1, out, f - 1) end
-
-(* b's bytes appended to out; consumes b *)
-fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void = let
-  val @(ba, bl) = $B.to_arr(b)
-  val @(fz, bv) = $A.freeze<byte>(ba)
-  val () = copy_to_builder_v(bv, 0, bl, VMAX, out)
-  val () = $A.drop<byte>(fz, bv)
-in $A.free<byte>($A.thaw<byte>(fz)) end
-
-(* The number of decimal digits of n > 0 *)
-fun digits {f:nat} .<f>. (n: int, f: int f): int =
-  if f <= 0 then 1 else if n < 10 then 1 else 1 + digits(n / 10, f - 1)
-
-(* Whether errors are colored, as Rust's display_fancy decides: standard
-   error is a terminal and NO_COLOR is not set *)
-fn use_color (): bool =
-  if ~$E.stderr_is_terminal() then false
-  else let
-    var k_c = @[char][8]('N', 'O', '_', 'C', 'O', 'L', 'O', 'R')
-    val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(k_c, 8))
-    val vb = $A.alloc<byte>(16)
-    val set = (case+ $E.get(bv_k, 8, vb, 16) of | ~$R.some(_) => true | ~$R.none() => false): bool
-    val () = $A.free<byte>(vb)
-    val () = $A.drop<byte>(fz_k, bv_k)
-    val () = $A.free<byte>($A.thaw<byte>(fz_k))
-  in ~set end
-
-(* Rust's ANSI escapes, or nothing when c is false *)
-fn put_red (out: !$B.builder_v >> $B.builder_v, c: bool): void =
-  if c then bput_v(out, "\033[1;31m") else bput_v(out, "")
-fn put_blue (out: !$B.builder_v >> $B.builder_v, c: bool): void =
-  if c then bput_v(out, "\033[1;34m") else bput_v(out, "")
-fn put_reset (out: !$B.builder_v >> $B.builder_v, c: bool): void =
-  if c then bput_v(out, "\033[0m") else bput_v(out, "")
-
-(* " |" with the bar in blue *)
-fn put_bar (out: !$B.builder_v >> $B.builder_v, c: bool): void = let
-  val () = put_char_v(out, 32)
-  val () = put_blue(out, c)
-  val () = put_char_v(out, 124)
-in put_reset(out, c) end
 
 (* Rust's display_fancy of the error msg at offset off of src[0, n), a
    file labeled lab[l0, l1), appended to out; consumes msg *)

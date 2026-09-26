@@ -509,6 +509,11 @@ fn is_lib_kind {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 (* Writes docs/ when bats.toml has kind = "lib", as the Rust bats's check
    does. Returns 1 for a library whose docs were written, 0 for any other
    package, ~1 on an error. *)
+(* Whether the kind kbuf[0, klen) is lib; no kind is lib too, as in Rust's
+   config::load *)
+fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
+  if klen = 0 then true else is_lib_kind(kbuf, klen)
+
 
 
 implement generate_lib_docs() = let
@@ -522,10 +527,10 @@ in
   | ~$R.ok(tfd) => let
       val tbuf = $A.alloc<byte>(8192)
       val trr = $F.file_read(tfd, tbuf, 8192)
-      val () = (case+ trr of | ~$R.ok(_) => () | ~$R.err(_) => ())
+      val tn = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
       val () = $R.discard<int><int>($F.file_close(tfd))
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, 8192)
+      val pr = $T.parse(bv_tb, tn)
       val () = $A.drop<byte>(fz_tb, bv_tb)
       val () = $A.free<byte>($A.thaw<byte>(fz_tb))
     in
@@ -552,7 +557,8 @@ in
           val () = $A.free<byte>($A.thaw<byte>(fz_s))
           val () = $T.toml_free(doc)
           val klen = (case+ kr of | ~$R.some(k) => k | ~$R.none() => 0): int
-          val is_lib = is_lib_kind(kbuf, klen)
+          (* No kind is a library, as in Rust's config::load *)
+          val is_lib = kind_is_lib(kbuf, klen)
           val () = $A.free<byte>(kbuf)
           val nlen = (case+ nr of | ~$R.some(k) => k | ~$R.none() => 0): int
           val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
