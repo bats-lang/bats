@@ -4,10 +4,15 @@
 # usage: tests/metric-eq/check.sh <bats-binary>
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-cd "$(dirname "$0")"
+HERE=$(cd "$(dirname "$0")" && pwd)
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+# Run in a copy, so nothing the commands write lands in the checkout
+cp -R "$HERE/bats.toml" "$HERE/src" "$TMP/"
+cd "$TMP"
 rm -rf build dist
-if ! "$BATS" check > /tmp/metric-eq.log 2>&1; then
-  echo "FAIL: fun with == before its metric was rejected"; grep error /tmp/metric-eq.log | head -3
+if ! "$BATS" check > "$TMP/check.log" 2>&1; then
+  echo "FAIL: fun with == before its metric was rejected"; grep error "$TMP/check.log" | head -3
   exit 1
 fi
 rm -rf build dist

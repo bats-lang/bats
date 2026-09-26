@@ -6,8 +6,13 @@
 # usage: tests/lock-dedupe/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-REPO=$2
-cd "$(dirname "$0")"
+REPO=$(cd "$2" && pwd)
+HERE=$(cd "$(dirname "$0")" && pwd)
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+# Run in a copy, so nothing the commands write lands in the checkout
+cp -R "$HERE/bats.toml" "$HERE/src" "$TMP/"
+cd "$TMP"
 rm -rf bats_modules bats.lock
 for run in 1 2; do
   "$BATS" lock --repository "$REPO" >/dev/null
