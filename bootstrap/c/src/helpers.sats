@@ -898,9 +898,6 @@ fn run_cmd {le:agz}
 
 
 
-
-
-
 fn parse_decimal {l:agz}{n:pos}
   (buf: !$A.arr(byte, l, n), len: int, max: int n): int
 
@@ -946,9 +943,6 @@ fn run_cmd_capture {le:agz}{lo:agz}
   (exec_bv: !$A.borrow(byte, le, 524288),
    argv: $L.listv($P.arg_entry),
    outbuf: !$A.arr(byte, lo, 4096)): @(int, int)
-
-
-
 
 
 
@@ -1075,9 +1069,6 @@ fn run_cc {lph:agz}{lo:agz}{li:agz}
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int,
    rel: int): int
-
-
-
 
 
 

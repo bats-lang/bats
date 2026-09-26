@@ -93,6 +93,19 @@ fn spawn
   : $R.result(spawn_pipes(sin, sout, serr), int)
 
 
+
+fn spawn_inherit_env_with
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}
+  (path: !$A.borrow(byte, lp, 524288),
+   argv: $L.listv(arg_entry),
+   extra: $L.listv(arg_entry),
+   stdin_cfg: stream_config(sin),
+   stdout_cfg: stream_config(sout),
+   stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
 fn spawn_inherit_env
   {sin:bool}{sout:bool}{serr:bool}
   {lp:agz}
@@ -102,6 +115,10 @@ fn spawn_inherit_env
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+
 
 
 
