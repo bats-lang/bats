@@ -8,6 +8,7 @@
 #use env as E
 #use str as S
 #use file as F
+#use list as L
 #use process as P
 #use result as R
 #use toml as T
@@ -1563,33 +1564,6 @@ implement do_build(release, build_target) = let
 in
   if r0 <> 0 then ()
   else let
-    (* Step 1b: Write and compile native runtime *)
-    var nrt_b : $B.builder_v = $B.create()
-    val () = bput_v(nrt_b, "/* _bats_native_runtime.c -- ATS2 memory allocator backed by libc */\n")
-    val () = bput_v(nrt_b, "#include <stdlib.h>\n")
-    val () = bput_v(nrt_b, "void atsruntime_mfree_undef(void *ptr) { free(ptr); }\n")
-    val () = bput_v(nrt_b, "void *atsruntime_malloc_undef(size_t bsz) { return malloc(bsz); }\n")
-    val () = bput_v(nrt_b, "void *atsruntime_calloc_undef(size_t asz, size_t tsz) { return calloc(asz, tsz); }\n")
-    val () = bput_v(nrt_b, "void *atsruntime_realloc_undef(void *ptr, size_t bsz) { return realloc(ptr, bsz); }\n")
-    val nrt_path = str_to_path_arr("build/_bats_native_runtime.c")
-    val @(fz_nrtp, bv_nrtp) = $A.freeze<byte>(nrt_path)
-    val _ = write_file_from_builder(bv_nrtp, 524288, nrt_b)
-    val () = $A.drop<byte>(fz_nrtp, bv_nrtp)
-    val () = $A.free<byte>($A.thaw<byte>(fz_nrtp))
-    val nrt_exec = str_to_path_arr("/usr/bin/clang")
-    val @(fz_nrt_exec, bv_nrt_exec) = $A.freeze<byte>(nrt_exec)
-    var na1 = $B.create() val () = bput_v(na1, "clang")
-    var na2 = $B.create() val () = bput_v(na2, "-c")
-    var na3 = $B.create() val () = bput_v(na3, "-o")
-    var na4 = $B.create() val () = bput_v(na4, "build/_bats_native_runtime.o")
-    var na5 = $B.create() val () = bput_v(na5, "build/_bats_native_runtime.c")
-    val nrt_argv = $L.list_vt_cons(mk_arg(na1), $L.list_vt_cons(mk_arg(na2),
-      $L.list_vt_cons(mk_arg(na3), $L.list_vt_cons(mk_arg(na4),
-      $L.list_vt_cons(mk_arg(na5), $L.list_vt_nil())))))
-    val nrt_r = run_cmd(bv_nrt_exec, nrt_argv)
-    val () = $A.drop<byte>(fz_nrt_exec, bv_nrt_exec)
-    val () = $A.free<byte>($A.thaw<byte>(fz_nrt_exec))
-    val () = (if nrt_r <> 0 then let val () = set_build_err() in println! ("error: failed to compile native runtime") end else ())
     (* Step 2: Ensure ATS2 toolchain at $HOME/.bats/ats2 *)
     val phbuf = $A.alloc<byte>(512)
     val hk = $A.alloc<byte>(4)
@@ -1823,6 +1797,34 @@ in
         val () = $A.drop<byte>(fz_exec, bv_exec)
         val () = $A.free<byte>($A.thaw<byte>(fz_exec))
       in end else ()
+
+      (* Step 2b: Write and compile native runtime (after stale .o removal) *)
+      var nrt_b : $B.builder_v = $B.create()
+      val () = bput_v(nrt_b, "/* _bats_native_runtime.c -- ATS2 memory allocator backed by libc */\n")
+      val () = bput_v(nrt_b, "#include <stdlib.h>\n")
+      val () = bput_v(nrt_b, "void atsruntime_mfree_undef(void *ptr) { free(ptr); }\n")
+      val () = bput_v(nrt_b, "void *atsruntime_malloc_undef(size_t bsz) { return malloc(bsz); }\n")
+      val () = bput_v(nrt_b, "void *atsruntime_calloc_undef(size_t asz, size_t tsz) { return calloc(asz, tsz); }\n")
+      val () = bput_v(nrt_b, "void *atsruntime_realloc_undef(void *ptr, size_t bsz) { return realloc(ptr, bsz); }\n")
+      val nrt_path = str_to_path_arr("build/_bats_native_runtime.c")
+      val @(fz_nrtp, bv_nrtp) = $A.freeze<byte>(nrt_path)
+      val _ = write_file_from_builder(bv_nrtp, 524288, nrt_b)
+      val () = $A.drop<byte>(fz_nrtp, bv_nrtp)
+      val () = $A.free<byte>($A.thaw<byte>(fz_nrtp))
+      val nrt_exec = str_to_path_arr("/usr/bin/clang")
+      val @(fz_nrt_exec, bv_nrt_exec) = $A.freeze<byte>(nrt_exec)
+      var na1 = $B.create() val () = bput_v(na1, "clang")
+      var na2 = $B.create() val () = bput_v(na2, "-c")
+      var na3 = $B.create() val () = bput_v(na3, "-o")
+      var na4 = $B.create() val () = bput_v(na4, "build/_bats_native_runtime.o")
+      var na5 = $B.create() val () = bput_v(na5, "build/_bats_native_runtime.c")
+      val nrt_argv = $L.list_vt_cons(mk_arg(na1), $L.list_vt_cons(mk_arg(na2),
+        $L.list_vt_cons(mk_arg(na3), $L.list_vt_cons(mk_arg(na4),
+        $L.list_vt_cons(mk_arg(na5), $L.list_vt_nil())))))
+      val nrt_r = run_cmd(bv_nrt_exec, nrt_argv)
+      val () = $A.drop<byte>(fz_nrt_exec, bv_nrt_exec)
+      val () = $A.free<byte>($A.thaw<byte>(fz_nrt_exec))
+      val () = (if nrt_r <> 0 then let val () = set_build_err() in println! ("error: failed to compile native runtime") end else ())
 
       (* Step 3: Scan bats_modules/ for deps and preprocess *)
       val bm_arr = str_to_path_arr("bats_modules")
