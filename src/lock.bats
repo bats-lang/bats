@@ -555,21 +555,24 @@ fn put_why {lp:agz}
   in $A.free<byte>($A.thaw<byte>(fz_w)) end
 
 (* Appends the constraints of each key in the NUL-separated list
-   keys[off, len) of doc's [dependencies] (sec) to acc, from src[0, sk);
-   false after writing Rust's message to err *)
+   keys[off, len) of doc's [dependencies] (sec) to acc, from src[0, sk),
+   and counts in paths the path dependencies ({ path = ... }, whose
+   value this toml keeps as written): @(true, them, the count), or
+   @(false, ...) after writing Rust's message to err *)
 fun load_keys {lk,ls,lsec:agz}{n:nat}{f:nat} .<f>.
   (doc: !$T.toml_doc, sec: !$A.borrow(byte, lsec, 12),
    keys: !$A.borrow(byte, lk, 65536), off: pos_t, len: int,
    src: !$A.arr(byte, ls, 256), sk: int,
-   acc: cons(n), err: !$B.builder_v >> $B.builder_v, f: int f): [m:nat] @(bool, cons(m)) =
-  if f <= 0 then @(true, acc)
-  else if off >= len then @(true, acc)
+   acc: cons(n), paths: int, err: !$B.builder_v >> $B.builder_v, f: int f)
+  : [m:nat] @(bool, cons(m), int) =
+  if f <= 0 then @(true, acc, paths)
+  else if off >= len then @(true, acc, paths)
   else let
     val z = find_null_bv_from(keys, off, 65536)
     val kl = z - off
   in
-    if kl <= 0 then load_keys(doc, sec, keys, z + 1, len, src, sk, acc, err, f - 1)
-    else if kl > 65536 then @(true, acc)
+    if kl <= 0 then load_keys(doc, sec, keys, z + 1, len, src, sk, acc, paths, err, f - 1)
+    else if kl > 65536 then @(true, acc, paths)
     else let
       val ka = $A.alloc<byte>(kl)
       val () = fill_key(ka, kl, keys, off, 0)
@@ -582,40 +585,106 @@ fun load_keys {lk,ls,lsec:agz}{n:nat}{f:nat} .<f>.
       val p = $A.alloc<byte>(256)
       val pk = copy_name(keys, off, z, 65536, p, 0)
       val @(fz_v, bv_v) = $A.freeze<byte>(vb)
+      (* An inline table: Rust's DepValue::Path, not a constraint *)
+      val is_path = (if vl > 0 then peek(bv_v, 0, 4096) = 123 else false): bool
       var why : $B.builder_v = $B.create()
-      val @(ok, acc2) = parse_cons(bv_v, 0, vl, p, pk, src, sk, acc, why, 4096)
+      val @(ok, acc2) = parse_cons(bv_v, 0, (if is_path then 0 else vl): pos_t, p, pk, src, sk, acc, why, 4096)
       val () = $A.drop<byte>(fz_v, bv_v)
       val () = $A.free<byte>($A.thaw<byte>(fz_v))
       val () = put_why(ok, p, pk, why, err)
       val () = $A.free<byte>(p)
+      val paths2 = (if is_path then paths + 1 else paths): int
     in
-      if ok then load_keys(doc, sec, keys, z + 1, len, src, sk, acc2, err, f - 1)
-      else @(false, acc2)
+      if ok then load_keys(doc, sec, keys, z + 1, len, src, sk, acc2, paths2, err, f - 1)
+      else @(false, acc2, paths2)
     end
   end
 
-(* The constraints of doc's [dependencies], from src[0, sk) (Rust:
-   config::load's dependencies): @(1, them), or @(~1, none) after
-   writing Rust's "in [dependencies] '<name>': ..." to err *)
+(* The constraints of doc's [dependencies], from src[0, sk), and the
+   number of its path dependencies (Rust: config::load's dependencies):
+   @(1, them, the number), or @(~1, none, 0) after writing Rust's
+   "in [dependencies] '<name>': ..." to err *)
 fn doc_cons {ls:agz}
   (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: int,
-   err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
+   err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n), int) = let
   var sec_c = @[char][12]('d', 'e', 'p', 'e', 'n', 'd', 'e', 'n', 'c', 'i', 'e', 's')
   val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 12))
   val kb = $A.alloc<byte>(65536)
   val kr = $T.keys(doc, bv_s, 12, kb, 65536)
   val kl = (case+ kr of | ~$R.some(x) => x | ~$R.none() => 0): int
   val @(fz_kb, bv_kb) = $A.freeze<byte>(kb)
-  val @(ok, cs) = load_keys(doc, bv_s, bv_kb, 0, kl, src, sk, cons_nil(), err, 65536)
+  val @(ok, cs, paths) = load_keys(doc, bv_s, bv_kb, 0, kl, src, sk, cons_nil(), 0, err, 65536)
   val () = $A.drop<byte>(fz_kb, bv_kb)
   val () = $A.free<byte>($A.thaw<byte>(fz_kb))
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
 in
-  if ok then @(1, cs)
+  if ok then @(1, cs, paths)
   else let
     val () = cons_free(cs)
-  in @(~1, cons_nil()) end
+  in @(~1, cons_nil(), 0) end
+end
+
+(* Rust's "unknown package kind: '<v[0, vl)>'" appended to err when
+   bad *)
+fn put_unknown_kind {lv:agz}
+  (bad: bool, v: !$A.borrow(byte, lv, 256), vl: int, err: !$B.builder_v >> $B.builder_v): void =
+  if bad then let
+    val () = bput_v(err, "unknown package kind: '")
+    val () = copy_to_builder_v(v, 0, vl, 256, err)
+  in bput_v(err, "'") end
+  else bput_v(err, "")
+
+(* [package] kind (Rust: config::load): 1 for lib, which is the
+   default, 2 for bin, or ~1 after Rust's "unknown package kind: '<k>'"
+   in err *)
+fn doc_kind (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): int = let
+  var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+  val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+  var key_c = @[char][4]('k', 'i', 'n', 'd')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 4))
+  val vb = $A.alloc<byte>(256)
+  val vl = (case+ $T.get(doc, bv_s, 7, bv_k, 4, vb, 256) of
+    | ~$R.some(x) => x | ~$R.none() => ~1): int
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val @(fz_v, bv_v) = $A.freeze<byte>(vb)
+  var lib_c = @[char][3]('l', 'i', 'b')
+  var bin_c = @[char][3]('b', 'i', 'n')
+  val kind = (if vl < 0 then 1
+              else if vl <> 3 then ~1
+              else if lit_at(bv_v, 0, 256, lib_c, 3) then 1
+              else if lit_at(bv_v, 0, 256, bin_c, 3) then 2
+              else ~1): int
+  val () = put_unknown_kind(kind < 0, bv_v, vl, err)
+  val () = $A.drop<byte>(fz_v, bv_v)
+  val () = $A.free<byte>($A.thaw<byte>(fz_v))
+in kind end
+
+(* The constraints of doc (Rust: config::load), from src[0, sk):
+   @(1, them), or @(~1, none) after writing Rust's message to err: an
+   unknown kind, a constraint that does not parse, or a path dependency
+   in a lib package, in that order *)
+fn config_cons {ls:agz}
+  (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: int,
+   err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
+  val kind = doc_kind(doc, err)
+in
+  if kind < 0 then @(~1, cons_nil())
+  else let
+    val @(st, cs, paths) = doc_cons(doc, src, sk, err)
+  in
+    if st < 0 then @(~1, cs)
+    else if kind = 1 then
+      (if paths > 0 then let
+         val () = cons_free(cs)
+         val () = bput_v(err, "path dependencies are only supported in binary packages (kind = \"bin\")")
+       in @(~1, cons_nil()) end
+       else @(1, cs))
+    else @(1, cs)
+  end
 end
 
 (* The TOML file at the NUL-terminated path pa, parsed, or the errno
@@ -683,7 +752,7 @@ fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
       val () = $A.free<byte>($A.thaw<byte>(fz_k))
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
-      val r = doc_cons(doc, nb, nk, err)
+      val r = config_cons(doc, nb, nk, err)
       val () = $A.free<byte>(nb)
       val () = $T.toml_free(doc)
     in r end
@@ -703,7 +772,7 @@ in
   | ~$R.err(_) => cons_nil()
   | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
-      val @(st, cs) = doc_cons(doc, a, k, err)
+      val @(st, cs) = config_cons(doc, a, k, err)
       val () = $B.builder_free(err)
       val () = $T.toml_free(doc)
     in
