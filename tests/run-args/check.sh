@@ -44,6 +44,6 @@ B
 cd "$TMP/p"
 "$BATS" lock --repository "$REPO" > lock.log 2>&1 || { echo "FAIL: lock"; cat lock.log; exit 1; }
 rc=0; "$BATS" run --repository "$REPO" -- x "" "y z" > run.log 2>&1 || rc=$?
-grep -q "built: dist/debug/runargs" run.log || { echo "FAIL: build"; cat run.log; exit 1; }
+grep -q "built ./dist/debug/runargs (debug)" run.log || { echo "FAIL: build"; cat run.log; exit 1; }
 [ "$rc" = 0 ] || { echo "FAIL: the program did not get x, \"\", \"y z\""; cat run.log; exit 1; }
 echo "run-args: ok"

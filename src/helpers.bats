@@ -501,6 +501,17 @@ in lit_at(src, pos, max, c, 5) end
    ============================================================ *)
 
 
+(* b[i, len) to stderr. *)
+#pub fun prerr_seg {l:agz}{m:pos}{fuel:nat}
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void
+
+implement prerr_seg(b, i, len, m, fuel) =
+  if fuel <= 0 then ()
+  else if i >= len then ()
+  else let
+    val () = prerr_char(int2char0(peek(b, i, m)))
+  in prerr_seg(b, i + 1, len, m, fuel - 1) end
+
 #pub fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int n,
    fuel: int fuel): void
 

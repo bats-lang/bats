@@ -514,6 +514,17 @@ in lit_at(src, pos, max, c, 5) end
    ============================================================ *)
 
 
+(* b[i, len) to stderr. *)
+
+
+
+implement prerr_seg(b, i, len, m, fuel) =
+  if fuel <= 0 then ()
+  else if i >= len then ()
+  else let
+    val () = prerr_char(int2char0(peek(b, i, m)))
+  in prerr_seg(b, i + 1, len, m, fuel - 1) end
+
 
 
 

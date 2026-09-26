@@ -32,7 +32,7 @@ PROG
 cd "$TMP/p"
 "$BATS" lock --repository "$REPO" > lock.log 2>&1 || { echo "FAIL: lock"; cat lock.log; exit 1; }
 rc=0; BATS_RUN_PROBE=1 "$BATS" run --repository "$REPO" > run.log 2>&1 || rc=$?
-grep -q "built: dist/debug/runio" run.log || { echo "FAIL: build"; cat run.log; exit 1; }
+grep -q "built ./dist/debug/runio (debug)" run.log || { echo "FAIL: build"; cat run.log; exit 1; }
 grep -q "hello from the program" run.log || { echo "FAIL: the program's stdout did not reach ours"; cat run.log; exit 1; }
 [ "$rc" = 7 ] || { echo "FAIL: exited $rc, want 7 (8: no environment)"; cat run.log; exit 1; }
 echo "run-stdio: ok"

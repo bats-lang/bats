@@ -126,15 +126,6 @@ end
    upload: package library for repository
    ============================================================ *)
 
-(* b[i, len) to stderr. *)
-fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
-  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if i >= len then ()
-  else let
-    val () = prerr_char(int2char0(peek(b, i, m)))
-  in prerr_seg(b, i + 1, len, m, fuel - 1) end
-
 (* The sidecar line in sc (the hash so far) completed and written to
    zp + ".sha256", or the error when the archive could not be hashed *)
 fn finish_sidecar {lz:agz}
