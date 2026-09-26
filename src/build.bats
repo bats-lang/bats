@@ -518,11 +518,11 @@ in case+ r of
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(4096)
       val rr = $F.file_read(fd, buf, 4096)
-      val bl = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+      val bl = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
       val cr = $F.file_close(fd)
       val () = $R.discard<int><int>(cr)
       val @(fz_b, bv_b) = $A.freeze<byte>(buf)
-      val pr = $T.parse(bv_b, 4096)
+      val pr = $T.parse(bv_b, bl)
       val () = $A.drop<byte>(fz_b, bv_b)
       val () = $A.free<byte>($A.thaw<byte>(fz_b))
     in case+ pr of

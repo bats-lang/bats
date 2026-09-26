@@ -313,7 +313,8 @@ in
               else if cmd_code = 1 then let (* check *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_check() else () end
+              (* Rust: cmd_check's config::load, then resolve_deps *)
+              in if project_kind() < 0 then () else if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_check() else () end
               else if cmd_code = 2 then let (* clean *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
@@ -366,7 +367,7 @@ in
               else if cmd_code = 6 then let (* test *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_test() else () end
+              in if project_kind() < 0 then () else if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_test() else () end
               else if cmd_code = 7 then let (* tree *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
