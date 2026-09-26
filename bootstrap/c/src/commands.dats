@@ -517,88 +517,6 @@ fn git_version (): version_arr = let
   val @(va, vl) = $B.to_arr(vb_b)
 in @(va, 524288, vl, false) end
 
-(* The first '.' in [i, e), or e *)
-fun find_dot {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): pos_t =
-  if f <= 0 then e
-  else if i >= e then e
-  else if $AR.eq_int_int(peek(b, i, n), 46) then i
-  else find_dot(b, i + 1, e, n, f - 1)
-
-(* Whether [i, e) is all ASCII digits *)
-fun all_digits {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): bool =
-  if f <= 0 then false
-  else if i >= e then true
-  else let val c = peek(b, i, n)
-  in if c >= 48 && c <= 57 then all_digits(b, i + 1, e, n, f - 1) else false end
-
-(* The first position in [i, e) that is not '0', or e *)
-fun first_nonzero {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): pos_t =
-  if f <= 0 then e
-  else if i >= e then e
-  else if $AR.eq_int_int(peek(b, i, n), 48) then first_nonzero(b, i + 1, e, n, f - 1)
-  else i
-
-(* Whether the digits b[z, z + 10) are at most m[0, 10) *)
-fun digits_le {l:agz}{n:pos}{lm:agz}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), z: pos_t, n: int n,
-   m: !$A.borrow(byte, lm, 10), j: pos_t, f: int f): bool =
-  if f <= 0 then true
-  else if j >= 10 then true
-  else let
-    val x = peek(b, z + j, n)
-    val y = peek(m, j, 10)
-  in
-    if x < y then true
-    else if x > y then false
-    else digits_le(b, z, n, m, j + 1, f - 1)
-  end
-
-(* The digits of a u32 part without leading zeros: [z, e), or z = ~1
-   when [s, e) is not one (Rust: u32::from_str after an optional '+') *)
-fn u32_digits {l:agz}{n:pos}
-  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n): pos_t = let
-  val d = (if s < e then
-    (if $AR.eq_int_int(peek(b, s, n), 43) then s + 1 else s) else s): pos_t
-  var max_c = @[char][10]('4', '2', '9', '4', '9', '6', '7', '2', '9', '5')
-  val @(fz_m, bv_m) = $A.freeze<byte>($S.from_char_array(max_c, 10))
-  val z0 = first_nonzero(b, d, e, n, 8192)
-  val z = (if z0 >= e then e - 1 else z0): pos_t
-  val fits = (if e - z < 10 then true
-    else if e - z > 10 then false
-    else digits_le(b, z, n, bv_m, 0, 10)): bool
-  val () = $A.drop<byte>(fz_m, bv_m)
-  val () = $A.free<byte>($A.thaw<byte>(fz_m))
-in
-  if e - d < 1 then ~1
-  else if ~all_digits(b, d, e, n, 8192) then ~1
-  else if fits then z
-  else ~1
-end
-
-(* Rust's Version::parse over the parts of b[i, be), rendered into out:
-   @(~1, ~1), or the invalid part's [start, end) *)
-fun version_parts {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, be: pos_t, n: int n,
-   out: !$B.builder_v >> $B.builder_v, f: int f): @(pos_t, pos_t) =
-  if f <= 0 then @(~1, ~1)
-  else let
-    val pe = find_dot(b, i, be, n, 8192)
-    val z = u32_digits(b, i, pe, n)
-  in
-    if z < 0 then @(i, pe)
-    else let
-      val () = copy_to_builder_v(b, z, pe, n, out)
-    in
-      if pe >= be then @(~1, ~1)
-      else let
-        val () = put_char_v(out, 46)
-      in version_parts(b, pe + 1, be, n, out, f - 1) end
-    end
-  end
-
 (* Prints Rust's "invalid version part '<part>' in '<version>'" *)
 fn invalid_version_part {l:agz}{n:pos}
   (b: !$A.borrow(byte, l, n), ps: pos_t, pe: pos_t, t: int, n: int n): void = let
@@ -607,10 +525,6 @@ fn invalid_version_part {l:agz}{n:pos}
   val () = prerr! ("' in '")
   val () = prerr_seg(b, 0, t, n, 8192)
 in prerr! ("'\n") end
-
-(* "dev1" when dev *)
-fn put_dev1 (out: !$B.builder_v >> $B.builder_v, dev: bool): void =
-  if dev then bput_v(out, "dev1") else ()
 
 (* The upload version (Rust: resolve_version): [package] version when
    set; otherwise from git, which fails with 1 outside a git repository
@@ -632,7 +546,7 @@ in
       val dev = (if t >= 4 then lit_at(bv_a, t - 4, n, d_c, 4) else false): bool
       val be = (if dev then t - 4 else t): pos_t
       var out: $B.builder_v = $B.create()
-      val @(bad_s, bad_e) = version_parts(bv_a, 0, be, n, out, 8192)
+      val @(bad_s, bad_e) = parse_version_parts(bv_a, 0, be, n, out)
       val () = put_dev1(out, dev)
       val @(va, vl) = $B.to_arr(out)
       val () = (if bad_s >= 0 then invalid_version_part(bv_a, bad_s, bad_e, t, n) else ())
