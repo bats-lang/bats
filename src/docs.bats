@@ -468,7 +468,8 @@ fn is_lib_kind {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
     && peek_arr(kbuf, 2, 32) = 98
 
 (* Writes docs/ when bats.toml has kind = "lib", as the Rust bats's check
-   does. Returns 0, or ~1 on an error. *)
+   does. Returns 1 for a library whose docs were written, 0 for any other
+   package, ~1 on an error. *)
 #pub fn generate_lib_docs(): int
 
 implement generate_lib_docs() = let
@@ -516,7 +517,9 @@ in
           val () = $A.free<byte>(kbuf)
           val nlen = (case+ nr of | ~$R.some(k) => k | ~$R.none() => 0): int
           val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
-          val rc = (if is_lib then generate_docs(bv_nb, nlen, 256) else 0): int
+          val rc = (if ~is_lib then 0
+                    else if generate_docs(bv_nb, nlen, 256) < 0 then ~1
+                    else 1): int
           val () = $A.drop<byte>(fz_nb, bv_nb)
           val () = $A.free<byte>($A.thaw<byte>(fz_nb))
         in rc end
