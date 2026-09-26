@@ -16,7 +16,7 @@ p=$TMP/p
 mkdir -p "$p/src/bin" "$p/bats_modules/dep/src"
 printf '[package]\nname = "pp"\nkind = "bin"\n' > "$p/bats.toml"
 printf '[package]\nname = "dep"\nkind = "lib"\nunsafe = true\n' > "$p/bats_modules/dep/bats.toml"
-printf 'fn a (): int = $extfcall(int, "a")\n' > "$p/src/zeta.bats"
+printf 'fn a (): int = $extfcall(int, "a")\nval z = $Q.foo\n' > "$p/src/zeta.bats"
 printf '#include "share/atspre_staload.hats"\n\nfn b (): int =\n  $extval(int, "b")\n\n%%{\nint k;\n%%}\n' > "$p/src/alpha.bats"
 printf 'fn c (): int = $extfcall(int, "c")\n$UNSAFE begin\nfn q (): int = 1\nend\n#pub prfun lemma (): void\n' > "$p/src/lib.bats"
 printf 'fn d (): int = 4\n' > "$p/bats_modules/dep/src/lib.bats"

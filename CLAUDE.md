@@ -57,6 +57,8 @@ bats uses `--only <value>` (repeatable) instead of the old Rust bats' `--release
 
 The `end` that closes `$UNSAFE begin` is found in code only; the word `end` in the C of a `%{ ... %}` block (a comment, say) does not close it. The Rust bats closed the block there, which broke the build (`tests/unsafe-extcode-end`).
 
+`$X.member` is accepted when `X` is bound by ATS's `staload X = "..."` as well as by `#use ... as X`; packages staload bridge modules this way. The Rust bats reported "unknown alias" for a staload alias (`tests/staload-alias`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement

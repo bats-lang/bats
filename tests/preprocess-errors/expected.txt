@@ -16,6 +16,12 @@ error: '$extfcall' is not allowed outside of $UNSAFE begin...end block
  1 | fn a (): int = $extfcall(int, "a")
    |                ^
 
+error: unknown alias 'Q' in qualified access
+ --> zeta.bats:2:9
+   |
+ 2 | val z = $Q.foo
+   |         ^
+
 error: dependency 'nothere' not found (expected ./bats_modules/nothere/src/lib.bats)
  --> ./bats_modules/dep/src/lib2.bats:1:1
    |
