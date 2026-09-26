@@ -872,6 +872,77 @@ fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
 
 
 
+
+
+
+
+
+fn dedupe_lock {l:agz}
+  (a: !$A.arr(byte, l, 524288), len: int,
+   out: !$B.builder_v >> $B.builder_v): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 

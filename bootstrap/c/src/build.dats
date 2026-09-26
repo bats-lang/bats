@@ -812,7 +812,13 @@ in
               val n = resolve_pass(bv_rb3, rplen, bv_el, el_len, lock_b, n, 10)
               val lp = str_to_path_arr("bats.lock")
               val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-              val _ = write_file_from_builder(bv_lp, 524288, lock_b)
+              (* A pinned package is appended once per dependent and per
+                 pass; keep only its first line. *)
+              val @(lock_a, lock_len) = $B.to_arr(lock_b)
+              var dedup_b : $B.builder_v = $B.create()
+              val () = dedupe_lock(lock_a, lock_len, dedup_b)
+              val () = $A.free<byte>(lock_a)
+              val _ = write_file_from_builder(bv_lp, 524288, dedup_b)
               (* Count lines in bats.lock to report accurate dep count *)
               val lf_or = $F.file_open(bv_lp, 524288, 0, 0)
               val total_deps = (case+ lf_or of

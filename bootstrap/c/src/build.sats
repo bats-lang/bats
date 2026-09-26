@@ -888,6 +888,12 @@ fn do_lock(dev: int, dry_run: int): void
 
 
 
+
+
+
+
+
+
 fn write_wasm_runtime_h(): int
 
 
