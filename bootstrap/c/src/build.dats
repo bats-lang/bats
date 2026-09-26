@@ -244,11 +244,21 @@ in case+ dr of
 end
 
 (* ============================================================
-   clean: remove build/ and dist/ directories
+   clean: remove build/, dist/ and docs/, as the Rust bats does:
+   "cleaned N artifacts", N being how many of them existed
    ============================================================ *)
+fn dir_present {sn:nat | sn < $B.BUILDER_CAP} (name: string sn): int = let
+  val p = str_to_path_arr(name)
+  val @(fz_p, bv_p) = $A.freeze<byte>(p)
+  val e = $F.file_exists(bv_p, 524288)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in if e then 1 else 0 end
+
 
 
 implement do_clean() = let
+  val removed = dir_present("build") + dir_present("dist") + dir_present("docs")
   val exec = str_to_path_arr("rm")
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
   var b1 = $B.create()
@@ -264,13 +274,13 @@ implement do_clean() = let
   val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(b5), $L.list_vt_nil())))))
-  val rc = run_cmd(bv_exec, argv)
+  (* Removal errors are ignored, as the Rust bats's remove_dir_all *)
+  val _ = run_cmd(bv_exec, argv)
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
 in
-  if rc <> 0 then println! ("error: clean failed")
-  else if ~is_quiet() then println! ("cleaned build/, dist/, and docs/")
-  else ()
+  if is_quiet() then ()
+  else prerr! ("cleaned ", removed, " artifacts\n")
 end
 
 (* ============================================================
