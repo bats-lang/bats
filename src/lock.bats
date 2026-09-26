@@ -1891,6 +1891,426 @@ fun copy_path_deps {n:nat} .<n>. (ds: !pdeps(n)): bool =
       prval () = fold@(ds)
     in r end
 
+(* ============================================================
+   Validation before building (Rust: project::preprocess_all and
+   preprocess_one, emit::validate, BatsError::display_fancy)
+   ============================================================ *)
+
+#define VMAX 524288
+
+(* Rust's offset_to_line_col: 1-based line and column (in bytes) of
+   offset off in src *)
+fun line_col {ls:agz}{f:nat} .<f>.
+  (src: !$A.borrow(byte, ls, VMAX), i: pos_t, off: int, line: int, col: int, f: int f): @(int, int) =
+  if f <= 0 then @(line, col)
+  else if i >= off then @(line, col)
+  else if peek(src, i, VMAX) = 10 then line_col(src, i + 1, off, line + 1, 1, f - 1)
+  else line_col(src, i + 1, off, line, col + 1, f - 1)
+
+(* The start of the line holding position i *)
+fun line_start {ls:agz}{f:nat} .<f>. (src: !$A.borrow(byte, ls, VMAX), i: pos_t, f: int f): pos_t =
+  if f <= 0 then i
+  else if i <= 0 then 0
+  else if peek(src, i - 1, VMAX) = 10 then i
+  else line_start(src, i - 1, f - 1)
+
+fun put_spaces {f:nat} .<f>. (k: int, out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if k <= 0 then ()
+  else let
+    val () = put_char_v(out, 32)
+  in put_spaces(k - 1, out, f - 1) end
+
+(* b's bytes appended to out; consumes b *)
+fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void = let
+  val @(ba, bl) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(ba)
+  val () = copy_to_builder_v(bv, 0, bl, VMAX, out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+(* The number of decimal digits of n > 0 *)
+fun digits {f:nat} .<f>. (n: int, f: int f): int =
+  if f <= 0 then 1 else if n < 10 then 1 else 1 + digits(n / 10, f - 1)
+
+(* Rust's display_fancy of the error msg at offset off of src[0, n), a
+   file labeled lab[l0, l1), appended to out; consumes msg *)
+fn put_fancy {ll,ls:agz}
+  (lab: !$A.borrow(byte, ll, VMAX), l0: pos_t, l1: int, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   off: pos_t, msg: $B.builder_v, out: !$B.builder_v >> $B.builder_v): void = let
+  val @(line, col) = line_col(src, 0, off, 1, 1, VMAX)
+  val pad = digits(line, 16)
+  val ls = line_start(src, off, VMAX)
+  val le = find_byte(src, VMAX, off, n, 10, VMAX)
+  val () = bput_v(out, "error: ")
+  val () = append_builder(out, msg)
+  val () = bput_v(out, "\n --> ")
+  val () = copy_to_builder_v(lab, l0, l1, VMAX, out)
+  val () = put_char_v(out, 58)
+  val () = bput_int_v(out, line)
+  val () = put_char_v(out, 58)
+  val () = bput_int_v(out, col)
+  val () = put_char_v(out, 10)
+  val () = put_char_v(out, 32)
+  val () = put_spaces(pad, out, 16)
+  val () = bput_v(out, " |\n ")
+  val () = bput_int_v(out, line)
+  val () = bput_v(out, " | ")
+  val () = copy_to_builder_v(src, ls, le, VMAX, out)
+  val () = put_char_v(out, 10)
+  val () = put_char_v(out, 32)
+  val () = put_spaces(pad, out, 16)
+  val () = bput_v(out, " | ")
+  val () = put_spaces(col - 1, out, VMAX)
+in bput_v(out, "^\n") end
+
+(* errs + fancy, separated by a blank line as Rust's join("\n") does;
+   the count of errors after it *)
+fn add_error (cnt: int, fancy: $B.builder_v, errs: !$B.builder_v >> $B.builder_v): int = let
+  val () = (if cnt > 0 then put_char_v(errs, 10) else bput_v(errs, ""))
+  val () = append_builder(errs, fancy)
+in cnt + 1 end
+
+(* The kind of span idx *)
+fn span_kind {lp:agz} (spans: !$A.borrow(byte, lp, VMAX), idx: pos_t): int =
+  peek(spans, idx * 28, VMAX)
+
+fn is_word_byte (c: int): bool =
+  if c = 36 then true else if c = 35 then true
+  else if c = 95 then true
+  else if c >= 97 then c <= 122
+  else if c >= 65 then c <= 90
+  else if c >= 48 then c <= 57
+  else false
+
+(* The first position at or after i of src[0, e) that is not a word byte
+   (letters, digits, _, $ and #) *)
+fun word_end {ls:agz}{f:nat} .<f>. (src: !$A.borrow(byte, ls, VMAX), i: pos_t, e: pos_t, f: int f): pos_t =
+  if f <= 0 then i
+  else if i >= e then i
+  else if is_word_byte(peek(src, i, VMAX)) then word_end(src, i + 1, e, f - 1)
+  else i
+
+(* Whether src[s, s + 7) is "$UNSAFE" *)
+fn at_unsafe_kw {ls:agz} (src: !$A.borrow(byte, ls, VMAX), s: pos_t): bool = let
+  var u_c = @[char][7]('$', 'U', 'N', 'S', 'A', 'F', 'E')
+in lit_at(src, s, VMAX, u_c, 7) end
+
+(* Whether src[s, s + 4) is "#pub": the unsafe construct is a #pub prfun
+   without primplement *)
+(* Whether the word at src[s, e) is prfun or prfn *)
+fn at_prfun_kw {ls:agz} (src: !$A.borrow(byte, ls, VMAX), s: pos_t, e: pos_t): bool = let
+  val we = word_end(src, s, e, VMAX)
+  var a_c = @[char][5]('p', 'r', 'f', 'u', 'n')
+  var b_c = @[char][4]('p', 'r', 'f', 'n')
+in
+  if we - s = 5 then lit_at(src, s, VMAX, a_c, 5)
+  else if we - s = 4 then lit_at(src, s, VMAX, b_c, 4)
+  else false
+end
+
+fn at_pub_kw {ls:agz} (src: !$A.borrow(byte, ls, VMAX), s: pos_t): bool = let
+  var p_c = @[char][4]('#', 'p', 'u', 'b')
+in lit_at(src, s, VMAX, p_c, 4) end
+
+(* 'src[s, we)' is not allowed outside of $UNSAFE begin...end block *)
+fn put_word_msg {ls:agz}
+  (src: !$A.borrow(byte, ls, VMAX), s: pos_t, we: pos_t, m: !$B.builder_v >> $B.builder_v): void = let
+  val () = put_char_v(m, 39)
+  val () = copy_to_builder_v(src, s, we, VMAX, m)
+in bput_v(m, "' is not allowed outside of $UNSAFE begin...end block") end
+
+(* Rust's message for the unsafe construct, restricted keyword or
+   extcode block span at src[s, e) outside $UNSAFE (emit::validate) *)
+fn construct_msg {ls:agz}
+  (src: !$A.borrow(byte, ls, VMAX), kind: int, s: pos_t, e: pos_t, m: !$B.builder_v >> $B.builder_v): void = let
+  var fun_c = @[char][3]('f', 'u', 'n')
+  val we = word_end(src, s, e, VMAX)
+  val is_fun = (if we - s = 3 then lit_at(src, s, VMAX, fun_c, 3) else false): bool
+in
+  if kind = 6 then bput_v(m, "extcode block outside of $UNSAFE begin...end block")
+  else if at_unsafe_kw(src, s) then bput_v(m, "$UNSAFE construct outside of $UNSAFE begin...end block")
+  else if is_fun then
+    bput_v(m, "'fun' without termination metric is not allowed outside $UNSAFE; use 'fn' or add '.< metric >.'")
+  else put_word_msg(src, s, we, m)
+end
+
+(* Rust's "#pub prfun '<name>' has no primplement; ..." for the #pub
+   declaration whose keyword starts src[s, e) *)
+fn prfun_msg {ls:agz}
+  (src: !$A.borrow(byte, ls, VMAX), s: pos_t, e: pos_t, m: !$B.builder_v >> $B.builder_v): void = let
+  val k1 = word_end(src, s, e, VMAX)
+  val n0 = skip_space(src, VMAX, k1, e, VMAX)
+  val n1 = word_end(src, n0, e, VMAX)
+  val () = bput_v(m, "#pub prfun '")
+  val () = copy_to_builder_v(src, n0, n1, VMAX, m)
+in bput_v(m, "' has no primplement; unimplemented proof functions are unsound") end
+
+(* The start of the last component of p[0, pl) *)
+fun base_start {lp:agz}{f:nat} .<f>. (p: !$A.borrow(byte, lp, VMAX), i: pos_t, f: int f): pos_t =
+  if f <= 0 then i
+  else if i <= 0 then 0
+  else if peek(p, i - 1, VMAX) = 47 then i
+  else base_start(p, i - 1, f - 1)
+
+(* A span's start and end *)
+fn span_range {lp:agz} (spans: !$A.borrow(byte, lp, VMAX), idx: pos_t): @(pos_t, pos_t) =
+  @(span_i32(spans, idx * 28 + 2, VMAX), span_i32(spans, idx * 28 + 6, VMAX))
+
+(* Rust's "dependency '<pkg>' not found (expected <lib.bats>)" for each
+   #use whose package has no bats_modules/<pkg>/src/lib.bats, labeled with
+   the file's path p[0, pl) (preprocess_one) *)
+fun pass_uses {lp,ls,lsp:agz}{f:nat} .<f>.
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
+  if f <= 0 then cnt
+  else if idx >= count then cnt
+  else if span_kind(spans, idx) <> 1 then pass_uses(p, pl, src, n, spans, idx + 1, count, cnt, errs, f - 1)
+  else let
+    val @(ss, _) = span_range(spans, idx)
+    val ps = span_i32(spans, idx * 28 + 10, VMAX)
+    val pe = span_i32(spans, idx * 28 + 14, VMAX)
+    var lb : $B.builder_v = $B.create()
+    val () = bput_v(lb, "./bats_modules/")
+    val () = copy_to_builder_v(src, ps, pe, VMAX, lb)
+    val () = bput_v(lb, "/src/lib.bats")
+    val lbl = $B.length(lb)
+    val () = put_char_v(lb, 0)
+    val @(la, _) = $B.to_arr(lb)
+    val @(fz_l, bv_l) = $A.freeze<byte>(la)
+    val found = $F.file_exists(bv_l, VMAX)
+    val cnt2 = add_missing(found, p, pl, src, n, ss, ps, pe, bv_l, lbl, cnt, errs)
+    val () = $A.drop<byte>(fz_l, bv_l)
+    val () = $A.free<byte>($A.thaw<byte>(fz_l))
+  in pass_uses(p, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+
+and add_missing {lp,ls,ll:agz}
+  (found: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   ss: pos_t, ps: pos_t, pe: pos_t, lib: !$A.borrow(byte, ll, VMAX), lbl: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if found then cnt
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "dependency '")
+    val () = copy_to_builder_v(src, ps, pe, VMAX, m)
+    val () = bput_v(m, "' not found (expected ")
+    val () = copy_to_builder_v(lib, 0, lbl, VMAX, m)
+    val () = put_char_v(m, 41)
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
+  in add_error(cnt, fy, errs) end
+
+(* Rust's "$UNSAFE requires `unsafe = true` in bats.toml" for each
+   $UNSAFE block, labeled with the file's path (preprocess_one); an
+   unsafe package passes a count of 0 *)
+fun pass_unsafe_blocks {lp,ls,lsp:agz}{f:nat} .<f>.
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
+  if f <= 0 then cnt
+  else if idx >= count then cnt
+  else if span_kind(spans, idx) <> 4 then
+    pass_unsafe_blocks(p, pl, src, n, spans, idx + 1, count, cnt, errs, f - 1)
+  else let
+    val @(ss, _) = span_range(spans, idx)
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "$UNSAFE requires `unsafe = true` in bats.toml")
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
+    val cnt2 = add_error(cnt, fy, errs)
+  in pass_unsafe_blocks(p, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+
+(* The unsafe constructs, restricted keywords and extcode blocks outside
+   $UNSAFE, in order, labeled with the file's name p[b0, pl)
+   (emit::validate); want_pf selects the #pub prfun ones instead, which
+   Rust reports after the others *)
+fun pass_constructs {lp,ls,lsp:agz}{f:nat} .<f>.
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int, want_pf: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
+  if f <= 0 then cnt
+  else if idx >= count then cnt
+  else let
+    val kind = span_kind(spans, idx)
+    val @(ss, se) = span_range(spans, idx)
+    val is_pub = (if kind = 5 then at_pub_kw(src, ss) else false): bool
+    val ws = (if is_pub then span_i32(spans, idx * 28 + 10, VMAX) else ss): pos_t
+    val is_pf = (if is_pub then at_prfun_kw(src, ws, se) else false): bool
+    val hit = (if want_pf then is_pf
+               else if kind = 6 then true
+               else if kind = 9 then true
+               else if kind = 5 then ~is_pf
+               else false): bool
+    val cnt2 = add_construct(hit, want_pf, kind, p, b0, pl, src, n, ss, ws, se, cnt, errs)
+  in pass_constructs(p, b0, pl, src, n, spans, idx + 1, count, want_pf, cnt2, errs, f - 1) end
+
+and add_construct {lp,ls:agz}
+  (hit: bool, want_pf: bool, kind: int, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
+   src: !$A.borrow(byte, ls, VMAX), n: pos_t, ss: pos_t, ws: pos_t, se: pos_t,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if ~hit then cnt
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = (if want_pf then prfun_msg(src, ws, se, m) else construct_msg(src, kind, ws, se, m)): void
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
+  in add_error(cnt, fy, errs) end
+
+(* The errors of the file at the NUL-terminated path p[0, pl), whose
+   package is unsafe or not, added to errs (Rust: preprocess_one, in its
+   order), when wanted *)
+fn check_file {lp:agz}
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, wanted: bool, is_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if ~wanted then cnt else
+  case+ $F.file_open(p, VMAX, 0, 0) of
+  | ~$R.err(_) => cnt
+  | ~$R.ok(fd) => let
+      val buf = $A.alloc<byte>(VMAX)
+      val n = (case+ $F.file_read(fd, buf, VMAX) of
+        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= VMAX] int k
+      val () = $R.discard<int><int>($F.file_close(fd))
+      val @(fz_s, bv_s) = $A.freeze<byte>(buf)
+      val @(span_arr, _, count) = do_lex(bv_s, n, VMAX)
+      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
+      val b0 = base_start(p, pl, VMAX)
+      val c1 = pass_uses(p, pl, bv_s, n, bv_sp, 0, count, cnt, errs, VMAX)
+      val c2 = pass_unsafe_blocks(p, pl, bv_s, n, bv_sp, 0, (if is_unsafe then 0 else count): int, c1, errs, VMAX)
+      val c3 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, false, c2, errs, VMAX)
+      val c4 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, true, c3, errs, VMAX)
+      val () = $A.drop<byte>(fz_sp, bv_sp)
+      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+    in c4 end
+
+(* Whether the bats.toml at the NUL-terminated path in pa sets
+   unsafe = true *)
+fn toml_unsafe {lp:agz} (pa: $A.arr(byte, lp, 524288)): bool =
+  case+ read_toml(pa) of
+  | ~$R.err(_) => false
+  | ~$R.ok(doc) => let
+      var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+      val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+      var key_c = @[char][6]('u', 'n', 's', 'a', 'f', 'e')
+      val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 6))
+      val vb = $A.alloc<byte>(16)
+      val vl = (case+ $T.get(doc, bv_s, 7, bv_k, 6, vb, 16) of
+        | ~$R.some(x) => x | ~$R.none() => 0): int
+      val @(fz_v, bv_v) = $A.freeze<byte>(vb)
+      var t_c = @[char][4]('t', 'r', 'u', 'e')
+      val yes = (if vl = 4 then lit_at(bv_v, 0, 16, t_c, 4) else false): bool
+      val () = $A.drop<byte>(fz_v, bv_v)
+      val () = $A.free<byte>($A.thaw<byte>(fz_v))
+      val () = $A.drop<byte>(fz_k, bv_k)
+      val () = $A.free<byte>($A.thaw<byte>(fz_k))
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = $T.toml_free(doc)
+    in yes end
+
+(* The package root of the dependency file p[0, pl) =
+   ./bats_modules/<pkg>/src/...: the end of ./bats_modules/<pkg> *)
+fun dep_root_end {lp:agz}{f:nat} .<f>. (p: !$A.borrow(byte, lp, VMAX), i: pos_t, pl: pos_t, f: int f): pos_t =
+  if f <= 0 then pl
+  else if i + 5 > pl then pl
+  else let
+    var s_c = @[char][5]('/', 's', 'r', 'c', '/')
+  in
+    if lit_at(p, i, VMAX, s_c, 5) then i else dep_root_end(p, i + 1, pl, f - 1)
+  end
+
+(* Whether the dependency owning the file p[0, pl) is unsafe (Rust:
+   preprocess_all's config::load of its root) *)
+fn dep_unsafe {lp:agz} (p: !$A.borrow(byte, lp, VMAX), pl: pos_t): bool = let
+  val re = dep_root_end(p, 15, pl, VMAX)
+  var b : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(p, 0, re, VMAX, b)
+  val () = bput_v(b, "/bats.toml")
+  val () = put_char_v(b, 0)
+  val @(ba, _) = $B.to_arr(b)
+in toml_unsafe(ba) end
+
+(* Whether the file p[b0, pl) is named lib.bats *)
+fn is_lib_name {lp:agz} (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t): bool = let
+  var l_c = @[char][8]('l', 'i', 'b', '.', 'b', 'a', 't', 's')
+in if pl - b0 = 8 then lit_at(p, b0, VMAX, l_c, 8) else false end
+
+(* Whether p starts with ./src/bin/ *)
+fn in_bin {lp:agz} (p: !$A.borrow(byte, lp, VMAX)): bool = let
+  var b_c = @[char][10]('.', '/', 's', 'r', 'c', '/', 'b', 'i', 'n', '/')
+in lit_at(p, 0, VMAX, b_c, 10) end
+
+(* Checks each file of the NUL-separated list files[off, len): mode 0
+   the package's shared modules (not src/bin/, not named lib.bats), 1
+   the dependencies (each under its own unsafe flag), 2 every file *)
+fun check_list {lf:agz}{f:nat} .<f>.
+  (files: !$A.borrow(byte, lf, VMAX), off: pos_t, len: int, mode: int, own_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
+  if f <= 0 then cnt
+  else if off >= len then cnt
+  else let
+    val e = find_null_bv_from(files, off, VMAX)
+    var pb : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(files, off, e + 1, VMAX, pb)
+    val pl = e - off
+    val @(pa, _) = $B.to_arr(pb)
+    val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+    val b0 = base_start(bv_p, pl, VMAX)
+    val skip = (if mode = 0 then (if in_bin(bv_p) then true else is_lib_name(bv_p, b0, pl)) else false): bool
+    val uns = (if mode = 1 then dep_unsafe(bv_p, pl) else own_unsafe): bool
+    val cnt2 = check_file(bv_p, pl, ~skip, uns, cnt, errs)
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in check_list(files, e + 1, len, mode, own_unsafe, cnt2, errs, f - 1) end
+
+(* Checks the .bats files under dir (./src, ./bats_modules or
+   ./src/bin) in mode, as check_list does *)
+fn check_dir {sn:nat} (dir: string sn, mode: int, own_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  var d : $B.builder_v = $B.create()
+  val () = bput_v(d, dir)
+  val @(fa, flen) = sorted_bats_files(d)
+  val @(fz_f, bv_f) = $A.freeze<byte>(fa)
+  val c = check_list(bv_f, 0, flen, mode, own_unsafe, cnt, errs, 65536)
+  val () = $A.drop<byte>(fz_f, bv_f)
+  val () = $A.free<byte>($A.thaw<byte>(fz_f))
+in c end
+
+(* Prints cnt errors as Rust does; whether there were none *)
+fn report_errors (cnt: int, errs: $B.builder_v): bool =
+  if cnt <= 0 then let val () = $B.builder_free(errs) in true end
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "error: ")
+    val () = append_builder(m, errs)
+    val () = put_char_v(m, 10)
+    val () = prerr_builder(m)
+    val () = set_build_err()
+  in false end
+
+(* Before check, build or test: the errors Rust's preprocess_all finds in
+   the package's modules, its dependencies, src/lib.bats and its binaries,
+   in that order, printed as Rust prints them; false when there were
+   any *)
+#pub fn validate_project (): bool
+
+implement validate_project () = let
+  val own_unsafe = toml_unsafe(str_to_path_arr("./bats.toml"))
+  var errs : $B.builder_v = $B.create()
+  val c1 = check_dir("./src", 0, own_unsafe, 0, errs)
+  val c2 = check_dir("./bats_modules", 1, own_unsafe, c1, errs)
+  val lp = str_to_path_arr("./src/lib.bats")
+  val @(fz_l, bv_l) = $A.freeze<byte>(lp)
+  val c3 = check_file(bv_l, 14, $F.file_exists(bv_l, VMAX), own_unsafe, c2, errs)
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+  val c4 = check_dir("./src/bin", 2, own_unsafe, c3, errs)
+in
+  report_errors(c4, errs)
+end
+
 (* Before build, check or test: every #use package of src/ that is not a
    path dependency must be in bats_modules; the missing ones are fetched
    from the repository repo[0, rplen), or reported when there is none

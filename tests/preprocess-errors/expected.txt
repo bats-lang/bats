@@ -1,0 +1,48 @@
+error: error: '$extval' is not allowed outside of $UNSAFE begin...end block
+ --> alpha.bats:4:3
+   |
+ 4 |   $extval(int, "b")
+   |   ^
+
+error: extcode block outside of $UNSAFE begin...end block
+ --> alpha.bats:6:1
+   |
+ 6 | %{
+   | ^
+
+error: '$extfcall' is not allowed outside of $UNSAFE begin...end block
+ --> zeta.bats:1:16
+   |
+ 1 | fn a (): int = $extfcall(int, "a")
+   |                ^
+
+error: dependency 'nothere' not found (expected ./bats_modules/nothere/src/lib.bats)
+ --> ./bats_modules/dep/src/lib2.bats:1:1
+   |
+ 1 | #use nothere as N
+   | ^
+
+error: $UNSAFE requires `unsafe = true` in bats.toml
+ --> ./src/lib.bats:2:1
+   |
+ 2 | $UNSAFE begin
+   | ^
+
+error: '$extfcall' is not allowed outside of $UNSAFE begin...end block
+ --> lib.bats:1:16
+   |
+ 1 | fn c (): int = $extfcall(int, "c")
+   |                ^
+
+error: #pub prfun 'lemma' has no primplement; unimplemented proof functions are unsound
+ --> lib.bats:5:1
+   |
+ 5 | #pub prfun lemma (): void
+   | ^
+
+error: '$extfcall' is not allowed outside of $UNSAFE begin...end block
+ --> m.bats:1:16
+   |
+ 1 | fn g (): int = $extfcall(int, "g")
+   |                ^
+

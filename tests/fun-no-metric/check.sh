@@ -14,7 +14,7 @@ rm -rf build dist
 if "$BATS" check > "$TMP/check.log" 2>&1; then
   echo "FAIL: fun without a metric was accepted"; exit 1
 fi
-if ! grep -q 'unsafe construct' "$TMP/check.log"; then
+if ! grep -q 'not allowed outside' "$TMP/check.log"; then
   echo "FAIL: rejected, but not as an unsafe construct"; grep error "$TMP/check.log" | head -3; exit 1
 fi
 rm -rf build dist

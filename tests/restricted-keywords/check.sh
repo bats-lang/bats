@@ -22,7 +22,7 @@ reject() { # <body>
   if (cd "$d" && "$BATS" check) > "$d/log" 2>&1; then
     echo "FAIL: accepted: $1"; exit 1
   fi
-  grep -q 'unsafe construct' "$d/log" || { echo "FAIL: rejected, but not as an unsafe construct: $1"; grep error "$d/log" | head -3; exit 1; }
+  grep -q 'not allowed outside' "$d/log" || { echo "FAIL: rejected, but not as an unsafe construct: $1"; grep error "$d/log" | head -3; exit 1; }
 }
 accept() { # <unsafe> <body>
   lib "$1" "$2"
