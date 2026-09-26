@@ -248,12 +248,15 @@ in r end
 
 
 
-implement lit_at(src, pos, max, lit, m) = let
-  val @(f, b) = $A.freeze<byte>($S.from_char_array(lit, m))
-  val r = $S.chars_match_borrow(src, pos, max, b, 0, m)
-  val () = $A.drop<byte>(f, b)
-  val () = $A.free<byte>($A.thaw<byte>(f))
-in r end
+implement lit_at(src, pos, max, lit, m) =
+  if pos < 0 then false
+  else if pos + m > max then false
+  else let
+    val @(f, b) = $A.freeze<byte>($S.from_char_array(lit, m))
+    val r = $S.match_at(src, pos, b, m)
+    val () = $A.drop<byte>(f, b)
+    val () = $A.free<byte>($A.thaw<byte>(f))
+  in r end
 
 
 

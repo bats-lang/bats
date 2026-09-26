@@ -254,6 +254,9 @@ fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
 
 
 
+
+
+
 fn has_bats_ext {l:agz}{n:pos}{k:nat | k <= n}
   (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
 
