@@ -327,7 +327,7 @@ end
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
    was not given. *)
 (* git rev-parse --git-dir's exit code: 0 in a repository, > 0 outside
-   one, < 0 when git could not be run (Rust: resolve_version) *)
+   one, -errno when git could not be run (Rust: resolve_version) *)
 fn git_dir_rc (): int = let
   val git_exec = str_to_path_arr("git")
   val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
@@ -645,15 +645,33 @@ in
       else $R.ok(@(va, 524288, vl, true))
     end
   | ~$R.none() =>
-    if git_dir_rc() > 0 then $R.err(1)
-    else if git_tree_dirty() then $R.err(2)
-    else $R.ok(git_version())
+    let
+      val rc = git_dir_rc()
+    in
+      if rc < 0 then $R.err(rc)
+      else if rc > 0 then $R.err(1)
+      else if git_tree_dirty() then $R.err(2)
+      else $R.ok(git_version())
+    end
 end
 
-(* Prints resolve_version's error; an invalid version (3) was printed
-   where it was found *)
+(* Rust's "git not found: <OS error text> (os error <e>)" *)
+fn git_not_found (e: int): void = let
+  val buf = $A.alloc<byte>(256)
+  val k = $P.os_error_text(e, buf, 256)
+  val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+  val () = prerr! ("error: git not found: ")
+  val () = prerr_seg(bv_b, 0, k, 256, 256)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+in prerr! (" (os error ", e, ")\n") end
+
+(* Prints resolve_version's error: -errno when git could not be run,
+   1 outside a git repository, 2 on a dirty tree; an invalid version (3)
+   was printed where it was found *)
 fn version_error (code: int): void =
-  if code = 1 then prerr! ("error: not a git repository (required for auto-versioning)\n")
+  if code < 0 then git_not_found(0 - code)
+  else if code = 1 then prerr! ("error: not a git repository (required for auto-versioning)\n")
   else if code = 2 then prerr! ("error: working tree is dirty (commit or stash changes before upload)\n")
   else ()
 

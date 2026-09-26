@@ -79,6 +79,13 @@ fn pipe_end_close {b:bool} (p: pipe_end(b)): void
 
 
 
+fn os_error_text {l:agz}{n:pos}
+  (code: int, buf: !$A.arr(byte, l, n), max: int n): [k:nat | k <= n] int k
+
+
+
+
+
 fn spawn
   {sin:bool}{sout:bool}{serr:bool}
   {lp:agz}
@@ -113,6 +120,20 @@ fn spawn_inherit_env
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
