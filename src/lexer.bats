@@ -253,11 +253,15 @@ fun _has_metric {l:agz}{n:pos}{fuel:nat} .<fuel>.
       if $AR.eq_int_int($S.borrow_byte(src, pos + 1, max), 60) then true
       else _has_metric(src, pos + 1, max, fuel - 1)
     (* Found standalone "=" — end of signature, no metric *)
-    (* Skip <= >= == != by checking previous byte *)
+    (* Skip <= >= == != by checking the neighbouring bytes: the first
+       "=" of "==" is recognised by the next byte, the rest by the
+       previous one. *)
     else if $AR.eq_int_int(b, 61) then let
       val prev = (if pos > 0 then $S.borrow_byte(src, pos - 1, max) else 32): int
+      val next = $S.borrow_byte(src, pos + 1, max)
     in
-      if $AR.eq_int_int(prev, 60) then _has_metric(src, pos + 1, max, fuel - 1)
+      if $AR.eq_int_int(next, 61) then _has_metric(src, pos + 1, max, fuel - 1)
+      else if $AR.eq_int_int(prev, 60) then _has_metric(src, pos + 1, max, fuel - 1)
       else if $AR.eq_int_int(prev, 62) then _has_metric(src, pos + 1, max, fuel - 1)
       else if $AR.eq_int_int(prev, 61) then _has_metric(src, pos + 1, max, fuel - 1)
       else if $AR.eq_int_int(prev, 33) then _has_metric(src, pos + 1, max, fuel - 1)

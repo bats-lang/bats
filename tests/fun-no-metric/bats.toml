@@ -1,0 +1,3 @@
+[package]
+name = "fun-no-metric-test"
+kind = "lib"

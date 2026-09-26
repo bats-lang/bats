@@ -1,0 +1,3 @@
+[package]
+name = "metric-eq-test"
+kind = "lib"
