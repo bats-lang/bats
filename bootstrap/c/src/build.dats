@@ -1183,6 +1183,7 @@ implement do_build_wasm(release) = let
                 val @(fz_p, bv_p) = $A.freeze<byte>(pa)
                 val rc = wasm_cc_file(bv_p, pl)
               in if rc <> 0 then let
+                  val () = set_build_err()
                   val () = print! ("error: wasm cc failed for ")
                   val () = print_borrow(bv_e, 0, el, 256, 256)
                   val () = print_newline()
@@ -1541,7 +1542,8 @@ implement do_build_wasm(release) = let
   val lrc = run_cmd(bv_ld, link_argv)
   val () = $A.drop<byte>(fz_ld, bv_ld)
   val () = $A.free<byte>($A.thaw<byte>(fz_ld))
-  val () = (if lrc <> 0 then println! ("error: wasm-ld failed") else println! ("  built: dist/wasm/app.wasm"))
+  val () = (if lrc <> 0 then let val () = set_build_err() in println! ("error: wasm-ld failed") end
+    else println! ("  built: dist/wasm/app.wasm"))
 in end
 
 

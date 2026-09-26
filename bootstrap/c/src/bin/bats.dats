@@ -176,7 +176,7 @@ fun scan_only {l:agz}{fuel:nat} .<fuel>.
    Main: read argv from /proc/self/cmdline, dispatch
    ============================================================ *)
 
-implement __BATS_main0 () = let
+fn bats_main (): void = let
   val clp = $A.alloc<byte>(18)
   val () = make_proc_cmdline(clp)
   val @(fz_cl, bv_cl) = $A.freeze<byte>(clp)
@@ -458,4 +458,12 @@ in
     end
   | ~$R.err(e) =>
       println! ("Cannot open /proc/self/cmdline: ", e)
+end
+
+(* Exit non-zero when any command recorded an error, so CI and scripts
+   can rely on the exit status. *)
+implement __BATS_main0 () = let
+  val () = bats_main ()
+in
+  if has_build_err () then exit_void (1) else ()
 end
