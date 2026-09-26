@@ -22,6 +22,28 @@ staload AR = "arith/src/lib.sats"
 
 
 
+(* An incremental SHA-256: init, update with each piece of the input in
+   order, then finish. For input that does not fit one array, such as a
+   file read in chunks. *)
+
+
+
+
+
+
+
+
+
+
+
+(* Hashes data[0, len) after everything given so far. *)
+
+
+
+
+(* The SHA-256 of everything given, as 64 lowercase hex digits in out. *)
+
+
 (* ============================================================
    Word functions (FIPS 180-4, section 4.1.2)
    ============================================================ *)
@@ -169,10 +191,10 @@ fn _put_word {lo:agz}{p:nat | p + 8 <= 64}
 in loop(out, 0) end
 
 (* ============================================================
-   Main hash
+   Incremental hash
    ============================================================ *)
 
-implement hash {l}{n}{lo} (data, data_len, out) = let
+implement init () = let
   val h = $A.alloc<uint>(8)
   val () = $A.set<uint>(h, 0, 0x6a09e667u)
   val () = $A.set<uint>(h, 1, 0xbb67ae85u)
@@ -182,39 +204,58 @@ implement hash {l}{n}{lo} (data, data_len, out) = let
   val () = $A.set<uint>(h, 5, 0x9b05688cu)
   val () = $A.set<uint>(h, 6, 0x1f83d9abu)
   val () = $A.set<uint>(h, 7, 0x5be0cd19u)
-  val w = $A.alloc<uint>(64)
-  (* Whole blocks; returns where the last partial block starts. *)
-  fun blocks {lw,lh:agz}{bo:nat | bo <= n} .<n - bo>.
-    (data: !$A.arr(byte, l, n), w: !$A.arr(uint, lw, 64), h: !$A.arr(uint, lh, 8),
-     bo: int bo): [td:nat | td <= n; n < td + 64] int td =
-    if bo + 64 > data_len then bo
-    else let val () = _compress(data, bo, w, h) in blocks(data, w, h, bo + 64) end
-  val td = blocks(data, w, h, 0)
-  val tail = data_len - td
+in ctx_mk(h, $A.alloc<uint>(64), $A.alloc<byte>(64), 0, 0u, 0u) end
+
+(* data[i, k) appended to the block in buf[0, b), compressing each block
+   as it fills; the bytes left in the block *)
+fun _fill {lh,lw,lb,ld:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k}{b:nat | b < 64}
+  .<k - i>.
+  (h: !$A.arr(uint, lh, 8), w: !$A.arr(uint, lw, 64), buf: !$A.arr(byte, lb, 64),
+   data: !$A.arr(byte, ld, n), k: int k, i: int i, b: int b)
+  : [b2:nat | b2 < 64] int b2 =
+  if i >= k then b
+  else let
+    val () = $A.set<byte>(buf, b, $A.get<byte>(data, i))
+  in
+    if b + 1 >= 64 then let
+      val () = _compress(buf, 0, w, h)
+    in _fill(h, w, buf, data, k, i + 1, 0) end
+    else _fill(h, w, buf, data, k, i + 1, b + 1)
+  end
+
+implement update {l}{n}{k} (c, data, len) = let
+  val+ @ctx_mk(h, w, buf, b, hi, lo) = c
+  val () = b := _fill(h, w, buf, data, len, 0, b)
+  val nlo = lo + _u(len)
+  val () = (if nlo < lo then hi := hi + 1u else ())
+  val () = lo := nlo
+  prval () = fold@(c)
+in end
+
+implement finish {lo} (c, out) = let
+  val+ ~ctx_mk(h, w, buf, tail, nhi, nlo) = c
   (* The tail, 0x80, zeros and the 64-bit big-endian bit length, in one
      or two blocks. alloc zeroes the buffer. *)
   val pad = $A.alloc<byte>(128)
-  fun copy {lp:agz}{b,t:nat | b + t <= n; t < 64}{i:nat | i <= t} .<t - i>.
-    (data: !$A.arr(byte, l, n), pad: !$A.arr(byte, lp, 128),
-     b: int b, t: int t, i: int i): void =
+  fun copy {lp,lb:agz}{t:nat | t < 64}{i:nat | i <= t} .<t - i>.
+    (buf: !$A.arr(byte, lb, 64), pad: !$A.arr(byte, lp, 128), t: int t, i: int i): void =
     if i >= t then ()
     else let
-      val () = $A.set<byte>(pad, i, $A.get<byte>(data, b + i))
-    in copy(data, pad, b, t, i + 1) end
-  val () = copy(data, pad, td, tail, 0)
+      val () = $A.set<byte>(pad, i, $A.get<byte>(buf, i))
+    in copy(buf, pad, t, i + 1) end
+  val () = copy(buf, pad, tail, 0)
   val () = $A.set<byte>(pad, tail, $A.int2byte(128))
   val last = (if tail + 9 > 64 then 128 else 64): [e:int | e == 64 || e == 128] int e
-  val nu = _u(data_len)
-  val hi = nu >> 29
-  val lo = nu << 3
-  val () = $A.set<byte>(pad, last - 8, $A.int2byte(_byte(hi >> 24)))
-  val () = $A.set<byte>(pad, last - 7, $A.int2byte(_byte(hi >> 16)))
-  val () = $A.set<byte>(pad, last - 6, $A.int2byte(_byte(hi >> 8)))
-  val () = $A.set<byte>(pad, last - 5, $A.int2byte(_byte(hi)))
-  val () = $A.set<byte>(pad, last - 4, $A.int2byte(_byte(lo >> 24)))
-  val () = $A.set<byte>(pad, last - 3, $A.int2byte(_byte(lo >> 16)))
-  val () = $A.set<byte>(pad, last - 2, $A.int2byte(_byte(lo >> 8)))
-  val () = $A.set<byte>(pad, last - 1, $A.int2byte(_byte(lo)))
+  val bhi = (nhi << 3) lor (nlo >> 29)
+  val blo = nlo << 3
+  val () = $A.set<byte>(pad, last - 8, $A.int2byte(_byte(bhi >> 24)))
+  val () = $A.set<byte>(pad, last - 7, $A.int2byte(_byte(bhi >> 16)))
+  val () = $A.set<byte>(pad, last - 6, $A.int2byte(_byte(bhi >> 8)))
+  val () = $A.set<byte>(pad, last - 5, $A.int2byte(_byte(bhi)))
+  val () = $A.set<byte>(pad, last - 4, $A.int2byte(_byte(blo >> 24)))
+  val () = $A.set<byte>(pad, last - 3, $A.int2byte(_byte(blo >> 16)))
+  val () = $A.set<byte>(pad, last - 2, $A.int2byte(_byte(blo >> 8)))
+  val () = $A.set<byte>(pad, last - 1, $A.int2byte(_byte(blo)))
   val () = _compress_pad(pad, last, w, h)
   fun put {lh:agz}{j:nat | j <= 8} .<8 - j>.
     (out: !$A.arr(byte, lo, 64), h: !$A.arr(uint, lh, 8), j: int j): void =
@@ -222,6 +263,16 @@ implement hash {l}{n}{lo} (data, data_len, out) = let
     else let val () = _put_word(out, 8 * j, $A.get<uint>(h, j)) in put(out, h, j + 1) end
   val () = put(out, h, 0)
   val () = $A.free<byte>(pad)
+  val () = $A.free<byte>(buf)
   val () = $A.free<uint>(w)
   val () = $A.free<uint>(h)
 in end
+
+(* ============================================================
+   Main hash
+   ============================================================ *)
+
+implement hash {l}{n}{lo} (data, data_len, out) = let
+  val c = init()
+  val () = update(c, data, data_len)
+in finish(c, out) end
