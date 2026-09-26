@@ -201,6 +201,63 @@ implement do_generate_docs(pkg_name_len, kind_is_lib) =
    upload: package library for repository
    ============================================================ *)
 
+(* dst[i, n) = src[i, n) *)
+fun copy_prefix {la,lb:agz}{n:pos | n <= 524288}{i:nat | i <= n} .<n - i>.
+  (src: !$A.arr(byte, la, 524288), dst: !$A.arr(byte, lb, n), n: int n, i: int i): void =
+  if i >= n then ()
+  else let
+    val () = $A.set<byte>(dst, i, $A.get<byte>(src, i))
+  in copy_prefix(src, dst, n, i + 1) end
+
+(* Writes "<sha256 of the archive>  <archive filename>\n" to the sidecar,
+   as the Rust bats did. arc: the archive read into arc[0, n). *)
+fn write_sidecar_of {la,lz:agz}{n:nat | n <= 524288}
+  (arc: $A.arr(byte, la, 524288), n: int n,
+   zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
+  if n <= 0 then let
+    val () = $A.free<byte>(arc)
+    val () = set_build_err()
+  in println! ("error: cannot read the archive to hash it") end
+  else let
+    val data = $A.alloc<byte>(n)
+    val () = copy_prefix(arc, data, n, 0)
+    val () = $A.free<byte>(arc)
+    val hex = $A.alloc<byte>(64)
+    val () = $SHA.hash(data, n, hex)
+    val () = $A.free<byte>(data)
+    var sc: $B.builder_v = $B.create()
+    val @(fh, bh) = $A.freeze<byte>(hex)
+    val () = copy_to_builder_v(bh, 0, 64, 64, sc)
+    val () = $A.drop<byte>(fh, bh)
+    val () = $A.free<byte>($A.thaw<byte>(fh))
+    val () = bput_v(sc, "  ")
+    val base = find_basename_start(zp, 0, 524288, ~1, 524288)
+    val () = copy_to_builder_v(zp, base, zlen, 524288, sc)
+    val () = bput_v(sc, "\n")
+    var sp: $B.builder_v = $B.create()
+    val () = copy_to_builder_v(zp, 0, zlen, 524288, sp)
+    val () = bput_v(sp, ".sha256")
+    val () = put_char_v(sp, 0)
+    val @(spa, _) = $B.to_arr(sp)
+    val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
+    val _ = write_file_from_builder(bv_sp, 524288, sc)
+    val () = $A.drop<byte>(fz_sp, bv_sp)
+    val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+  in end
+
+(* The sidecar of the archive at zp[0, zlen) (NUL-terminated). *)
+fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
+  case+ $F.file_open(zp, 524288, 0, 0) of
+  | ~$R.ok(afd) => let
+      val arc = $A.alloc<byte>(524288)
+      val n = (case+ $F.file_read(afd, arc, 524288) of
+        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
+      val () = $R.discard<int><int>($F.file_close(afd))
+    in write_sidecar_of(arc, n, zp, zlen) end
+  | ~$R.err(_) => let
+      val () = set_build_err()
+    in println! ("error: cannot open the archive to hash it") end
+
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
    was not given. *)
 #pub fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
@@ -393,74 +450,8 @@ in
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
                 in println! ("error: upload failed") end
                 else let
-                  (* Write SHA-256 sidecar file: zip_path + ".sha256" *)
-                  val @(sha_buf, sha_rc) = (let
-                    (* Read archive and compute SHA256 using sha256 library *)
-                    val arc_or = $F.file_open(bv_zp, 524288, 0, 0)
-                    val sha_r = (case+ arc_or of
-                      | ~$R.ok(afd) => let
-                          val abuf = $A.alloc<byte>(524288)
-                          val ar = $F.file_read(afd, abuf, 524288)
-                          val alen = (case+ ar of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                          val acr = $F.file_close(afd)
-                          val () = $R.discard<int><int>(acr)
-                          val sha_out = $A.alloc<byte>(64)
-                          val () = $SHA.hash(abuf, 524288, sha_out)
-                          val () = $A.free<byte>(abuf)
-                          (* Write sha hex to temp file *)
-                          var sha_b = $B.create()
-                          val @(fz_sha, bv_sha) = $A.freeze<byte>(sha_out)
-                          val () = copy_to_builder(bv_sha, 0, 64, 64, sha_b, 65)
-                          val () = $A.drop<byte>(fz_sha, bv_sha)
-                          val () = $A.free<byte>($A.thaw<byte>(fz_sha))
-                          val sp = str_to_path_arr("/tmp/_bpoc_sha.txt")
-                          val @(fz_sp, bv_sp) = $A.freeze<byte>(sp)
-                          val wr = write_file_from_builder(bv_sp, 524288, sha_b)
-                          val () = $A.drop<byte>(fz_sp, bv_sp)
-                          val () = $A.free<byte>($A.thaw<byte>(fz_sp))
-                        in wr end
-                      | ~$R.err(_) => ~1): int
-                  in
-                    if sha_r <> 0 then let val sb = $A.alloc<byte>(65) in @(sb, ~1) end
-                    else let
-                      val sp3 = str_to_path_arr("/tmp/_bpoc_sha.txt")
-                      val @(fz_sp3, bv_sp3) = $A.freeze<byte>(sp3)
-                      val sf = $F.file_open(bv_sp3, 524288, 0, 0)
-                      val () = $A.drop<byte>(fz_sp3, bv_sp3)
-                      val () = $A.free<byte>($A.thaw<byte>(fz_sp3))
-                    in case+ sf of
-                      | ~$R.ok(sfd) => let
-                          val sb = $A.alloc<byte>(65)
-                          val sr2 = $F.file_read(sfd, sb, 65)
-                          val slen2 = (case+ sr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                          val scr = $F.file_close(sfd)
-                          val () = $R.discard<int><int>(scr)
-                        in @(sb, (if slen2 >= 64 then 0 else ~1): int) end
-                      | ~$R.err(_) => let val sb = $A.alloc<byte>(65) in @(sb, ~1) end
-                    end
-                  end): [lsb:agz] @($A.arr(byte, lsb, 65), int)
-                  val () = (if sha_rc = 0 then let
-                    var sidecar: $B.builder_v = $B.create()
-                    val @(fz_sh, bv_sh) = $A.freeze<byte>(sha_buf)
-                    val () = copy_to_builder_v(bv_sh, 0, 64, 65, sidecar)
-                    val () = bput_v(sidecar, "  ")
-                    (* just the filename part of zip_path *)
-                    val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, sidecar)
-                    val () = bput_v(sidecar, "\n")
-                    val () = $A.drop<byte>(fz_sh, bv_sh)
-                    val () = $A.free<byte>($A.thaw<byte>(fz_sh))
-                    (* write to zip_path + ".sha256" *)
-                    var sp2: $B.builder_v = $B.create()
-                    val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, sp2)
-                    val () = bput_v(sp2, ".sha256")
-                    val () = put_char_v(sp2, 0)
-                    val @(sp2a, _) = $B.to_arr(sp2)
-                    val @(fz_sp2, bv_sp2) = $A.freeze<byte>(sp2a)
-                    val _ = write_file_from_builder(bv_sp2, 524288, sidecar)
-                    val () = $A.drop<byte>(fz_sp2, bv_sp2)
-                    val () = $A.free<byte>($A.thaw<byte>(fz_sp2))
-                  in end
-                  else $A.free<byte>(sha_buf))
+                  (* The sidecar zip_path + ".sha256" *)
+                  val () = write_sidecar(bv_zp, zpa_len - 1)
                   val () = $A.drop<byte>(fz_zp, bv_zp)
                   val () = $A.free<byte>($A.thaw<byte>(fz_zp))
                   val () = $A.drop<byte>(fz_vb, bv_vb)
