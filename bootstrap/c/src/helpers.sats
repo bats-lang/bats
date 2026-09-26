@@ -1253,22 +1253,6 @@ fn strip_newline_arr {l:agz}
 
 
 
-fn strip_newline_arr524288 {l:agz}
-  (buf: !$A.arr(byte, l, 524288), len: pos_t): pos_t
-
-
-
-
-
-
-fn strip_newline_arr256 {l:agz}
-  (buf: !$A.arr(byte, l, 256), len: pos_t): pos_t
-
-
-
-
-
-
 
 
 
