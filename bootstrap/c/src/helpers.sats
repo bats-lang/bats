@@ -1264,14 +1264,6 @@ fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr
 
 
 
-fn strip_newline_arr {l:agz}
-  (buf: !$A.arr(byte, l, 4096), len: pos_t): pos_t
-
-
-
-
-
-
 
 
 

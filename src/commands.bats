@@ -5,6 +5,7 @@
 #use array as A
 #use arith as AR
 #use builder as B
+#use env as E
 #use file as F
 #use list as L
 #use str as S
@@ -558,135 +559,166 @@ in end
    init: create a new bats project
    ============================================================ *)
 
-#pub fn do_init(kind: int, claude: int): void
+(* b[i, len) to stderr. *)
+fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
+  if fuel <= 0 then ()
+  else if i >= len then ()
+  else let
+    val () = prerr_char(int2char0(peek(b, i, m)))
+  in prerr_seg(b, i + 1, len, m, fuel - 1) end
 
-implement do_init(kind, claude) = let
-  (* Check for existing project *)
-  val has_toml = file_exists("bats.toml")
-  val has_gi = file_exists(".gitignore")
+(* a[0, alen) = w[0, n) *)
+fun arg_is {l:agz}{n:pos}{i:nat | i <= n} .<n - i>.
+  (a: !$A.borrow(byte, l, 4096), alen: int, w: &(@[char][n]), n: int n, i: int i): bool =
+  if alen <> n then false
+  else if i >= n then true
+  else if peek(a, i, 4096) <> char2int0(w.[i]) then false
+  else arg_is(a, alen, w, n, i + 1)
+
+(* The project kind named by bats init's argument, as the Rust bats
+   accepted it: 0 for binary/bin, 1 for library/lib, ~1 otherwise. *)
+fn init_kind {l:agz} (a: !$A.borrow(byte, l, 4096), alen: int): int = let
+  var w1 = @[char][6]('b', 'i', 'n', 'a', 'r', 'y')
+  var w2 = @[char][3]('b', 'i', 'n')
+  var w3 = @[char][7]('l', 'i', 'b', 'r', 'a', 'r', 'y')
+  var w4 = @[char][3]('l', 'i', 'b')
 in
-  if has_toml then println! ("error: bats.toml already exists")
-  else if has_gi then println! ("error: .gitignore already exists")
+  if arg_is(a, alen, w1, 6, 0) then 0
+  else if arg_is(a, alen, w2, 3, 0) then 0
+  else if arg_is(a, alen, w3, 7, 0) then 1
+  else if arg_is(a, alen, w4, 3, 0) then 1
+  else ~1
+end
+
+(* Whether the NUL-terminated path in p exists. *)
+fn path_exists {l:agz} (p: !$A.borrow(byte, l, 524288)): bool =
+  case+ $F.file_open(p, 524288, 0, 0) of
+  | ~$R.ok(fd) => let val () = $R.discard<int><int>($F.file_close(fd)) in true end
+  | ~$R.err(_) => false
+
+(* The project name, as the Rust bats chose it: the current directory's
+   last component, or "myproject". Appended to b. *)
+fn add_project_name (b: !$B.builder_v >> $B.builder_v): void = let
+  val cwd = $A.alloc<byte>(4096)
+  val k = (case+ $E.cwd_read(cwd, 4096) of | ~$R.some(k) => k | ~$R.none() => 0): [k:nat | k <= 4096] int k
+  val @(fz_c, bv_c) = $A.freeze<byte>(cwd)
+  val start = find_basename_start(bv_c, 0, 4096, ~1, 4096)
+  val () = (if start < k then copy_to_builder_v(bv_c, start, k, 4096, b)
+    else bput_v(b, "myproject"))
+  val () = $A.drop<byte>(fz_c, bv_c)
+in $A.free<byte>($A.thaw<byte>(fz_c)) end
+
+(* The NUL-terminated path "src/bin/<name>.bats" or "src/lib.bats". *)
+fn init_source_path {ln:agz}
+  (kind: int, name: !$A.borrow(byte, ln, 524288), nlen: int): $B.builder_v = let
+  var p: $B.builder_v = $B.create()
+  val () = (if kind = 0 then let
+      val () = bput_v(p, "src/bin/")
+      val () = copy_to_builder_v(name, 0, nlen, 524288, p)
+    in bput_v(p, ".bats") end
+    else bput_v(p, "src/lib.bats"))
+  val () = put_char_v(p, 0)
+in p end
+
+(* Writes b to the NUL-terminated path in p; 0 on success. *)
+fn write_to {lp:agz} (p: !$A.borrow(byte, lp, 524288), b: $B.builder_v): int =
+  write_file_from_builder(p, 524288, b)
+
+(* bats init <kind>: as the Rust bats's cmd_init. arg: the kind argument
+   in arg[0, alen). *)
+#pub fn do_init {la:agz} (arg: !$A.borrow(byte, la, 4096), alen: int, claude: int): void
+
+implement do_init {la} (arg, alen, claude) = let
+  val kind = init_kind(arg, alen)
+in
+  if kind < 0 then let
+    val () = prerr! ("error: unknown project kind '")
+    val () = prerr_seg(arg, 0, alen, 4096, 4096)
+    val () = prerr! ("', use 'binary' or 'library'")
+    val () = prerr_newline()
+  in set_build_err() end
   else let
-  (* kind: 0=binary, 1=library *)
-  (* Get current directory name via readlink /proc/self/cwd *)
-  val @(cwd_buf, cwd_len) = (let
-    (* Get CWD via pwd *)
-    val pwd_exec = str_to_path_arr("pwd")
-    val @(fz_pwd, bv_pwd) = $A.freeze<byte>(pwd_exec)
-    var pwd_b1 = $B.create()
-    val () = bput_v(pwd_b1, "pwd")
-    val pwd_argv = $L.list_vt_cons(mk_arg(pwd_b1), $L.list_vt_nil())
-    (* TODO: run_cmd sends stdout to /dev/null, need stdout capture *)
-    val _ = run_cmd(bv_pwd, pwd_argv)
-    val () = $A.drop<byte>(fz_pwd, bv_pwd)
-    val () = $A.free<byte>($A.thaw<byte>(fz_pwd))
-    (* Write placeholder CWD *)
-    var cwdb = $B.create()
-    val () = $B.bput(cwdb, ".")
-    val cwdp = str_to_path_arr("/tmp/_bpoc_cwd.txt")
-    val @(fz_cwdp, bv_cwdp) = $A.freeze<byte>(cwdp)
-    val _ = write_file_from_builder(bv_cwdp, 524288, cwdb)
-    val () = $A.drop<byte>(fz_cwdp, bv_cwdp)
-    val () = $A.free<byte>($A.thaw<byte>(fz_cwdp))
-    val cp = str_to_path_arr("/tmp/_bpoc_cwd.txt")
-    val @(fz_cp, bv_cp) = $A.freeze<byte>(cp)
-    val cf = $F.file_open(bv_cp, 524288, 0, 0)
-    val () = $A.drop<byte>(fz_cp, bv_cp)
-    val () = $A.free<byte>($A.thaw<byte>(fz_cp))
-  in case+ cf of
-    | ~$R.ok(cfd) => let
-        val cb = $A.alloc<byte>(4096)
-        val cr2 = $F.file_read(cfd, cb, 4096)
-        val clen = (case+ cr2 of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): pos_t
-        val ccr = $F.file_close(cfd)
-        val () = $R.discard<int><int>(ccr)
-        (* strip trailing newline *)
-        val clen2 = strip_newline_arr(cb, clen)
-      in @(cb, clen2) end
-    | ~$R.err(_) => let val cb = $A.alloc<byte>(4096) in @(cb, 0) end
-  end): [lcwd:agz] @($A.arr(byte, lcwd, 4096), int)
-  val @(fz_cwd, bv_cwd) = $A.freeze<byte>(cwd_buf)
-  (* Find last '/' in cwd path to extract basename *)
-  fun find_last_slash {l2:agz}{fuel2:nat} .<fuel2>.
-    (bv: !$A.borrow(byte, l2, 4096), pos: pos_t, len: int,
-     last: pos_t, fuel2: int fuel2): pos_t =
-    if fuel2 <= 0 then last
-    else if pos >= len then last
-    else let
-      val b = peek(bv, pos, 4096)
-    in
-      if b = 47 then find_last_slash(bv, pos + 1, len, pos, fuel2 - 1)
-      else find_last_slash(bv, pos + 1, len, last, fuel2 - 1)
-    end
-  val last_slash = find_last_slash(bv_cwd, 0, cwd_len, ~1, 4096)
-  val name_start = last_slash + 1
-  val name_len = cwd_len - name_start
-  (* mkdir *)
-  var cmd1: $B.builder_v = $B.create()
-  val () = (if kind = 0 then bput_v(cmd1, "src/bin")
-    else bput_v(cmd1, "src"))
-  val _ = run_mkdir(cmd1)
-  (* Write bats.toml *)
-  var toml: $B.builder_v = $B.create()
-  val () = bput_v(toml, "[package]\nname = \"")
-  val () = copy_to_builder_v(bv_cwd, name_start, cwd_len, 4096, toml)
-  val () = (if kind = 0 then bput_v(toml, "\"\nkind = \"bin\"\n\n[dependencies]\n")
-    else bput_v(toml, "\"\nkind = \"lib\"\n\n[dependencies]\n"))
-  val tp = str_to_path_arr("bats.toml")
-  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val rc = write_file_from_builder(bv_tp, 524288, toml)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
-  (* Write source file *)
-  val @(rc2) = (if kind = 0 then let
-    var src = $B.create()
-    val () = $B.bput(src, "implement ")
-    val () = $B.bput(src, "main0 () = println! (\"hello, world!\")\n")
-    var src_path = $B.create()
-    val () = $B.bput(src_path, "src/bin/")
-    val () = copy_to_builder(bv_cwd, name_start, cwd_len, 4096, src_path, 4096)
-    val () = $B.bput(src_path, ".bats")
-    val () = $B.put_char(src_path, 0)
-    val @(src_pa, _) = $B.to_arr(src_path)
-    val @(fz_sp, bv_sp) = $A.freeze<byte>(src_pa)
-    val r = write_file_from_builder(bv_sp, 524288, src)
+    var nb: $B.builder_v = $B.create()
+    val () = add_project_name(nb)
+    val @(na, nlen) = $B.to_arr(nb)
+    val @(fz_n, bv_n) = $A.freeze<byte>(na)
+    val sp = init_source_path(kind, bv_n, nlen)
+    val @(spa, splen) = $B.to_arr(sp)
+    val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
+    val tp = str_to_path_arr("bats.toml")
+    val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
+    val gp = str_to_path_arr(".gitignore")
+    val @(fz_gp, bv_gp) = $A.freeze<byte>(gp)
+    val c_toml = path_exists(bv_tp)
+    val c_src = path_exists(bv_sp)
+    val c_gi = path_exists(bv_gp)
+    val () = (if c_toml || c_src || c_gi then let
+        val () = prerr! ("error: refusing to overwrite existing files:")
+        val () = prerr_newline()
+        val () = (if c_toml then let val () = prerr! ("  bats.toml") in prerr_newline() end else ())
+        val () = (if c_src then let
+            val () = prerr! ("  ")
+            val () = prerr_seg(bv_sp, 0, splen - 1, 524288, 524288)
+          in prerr_newline() end else ())
+        val () = (if c_gi then let val () = prerr! ("  .gitignore") in prerr_newline() end else ())
+      in set_build_err() end
+      else let
+        var toml: $B.builder_v = $B.create()
+        val () = bput_v(toml, "[package]\nname = \"")
+        val () = copy_to_builder_v(bv_n, 0, nlen, 524288, toml)
+        val () = (if kind = 0 then bput_v(toml, "\"\nkind = \"bin\"\n")
+          else bput_v(toml, "\"\nkind = \"lib\"\n"))
+        val r1 = write_to(bv_tp, toml)
+        var dir: $B.builder_v = $B.create()
+        val () = (if kind = 0 then bput_v(dir, "src/bin") else bput_v(dir, "src"))
+        val _ = run_mkdir(dir)
+        var src: $B.builder_v = $B.create()
+        (* split so the emitter does not take the text for this file's main0 *)
+        val () = (if kind = 0 then let
+            val () = bput_v(src, "implement ")
+          in bput_v(src, "main0 () = println! (\"hello, world!\")\n") end
+          else bput_v(src, "#pub fun hello(): void\n\nimplement hello () = println! (\"hello from library\")\n"))
+        val r2 = write_to(bv_sp, src)
+        var gi: $B.builder_v = $B.create()
+        val () = bput_v(gi, "build/\ndist/\ndocs/\nbats_modules/\n")
+        val r3 = write_to(bv_gp, gi)
+      in
+        if r1 <> 0 then let
+          val () = prerr! ("error: cannot write bats.toml")
+          val () = prerr_newline()
+        in set_build_err() end
+        else if r2 <> 0 then let
+          val () = prerr! ("error: cannot write ")
+          val () = prerr_seg(bv_sp, 0, splen - 1, 524288, 524288)
+          val () = prerr_newline()
+        in set_build_err() end
+        else if r3 <> 0 then let
+          val () = prerr! ("error: cannot write .gitignore")
+          val () = prerr_newline()
+        in set_build_err() end
+        else let
+          val () = (if claude > 0 then write_claude_rules() else ())
+        in
+          if is_quiet() then ()
+          else let
+            val () = prerr! ("created ")
+            val () = prerr_seg(arg, 0, alen, 4096, 4096)
+            val () = prerr! (" project '")
+            val () = prerr_seg(bv_n, 0, nlen, 524288, 524288)
+            val () = prerr! ("'")
+          in prerr_newline() end
+        end
+      end)
+    val () = $A.drop<byte>(fz_gp, bv_gp)
+    val () = $A.free<byte>($A.thaw<byte>(fz_gp))
+    val () = $A.drop<byte>(fz_tp, bv_tp)
+    val () = $A.free<byte>($A.thaw<byte>(fz_tp))
     val () = $A.drop<byte>(fz_sp, bv_sp)
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
-  in @(r) end
-  else let
-    var src = $B.create()
-    val () = $B.bput(src, "#pub fun hello(): void\n\n")
-    val () = $B.bput(src, "implement hello () = println! (\"hello from library\")\n")
-    var src_path = $B.create()
-    val () = $B.bput(src_path, "src/lib.bats")
-    val () = $B.put_char(src_path, 0)
-    val @(src_pa, _) = $B.to_arr(src_path)
-    val @(fz_sp, bv_sp) = $A.freeze<byte>(src_pa)
-    val r = write_file_from_builder(bv_sp, 524288, src)
-    val () = $A.drop<byte>(fz_sp, bv_sp)
-    val () = $A.free<byte>($A.thaw<byte>(fz_sp))
-  in @(r) end): @(int)
-  val () = $A.drop<byte>(fz_cwd, bv_cwd)
-  val () = $A.free<byte>($A.thaw<byte>(fz_cwd))
-  (* Write .gitignore *)
-  var gi = $B.create()
-  val () = $B.bput(gi, "build/\ndist/\nbats_modules/\ndocs/\n")
-  val gp = str_to_path_arr(".gitignore")
-  val @(fz_gp, bv_gp) = $A.freeze<byte>(gp)
-  val rc3 = write_file_from_builder(bv_gp, 524288, gi)
-  val () = $A.drop<byte>(fz_gp, bv_gp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_gp))
-in
-  if rc = 0 then
-    if rc2 = 0 then
-      if rc3 = 0 then let
-        val () = (if claude > 0 then write_claude_rules() else ())
-      in println! ("initialized bats project in current directory") end
-      else println! ("error: failed to write .gitignore")
-    else println! ("error: failed to write source file")
-  else println! ("error: failed to write bats.toml")
-end end
+    val () = $A.drop<byte>(fz_n, bv_n)
+  in $A.free<byte>($A.thaw<byte>(fz_n)) end
+end
 
 (* ============================================================
    tree: display dependency tree from bats.lock
@@ -970,14 +1002,6 @@ fun list_has {ln,lb:agz}{fuel:nat} .<fuel>.
   else if entry_eq(n, s, b, blen, 0, 257) then true
   else list_has(n, nlen, find_null_bv_from(n, s, 524288) + 1, b, blen, fuel - 1)
 
-(* b[i, len) to stderr. *)
-fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
-  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if i >= len then ()
-  else let
-    val () = prerr_char(int2char0(peek(b, i, m)))
-  in prerr_seg(b, i + 1, len, m, fuel - 1) end
 
 (* The NUL-terminated entries of n[s, nlen) to stderr, ", "-separated. *)
 fun prerr_names {ln:agz}{fuel:nat} .<fuel>.
