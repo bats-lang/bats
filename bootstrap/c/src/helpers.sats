@@ -494,13 +494,6 @@ fn lit_staload_dq {l:agz}{n:pos}
 
 
 
-fn lit_target_wasm_binary {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
-
-
-
-
-
 fn lit_while {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
 

@@ -24,6 +24,9 @@ jobs:
           mkdir -p ~/.bats
           ln -sf ~/.ats2/ATS2-Postiats-int-0.4.2 ~/.bats/ats2
 
+      - name: Install wasm-ld (wasm fixtures)
+        run: sudo apt-get install -y -q lld
+
       - name: Build seed compiler from bootstrap/c
         run: |
           cp -R bootstrap/c ~/seed

@@ -300,32 +300,25 @@ in
                 if ~bin_package() then ()
                 else if ~resolve_deps(bv_repo, repo_len) then ()
                 else if ~validate_project() then ()
-                else if only_mask = 0 then let
-                  val () = do_build(0, 0, bv_tc, tc_len)
-                  val () = do_build(1, 0, bv_tc, tc_len)
-                  val () = do_build(0, 1, bv_tc, tc_len)
-                in do_build(1, 1, bv_tc, tc_len) end
                 else let
-                  val bt = (if has_wasm > 0 then 1 else 0): int
-                  val () = (if has_debug > 0 then do_build(0, bt, bv_tc, tc_len) else ())
-                  val () = (if has_release > 0 then do_build(1, bt, bv_tc, tc_len) else ())
-                  val () = (if has_debug = 0 then
-                    if has_release = 0 then do_build(0, bt, bv_tc, tc_len)
-                    else ()
-                  else ())
+                  (* The matrix: an axis --only does not name keeps all
+                     its values (debug and release; native and wasm) *)
+                  val has_native = ((only_mask / 4) mod 2)
+                  val any_prof = (has_debug + has_release = 0): bool
+                  val any_tgt = (has_native + has_wasm = 0): bool
+                  val dbg = (if any_prof then true else has_debug > 0): bool
+                  val rls = (if any_prof then true else has_release > 0): bool
+                  val nat = (if any_tgt then true else has_native > 0): bool
+                  val wsm = (if any_tgt then true else has_wasm > 0): bool
+                  val () = (if nat then (if dbg then do_build(0, 0, bv_tc, tc_len) else ()) else ())
+                  val () = (if nat then (if rls then do_build(1, 0, bv_tc, tc_len) else ()) else ())
+                  val () = (if wsm then (if dbg then do_build(0, 1, bv_tc, tc_len) else ()) else ())
                   val () = (if has_wasm > 0 then
                     if is_to_c() then
                       println! ("error: --to-c wasm is not yet implemented without shell")
                     else ()
                   else ())
-                in
-                  if has_debug = 0 then
-                    if has_release = 0 then
-                      if has_wasm = 0 then do_build(0, 0, bv_tc, tc_len)
-                      else ()
-                    else ()
-                  else ()
-                end
+                in (if wsm then (if rls then do_build(1, 1, bv_tc, tc_len) else ()) else ()) end
               end
               else if cmd_code = 1 then let (* check *)
                 val () = $AP.parse_result_free(r)
