@@ -1636,9 +1636,22 @@ in case+ r of
   | ~$R.err(_) => 0
 end
 
+(* to_c: the --to-c directory in to_c[0, tclen); tclen is 0 when it was
+   not given. *)
 
 
-implement do_build(release, build_target) = let
+
+(* do_build without --to-c *)
+
+
+implement do_build_plain(release, build_target) = let
+  val none = $A.alloc<byte>(4096)
+  val @(fz_n, bv_n) = $A.freeze<byte>(none)
+  val () = do_build(release, build_target, bv_n, 0)
+  val () = $A.drop<byte>(fz_n, bv_n)
+in $A.free<byte>($A.thaw<byte>(fz_n)) end
+
+implement do_build {lt} (release, build_target, to_c, tclen) = let
   val is_unsafe = read_unsafe_flag()
   (* Step 1: mkdir build directories *)
   var mb1 : $B.builder_v = $B.create()
@@ -4252,25 +4265,11 @@ in
       (* --to-c: copy C files and generate Makefile *)
       val () = (if is_to_c() then if get_to_c_done() = 0 then let
         val () = set_to_c_done(1)
-        val tc_p = str_to_path_arr("/tmp/_bpoc_to_c.txt")
-        val @(fz_tcp, bv_tcp) = $A.freeze<byte>(tc_p)
-        val tc_or = $F.file_open(bv_tcp, 524288, 0, 0)
-        val () = $A.drop<byte>(fz_tcp, bv_tcp)
-        val () = $A.free<byte>($A.thaw<byte>(fz_tcp))
-        val () = (case+ tc_or of
-          | ~$R.ok(tcfd) => let
-              val tcb = $A.alloc<byte>(4096)
-              val tcr2 = $F.file_read(tcfd, tcb, 4096)
-              val tcl = (case+ tcr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
-              val tcc = $F.file_close(tcfd)
-              val () = $R.discard<int><int>(tcc)
-              val tcl2 = strip_newline_arr(tcb, tcl)
-              val @(fz_tcb, bv_tcb) = $A.freeze<byte>(tcb)
-            in
-              if tcl2 > 0 then let
+        val () = (
+              if tclen > 0 then let
                 (* mkdir target *)
                 var md : $B.builder_v = $B.create()
-                val () = copy_to_builder_v(bv_tcb, 0, tcl2, 4096, md)
+                val () = copy_to_builder_v(to_c, 0, tclen, 4096, md)
                 val _ = run_mkdir(md)
                 (* cp -r build/ <target>/ — copy all C files *)
                 val cp_exec = str_to_path_arr("cp")
@@ -4279,7 +4278,7 @@ in
                 var cpa2 = $B.create() val () = bput_v(cpa2, "-r")
                 var cpa3 = $B.create() val () = bput_v(cpa3, "build/.")
                 var cpa4 = $B.create()
-                val () = copy_to_builder_v(bv_tcb, 0, tcl2, 4096, cpa4)
+                val () = copy_to_builder_v(to_c, 0, tclen, 4096, cpa4)
                 val () = bput_v(cpa4, "/")
                 val cp_argv = $L.list_vt_cons(mk_arg(cpa1), $L.list_vt_cons(mk_arg(cpa2),
                   $L.list_vt_cons(mk_arg(cpa3), $L.list_vt_cons(mk_arg(cpa4),
@@ -4301,7 +4300,7 @@ in
                 val () = bput_v(mf, "release/bats: $(RELEASE_OBJS)\n\tmkdir -p release\n\t$(CC) -o $@ $^ -O2\n\n")
                 val () = bput_v(mf, "clean:\n\trm -f *.o\n\trm -rf debug release\n")
                 var mfp : $B.builder_v = $B.create()
-                val () = copy_to_builder_v(bv_tcb, 0, tcl2, 4096, mfp)
+                val () = copy_to_builder_v(to_c, 0, tclen, 4096, mfp)
                 val () = bput_v(mfp, "/Makefile")
                 val () = put_char_v(mfp, 0)
                 val @(mfpa, _) = $B.to_arr(mfp)
@@ -4309,16 +4308,9 @@ in
                 val _ = write_file_from_builder(bv_mfp, 524288, mf)
                 val () = $A.drop<byte>(fz_mfp, bv_mfp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_mfp))
-                val () = $A.drop<byte>(fz_tcb, bv_tcb)
-                val () = $A.free<byte>($A.thaw<byte>(fz_tcb))
                 val () = (if ~is_quiet() then println! ("  to-c: generated") else ())
               in end
-              else let
-                val () = $A.drop<byte>(fz_tcb, bv_tcb)
-                val () = $A.free<byte>($A.thaw<byte>(fz_tcb))
-              in end
-            end
-          | ~$R.err(_) => ())
+              else ())
       in end else () else ())
 
       val () = $A.drop<byte>(fz_patshome, bv_patshome)

@@ -38,7 +38,7 @@ staload "emitter.sats"
 implement do_test() = let
   (* Enable test mode so emit includes unittest blocks *)
   val () = set_test_mode(true)
-  val () = do_build(0, 0)
+  val () = do_build_plain(0, 0)
   val () = set_test_mode(false)
   (* Scan source for test function names in $UNITTEST.run blocks *)
   (* Use C helper to scan the source file *)
@@ -1010,7 +1010,7 @@ fun prerr_names {ln:agz}{fuel:nat} .<fuel>.
 
 
 implement do_run {lb,le} (release, bin, blen, extra, elen) = let
-  val () = do_build(release, 0)
+  val () = do_build_plain(release, 0)
   (* The binaries the build produced, NUL-terminated, in name order *)
   var names: $B.builder_v = $B.create()
   val count = collect_built(names, $A.alloc<byte>(256), 0, release, 0, 4096)
@@ -1073,8 +1073,8 @@ end
 
 implement do_check() = let
   val () = clear_build_err()
-  val () = do_build(0, 0)
-  val () = do_build(0, 1)
+  val () = do_build_plain(0, 0)
+  val () = do_build_plain(0, 1)
 in
   if has_build_err() then
     println! ("check failed")
