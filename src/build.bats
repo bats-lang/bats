@@ -1701,6 +1701,12 @@ in
         val b = peek(buf, pos, 512)
         val () = put_char_v(dst, b)
       in arr_to_builder(buf, pos + 1, len, dst, fuel - 1) end
+    (* The download next to the toolchain, as the Rust bats did:
+       <patshome>-postiats-0.4.2.tgz, i.e. ~/.bats/ats2-postiats-0.4.2.tgz *)
+    fn ats2_tarball {l:agz}
+      (buf: !$A.borrow(byte, l, 512), plen: int, dst: !$B.builder_v >> $B.builder_v): void = let
+      val () = arr_to_builder(buf, 0, plen, dst, 512)
+    in bput_v(dst, "-postiats-0.4.2.tgz") end
     fn ensure_ats2 {l:agz}
       (buf: !$A.borrow(byte, l, 512), plen: int): void = let
       (* Check if patsopt exists by trying to stat it *)
@@ -1721,26 +1727,26 @@ in
         var mkb : $B.builder_v = $B.create()
         val () = arr_to_builder(buf, 0, plen, mkb, 512)
         val _ = run_mkdir(mkb)
-        (* curl -sL <url> -o /tmp/_bpoc_ats2.tgz *)
+        (* curl -sL <url> -o <tarball> *)
         val curl_exec = str_to_path_arr("curl")
         val @(fz_ce, bv_ce) = $A.freeze<byte>(curl_exec)
         var ca1 = $B.create() val () = bput_v(ca1, "curl")
         var ca2 = $B.create() val () = bput_v(ca2, "-sL")
         var ca3 = $B.create() val () = bput_v(ca3, "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-int-0.4.2.tgz")
         var ca4 = $B.create() val () = bput_v(ca4, "-o")
-        var ca5 = $B.create() val () = bput_v(ca5, "/tmp/_bpoc_ats2.tgz")
+        var ca5 = $B.create() val () = ats2_tarball(buf, plen, ca5)
         val curl_argv = $L.list_vt_cons(mk_arg(ca1), $L.list_vt_cons(mk_arg(ca2),
           $L.list_vt_cons(mk_arg(ca3), $L.list_vt_cons(mk_arg(ca4),
           $L.list_vt_cons(mk_arg(ca5), $L.list_vt_nil())))))
         val r1 = run_cmd(bv_ce, curl_argv)
         val () = $A.drop<byte>(fz_ce, bv_ce)
         val () = $A.free<byte>($A.thaw<byte>(fz_ce))
-        (* tar -xzf /tmp/_bpoc_ats2.tgz --strip-components=1 -C <patshome> *)
+        (* tar -xzf <tarball> --strip-components=1 -C <patshome> *)
         val tar_exec = str_to_path_arr("tar")
         val @(fz_te, bv_te) = $A.freeze<byte>(tar_exec)
         var ta1 = $B.create() val () = bput_v(ta1, "tar")
         var ta2 = $B.create() val () = bput_v(ta2, "-xzf")
-        var ta3 = $B.create() val () = bput_v(ta3, "/tmp/_bpoc_ats2.tgz")
+        var ta3 = $B.create() val () = ats2_tarball(buf, plen, ta3)
         var ta4 = $B.create() val () = bput_v(ta4, "--strip-components=1")
         var ta5 = $B.create() val () = bput_v(ta5, "-C")
         var ta6 = $B.create()
@@ -1752,11 +1758,11 @@ in
         val r2 = run_cmd(bv_te, tar_argv)
         val () = $A.drop<byte>(fz_te, bv_te)
         val () = $A.free<byte>($A.thaw<byte>(fz_te))
-        (* rm /tmp/_bpoc_ats2.tgz *)
+        (* rm <tarball> *)
         val rm_exec = str_to_path_arr("rm")
         val @(fz_re, bv_re) = $A.freeze<byte>(rm_exec)
         var ra1 = $B.create() val () = bput_v(ra1, "rm")
-        var ra2 = $B.create() val () = bput_v(ra2, "/tmp/_bpoc_ats2.tgz")
+        var ra2 = $B.create() val () = ats2_tarball(buf, plen, ra2)
         val rm_argv = $L.list_vt_cons(mk_arg(ra1),
           $L.list_vt_cons(mk_arg(ra2), $L.list_vt_nil()))
         val _ = run_cmd(bv_re, rm_argv)
