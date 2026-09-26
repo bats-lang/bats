@@ -1,0 +1,128 @@
+=== 1 rc=1
+error: parse error in './bats.toml': TOML parse error at line 1, column 9
+  |
+1 | [package
+  |         ^
+invalid table header
+expected `.`, `]`
+
+=== 2 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 10
+  |
+2 | name = "x
+  |          ^
+invalid basic string
+
+=== 3 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 8
+  |
+2 | name = x
+  |        ^
+invalid string
+expected `"`, `'`
+
+=== 4 rc=1
+error: parse error in './bats.toml': TOML parse error at line 3, column 1
+  |
+3 | name = "y"
+  | ^
+duplicate key `name` in table `package`
+
+=== 5 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 6
+  |
+2 | name "x"
+  |      ^
+expected `.`, `=`
+
+=== 6 rc=1
+error: parse error in './bats.toml': TOML parse error at line 1, column 10
+  |
+1 | [package]]
+  |          ^
+invalid table header
+expected newline, `#`
+
+=== 7 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 12
+  |
+2 | name = "a" extra
+  |            ^
+expected newline, `#`
+
+=== 8 rc=1
+error: parse error in './bats.toml': TOML parse error at line 3, column 1
+  |
+3 | [package]
+  | ^
+invalid table header
+duplicate key `package` in document root
+
+=== 9 rc=1
+error: parse error in './bats.toml': TOML parse error at line 1, column 5
+  |
+1 | name
+  |     ^
+expected `.`, `=`
+
+=== 10 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 1
+  |
+2 | = "a"
+  | ^
+invalid key
+
+=== 11 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 8
+  |
+2 | name = 
+  |        ^
+invalid string
+expected `"`, `'`
+
+=== 12 rc=1
+error: parse error in './bats.toml': TOML parse error at line 1, column 2
+  |
+1 | []
+  |  ^
+invalid key
+
+=== 13 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 12
+  |
+2 | name = "a\q"
+  |            ^
+invalid escape sequence
+expected `b`, `f`, `n`, `r`, `t`, `u`, `U`, `\`, `"`
+
+=== 14 rc=1
+error: parse error in './bats.toml': TOML parse error at line 1, column 7
+  |
+1 | [pack age]
+  |       ^
+invalid table header
+expected `.`, `]`
+
+=== 15 rc=0
+generated docs (1 module(s))
+check passed (library)
+=== 16 rc=1
+error: parse error in './bats.toml': TOML parse error at line 5, column 1
+  |
+5 | arith = ">= 1"
+  | ^
+duplicate key `arith` in table `dependencies`
+
+=== 17 rc=1
+error: parse error in './bats.toml': TOML parse error at line 2, column 1
+  |
+2 | x = 2
+  | ^
+duplicate key `x` in document root
+
+=== 18 rc=0
+generated docs (1 module(s))
+check passed (library)
+=== 19 rc=0
+generated docs (1 module(s))
+check passed (library)

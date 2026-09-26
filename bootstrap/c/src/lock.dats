@@ -920,6 +920,20 @@ fn finish_check (kind: int, doc: !$T.toml_doc, s: pos_t, e: int, m: $B.builder_v
    first [package] field of the wrong type, in the file's order, else a
    missing [package], else a missing name, written to err as the toml
    crate reports it; whether there was none *)
+(* The toml crate's syntax error in doc, if any, to err (config::load's
+   toml::from_str fails before serde reads a field); whether there was
+   none *)
+fn syntax_check (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): bool = let
+  val mb = $A.alloc<byte>(512)
+  val @(off, k) = $T.syntax_error(doc, mb, 512)
+  val @(fz_m, bv_m) = $A.freeze<byte>(mb)
+  var m : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv_m, 0, k, 512, m)
+  val () = $A.drop<byte>(fz_m, bv_m)
+  val () = $A.free<byte>($A.thaw<byte>(fz_m))
+  val s = (if off < 0 then 0 else off): pos_t
+in finish_check((if off < 0 then 0 else 1): int, doc, s, s, m, err) end
+
 fn serde_check (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): bool = let
   var n_c = @[char][4]('n', 'a', 'm', 'e')
   var k_c = @[char][4]('k', 'i', 'n', 'd')
@@ -960,7 +974,7 @@ in finish_check(kind, doc, sp, ep, m, err) end
 fn config_cons {ls:agz}
   (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: int,
    err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
-  val ok = serde_check(doc, err)
+  val ok = (if syntax_check(doc, err) then serde_check(doc, err) else false): bool
   val kind = (if ok then doc_kind(doc, err) else ~1): int
 in
   if kind < 0 then @(~1, cons_nil())
