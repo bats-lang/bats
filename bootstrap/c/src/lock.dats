@@ -1637,6 +1637,45 @@ fn report_missing {nm:nat} (missing: names(nm)): void = let
   val () = names_free(missing)
 in prerr_builder(m) end
 
+(* kind, after printing err and failing when kind < 0; consumes err *)
+fn report_config (kind: int, err: $B.builder_v): int =
+  if kind < 0 then let
+    var e : $B.builder_v = err
+    val () = put_char_v(e, 10)
+    val () = prerr_builder(e)
+    val () = set_build_err()
+  in kind end
+  else let
+    val () = $B.builder_free(err)
+  in kind end
+
+(* The project's kind as Rust's config::load reads bats.toml: 1 for lib,
+   2 for bin, or ~1 after printing its error (a bats.toml that cannot be
+   read, an unknown kind, a constraint that does not parse, a path
+   dependency in a lib package) *)
+
+
+implement project_kind () = let
+  var err : $B.builder_v = $B.create()
+  val () = bput_v(err, "error: ")
+  val kind = (case+ read_toml(str_to_path_arr("bats.toml")) of
+    | ~$R.err(e) => let
+        val () = put_cannot_read(e, err)
+      in ~1 end
+    | ~$R.ok(doc) => let
+        val nb = $A.alloc<byte>(256)
+        val @(st, cs) = config_cons(doc, nb, 0, err)
+        val () = cons_free(cs)
+        val () = $A.free<byte>(nb)
+        var quiet_err : $B.builder_v = $B.create()
+        val k = (if st < 0 then ~1 else doc_kind(doc, quiet_err)): int
+        val () = $B.builder_free(quiet_err)
+        val () = $T.toml_free(doc)
+      in k end): int
+in
+  report_config(kind, err)
+end
+
 (* Before build, check or test: every #use package of src/ that is not a
    path dependency must be in bats_modules; the missing ones are fetched
    from the repository repo[0, rplen), or reported when there is none
