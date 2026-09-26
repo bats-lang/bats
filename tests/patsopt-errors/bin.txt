@@ -1,0 +1,8 @@
+error: patsopt error:
+X/src/bin/po.bats: 63(line=3, offs=5) -- 69(line=3, offs=11): error(3): the pattern cannot be given the ascribed type.
+X/src/bin/po.bats: 63(line=3, offs=5) -- 69(line=3, offs=11): error(3): mismatch of static terms (tyleq):
+The actual term is: S2Eapp(S2Ecst(string_int_type); S2Eint(1))
+The needed term is: S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int))
+patsopt(TRANS3): there are [1] errors in total.
+exit(ATS): uncaught exception: _2tmp_2ATS_2dPostiats_2src_2pats_error_2esats__FatalErrorExn(1025)
+

@@ -1407,8 +1407,8 @@ implement do_check() = let
   val () = do_build_plain(0, 0)
   val () = do_build_plain(0, 1)
 in
-  if has_build_err() then
-    println! ("check failed")
+  (* The error is already reported, as Rust's check reports it *)
+  if has_build_err() then ()
   else let
     val kind = generate_lib_docs()
   in

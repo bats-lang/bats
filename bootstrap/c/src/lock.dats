@@ -94,21 +94,6 @@ fn put_name {la:agz}
   (a: !$A.arr(byte, la, 256), k: int, out: !$B.builder_v >> $B.builder_v): void =
   put_bytes(a, 0, k, out, 256)
 
-(* b's bytes to stderr; consumes b *)
-fn prerr_builder (b: $B.builder_v): void = let
-  val @(ba, bl) = $B.to_arr(b)
-  fun loop {lb:agz}{f:nat} .<f>.
-    (a: !$A.arr(byte, lb, 524288), i: pos_t, n: int, f: int f): void =
-    if f <= 0 then ()
-    else if i >= n then ()
-    else if i < 0 then ()
-    else if i >= 524288 then ()
-    else let
-      val () = prerr_char(int2char0(byte2int0($A.get<byte>(a, i))))
-    in loop(a, i + 1, n, f - 1) end
-  val () = loop(ba, 0, bl, 524288)
-in $A.free<byte>(ba) end
-
 (* ============================================================
    The #use packages of a directory (Rust: collect_packages)
    ============================================================ *)

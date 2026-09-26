@@ -18,8 +18,8 @@ printf '#pub fun g (): int\n\nimplement g () = "not an int"\n' > src/other.bats
 if "$BATS" check --repository "$REPO" > check.log 2>&1; then
   echo "FAIL: type error in src/other.bats passed check"; cat check.log; rm -f check.log; cleanup; exit 1
 fi
-grep -q "patsopt failed for build/src/other.dats" check.log || {
-  echo "FAIL: check failed without naming src/other.dats"; cat check.log; rm -f check.log; cleanup; exit 1; }
+grep -q "^/.*/src/other.bats: .*(line=3, " check.log || {
+  echo "FAIL: check failed without naming src/other.bats"; cat check.log; rm -f check.log; cleanup; exit 1; }
 printf '#pub fun g (): int\n\nimplement g () = 1\n' > src/other.bats
 rm -rf build
 "$BATS" check --repository "$REPO" > check.log 2>&1 || {
