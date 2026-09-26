@@ -513,6 +513,17 @@ fn lit_while {l:agz}{n:pos}
 
 
 
+
+fun prerr_seg {l:agz}{m:pos}{fuel:nat}
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void
+
+
+
+
+
+
+
+
 fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int n,
    fuel: int fuel): void
 

@@ -523,7 +523,6 @@ implement do_build_wasm(release) = let
   val () = put_char_v(db, 0)
   val @(dba, _) = $B.to_arr(db)
   val @(fz_db, bv_db) = $A.freeze<byte>(dba)
-  val () = println! ("  compiling WASM...")
   (* Compile entry *)
   var eb : $B.builder_v = $B.create()
   val () = bput_v(eb, "build/_bats_entry_")
@@ -925,7 +924,6 @@ implement do_build_wasm(release) = let
         val () = $R.discard<int><int>(dcr7)
       in bc end
     | ~$R.err(_) => let val () = bput_v(link_b, "") in link_count3 end): int
-  val () = println! ("  linking WASM...")
   var mb1 : $B.builder_v = $B.create()
   val () = bput_v(mb1, "dist")
   val _ = run_mkdir(mb1)
@@ -1462,12 +1460,6 @@ in
                                       val () = print! ("/")
                                       val () = print_borrow(bv_se, 0, sel, 256, 256)
                                     in print_newline() end
-                                    else if ~is_quiet() then let
-                                      val () = print! ("  preprocessed dep: ")
-                                      val () = print_borrow(ns_bv, 0, ns_len, 256, 256)
-                                      val () = print! ("/")
-                                      val () = print_borrow(bv_se, 0, sel, 256, 256)
-                                    in print_newline() end
                                     else ())
                                     val () = $A.drop<byte>(fz_sp2, bv_sp2)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_sp2))
@@ -1550,10 +1542,6 @@ in
                                                     val @(fz_sdn, bv_sdn) = $A.freeze<byte>(sda_ns)
                                                     val pr_ns = preprocess_one(bv_spn, bv_ssn, bv_sdn, build_target, 1, target_changed)
                                                     val () = (if pr_ns <> 0 then ()
-                                                    else if ~is_quiet() then let
-                                                      val () = print! ("  preprocessed dep extra: ")
-                                                      val () = print_borrow(bv_ens, 0, elen_ns, 256, 256)
-                                                    in print_newline() end
                                                     else ())
                                                     val () = $A.drop<byte>(fz_spn, bv_spn)
                                                     val () = $A.free<byte>($A.thaw<byte>(fz_spn))
@@ -1626,10 +1614,6 @@ in
                       val () = print! ("warning: preprocess failed for dep ")
                       val () = print_borrow(bv_e, 0, elen, 256, 256)
                     in print_newline() end
-                    else if ~is_quiet() then let
-                      val () = print! ("  preprocessed dep: ")
-                      val () = print_borrow(bv_e, 0, elen, 256, 256)
-                    in print_newline() end
                     else ())
                     (* Scan additional .bats files in this dep *)
                     var dep_src_b : $B.builder_v = $B.create()
@@ -1700,10 +1684,6 @@ in
                                       val () = print! ("warning: preprocess failed for extra file in dep ")
                                       val () = print_borrow(dep_bv, 0, dep_len, 256, 256)
                                     in print_newline() end
-                                    else if ~is_quiet() then let
-                                      val () = print! ("  preprocessed dep extra: ")
-                                      val () = print_borrow(bv_ex, 0, elen_ex, 256, 256)
-                                    in print_newline() end
                                     else ())
                                     val () = $A.drop<byte>(fz_spa, bv_spa)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_spa))
@@ -1740,8 +1720,7 @@ in
             val dcr = $F.dir_close(d)
             val () = $R.discard<int><int>(dcr)
           in end
-        | ~$R.err(_) =>
-            println! ("warning: no bats_modules/ directory"))
+        | ~$R.err(_) => ())
 
       (* Step 3b: Preprocess src/*.bats shared modules *)
       val sm_arr = str_to_path_arr("src")
@@ -1797,10 +1776,6 @@ in
                     val () = (if pr_sm <> 0 then let
                       val () = set_build_err()
                       val () = print! ("warning: preprocess failed for src/")
-                      val () = print_borrow(bv_esm, 0, elen_sm, 256, 256)
-                    in print_newline() end
-                    else if ~is_quiet() then let
-                      val () = print! ("  preprocessed: src/")
                       val () = print_borrow(bv_esm, 0, elen_sm, 256, 256)
                     in print_newline() end
                     else ())
@@ -2268,10 +2243,6 @@ in
                       val () = print! ("error: preprocess failed for ")
                       val () = print_borrow(bv_e, 0, elen, 256, 256)
                     in print_newline() end
-                    else if ~is_quiet() then let
-                      val () = print! ("  preprocessed: src/bin/")
-                      val () = print_borrow(bv_e, 0, elen, 256, 256)
-                    in print_newline() end
                     else ())
                     (* Step 5: Generate synthetic entry *)
                     var entry : $B.builder_v = $B.create()
@@ -2356,7 +2327,6 @@ in
                     val () = (if ew <> 0 then let
                       val () = set_build_err()
                     in println! ("error: failed to write synthetic entry") end
-                      else if ~is_quiet() then println! ("  generated synthetic entry")
                       else ())
 
                     (* Step 6: Run patsopt on all .dats files *)
@@ -2459,12 +2429,6 @@ in
                                                     val () = print! ("/")
                                                     val () = print_borrow(bv_sde, 0, sel, 256, 256)
                                                   in print_newline() end
-                                                  else if ~is_quiet() then let
-                                                    val () = print! ("  patsopt: ")
-                                                    val () = print_borrow(ns_name, 0, ns_len, 256, 256)
-                                                    val () = print! ("/")
-                                                    val () = print_borrow(bv_sde, 0, sel, 256, 256)
-                                                  in print_newline() end
                                                   else ())
                                                   (* patsopt extra .dats in this sub-package *)
                                                   var peb : $B.builder_v = $B.create()
@@ -2529,10 +2493,6 @@ in
                                   in (if rc <> 0 then let
                                     val () = set_build_err()
                                     val () = print! ("error: patsopt failed for dep ")
-                                    val () = print_borrow(bv_de, 0, dlen, 256, 256)
-                                  in print_newline() end
-                                  else if ~is_quiet() then let
-                                    val () = print! ("  patsopt: ")
                                     val () = print_borrow(bv_de, 0, dlen, 256, 256)
                                   in print_newline() end
                                   else ()) end)
@@ -2616,10 +2576,6 @@ in
                                                   in (if rc3 <> 0 then let
                                                     val () = set_build_err()
                                                     val () = print! ("error: patsopt failed for extra ")
-                                                    val () = print_borrow(bv_d3, 0, dl3, 256, 256)
-                                                  in print_newline() end
-                                                  else if ~is_quiet() then let
-                                                    val () = print! ("  patsopt extra: ")
                                                     val () = print_borrow(bv_d3, 0, dl3, 256, 256)
                                                   in print_newline() end
                                                   else ()) end)
@@ -2710,10 +2666,6 @@ in
                                     val () = print! ("error: patsopt failed for src module ")
                                     val () = print_borrow(bv_dpsm, 0, dl_psm, 256, 256)
                                   in print_newline() end
-                                  else if ~is_quiet() then let
-                                    val () = print! ("  patsopt: src/")
-                                    val () = print_borrow(bv_dpsm, 0, dl_psm, 256, 256)
-                                  in print_newline() end
                                   else ()) end)
                                   val () = $A.drop<byte>(fz_dpsm, bv_dpsm)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_dpsm))
@@ -2766,7 +2718,6 @@ in
                     in (if rbp <> 0 then let
                       val () = set_build_err()
                     in println! ("error: patsopt failed for binary") end
-                      else if ~is_quiet() then println! ("  patsopt: binary")
                       else ()) end)
 
                     (* patsopt for synthetic entry *)
@@ -2806,7 +2757,6 @@ in
                     in (if rep <> 0 then let
                       val () = set_build_err()
                     in println! ("error: patsopt failed for entry") end
-                      else if ~is_quiet() then println! ("  patsopt: entry")
                       else ()) end)
 
                     (* Step 7: clang compile all _dats.c -- skip when --to-c *)
@@ -3155,7 +3105,6 @@ in
                       val _ = write_wasm_stubs()
                       val wrt_rc = compile_wasm_runtime()
                       val () = (if wrt_rc <> 0 then let val () = set_build_err() in println! ("error: WASM runtime compile failed") end else ())
-                      val () = println! ("  compiling WASM...")
                       (* Compile entry _dats.c *)
                       var we_b : $B.builder_v = $B.create()
                       val () = bput_v(we_b, "build/_bats_entry_")
@@ -3381,7 +3330,6 @@ in
                       var mb_w2 : $B.builder_v = $B.create()
                       val () = bput_v(mb_w2, "dist/wasm")
                       val _ = run_mkdir(mb_w2)
-                      val () = println! ("  linking WASM...")
                       val wld_exec = str_to_path_arr("wasm-ld")
                       val @(fz_wld, bv_wld) = $A.freeze<byte>(wld_exec)
                       val wl_list = split_null_to_list(wl)
@@ -3590,10 +3538,13 @@ in
                       if ~is_quiet() then
                         if bin_bt > 0 then println! ("  built: dist/wasm/app.wasm")
                         else let
-                          val () = (if rel > 0 then print! ("  built: dist/release/")
-                            else print! ("  built: dist/debug/"))
-                          val () = print_borrow(bv_e, 0, stem_len, 256, 256)
-                        in print_newline() end
+                          (* Rust: "built <exe> (<profile>)" on stderr *)
+                          val () = (if rel > 0 then prerr! ("built ./dist/release/")
+                            else prerr! ("built ./dist/debug/"))
+                          val () = prerr_seg(bv_e, 0, stem_len, 256, 256)
+                        in
+                          if rel > 0 then prerr! (" (release)\n") else prerr! (" (debug)\n")
+                        end
                       else ()
                     else let val () = set_build_err() in println! ("error: link failed") end)
                     val () = $A.drop<byte>(fz_e, bv_e)
@@ -3639,7 +3590,6 @@ in
           val () = (if lrc <> 0 then let
             val () = set_build_err()
           in println! ("error: patsopt failed for src/lib.bats") end
-          else if ~is_quiet() then println! ("  patsopt: src/lib.bats")
           else ())
           (* The library's other modules: type-check them too, or an
              error in one only shows up in some consumer's build. *)
