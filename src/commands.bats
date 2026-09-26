@@ -34,7 +34,7 @@ implement do_test() = let
   (* Use C helper to scan the source file *)
   val src_arr = str_to_path_arr("src/bin")
   val @(fz_sa, bv_sa) = $A.freeze<byte>(src_arr)
-  val dir_r = $F.dir_open(bv_sa, 524288)
+  val dir_r = $F.dir_read(bv_sa, 524288)
   val () = $A.drop<byte>(fz_sa, bv_sa)
   val () = $A.free<byte>($A.thaw<byte>(fz_sa))
   val found_tests = $A.alloc<byte>(1)
@@ -42,20 +42,18 @@ implement do_test() = let
 in
   case+ dir_r of
   | ~$R.ok(sd) => let
-      fun scan_test_dir {lft:agz}{fuel:nat} .<fuel>.
-        (sd: !$F.dir, ft: !$A.arr(byte, lft, 1), fuel: int fuel): void =
-        if fuel <= 0 then ()
+      fun scan_test_dir {n,i:nat | i <= n}{lft:agz} .<n - i>.
+        (sd: !$F.entries(n), i: int i, n: int n, ft: !$A.arr(byte, lft, 1)): void =
+        if i >= n then ()
         else let
           val ent = $A.alloc<byte>(256)
-          val nr = $F.dir_next(sd, ent, 256)
-          val elen = dir_name_len(nr)
+          val elen = $F.entries_name(sd, i, ent, 256)
         in
-          if elen < 0 then $A.free<byte>(ent)
-          else let
+          let
             val ddd = is_dot_or_dotdot(ent, elen, 256)
             val bb = has_bats_ext(ent, elen, 256)
           in
-            if ddd then let val () = $A.free<byte>(ent) in scan_test_dir(sd, ft, fuel - 1) end
+            if ddd then let val () = $A.free<byte>(ent) in scan_test_dir(sd, i + 1, n, ft) end
             else if bb then let
               (* Read source file *)
               var spath = $B.create()
@@ -92,13 +90,12 @@ in
                     in () end
                   end
                 | ~$R.err(_) => ())
-            in scan_test_dir(sd, ft, fuel - 1) end
-            else let val () = $A.free<byte>(ent) in scan_test_dir(sd, ft, fuel - 1) end
+            in scan_test_dir(sd, i + 1, n, ft) end
+            else let val () = $A.free<byte>(ent) in scan_test_dir(sd, i + 1, n, ft) end
           end
         end
-      val () = scan_test_dir(sd, found_tests, 200)
-      val dcr = $F.dir_close(sd)
-      val () = $R.discard<int><int>(dcr)
+      val () = scan_test_dir(sd, 0, $F.entries_count(sd), found_tests)
+      val () = $F.entries_free(sd)
       val ft0 = byte2int0($A.get<byte>(found_tests, 0))
       val () = $A.free<byte>(found_tests)
     in
@@ -1240,42 +1237,8 @@ fun extra_arg_list {l:agz}{fuel:nat} .<fuel>.
     val () = copy_to_builder_v(bv, start, e, 4096, wb)
   in extra_arg_list(bv, np + 1, total, $L.list_vt_cons(mk_arg(wb), acc), fuel - 1) end
 
-(* Appends to names, each NUL-terminated and in name order, every NAME
-   of src/bin/NAME.bats for which the build produced dist/<mode>/NAME;
-   returns how many. *)
-fun collect_built {lq:agz}{fuel:nat} .<fuel>.
-  (names: !$B.builder_v >> $B.builder_v, prev: $A.arr(byte, lq, 256), prev_len: int,
-   release: int, count: int, fuel: int fuel): int =
-  if fuel <= 0 then let
-    val () = $A.free<byte>(prev)
-  in count end
-  else let
-    val sb = str_to_path_arr("src/bin")
-    val @(fz_sb, bv_sb) = $A.freeze<byte>(sb)
-    val @(fz_pv, bv_pv) = $A.freeze<byte>(prev)
-    val @(ent, el) = dir_next_sorted(bv_sb, 524288, bv_pv, prev_len)
-    val () = $A.drop<byte>(fz_pv, bv_pv)
-    val () = $A.free<byte>($A.thaw<byte>(fz_pv))
-    val () = $A.drop<byte>(fz_sb, bv_sb)
-    val () = $A.free<byte>($A.thaw<byte>(fz_sb))
-  in
-    if el < 0 then let
-      val () = $A.free<byte>(ent)
-    in count end
-    else if ~has_bats_ext(ent, el, 256) then
-      collect_built(names, ent, el, release, count, fuel - 1)
-    else let
-      val @(fz_e, bv_e) = $A.freeze<byte>(ent)
-      val built = is_built(bv_e, el - 5, release)
-      val () = (if built then add_name(names, bv_e, el - 5) else ())
-      val () = $A.drop<byte>(fz_e, bv_e)
-      val ent = $A.thaw<byte>(fz_e)
-      val inc = (if built then 1 else 0): int
-    in collect_built(names, ent, el, release, count + inc, fuel - 1) end
-  end
-
 (* Whether dist/<mode>/NAME exists, for NAME = ent[0, len). *)
-and is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): bool = let
+fn is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): bool = let
   var pb: $B.builder_v = $B.create()
   val () = (if release > 0 then bput_v(pb, "dist/release/") else bput_v(pb, "dist/debug/"))
   val () = copy_to_builder_v(ent, 0, len, 256, pb)
@@ -1289,10 +1252,47 @@ and is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): 
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in built end
 
-and add_name {le:agz}
+fn add_name {le:agz}
   (names: !$B.builder_v >> $B.builder_v, ent: !$A.borrow(byte, le, 256), len: int): void = let
   val () = copy_to_builder_v(ent, 0, len, 256, names)
 in put_char_v(names, 0) end
+
+(* Appends to names, each NUL-terminated and in name order, every NAME
+   of src/bin/NAME.bats (entries i.. of es) for which the build produced
+   dist/<mode>/NAME; returns count plus how many. *)
+fun collect_built_from {n,i:nat | i <= n} .<n - i>.
+  (es: !$F.entries(n), i: int i, n: int n,
+   names: !$B.builder_v >> $B.builder_v, release: int, count: int): int =
+  if i >= n then count
+  else let
+    val ent = $A.alloc<byte>(256)
+    val el = $F.entries_name(es, i, ent, 256)
+  in
+    if ~has_bats_ext(ent, el, 256) then let
+      val () = $A.free<byte>(ent)
+    in collect_built_from(es, i + 1, n, names, release, count) end
+    else let
+      val @(fz_e, bv_e) = $A.freeze<byte>(ent)
+      val built = is_built(bv_e, el - 5, release)
+      val () = (if built then add_name(names, bv_e, el - 5) else ())
+      val () = $A.drop<byte>(fz_e, bv_e)
+      val () = $A.free<byte>($A.thaw<byte>(fz_e))
+      val inc = (if built then 1 else 0): int
+    in collect_built_from(es, i + 1, n, names, release, count + inc) end
+  end
+
+fn collect_built (names: !$B.builder_v >> $B.builder_v, release: int): int = let
+  val sb = str_to_path_arr("src/bin")
+  val @(fz_sb, bv_sb) = $A.freeze<byte>(sb)
+  val count = (case+ $F.dir_read(bv_sb, 524288) of
+    | ~$R.ok(es) => let
+        val c = collect_built_from(es, 0, $F.entries_count(es), names, release, 0)
+        val () = $F.entries_free(es)
+      in c end
+    | ~$R.err(_) => 0): int
+  val () = $A.drop<byte>(fz_sb, bv_sb)
+  val () = $A.free<byte>($A.thaw<byte>(fz_sb))
+in count end
 
 (* Appends the chosen binary's name: bin[0, blen) for 0, the first
    entry of n for 1, nothing otherwise. *)
@@ -1344,7 +1344,7 @@ implement do_run {lb,le} (release, bin, blen, extra, elen) = let
   val () = do_build_plain(release, 0)
   (* The binaries the build produced, NUL-terminated, in name order *)
   var names: $B.builder_v = $B.create()
-  val count = collect_built(names, $A.alloc<byte>(256), 0, release, 0, 4096)
+  val count = collect_built(names, release)
   val @(na, nlen) = $B.to_arr(names)
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
   (* As the Rust bats: --bin names one of them; without it there must be

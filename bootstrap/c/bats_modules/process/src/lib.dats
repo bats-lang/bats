@@ -128,25 +128,33 @@ static int _proc_spawn(
     return -(e > 0 ? e : 1);
   }
 
-  const char *argv_ptrs[256];
-  int ai = 0;
-  const char *p = argv_buf;
-  int i;
-  for (i = 0; i < argv_count && ai < 255; i++) {
-    argv_ptrs[ai++] = p;
-    p += strlen(p) + 1;
-  }
-  argv_ptrs[ai] = (const char *)0;
-
   /* envp_count >= 0: exactly the envp_count entries of envp_buf.
      envp_count = -(k + 1): the parent's environment, with the k
      NAME=VALUE entries of envp_buf added or replacing. */
   int inherit = envp_count < 0;
   int nlist = inherit ? -envp_count - 1 : envp_count;
-  const char *envp_ptrs[256];
+  /* Sized by the counts: every argument and entry is passed */
+  const char **argv_ptrs = (const char **)malloc(((size_t)(argv_count > 0 ? argv_count : 0) + 1) * sizeof(char *));
+  const char **envp_ptrs = (const char **)malloc(((size_t)(nlist > 0 ? nlist : 0) + 1) * sizeof(char *));
+  if (!argv_ptrs || !envp_ptrs) {
+    free(argv_ptrs); free(envp_ptrs);
+    close(exec_err[0]); close(exec_err[1]);
+    if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
+    if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
+    if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
+    return -ENOMEM;
+  }
+  int ai = 0;
+  const char *p = argv_buf;
+  int i;
+  for (i = 0; i < argv_count; i++) {
+    argv_ptrs[ai++] = p;
+    p += strlen(p) + 1;
+  }
+  argv_ptrs[ai] = (const char *)0;
   int ei = 0;
   p = envp_buf;
-  for (i = 0; i < nlist && ei < 255; i++) {
+  for (i = 0; i < nlist; i++) {
     envp_ptrs[ei++] = p;
     p += strlen(p) + 1;
   }
@@ -159,6 +167,7 @@ static int _proc_spawn(
     while (environ[n]) n++;
     envv = (char **)malloc((n + (size_t)ei + 1) * sizeof(char *));
     if (!envv) {
+      free(argv_ptrs); free(envp_ptrs);
       close(exec_err[0]); close(exec_err[1]);
       if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
       if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
@@ -179,7 +188,7 @@ static int _proc_spawn(
   int pid = fork();
   if (pid < 0) {
     int e = errno;
-    free(envv);
+    free(envv); free(argv_ptrs); free(envp_ptrs);
     close(exec_err[0]); close(exec_err[1]);
     if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
     if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
@@ -220,7 +229,7 @@ static int _proc_spawn(
     _exit(127);
   }
 
-  free(envv);
+  free(envv); free(argv_ptrs); free(envp_ptrs);
   close(exec_err[1]);
   {
     int e = 0;

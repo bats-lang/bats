@@ -1109,19 +1109,16 @@ end
 (* The newest version among the archives in the directory d whose names
    start with pfx[0, pl) that meets the constraints cs on the package
    a[0, k); dev versions only when dev *)
-fun scan_versions {lp,la:agz}{nc:nat}{fuel:nat} .<fuel>.
-  (d: !$F.dir, pfx: !$A.borrow(byte, lp, 524288), pl: pos_t, dev: bool,
+fun scan_versions {n,i:nat | i <= n}{lp,la:agz}{nc:nat} .<n - i>.
+  (d: !$F.entries(n), i: int i, n: int n, pfx: !$A.borrow(byte, lp, 524288), pl: pos_t, dev: bool,
    cs: !cons(nc), a: !$A.arr(byte, la, 256), k: int,
-   best: $R.option(cand), fuel: int fuel): $R.option(cand) =
-  if fuel <= 0 then best
+   best: $R.option(cand)): $R.option(cand) =
+  if i >= n then best
   else let
     val e = $A.alloc<byte>(256)
-    val el = dir_name_len($F.dir_next(d, e, 256))
+    val el = $F.entries_name(d, i, e, 256)
   in
-    if el < 0 then let
-      val () = $A.free<byte>(e)
-    in best end
-    else let
+    let
       val @(fz_e, bv_e) = $A.freeze<byte>(e)
       val c = (if is_archive_of(bv_e, el, pfx, pl)
                then file_cand(bv_e, pl, el - 5) else $R.none()): $R.option(cand)
@@ -1137,7 +1134,7 @@ fun scan_versions {lp,la:agz}{nc:nat}{fuel:nat} .<fuel>.
           in best end
           else keep_newer(best, cv)
         | ~$R.none() => best): $R.option(cand)
-    in scan_versions(d, pfx, pl, dev, cs, a, k, best2, fuel - 1) end
+    in scan_versions(d, i + 1, n, pfx, pl, dev, cs, a, k, best2) end
   end
 
 (* The name a[0, k) with '/' made '_', then '_' (Rust: package_to_prefix) *)
@@ -1168,7 +1165,7 @@ fn find_latest {lr,la:agz}{nc:nat}
   val () = put_char_v(dp, 0)
   val @(da, _) = $B.to_arr(dp)
   val @(fz_d, bv_d) = $A.freeze<byte>(da)
-  val dr = $F.dir_open(bv_d, 524288)
+  val dr = $F.dir_read(bv_d, 524288)
   val () = $A.drop<byte>(fz_d, bv_d)
   val () = $A.free<byte>($A.thaw<byte>(fz_d))
   var pb : $B.builder_v = $B.create()
@@ -1178,8 +1175,8 @@ fn find_latest {lr,la:agz}{nc:nat}
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   val r = (case+ dr of
     | ~$R.ok(d) => let
-        val best = scan_versions(d, bv_p, pl, dev, cs, a, k, $R.none(), 65536)
-        val () = $R.discard<int><int>($F.dir_close(d))
+        val best = scan_versions(d, 0, $F.entries_count(d), bv_p, pl, dev, cs, a, k, $R.none())
+        val () = $F.entries_free(d)
       in best end
     | ~$R.err(_) => $R.none()): $R.option(cand)
   val () = $A.drop<byte>(fz_p, bv_p)
@@ -2058,20 +2055,18 @@ fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
     in true end
   | ~$R.err(_) => false
 
-(* Copies the entries of the open directory d, at s[0, sl), into
-   d[0, dl) (Rust: copy_dir_recursive); false on an error *)
-fun copy_entries {ls,ld:agz}{f:nat} .<f, 0>.
-  (dir: !$F.dir, s: !$A.borrow(byte, ls, 524288), sl: int,
+(* Copies entries i.. of the directory at s[0, sl) into d[0, dl)
+   (Rust: copy_dir_recursive); false on an error. f bounds the depth
+   still allowed, far past what a path can reach *)
+fun copy_entries {n,i:nat | i <= n}{ls,ld:agz}{f:nat} .<f, 0, n - i>.
+  (dir: !$F.entries(n), i: int i, n: int n, s: !$A.borrow(byte, ls, 524288), sl: int,
    d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool =
-  if f <= 0 then true
+  if i >= n then true
   else let
     val e = $A.alloc<byte>(256)
-    val el = dir_name_len($F.dir_next(dir, e, 256))
+    val el = $F.entries_name(dir, i, e, 256)
   in
-    if el < 0 then let
-      val () = $A.free<byte>(e)
-    in true end
-    else let
+    let
       val @(fz_e, bv_e) = $A.freeze<byte>(e)
       val @(ca, cl) = child_path(s, sl, bv_e, el)
       val @(da, dl2) = child_path(d, dl, bv_e, el)
@@ -2079,7 +2074,7 @@ fun copy_entries {ls,ld:agz}{f:nat} .<f, 0>.
       val @(fz_d, bv_d) = $A.freeze<byte>(da)
       val is_dir = is_directory(bv_c)
       val ok = (if skipped_name(bv_e, el, is_dir) then true
-                else if is_dir then copy_tree(bv_c, cl, bv_d, dl2, f - 1)
+                else if is_dir then (if f > 0 then copy_tree(bv_c, cl, bv_d, dl2, f - 1) else false)
                 else copy_file(bv_c, bv_d)): bool
       val () = $A.drop<byte>(fz_d, bv_d)
       val () = $A.free<byte>($A.thaw<byte>(fz_d))
@@ -2088,24 +2083,24 @@ fun copy_entries {ls,ld:agz}{f:nat} .<f, 0>.
       val () = $A.drop<byte>(fz_e, bv_e)
       val () = $A.free<byte>($A.thaw<byte>(fz_e))
     in
-      if ok then copy_entries(dir, s, sl, d, dl, f - 1) else false
+      if ok then copy_entries(dir, i + 1, n, s, sl, d, dl, f) else false
     end
   end
 
 (* Copies the directory s[0, sl) (NUL-terminated) to d[0, dl), creating
    it, without its build, dist, docs and bats_modules directories *)
-and copy_tree {ls,ld:agz}{f:nat} .<f, 1>.
+and copy_tree {ls,ld:agz}{f:nat} .<f, 1, 0>.
   (s: !$A.borrow(byte, ls, 524288), sl: int,
    d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool = let
   var mk : $B.builder_v = $B.create()
   val () = copy_to_builder_v(d, 0, dl, 524288, mk)
   val _ = run_mkdir(mk)
 in
-  case+ $F.dir_open(s, 524288) of
+  case+ $F.dir_read(s, 524288) of
   | ~$R.err(_) => false
   | ~$R.ok(dir) => let
-      val ok = copy_entries(dir, s, sl, d, dl, f)
-      val () = $R.discard<int><int>($F.dir_close(dir))
+      val ok = copy_entries(dir, 0, $F.entries_count(dir), s, sl, d, dl, f)
+      val () = $F.entries_free(dir)
     in ok end
 end
 

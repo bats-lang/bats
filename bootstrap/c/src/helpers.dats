@@ -215,15 +215,6 @@ implement is_dot_or_dotdot(ent, len, max) =
    Filename matchers
    ============================================================ *)
 
-(* Name length from $F.dir_next into a 256-byte buffer, or ~1 at the
-   end of the directory. *)
-
-
-implement dir_name_len (o) =
-  case+ o of
-  | ~$R.some(k) => k
-  | ~$R.none() => ~1
-
 (* Whether ent[0, len) ends with the chars sfx. *)
 
 
@@ -1537,86 +1528,6 @@ implement ap_string_pos(p, name, nn, help, nh) = let
   val () = $A.drop<byte>(fzh, bvh)
   val () = $A.free<byte>($A.thaw<byte>(fzh))
 in @(p2, h) end
-
-(* Byte-lexicographic a[0..alen) < b[0..blen) for directory entry names.
-   The index is statically bounded by the 256-byte buffers. *)
-fun name_lt_loop {la:agz}{lb:agz}{i:nat | i <= 256} .<256 - i>.
-  (a: !$A.borrow(byte, la, 256), alen: int,
-   b: !$A.borrow(byte, lb, 256), blen: int, i: int i): bool =
-  if i >= 256 then false
-  else if i >= alen then i < blen
-  else if i >= blen then false
-  else let
-    val ca = byte2int0($A.read<byte>(a, i))
-    val cb = byte2int0($A.read<byte>(b, i))
-  in
-    if ca < cb then true
-    else if ca > cb then false
-    else name_lt_loop(a, alen, b, blen, i + 1)
-  end
-
-fn name_lt {la:agz}{lb:agz}
-  (a: !$A.borrow(byte, la, 256), alen: int,
-   b: !$A.borrow(byte, lb, 256), blen: int): bool =
-  name_lt_loop(a, alen, b, blen, 0)
-
-(* Smallest entry of directory `path` strictly after prev[0..prev_len)
-   (prev_len <= 0: smallest entry overall). Returns the entry buffer and
-   its length, or length -1 when there is none. Walking a directory with
-   this makes generated output independent of readdir order. *)
-
-
-
-
-
-implement dir_next_sorted (path, path_len, prev, prev_len) = let
-  fun scan {lq:agz}{lb:agz}{k:nat} .<k>.
-    (d: !$F.dir, prev: !$A.borrow(byte, lq, 256), prev_len: int,
-     best: $A.arr(byte, lb, 256), best_len: [b:int | ~1 <= b; b <= 256] int b, fuel: int k)
-    : [lo:agz] @($A.arr(byte, lo, 256), [k:int | ~1 <= k; k <= 256] int k) =
-    if fuel <= 0 then @(best, best_len)
-    else let
-      val e = $A.alloc<byte>(256)
-      val nr = $F.dir_next(d, e, 256)
-      val el = dir_name_len(nr)
-    in
-      if el < 0 then let
-        val () = $A.free<byte>(e)
-      in @(best, best_len) end
-      else let
-        val @(fz_e, bv_e) = $A.freeze<byte>(e)
-        val @(fz_b, bv_b) = $A.freeze<byte>(best)
-        val after_prev = (if prev_len <= 0 then true
-          else name_lt(prev, prev_len, bv_e, el)): bool
-        val beats = (if ~after_prev then false
-          else if best_len < 0 then true
-          else name_lt(bv_e, el, bv_b, best_len)): bool
-        val () = $A.drop<byte>(fz_b, bv_b)
-        val best = $A.thaw<byte>(fz_b)
-        val () = $A.drop<byte>(fz_e, bv_e)
-        val e = $A.thaw<byte>(fz_e)
-      in
-        if beats then let
-          val () = $A.free<byte>(best)
-        in scan(d, prev, prev_len, e, el, fuel - 1) end
-        else let
-          val () = $A.free<byte>(e)
-        in scan(d, prev, prev_len, best, best_len, fuel - 1) end
-      end
-    end
-  val dr = $F.dir_open(path, path_len)
-in
-  case+ dr of
-  | ~$R.ok(d) => let
-      val none = $A.alloc<byte>(256)
-      val r = scan(d, prev, prev_len, none, ~1, 4096)
-      val dcr = $F.dir_close(d)
-      val () = $R.discard<int><int>(dcr)
-    in r end
-  | ~$R.err(_) => let
-      val none = $A.alloc<byte>(256)
-    in @(none, ~1) end
-end
 
 (* Feeds the rest of the file fd to c, a chunk at a time *)
 fun _hash_chunks {lb:agz}{f:nat} .<f>.

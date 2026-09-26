@@ -24,6 +24,7 @@ staload R = "result/src/lib.sats"
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -81,6 +82,61 @@ static int _file_readdir(void *dirp, char *name_buf, int max_len) {
 }
 static int _file_closedir(void *dirp) {
   return closedir(dirp);
+}
+/* All of a directory's entries, read in one pass and sorted by name
+   (bytewise, a prefix before its extensions), so walks over them are
+   bounded and in the same order on every system. */
+typedef struct { char *name; int len; } _file_entry_t;
+typedef struct { int n; _file_entry_t *es; } _file_entries_t;
+static int _file_entry_cmp(const void *x, const void *y) {
+  const _file_entry_t *a = (const _file_entry_t *)x;
+  const _file_entry_t *b = (const _file_entry_t *)y;
+  int m = a->len < b->len ? a->len : b->len;
+  int c = memcmp(a->name, b->name, m);
+  if (c != 0) return c;
+  return a->len - b->len;
+}
+static void *_file_dir_read(const char *path) {
+  DIR *d = opendir(path);
+  _file_entries_t *r;
+  struct dirent *e;
+  int cap = 16;
+  if (!d) return (void *)0;
+  r = (_file_entries_t *)malloc(sizeof(_file_entries_t));
+  r->n = 0;
+  r->es = (_file_entry_t *)malloc(cap * sizeof(_file_entry_t));
+  while ((e = readdir(d)) != 0) {
+    int len = (int)strlen(e->d_name);
+    char *s = (char *)malloc(len > 0 ? len : 1);
+    if (r->n == cap) {
+      cap = 2 * cap;
+      r->es = (_file_entry_t *)realloc(r->es, cap * sizeof(_file_entry_t));
+    }
+    memcpy(s, e->d_name, len);
+    r->es[r->n].name = s;
+    r->es[r->n].len = len;
+    r->n++;
+  }
+  closedir(d);
+  qsort(r->es, r->n, sizeof(_file_entry_t), _file_entry_cmp);
+  return (void *)r;
+}
+static int _file_entries_count(void *p) {
+  return ((_file_entries_t *)p)->n;
+}
+static int _file_entries_name(void *p, int i, char *name_buf, int max_len) {
+  _file_entry_t *e = &((_file_entries_t *)p)->es[i];
+  int len = e->len;
+  if (len > max_len) len = max_len;
+  memcpy(name_buf, e->name, len);
+  return len;
+}
+static void _file_entries_free(void *p) {
+  _file_entries_t *r = (_file_entries_t *)p;
+  int i;
+  for (i = 0; i < r->n; i++) free(r->es[i].name);
+  free(r->es);
+  free(r);
 }
 static int _file_ptr_nonnull(void *p) {
   return p != (void*)0 ? 1 : 0;
@@ -143,6 +199,11 @@ static int _file_mkdir(const char *path, int mode) {
 
 
 
+(* A directory's entries, read in one pass and sorted by name (bytewise):
+   n names, so a walk over them is bounded by n. *)
+
+
+
 (* ============================================================
    File operations
    ============================================================ *)
@@ -180,6 +241,22 @@ static int _file_mkdir(const char *path, int mode) {
 
 (* Length of the next entry's name, copied to name_buf[0, k) and
    truncated to max_len; none at the end of the directory. *)
+
+
+
+
+
+
+(* Every entry of the directory at path (including . and ..), sorted by
+   name. *)
+
+
+
+
+
+
+(* Length of entry i's name, copied to name_buf[0, k) and truncated to
+   max_len. *)
 
 
 
@@ -352,6 +429,35 @@ in
   if r >= 0 then $R.some(r)
   else $R.none()
 end
+
+implement dir_read {lb}{n} (path, path_len) = let
+  val cpath = _with_cpath(path, path_len)
+  val p =  $extfcall(ptr, "_file_dir_read",
+    $UNSAFE.castvwtp1{ptr}(cpath)) 
+  val () = $A.free<byte>(cpath)
+in
+  if ptr_isnot_null(p) then let
+    val k =  $extfcall([k:nat] int k, "_file_entries_count", p) 
+  in $R.ok(entries_mk(p, k)) end
+  else $R.err(~1)
+end
+
+implement entries_count {n} (es) = let
+  val+ @entries_mk(_, k) = es
+  val r = k
+  prval () = fold@(es)
+in r end
+
+implement entries_name {n}{i}{l}{m} (es, i, name_buf, max_len) = let
+  val+ @entries_mk(p, _) = es
+  val r =  $extfcall([k:nat | k <= m] int k, "_file_entries_name", p, i,
+    $UNSAFE.castvwtp1{ptr}(name_buf), max_len) 
+  prval () = fold@(es)
+in r end
+
+implement entries_free {n} (es) = let
+  val+ ~entries_mk(p, _) = es
+in  $extfcall(void, "_file_entries_free", p)  end
 
 implement dir_close(d) = let
   val+ ~dir_mk(dp) = d

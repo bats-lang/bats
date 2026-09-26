@@ -208,26 +208,24 @@ in pa end
 fn list_dir {ld:agz}
   (dir: !$A.borrow(byte, ld, 524288), dlen: pos_t,
    dirs: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void = let
-  val dr = $F.dir_open(dir, 524288)
+  val dr = $F.dir_read(dir, 524288)
 in case+ dr of
   | ~$R.ok(d) => let
-      fun loop {fuel:nat} .<fuel>.
-        (d: !$F.dir, dir: !$A.borrow(byte, ld, 524288), dlen: pos_t,
-         dirs: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v,
-         fuel: int fuel): void =
-        if fuel <= 0 then ()
+      fun loop {n,i:nat | i <= n} .<n - i>.
+        (d: !$F.entries(n), i: int i, n: int n, dir: !$A.borrow(byte, ld, 524288), dlen: pos_t,
+         dirs: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void =
+        if i >= n then ()
         else let
           val e = $A.alloc<byte>(256)
-          val el = dir_name_len($F.dir_next(d, e, 256))
+          val el = $F.entries_name(d, i, e, 256)
           val c0 = peek_arr(e, 0, 256)
           val c1 = peek_arr(e, 1, 256)
         in
-          if el < 0 then $A.free<byte>(e)
-          else if el = 0 then let val () = $A.free<byte>(e)
-            in loop(d, dir, dlen, dirs, files, fuel - 1) end
+          if el = 0 then let val () = $A.free<byte>(e)
+            in loop(d, i + 1, n, dir, dlen, dirs, files) end
           else if el <= 2 && c0 = 46 && (el = 1 || c1 = 46) then let
             val () = $A.free<byte>(e)
-          in loop(d, dir, dlen, dirs, files, fuel - 1) end
+          in loop(d, i + 1, n, dir, dlen, dirs, files) end
           else let
             val is_bats = has_bats_ext(e, el, 256)
             val @(fz_e, bv_e) = $A.freeze<byte>(e)
@@ -250,10 +248,10 @@ in case+ dr of
                       else ())
             val () = $A.drop<byte>(fz_c, bv_c)
             val () = $A.free<byte>($A.thaw<byte>(fz_c))
-          in loop(d, dir, dlen, dirs, files, fuel - 1) end
+          in loop(d, i + 1, n, dir, dlen, dirs, files) end
         end
-      val () = loop(d, dir, dlen, dirs, files, 65536)
-    in $R.discard<int><int>($F.dir_close(d)) end
+      val () = loop(d, 0, $F.entries_count(d), dir, dlen, dirs, files)
+    in $F.entries_free(d) end
   | ~$R.err(_) => ()
 end
 

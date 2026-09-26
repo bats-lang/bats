@@ -48,6 +48,11 @@ datavtype dir =
 
 
 
+datavtype entries(int) =
+  | {n:nat} entries_mk(n) of (ptr, int n)
+
+
+
 
 
 
@@ -88,6 +93,22 @@ fn dir_next
   (d: !dir, name_buf: !$A.arr(byte, l, n), max_len: int n): $R.option([k:nat | k <= n] int k)
 
 fn dir_close(d: dir): $R.result(int, int)
+
+
+
+fn dir_read
+  {lb:agz}{n:pos | n < 1048576}
+  (path: !$A.borrow(byte, lb, n), path_len: int n): $R.result([k:nat] entries(k), int)
+
+fn entries_count {n:int} (es: !entries(n)): int n
+
+
+
+fn entries_name
+  {n:int}{i:nat | i < n}{l:agz}{m:pos}
+  (es: !entries(n), i: int i, name_buf: !$A.arr(byte, l, m), max_len: int m): [k:nat | k <= m] int k
+
+fn entries_free {n:int} (es: entries(n)): void
 
 
 
@@ -166,6 +187,33 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, int)
 fn buf_flush(w: !buf_writer): $R.result(int, int)
 
 fn buf_writer_close(w: buf_writer): $R.result(int, int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

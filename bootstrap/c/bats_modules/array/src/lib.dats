@@ -53,22 +53,6 @@ staload "./lib.sats"
 
 
 (* ============================================================
-   Split / join (sub-array with size tracking)
-   ============================================================ *)
-
-
-
-
-
-
-
-
-
-
-
-
-
-(* ============================================================
    Freeze / thaw borrow protocol
    ============================================================ *)
 
@@ -206,6 +190,8 @@ staload "./lib.sats"
 
 
 
+(* v as 4 little-endian bytes at i (two's complement), on any host and
+   at any offset. *)
 
 
 
@@ -271,39 +257,6 @@ staload "./lib.sats"
 
 
 (* ============================================================
-   Arena -- bulk allocation with token-tracked lifecycle
-   ============================================================ *)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(* ============================================================
    C runtime helpers
    ============================================================ *)
 
@@ -317,7 +270,12 @@ _arr_set_byte(void *p, int off, int v) {
 }
 static inline void
 _arr_set_i32(void *p, int off, int v) {
-  *(int *)(((char *)p) + off) = v;
+  unsigned char *d = ((unsigned char *)p) + off;
+  unsigned int u = (unsigned int)v;
+  d[0] = (unsigned char)u;
+  d[1] = (unsigned char)(u >> 8);
+  d[2] = (unsigned char)(u >> 16);
+  d[3] = (unsigned char)(u >> 24);
 }
 static inline void
 _arr_copy_at(void *dst, int off, void *src, int len) {
@@ -325,32 +283,6 @@ _arr_copy_at(void *dst, int off, void *src, int len) {
   unsigned char *s = (unsigned char *)src;
   int i;
   for (i = 0; i < len; i++) d[i] = s[i];
-}
-
-typedef struct { char *base; int used; int max_sz; } _arr_arena_t;
-
-static inline void *
-_arr_arena_create(int max_sz) {
-  _arr_arena_t *a;
-  a = (void *)malloc(sizeof(_arr_arena_t));
-  a->base = (char *)malloc(max_sz);
-  a->used = 0;
-  a->max_sz = max_sz;
-  memset(a->base, 0, max_sz);
-  return (void *)a;
-}
-static inline void *
-_arr_arena_alloc(void *arena, int sz) {
-  _arr_arena_t *a = (_arr_arena_t *)arena;
-  void *p = (void *)(a->base + a->used);
-  a->used += sz;
-  return p;
-}
-static inline void
-_arr_arena_destroy(void *arena) {
-  _arr_arena_t *a = (_arr_arena_t *)arena;
-  free(a->base);
-  free((void *)a);
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 %}
@@ -368,8 +300,6 @@ local
   assume borrow(a, l, n) = ptr l
   assume text(n) = ptr
   assume text_builder(n, i) = ptr
-  assume arena(l, max, k) = ptr l
-  assume arena_token(la, l, n) = ptr l
 
 
 in
@@ -408,18 +338,6 @@ get{l}{n,i}(arr, i) =
 implement{a}
 set{l}{n,i}(arr, i, v) =
    $UNSAFE.ptr0_set<a>(ptr_add<a>(arr, i), v) 
-
-(* -- Split / join -- *)
-
-implement{a}
-split{l}{n,m}(arr, m) = let
-  val tail =  $UNSAFE.cast{ptr(l+m)}(ptr_add<a>(arr, m)) 
-in
-  @(arr, tail)
-end
-
-implement{a}
-join{l}{n,m}(left, right) = left
 
 (* -- Freeze / thaw -- *)
 
@@ -531,33 +449,6 @@ write_u16le{l}{n}{i}{v}(arr, i, v) = let
   val () =  $extfcall(void, "_arr_set_byte", arr, i, v0) 
   val () =  $extfcall(void, "_arr_set_byte", arr, i + 1, v0 / 256) 
 in () end
-
-(* -- Arena -- *)
-
-
-extern fun _arena_create_impl
-  (max: int): [l:agz] ptr l = "mac#_arr_arena_create"
-extern fun _arena_alloc_impl
-  (arena: ptr, size: int): [l:agz] ptr l = "mac#_arr_arena_alloc"
-extern fun _arena_destroy_impl
-  (arena: ptr): void = "mac#_arr_arena_destroy"
-
-
-implement
-arena_create{max}(max_size) = _arena_create_impl(max_size)
-
-implement{a}
-arena_alloc{la}{max}{k}{n}(ar, n) = let
-  val nbytes = n * sz2i(sizeof<a>)
-  val p = _arena_alloc_impl(
-     $UNSAFE.castvwtp1{ptr}(ar) , nbytes)
-in @(p, p) end
-
-implement{a}
-arena_return{la}{max}{k}{l}{n}(ar, token, v) = ()
-
-implement
-arena_destroy{l}{max}(ar) = _arena_destroy_impl(ar)
 
 end (* local -- main implementation block *)
 

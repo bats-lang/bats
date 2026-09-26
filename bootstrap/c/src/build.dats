@@ -115,26 +115,23 @@ fn patsopt_dir_extra
   {ld:agz}{lph:agz}
   (dir_bv: !$A.borrow(byte, ld, 524288), dir_len: int,
    ph: !$A.borrow(byte, lph, 512), phlen: int): void = let
-  val dr = $F.dir_open(dir_bv, 524288)
+  val dr = $F.dir_read(dir_bv, 524288)
 in case+ dr of
   | ~$R.ok(d) => let
-      fun loop {fuel:nat} .<fuel>.
-        (d: !$F.dir,
+      fun loop {n,i:nat | i <= n} .<n - i>.
+        (d: !$F.entries(n), i: int i, n: int n,
          dir_bv: !$A.borrow(byte, ld, 524288), dir_len: int,
-         ph: !$A.borrow(byte, lph, 512), phlen: int,
-         fuel: int fuel): void =
-        if fuel <= 0 then ()
+         ph: !$A.borrow(byte, lph, 512), phlen: int): void =
+        if i >= n then ()
         else let
           val e = $A.alloc<byte>(256)
-          val nr = $F.dir_next(d, e, 256)
-          val el = dir_name_len(nr)
-        in if el < 0 then $A.free<byte>(e)
-          else let
+          val el = $F.entries_name(d, i, e, 256)
+        in let
             val is_d = has_dats_ext(e, el, 256)
             val is_l = is_lib_dats(e, el, 256)
           in if is_d then
             if is_l then let val () = $A.free<byte>(e)
-            in loop(d, dir_bv, dir_len, ph, phlen, fuel - 1) end
+            in loop(d, i + 1, n, dir_bv, dir_len, ph, phlen) end
             else let
               val stem = el - 5
               val @(fz_e, bv_e) = $A.freeze<byte>(e)
@@ -175,14 +172,13 @@ in case+ dr of
               val () = $A.free<byte>($A.thaw<byte>(fz_i))
               val () = $A.drop<byte>(fz_e, bv_e)
               val () = $A.free<byte>($A.thaw<byte>(fz_e))
-            in loop(d, dir_bv, dir_len, ph, phlen, fuel - 1) end
+            in loop(d, i + 1, n, dir_bv, dir_len, ph, phlen) end
           else let val () = $A.free<byte>(e)
-          in loop(d, dir_bv, dir_len, ph, phlen, fuel - 1) end
+          in loop(d, i + 1, n, dir_bv, dir_len, ph, phlen) end
           end
         end
-      val () = loop(d, dir_bv, dir_len, ph, phlen, 200)
-      val dcr = $F.dir_close(d)
-      val () = $R.discard<int><int>(dcr)
+      val () = loop(d, 0, $F.entries_count(d), dir_bv, dir_len, ph, phlen)
+      val () = $F.entries_free(d)
     in end
   | ~$R.err(_) => ()
 end
@@ -193,28 +189,26 @@ fn cc_dir_extra
   (dir_bv: !$A.borrow(byte, ld, 524288), dir_len: int,
    ph: !$A.borrow(byte, lph, 512), phlen: int,
    rel: int): void = let
-  val dr = $F.dir_open(dir_bv, 524288)
+  val dr = $F.dir_read(dir_bv, 524288)
 in case+ dr of
   | ~$R.ok(d) => let
-      fun loop {fuel:nat} .<fuel>.
-        (d: !$F.dir,
+      fun loop {n,i:nat | i <= n} .<n - i>.
+        (d: !$F.entries(n), i: int i, n: int n,
          dir_bv: !$A.borrow(byte, ld, 524288), dir_len: int,
          ph: !$A.borrow(byte, lph, 512), phlen: int,
-         rel: int, fuel: int fuel): void =
-        if fuel <= 0 then ()
+         rel: int): void =
+        if i >= n then ()
         else let
           val e = $A.alloc<byte>(256)
-          val nr = $F.dir_next(d, e, 256)
-          val el = dir_name_len(nr)
-        in if el < 0 then $A.free<byte>(e)
-          else let
+          val el = $F.entries_name(d, i, e, 256)
+        in let
             val is_c = has_dats_c_ext(e, el, 256)
           in if ~is_c then let val () = $A.free<byte>(e)
-            in loop(d, dir_bv, dir_len, ph, phlen, rel, fuel - 1) end
+            in loop(d, i + 1, n, dir_bv, dir_len, ph, phlen, rel) end
           else let
             val is_l = has_lib_dats_c_sfx(e, el, 256)
           in if is_l then let val () = $A.free<byte>(e)
-            in loop(d, dir_bv, dir_len, ph, phlen, rel, fuel - 1) end
+            in loop(d, i + 1, n, dir_bv, dir_len, ph, phlen, rel) end
             else let
               val stem = el - 2
               val @(fz_e, bv_e) = $A.freeze<byte>(e)
@@ -241,13 +235,12 @@ in case+ dr of
               val () = $A.free<byte>($A.thaw<byte>(fz_i))
               val () = $A.drop<byte>(fz_e, bv_e)
               val () = $A.free<byte>($A.thaw<byte>(fz_e))
-            in loop(d, dir_bv, dir_len, ph, phlen, rel, fuel - 1) end
+            in loop(d, i + 1, n, dir_bv, dir_len, ph, phlen, rel) end
             end
           end
         end
-      val () = loop(d, dir_bv, dir_len, ph, phlen, rel, 200)
-      val dcr = $F.dir_close(d)
-      val () = $R.discard<int><int>(dcr)
+      val () = loop(d, 0, $F.entries_count(d), dir_bv, dir_len, ph, phlen, rel)
+      val () = $F.entries_free(d)
     in end
   | ~$R.err(_) => ()
 end
@@ -909,27 +902,24 @@ in
       (* Step 3: Scan bats_modules/ for deps and preprocess *)
       val bm_arr = str_to_path_arr("bats_modules")
       val @(fz_bm, bv_bm) = $A.freeze<byte>(bm_arr)
-      val bmdir_r = $F.dir_open(bv_bm, 524288)
+      val bmdir_r = $F.dir_read(bv_bm, 524288)
       val () = $A.drop<byte>(fz_bm, bv_bm)
       val () = $A.free<byte>($A.thaw<byte>(fz_bm))
       val () = (case+ bmdir_r of
         | ~$R.ok(d) => let
-            fun scan_deps {lph:agz}{fuel:nat} .<fuel>.
-              (d: !$F.dir, ph: !$A.borrow(byte, lph, 512),
-               fuel: int fuel): void =
-              if fuel <= 0 then ()
+            fun scan_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
+              (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512)): void =
+              if i >= n then ()
               else let
                 val ent = $A.alloc<byte>(256)
-                val nr = $F.dir_next(d, ent, 256)
-                val elen = dir_name_len(nr)
+                val elen = $F.entries_name(d, i, ent, 256)
               in
-                if elen < 0 then $A.free<byte>(ent)
-                else let
+                let
                   val dd = is_dot_or_dotdot(ent, elen, 256)
                 in
                   if dd then let
                     val () = $A.free<byte>(ent)
-                  in scan_deps(d, ph, fuel - 1) end
+                  in scan_deps(d, i + 1, n, ph) end
                   else let
                     val @(fz_e, bv_e) = $A.freeze<byte>(ent)
                     (* Check if this is a package (has bats.toml) or a namespace dir *)
@@ -954,29 +944,26 @@ in
                       val () = put_char_v(nsd, 0)
                       val @(nsd_a, _) = $B.to_arr(nsd)
                       val @(fz_nsd, bv_nsd) = $A.freeze<byte>(nsd_a)
-                      val nsd_r = $F.dir_open(bv_nsd, 524288)
+                      val nsd_r = $F.dir_read(bv_nsd, 524288)
                       val () = $A.drop<byte>(fz_nsd, bv_nsd)
                       val () = $A.free<byte>($A.thaw<byte>(fz_nsd))
                       val () = (case+ nsd_r of
                         | ~$R.ok(nsd2) => let
                             (* Process each subdir as if it were a top-level dep
                                with name <namespace>/<subdir> *)
-                            fun scan_ns {lph2:agz}{lns:agz}{fuel2:nat} .<fuel2>.
-                              (nsd2: !$F.dir, ph2: !$A.borrow(byte, lph2, 512),
-                               ns_bv: !$A.borrow(byte, lns, 256), ns_len: int,
-                               fuel2: int fuel2): void =
-                              if fuel2 <= 0 then ()
+                            fun scan_ns {n,i:nat | i <= n}{lph2:agz}{lns:agz} .<n - i>.
+                              (nsd2: !$F.entries(n), i: int i, n: int n, ph2: !$A.borrow(byte, lph2, 512),
+                               ns_bv: !$A.borrow(byte, lns, 256), ns_len: int): void =
+                              if i >= n then ()
                               else let
                                 val se = $A.alloc<byte>(256)
-                                val snr = $F.dir_next(nsd2, se, 256)
-                                val sel = dir_name_len(snr)
+                                val sel = $F.entries_name(nsd2, i, se, 256)
                               in
-                                if sel < 0 then $A.free<byte>(se)
-                                else let
+                                let
                                   val sdd = is_dot_or_dotdot(se, sel, 256)
                                 in
                                   if sdd then let val () = $A.free<byte>(se)
-                                  in scan_ns(nsd2, ph2, ns_bv, ns_len, fuel2 - 1) end
+                                  in scan_ns(nsd2, i + 1, n, ph2, ns_bv, ns_len) end
                                   else let
                                     val @(fz_se, bv_se) = $A.freeze<byte>(se)
                                     (* Check that subdir is a package (has bats.toml) *)
@@ -998,7 +985,7 @@ in
                                     if ~ns_is_pkg then let
                                       val () = $A.drop<byte>(fz_se, bv_se)
                                       val () = $A.free<byte>($A.thaw<byte>(fz_se))
-                                    in scan_ns(nsd2, ph2, ns_bv, ns_len, fuel2 - 1) end
+                                    in scan_ns(nsd2, i + 1, n, ph2, ns_bv, ns_len) end
                                     else let
                                     (* Build full dep name: <namespace>/<subdir> *)
                                     (* mkdir build/bats_modules/<namespace>/<subdir>/src *)
@@ -1064,34 +1051,31 @@ in
                                     val () = put_char_v(nsd_src, 0)
                                     val @(nsd_sa, _) = $B.to_arr(nsd_src)
                                     val @(fz_nsd, bv_nsd) = $A.freeze<byte>(nsd_sa)
-                                    val nsd_dir = $F.dir_open(bv_nsd, 524288)
+                                    val nsd_dir = $F.dir_read(bv_nsd, 524288)
                                     val () = $A.drop<byte>(fz_nsd, bv_nsd)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_nsd))
                                     val () = (case+ nsd_dir of
                                       | ~$R.ok(d_ns_ex) => let
                                           fun scan_ns_extra
-                                            {ld2:agz}{ld3:agz}{fuel_ns:nat} .<fuel_ns>.
-                                            (d_ns_ex: !$F.dir,
+                                            {n,i:nat | i <= n}{ld2:agz}{ld3:agz} .<n - i>.
+                                            (d_ns_ex: !$F.entries(n), i: int i, n: int n,
                                              ns_bv2: !$A.borrow(byte, ld2, 256),
                                              ns_len2: int,
                                              se_bv2: !$A.borrow(byte, ld3, 256),
-                                             se_len2: int,
-                                             fuel_ns: int fuel_ns): void =
-                                            if fuel_ns <= 0 then ()
+                                             se_len2: int): void =
+                                            if i >= n then ()
                                             else let
                                               val ent_ns = $A.alloc<byte>(256)
-                                              val nr_ns = $F.dir_next(d_ns_ex, ent_ns, 256)
-                                              val elen_ns = dir_name_len(nr_ns)
+                                              val elen_ns = $F.entries_name(d_ns_ex, i, ent_ns, 256)
                                             in
-                                              if elen_ns < 0 then $A.free<byte>(ent_ns)
-                                              else let
+                                              let
                                                 val is_bats_ns = has_bats_ext(ent_ns, elen_ns, 256)
                                                 val is_lib_ns = is_lib_bats(ent_ns, elen_ns, 256)
                                               in
                                                 if is_bats_ns then
                                                   if is_lib_ns then let
                                                     val () = $A.free<byte>(ent_ns)
-                                                  in scan_ns_extra(d_ns_ex, ns_bv2, ns_len2, se_bv2, se_len2, fuel_ns - 1) end
+                                                  in scan_ns_extra(d_ns_ex, i + 1, n, ns_bv2, ns_len2, se_bv2, se_len2) end
                                                   else let
                                                     val stem_ns = elen_ns - 5
                                                     val @(fz_ens, bv_ens) = $A.freeze<byte>(ent_ns)
@@ -1138,31 +1122,30 @@ in
                                                     val () = $A.free<byte>($A.thaw<byte>(fz_sdn))
                                                     val () = $A.drop<byte>(fz_ens, bv_ens)
                                                     val () = $A.free<byte>($A.thaw<byte>(fz_ens))
-                                                  in scan_ns_extra(d_ns_ex, ns_bv2, ns_len2, se_bv2, se_len2, fuel_ns - 1) end
+                                                  in scan_ns_extra(d_ns_ex, i + 1, n, ns_bv2, ns_len2, se_bv2, se_len2) end
                                                 else let
                                                   val () = $A.free<byte>(ent_ns)
-                                                in scan_ns_extra(d_ns_ex, ns_bv2, ns_len2, se_bv2, se_len2, fuel_ns - 1) end
+                                                in scan_ns_extra(d_ns_ex, i + 1, n, ns_bv2, ns_len2, se_bv2, se_len2) end
                                               end
                                             end
                                         in
-                                          scan_ns_extra(d_ns_ex, ns_bv, ns_len, bv_se, sel, 100);
-                                          (let val dcr = $F.dir_close(d_ns_ex) val () = $R.discard<int><int>(dcr) in end)
+                                          scan_ns_extra(d_ns_ex, 0, $F.entries_count(d_ns_ex), ns_bv, ns_len, bv_se, sel);
+                                          $F.entries_free(d_ns_ex)
                                         end
                                       | ~$R.err(_) => ())
                                     val () = $A.drop<byte>(fz_se, bv_se)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_se))
-                                  in scan_ns(nsd2, ph2, ns_bv, ns_len, fuel2 - 1) end
+                                  in scan_ns(nsd2, i + 1, n, ph2, ns_bv, ns_len) end
                                   end
                                 end
                               end
-                            val () = scan_ns(nsd2, ph, bv_e, elen, 100)
-                            val dcr_ns = $F.dir_close(nsd2)
-                            val () = $R.discard<int><int>(dcr_ns)
+                            val () = scan_ns(nsd2, 0, $F.entries_count(nsd2), ph, bv_e, elen)
+                            val () = $F.entries_free(nsd2)
                           in end
                         | ~$R.err(_) => ())
                       val () = $A.drop<byte>(fz_e, bv_e)
                       val () = $A.free<byte>($A.thaw<byte>(fz_e))
-                    in scan_deps(d, ph, fuel - 1) end
+                    in scan_deps(d, i + 1, n, ph) end
                     else let
                     (* Regular package *)
                     (* mkdir -p build/bats_modules/<name>/src *)
@@ -1210,32 +1193,29 @@ in
                     val () = put_char_v(dep_src_b, 0)
                     val @(dsp_arr, _) = $B.to_arr(dep_src_b)
                     val @(fz_dsp, bv_dsp) = $A.freeze<byte>(dsp_arr)
-                    val dep_src_dir = $F.dir_open(bv_dsp, 524288)
+                    val dep_src_dir = $F.dir_read(bv_dsp, 524288)
                     val () = $A.drop<byte>(fz_dsp, bv_dsp)
                     val () = $A.free<byte>($A.thaw<byte>(fz_dsp))
                     val () = (case+ dep_src_dir of
                       | ~$R.ok(d_ex) => let
                           fun scan_extra_bats
-                            {ld:agz}{fuel_ex:nat} .<fuel_ex>.
-                            (d_ex: !$F.dir,
+                            {n,i:nat | i <= n}{ld:agz} .<n - i>.
+                            (d_ex: !$F.entries(n), i: int i, n: int n,
                              dep_bv: !$A.borrow(byte, ld, 256),
-                             dep_len: int,
-                             fuel_ex: int fuel_ex): void =
-                            if fuel_ex <= 0 then ()
+                             dep_len: int): void =
+                            if i >= n then ()
                             else let
                               val ent_ex = $A.alloc<byte>(256)
-                              val nr_ex = $F.dir_next(d_ex, ent_ex, 256)
-                              val elen_ex = dir_name_len(nr_ex)
+                              val elen_ex = $F.entries_name(d_ex, i, ent_ex, 256)
                             in
-                              if elen_ex < 0 then $A.free<byte>(ent_ex)
-                              else let
+                              let
                                 val is_bats = has_bats_ext(ent_ex, elen_ex, 256)
                                 val is_lib = is_lib_bats(ent_ex, elen_ex, 256)
                               in
                                 if is_bats then
                                   if is_lib then let
                                     val () = $A.free<byte>(ent_ex)
-                                  in scan_extra_bats(d_ex, dep_bv, dep_len, fuel_ex - 1) end
+                                  in scan_extra_bats(d_ex, i + 1, n, dep_bv, dep_len) end
                                   else let
                                     val stem_ex = elen_ex - 5
                                     val @(fz_ex, bv_ex) = $A.freeze<byte>(ent_ex)
@@ -1280,15 +1260,14 @@ in
                                     val () = $A.free<byte>($A.thaw<byte>(fz_sda))
                                     val () = $A.drop<byte>(fz_ex, bv_ex)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_ex))
-                                  in scan_extra_bats(d_ex, dep_bv, dep_len, fuel_ex - 1) end
+                                  in scan_extra_bats(d_ex, i + 1, n, dep_bv, dep_len) end
                                 else let
                                   val () = $A.free<byte>(ent_ex)
-                                in scan_extra_bats(d_ex, dep_bv, dep_len, fuel_ex - 1) end
+                                in scan_extra_bats(d_ex, i + 1, n, dep_bv, dep_len) end
                               end
                             end
-                          val () = scan_extra_bats(d_ex, bv_e, elen, 200)
-                          val dcr_ex = $F.dir_close(d_ex)
-                          val () = $R.discard<int><int>(dcr_ex)
+                          val () = scan_extra_bats(d_ex, 0, $F.entries_count(d_ex), bv_e, elen)
+                          val () = $F.entries_free(d_ex)
                         in end
                       | ~$R.err(_) => ())
                     val () = $A.drop<byte>(fz_sp, bv_sp)
@@ -1299,40 +1278,37 @@ in
                     val () = $A.free<byte>($A.thaw<byte>(fz_sd))
                     val () = $A.drop<byte>(fz_e, bv_e)
                     val () = $A.free<byte>($A.thaw<byte>(fz_e))
-                  in scan_deps(d, ph, fuel - 1) end
+                  in scan_deps(d, i + 1, n, ph) end
                   end (* if ~is_pkg *)
                 end
               end
-            val () = scan_deps(d, bv_patshome, 200)
-            val dcr = $F.dir_close(d)
-            val () = $R.discard<int><int>(dcr)
+            val () = scan_deps(d, 0, $F.entries_count(d), bv_patshome)
+            val () = $F.entries_free(d)
           in end
         | ~$R.err(_) => ())
 
       (* Step 3b: Preprocess src/*.bats shared modules *)
       val sm_arr = str_to_path_arr("src")
       val @(fz_sm, bv_sm) = $A.freeze<byte>(sm_arr)
-      val smdir_r = $F.dir_open(bv_sm, 524288)
+      val smdir_r = $F.dir_read(bv_sm, 524288)
       val () = $A.drop<byte>(fz_sm, bv_sm)
       val () = $A.free<byte>($A.thaw<byte>(fz_sm))
       val () = (case+ smdir_r of
         | ~$R.ok(d_sm) => let
-            fun scan_src_modules {fuel_sm:nat} .<fuel_sm>.
-              (d_sm: !$F.dir, fuel_sm: int fuel_sm): void =
-              if fuel_sm <= 0 then ()
+            fun scan_src_modules {n,i:nat | i <= n} .<n - i>.
+              (d_sm: !$F.entries(n), i: int i, n: int n): void =
+              if i >= n then ()
               else let
                 val ent_sm = $A.alloc<byte>(256)
-                val nr_sm = $F.dir_next(d_sm, ent_sm, 256)
-                val elen_sm = dir_name_len(nr_sm)
+                val elen_sm = $F.entries_name(d_sm, i, ent_sm, 256)
               in
-                if elen_sm < 0 then $A.free<byte>(ent_sm)
-                else let
+                let
                   val dd_sm = is_dot_or_dotdot(ent_sm, elen_sm, 256)
                   val bb_sm = has_bats_ext(ent_sm, elen_sm, 256)
                 in
                   if dd_sm then let
                     val () = $A.free<byte>(ent_sm)
-                  in scan_src_modules(d_sm, fuel_sm - 1) end
+                  in scan_src_modules(d_sm, i + 1, n) end
                   else if bb_sm then let
                     val stem_sm = elen_sm - 5
                     val @(fz_esm, bv_esm) = $A.freeze<byte>(ent_sm)
@@ -1374,22 +1350,21 @@ in
                     val () = $A.free<byte>($A.thaw<byte>(fz_sda_sm))
                     val () = $A.drop<byte>(fz_esm, bv_esm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_esm))
-                  in scan_src_modules(d_sm, fuel_sm - 1) end
+                  in scan_src_modules(d_sm, i + 1, n) end
                   else let
                     val () = $A.free<byte>(ent_sm)
-                  in scan_src_modules(d_sm, fuel_sm - 1) end
+                  in scan_src_modules(d_sm, i + 1, n) end
                 end
               end
-            val () = scan_src_modules(d_sm, 200)
-            val dcr_sm = $F.dir_close(d_sm)
-            val () = $R.discard<int><int>(dcr_sm)
+            val () = scan_src_modules(d_sm, 0, $F.entries_count(d_sm))
+            val () = $F.entries_free(d_sm)
           in end
         | ~$R.err(_) => ())
 
       (* Step 4: Preprocess src/bin/*.bats *)
       val sb_arr = str_to_path_arr("src/bin")
       val @(fz_sb, bv_sb) = $A.freeze<byte>(sb_arr)
-      val sbdir_r = $F.dir_open(bv_sb, 524288)
+      val sbdir_r = $F.dir_read(bv_sb, 524288)
       val () = $A.drop<byte>(fz_sb, bv_sb)
       val () = $A.free<byte>($A.thaw<byte>(fz_sb))
       val () = (case+ sbdir_r of
@@ -1587,30 +1562,27 @@ in
                 val () = put_char_v(dsb, 0)
                 val @(dsba, _) = $B.to_arr(dsb)
                 val @(fz_dsb, bv_dsb) = $A.freeze<byte>(dsba)
-                val ext_dir = $F.dir_open(bv_dsb, 524288)
+                val ext_dir = $F.dir_read(bv_dsb, 524288)
                 val () = $A.drop<byte>(fz_dsb, bv_dsb)
                 val () = $A.free<byte>($A.thaw<byte>(fz_dsb))
                 val () = (case+ ext_dir of
                   | ~$R.ok(d_ext) => let
-                      fun scan_extra {ls3:agz}{fuel_se:nat} .<fuel_se>.
-                        (d_ext2: !$F.dir,
+                      fun scan_extra {n,i:nat | i <= n}{ls3:agz} .<n - i>.
+                        (d_ext2: !$F.entries(n), i: int i, n: int n,
                          seen3: !$A.arr(byte, ls3, 16384),
                          dep_pos: pos_t, dep_len: int,
-                         eb2: !$B.builder_v >> $B.builder_v,
-                         fuel_se: int fuel_se): void =
-                        if fuel_se <= 0 then ()
+                         eb2: !$B.builder_v >> $B.builder_v): void =
+                        if i >= n then ()
                         else let
                           val de = $A.alloc<byte>(256)
-                          val nr = $F.dir_next(d_ext2, de, 256)
-                          val dl = dir_name_len(nr)
-                        in if dl < 0 then $A.free<byte>(de)
-                        else let
+                          val dl = $F.entries_name(d_ext2, i, de, 256)
+                        in let
                           val is_d = has_dats_ext(de, dl, 256)
                           val is_l = is_lib_dats(de, dl, 256)
                         in if is_d then
                           if is_l then let
                             val () = $A.free<byte>(de)
-                          in scan_extra(d_ext2, seen3, dep_pos, dep_len, eb2, fuel_se-1) end
+                          in scan_extra(d_ext2, i + 1, n, seen3, dep_pos, dep_len, eb2) end
                           else let
                             val @(fz_de, bv_de) = $A.freeze<byte>(de)
                             val () = bput_v(eb2, "dynload \"./bats_modules/")
@@ -1622,46 +1594,33 @@ in
                             val () = bput_v(eb2, "\"\n")
                             val () = $A.drop<byte>(fz_de, bv_de)
                             val () = $A.free<byte>($A.thaw<byte>(fz_de))
-                          in scan_extra(d_ext2, seen3, dep_pos, dep_len, eb2, fuel_se-1) end
+                          in scan_extra(d_ext2, i + 1, n, seen3, dep_pos, dep_len, eb2) end
                         else let
                           val () = $A.free<byte>(de)
-                        in scan_extra(d_ext2, seen3, dep_pos, dep_len, eb2, fuel_se-1) end
+                        in scan_extra(d_ext2, i + 1, n, seen3, dep_pos, dep_len, eb2) end
                         end
                         end
-                      val () = scan_extra(d_ext, seen2, pos, elen, eb, 200)
-                      val dcr = $F.dir_close(d_ext)
-                      val () = $R.discard<int><int>(dcr)
+                      val () = scan_extra(d_ext, 0, $F.entries_count(d_ext), seen2, pos, elen, eb)
+                      val () = $F.entries_free(d_ext)
                     in end
                   | ~$R.err(_) => ())
                 val next = pos + elen + 1
               in emit_closure_dynloads(seen2, spos, next, eb, fuel_ed - 1) end
 
-            (* Scan shared modules (build/src/*.dats) for dep references *)
-            (* Walks build/src in sorted order so the dep list, and hence
-               the synthetic entry, does not depend on readdir order. *)
-            fun scan_shared_module_deps {ls2:agz}{lq:agz}{fuel_sm:nat} .<fuel_sm>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
-               prev: $A.arr(byte, lq, 256), prev_len: int,
-               fuel_sm: int fuel_sm): pos_t =
-              if fuel_sm <= 0 then let
-                val () = $A.free<byte>(prev)
-              in spos end
+            (* Scan shared modules (build/src/*.dats) for dep references,
+               in sorted order so the dep list, and hence the synthetic
+               entry, does not depend on readdir order. *)
+            fun scan_shared_module_deps {n,i:nat | i <= n}{ls2:agz} .<n - i>.
+              (es: !$F.entries(n), i: int i, n: int n,
+               seen2: !$A.arr(byte, ls2, 16384), spos: pos_t): pos_t =
+              if i >= n then spos
               else let
-                val smd_arr = str_to_path_arr("build/src")
-                val @(fz_smd, bv_smd) = $A.freeze<byte>(smd_arr)
-                val @(fz_pv, bv_pv) = $A.freeze<byte>(prev)
-                val @(sme, sel) = dir_next_sorted(bv_smd, 524288, bv_pv, prev_len)
-                val () = $A.drop<byte>(fz_pv, bv_pv)
-                val () = $A.free<byte>($A.thaw<byte>(fz_pv))
-                val () = $A.drop<byte>(fz_smd, bv_smd)
-                val () = $A.free<byte>($A.thaw<byte>(fz_smd))
-              in if sel < 0 then let
-                val () = $A.free<byte>(sme)
-              in spos end
-              else let
+                val sme = $A.alloc<byte>(256)
+                val sel = $F.entries_name(es, i, sme, 256)
                 val is_dats = has_dats_ext(sme, sel, 256)
-              in if ~is_dats then
-                scan_shared_module_deps(seen2, spos, sme, sel, fuel_sm - 1)
+              in if ~is_dats then let
+                val () = $A.free<byte>(sme)
+              in scan_shared_module_deps(es, i + 1, n, seen2, spos) end
               else let
                 (* Build path: build/src/NAME.dats *)
                 var smpath : $B.builder_v = $B.create()
@@ -1669,7 +1628,7 @@ in
                 val @(fz_sme, bv_sme) = $A.freeze<byte>(sme)
                 val () = copy_to_builder_v(bv_sme, 0, sel, 256, smpath)
                 val () = $A.drop<byte>(fz_sme, bv_sme)
-                val sme = $A.thaw<byte>(fz_sme)
+                val () = $A.free<byte>($A.thaw<byte>(fz_sme))
                 val () = put_char_v(smpath, 0)
                 val @(smpa, _) = $B.to_arr(smpath)
                 val @(fz_smp, bv_smp) = $A.freeze<byte>(smpa)
@@ -1691,10 +1650,22 @@ in
                       val () = $A.free<byte>($A.thaw<byte>(fz_smb))
                     in ns end
                   | ~$R.err(_) => spos): pos_t
-              in scan_shared_module_deps(seen2, new_spos, sme, sel,
-                fuel_sm - 1) end
+              in scan_shared_module_deps(es, i + 1, n, seen2, new_spos) end
               end
-              end
+
+            fn shared_module_deps {ls2:agz}
+              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t): pos_t = let
+              val smd_arr = str_to_path_arr("build/src")
+              val @(fz_smd, bv_smd) = $A.freeze<byte>(smd_arr)
+              val r = (case+ $F.dir_read(bv_smd, 524288) of
+                | ~$R.ok(es) => let
+                    val r = scan_shared_module_deps(es, 0, $F.entries_count(es), seen2, spos)
+                    val () = $F.entries_free(es)
+                  in r end
+                | ~$R.err(_) => spos): pos_t
+              val () = $A.drop<byte>(fz_smd, bv_smd)
+              val () = $A.free<byte>($A.thaw<byte>(fz_smd))
+            in r end
 
             (* Link .o files for deps in the staload-chain closure *)
             fun link_closure_deps {ls2:agz}{fuel_ld:nat} .<fuel_ld>.
@@ -1719,30 +1690,27 @@ in
                 val () = put_char_v(ldsb, 0)
                 val @(ldsba, _) = $B.to_arr(ldsb)
                 val @(fz_ldsb, bv_ldsb) = $A.freeze<byte>(ldsba)
-                val ld_dir = $F.dir_open(bv_ldsb, 524288)
+                val ld_dir = $F.dir_read(bv_ldsb, 524288)
                 val () = $A.drop<byte>(fz_ldsb, bv_ldsb)
                 val () = $A.free<byte>($A.thaw<byte>(fz_ldsb))
                 val () = (case+ ld_dir of
                   | ~$R.ok(d_ld) => let
-                      fun link_extra_o {ls3:agz}{fuel_le:nat} .<fuel_le>.
-                        (d_ld2: !$F.dir,
+                      fun link_extra_o {n,i:nat | i <= n}{ls3:agz} .<n - i>.
+                        (d_ld2: !$F.entries(n), i: int i, n: int n,
                          seen3: !$A.arr(byte, ls3, 16384),
                          dep_pos: pos_t, dep_len: int,
-                         lb2: !$B.builder_v >> $B.builder_v,
-                         fuel_le: int fuel_le): void =
-                        if fuel_le <= 0 then ()
+                         lb2: !$B.builder_v >> $B.builder_v): void =
+                        if i >= n then ()
                         else let
                           val le = $A.alloc<byte>(256)
-                          val lnr = $F.dir_next(d_ld2, le, 256)
-                          val lel = dir_name_len(lnr)
-                        in if lel < 0 then $A.free<byte>(le)
-                        else let
+                          val lel = $F.entries_name(d_ld2, i, le, 256)
+                        in let
                           val is_o = has_dats_o_ext(le, lel, 256)
                           val is_l = has_lib_dats_o_sfx(le, lel, 256)
                         in if is_o then
                           if is_l then let
                             val () = $A.free<byte>(le)
-                          in link_extra_o(d_ld2, seen3, dep_pos, dep_len, lb2, fuel_le-1) end
+                          in link_extra_o(d_ld2, i + 1, n, seen3, dep_pos, dep_len, lb2) end
                           else let
                             val @(fz_le, bv_le) = $A.freeze<byte>(le)
                             val () = bput_v(lb2, " build/bats_modules/")
@@ -1753,40 +1721,37 @@ in
                               lb2)
                             val () = $A.drop<byte>(fz_le, bv_le)
                             val () = $A.free<byte>($A.thaw<byte>(fz_le))
-                          in link_extra_o(d_ld2, seen3, dep_pos, dep_len, lb2, fuel_le-1) end
+                          in link_extra_o(d_ld2, i + 1, n, seen3, dep_pos, dep_len, lb2) end
                         else let
                           val () = $A.free<byte>(le)
-                        in link_extra_o(d_ld2, seen3, dep_pos, dep_len, lb2, fuel_le-1) end
+                        in link_extra_o(d_ld2, i + 1, n, seen3, dep_pos, dep_len, lb2) end
                         end
                         end
-                      val () = link_extra_o(d_ld, seen2, pos, elen, lb, 200)
-                      val dcr = $F.dir_close(d_ld)
-                      val () = $R.discard<int><int>(dcr)
+                      val () = link_extra_o(d_ld, 0, $F.entries_count(d_ld), seen2, pos, elen, lb)
+                      val () = $F.entries_free(d_ld)
                     in end
                   | ~$R.err(_) => ())
                 val next = pos + elen + 1
               in link_closure_deps(seen2, spos, next, lb, fuel_ld - 1) end
 
-            fun scan_bins {lph:agz}{fuel:nat} .<fuel>.
-              (d: !$F.dir, ph: !$A.borrow(byte, lph, 512),
-               phlen: int, rel: int, fuel: int fuel): void =
-              if fuel <= 0 then ()
+            fun scan_bins {n,i:nat | i <= n}{lph:agz} .<n - i>.
+              (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512),
+               phlen: int, rel: int): void =
+              if i >= n then ()
               else let
                 val ent = $A.alloc<byte>(256)
-                val nr = $F.dir_next(d, ent, 256)
-                val elen = dir_name_len(nr)
+                val elen = $F.entries_name(d, i, ent, 256)
               in
-                if elen < 0 then $A.free<byte>(ent)
-                else let
+                let
                   val dd = is_dot_or_dotdot(ent, elen, 256)
                   val bb = has_bats_ext(ent, elen, 256)
                 in
                   if dd then let
                     val () = $A.free<byte>(ent)
-                  in scan_bins(d, ph, phlen, rel, fuel - 1) end
+                  in scan_bins(d, i + 1, n, ph, phlen, rel) end
                   else if ~bb then let
                     val () = $A.free<byte>(ent)
-                  in scan_bins(d, ph, phlen, rel, fuel - 1) end
+                  in scan_bins(d, i + 1, n, ph, phlen, rel) end
                   else let
                     val @(fz_e, bv_e) = $A.freeze<byte>(ent)
                     val stem_len = elen - 5
@@ -1806,7 +1771,7 @@ in
                     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
                     val () = $A.drop<byte>(fz_e, bv_e)
                     val () = $A.free<byte>($A.thaw<byte>(fz_e))
-                  in scan_bins(d, ph, phlen, rel, fuel - 1) end
+                  in scan_bins(d, i + 1, n, ph, phlen, rel) end
                   else let
                     val bin_bt = (if is_wasm_bin > 0 then 1 else 0): int
                     var ss : $B.builder_v = $B.create()
@@ -1853,9 +1818,7 @@ in
                           val () = $A.drop<byte>(fz_db, bv_db)
                           val () = $A.free<byte>($A.thaw<byte>(fz_db))
                           (* Also scan shared modules for deps *)
-                          val sm_start = $A.alloc<byte>(256)
-                          val sp2 = scan_shared_module_deps(dep_seen,
-                            sp1, sm_start, 0, 100)
+                          val sp2 = shared_module_deps(dep_seen, sp1)
                           val fsp = collect_trans_deps(dep_seen, sp2, 0, 200)
                           val () = emit_closure_dynloads(dep_seen, fsp,
                             0, entry, 200)
@@ -1863,38 +1826,33 @@ in
                         in end
                       | ~$R.err(_) => ())
                     (* dynload src/*.dats shared modules, in sorted order *)
-                    fun add_src_dynloads {lq:agz}{fuel_dsm:nat} .<fuel_dsm>.
-                      (prev: $A.arr(byte, lq, 256), prev_len: int,
-                       eb: !$B.builder_v >> $B.builder_v,
-                       fuel_dsm: int fuel_dsm): void =
-                      if fuel_dsm <= 0 then $A.free<byte>(prev)
+                    fun add_src_dynloads {n,i:nat | i <= n} .<n - i>.
+                      (es: !$F.entries(n), i: int i, n: int n,
+                       eb: !$B.builder_v >> $B.builder_v): void =
+                      if i >= n then ()
                       else let
-                        val dsm_arr = str_to_path_arr("build/src")
-                        val @(fz_dsm, bv_dsm) = $A.freeze<byte>(dsm_arr)
-                        val @(fz_pv, bv_pv) = $A.freeze<byte>(prev)
-                        val @(de_sm, dl_sm) = dir_next_sorted(bv_dsm, 524288,
-                          bv_pv, prev_len)
-                        val () = $A.drop<byte>(fz_pv, bv_pv)
-                        val () = $A.free<byte>($A.thaw<byte>(fz_pv))
-                        val () = $A.drop<byte>(fz_dsm, bv_dsm)
-                        val () = $A.free<byte>($A.thaw<byte>(fz_dsm))
-                      in
-                        if dl_sm < 0 then $A.free<byte>(de_sm)
-                        else let
-                          val is_d = has_dats_ext(de_sm, dl_sm, 256)
-                          val @(fz_dsme, bv_dsme) = $A.freeze<byte>(de_sm)
-                          val () = (if is_d then let
-                              val () = bput_v(eb, "dynload \"./src/")
-                              val () = copy_to_builder_v(bv_dsme, 0, dl_sm, 256,
-                                eb)
-                            in bput_v(eb, "\"\n") end
-                            else ())
-                          val () = $A.drop<byte>(fz_dsme, bv_dsme)
-                        in add_src_dynloads($A.thaw<byte>(fz_dsme), dl_sm, eb,
-                          fuel_dsm - 1) end
-                      end
-                    val dsm_start = $A.alloc<byte>(256)
-                    val () = add_src_dynloads(dsm_start, 0, entry, 200)
+                        val de_sm = $A.alloc<byte>(256)
+                        val dl_sm = $F.entries_name(es, i, de_sm, 256)
+                        val is_d = has_dats_ext(de_sm, dl_sm, 256)
+                        val @(fz_dsme, bv_dsme) = $A.freeze<byte>(de_sm)
+                        val () = (if is_d then let
+                            val () = bput_v(eb, "dynload \"./src/")
+                            val () = copy_to_builder_v(bv_dsme, 0, dl_sm, 256,
+                              eb)
+                          in bput_v(eb, "\"\n") end
+                          else ())
+                        val () = $A.drop<byte>(fz_dsme, bv_dsme)
+                        val () = $A.free<byte>($A.thaw<byte>(fz_dsme))
+                      in add_src_dynloads(es, i + 1, n, eb) end
+                    val dsm_arr = str_to_path_arr("build/src")
+                    val @(fz_dsm, bv_dsm) = $A.freeze<byte>(dsm_arr)
+                    val () = (case+ $F.dir_read(bv_dsm, 524288) of
+                      | ~$R.ok(es) => let
+                          val () = add_src_dynloads(es, 0, $F.entries_count(es), entry)
+                        in $F.entries_free(es) end
+                      | ~$R.err(_) => ())
+                    val () = $A.drop<byte>(fz_dsm, bv_dsm)
+                    val () = $A.free<byte>($A.thaw<byte>(fz_dsm))
                     val () = bput_v(entry, "dynload \"./src/bin/")
                     val () = copy_to_builder_v(bv_e, 0, stem_len, 256, entry)
                     val () = bput_v(entry, ".dats\"\n")
@@ -1920,28 +1878,25 @@ in
                     (* patsopt for dep modules *)
                     val bm3_arr = str_to_path_arr("bats_modules")
                     val @(fz_bm3, bv_bm3) = $A.freeze<byte>(bm3_arr)
-                    val bdir3 = $F.dir_open(bv_bm3, 524288)
+                    val bdir3 = $F.dir_read(bv_bm3, 524288)
                     val () = $A.drop<byte>(fz_bm3, bv_bm3)
                     val () = $A.free<byte>($A.thaw<byte>(fz_bm3))
                     val () = (case+ bdir3 of
                       | ~$R.ok(dd3) => let
-                          fun patsopt_deps {lph:agz}{fuel3:nat} .<fuel3>.
-                            (dd3: !$F.dir,
-                             ph: !$A.borrow(byte, lph, 512), phlen: int,
-                             fuel3: int fuel3): void =
-                            if fuel3 <= 0 then ()
+                          fun patsopt_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
+                            (dd3: !$F.entries(n), i: int i, n: int n,
+                             ph: !$A.borrow(byte, lph, 512), phlen: int): void =
+                            if i >= n then ()
                             else let
                               val de = $A.alloc<byte>(256)
-                              val dnr = $F.dir_next(dd3, de, 256)
-                              val dlen = dir_name_len(dnr)
+                              val dlen = $F.entries_name(dd3, i, de, 256)
                             in
-                              if dlen < 0 then $A.free<byte>(de)
-                              else let
+                              let
                                 val ddd = is_dot_or_dotdot(de, dlen, 256)
                               in
                                 if ddd then let
                                   val () = $A.free<byte>(de)
-                                in patsopt_deps(dd3, ph, phlen, fuel3 - 1) end
+                                in patsopt_deps(dd3, i + 1, n, ph, phlen) end
                                 else let
                                   val @(fz_de, bv_de) = $A.freeze<byte>(de)
                                   (* Check if package (has bats.toml) — skip namespace dirs *)
@@ -1965,24 +1920,21 @@ in
                                     val () = put_char_v(ns_d, 0)
                                     val @(ns_da, _) = $B.to_arr(ns_d)
                                     val @(fz_nsd, bv_nsd) = $A.freeze<byte>(ns_da)
-                                    val ns_r = $F.dir_open(bv_nsd, 524288)
+                                    val ns_r = $F.dir_read(bv_nsd, 524288)
                                     val () = $A.drop<byte>(fz_nsd, bv_nsd)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_nsd))
                                     val () = (case+ ns_r of
                                       | ~$R.ok(nsd) => let
-                                          fun patsopt_ns {lph2:agz}{lns2:agz}{fuel_ns:nat} .<fuel_ns>.
-                                            (nsd: !$F.dir, ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
-                                             ns_name: !$A.borrow(byte, lns2, 256), ns_len: int,
-                                             fuel_ns: int fuel_ns): void =
-                                            if fuel_ns <= 0 then ()
+                                          fun patsopt_ns {n,i:nat | i <= n}{lph2:agz}{lns2:agz} .<n - i>.
+                                            (nsd: !$F.entries(n), i: int i, n: int n, ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
+                                             ns_name: !$A.borrow(byte, lns2, 256), ns_len: int): void =
+                                            if i >= n then ()
                                             else let
                                               val sde = $A.alloc<byte>(256)
-                                              val snr = $F.dir_next(nsd, sde, 256)
-                                              val sel = dir_name_len(snr)
-                                            in if sel < 0 then $A.free<byte>(sde)
-                                              else let val sdd = is_dot_or_dotdot(sde, sel, 256) in
+                                              val sel = $F.entries_name(nsd, i, sde, 256)
+                                            in let val sdd = is_dot_or_dotdot(sde, sel, 256) in
                                                 if sdd then let val () = $A.free<byte>(sde)
-                                                in patsopt_ns(nsd, ph2, ph2len, ns_name, ns_len, fuel_ns-1) end
+                                                in patsopt_ns(nsd, i + 1, n, ph2, ph2len, ns_name, ns_len) end
                                                 else let
                                                   val @(fz_sde, bv_sde) = $A.freeze<byte>(sde)
                                                   (* Build paths: build/bats_modules/<ns>/<sub>/src/lib.dats *)
@@ -2025,17 +1977,16 @@ in
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_pe))
                                                   val () = $A.drop<byte>(fz_sde, bv_sde)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_sde))
-                                                in patsopt_ns(nsd, ph2, ph2len, ns_name, ns_len, fuel_ns-1) end
+                                                in patsopt_ns(nsd, i + 1, n, ph2, ph2len, ns_name, ns_len) end
                                               end
                                             end
-                                          val () = patsopt_ns(nsd, ph, phlen, bv_de, dlen, 100)
-                                          val dcr_ns = $F.dir_close(nsd)
-                                          val () = $R.discard<int><int>(dcr_ns)
+                                          val () = patsopt_ns(nsd, 0, $F.entries_count(nsd), ph, phlen, bv_de, dlen)
+                                          val () = $F.entries_free(nsd)
                                         in end
                                       | ~$R.err(_) => ())
                                     val () = $A.drop<byte>(fz_de, bv_de)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_de))
-                                  in patsopt_deps(dd3, ph, phlen, fuel3 - 1) end
+                                  in patsopt_deps(dd3, i + 1, n, ph, phlen) end
                                   else let
                                   val pats_fresh = let
                                     var ob : $B.builder_v = $B.create()
@@ -2079,32 +2030,29 @@ in
                                   val () = put_char_v(pats_src_b, 0)
                                   val @(ps_a, _) = $B.to_arr(pats_src_b)
                                   val @(fz_ps, bv_ps) = $A.freeze<byte>(ps_a)
-                                  val pats_dir = $F.dir_open(bv_ps, 524288)
+                                  val pats_dir = $F.dir_read(bv_ps, 524288)
                                   val () = $A.drop<byte>(fz_ps, bv_ps)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_ps))
                                   val () = (case+ pats_dir of
                                     | ~$R.ok(d_pt) => let
                                         fun patsopt_extra
-                                          {lph2:agz}{ld3:agz}{fuel_p:nat} .<fuel_p>.
-                                          (d_pt: !$F.dir,
+                                          {n,i:nat | i <= n}{lph2:agz}{ld3:agz} .<n - i>.
+                                          (d_pt: !$F.entries(n), i: int i, n: int n,
                                            ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
-                                           dep3: !$A.borrow(byte, ld3, 256), dep3_len: int,
-                                           fuel_p: int fuel_p): void =
-                                          if fuel_p <= 0 then ()
+                                           dep3: !$A.borrow(byte, ld3, 256), dep3_len: int): void =
+                                          if i >= n then ()
                                           else let
                                             val de3 = $A.alloc<byte>(256)
-                                            val nr3 = $F.dir_next(d_pt, de3, 256)
-                                            val dl3 = dir_name_len(nr3)
+                                            val dl3 = $F.entries_name(d_pt, i, de3, 256)
                                           in
-                                            if dl3 < 0 then $A.free<byte>(de3)
-                                            else let
+                                            let
                                               val is_d = has_dats_ext(de3, dl3, 256)
                                               val is_l = is_lib_dats(de3, dl3, 256)
                                             in
                                               if is_d then
                                                 if is_l then let
                                                   val () = $A.free<byte>(de3)
-                                                in patsopt_extra(d_pt, ph2, ph2len, dep3, dep3_len, fuel_p - 1) end
+                                                in patsopt_extra(d_pt, i + 1, n, ph2, ph2len, dep3, dep3_len) end
                                                 else let
                                                   val stem3 = dl3 - 5
                                                   val @(fz_d3, bv_d3) = $A.freeze<byte>(de3)
@@ -2151,50 +2099,45 @@ in
                                                   in () end)
                                                   val () = $A.drop<byte>(fz_d3, bv_d3)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_d3))
-                                                in patsopt_extra(d_pt, ph2, ph2len, dep3, dep3_len, fuel_p - 1) end
+                                                in patsopt_extra(d_pt, i + 1, n, ph2, ph2len, dep3, dep3_len) end
                                               else let
                                                 val () = $A.free<byte>(de3)
-                                              in patsopt_extra(d_pt, ph2, ph2len, dep3, dep3_len, fuel_p - 1) end
+                                              in patsopt_extra(d_pt, i + 1, n, ph2, ph2len, dep3, dep3_len) end
                                             end
                                           end
-                                        val () = patsopt_extra(d_pt, ph, phlen, bv_de, dlen, 200)
-                                        val dcr_pt = $F.dir_close(d_pt)
-                                        val () = $R.discard<int><int>(dcr_pt)
+                                        val () = patsopt_extra(d_pt, 0, $F.entries_count(d_pt), ph, phlen, bv_de, dlen)
+                                        val () = $F.entries_free(d_pt)
                                       in end
                                     | ~$R.err(_) => ())
                                   val () = $A.drop<byte>(fz_de, bv_de)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_de))
-                                in patsopt_deps(dd3, ph, phlen, fuel3 - 1) end
+                                in patsopt_deps(dd3, i + 1, n, ph, phlen) end
                                   end (* if ~is_p *)
                               end
                             end
-                          val () = patsopt_deps(dd3, ph, phlen, 200)
-                          val dcr3 = $F.dir_close(dd3)
-                          val () = $R.discard<int><int>(dcr3)
+                          val () = patsopt_deps(dd3, 0, $F.entries_count(dd3), ph, phlen)
+                          val () = $F.entries_free(dd3)
                         in end
                       | ~$R.err(_) => ())
 
                     (* patsopt for src/*.dats shared modules *)
                     val psm_arr = str_to_path_arr("build/src")
                     val @(fz_psm, bv_psm) = $A.freeze<byte>(psm_arr)
-                    val psm_dir = $F.dir_open(bv_psm, 524288)
+                    val psm_dir = $F.dir_read(bv_psm, 524288)
                     val () = $A.drop<byte>(fz_psm, bv_psm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_psm))
                     val () = (case+ psm_dir of
                       | ~$R.ok(d_psm) => let
                           fun patsopt_src_modules
-                            {lph_sm:agz}{fuel_psm:nat} .<fuel_psm>.
-                            (d_psm: !$F.dir,
-                             ph_sm: !$A.borrow(byte, lph_sm, 512), ph_sm_len: int,
-                             fuel_psm: int fuel_psm): void =
-                            if fuel_psm <= 0 then ()
+                            {n,i:nat | i <= n}{lph_sm:agz} .<n - i>.
+                            (d_psm: !$F.entries(n), i: int i, n: int n,
+                             ph_sm: !$A.borrow(byte, lph_sm, 512), ph_sm_len: int): void =
+                            if i >= n then ()
                             else let
                               val de_psm = $A.alloc<byte>(256)
-                              val nr_psm = $F.dir_next(d_psm, de_psm, 256)
-                              val dl_psm = dir_name_len(nr_psm)
+                              val dl_psm = $F.entries_name(d_psm, i, de_psm, 256)
                             in
-                              if dl_psm < 0 then $A.free<byte>(de_psm)
-                              else let
+                              let
                                 val is_d = has_dats_ext(de_psm, dl_psm, 256)
                               in
                                 if is_d then let
@@ -2234,15 +2177,14 @@ in
                                   in () end)
                                   val () = $A.drop<byte>(fz_dpsm, bv_dpsm)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_dpsm))
-                                in patsopt_src_modules(d_psm, ph_sm, ph_sm_len, fuel_psm - 1) end
+                                in patsopt_src_modules(d_psm, i + 1, n, ph_sm, ph_sm_len) end
                                 else let
                                   val () = $A.free<byte>(de_psm)
-                                in patsopt_src_modules(d_psm, ph_sm, ph_sm_len, fuel_psm - 1) end
+                                in patsopt_src_modules(d_psm, i + 1, n, ph_sm, ph_sm_len) end
                               end
                             end
-                          val () = patsopt_src_modules(d_psm, ph, phlen, 200)
-                          val dcr_psm = $F.dir_close(d_psm)
-                          val () = $R.discard<int><int>(dcr_psm)
+                          val () = patsopt_src_modules(d_psm, 0, $F.entries_count(d_psm), ph, phlen)
+                          val () = $F.entries_free(d_psm)
                         in end
                       | ~$R.err(_) => ())
 
@@ -2323,28 +2265,26 @@ in
                     (* Compile deps *)
                     val bm4_arr = str_to_path_arr("bats_modules")
                     val @(fz_bm4, bv_bm4) = $A.freeze<byte>(bm4_arr)
-                    val bdir4 = $F.dir_open(bv_bm4, 524288)
+                    val bdir4 = $F.dir_read(bv_bm4, 524288)
                     val () = $A.drop<byte>(fz_bm4, bv_bm4)
                     val () = $A.free<byte>($A.thaw<byte>(fz_bm4))
                     val () = (case+ bdir4 of
                       | ~$R.ok(dd4) => let
-                          fun clang_deps {lph:agz}{fuel4:nat} .<fuel4>.
-                            (dd4: !$F.dir,
+                          fun clang_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
+                            (dd4: !$F.entries(n), i: int i, n: int n,
                              ph: !$A.borrow(byte, lph, 512), phlen: int,
-                             rr: int, fuel4: int fuel4): void =
-                            if fuel4 <= 0 then ()
+                             rr: int): void =
+                            if i >= n then ()
                             else let
                               val de = $A.alloc<byte>(256)
-                              val dnr = $F.dir_next(dd4, de, 256)
-                              val dlen = dir_name_len(dnr)
+                              val dlen = $F.entries_name(dd4, i, de, 256)
                             in
-                              if dlen < 0 then $A.free<byte>(de)
-                              else let
+                              let
                                 val ddd = is_dot_or_dotdot(de, dlen, 256)
                               in
                                 if ddd then let
                                   val () = $A.free<byte>(de)
-                                in clang_deps(dd4, ph, phlen, rr, fuel4 - 1) end
+                                in clang_deps(dd4, i + 1, n, ph, phlen, rr) end
                                 else let
                                   val @(fz_de, bv_de) = $A.freeze<byte>(de)
                                   var pk_b3 : $B.builder_v = $B.create()
@@ -2367,24 +2307,22 @@ in
                                     val () = put_char_v(ns_cd, 0)
                                     val @(ns_cda, _) = $B.to_arr(ns_cd)
                                     val @(fz_nscd, bv_nscd) = $A.freeze<byte>(ns_cda)
-                                    val ns_cr = $F.dir_open(bv_nscd, 524288)
+                                    val ns_cr = $F.dir_read(bv_nscd, 524288)
                                     val () = $A.drop<byte>(fz_nscd, bv_nscd)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_nscd))
                                     val () = (case+ ns_cr of
                                       | ~$R.ok(nscd) => let
-                                          fun clang_ns {lph3:agz}{lns3:agz}{fuel_cn:nat} .<fuel_cn>.
-                                            (nscd: !$F.dir, ph3: !$A.borrow(byte, lph3, 512), ph3len: int,
+                                          fun clang_ns {n,i:nat | i <= n}{lph3:agz}{lns3:agz} .<n - i>.
+                                            (nscd: !$F.entries(n), i: int i, n: int n, ph3: !$A.borrow(byte, lph3, 512), ph3len: int,
                                              ns3: !$A.borrow(byte, lns3, 256), ns3len: int,
-                                             rr3: int, fuel_cn: int fuel_cn): void =
-                                            if fuel_cn <= 0 then ()
+                                             rr3: int): void =
+                                            if i >= n then ()
                                             else let
                                               val sde = $A.alloc<byte>(256)
-                                              val snr = $F.dir_next(nscd, sde, 256)
-                                              val sel = dir_name_len(snr)
-                                            in if sel < 0 then $A.free<byte>(sde)
-                                              else let val sdd = is_dot_or_dotdot(sde, sel, 256) in
+                                              val sel = $F.entries_name(nscd, i, sde, 256)
+                                            in let val sdd = is_dot_or_dotdot(sde, sel, 256) in
                                                 if sdd then let val () = $A.free<byte>(sde)
-                                                in clang_ns(nscd, ph3, ph3len, ns3, ns3len, rr3, fuel_cn-1) end
+                                                in clang_ns(nscd, i + 1, n, ph3, ph3len, ns3, ns3len, rr3) end
                                                 else let
                                                   val @(fz_sde, bv_sde) = $A.freeze<byte>(sde)
                                                   var co : $B.builder_v = $B.create()
@@ -2425,17 +2363,16 @@ in
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_ce))
                                                   val () = $A.drop<byte>(fz_sde, bv_sde)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_sde))
-                                                in clang_ns(nscd, ph3, ph3len, ns3, ns3len, rr3, fuel_cn-1) end
+                                                in clang_ns(nscd, i + 1, n, ph3, ph3len, ns3, ns3len, rr3) end
                                               end
                                             end
-                                          val () = clang_ns(nscd, ph, phlen, bv_de, dlen, rr, 100)
-                                          val dcr_cn = $F.dir_close(nscd)
-                                          val () = $R.discard<int><int>(dcr_cn)
+                                          val () = clang_ns(nscd, 0, $F.entries_count(nscd), ph, phlen, bv_de, dlen, rr)
+                                          val () = $F.entries_free(nscd)
                                         in end
                                       | ~$R.err(_) => ())
                                     val () = $A.drop<byte>(fz_de, bv_de)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_de))
-                                  in clang_deps(dd4, ph, phlen, rr, fuel4 - 1) end
+                                  in clang_deps(dd4, i + 1, n, ph, phlen, rr) end
                                   else let
                                   val cc_fresh = let
                                     var ob : $B.builder_v = $B.create()
@@ -2483,32 +2420,30 @@ in
                                   val () = put_char_v(cc_src_b, 0)
                                   val @(cs_a, _) = $B.to_arr(cc_src_b)
                                   val @(fz_cs, bv_cs) = $A.freeze<byte>(cs_a)
-                                  val cc_dir = $F.dir_open(bv_cs, 524288)
+                                  val cc_dir = $F.dir_read(bv_cs, 524288)
                                   val () = $A.drop<byte>(fz_cs, bv_cs)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_cs))
                                   val () = (case+ cc_dir of
                                     | ~$R.ok(d_cc) => let
                                         fun clang_extra
-                                          {lph2:agz}{ld4:agz}{fuel_c:nat} .<fuel_c>.
-                                          (d_cc: !$F.dir,
+                                          {n,i:nat | i <= n}{lph2:agz}{ld4:agz} .<n - i>.
+                                          (d_cc: !$F.entries(n), i: int i, n: int n,
                                            ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
                                            dep4: !$A.borrow(byte, ld4, 256), dep4_len: int,
-                                           rr2: int, fuel_c: int fuel_c): void =
-                                          if fuel_c <= 0 then ()
+                                           rr2: int): void =
+                                          if i >= n then ()
                                           else let
                                             val de4 = $A.alloc<byte>(256)
-                                            val nr4 = $F.dir_next(d_cc, de4, 256)
-                                            val dl4 = dir_name_len(nr4)
+                                            val dl4 = $F.entries_name(d_cc, i, de4, 256)
                                           in
-                                            if dl4 < 0 then $A.free<byte>(de4)
-                                            else let
+                                            let
                                               val is_c = has_dats_c_ext(de4, dl4, 256)
                                               val is_l = is_lib_dats_c(de4, dl4, 256)
                                             in
                                               if is_c then
                                                 if is_l then let
                                                   val () = $A.free<byte>(de4)
-                                                in clang_extra(d_cc, ph2, ph2len, dep4, dep4_len, rr2, fuel_c - 1) end
+                                                in clang_extra(d_cc, i + 1, n, ph2, ph2len, dep4, dep4_len, rr2) end
                                                 else let
                                                   val stem4 = dl4 - 7
                                                   val @(fz_d4, bv_d4) = $A.freeze<byte>(de4)
@@ -2558,50 +2493,46 @@ in
                                                   in print_newline() end else ()) end)
                                                   val () = $A.drop<byte>(fz_d4, bv_d4)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_d4))
-                                                in clang_extra(d_cc, ph2, ph2len, dep4, dep4_len, rr2, fuel_c - 1) end
+                                                in clang_extra(d_cc, i + 1, n, ph2, ph2len, dep4, dep4_len, rr2) end
                                               else let
                                                 val () = $A.free<byte>(de4)
-                                              in clang_extra(d_cc, ph2, ph2len, dep4, dep4_len, rr2, fuel_c - 1) end
+                                              in clang_extra(d_cc, i + 1, n, ph2, ph2len, dep4, dep4_len, rr2) end
                                             end
                                           end
-                                        val () = clang_extra(d_cc, ph, phlen, bv_de, dlen, rr, 200)
-                                        val dcr_cc = $F.dir_close(d_cc)
-                                        val () = $R.discard<int><int>(dcr_cc)
+                                        val () = clang_extra(d_cc, 0, $F.entries_count(d_cc), ph, phlen, bv_de, dlen, rr)
+                                        val () = $F.entries_free(d_cc)
                                       in end
                                     | ~$R.err(_) => ())
                                   val () = $A.drop<byte>(fz_de, bv_de)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_de))
-                                in clang_deps(dd4, ph, phlen, rr, fuel4 - 1) end
+                                in clang_deps(dd4, i + 1, n, ph, phlen, rr) end
                                   end (* if ~is_p3 *)
                               end
                             end
-                          val () = clang_deps(dd4, ph, phlen, rel, 200)
-                          val dcr4 = $F.dir_close(dd4)
-                          val () = $R.discard<int><int>(dcr4)
+                          val () = clang_deps(dd4, 0, $F.entries_count(dd4), ph, phlen, rel)
+                          val () = $F.entries_free(dd4)
                         in end
                       | ~$R.err(_) => ())
 
                     (* Compile src/*.dats shared modules *)
                     val csm_arr = str_to_path_arr("build/src")
                     val @(fz_csm, bv_csm) = $A.freeze<byte>(csm_arr)
-                    val csm_dir = $F.dir_open(bv_csm, 524288)
+                    val csm_dir = $F.dir_read(bv_csm, 524288)
                     val () = $A.drop<byte>(fz_csm, bv_csm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_csm))
                     val () = (case+ csm_dir of
                       | ~$R.ok(d_csm) => let
                           fun clang_src_modules
-                            {lph_cm:agz}{fuel_csm:nat} .<fuel_csm>.
-                            (d_csm: !$F.dir,
+                            {n,i:nat | i <= n}{lph_cm:agz} .<n - i>.
+                            (d_csm: !$F.entries(n), i: int i, n: int n,
                              ph_cm: !$A.borrow(byte, lph_cm, 512), ph_cm_len: int,
-                             rr_cm: int, fuel_csm: int fuel_csm): void =
-                            if fuel_csm <= 0 then ()
+                             rr_cm: int): void =
+                            if i >= n then ()
                             else let
                               val de_csm = $A.alloc<byte>(256)
-                              val nr_csm = $F.dir_next(d_csm, de_csm, 256)
-                              val dl_csm = dir_name_len(nr_csm)
+                              val dl_csm = $F.entries_name(d_csm, i, de_csm, 256)
                             in
-                              if dl_csm < 0 then $A.free<byte>(de_csm)
-                              else let
+                              let
                                 val is_c = has_dats_c_ext(de_csm, dl_csm, 256)
                               in
                                 if is_c then let
@@ -2645,15 +2576,14 @@ in
                                   in print_newline() end else ()) end)
                                   val () = $A.drop<byte>(fz_dcsm, bv_dcsm)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_dcsm))
-                                in clang_src_modules(d_csm, ph_cm, ph_cm_len, rr_cm, fuel_csm - 1) end
+                                in clang_src_modules(d_csm, i + 1, n, ph_cm, ph_cm_len, rr_cm) end
                                 else let
                                   val () = $A.free<byte>(de_csm)
-                                in clang_src_modules(d_csm, ph_cm, ph_cm_len, rr_cm, fuel_csm - 1) end
+                                in clang_src_modules(d_csm, i + 1, n, ph_cm, ph_cm_len, rr_cm) end
                               end
                             end
-                          val () = clang_src_modules(d_csm, ph, phlen, rel, 200)
-                          val dcr_csm = $F.dir_close(d_csm)
-                          val () = $R.discard<int><int>(dcr_csm)
+                          val () = clang_src_modules(d_csm, 0, $F.entries_count(d_csm), ph, phlen, rel)
+                          val () = $F.entries_free(d_csm)
                         in end
                       | ~$R.err(_) => ())
 
@@ -2773,27 +2703,25 @@ in
                                 val () = put_char_v(wds, 0)
                                 val @(wdsa, _) = $B.to_arr(wds)
                                 val @(fz_wds, bv_wds) = $A.freeze<byte>(wdsa)
-                                val wd_dr = $F.dir_open(bv_wds, 524288)
+                                val wd_dr = $F.dir_read(bv_wds, 524288)
                                 val () = $A.drop<byte>(fz_wds, bv_wds)
                                 val () = $A.free<byte>($A.thaw<byte>(fz_wds))
                                 val cnt3 = (case+ wd_dr of
                                   | ~$R.ok(wd) => let
-                                      fun wcc_ex {ls3:agz}{fuel2:nat} .<fuel2>.
-                                        (wd2: !$F.dir, s: !$A.arr(byte, ls3, 16384),
+                                      fun wcc_ex {n,i:nat | i <= n}{ls3:agz} .<n - i>.
+                                        (wd2: !$F.entries(n), i: int i, n: int n, s: !$A.arr(byte, ls3, 16384),
                                          dp: pos_t, dl: int,
                                          lb2: !$B.builder_v >> $B.builder_v,
-                                         c: int, fuel2: int fuel2): int =
-                                        if fuel2 <= 0 then c
+                                         c: int): int =
+                                        if i >= n then c
                                         else let
                                           val ef = $A.alloc<byte>(256)
-                                          val enr = $F.dir_next(wd2, ef, 256)
-                                          val el = dir_name_len(enr)
-                                        in if el < 0 then let val () = $A.free<byte>(ef) in c end
-                                        else let
+                                          val el = $F.entries_name(wd2, i, ef, 256)
+                                        in let
                                           val ic = has_dats_c_ext(ef, el, 256)
                                           val il = has_lib_dats_c_sfx(ef, el, 256)
                                         in if ic then if il then let val () = $A.free<byte>(ef)
-                                          in wcc_ex(wd2, s, dp, dl, lb2, c, fuel2-1) end
+                                          in wcc_ex(wd2, i + 1, n, s, dp, dl, lb2, c) end
                                           else let
                                             val @(fz_ef, bv_ef) = $A.freeze<byte>(ef)
                                             var wp : $B.builder_v = $B.create()
@@ -2814,21 +2742,18 @@ in
                                             val () = $A.free<byte>($A.thaw<byte>(fz_wp))
                                             val () = $A.drop<byte>(fz_ef, bv_ef)
                                             val () = $A.free<byte>($A.thaw<byte>(fz_ef))
-                                          in wcc_ex(wd2, s, dp, dl, lb2, c2, fuel2-1) end
+                                          in wcc_ex(wd2, i + 1, n, s, dp, dl, lb2, c2) end
                                         else let val () = $A.free<byte>(ef)
-                                        in wcc_ex(wd2, s, dp, dl, lb2, c, fuel2-1) end
+                                        in wcc_ex(wd2, i + 1, n, s, dp, dl, lb2, c) end
                                         end
                                         end
-                                      val cx = wcc_ex(wd, seen, pos, elen, lb, cnt2, 200)
-                                      val dcr_wd = $F.dir_close(wd)
-                                      val () = $R.discard<int><int>(dcr_wd)
+                                      val cx = wcc_ex(wd, 0, $F.entries_count(wd), seen, pos, elen, lb, cnt2)
+                                      val () = $F.entries_free(wd)
                                     in cx end
                                   | ~$R.err(_) => cnt2): int
                                 val next = pos + elen + 1
                               in wcc_deps(seen, spos, next, lb, cnt3, fuel - 1) end
-                            val w_sm_start = $A.alloc<byte>(256)
-                            val w_sp2 = scan_shared_module_deps(w_seen, w_sp1,
-                              w_sm_start, 0, 100)
+                            val w_sp2 = shared_module_deps(w_seen, w_sp1)
                             val w_fsp = collect_trans_deps(w_seen, w_sp2, 0, 200)
                             val dc = wcc_deps(w_seen, w_fsp, 0, wl, 0, 200)
                             val () = !wl_dep_cnt := dc
@@ -2839,25 +2764,23 @@ in
                       (* Compile src modules and add .o to link *)
                       val wsm_a = str_to_path_arr("build/src")
                       val @(fz_wsma, bv_wsma) = $A.freeze<byte>(wsm_a)
-                      val wsm_dr = $F.dir_open(bv_wsma, 524288)
+                      val wsm_dr = $F.dir_read(bv_wsma, 524288)
                       val () = $A.drop<byte>(fz_wsma, bv_wsma)
                       val () = $A.free<byte>($A.thaw<byte>(fz_wsma))
                       val wl_sm_cnt = ref<int>(0)
                       val () = (case+ wsm_dr of
                         | ~$R.ok(wsm_d) => let
-                            fun wcc_sm {fuel3:nat} .<fuel3>.
-                              (d: !$F.dir, lb: !$B.builder_v >> $B.builder_v,
-                               c: int, fuel3: int fuel3): int =
-                              if fuel3 <= 0 then c
+                            fun wcc_sm {n,i:nat | i <= n} .<n - i>.
+                              (d: !$F.entries(n), i: int i, n: int n, lb: !$B.builder_v >> $B.builder_v,
+                               c: int): int =
+                              if i >= n then c
                               else let
                                 val se = $A.alloc<byte>(256)
-                                val snr = $F.dir_next(d, se, 256)
-                                val sl = dir_name_len(snr)
-                              in if sl < 0 then let val () = $A.free<byte>(se) in c end
-                              else let
+                                val sl = $F.entries_name(d, i, se, 256)
+                              in let
                                 val isc = has_dats_c_ext(se, sl, 256)
                               in if ~isc then let val () = $A.free<byte>(se)
-                                in wcc_sm(d, lb, c, fuel3 - 1) end
+                                in wcc_sm(d, i + 1, n, lb, c) end
                               else let
                                 val @(fz_se2, bv_se2) = $A.freeze<byte>(se)
                                 var smp : $B.builder_v = $B.create()
@@ -2876,13 +2799,12 @@ in
                                 val () = $A.free<byte>($A.thaw<byte>(fz_smp))
                                 val () = $A.drop<byte>(fz_se2, bv_se2)
                                 val () = $A.free<byte>($A.thaw<byte>(fz_se2))
-                              in wcc_sm(d, lb, c2, fuel3 - 1) end
+                              in wcc_sm(d, i + 1, n, lb, c2) end
                               end
                               end
-                            val sc = wcc_sm(wsm_d, wl, 0, 200)
+                            val sc = wcc_sm(wsm_d, 0, $F.entries_count(wsm_d), wl, 0)
                             val () = !wl_sm_cnt := sc
-                            val dcr_wsm2 = $F.dir_close(wsm_d)
-                            val () = $R.discard<int><int>(dcr_wsm2)
+                            val () = $F.entries_free(wsm_d)
                           in end
                         | ~$R.err(_) => ())
                       val wl_argc2 = wl_argc1 + !wl_sm_cnt
@@ -3001,9 +2923,7 @@ in
                           val () = $A.drop<byte>(fz_ldb, bv_ldb)
                           val () = $A.free<byte>($A.thaw<byte>(fz_ldb))
                           (* Also scan shared modules for deps *)
-                          val lk_sm_start = $A.alloc<byte>(256)
-                          val lk_sp2 = scan_shared_module_deps(lk_dep_seen,
-                            lk_sp1, lk_sm_start, 0, 100)
+                          val lk_sp2 = shared_module_deps(lk_dep_seen, lk_sp1)
                           val lk_fsp = collect_trans_deps(lk_dep_seen, lk_sp2, 0, 200)
                           val () = link_closure_deps(lk_dep_seen, lk_fsp,
                             0, link, 200)
@@ -3013,22 +2933,19 @@ in
                     (* Link src/*.dats shared module .o files *)
                     val lsm_arr = str_to_path_arr("build/src")
                     val @(fz_lsm, bv_lsm) = $A.freeze<byte>(lsm_arr)
-                    val lsm_dir = $F.dir_open(bv_lsm, 524288)
+                    val lsm_dir = $F.dir_read(bv_lsm, 524288)
                     val () = $A.drop<byte>(fz_lsm, bv_lsm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_lsm))
                     val () = (case+ lsm_dir of
                       | ~$R.ok(d_lsm) => let
-                          fun link_src_modules {fuel_lsm:nat} .<fuel_lsm>.
-                            (d_lsm: !$F.dir, lb: !$B.builder_v >> $B.builder_v,
-                             fuel_lsm: int fuel_lsm): void =
-                            if fuel_lsm <= 0 then ()
+                          fun link_src_modules {n,i:nat | i <= n} .<n - i>.
+                            (d_lsm: !$F.entries(n), i: int i, n: int n, lb: !$B.builder_v >> $B.builder_v): void =
+                            if i >= n then ()
                             else let
                               val de_lsm = $A.alloc<byte>(256)
-                              val nr_lsm = $F.dir_next(d_lsm, de_lsm, 256)
-                              val dl_lsm = dir_name_len(nr_lsm)
+                              val dl_lsm = $F.entries_name(d_lsm, i, de_lsm, 256)
                             in
-                              if dl_lsm < 0 then $A.free<byte>(de_lsm)
-                              else let
+                              let
                                 val is_o = has_dats_o_ext(de_lsm, dl_lsm, 256)
                               in
                                 if is_o then let
@@ -3038,15 +2955,14 @@ in
                                     lb)
                                   val () = $A.drop<byte>(fz_dlsm, bv_dlsm)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_dlsm))
-                                in link_src_modules(d_lsm, lb, fuel_lsm - 1) end
+                                in link_src_modules(d_lsm, i + 1, n, lb) end
                                 else let
                                   val () = $A.free<byte>(de_lsm)
-                                in link_src_modules(d_lsm, lb, fuel_lsm - 1) end
+                                in link_src_modules(d_lsm, i + 1, n, lb) end
                               end
                             end
-                          val () = link_src_modules(d_lsm, link, 200)
-                          val dcr_lsm = $F.dir_close(d_lsm)
-                          val () = $R.discard<int><int>(dcr_lsm)
+                          val () = link_src_modules(d_lsm, 0, $F.entries_count(d_lsm), link)
+                          val () = $F.entries_free(d_lsm)
                         in end
                       | ~$R.err(_) => ())
                     val () = (if rel > 0 then bput_v(link, " -O2")
@@ -3117,13 +3033,12 @@ in
                     else let val () = set_build_err() in println! ("error: link failed") end)
                     val () = $A.drop<byte>(fz_e, bv_e)
                     val () = $A.free<byte>($A.thaw<byte>(fz_e))
-                  in scan_bins(d, ph, phlen, rel, fuel - 1) end
+                  in scan_bins(d, i + 1, n, ph, phlen, rel) end
                 end
               end
               end
-            val () = scan_bins(d2, bv_patshome, phlen, release, 100)
-            val dcr2 = $F.dir_close(d2)
-            val () = $R.discard<int><int>(dcr2)
+            val () = scan_bins(d2, 0, $F.entries_count(d2), bv_patshome, phlen, release)
+            val () = $F.entries_free(d2)
           in end
         | ~$R.err(_) => ())
 
