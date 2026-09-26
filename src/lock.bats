@@ -5,6 +5,7 @@
 #use array as A
 #use arith as AR
 #use builder as B
+#use env as E
 #use file as F
 #use list as L
 #use process as P
@@ -1714,6 +1715,16 @@ fun copy_bytes {f:nat} .<f>. (src: !$F.fd, dst: !$F.fd, f: int f): bool =
 
 (* Copies the file at the NUL-terminated path s to d (Rust: fs::copy);
    false on an error *)
+(* Gives d the permission bits of s, as Rust's fs::copy does *)
+fn copy_mode {ls,ld:agz}
+  (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
+  case+ $F.file_mode(s, 524288) of
+  | ~$R.err(_) => false
+  | ~$R.ok(m) =>
+    (case+ $F.file_chmod(d, 524288, m) of
+     | ~$R.ok(_) => true
+     | ~$R.err(_) => false)
+
 fn copy_file {ls,ld:agz}
   (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
   case+ $F.file_open(s, 524288, 0, 0) of
@@ -1727,7 +1738,7 @@ fn copy_file {ls,ld:agz}
          val ok = copy_bytes(sf, df, 1048576)
          val () = $R.discard<int><int>($F.file_close(sf))
          val () = $R.discard<int><int>($F.file_close(df))
-       in ok end)
+       in if ok then copy_mode(s, d) else false end)
 
 (* Whether e[0, el) is ".", "..", or a directory Rust's copy skips:
    build, dist, docs or bats_modules *)
@@ -1933,18 +1944,55 @@ in $A.free<byte>($A.thaw<byte>(fz)) end
 fun digits {f:nat} .<f>. (n: int, f: int f): int =
   if f <= 0 then 1 else if n < 10 then 1 else 1 + digits(n / 10, f - 1)
 
+(* Whether errors are colored, as Rust's display_fancy decides: standard
+   error is a terminal and NO_COLOR is not set *)
+fn use_color (): bool =
+  if ~$E.stderr_is_terminal() then false
+  else let
+    var k_c = @[char][8]('N', 'O', '_', 'C', 'O', 'L', 'O', 'R')
+    val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(k_c, 8))
+    val vb = $A.alloc<byte>(16)
+    val set = (case+ $E.get(bv_k, 8, vb, 16) of | ~$R.some(_) => true | ~$R.none() => false): bool
+    val () = $A.free<byte>(vb)
+    val () = $A.drop<byte>(fz_k, bv_k)
+    val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  in ~set end
+
+(* Rust's ANSI escapes, or nothing when c is false *)
+fn put_red (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[1;31m") else bput_v(out, "")
+fn put_blue (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[1;34m") else bput_v(out, "")
+fn put_reset (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[0m") else bput_v(out, "")
+
+(* " |" with the bar in blue *)
+fn put_bar (out: !$B.builder_v >> $B.builder_v, c: bool): void = let
+  val () = put_char_v(out, 32)
+  val () = put_blue(out, c)
+  val () = put_char_v(out, 124)
+in put_reset(out, c) end
+
 (* Rust's display_fancy of the error msg at offset off of src[0, n), a
    file labeled lab[l0, l1), appended to out; consumes msg *)
 fn put_fancy {ll,ls:agz}
   (lab: !$A.borrow(byte, ll, VMAX), l0: pos_t, l1: int, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
    off: pos_t, msg: $B.builder_v, out: !$B.builder_v >> $B.builder_v): void = let
+  val c = use_color()
   val @(line, col) = line_col(src, 0, off, 1, 1, VMAX)
   val pad = digits(line, 16)
   val ls = line_start(src, off, VMAX)
   val le = find_byte(src, VMAX, off, n, 10, VMAX)
-  val () = bput_v(out, "error: ")
+  val () = put_red(out, c)
+  val () = bput_v(out, "error:")
+  val () = put_reset(out, c)
+  val () = put_char_v(out, 32)
   val () = append_builder(out, msg)
-  val () = bput_v(out, "\n --> ")
+  val () = bput_v(out, "\n ")
+  val () = put_blue(out, c)
+  val () = bput_v(out, "-->")
+  val () = put_reset(out, c)
+  val () = put_char_v(out, 32)
   val () = copy_to_builder_v(lab, l0, l1, VMAX, out)
   val () = put_char_v(out, 58)
   val () = bput_int_v(out, line)
@@ -1953,16 +2001,22 @@ fn put_fancy {ll,ls:agz}
   val () = put_char_v(out, 10)
   val () = put_char_v(out, 32)
   val () = put_spaces(pad, out, 16)
-  val () = bput_v(out, " |\n ")
+  val () = put_bar(out, c)
+  val () = bput_v(out, "\n ")
   val () = bput_int_v(out, line)
-  val () = bput_v(out, " | ")
+  val () = put_bar(out, c)
+  val () = put_char_v(out, 32)
   val () = copy_to_builder_v(src, ls, le, VMAX, out)
   val () = put_char_v(out, 10)
   val () = put_char_v(out, 32)
   val () = put_spaces(pad, out, 16)
-  val () = bput_v(out, " | ")
+  val () = put_bar(out, c)
+  val () = put_char_v(out, 32)
   val () = put_spaces(col - 1, out, VMAX)
-in bput_v(out, "^\n") end
+  val () = put_red(out, c)
+  val () = put_char_v(out, 94)
+  val () = put_reset(out, c)
+in put_char_v(out, 10) end
 
 (* errs + fancy, separated by a blank line as Rust's join("\n") does;
    the count of errors after it *)

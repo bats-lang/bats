@@ -97,6 +97,16 @@ static int _file_exists(const char *path) {
   struct stat st;
   return stat(path, &st) == 0 ? 1 : 0;
 }
+/* The permission bits (st_mode & 07777) of path; -errno on failure. */
+static int _file_mode(const char *path) {
+  struct stat st;
+  if (stat(path, &st) != 0) return -errno;
+  return (int)(st.st_mode & 07777);
+}
+/* 0, or -errno on failure. */
+static int _file_chmod(const char *path, int mode) {
+  return chmod(path, (mode_t)mode) == 0 ? 0 : -errno;
+}
 static int _file_mkdir(const char *path, int mode) {
   return mkdir(path, mode);
 }
@@ -192,6 +202,18 @@ static int _file_mkdir(const char *path, int mode) {
 
 
 
+
+
+
+
+(* The permission bits (0 to 07777) of the file at path; the errno
+   (positive) when it cannot be read. *)
+
+
+
+
+(* Sets the permission bits of the file at path to mode; the errno
+   (positive) when it cannot. *)
 
 
 
@@ -370,6 +392,26 @@ implement file_exists {lb}{n} (path, path_len) = let
     $UNSAFE.castvwtp1{ptr}(cpath)) 
   val () = $A.free<byte>(cpath)
 in r > 0 end
+
+implement file_mode {lb}{n} (path, path_len) = let
+  val cpath = _with_cpath(path, path_len)
+  val m =  $extfcall([m:int | m <= 4095] int m, "_file_mode",
+    $UNSAFE.castvwtp1{ptr}(cpath)) 
+  val () = $A.free<byte>(cpath)
+in
+  if m >= 0 then $R.ok(m)
+  else $R.err(~m)
+end
+
+implement file_chmod {lb}{n} (path, path_len, mode) = let
+  val cpath = _with_cpath(path, path_len)
+  val r =  $extfcall(int, "_file_chmod",
+    $UNSAFE.castvwtp1{ptr}(cpath), mode) 
+  val () = $A.free<byte>(cpath)
+in
+  if $AR.eq_int_int(r, 0) then $R.ok(0)
+  else $R.err(~r)
+end
 
 implement file_mkdir {lb}{n} (path, path_len, mode) = let
   val cpath = _with_cpath(path, path_len)

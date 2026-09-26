@@ -1,12 +1,14 @@
 staload A = "array/src/lib.sats"
 staload AR = "arith/src/lib.sats"
 staload B = "builder/src/lib.sats"
+staload E = "env/src/lib.sats"
 staload F = "file/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload T = "toml/src/lib.sats"
+
 
 
 
@@ -1653,6 +1655,59 @@ staload "docs.sats"
 
 
 fn project_kind (): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

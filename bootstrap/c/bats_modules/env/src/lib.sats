@@ -49,6 +49,12 @@ fn cwd_read
   : $R.option([k:nat | k <= n] int k)
 
 
+fn stderr_is_terminal (): bool
+
+
+
+
+
 
 
 

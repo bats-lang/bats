@@ -111,6 +111,18 @@ fn file_mkdir
 
 
 
+fn file_mode
+  {lb:agz}{n:pos | n < 1048576}
+  (path: !$A.borrow(byte, lb, n), path_len: int n): $R.result([m:nat | m <= 4095] int m, int)
+
+
+
+fn file_chmod
+  {lb:agz}{n:pos | n < 1048576}
+  (path: !$A.borrow(byte, lb, n), path_len: int n, mode: int): $R.result(int, int)
+
+
+
 
 
 stadef BUF_SIZE = 4096
@@ -154,6 +166,24 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, int)
 fn buf_flush(w: !buf_writer): $R.result(int, int)
 
 fn buf_writer_close(w: buf_writer): $R.result(int, int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
