@@ -61,6 +61,8 @@ The `end` that closes `$UNSAFE begin` is found in code only; the word `end` in t
 
 A dependency's `#pub` names are not renamed. The Rust bats renamed each dependency file's `#pub` names to `__BATS__<pkg>_<name>` on its own, so a call from one module of a dependency to another module's `#pub` function (as in bridge) no longer resolved (`tests/dep-cross-module`).
 
+The wasm prelude defines `atspre_cloptr_free` (as ATS's `basics.cats` does, with `ATS_MFREE`). The Rust bats's wasm prelude lacked it, so a wasm binary that freed a closure imported it from a host that has none and failed to instantiate (`tests/wasm-cloptr-free`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement
