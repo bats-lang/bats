@@ -1,0 +1,3 @@
+[package]
+name = "lib-module-error"
+kind = "lib"

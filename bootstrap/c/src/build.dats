@@ -94,7 +94,8 @@ end end
    Helpers: run patsopt/cc on all extra .dats/.c files in a dir
    ============================================================ *)
 
-(* Run patsopt on all non-lib .dats files in a build src dir.
+(* Run patsopt on all non-lib .dats files in a build src dir, skipping
+   ones whose C output is already fresh. A failure is a build error.
    dir_bv: null-terminated path like "build/bats_modules/foo/src" *)
 fn patsopt_dir_extra
   {ld:agz}{lph:agz}
@@ -139,7 +140,26 @@ in case+ dr of
               val () = put_char_v(ib, 0)
               val @(ia, il) = $B.to_arr(ib)
               val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-              val _ = run_patsopt(ph, phlen, bv_o, ol, bv_i, il)
+              val fresh = let
+                var fo : $B.builder_v = $B.create()
+                val () = copy_to_builder_v(dir_bv, 0, dl, 524288, fo)
+                val () = bput_v(fo, "/")
+                val () = copy_to_builder_v(bv_e, 0, stem, 256, fo)
+                val () = bput_v(fo, "_dats.c")
+                val () = put_char_v(fo, 0)
+                var fi : $B.builder_v = $B.create()
+                val () = copy_to_builder_v(dir_bv, 0, dl, 524288, fi)
+                val () = bput_v(fi, "/")
+                val () = copy_to_builder_v(bv_e, 0, el, 256, fi)
+                val () = put_char_v(fi, 0)
+              in freshness_check_bv(fo, fi) end
+              val rc = (if fresh then 0 else run_patsopt(ph, phlen, bv_o, ol, bv_i, il)): int
+              val () = (if rc <> 0 then let
+                val () = set_build_err()
+                val () = print! ("error: patsopt failed for ")
+                val () = print_borrow(bv_i, 0, il - 1, 524288, 524288)
+              in print_newline() end
+              else ())
               val () = $A.drop<byte>(fz_o, bv_o)
               val () = $A.free<byte>($A.thaw<byte>(fz_o))
               val () = $A.drop<byte>(fz_i, bv_i)
@@ -4237,6 +4257,13 @@ in
           in println! ("error: patsopt failed for src/lib.bats") end
           else if ~is_quiet() then println! ("  patsopt: src/lib.bats")
           else ())
+          (* The library's other modules: type-check them too, or an
+             error in one only shows up in some consumer's build. *)
+          val src_dir = str_to_path_arr("build/src")
+          val @(fz_sd, bv_sd) = $A.freeze<byte>(src_dir)
+          val () = patsopt_dir_extra(bv_sd, 10, bv_patshome, phlen)
+          val () = $A.drop<byte>(fz_sd, bv_sd)
+          val () = $A.free<byte>($A.thaw<byte>(fz_sd))
         in end
         else ())
 
