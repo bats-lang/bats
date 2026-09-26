@@ -18,8 +18,9 @@ staload R = "result/src/lib.sats"
 
 
 stadef TOML_MAX_BUF = 65536
-stadef TOML_ENTRY_INTS = 1536
-
+stadef TOML_MAX_ENTRIES = 256
+(* Six 16-bit fields per entry, two bytes each. *)
+stadef TOML_ENTRY_BYTES = 3072
 
 
 
@@ -36,12 +37,12 @@ stadef TOML_ENTRY_INTS = 1536
 
 
 datavtype toml_doc =
-  | {lb:agz}{le:agz}
+  | {lb:agz}{le:agz}{m:nat | m <= TOML_MAX_BUF}{k:nat | k <= TOML_MAX_ENTRIES}
     toml_doc_mk of (
       $A.arr(byte, lb, TOML_MAX_BUF),
-      int,
-      $A.arr(int, le, TOML_ENTRY_INTS),
-      int
+      int m,
+      $A.arr(byte, le, TOML_ENTRY_BYTES),
+      int k
     )
 
 
@@ -67,126 +68,6 @@ fun keys
 
 fun toml_free
   (doc: toml_doc): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

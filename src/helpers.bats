@@ -126,53 +126,280 @@ implement is_dot_or_dotdot(ent, len, max) =
    Filename matchers
    ============================================================ *)
 
-#pub fn has_bats_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+(* Name length from $F.dir_next into a 256-byte buffer, or ~1 at the
+   end of the directory. *)
+#pub fn dir_name_len (o: $R.option([k:nat | k <= 256] int k)): [k:int | ~1 <= k; k <= 256] int k
 
-implement has_bats_ext(ent, len, max) =
-  $S.has_suffix(ent, len, max, ".bats", 5)
+implement dir_name_len (o) =
+  case+ o of
+  | ~$R.some(k) => k
+  | ~$R.none() => ~1
 
-#pub fn has_dats_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+(* Whether ent[0, len) ends with the chars sfx. *)
+#pub fn ent_has_suffix {l:agz}{n:pos}{k:nat | k <= n}{m:pos | m <= 1048576}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n, sfx: &(@[char][m]), m: int m): bool
 
-implement has_dats_ext(ent, len, max) =
-  $S.has_suffix(ent, len, max, ".dats", 5)
+implement ent_has_suffix(ent, len, max, sfx, m) = let
+  val @(f, b) = $A.freeze<byte>($S.from_char_array(sfx, m))
+  val r = $S.has_suffix(ent, len, max, b, m)
+  val () = $A.drop<byte>(f, b)
+  val () = $A.free<byte>($A.thaw<byte>(f))
+in r end
 
-#pub fn has_dats_c_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+(* Whether ent[0, len) is exactly the chars s. *)
+#pub fn ent_name_eq {l:agz}{n:pos}{k:nat | k <= n}{m:pos | m <= 1048576}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n, s: &(@[char][m]), m: int m): bool
 
-implement has_dats_c_ext(ent, len, max) =
-  $S.has_suffix(ent, len, max, "_dats.c", 7)
+implement ent_name_eq(ent, len, max, s, m) = let
+  val @(f, b) = $A.freeze<byte>($S.from_char_array(s, m))
+  val r = $S.name_eq(ent, len, max, b, m)
+  val () = $A.drop<byte>(f, b)
+  val () = $A.free<byte>($A.thaw<byte>(f))
+in r end
 
-#pub fn has_dats_o_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+(* Whether src[pos, pos + m) spells the chars lit. *)
+#pub fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n, lit: &(@[char][m]), m: int m): bool
 
-implement has_dats_o_ext(ent, len, max) =
-  $S.has_suffix(ent, len, max, "_dats.o", 7)
+implement lit_at(src, pos, max, lit, m) = let
+  val @(f, b) = $A.freeze<byte>($S.from_char_array(lit, m))
+  val r = $S.chars_match_borrow(src, pos, max, b, 0, m)
+  val () = $A.drop<byte>(f, b)
+  val () = $A.free<byte>($A.thaw<byte>(f))
+in r end
 
-#pub fn is_lib_bats {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+#pub fn has_bats_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
 
-implement is_lib_bats(ent, len, max) =
-  $S.name_eq(ent, len, max, "lib.bats", 8)
+implement has_bats_ext(ent, len, max) = let
+  var c = @[char][5]('.', 'b', 'a', 't', 's')
+in ent_has_suffix(ent, len, max, c, 5) end
 
-#pub fn is_lib_dats {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+#pub fn has_dats_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
 
-implement is_lib_dats(ent, len, max) =
-  $S.name_eq(ent, len, max, "lib.dats", 8)
+implement has_dats_ext(ent, len, max) = let
+  var c = @[char][5]('.', 'd', 'a', 't', 's')
+in ent_has_suffix(ent, len, max, c, 5) end
 
-#pub fn is_lib_dats_c {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+#pub fn has_dats_c_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
 
-implement is_lib_dats_c(ent, len, max) =
-  $S.name_eq(ent, len, max, "lib_dats.c", 10)
+implement has_dats_c_ext(ent, len, max) = let
+  var c = @[char][7]('_', 'd', 'a', 't', 's', '.', 'c')
+in ent_has_suffix(ent, len, max, c, 7) end
 
-#pub fn is_lib_dats_o {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+#pub fn has_dats_o_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
 
-implement is_lib_dats_o(ent, len, max) =
-  $S.name_eq(ent, len, max, "lib_dats.o", 10)
+implement has_dats_o_ext(ent, len, max) = let
+  var c = @[char][7]('_', 'd', 'a', 't', 's', '.', 'o')
+in ent_has_suffix(ent, len, max, c, 7) end
+
+#pub fn has_sha256_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement has_sha256_ext(ent, len, max) = let
+  var c = @[char][7]('.', 's', 'h', 'a', '2', '5', '6')
+in ent_has_suffix(ent, len, max, c, 7) end
+
+#pub fn has_lib_dats_c_sfx {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement has_lib_dats_c_sfx(ent, len, max) = let
+  var c = @[char][10]('l', 'i', 'b', '_', 'd', 'a', 't', 's', '.', 'c')
+in ent_has_suffix(ent, len, max, c, 10) end
+
+#pub fn has_lib_dats_o_sfx {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement has_lib_dats_o_sfx(ent, len, max) = let
+  var c = @[char][10]('l', 'i', 'b', '_', 'd', 'a', 't', 's', '.', 'o')
+in ent_has_suffix(ent, len, max, c, 10) end
+
+#pub fn is_lib_bats {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement is_lib_bats(ent, len, max) = let
+  var c = @[char][8]('l', 'i', 'b', '.', 'b', 'a', 't', 's')
+in ent_name_eq(ent, len, max, c, 8) end
+
+#pub fn is_lib_dats {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement is_lib_dats(ent, len, max) = let
+  var c = @[char][8]('l', 'i', 'b', '.', 'd', 'a', 't', 's')
+in ent_name_eq(ent, len, max, c, 8) end
+
+#pub fn is_lib_dats_c {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement is_lib_dats_c(ent, len, max) = let
+  var c = @[char][10]('l', 'i', 'b', '_', 'd', 'a', 't', 's', '.', 'c')
+in ent_name_eq(ent, len, max, c, 10) end
+
+#pub fn is_lib_dats_o {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+implement is_lib_dats_o(ent, len, max) = let
+  var c = @[char][10]('l', 'i', 'b', '_', 'd', 'a', 't', 's', '.', 'o')
+in ent_name_eq(ent, len, max, c, 10) end
+
+(* Keyword and literal matchers: whether src[pos, pos + len) spells it. *)
+
+#pub fn lit_as {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_as(src, pos, max) = let
+  var c = @[char][2]('a', 's')
+in lit_at(src, pos, max, c, 2) end
+
+#pub fn lit_begin {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_begin(src, pos, max) = let
+  var c = @[char][5]('b', 'e', 'g', 'i', 'n')
+in lit_at(src, pos, max, c, 5) end
+
+#pub fn lit_binary {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_binary(src, pos, max) = let
+  var c = @[char][6]('b', 'i', 'n', 'a', 'r', 'y')
+in lit_at(src, pos, max, c, 6) end
+
+#pub fn lit_dollar_UNITTEST {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_dollar_UNITTEST(src, pos, max) = let
+  var c = @[char][9]('$', 'U', 'N', 'I', 'T', 'T', 'E', 'S', 'T')
+in lit_at(src, pos, max, c, 9) end
+
+#pub fn lit_dollar_UNSAFE {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_dollar_UNSAFE(src, pos, max) = let
+  var c = @[char][7]('$', 'U', 'N', 'S', 'A', 'F', 'E')
+in lit_at(src, pos, max, c, 7) end
+
+#pub fn lit_dot_slash {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_dot_slash(src, pos, max) = let
+  var c = @[char][2]('.', '/')
+in lit_at(src, pos, max, c, 2) end
+
+#pub fn lit_end {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_end(src, pos, max) = let
+  var c = @[char][3]('e', 'n', 'd')
+in lit_at(src, pos, max, c, 3) end
+
+#pub fn lit_exthash {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_exthash(src, pos, max) = let
+  var c = @[char][4]('e', 'x', 't', '#')
+in lit_at(src, pos, max, c, 4) end
+
+#pub fn lit_fun {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_fun(src, pos, max) = let
+  var c = @[char][3]('f', 'u', 'n')
+in lit_at(src, pos, max, c, 3) end
+
+#pub fn lit_hash_pub {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_hash_pub(src, pos, max) = let
+  var c = @[char][4]('#', 'p', 'u', 'b')
+in lit_at(src, pos, max, c, 4) end
+
+#pub fn lit_hash_target {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_hash_target(src, pos, max) = let
+  var c = @[char][7]('#', 't', 'a', 'r', 'g', 'e', 't')
+in lit_at(src, pos, max, c, 7) end
+
+#pub fn lit_hash_use {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_hash_use(src, pos, max) = let
+  var c = @[char][4]('#', 'u', 's', 'e')
+in lit_at(src, pos, max, c, 4) end
+
+#pub fn lit_let {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_let(src, pos, max) = let
+  var c = @[char][3]('l', 'e', 't')
+in lit_at(src, pos, max, c, 3) end
+
+#pub fn lit_local {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_local(src, pos, max) = let
+  var c = @[char][5]('l', 'o', 'c', 'a', 'l')
+in lit_at(src, pos, max, c, 5) end
+
+#pub fn lit_machash {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_machash(src, pos, max) = let
+  var c = @[char][4]('m', 'a', 'c', '#')
+in lit_at(src, pos, max, c, 4) end
+
+#pub fn lit_no_mangle {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_no_mangle(src, pos, max) = let
+  var c = @[char][9]('n', 'o', '_', 'm', 'a', 'n', 'g', 'l', 'e')
+in lit_at(src, pos, max, c, 9) end
+
+#pub fn lit_prfn {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_prfn(src, pos, max) = let
+  var c = @[char][4]('p', 'r', 'f', 'n')
+in lit_at(src, pos, max, c, 4) end
+
+#pub fn lit_prfun {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_prfun(src, pos, max) = let
+  var c = @[char][5]('p', 'r', 'f', 'u', 'n')
+in lit_at(src, pos, max, c, 5) end
+
+#pub fn lit_primplement {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_primplement(src, pos, max) = let
+  var c = @[char][11]('p', 'r', 'i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't')
+in lit_at(src, pos, max, c, 11) end
+
+#pub fn lit_slash_srcslash_libdot_dats {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_slash_srcslash_libdot_dats(src, pos, max) = let
+  var c = @[char][13]('/', 's', 'r', 'c', '/', 'l', 'i', 'b', '.', 'd', 'a', 't', 's')
+in lit_at(src, pos, max, c, 13) end
+
+#pub fn lit_staload_dq {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_staload_dq(src, pos, max) = let
+  var c = @[char][9]('s', 't', 'a', 'l', 'o', 'a', 'd', ' ', '\042')
+in lit_at(src, pos, max, c, 9) end
+
+#pub fn lit_target_wasm_binary {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+implement lit_target_wasm_binary(src, pos, max) = let
+  var c = @[char][18]('t', 'a', 'r', 'g', 'e', 't', ' ', 'w', 'a', 's', 'm', ' ', 'b', 'i', 'n', 'a', 'r', 'y')
+in lit_at(src, pos, max, c, 18) end
 
 (* ============================================================
    Byte-level helpers
@@ -1087,48 +1314,42 @@ implement count_argc(buf, len) =
   count_argc_loop(buf, 0, len, 4096, 0, 4097)
 
 
-#pub fn ap_flag {sn:pos}{sh:pos}
-  (p: $AP.parser, name: string sn, sc: int, help: string sh
-  ): @($AP.parser, $AP.arg($AP.bool_val))
+#pub fn ap_flag {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: int, help: &(@[char][nh]), nh: int nh
+  ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.bool_val))
 
-implement ap_flag(p, name, sc, help) = let
-  val @(na, nl) = $S.str_to_borrow(name)
-  val @(fzn, bvn) = $A.freeze<byte>(na)
-  val @(ha, hl) = $S.str_to_borrow(help)
-  val @(fzh, bvh) = $A.freeze<byte>(ha)
-  val @(p2, h) = $AP.add_flag(p, bvn, nl, sc, bvh, hl)
+implement ap_flag(p, name, nn, sc, help, nh) = let
+  val @(fzn, bvn) = $A.freeze<byte>($S.from_char_array(name, nn))
+  val @(fzh, bvh) = $A.freeze<byte>($S.from_char_array(help, nh))
+  val @(p2, h) = $AP.add_flag(p, bvn, nn, sc, bvh, nh)
   val () = $A.drop<byte>(fzn, bvn)
   val () = $A.free<byte>($A.thaw<byte>(fzn))
   val () = $A.drop<byte>(fzh, bvh)
   val () = $A.free<byte>($A.thaw<byte>(fzh))
 in @(p2, h) end
 
-#pub fn ap_string_opt {sn:pos}{sh:pos}
-  (p: $AP.parser, name: string sn, sc: int, help: string sh
-  ): @($AP.parser, $AP.arg($AP.string_val))
+#pub fn ap_string_opt {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: int, help: &(@[char][nh]), nh: int nh
+  ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.string_val))
 
-implement ap_string_opt(p, name, sc, help) = let
-  val @(na, nl) = $S.str_to_borrow(name)
-  val @(fzn, bvn) = $A.freeze<byte>(na)
-  val @(ha, hl) = $S.str_to_borrow(help)
-  val @(fzh, bvh) = $A.freeze<byte>(ha)
-  val @(p2, h) = $AP.add_string(p, bvn, nl, sc, bvh, hl, false)
+implement ap_string_opt(p, name, nn, sc, help, nh) = let
+  val @(fzn, bvn) = $A.freeze<byte>($S.from_char_array(name, nn))
+  val @(fzh, bvh) = $A.freeze<byte>($S.from_char_array(help, nh))
+  val @(p2, h) = $AP.add_string(p, bvn, nn, sc, bvh, nh, false)
   val () = $A.drop<byte>(fzn, bvn)
   val () = $A.free<byte>($A.thaw<byte>(fzn))
   val () = $A.drop<byte>(fzh, bvh)
   val () = $A.free<byte>($A.thaw<byte>(fzh))
 in @(p2, h) end
 
-#pub fn ap_string_pos {sn:pos}{sh:pos}
-  (p: $AP.parser, name: string sn, help: string sh
-  ): @($AP.parser, $AP.arg($AP.string_val))
+#pub fn ap_string_pos {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, help: &(@[char][nh]), nh: int nh
+  ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.string_val))
 
-implement ap_string_pos(p, name, help) = let
-  val @(na, nl) = $S.str_to_borrow(name)
-  val @(fzn, bvn) = $A.freeze<byte>(na)
-  val @(ha, hl) = $S.str_to_borrow(help)
-  val @(fzh, bvh) = $A.freeze<byte>(ha)
-  val @(p2, h) = $AP.add_string(p, bvn, nl, 0, bvh, hl, true)
+implement ap_string_pos(p, name, nn, help, nh) = let
+  val @(fzn, bvn) = $A.freeze<byte>($S.from_char_array(name, nn))
+  val @(fzh, bvh) = $A.freeze<byte>($S.from_char_array(help, nh))
+  val @(p2, h) = $AP.add_string(p, bvn, nn, 0, bvh, nh, true)
   val () = $A.drop<byte>(fzn, bvn)
   val () = $A.free<byte>($A.thaw<byte>(fzn))
   val () = $A.drop<byte>(fzh, bvh)
@@ -1164,18 +1385,18 @@ fn name_lt {la:agz}{lb:agz}
 #pub fn dir_next_sorted {lp:agz}{np:pos | np < 1048576}{lq:agz}
   (path: !$A.borrow(byte, lp, np), path_len: int np,
    prev: !$A.borrow(byte, lq, 256), prev_len: int)
-  : [lo:agz] @($A.arr(byte, lo, 256), int)
+  : [lo:agz] @($A.arr(byte, lo, 256), [k:int | ~1 <= k; k <= 256] int k)
 
 implement dir_next_sorted (path, path_len, prev, prev_len) = let
   fun scan {lq:agz}{lb:agz}{k:nat} .<k>.
     (d: !$F.dir, prev: !$A.borrow(byte, lq, 256), prev_len: int,
-     best: $A.arr(byte, lb, 256), best_len: int, fuel: int k)
-    : [lo:agz] @($A.arr(byte, lo, 256), int) =
+     best: $A.arr(byte, lb, 256), best_len: [b:int | ~1 <= b; b <= 256] int b, fuel: int k)
+    : [lo:agz] @($A.arr(byte, lo, 256), [k:int | ~1 <= k; k <= 256] int k) =
     if fuel <= 0 then @(best, best_len)
     else let
       val e = $A.alloc<byte>(256)
       val nr = $F.dir_next(d, e, 256)
-      val el = $R.option_unwrap_or<int>(nr, ~1)
+      val el = dir_name_len(nr)
     in
       if el < 0 then let
         val () = $A.free<byte>(e)

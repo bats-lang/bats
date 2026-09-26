@@ -143,10 +143,7 @@ drop_borrow_at
 
 
 stadef SAFE_CHAR (c:int) =
-  (c >= 97 && c <= 122)
-  || (c >= 65 && c <= 90)
-  || (c >= 48 && c <= 57)
-  || c == 45
+  (c >= 0 && c < 256)
 
 abstype text (n:int) = ptr
 
