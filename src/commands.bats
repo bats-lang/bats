@@ -182,6 +182,163 @@ fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
       val () = set_build_err()
     in prerr! ("error: cannot read archive for checksum\n") end
 
+(* The end of the line starting at i: the next '\n', or len *)
+fun line_end {l:agz}{n:pos}{f:nat} .<f>.
+  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, n: int n, f: int f): pos_t =
+  if f <= 0 then i
+  else if i >= len then i
+  else if $AR.eq_int_int(peek(b, i, n), 10) then i
+  else line_end(b, i + 1, len, n, f - 1)
+
+(* Whether c is whitespace as Rust's str::trim sees it (ASCII) *)
+fn is_ws (c: int): bool =
+  $AR.eq_int_int(c, 32) || $AR.eq_int_int(c, 9) || $AR.eq_int_int(c, 10) ||
+  $AR.eq_int_int(c, 11) || $AR.eq_int_int(c, 12) || $AR.eq_int_int(c, 13)
+
+(* The first non-whitespace position in [i, e), or e *)
+fun skip_ws {l:agz}{n:pos}{f:nat} .<f>.
+  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): pos_t =
+  if f <= 0 then i
+  else if i >= e then e
+  else if is_ws(peek(b, i, n)) then skip_ws(b, i + 1, e, n, f - 1)
+  else i
+
+(* The end of [s, e) with trailing whitespace dropped *)
+fun trim_end {l:agz}{n:pos}{f:nat} .<f>.
+  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n, f: int f): pos_t =
+  if f <= 0 then e
+  else if e <= s then s
+  else if is_ws(peek(b, e - 1, n)) then trim_end(b, s, e - 1, n, f - 1)
+  else e
+
+(* Whether [i, e) holds a '=' *)
+fun has_eq {l:agz}{n:pos}{f:nat} .<f>.
+  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): bool =
+  if f <= 0 then false
+  else if i >= e then false
+  else if $AR.eq_int_int(peek(b, i, n), 61) then true
+  else has_eq(b, i + 1, e, n, f - 1)
+
+(* Rust's inject_version: a line whose trim starts with "version" and
+   holds '=' *)
+fn is_version_line {l:agz}{n:pos}
+  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n): bool = let
+  var c = @[char][7]('v', 'e', 'r', 's', 'i', 'o', 'n')
+  val t = skip_ws(b, s, e, n, 8192)
+in
+  if t + 7 > e then false
+  else if lit_at(b, t, n, c, 7) then has_eq(b, s, e, n, 8192)
+  else false
+end
+
+(* Whether the trimmed line is "[package]" *)
+fn is_package_line {l:agz}{n:pos}
+  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n): bool = let
+  var c = @[char][9]('\[', 'p', 'a', 'c', 'k', 'a', 'g', 'e', ']')
+  val t = skip_ws(b, s, e, n, 8192)
+  val te = trim_end(b, t, e, n, 8192)
+in
+  if te - t <> 9 then false else lit_at(b, t, n, c, 9)
+end
+
+(* Whether any line of b[i, len) is a version line *)
+fun any_version_line {l:agz}{n:pos}{f:nat} .<f>.
+  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, n: int n, f: int f): bool =
+  if f <= 0 then false
+  else if i >= len then false
+  else let
+    val e = line_end(b, i, len, n, 8192)
+  in
+    if is_version_line(b, i, e, n) then true
+    else any_version_line(b, e + 1, len, n, f - 1)
+  end
+
+(* version = "<v>" and a newline *)
+fn put_version_line {lv:agz}{nv:pos}
+  (out: !$B.builder_v >> $B.builder_v,
+   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): void = let
+  val () = bput_v(out, "version = \"")
+  val () = copy_to_builder_v(v, 0, vlen, nv, out)
+in bput_v(out, "\"\n") end
+
+(* One line b[i, ce) of inject_lines *)
+fn inject_line {l:agz}{n:pos}{lv:agz}{nv:pos}
+  (b: !$A.borrow(byte, l, n), i: pos_t, ce: pos_t, n: int n,
+   replace: bool, ver_line: bool, pkg_line: bool,
+   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if replace && ver_line then put_version_line(out, v, vlen, nv)
+  else let
+    val () = copy_to_builder_v(b, i, ce, n, out)
+    val () = put_char_v(out, 10)
+  in
+    if replace then ()
+    else if pkg_line then put_version_line(out, v, vlen, nv)
+    else ()
+  end
+
+(* Rust's inject_version over the lines of b[i, len): with a version
+   line present (replace), each one becomes the new version line;
+   otherwise the version line goes after "[package]". Every line ends
+   with '\n' and loses a trailing '\r', as str::lines does. *)
+fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{f:nat} .<f>.
+  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, n: int n, replace: bool,
+   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
+   out: !$B.builder_v >> $B.builder_v, f: int f): void =
+  if f <= 0 then ()
+  else if i >= len then ()
+  else let
+    val e = line_end(b, i, len, n, 8192)
+    val ce = (if e > i then
+      (if $AR.eq_int_int(peek(b, e - 1, n), 13) then e - 1 else e) else e): pos_t
+    val ver_line = is_version_line(b, i, ce, n)
+    val pkg_line = is_package_line(b, i, ce, n)
+    val () = inject_line(b, i, ce, n, replace, ver_line, pkg_line, v, vlen, nv, out)
+  in inject_lines(b, e + 1, len, n, replace, v, vlen, nv, out, f - 1) end
+
+(* Frees an argument list that will not be run *)
+fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
+  case+ xs of
+  | ~$L.list_vt_cons(a, rest) => let
+      val @(arr, _) = a
+      val () = $A.free<byte>(arr)
+    in free_args(rest) end
+  | ~$L.list_vt_nil() => ()
+
+(* Writes bats.toml with the version injected (Rust: write_with_version)
+   to build/upload/bats.toml; 0 on success *)
+fn write_with_version {lv:agz}{nv:pos}
+  (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
+  val tp = str_to_path_arr("bats.toml")
+  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
+  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val () = $A.drop<byte>(fz_tp, bv_tp)
+  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+in
+  case+ tor of
+  | ~$R.ok(tfd) => let
+      val tbuf = $A.alloc<byte>(8192)
+      val trr = $F.file_read(tfd, tbuf, 8192)
+      val tlen = (case+ trr of | ~$R.ok(k) => k | ~$R.err(_) => 0): int
+      val () = $R.discard<int><int>($F.file_close(tfd))
+      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
+      val replace = any_version_line(bv_tb, 0, tlen, 8192, 8192)
+      var out: $B.builder_v = $B.create()
+      val () = inject_lines(bv_tb, 0, tlen, 8192, replace, v, vlen, nv, out, 8192)
+      val () = $A.drop<byte>(fz_tb, bv_tb)
+      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
+      var dir: $B.builder_v = $B.create()
+      val () = bput_v(dir, "build/upload")
+      val _ = run_mkdir(dir)
+      val upath = str_to_path_arr("build/upload/bats.toml")
+      val @(fz_op, bv_op) = $A.freeze<byte>(upath)
+      val rc = write_file_from_builder(bv_op, 524288, out)
+      val () = $A.drop<byte>(fz_op, bv_op)
+      val () = $A.free<byte>($A.thaw<byte>(fz_op))
+    in rc end
+  | ~$R.err(_) => 1
+end
+
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
    was not given. *)
 (* git rev-parse --git-dir's exit code: 0 in a repository, > 0 outside
@@ -315,8 +472,9 @@ in
   else false
 end
 
-(* A byte array with its size and a length *)
-vtypedef version_arr = [l:agz][n:pos] @($A.arr(byte, l, n), int n, int)
+(* A version: bytes with the array's size, the length, and whether it
+   came from [package] version (true) or from git (false) *)
+vtypedef version_arr = [l:agz][n:pos] @($A.arr(byte, l, n), int n, int, bool)
 
 (* The version from git: the last commit's date and seconds since
    midnight, with dev1 off the trunk (Rust: resolve_version) *)
@@ -372,7 +530,7 @@ fn git_version (): version_arr = let
   val () = bput_int_v(vb_b, secs)
   val () = (if ~is_main then bput_v(vb_b, "dev1") else bput_v(vb_b, ""))
   val @(va, vl) = $B.to_arr(vb_b)
-in @(va, 524288, vl) end
+in @(va, 524288, vl, false) end
 
 (* The upload version (Rust: resolve_version): [package] version when
    set; otherwise from git, which fails with 1 outside a git repository
@@ -387,7 +545,7 @@ in
   case+ v of
   | ~$R.some(a) => let
       val @(arr, n, t) = a
-    in $R.ok(@(arr, n, t)) end
+    in $R.ok(@(arr, n, t, true)) end
   | ~$R.none() =>
     if git_dir_rc() > 0 then $R.err(1)
     else if git_tree_dirty() then $R.err(2)
@@ -482,7 +640,7 @@ in
                     val () = set_build_err()
                   in version_error(code) end
                 | ~$R.ok(ver) => let
-                val @(verbuf, vmax, verlen) = ver
+                val @(verbuf, vmax, verlen, explicit) = ver
                 val @(fz_vb, bv_vb) = $A.freeze<byte>(verbuf)
                 (* Build output zip path: repo/pkg/prefix_ver.bats *)
                 var zip_path: $B.builder_v = $B.create()
@@ -525,8 +683,6 @@ in
                 val () = bput_v(za2, "-r")
                 var za3 = $B.create()
                 val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, za3)
-                var za4 = $B.create()
-                val () = bput_v(za4, "bats.toml")
                 var za5 = $B.create()
                 val () = bput_v(za5, "src/")
                 (* Rust: "uploaded <name> v<version> to <repository>" *)
@@ -553,11 +709,38 @@ in
                     val () = bput_v(za6, "docs/")
                   in $L.list_vt_cons(mk_arg(za6), $L.list_vt_nil()) end
                   else $L.list_vt_nil()): $L.listv($P.arg_entry)
+                val src_docs = $L.list_vt_cons(mk_arg(za5), zip_docs)
+                (* An explicit version packages bats.toml as it is; one from
+                   git goes into a copy with the version injected, added
+                   first under the name bats.toml (Rust: build::upload) *)
+                val toml_rc = (if explicit then 0 else let
+                    val wrc = write_with_version(bv_vb, verlen, vmax)
+                  in
+                    if wrc <> 0 then wrc else let
+                      var zj1 = $B.create()
+                      val () = bput_v(zj1, "zip")
+                      var zj2 = $B.create()
+                      val () = bput_v(zj2, "-j")
+                      var zj3 = $B.create()
+                      val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, zj3)
+                      var zj4 = $B.create()
+                      val () = bput_v(zj4, "build/upload/bats.toml")
+                    in run_cmd(bv_ze, $L.list_vt_cons(mk_arg(zj1),
+                         $L.list_vt_cons(mk_arg(zj2), $L.list_vt_cons(mk_arg(zj3),
+                         $L.list_vt_cons(mk_arg(zj4), $L.list_vt_nil()))))) end
+                  end): int
+                val zip_files = (if explicit then let
+                    var za4 = $B.create()
+                    val () = bput_v(za4, "bats.toml")
+                  in $L.list_vt_cons(mk_arg(za4), src_docs) end
+                  else src_docs): $L.listv($P.arg_entry)
                 val zip_argv = $L.list_vt_cons(mk_arg(za1),
                   $L.list_vt_cons(mk_arg(za2), $L.list_vt_cons(mk_arg(za3),
-                  $L.list_vt_cons(mk_arg(za4), $L.list_vt_cons(mk_arg(za5),
-                  zip_docs)))))
-                val rc = run_cmd(bv_ze, zip_argv)
+                  zip_files)))
+                val rc = (if toml_rc <> 0 then let
+                    val () = free_args(zip_argv)
+                  in toml_rc end
+                  else run_cmd(bv_ze, zip_argv)): int
                 val () = $A.drop<byte>(fz_ze, bv_ze)
                 val () = $A.free<byte>($A.thaw<byte>(fz_ze))
               in
