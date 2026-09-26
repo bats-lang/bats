@@ -43,6 +43,20 @@ fn args_read
 
 
 
+fn cwd_read
+  {l:agz}{n:pos}
+  (buf: !$A.arr(byte, l, n), max_len: int n)
+  : $R.option([k:nat | k <= n] int k)
+
+
+
+
+
+
+
+
+
+
 
 
 

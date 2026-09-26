@@ -1253,14 +1253,6 @@ implement str_to_path_arr(s) = let
   val @(arr, _) = $B.to_arr(b)
 in arr end
 
-#pub fn strip_newline_arr {l:agz}
-  (buf: !$A.arr(byte, l, 4096), len: pos_t): pos_t
-
-implement strip_newline_arr(buf, len) =
-  if len <= 0 then 0
-  else if len > 4096 then len
-  else (if peek_arr(buf, len - 1, 4096) = 10 then len - 1 else len): pos_t
-
 (* ============================================================
    String constant builders
    ============================================================ *)

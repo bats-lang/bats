@@ -1,6 +1,7 @@
 staload A = "array/src/lib.sats"
 staload AR = "arith/src/lib.sats"
 staload B = "builder/src/lib.sats"
+staload E = "env/src/lib.sats"
 staload F = "file/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload S = "str/src/lib.sats"
@@ -8,6 +9,7 @@ staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload SHA = "sha256/src/lib.sats"
 staload T = "toml/src/lib.sats"
+
 
 
 
@@ -568,7 +570,6 @@ fn write_claude_rules(): void
 
 
 
-fn do_init(kind: int, claude: int): void
 
 
 
@@ -606,6 +607,38 @@ fn do_init(kind: int, claude: int): void
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn do_init {la:agz} (arg: !$A.borrow(byte, la, 4096), alen: int, claude: int): void
 
 
 
@@ -839,14 +872,6 @@ fn do_remove {l:agz}{n:pos}
 
 
 fn run_process_demo(): void
-
-
-
-
-
-
-
-
 
 
 

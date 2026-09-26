@@ -345,19 +345,17 @@ in
               else if cmd_code = 5 then let (* init *)
                 val init_claude = (if $AP.get_bool(r, h_claude) then 1 else 0): int
                 val () = $AP.parse_result_free(r)
-                fn check_init_arg {l2:agz}
-                  (buf: !$A.arr(byte, l2, 4096), alen: int): int =
-                  if alen <= 0 then ~1
-                  else let val b0 = byte2int0($A.get<byte>(buf, 0)) in
-                    if $AR.eq_int_int(b0, 98) then 0
-                    else if $AR.eq_int_int(b0, 108) then 1
-                    else ~1
-                  end
-                val kind = check_init_arg(arg_buf, arg_len)
-                val () = $A.free<byte>(arg_buf)
               in
-                if kind >= 0 then do_init(kind, init_claude)
-                else println! ("error: specify 'binary' or 'library'\nusage: bats init binary|library")
+                if arg_len > 0 then let
+                  val @(fz_ia, bv_ia) = $A.freeze<byte>(arg_buf)
+                  val () = do_init(bv_ia, arg_len, init_claude)
+                  val () = $A.drop<byte>(fz_ia, bv_ia)
+                in $A.free<byte>($A.thaw<byte>(fz_ia)) end
+                else let
+                  val () = $A.free<byte>(arg_buf)
+                  val () = prerr! ("error: specify 'binary' or 'library'\nusage: bats init binary [--claude]\n       bats init library [--claude]")
+                  val () = prerr_newline()
+                in set_build_err() end
               end
               else if cmd_code = 6 then let (* test *)
                 val () = $AP.parse_result_free(r)
