@@ -16,17 +16,6 @@ fn is_ident_byte(b: int): bool =
   (b >= 48 && b <= 57) ||
   $AR.eq_int_int(b, 95)
 
-(* A position in the source. Indexed, so a read at it is proven in
-   bounds by the comparisons in peek, with no cast. *)
-typedef pos_t = [p:int] int p
-
-(* Byte at p, or 0 outside [0, n). *)
-fn peek {l:agz}{n:pos}{p:int}
-  (src: !$A.borrow(byte, l, n), p: int p, n: int n): int =
-  if p < 0 then 0
-  else if p >= n then 0
-  else byte2int0($A.read<byte>(src, p))
-
 fn is_ident_start(b: int): bool =
   (b >= 97 && b <= 122) ||
   (b >= 65 && b <= 90) ||
@@ -952,18 +941,6 @@ fun lex_main {l:agz}{n:pos}{fuel:nat} .<fuel>.
    properly-lexed inner spans, and target_end (kind=14).
    ============================================================ *)
 
-fn _get_i32 {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t =
-  let
-    val b0 = $AR.low_byte(peek(bv, off, max))
-    val b1 = $AR.low_byte(peek(bv, off + 1, max))
-    val b2 = $AR.low_byte(peek(bv, off + 2, max))
-    val b3 = $AR.low_byte(peek(bv, off + 3, max))
-    (* Two's complement without overflow: the top byte counts as
-       b3 - 256 when its sign bit is set. *)
-    val hi = (if b3 < 128 then b3 else b3 - 256): [h:int | ~128 <= h; h < 128] int h
-  in b0 + b1 * 256 + b2 * 65536 + hi * 16777216 end
-
 (* Check if any kind=11 spans exist *)
 fun _has_target_blocks {l:agz}{n:pos}{fuel:nat} .<fuel>.
   (spans: !$A.borrow(byte, l, n), max: int n,
@@ -998,11 +975,11 @@ fun _expand_target_blocks {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
   in
     if $AR.eq_int_int(kind, 11) then let
       val base = idx * 28
-      val ss = _get_i32(spans, base + 2, span_max)
-      val se = _get_i32(spans, base + 6, span_max)
-      val block_target = _get_i32(spans, base + 10, span_max)
-      val cs = _get_i32(spans, base + 14, span_max)
-      val ce = _get_i32(spans, base + 18, span_max)
+      val ss = span_i32(spans, base + 2, span_max)
+      val se = span_i32(spans, base + 6, span_max)
+      val block_target = span_i32(spans, base + 10, span_max)
+      val cs = span_i32(spans, base + 14, span_max)
+      val ce = span_i32(spans, base + 18, span_max)
       (* Emit target_begin marker: kind=13, covers [ss, cs) *)
       val () = put_span(out, 13, 0, ss, cs, block_target, 0, 0, 0)
       (* Lex inner content: use ce as src_len bound *)

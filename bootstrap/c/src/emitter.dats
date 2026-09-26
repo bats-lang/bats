@@ -16,26 +16,26 @@ staload "helpers.sats"
 
 (* Compute line number from byte offset by counting newlines *)
 fn _byte_to_line {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): int = let
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): int = let
   fun count {l2:agz}{n2:pos}{fuel:nat} .<fuel>.
     (src: !$A.borrow(byte, l2, n2), max: int n2,
-     i: int, limit: int, line: int, fuel: int fuel): int =
+     i: pos_t, limit: pos_t, line: int, fuel: int fuel): int =
     if fuel <= 0 then line
     else if i >= limit then line
-    else if $AR.eq_int_int(byte2int0($A.read<byte>(src, $AR.checked_idx(i, max))), 10)
+    else if $AR.eq_int_int(peek(src, i, max), 10)
     then count(src, max, i + 1, limit, line + 1, fuel - 1)
     else count(src, max, i + 1, limit, line, fuel - 1)
 in count(src, max, 0, pos, 1, max) end
 
 (* Compute column from byte offset by finding last newline before pos *)
 fn _byte_to_col {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): int = let
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): int = let
   fun scan {l2:agz}{n2:pos}{fuel:nat} .<fuel>.
     (src: !$A.borrow(byte, l2, n2), max: int n2,
-     i: int, fuel: int fuel): int =
+     i: pos_t, fuel: int fuel): int =
     if fuel <= 0 then pos + 1
     else if i < 0 then pos + 1
-    else if $AR.eq_int_int(byte2int0($A.read<byte>(src, $AR.checked_idx(i, max))), 10)
+    else if $AR.eq_int_int(peek(src, i, max), 10)
     then pos - i
     else scan(src, max, i - 1, fuel - 1)
 in scan(src, max, pos - 1, max) end
@@ -44,46 +44,37 @@ in scan(src, max, pos - 1, max) end
    Emitter: read span records
    ============================================================ *)
 
-fn read_i32 {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), off: int, max: int n): int =
-  let
-    val b0 = byte2int0($A.read<byte>(bv, $AR.checked_idx(off, max)))
-    val b1 = byte2int0($A.read<byte>(bv, $AR.checked_idx(off + 1, max)))
-    val b2 = byte2int0($A.read<byte>(bv, $AR.checked_idx(off + 2, max)))
-    val b3 = byte2int0($A.read<byte>(bv, $AR.checked_idx(off + 3, max)))
-  in b0 + b1 * 256 + b2 * 65536 + b3 * 16777216 end
-
 fn span_kind {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  $S.borrow_byte(spans, idx * 28, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): int =
+  peek(spans, idx * 28, max)
 
 fn span_dest {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  $S.borrow_byte(spans, idx * 28 + 1, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): int =
+  peek(spans, idx * 28 + 1, max)
 
 fn span_start {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  read_i32(spans, idx * 28 + 2, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
+  span_i32(spans, idx * 28 + 2, max)
 
 fn span_end {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  read_i32(spans, idx * 28 + 6, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
+  span_i32(spans, idx * 28 + 6, max)
 
 fn span_aux1 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  read_i32(spans, idx * 28 + 10, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
+  span_i32(spans, idx * 28 + 10, max)
 
 fn span_aux2 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  read_i32(spans, idx * 28 + 14, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
+  span_i32(spans, idx * 28 + 14, max)
 
 fn span_aux3 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  read_i32(spans, idx * 28 + 18, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
+  span_i32(spans, idx * 28 + 18, max)
 
 fn span_aux4 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: int, max: int n): int =
-  read_i32(spans, idx * 28 + 22, max)
+  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
+  span_i32(spans, idx * 28 + 22, max)
 
 (* ============================================================
    Emitter: copy source range to builder, count newlines
@@ -91,42 +82,42 @@ fn span_aux4 {l:agz}{n:pos}
 
 (* Copy bytes from source borrow to builder. *)
 fun emit_range {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
   if fuel <= 0 then ()
   else if start >= end_pos then ()
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
     val () = $B.put_char(out, b)
   in emit_range(src, start + 1, end_pos, max, out, fuel - 1) end
 
 (* Copy bytes, transforming .bats" → .sats" for staload paths. *)
 fun emit_range_stald {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
   if fuel <= 0 then ()
   else if start >= end_pos then ()
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
     (* Check for .bats" pattern: 46,98,97,116,115,34 → replace b(98) with s(115) *)
     val b_out = (if $AR.eq_int_int(b, 98) &&
-      $AR.eq_int_int($S.borrow_byte(src, start - 1, max), 46) &&
-      $AR.eq_int_int($S.borrow_byte(src, start + 1, max), 97) &&
-      $AR.eq_int_int($S.borrow_byte(src, start + 2, max), 116) &&
-      $AR.eq_int_int($S.borrow_byte(src, start + 3, max), 115) &&
-      $AR.eq_int_int($S.borrow_byte(src, start + 4, max), 34)
+      $AR.eq_int_int(peek(src, start - 1, max), 46) &&
+      $AR.eq_int_int(peek(src, start + 1, max), 97) &&
+      $AR.eq_int_int(peek(src, start + 2, max), 116) &&
+      $AR.eq_int_int(peek(src, start + 3, max), 115) &&
+      $AR.eq_int_int(peek(src, start + 4, max), 34)
     then 115 else b): int
     val () = $B.put_char(out, b_out)
   in emit_range_stald(src, start + 1, end_pos, max, out, fuel - 1) end
 
 (* Count newlines in source range, emit that many newlines *)
 fun emit_blanks_count {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, count: int, fuel: int fuel): int =
   if fuel <= 0 then count
   else if start >= end_pos then count
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
     val new_count = (if $AR.eq_int_int(b, 10) then count + 1 else count): int
   in emit_blanks_count(src, start + 1, end_pos, max, new_count, fuel - 1) end
 
@@ -139,12 +130,12 @@ fun emit_newlines {bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
   in emit_newlines(out, count - 1, fuel - 1) end
 
 fun emit_blanks {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
   if fuel <= 0 then ()
   else if start >= end_pos then ()
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
   in
     if $AR.eq_int_int(b, 10) then let
       val () = $B.put_char(out, 10)
@@ -154,29 +145,29 @@ fun emit_blanks {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}
 
 (* Builder_v wrappers: compute fuel from remaining capacity *)
 fn emit_range_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   emit_range(src, start, end_pos, max, out, 524288 - $B.length(out))
 
 fn emit_range_stald_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   emit_range_stald(src, start, end_pos, max, out, 524288 - $B.length(out))
 
 fn emit_blanks_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   emit_blanks(src, start, end_pos, max, out, 524288 - $B.length(out))
 
 (* Single-pass: blank [ss,cs), content [cs,ce), blank [ce,se) *)
 fun emit_blank_content_blank {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), pos: int, se: int,
-   cs: int, ce: int, max: int ns,
+  (src: !$A.borrow(byte, ls, ns), pos: pos_t, se: pos_t,
+   cs: pos_t, ce: pos_t, max: int ns,
    out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
   if fuel <= 0 then ()
   else if pos >= se then ()
   else let
-    val b = $S.borrow_byte(src, pos, max)
+    val b = peek(src, pos, max)
     val in_content = pos >= cs && pos < ce
   in
     if in_content then let
@@ -190,16 +181,16 @@ fun emit_blank_content_blank {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B
 
 (* Find matching end keyword for $UNSAFE begin, tracking begin/let/local/end nesting *)
 fun find_matching_end {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), pos: int, src_len: int, max: int ns,
-   depth: int, fuel: int fuel): int =
+  (src: !$A.borrow(byte, ls, ns), pos: pos_t, src_len: pos_t, max: int ns,
+   depth: int, fuel: int fuel): pos_t =
   if fuel <= 0 then src_len
   else if pos >= src_len then src_len
   else let
-    val b0 = $S.borrow_byte(src, pos, max)
-    val b1 = $S.borrow_byte(src, pos + 1, max)
-    val b2 = $S.borrow_byte(src, pos + 2, max)
-    val b3 = $S.borrow_byte(src, pos + 3, max)
-    val bp = $S.borrow_byte(src, pos - 1, max)
+    val b0 = peek(src, pos, max)
+    val b1 = peek(src, pos + 1, max)
+    val b2 = peek(src, pos + 2, max)
+    val b3 = peek(src, pos + 3, max)
+    val bp = peek(src, pos - 1, max)
     (* Keyword boundary: byte is NOT a-z, A-Z, 0-9, or _ *)
     val after_boundary = ~($AR.gte_int_int(b3, 97) && $AR.lte_int_int(b3, 122)) &&
                          ~($AR.gte_int_int(b3, 65) && $AR.lte_int_int(b3, 90)) &&
@@ -218,7 +209,7 @@ fun find_matching_end {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
     (* Check for begin: b(98) e(101) g(103) i(105) n(110) with before boundary *)
     else if $AR.eq_int_int(b0, 98) && $AR.eq_int_int(b1, 101) &&
             $AR.eq_int_int(b2, 103) && $AR.eq_int_int(b3, 105) &&
-            $AR.eq_int_int($S.borrow_byte(src, pos + 4, max), 110)
+            $AR.eq_int_int(peek(src, pos + 4, max), 110)
             && before_boundary then
       find_matching_end(src, pos + 5, src_len, max, depth + 1, fuel - 1)
     (* Check for let: l(108) e(101) t(116) with word boundaries *)
@@ -230,13 +221,13 @@ fun find_matching_end {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
 
 (* Blank a range then tail-call content processing *)
 fun emit_blank_then_content {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), pos: int, blank_end: int,
-   content_end: int, end_kw_end: int, scan_end: int, overall_end: int,
+  (src: !$A.borrow(byte, ls, ns), pos: pos_t, blank_end: int,
+   content_end: int, end_kw_end: int, scan_end: pos_t, overall_end: pos_t,
    max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
   if fuel <= 0 then ()
   else if pos < blank_end then let
     (* Phase 1: blank "$UNSAFE begin" region *)
-    val b = $S.borrow_byte(src, pos, max)
+    val b = peek(src, pos, max)
   in
     if $AR.eq_int_int(b, 10) then let
       val () = $B.put_char(out, 10)
@@ -245,11 +236,11 @@ fun emit_blank_then_content {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.
   end
   else if pos < content_end then let
     (* Phase 2: copy inner $UNSAFE content *)
-    val () = $B.put_char(out, $S.borrow_byte(src, pos, max))
+    val () = $B.put_char(out, peek(src, pos, max))
   in emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1) end
   else if pos < end_kw_end then let
     (* Phase 3: blank "end" keyword *)
-    val b = $S.borrow_byte(src, pos, max)
+    val b = peek(src, pos, max)
   in
     if $AR.eq_int_int(b, 10) then let
       val () = $B.put_char(out, 10)
@@ -264,25 +255,25 @@ fun emit_blank_then_content {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.
    Scans byte by byte. When $UNSAFE begin is found, blanks it, emits inner
    content recursively, blanks end. Other content emitted as-is. *)
 and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
-   overall_end: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
+   overall_end: pos_t,
    max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
   if fuel <= 0 then ()
   else if start >= end_pos then
     (* After content range, blank [end_pos, overall_end) *)
     emit_blanks(src, end_pos, overall_end, max, out, fuel)
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
   in
     if $AR.eq_int_int(b, 36) &&
-       $AR.eq_int_int($S.borrow_byte(src, start + 1, max), 85) &&
-       $AR.eq_int_int($S.borrow_byte(src, start + 2, max), 78) &&
-       $AR.eq_int_int($S.borrow_byte(src, start + 3, max), 83) &&
-       $AR.eq_int_int($S.borrow_byte(src, start + 4, max), 65) &&
-       $AR.eq_int_int($S.borrow_byte(src, start + 5, max), 70) &&
-       $AR.eq_int_int($S.borrow_byte(src, start + 6, max), 69) then let
+       $AR.eq_int_int(peek(src, start + 1, max), 85) &&
+       $AR.eq_int_int(peek(src, start + 2, max), 78) &&
+       $AR.eq_int_int(peek(src, start + 3, max), 83) &&
+       $AR.eq_int_int(peek(src, start + 4, max), 65) &&
+       $AR.eq_int_int(peek(src, start + 5, max), 70) &&
+       $AR.eq_int_int(peek(src, start + 6, max), 69) then let
       val after = start + 7
-      val next = $S.borrow_byte(src, after, max)
+      val next = peek(src, after, max)
     in
       if $AR.eq_int_int(next, 46) then let
         val () = $B.put_char(out, b)
@@ -290,19 +281,19 @@ and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $
       else let
         (* Skip whitespace after $UNSAFE *)
         val p0 = (let fun skip {ls2:agz}{ns2:pos}{f:nat} .<f>.
-          (s: !$A.borrow(byte, ls2, ns2), m: int ns2, p: int, lim: int, f: int f): int =
+          (s: !$A.borrow(byte, ls2, ns2), m: int ns2, p: pos_t, lim: pos_t, f: int f): pos_t =
           if f <= 0 then p else if p >= lim then p
-          else let val c = $S.borrow_byte(s, p, m) in
+          else let val c = peek(s, p, m) in
             if $AR.eq_int_int(c, 32) || $AR.eq_int_int(c, 10) || $AR.eq_int_int(c, 13) || $AR.eq_int_int(c, 9)
             then skip(s, m, p + 1, lim, f - 1) else p end
-        in skip(src, max, after, end_pos, 256) end): int
+        in skip(src, max, after, end_pos, 256) end): pos_t
       in
         (* Check for begin: 98,101,103,105,110 *)
-        if $AR.eq_int_int($S.borrow_byte(src, p0, max), 98) &&
-           $AR.eq_int_int($S.borrow_byte(src, p0 + 1, max), 101) &&
-           $AR.eq_int_int($S.borrow_byte(src, p0 + 2, max), 103) &&
-           $AR.eq_int_int($S.borrow_byte(src, p0 + 3, max), 105) &&
-           $AR.eq_int_int($S.borrow_byte(src, p0 + 4, max), 110) then let
+        if $AR.eq_int_int(peek(src, p0, max), 98) &&
+           $AR.eq_int_int(peek(src, p0 + 1, max), 101) &&
+           $AR.eq_int_int(peek(src, p0 + 2, max), 103) &&
+           $AR.eq_int_int(peek(src, p0 + 3, max), 105) &&
+           $AR.eq_int_int(peek(src, p0 + 4, max), 110) then let
           val cs2 = p0 + 5
           val end2 = find_matching_end(src, cs2, end_pos, max, 1, 524288)
           val ep2 = (if end2 < end_pos then end2 + 3 else end2): int
@@ -316,19 +307,19 @@ and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $
     end
     else let
       val b_out = (if $AR.eq_int_int(b, 98) &&
-        $AR.eq_int_int($S.borrow_byte(src, start - 1, max), 46) &&
-        $AR.eq_int_int($S.borrow_byte(src, start + 1, max), 97) &&
-        $AR.eq_int_int($S.borrow_byte(src, start + 2, max), 116) &&
-        $AR.eq_int_int($S.borrow_byte(src, start + 3, max), 115) &&
-        $AR.eq_int_int($S.borrow_byte(src, start + 4, max), 34)
+        $AR.eq_int_int(peek(src, start - 1, max), 46) &&
+        $AR.eq_int_int(peek(src, start + 1, max), 97) &&
+        $AR.eq_int_int(peek(src, start + 2, max), 116) &&
+        $AR.eq_int_int(peek(src, start + 3, max), 115) &&
+        $AR.eq_int_int(peek(src, start + 4, max), 34)
       then 115 else b): int
       val () = $B.put_char(out, b_out)
     in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
   end
 
 fn emit_range_process_unsafe_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
-   overall_end: int, max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
+   overall_end: pos_t, max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   emit_range_process_unsafe(src, start, end_pos, overall_end, max, out, 524288 - $B.length(out))
 
 (* ============================================================
@@ -369,19 +360,19 @@ fn emit_mangled_byte(out: !$B.builder_v >> $B.builder_v, b: int): void =
 
 (* Emit mangled package name from source range *)
 fun emit_mangled_pkg {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: int, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
    max: int ns, out: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
   if fuel <= 0 then ()
   else if start >= end_pos then ()
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
     val () = emit_mangled_byte(out, b)
   in emit_mangled_pkg(src, start + 1, end_pos, max, out, fuel - 1) end
 
 (* Emit qualified access: __BATS__<mangled_pkg>_<member> *)
 fn emit_qualified {ls:agz}{ns:pos}{lp:agz}{np:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_idx: int, span_max: int np,
+   spans: !$A.borrow(byte, lp, np), span_idx: pos_t, span_max: int np,
    out: !$B.builder_v >> $B.builder_v): void = let
   val alias_s = span_aux1(spans, span_idx, span_max)
   val alias_e = span_aux2(spans, span_idx, span_max)
@@ -420,7 +411,7 @@ in end
 (* Emit one staload line for a #use dependency: staload "pkg/src/lib.dats" (no alias) *)
 fn emit_dep_stld {ls:agz}{ns:pos}{lp:agz}{np:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_idx: int, span_max: int np,
+   spans: !$A.borrow(byte, lp, np), span_idx: pos_t, span_max: int np,
    out: !$B.builder_v >> $B.builder_v): void = let
   val pkg_s = span_aux1(spans, span_idx, span_max)
   val pkg_e = span_aux2(spans, span_idx, span_max)
@@ -457,7 +448,7 @@ in end
 (* Emit one staload line for .sats: staload ALIAS = "pkg/src/lib.sats" *)
 fn emit_dep_stld_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_idx: int, span_max: int np,
+   spans: !$A.borrow(byte, lp, np), span_idx: pos_t, span_max: int np,
    out: !$B.builder_v >> $B.builder_v): void = let
   val pkg_s = span_aux1(spans, span_idx, span_max)
   val pkg_e = span_aux2(spans, span_idx, span_max)
@@ -505,7 +496,7 @@ in end
 fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
    spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: int,
+   span_count: int, idx: pos_t,
    sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
    build_target: int, is_unsafe: int, errors: int,
    target_state: int, fuel: int fuel): int =
@@ -708,7 +699,7 @@ fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
 fun build_prelude {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
    spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: int,
+   span_count: int, idx: pos_t,
    prelude: !$B.builder_v >> $B.builder_v,
    build_target: int, target_state: int, fuel: int fuel): int =
   if fuel <= 0 then 0
@@ -742,7 +733,7 @@ fun build_prelude {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
 fun build_prelude_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
    spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: int,
+   span_count: int, idx: pos_t,
    prelude: !$B.builder_v >> $B.builder_v,
    build_target: int, target_state: int, fuel: int fuel): void =
   if fuel <= 0 then ()
@@ -816,18 +807,18 @@ implement do_emit (src, src_len, src_max, spans, span_max, span_count, build_tar
   val @(fz_dt, bv_dt) = $A.freeze<byte>(dats_tmp)
   (* Search for the entry point pattern: 15 chars starting with 'i' *)
   fun find_impl_main0 {ld:agz}{nd:pos}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, ld, nd), len: int, max: int nd, pos: int, fuel: int fuel): int =
+    (bv: !$A.borrow(byte, ld, nd), len: int, max: int nd, pos: pos_t, fuel: int fuel): pos_t =
     if fuel <= 0 then ~1
     else if pos + 15 > len then ~1
     else let
       val p = pos
-      val b0 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p, max)))
+      val b0 = peek(bv, p, max)
       in
         if $AR.eq_int_int(b0, 105) then let (* 'i' *)
-          val b4 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 4, max)))
-          val b9 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 9, max)))
-          val b10 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 10, max)))
-          val b14 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 14, max)))
+          val b4 = peek(bv, p + 4, max)
+          val b9 = peek(bv, p + 9, max)
+          val b10 = peek(bv, p + 10, max)
+          val b14 = peek(bv, p + 14, max)
         in
           (* Check pattern: e=101@4, ' '=32@9, m=109@10, 0=48@14 *)
           if $AR.eq_int_int(b4, 101) then
@@ -835,16 +826,16 @@ implement do_emit (src, src_len, src_max, spans, span_max, span_count, build_tar
               if $AR.eq_int_int(b10, 109) then
                 if $AR.eq_int_int(b14, 48) then let
                   (* Verify full match: check remaining bytes *)
-                  val b1 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 1, max)))
-                  val b2 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 2, max)))
-                  val b3 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 3, max)))
-                  val b5 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 5, max)))
-                  val b6 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 6, max)))
-                  val b7 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 7, max)))
-                  val b8 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 8, max)))
-                  val b11 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 11, max)))
-                  val b12 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 12, max)))
-                  val b13 = byte2int0($A.read<byte>(bv, $AR.checked_idx(p + 13, max)))
+                  val b1 = peek(bv, p + 1, max)
+                  val b2 = peek(bv, p + 2, max)
+                  val b3 = peek(bv, p + 3, max)
+                  val b5 = peek(bv, p + 5, max)
+                  val b6 = peek(bv, p + 6, max)
+                  val b7 = peek(bv, p + 7, max)
+                  val b8 = peek(bv, p + 8, max)
+                  val b11 = peek(bv, p + 11, max)
+                  val b12 = peek(bv, p + 12, max)
+                  val b13 = peek(bv, p + 13, max)
                 in
                   (* m=109 p=112 l=108 e=101 m=109 e=101 n=110 t=116 a=97 i=105 n=110 *)
                   if $AR.eq_int_int(b1, 109) then
