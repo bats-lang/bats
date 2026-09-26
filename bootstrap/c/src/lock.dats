@@ -565,21 +565,24 @@ fn put_why {lp:agz}
   in $A.free<byte>($A.thaw<byte>(fz_w)) end
 
 (* Appends the constraints of each key in the NUL-separated list
-   keys[off, len) of doc's [dependencies] (sec) to acc, from src[0, sk);
-   false after writing Rust's message to err *)
+   keys[off, len) of doc's [dependencies] (sec) to acc, from src[0, sk),
+   and counts in paths the path dependencies ({ path = ... }, whose
+   value this toml keeps as written): @(true, them, the count), or
+   @(false, ...) after writing Rust's message to err *)
 fun load_keys {lk,ls,lsec:agz}{n:nat}{f:nat} .<f>.
   (doc: !$T.toml_doc, sec: !$A.borrow(byte, lsec, 12),
    keys: !$A.borrow(byte, lk, 65536), off: pos_t, len: int,
    src: !$A.arr(byte, ls, 256), sk: int,
-   acc: cons(n), err: !$B.builder_v >> $B.builder_v, f: int f): [m:nat] @(bool, cons(m)) =
-  if f <= 0 then @(true, acc)
-  else if off >= len then @(true, acc)
+   acc: cons(n), paths: int, err: !$B.builder_v >> $B.builder_v, f: int f)
+  : [m:nat] @(bool, cons(m), int) =
+  if f <= 0 then @(true, acc, paths)
+  else if off >= len then @(true, acc, paths)
   else let
     val z = find_null_bv_from(keys, off, 65536)
     val kl = z - off
   in
-    if kl <= 0 then load_keys(doc, sec, keys, z + 1, len, src, sk, acc, err, f - 1)
-    else if kl > 65536 then @(true, acc)
+    if kl <= 0 then load_keys(doc, sec, keys, z + 1, len, src, sk, acc, paths, err, f - 1)
+    else if kl > 65536 then @(true, acc, paths)
     else let
       val ka = $A.alloc<byte>(kl)
       val () = fill_key(ka, kl, keys, off, 0)
@@ -592,57 +595,123 @@ fun load_keys {lk,ls,lsec:agz}{n:nat}{f:nat} .<f>.
       val p = $A.alloc<byte>(256)
       val pk = copy_name(keys, off, z, 65536, p, 0)
       val @(fz_v, bv_v) = $A.freeze<byte>(vb)
+      (* An inline table: Rust's DepValue::Path, not a constraint *)
+      val is_path = (if vl > 0 then peek(bv_v, 0, 4096) = 123 else false): bool
       var why : $B.builder_v = $B.create()
-      val @(ok, acc2) = parse_cons(bv_v, 0, vl, p, pk, src, sk, acc, why, 4096)
+      val @(ok, acc2) = parse_cons(bv_v, 0, (if is_path then 0 else vl): pos_t, p, pk, src, sk, acc, why, 4096)
       val () = $A.drop<byte>(fz_v, bv_v)
       val () = $A.free<byte>($A.thaw<byte>(fz_v))
       val () = put_why(ok, p, pk, why, err)
       val () = $A.free<byte>(p)
+      val paths2 = (if is_path then paths + 1 else paths): int
     in
-      if ok then load_keys(doc, sec, keys, z + 1, len, src, sk, acc2, err, f - 1)
-      else @(false, acc2)
+      if ok then load_keys(doc, sec, keys, z + 1, len, src, sk, acc2, paths2, err, f - 1)
+      else @(false, acc2, paths2)
     end
   end
 
-(* The constraints of doc's [dependencies], from src[0, sk) (Rust:
-   config::load's dependencies): @(1, them), or @(~1, none) after
-   writing Rust's "in [dependencies] '<name>': ..." to err *)
+(* The constraints of doc's [dependencies], from src[0, sk), and the
+   number of its path dependencies (Rust: config::load's dependencies):
+   @(1, them, the number), or @(~1, none, 0) after writing Rust's
+   "in [dependencies] '<name>': ..." to err *)
 fn doc_cons {ls:agz}
   (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: int,
-   err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
+   err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n), int) = let
   var sec_c = @[char][12]('d', 'e', 'p', 'e', 'n', 'd', 'e', 'n', 'c', 'i', 'e', 's')
   val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 12))
   val kb = $A.alloc<byte>(65536)
   val kr = $T.keys(doc, bv_s, 12, kb, 65536)
   val kl = (case+ kr of | ~$R.some(x) => x | ~$R.none() => 0): int
   val @(fz_kb, bv_kb) = $A.freeze<byte>(kb)
-  val @(ok, cs) = load_keys(doc, bv_s, bv_kb, 0, kl, src, sk, cons_nil(), err, 65536)
+  val @(ok, cs, paths) = load_keys(doc, bv_s, bv_kb, 0, kl, src, sk, cons_nil(), 0, err, 65536)
   val () = $A.drop<byte>(fz_kb, bv_kb)
   val () = $A.free<byte>($A.thaw<byte>(fz_kb))
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
 in
-  if ok then @(1, cs)
+  if ok then @(1, cs, paths)
   else let
     val () = cons_free(cs)
-  in @(~1, cons_nil()) end
+  in @(~1, cons_nil(), 0) end
 end
 
-(* The TOML file at the NUL-terminated path pa, parsed; none when it
-   cannot be read *)
-fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.option($T.toml_doc) = let
+(* Rust's "unknown package kind: '<v[0, vl)>'" appended to err when
+   bad *)
+fn put_unknown_kind {lv:agz}
+  (bad: bool, v: !$A.borrow(byte, lv, 256), vl: int, err: !$B.builder_v >> $B.builder_v): void =
+  if bad then let
+    val () = bput_v(err, "unknown package kind: '")
+    val () = copy_to_builder_v(v, 0, vl, 256, err)
+  in bput_v(err, "'") end
+  else bput_v(err, "")
+
+(* [package] kind (Rust: config::load): 1 for lib, which is the
+   default, 2 for bin, or ~1 after Rust's "unknown package kind: '<k>'"
+   in err *)
+fn doc_kind (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): int = let
+  var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+  val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+  var key_c = @[char][4]('k', 'i', 'n', 'd')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 4))
+  val vb = $A.alloc<byte>(256)
+  val vl = (case+ $T.get(doc, bv_s, 7, bv_k, 4, vb, 256) of
+    | ~$R.some(x) => x | ~$R.none() => ~1): int
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val @(fz_v, bv_v) = $A.freeze<byte>(vb)
+  var lib_c = @[char][3]('l', 'i', 'b')
+  var bin_c = @[char][3]('b', 'i', 'n')
+  val kind = (if vl < 0 then 1
+              else if vl <> 3 then ~1
+              else if lit_at(bv_v, 0, 256, lib_c, 3) then 1
+              else if lit_at(bv_v, 0, 256, bin_c, 3) then 2
+              else ~1): int
+  val () = put_unknown_kind(kind < 0, bv_v, vl, err)
+  val () = $A.drop<byte>(fz_v, bv_v)
+  val () = $A.free<byte>($A.thaw<byte>(fz_v))
+in kind end
+
+(* The constraints of doc (Rust: config::load), from src[0, sk):
+   @(1, them), or @(~1, none) after writing Rust's message to err: an
+   unknown kind, a constraint that does not parse, or a path dependency
+   in a lib package, in that order *)
+fn config_cons {ls:agz}
+  (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: int,
+   err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
+  val kind = doc_kind(doc, err)
+in
+  if kind < 0 then @(~1, cons_nil())
+  else let
+    val @(st, cs, paths) = doc_cons(doc, src, sk, err)
+  in
+    if st < 0 then @(~1, cs)
+    else if kind = 1 then
+      (if paths > 0 then let
+         val () = cons_free(cs)
+         val () = bput_v(err, "path dependencies are only supported in binary packages (kind = \"bin\")")
+       in @(~1, cons_nil()) end
+       else @(1, cs))
+    else @(1, cs)
+  end
+end
+
+(* The TOML file at the NUL-terminated path pa, parsed, or the errno
+   of why it could not be read *)
+fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.result($T.toml_doc, int) = let
   val @(fz, bv) = $A.freeze<byte>(pa)
   val fr = $F.file_open(bv, 524288, 0, 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
   case+ fr of
-  | ~$R.err(_) => $R.none()
+  | ~$R.err(e) => $R.err(e)
   | ~$R.ok(fd) => let
       val tb = $A.alloc<byte>(65536)
       val rr = $F.file_read(fd, tb, 65536)
       val () = $R.discard<int><int>($F.file_close(fd))
-      val ok = (case+ rr of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+      val e = (case+ rr of | ~$R.ok(_) => 0 | ~$R.err(e) => e): int
       val @(fz_t, bv_t) = $A.freeze<byte>(tb)
       val pr = $T.parse(bv_t, 65536)
       val () = $A.drop<byte>(fz_t, bv_t)
@@ -650,21 +719,37 @@ in
     in
       case+ pr of
       | ~$R.ok(doc) =>
-        if ok then $R.some(doc)
+        if e = 0 then $R.ok(doc)
         else let
           val () = $T.toml_free(doc)
-        in $R.none() end
-      | ~$R.err(_) => $R.none()
+        in $R.err(e) end
+      | ~$R.err(_) => $R.err(e)
     end
 end
 
+(* Rust's "cannot read './bats.toml': <text> (os error <e>)" appended
+   to err (config::load, io::Error's Display) *)
+fn put_cannot_read (e: int, err: !$B.builder_v >> $B.builder_v): void = let
+  val buf = $A.alloc<byte>(256)
+  val k = $P.os_error_text(e, buf, 256)
+  val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+  val () = bput_v(err, "cannot read './bats.toml': ")
+  val () = copy_to_builder_v(bv_b, 0, k, 256, err)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  val () = bput_v(err, " (os error ")
+  val () = bput_int_v(err, e)
+in bput_v(err, ")") end
+
 (* The constraints of the project's bats.toml, from its [package] name:
-   @(1, them), @(0, none) when there is no bats.toml, or @(~1, none)
-   after writing Rust's message to err *)
+   @(1, them), or @(~1, none) after writing Rust's message to err, as
+   when bats.toml cannot be read (Rust: cmd_lock's config::load) *)
 fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
   case+ read_toml(str_to_path_arr("bats.toml")) of
-  | ~$R.none() => @(0, cons_nil())
-  | ~$R.some(doc) => let
+  | ~$R.err(e) => let
+      val () = put_cannot_read(e, err)
+    in @(~1, cons_nil()) end
+  | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
       val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
       var key_c = @[char][4]('n', 'a', 'm', 'e')
@@ -677,7 +762,7 @@ fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
       val () = $A.free<byte>($A.thaw<byte>(fz_k))
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
-      val r = doc_cons(doc, nb, nk, err)
+      val r = config_cons(doc, nb, nk, err)
       val () = $A.free<byte>(nb)
       val () = $T.toml_free(doc)
     in r end
@@ -694,10 +779,10 @@ fn dep_cons {la:agz} (a: !$A.arr(byte, la, 256), k: int): [n:nat] cons(n) = let
   val @(pa, _) = $B.to_arr(p)
 in
   case+ read_toml(pa) of
-  | ~$R.none() => cons_nil()
-  | ~$R.some(doc) => let
+  | ~$R.err(_) => cons_nil()
+  | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
-      val @(st, cs) = doc_cons(doc, a, k, err)
+      val @(st, cs) = config_cons(doc, a, k, err)
       val () = $B.builder_free(err)
       val () = $T.toml_free(doc)
     in
@@ -977,11 +1062,13 @@ fn no_version {lr,la:agz}{nc:nat}
    cs: !cons(nc)): void =
   if cons_about(cs, a, k) then unsatisfied(cs, a, k) else not_found(repo, rl, a, k)
 
-(* Resolves the packages on stack, the newest first, into lock lines;
-   all holds every package queued so far, cs the constraints read so far.
+(* Resolves the packages on stack, the newest first, into lock lines,
+   skipping the path dependencies pn; all holds every package queued so
+   far, cs the constraints read so far.
    @(0 or ~1 on an error, the number resolved) (Rust: resolve_all) *)
-fun resolve_all {s,m,nc:nat}{lr:agz}{f:nat} .<f>.
-  (stack: names(s), all: names(m), cs: cons(nc), repo: !$A.borrow(byte, lr, 4096), rl: int,
+fun resolve_all {s,m,nc,np:nat}{lr:agz}{f:nat} .<f>.
+  (stack: names(s), all: names(m), cs: cons(nc), pn: !names(np),
+   repo: !$A.borrow(byte, lr, 4096), rl: int,
    dev: bool, lock: !$B.builder_v >> $B.builder_v, count: int, f: int f): @(int, int) =
   if f <= 0 then let
     val () = names_free(stack)
@@ -993,7 +1080,12 @@ fun resolve_all {s,m,nc:nat}{lr:agz}{f:nat} .<f>.
       val () = names_free(all)
       val () = cons_free(cs)
     in @(0, count) end
-  | ~names_cons(a, k, rest) => let
+  | ~names_cons(a, k, rest) =>
+    (* A path dependency is not resolved from the repository *)
+    if names_has(pn, a, k) then let
+      val () = $A.free<byte>(a)
+    in resolve_all(rest, all, cs, pn, repo, rl, dev, lock, count, f - 1) end
+    else let
       val latest = find_latest(repo, rl, a, k, dev, cs)
     in
       case+ latest of
@@ -1018,7 +1110,7 @@ fun resolve_all {s,m,nc:nat}{lr:agz}{f:nat} .<f>.
           val @(stack2, all2) = push_new(ts, rest, all)
           val () = $A.free<byte>(a)
         in
-          if ok then resolve_all(stack2, all2, cs2, repo, rl, dev, lock, count + 1, f - 1)
+          if ok then resolve_all(stack2, all2, cs2, pn, repo, rl, dev, lock, count + 1, f - 1)
           else let
             val () = names_free(stack2)
             val () = names_free(all2)
@@ -1266,6 +1358,189 @@ fn finish_lock (st: int, n: int, lock: $B.builder_v, dry: bool): void =
     else prerr! ("wrote bats.lock (", n, " dependencies)\n")
   end
 
+(* ============================================================
+   Path dependencies (Rust: config's DepValue::Path, resolve_all)
+   ============================================================ *)
+
+(* The path dependencies of the project, in [dependencies] order: each
+   name[0, k) and its directory path[0, pl) *)
+datavtype pdeps(int) =
+  | pd_nil(0) of ()
+  | {ln,lp:agz}{k:pos | k <= 256}{n:nat}
+    pd_cons(n + 1) of ($A.arr(byte, ln, 256), int k, $A.arr(byte, lp, 256), int, pdeps(n))
+
+fun pdeps_free {n:nat} .<n>. (ds: pdeps(n)): void =
+  case+ ds of
+  | ~pd_nil() => ()
+  | ~pd_cons(a, _, p, _, rest) => let
+      val () = $A.free<byte>(a)
+      val () = $A.free<byte>(p)
+    in pdeps_free(rest) end
+
+(* The names of ds *)
+fun pdeps_names {n:nat} .<n>. (ds: !pdeps(n)): names(n) =
+  case+ ds of
+  | pd_nil() => names_nil()
+  | @pd_cons(a, k, _, _, rest) => let
+      val b = $A.alloc<byte>(256)
+      val () = copy_arr_name(a, b, k, 0)
+      val kk = k
+      val r = pdeps_names(rest)
+      prval () = fold@(ds)
+    in names_cons(b, kk, r) end
+
+(* The path of the inline table v[0, vl) = { path = "<path>" }, as
+   [start, end), or @(~1, ~1) *)
+fn path_value {lv:agz} (v: !$A.borrow(byte, lv, 4096), vl: pos_t): @(pos_t, pos_t) = let
+  var path_c = @[char][4]('p', 'a', 't', 'h')
+  val i0 = skip_space(v, 4096, 1, vl, 4096)
+  val quoted = peek(v, i0, 4096) = 34
+  val ks = (if quoted then i0 + 1 else i0): pos_t
+  val key_ok = lit_at(v, ks, 4096, path_c, 4) &&
+    (if quoted then peek(v, ks + 4, 4096) = 34 else true)
+  val ke = (if quoted then ks + 5 else ks + 4): pos_t
+  val i1 = skip_space(v, 4096, ke, vl, 4096)
+  val i2 = skip_space(v, 4096, i1 + 1, vl, 4096)
+  val qs = i2 + 1
+  val qe = find_byte(v, 4096, qs, vl, 34, 4096)
+in
+  if ~key_ok then @(~1, ~1)
+  else if peek(v, i1, 4096) <> 61 then @(~1, ~1)
+  else if peek(v, i2, 4096) <> 34 then @(~1, ~1)
+  else if qe >= vl then @(~1, ~1)
+  else @(qs, qe)
+end
+
+(* v[ps, pe) copied into pa when ps >= 0; its length *)
+fn copy_path {lv,lp:agz}
+  (v: !$A.borrow(byte, lv, 4096), ps: pos_t, pe: pos_t, pa: !$A.arr(byte, lp, 256)): int =
+  if ps >= 0 then copy_name(v, ps, pe, 4096, pa, 0) else 0
+
+(* The path dependencies among the keys keys[off, len) of doc's
+   [dependencies] (sec), in order *)
+fun path_keys {lk,lsec:agz}{f:nat} .<f>.
+  (doc: !$T.toml_doc, sec: !$A.borrow(byte, lsec, 12),
+   keys: !$A.borrow(byte, lk, 65536), off: pos_t, len: int, f: int f): [n:nat] pdeps(n) =
+  if f <= 0 then pd_nil()
+  else if off >= len then pd_nil()
+  else let
+    val z = find_null_bv_from(keys, off, 65536)
+    val kl = z - off
+  in
+    if kl <= 0 then path_keys(doc, sec, keys, z + 1, len, f - 1)
+    else if kl > 65536 then pd_nil()
+    else let
+      val ka = $A.alloc<byte>(kl)
+      val () = fill_key(ka, kl, keys, off, 0)
+      val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+      val vb = $A.alloc<byte>(4096)
+      val vr = $T.get(doc, sec, 12, bv_k, kl, vb, 4096)
+      val () = $A.drop<byte>(fz_k, bv_k)
+      val () = $A.free<byte>($A.thaw<byte>(fz_k))
+      val vl = (case+ vr of | ~$R.some(x) => x | ~$R.none() => 0): pos_t
+      val @(fz_v, bv_v) = $A.freeze<byte>(vb)
+      val @(ps, pe) = (if vl > 0 then (if peek(bv_v, 0, 4096) = 123 then path_value(bv_v, vl)
+                                      else @(~1, ~1)) else @(~1, ~1)): @(pos_t, pos_t)
+      val pa = $A.alloc<byte>(256)
+      val pl = copy_path(bv_v, ps, pe, pa)
+      val () = $A.drop<byte>(fz_v, bv_v)
+      val () = $A.free<byte>($A.thaw<byte>(fz_v))
+      val na = $A.alloc<byte>(256)
+      val nk = copy_name(keys, off, z, 65536, na, 0)
+    in
+      if ps < 0 then let
+        val () = $A.free<byte>(pa)
+        val () = $A.free<byte>(na)
+      in path_keys(doc, sec, keys, z + 1, len, f - 1) end
+      else if nk <= 0 then let
+        val () = $A.free<byte>(pa)
+        val () = $A.free<byte>(na)
+      in path_keys(doc, sec, keys, z + 1, len, f - 1) end
+      else pd_cons(na, nk, pa, pl, path_keys(doc, sec, keys, z + 1, len, f - 1))
+    end
+  end
+
+(* The path dependencies of doc's [dependencies] *)
+fn doc_pdeps (doc: !$T.toml_doc): [n:nat] pdeps(n) = let
+  var sec_c = @[char][12]('d', 'e', 'p', 'e', 'n', 'd', 'e', 'n', 'c', 'i', 'e', 's')
+  val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 12))
+  val kb = $A.alloc<byte>(65536)
+  val kl = (case+ $T.keys(doc, bv_s, 12, kb, 65536) of
+    | ~$R.some(x) => x | ~$R.none() => 0): int
+  val @(fz_kb, bv_kb) = $A.freeze<byte>(kb)
+  val ds = path_keys(doc, bv_s, bv_kb, 0, kl, 65536)
+  val () = $A.drop<byte>(fz_kb, bv_kb)
+  val () = $A.free<byte>($A.thaw<byte>(fz_kb))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in ds end
+
+(* The project's path dependencies; none when bats.toml cannot be read *)
+fn project_pdeps (): [n:nat] pdeps(n) =
+  case+ read_toml(str_to_path_arr("bats.toml")) of
+  | ~$R.err(_) => pd_nil()
+  | ~$R.ok(doc) => let
+      val ds = doc_pdeps(doc)
+      val () = $T.toml_free(doc)
+    in ds end
+
+(* xs without the name a[0, k) *)
+fun names_remove {n:nat}{la:agz} .<n>.
+  (xs: names(n), a: !$A.arr(byte, la, 256), k: int): [m:nat] names(m) =
+  case+ xs of
+  | ~names_nil() => names_nil()
+  | ~names_cons(b, kb, rest) =>
+    if name_is(b, kb, a, k) then let
+      val () = $A.free<byte>(b)
+    in names_remove(rest, a, k) end
+    else names_cons(b, kb, names_remove(rest, a, k))
+
+(* The constraints of the bats.toml in the path dependency's directory
+   p[0, pl), from its name a[0, k); none when it does not load *)
+fn pdep_cons {la,lp:agz}
+  (a: !$A.arr(byte, la, 256), k: int, p: !$A.arr(byte, lp, 256), pl: int): [n:nat] cons(n) = let
+  var b : $B.builder_v = $B.create()
+  val () = put_name(p, pl, b)
+  val () = bput_v(b, "/bats.toml")
+  val () = put_char_v(b, 0)
+  val @(ba, _) = $B.to_arr(b)
+in
+  case+ read_toml(ba) of
+  | ~$R.err(_) => cons_nil()
+  | ~$R.ok(doc) => let
+      var err : $B.builder_v = $B.create()
+      val @(st, cs) = config_cons(doc, a, k, err)
+      val () = $B.builder_free(err)
+      val () = $T.toml_free(doc)
+    in
+      if st > 0 then cs
+      else let
+        val () = cons_free(cs)
+      in cons_nil() end
+    end
+end
+
+(* For each path dependency: the #use packages of its src join stack and
+   all, the dependency itself leaves them, and the constraints of its
+   bats.toml join cs (Rust: resolve_all, before resolving) *)
+fun add_pdeps {n,s,m,c:nat} .<n>.
+  (ds: !pdeps(n), stack: names(s), all: names(m), cs: cons(c))
+  : [s2,m2,c2:nat] @(names(s2), names(m2), cons(c2)) =
+  case+ ds of
+  | pd_nil() => @(stack, all, cs)
+  | @pd_cons(a, k, p, pl, rest) => let
+      var d : $B.builder_v = $B.create()
+      val () = put_name(p, pl, d)
+      val () = bput_v(d, "/src")
+      val ts = collect_uses(d)
+      val @(stack1, all1) = push_new(ts, stack, all)
+      val stack2 = names_remove(stack1, a, k)
+      val all2 = names_remove(all1, a, k)
+      val cs2 = cons_append(cs, pdep_cons(a, k, p, pl))
+      val r = add_pdeps(rest, stack2, all2, cs2)
+      prval () = fold@(ds)
+    in r end
+
 (* Resolves the #use packages of src/ under the project's constraints
    cs and writes bats.lock, when cst says they were read; otherwise
    reports err, Rust's message about them; consumes err *)
@@ -1284,8 +1559,13 @@ fn lock_with {lr:agz}{nc:nat}
     val () = bput_v(src, "src")
     val pkgs = collect_uses(src)
     val all = names_copy(pkgs)
+    val ds = project_pdeps()
+    val @(stack, all2, cs2) = add_pdeps(ds, pkgs, all, cs)
+    val pn = pdeps_names(ds)
+    val () = pdeps_free(ds)
     var lock : $B.builder_v = $B.create()
-    val @(st, n) = resolve_all(pkgs, all, cs, repo, rplen, dev, lock, 0, 65536)
+    val @(st, n) = resolve_all(stack, all2, cs2, pn, repo, rplen, dev, lock, 0, 65536)
+    val () = names_free(pn)
   in finish_lock(st, n, lock, dry) end
 
 (* bats lock --repository <repo[0, rplen)> [--dev] [--dry-run]: resolves

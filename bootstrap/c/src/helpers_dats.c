@@ -422,7 +422,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 3027(line=104, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -432,6 +432,7 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 /* flags are file's own values (the O_* stadefs below); the host's
    O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
@@ -446,13 +447,19 @@ static int _file_open(const char *path, int flags, int mode) {
   if (flags & 64) f |= O_CREAT;
   if (flags & 512) f |= O_TRUNC;
   if (flags & 1024) f |= O_APPEND;
-  return open(path, f, mode);
+  int fd = open(path, f, mode);
+  return fd >= 0 ? fd : -errno;
 }
+/* Reads until len bytes or EOF; a failure before any byte is -errno,
+   after some bytes those bytes: the next read reports it. EINTR is
+   retried, as the readers of Rust do. */
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
   while (total < len) {
     int n = (int)read(fd, (char *)buf + total, (unsigned int)(len - total));
-    if (n <= 0) break;
+    if (n < 0 && errno == EINTR) continue;
+    if (n < 0) return total > 0 ? total : -errno;
+    if (n == 0) break;
     total += n;
   }
   return total;
@@ -742,7 +749,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 3027(line=104, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -752,6 +759,7 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 /* flags are file's own values (the O_* stadefs below); the host's
    O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
@@ -766,13 +774,19 @@ static int _file_open(const char *path, int flags, int mode) {
   if (flags & 64) f |= O_CREAT;
   if (flags & 512) f |= O_TRUNC;
   if (flags & 1024) f |= O_APPEND;
-  return open(path, f, mode);
+  int fd = open(path, f, mode);
+  return fd >= 0 ? fd : -errno;
 }
+/* Reads until len bytes or EOF; a failure before any byte is -errno,
+   after some bytes those bytes: the next read reports it. EINTR is
+   retried, as the readers of Rust do. */
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
   while (total < len) {
     int n = (int)read(fd, (char *)buf + total, (unsigned int)(len - total));
-    if (n <= 0) break;
+    if (n < 0 && errno == EINTR) continue;
+    if (n < 0) return total > 0 ? total : -errno;
+    if (n == 0) break;
     total += n;
   }
   return total;
@@ -14770,7 +14784,7 @@ ATSstatic()
 /*
 imparg = a(6422)
 tmparg = S2Evar(a(6422))
-tmpsub = Some(a(6422) -> S2Eexi(c$16853(24178); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16853(24178))), S2Eapp(S2Ecst(<); S2Evar(c$16853(24178)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16853(24178)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16853(24178)))))
+tmpsub = Some(a(6422) -> S2Eexi(c$16854(24179); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16854(24179))), S2Eapp(S2Ecst(<); S2Evar(c$16854(24179)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16854(24179)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16854(24179)))))
 */
 atstkind_t0ype(atstype_char)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__16__5(atstkind_type(atstype_ptrk) arg0)
@@ -18174,7 +18188,7 @@ ATSstatic()
 /*
 imparg = a(6422)
 tmparg = S2Evar(a(6422))
-tmpsub = Some(a(6422) -> S2Eexi(c$16854(24179); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16854(24179))), S2Eapp(S2Ecst(<); S2Evar(c$16854(24179)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16854(24179)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16854(24179)))))
+tmpsub = Some(a(6422) -> S2Eexi(c$16855(24180); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16855(24180))), S2Eapp(S2Ecst(<); S2Evar(c$16855(24180)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16855(24180)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16855(24180)))))
 */
 atstkind_t0ype(atstype_char)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__16__6(atstkind_type(atstype_ptrk) arg0)
