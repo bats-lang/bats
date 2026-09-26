@@ -59,6 +59,8 @@ The `end` that closes `$UNSAFE begin` is found in code only; the word `end` in t
 
 `$X.member` is accepted when `X` is bound by ATS's `staload X = "..."` as well as by `#use ... as X`; packages staload bridge modules this way. The Rust bats reported "unknown alias" for a staload alias (`tests/staload-alias`).
 
+A dependency's `#pub` names are not renamed. The Rust bats renamed each dependency file's `#pub` names to `__BATS__<pkg>_<name>` on its own, so a call from one module of a dependency to another module's `#pub` function (as in bridge) no longer resolved (`tests/dep-cross-module`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement
