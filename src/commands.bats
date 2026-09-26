@@ -307,16 +307,18 @@ in
                   $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
                 val br_out = $A.alloc<byte>(4096)
                 val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
-                (* Check if branch is "main" (109,97,105,110) *)
+                (* Check if branch is exactly "main\n" (109,97,105,110,10) *)
                 val b0 = byte2int0($A.get<byte>(br_out, 0))
                 val b1 = byte2int0($A.get<byte>(br_out, 1))
                 val b2 = byte2int0($A.get<byte>(br_out, 2))
                 val b3 = byte2int0($A.get<byte>(br_out, 3))
-                val is_main = (if br_len >= 4 then
+                val b4 = byte2int0($A.get<byte>(br_out, 4))
+                val is_main = (if br_len = 5 then
                   $AR.eq_int_int(b0, 109) &&
                   $AR.eq_int_int(b1, 97) &&
                   $AR.eq_int_int(b2, 105) &&
-                  $AR.eq_int_int(b3, 110)
+                  $AR.eq_int_int(b3, 110) &&
+                  $AR.eq_int_int(b4, 10)
                 else false): bool
                 val () = $A.free<byte>(br_out)
                 val () = $A.drop<byte>(fz_ge, bv_ge)
