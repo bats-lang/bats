@@ -8,7 +8,6 @@ staload "list/src/lib.dats"
 staload "str/src/lib.dats"
 staload "process/src/lib.dats"
 staload "result/src/lib.dats"
-staload "sha256/src/lib.dats"
 staload "toml/src/lib.dats"
 (* commands -- subcommand implementations for the bats compiler *)
 
@@ -23,7 +22,6 @@ staload L = "list/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
-staload SHA = "sha256/src/lib.sats"
 staload T = "toml/src/lib.sats"
 
 staload "helpers.sats"
@@ -128,14 +126,6 @@ end
    upload: package library for repository
    ============================================================ *)
 
-(* dst[i, n) = src[i, n) *)
-fun copy_prefix {la,lb:agz}{n:pos | n <= 524288}{i:nat | i <= n} .<n - i>.
-  (src: !$A.arr(byte, la, 524288), dst: !$A.arr(byte, lb, n), n: int n, i: int i): void =
-  if i >= n then ()
-  else let
-    val () = $A.set<byte>(dst, i, $A.get<byte>(src, i))
-  in copy_prefix(src, dst, n, i + 1) end
-
 (* b[i, len) to stderr. *)
 fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
   (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
@@ -145,54 +135,37 @@ fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
     val () = prerr_char(int2char0(peek(b, i, m)))
   in prerr_seg(b, i + 1, len, m, fuel - 1) end
 
-(* Writes "<sha256 of the archive>  <archive filename>\n" to the sidecar,
-   as the Rust bats did. arc: the archive read into arc[0, n). *)
-fn write_sidecar_of {la,lz:agz}{n:nat | n <= 524288}
-  (arc: $A.arr(byte, la, 524288), n: int n,
-   zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
-  if n <= 0 then let
-    val () = $A.free<byte>(arc)
+(* The sidecar line in sc (the hash so far) completed and written to
+   zp + ".sha256", or the error when the archive could not be hashed *)
+fn finish_sidecar {lz:agz}
+  (ok: bool, sc: $B.builder_v, zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
+  if ~ok then let
+    val () = $B.builder_free(sc)
     val () = set_build_err()
   in prerr! ("error: cannot read archive for checksum\n") end
   else let
-    val data = $A.alloc<byte>(n)
-    val () = copy_prefix(arc, data, n, 0)
-    val () = $A.free<byte>(arc)
-    val hex = $A.alloc<byte>(64)
-    val () = $SHA.hash(data, n, hex)
-    val () = $A.free<byte>(data)
-    var sc: $B.builder_v = $B.create()
-    val @(fh, bh) = $A.freeze<byte>(hex)
-    val () = copy_to_builder_v(bh, 0, 64, 64, sc)
-    val () = $A.drop<byte>(fh, bh)
-    val () = $A.free<byte>($A.thaw<byte>(fh))
-    val () = bput_v(sc, "  ")
+    var line = sc
+    val () = bput_v(line, "  ")
     val base = find_basename_start(zp, 0, 524288, ~1, 524288)
-    val () = copy_to_builder_v(zp, base, zlen, 524288, sc)
-    val () = bput_v(sc, "\n")
+    val () = copy_to_builder_v(zp, base, zlen, 524288, line)
+    val () = bput_v(line, "\n")
     var sp: $B.builder_v = $B.create()
     val () = copy_to_builder_v(zp, 0, zlen, 524288, sp)
     val () = bput_v(sp, ".sha256")
     val () = put_char_v(sp, 0)
     val @(spa, _) = $B.to_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
-    val _ = write_file_from_builder(bv_sp, 524288, sc)
+    val _ = write_file_from_builder(bv_sp, 524288, line)
     val () = $A.drop<byte>(fz_sp, bv_sp)
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
   in end
 
-(* The sidecar of the archive at zp[0, zlen) (NUL-terminated). *)
-fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
-  case+ $F.file_open(zp, 524288, 0, 0) of
-  | ~$R.ok(afd) => let
-      val arc = $A.alloc<byte>(524288)
-      val n = (case+ $F.file_read(afd, arc, 524288) of
-        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
-      val () = $R.discard<int><int>($F.file_close(afd))
-    in write_sidecar_of(arc, n, zp, zlen) end
-  | ~$R.err(_) => let
-      val () = set_build_err()
-    in prerr! ("error: cannot read archive for checksum\n") end
+(* Writes "<sha256 of the archive>  <archive filename>\n" to the sidecar
+   of the archive at zp[0, zlen) (NUL-terminated), as the Rust bats did *)
+fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void = let
+  var sc: $B.builder_v = $B.create()
+  val ok = put_file_sha256(zp, sc)
+in finish_sidecar(ok, sc, zp, zlen) end
 
 (* The end of the line starting at i: the next '\n', or len *)
 fun line_end {l:agz}{n:pos}{f:nat} .<f>.

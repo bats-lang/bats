@@ -209,14 +209,14 @@ ATSdynloadflag_init(build_057_bats_modules_057_toml_057_src_057_lib_056_dats__dy
 ATSextern()
 atsvoid_t0ype
 build_057_bats_modules_057_toml_057_src_057_lib_056_dats__dynload(/*void*/) ;
-ATSdynloadflag_init(build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynloadflag) ;
-ATSextern()
-atsvoid_t0ype
-build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynload(/*void*/) ;
 ATSdynloadflag_init(build_057_bats_modules_057_path_057_src_057_lib_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
 build_057_bats_modules_057_path_057_src_057_lib_056_dats__dynload(/*void*/) ;
+ATSdynloadflag_init(build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynloadflag) ;
+ATSextern()
+atsvoid_t0ype
+build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynload(/*void*/) ;
 ATSdynloadflag_init(build_057_src_057_build_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
@@ -281,8 +281,8 @@ ATSdynloadfcall(build_057_bats_modules_057_process_057_src_057_lib_056_dats__dyn
 ATSdynloadfcall(build_057_bats_modules_057_result_057_src_057_lib_056_dats__dynload) ;
 ATSdynloadfcall(build_057_bats_modules_057_list_057_src_057_lib_056_dats__dynload) ;
 ATSdynloadfcall(build_057_bats_modules_057_toml_057_src_057_lib_056_dats__dynload) ;
-ATSdynloadfcall(build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynload) ;
 ATSdynloadfcall(build_057_bats_modules_057_path_057_src_057_lib_056_dats__dynload) ;
+ATSdynloadfcall(build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_build_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_commands_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_docs_056_dats__dynload) ;
