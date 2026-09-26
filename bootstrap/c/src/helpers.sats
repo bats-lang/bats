@@ -139,6 +139,37 @@ fn is_dot_or_dotdot {l:agz}{n:pos}
 
 
 
+typedef pos_t = [p:int] int p
+
+
+fn peek {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), p: int p, n: int n): int
+
+
+
+
+
+
+
+
+
+fn span_i32 {l:agz}{n:pos}
+  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn dir_name_len (o: $R.option([k:nat | k <= 256] int k)): [k:int | ~1 <= k; k <= 256] int k
 
 
