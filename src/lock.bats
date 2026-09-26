@@ -2180,6 +2180,28 @@ fun alias_known {ls,lsp:agz}{f:nat} .<f>.
     else alias_known(src, spans, idx + 1, count, as0, ae, f - 1)
   end
 
+(* Whether src[0, n) binds the alias src[as0, ae) with ATS's
+   staload <alias> = "...", which the Rust bats did not accept (an
+   allowed divergence: packages staload bridge modules this way) *)
+fun staload_alias {ls:agz}{f:nat} .<f>.
+  (src: !$A.borrow(byte, ls, VMAX), i: pos_t, n: pos_t, as0: pos_t, ae: pos_t, f: int f): bool =
+  if f <= 0 then false
+  else if i + 7 > n then false
+  else let
+    var s_c = @[char][7]('s', 't', 'a', 'l', 'o', 'a', 'd')
+    val at_kw = (if i > 0 then (if is_word_byte(peek(src, i - 1, VMAX)) then false
+                                else lit_at(src, i, VMAX, s_c, 7))
+                 else lit_at(src, i, VMAX, s_c, 7)): bool
+    val k0 = skip_space(src, VMAX, i + 7, n, VMAX)
+    val k1 = word_end(src, k0, n, VMAX)
+    val k2 = skip_space(src, VMAX, k1, n, VMAX)
+    val hit = (if ~at_kw then false
+               else if k0 = i + 7 then false
+               else if k1 - k0 <> ae - as0 then false
+               else if ~same_bytes(src, k0, as0, ae - as0, VMAX) then false
+               else peek(src, k2, VMAX) = 61): bool
+  in if hit then true else staload_alias(src, i + 1, n, as0, ae, f - 1) end
+
 (* Rust's "unknown alias '<a>' in qualified access" for each $a.member
    whose a no #use names, labeled with the file's name p[b0, pl)
    (emit::validate) *)
@@ -2194,7 +2216,9 @@ fun pass_aliases {lp,ls,lsp:agz}{f:nat} .<f>.
     val @(ss, _) = span_range(spans, idx)
     val as0 = span_i32(spans, idx * 28 + 10, VMAX)
     val ae = span_i32(spans, idx * 28 + 14, VMAX)
-    val bad = (if is_q then ~alias_known(src, spans, 0, count, as0, ae, VMAX) else false): bool
+    val bad = (if ~is_q then false
+               else if alias_known(src, spans, 0, count, as0, ae, VMAX) then false
+               else ~staload_alias(src, 0, n, as0, ae, VMAX)): bool
     val cnt2 = add_alias_error(bad, p, b0, pl, src, n, ss, as0, ae, cnt, errs)
   in pass_aliases(p, b0, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
 
