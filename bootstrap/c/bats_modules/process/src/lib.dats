@@ -38,6 +38,7 @@ staload F = "file/src/lib.sats"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <string.h>
 
 typedef struct {
@@ -94,20 +95,37 @@ static int _proc_spawn(
   int stderr_pipe[2] = {-1, -1};
 
   if (stdin_mode == 0) {
-    if (pipe(stdin_pipe) < 0) return -1;
+    if (pipe(stdin_pipe) < 0) return -(errno > 0 ? errno : 1);
   }
   if (stdout_mode == 0) {
     if (pipe(stdout_pipe) < 0) {
+      int e = errno;
       if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
-      return -1;
+      return -(e > 0 ? e : 1);
     }
   }
   if (stderr_mode == 0) {
     if (pipe(stderr_pipe) < 0) {
+      int e = errno;
       if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
       if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
-      return -1;
+      return -(e > 0 ? e : 1);
     }
+  }
+
+  /* The child writes errno here when exec fails; close-on-exec, so a
+     successful exec closes it and the parent reads nothing (as Rust's
+     Command::spawn does) */
+  int exec_err[2] = {-1, -1};
+  if (pipe(exec_err) < 0
+      || fcntl(exec_err[0], F_SETFD, FD_CLOEXEC) < 0
+      || fcntl(exec_err[1], F_SETFD, FD_CLOEXEC) < 0) {
+    int e = errno;
+    if (exec_err[0] >= 0) { close(exec_err[0]); close(exec_err[1]); }
+    if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
+    if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
+    if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
+    return -(e > 0 ? e : 1);
   }
 
   const char *argv_ptrs[256];
@@ -141,10 +159,11 @@ static int _proc_spawn(
     while (environ[n]) n++;
     envv = (char **)malloc((n + (size_t)ei + 1) * sizeof(char *));
     if (!envv) {
+      close(exec_err[0]); close(exec_err[1]);
       if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
       if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
       if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
-      return -1;
+      return -ENOMEM;
     }
     for (j = 0; j < n; j++) {
       size_t len = strcspn(environ[j], "=");
@@ -159,14 +178,17 @@ static int _proc_spawn(
 
   int pid = fork();
   if (pid < 0) {
+    int e = errno;
     free(envv);
+    close(exec_err[0]); close(exec_err[1]);
     if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
     if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
     if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
-    return -1;
+    return -(e > 0 ? e : 1);
   }
 
   if (pid == 0) {
+    close(exec_err[0]);
     if (stdin_mode == 0) {
       dup2(stdin_pipe[0], 0); close(stdin_pipe[0]); close(stdin_pipe[1]);
     } else if (stdin_mode == 1) {
@@ -190,10 +212,33 @@ static int _proc_spawn(
     }
     _exec_search(path, (char *const *)argv_ptrs,
            inherit ? envv : (char *const *)envp_ptrs);
+    {
+      int e = errno;
+      ssize_t w;
+      do { w = write(exec_err[1], &e, sizeof e); } while (w < 0 && errno == EINTR);
+    }
     _exit(127);
   }
 
   free(envv);
+  close(exec_err[1]);
+  {
+    int e = 0;
+    ssize_t r;
+    do { r = read(exec_err[0], &e, sizeof e); } while (r < 0 && errno == EINTR);
+    close(exec_err[0]);
+    if (r == (ssize_t)sizeof e) {
+      int st;
+      while (waitpid(pid, &st, 0) < 0 && errno == EINTR) {}
+      if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); close(stdin_pipe[1]); }
+      if (stdout_pipe[0] >= 0) { close(stdout_pipe[0]); close(stdout_pipe[1]); }
+      if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
+      if (stdin_mode == 1) close(stdin_fd);
+      if (stdout_mode == 1) close(stdout_fd);
+      if (stderr_mode == 1) close(stderr_fd);
+      return -(e > 0 ? e : 1);
+    }
+  }
   if (stdin_pipe[0] >= 0) { close(stdin_pipe[0]); _spawn_res.stdin_parent_fd = stdin_pipe[1]; }
   if (stdout_pipe[1] >= 0) { close(stdout_pipe[1]); _spawn_res.stdout_parent_fd = stdout_pipe[0]; }
   if (stderr_pipe[1] >= 0) { close(stderr_pipe[1]); _spawn_res.stderr_parent_fd = stderr_pipe[0]; }
@@ -202,6 +247,15 @@ static int _proc_spawn(
   if (stderr_mode == 1) close(stderr_fd);
   _spawn_res.pid = pid;
   return pid;
+}
+
+/* strerror(code) copied into buf[0, max); its length */
+static int _proc_error_text(int code, char *buf, int max) {
+  const char *s = strerror(code);
+  size_t n = s ? strlen(s) : 0;
+  if (n > (size_t)max) n = (size_t)max;
+  if (n) memcpy(buf, s, n);
+  return (int)n;
 }
 
 static int _spawn_get_stdin_fd(void) { return _spawn_res.stdin_parent_fd; }
@@ -274,8 +328,15 @@ static int _proc_try_wait(int pid) {
 
 
 
+(* The OS's description of error code (strerror), which Rust's io::Error
+   shows before " (os error <code>)", copied into buf; its length *)
+
+
+
 (* path: an executable's path, or a command name without '/', looked up
-   on this process's PATH as execvp does. *)
+   on this process's PATH as execvp does. Fails with the errno (> 0) of
+   what went wrong, including an exec that could not run (ENOENT for a
+   command found nowhere), as Rust's Command::spawn does. *)
 
 
 
@@ -425,7 +486,7 @@ in
     val () = _consume_cfg(stdin_cfg)
     val () = _consume_cfg(stdout_cfg)
     val () = _consume_cfg(stderr_cfg)
-  in $R.err(~1) end
+  in $R.err(0 - pid) end
 end
 
 implement child_wait(c) = let
@@ -450,6 +511,21 @@ implement child_pid(c) = let
   val p = pid
   prval () = fold@(c)
 in p end
+
+implement os_error_text {l}{n} (code, buf, max) =
+   $extfcall([k:nat | k <= n] int k, "_proc_error_text", code,
+    $UNSAFE.castvwtp1{ptr}(buf), max) 
+
+(* Static test: os_error_text's length indexes its buffer *)
+fn _last_byte {l:agz}{n:pos}{k:nat | k <= n}
+  (buf: !$A.arr(byte, l, n), k: int k): int =
+  if k > 0 then byte2int0($A.get<byte>(buf, k - 1)) else 0
+
+fn _test_os_error_text_bounded (): void = let
+  val buf = $A.alloc<byte>(64)
+  val k = os_error_text(2, buf, 64)
+  val _ = _last_byte(buf, k)
+in $A.free<byte>(buf) end
 
 implement pipe_end_close {b} (p) =
   case+ p of

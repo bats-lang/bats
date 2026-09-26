@@ -960,7 +960,9 @@ implement timestamp_to_calver(ts) = let
   val y2 = (if m <= 2 then $AR.add_int_int(y, 1) else y): int
 in @(y2, m, d, secs_of_day) end
 
-(* Run a command and capture stdout into outbuf. Returns @(exit_code, stdout_len). *)
+(* Run a command and capture stdout into outbuf. Returns @(exit_code,
+   stdout_len); the exit code is -errno when the command could not be
+   run (Rust: Command::output's Err). *)
 
 
 
@@ -991,7 +993,7 @@ in
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
     in @(ec, olen) end
-  | ~$R.err(_) => @(~1, 0)
+  | ~$R.err(e) => @(0 - e, 0)
 end
 
 
