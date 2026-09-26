@@ -12,9 +12,10 @@ if command -v sha256sum >/dev/null 2>&1; then SUM="sha256sum"; else SUM="shasum 
 mkdir -p "$TMP/repo" "$TMP/lib/src"
 printf '[package]\nname = "sidecar"\nkind = "lib"\n' > "$TMP/lib/bats.toml"
 printf '#pub fun f (): int\n\nimplement f () = 1\n' > "$TMP/lib/src/lib.bats"
+printf 'build/\ndist/\ndocs/\n' > "$TMP/lib/.gitignore"
 cd "$TMP/lib"
 git init -q . && git add -A && git -c user.name=t -c user.email=t@t commit -qm t
-"$BATS" upload --repository "$TMP/repo" > up.log 2>&1 || { echo "FAIL: upload"; cat up.log; exit 1; }
+"$BATS" upload --repository "$TMP/repo" > "$TMP/up.log" 2>&1 || { echo "FAIL: upload"; cat "$TMP/up.log"; exit 1; }
 cd "$TMP/repo/sidecar"
 arc=$(ls *.bats)
 want=$($SUM "$arc")
