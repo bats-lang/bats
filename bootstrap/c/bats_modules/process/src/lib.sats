@@ -45,10 +45,15 @@ datavtype pipe_end(b:bool) =
   | pipe_none(false) of ()
 
 
+
+
+
+
 datavtype stream_config(b:bool) =
   | pipe_new(true) of ()
   | inherit_fd(false) of ($F.fd)
   | dev_null(false) of ()
+  | inherit(false) of ()
 
 
 datavtype spawn_pipes(sin:bool, sout:bool, serr:bool) =
@@ -84,6 +89,37 @@ fn spawn
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+fn spawn_inherit_env
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}
+  (path: !$A.borrow(byte, lp, 524288),
+   argv: $L.listv(arg_entry),
+   stdin_cfg: stream_config(sin),
+   stdout_cfg: stream_config(sout),
+   stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -444,5 +444,7 @@ end
 implement main0 () = let
   val () = bats_main ()
 in
-  if has_build_err () then exit_void (1) else ()
+  if has_build_err () then exit_void (1)
+  else if get_exit_code () <> 0 then exit_void (get_exit_code ())
+  else ()
 end
