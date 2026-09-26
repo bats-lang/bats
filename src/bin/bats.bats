@@ -150,6 +150,20 @@ fn opt_string_copy {l:agz}{n:pos}
    Main: read argv (args_read: NUL-separated), dispatch
    ============================================================ *)
 
+(* Whether the project is a binary package, which build and run need;
+   false after printing the error (Rust: cmd_build's config::load, then
+   build::build's kind check) *)
+fn bin_package (): bool = let
+  val k = project_kind()
+in
+  if k < 0 then false
+  else if k = 2 then true
+  else let
+    val () = prerr! ("error: 'bats build' is only for binary packages (kind = \"bin\")\n")
+    val () = set_build_err()
+  in false end
+end
+
 fn bats_main (): void = let
   val cl_buf = $A.alloc<byte>(4096)
   val cl_read = $E.args_read(cl_buf, 4096)
@@ -271,8 +285,10 @@ in
                 val has_release = ((only_mask / 2) mod 2)
                 val has_wasm = ((only_mask / 8) mod 2)
               in
-                (* Rust: build::resolve_deps, once before the builds *)
-                if ~resolve_deps(bv_repo, repo_len) then ()
+                (* Rust: cmd_build's config::load, then build's kind
+                   check, then resolve_deps, once before the builds *)
+                if ~bin_package() then ()
+                else if ~resolve_deps(bv_repo, repo_len) then ()
                 else if only_mask = 0 then let
                   val () = do_build(0, 0, bv_tc, tc_len)
                   val () = do_build(1, 0, bv_tc, tc_len)
@@ -332,7 +348,8 @@ in
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
-                val () = (if resolve_deps(bv_repo, repo_len) then
+                val () = (if ~bin_package() then ()
+                  else if resolve_deps(bv_repo, repo_len) then
                   do_run(run_release, bv_bin, bin_len, bv_extra, extra_len) else ())
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
