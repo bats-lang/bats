@@ -413,6 +413,29 @@ fn name_eq
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn borrow_byte {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): int
 

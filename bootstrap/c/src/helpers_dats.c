@@ -332,7 +332,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -343,8 +343,20 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs
 #include <dirent.h>
 #include <string.h>
 
+/* flags are file's own values (the O_* stadefs below); the host's
+   O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
+   macOS and the BSDs), so they are translated here. */
 static int _file_open(const char *path, int flags, int mode) {
-  return open(path, flags, mode);
+  int f;
+  switch (flags & 3) {
+    case 0: f = O_RDONLY; break;
+    case 1: f = O_WRONLY; break;
+    default: f = O_RDWR; break;
+  }
+  if (flags & 64) f |= O_CREAT;
+  if (flags & 512) f |= O_TRUNC;
+  if (flags & 1024) f |= O_APPEND;
+  return open(path, f, mode);
 }
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
@@ -688,7 +700,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -699,8 +711,20 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2281(line=85, offs
 #include <dirent.h>
 #include <string.h>
 
+/* flags are file's own values (the O_* stadefs below); the host's
+   O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
+   macOS and the BSDs), so they are translated here. */
 static int _file_open(const char *path, int flags, int mode) {
-  return open(path, flags, mode);
+  int f;
+  switch (flags & 3) {
+    case 0: f = O_RDONLY; break;
+    case 1: f = O_WRONLY; break;
+    default: f = O_RDWR; break;
+  }
+  if (flags & 64) f |= O_CREAT;
+  if (flags & 512) f |= O_TRUNC;
+  if (flags & 1024) f |= O_APPEND;
+  return open(path, f, mode);
 }
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
@@ -13653,7 +13677,7 @@ ATSstatic()
 /*
 imparg = a(6410)
 tmparg = S2Evar(a(6410))
-tmpsub = Some(a(6410) -> S2Eexi(c$16065(23309); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16065(23309))), S2Eapp(S2Ecst(<); S2Evar(c$16065(23309)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16065(23309)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16065(23309)))))
+tmpsub = Some(a(6410) -> S2Eexi(c$16120(23366); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16120(23366))), S2Eapp(S2Ecst(<); S2Evar(c$16120(23366)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16120(23366)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16120(23366)))))
 */
 atstkind_t0ype(atstype_char)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__16__5(atstkind_type(atstype_ptrk) arg0)
@@ -17057,7 +17081,7 @@ ATSstatic()
 /*
 imparg = a(6410)
 tmparg = S2Evar(a(6410))
-tmpsub = Some(a(6410) -> S2Eexi(c$16066(23310); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16066(23310))), S2Eapp(S2Ecst(<); S2Evar(c$16066(23310)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16066(23310)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16066(23310)))))
+tmpsub = Some(a(6410) -> S2Eexi(c$16121(23367); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$16121(23367))), S2Eapp(S2Ecst(<); S2Evar(c$16121(23367)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$16121(23367)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$16121(23367)))))
 */
 atstkind_t0ype(atstype_char)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__16__6(atstkind_type(atstype_ptrk) arg0)

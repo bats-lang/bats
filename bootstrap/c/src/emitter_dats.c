@@ -1331,8 +1331,8 @@ build/src/emitter.dats: 1157(line=33, offs=7) -- 1453(line=40, offs=41)
 /*
 local: scan_13$0(level=1)
 global: scan_13$0(level=1)
-local: pos$5176(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int))))
-global: pos$5176(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int))))
+local: pos$5180(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int))))
+global: pos$5180(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int))))
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
