@@ -329,6 +329,7 @@ ATSdyncst_extfun(build_057_src_057_helpers_056_sats__lit_prfun, (atsrefarg0_type
 ATSdyncst_extfun(build_057_src_057_helpers_056_sats__lit_prfn, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_bool)) ;
 ATSdyncst_extfun(build_057_src_057_helpers_056_sats__lit_primplement, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_bool)) ;
 ATSdyncst_extfun(build_057_src_057_helpers_056_sats__lit_no_mangle, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_bool)) ;
+ATSdyncst_extfun(build_057_src_057_helpers_056_sats__lit_while, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_bool)) ;
 ATSdyncst_mac(atspre_g0int_sub_int)
 ATSdyncst_mac(atspre_g0int_add_int)
 ATSdyncst_mac(atspre_g1int_lt_int)
@@ -616,8 +617,12 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__3(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
+atstkind_t0ype(atstype_bool)
+looking_at_while_66(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_to_eol_66(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+skip_to_eol_67(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -629,7 +634,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__3(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_ident_69(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+skip_ident_70(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -637,7 +642,7 @@ ATSLIB_056_prelude__lte_g1int_int__29__5(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-_skip_to_name_71(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_skip_to_name_72(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -649,7 +654,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__4(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-_skip_brace_74(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_skip_brace_75(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -661,7 +666,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__5(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-_has_primplement_77(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_has_primplement_78(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -673,7 +678,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__6(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-_names_match_80(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_names_match_81(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -685,7 +690,7 @@ ATSLIB_056_prelude__lte_g0int_int__5__6(atstkind_t0ype(atstype_int), atstkind_t0
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_nonws_84(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+skip_nonws_85(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -693,11 +698,11 @@ ATSLIB_056_prelude__lte_g1int_int__29__10(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 postiats_tyrec_0
-lex_line_comment_86(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_line_comment_87(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_c_comment_inner_88(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_c_comment_inner_89(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -709,11 +714,11 @@ ATSLIB_056_prelude__gte_g1int_int__24__7(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 postiats_tyrec_0
-lex_c_comment_91(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_c_comment_92(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_ml_comment_inner_92(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_ml_comment_inner_93(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -729,11 +734,11 @@ ATSLIB_056_prelude__gte_g1int_int__24__8(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 postiats_tyrec_0
-lex_ml_comment_96(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_ml_comment_97(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_string_inner_97(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_string_inner_98(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -745,15 +750,15 @@ ATSLIB_056_prelude__gte_g1int_int__24__9(atstkind_t0ype(atstype_int), atstkind_t
 
 ATSstatic()
 postiats_tyrec_0
-lex_string_100(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_string_101(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 postiats_tyrec_0
-lex_char_lit_101(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_char_lit_102(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_extcode_inner_102(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_extcode_inner_103(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -765,7 +770,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__10(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 postiats_tyrec_0
-lex_extcode_105(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_extcode_106(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -773,11 +778,11 @@ ATSLIB_056_prelude__gte_g1int_int__24__11(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 postiats_tyrec_0
-lex_hash_use_107(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_hash_use_108(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 postiats_tyrec_1
-lex_qualified_108(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_qualified_109(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -785,7 +790,7 @@ ATSLIB_056_prelude__gt_g1int_int__57__2(atstkind_t0ype(atstype_int), atstkind_t0
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-is_blank_line_110(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+is_blank_line_111(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -797,7 +802,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__12(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_pub_lines_113(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_pub_lines_114(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -813,7 +818,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__14(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_blanks_117(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+skip_blanks_118(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -827,25 +832,25 @@ ATSLIB_056_prelude__gte_g1int_int__24__15(atstkind_t0ype(atstype_int), atstkind_
 #if(0)
 ATSextern()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lt_g1int_int__121(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
 #endif // end of [QUALIFIED]
 #endif // end of [TEMPLATE]
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lt_g1int_int__121__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-looking_at_let_123(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+looking_at_let_124(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-looking_at_local_124(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+looking_at_local_125(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-find_end_kw_125(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+find_end_kw_126(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -861,35 +866,35 @@ ATSLIB_056_prelude__lte_g0int_int__5__8(atstkind_t0ype(atstype_int), atstkind_t0
 
 ATSstatic()
 postiats_tyrec_1
-lex_unsafe_dispatch_129(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_unsafe_dispatch_130(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lt_g1int_int__121__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 postiats_tyrec_1
-lex_unittest_dispatch_131(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_unittest_dispatch_132(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__3(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lt_g1int_int__121__3(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__4(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lt_g1int_int__121__4(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 postiats_tyrec_0
-lex_target_decl_134(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_target_decl_135(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__5(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__lt_g1int_int__121__5(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_passthrough_scan_136(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_passthrough_scan_137(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -901,7 +906,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__17(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 postiats_tyrec_0
-lex_main_139(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+lex_main_140(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -913,7 +918,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__18(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-_has_target_blocks_142(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_has_target_blocks_143(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -925,7 +930,7 @@ ATSLIB_056_prelude__gte_g0int_int__1__6(atstkind_t0ype(atstype_int), atstkind_t0
 
 ATSstatic()
 atsvoid_t0ype
-_copy_span_bytes_146(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_copy_span_bytes_147(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -937,7 +942,7 @@ ATSLIB_056_prelude__gte_g1int_int__24__19(atstkind_t0ype(atstype_int), atstkind_
 
 ATSstatic()
 atstkind_t0ype(atstype_int)
-_expand_target_blocks_149(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+_expand_target_blocks_150(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -957,57 +962,57 @@ build_057_src_057_lexer_056_sats__do_lex(atsrefarg0_type(atstkind_type(atstype_p
 #if(0)
 ATSextern()
 postiats_tyrec_3
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154(atstkind_type(atstype_ptrk)) ;
 #endif // end of [QUALIFIED]
 #endif // end of [TEMPLATE]
 
 ATSstatic()
 postiats_tyrec_3
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153__1(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154__1(atstkind_type(atstype_ptrk)) ;
 
 #if(0)
 #if(0)
 ATSextern()
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 #endif // end of [QUALIFIED]
 #endif // end of [TEMPLATE]
 
 ATSstatic()
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__1(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__1(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 
 #if(0)
 #if(0)
 ATSextern()
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158(atstkind_type(atstype_ptrk)) ;
 #endif // end of [QUALIFIED]
 #endif // end of [TEMPLATE]
 
 ATSstatic()
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157__1(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158__1(atstkind_type(atstype_ptrk)) ;
 
 #if(0)
 #if(0)
 ATSextern()
 atstkind_type(atstype_ptrk)
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160(atstkind_type(atstype_ptrk)) ;
 #endif // end of [QUALIFIED]
 #endif // end of [TEMPLATE]
 
 ATSstatic()
 atstkind_type(atstype_ptrk)
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__1(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__1(atstkind_type(atstype_ptrk)) ;
 
 ATSstatic()
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__2(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__2(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_type(atstype_ptrk)) ;
 
 ATSstatic()
 atstkind_type(atstype_ptrk)
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__2(atstkind_type(atstype_ptrk)) ;
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__2(atstkind_type(atstype_ptrk)) ;
 
 /*
 build/src/lexer.dats: 436(line=18, offs=4) -- 568(line=22, offs=24)
@@ -1159,8 +1164,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -1178,12 +1183,12 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp6, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(5334))>)(arg1)) ;
+ATSINSmove(tmp6, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(5336))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret5, PMVtmpltcst(g0int_gte<S2Evar(tk(5334))>)(arg0, tmp6)) ;
+ATSINSmove(tmpret5, PMVtmpltcst(g0int_gte<S2Evar(tk(5336))>)(arg0, tmp6)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret5) ;
@@ -1201,9 +1206,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1243,8 +1248,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -1262,12 +1267,12 @@ ATSINSflab(__patsflab_lte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12046(line=621, offs=30) -- 12057(line=621, offs=41)
 */
-ATSINSmove(tmp10, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(5332))>)(arg1)) ;
+ATSINSmove(tmp10, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(5334))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12028(line=621, offs=12) -- 12059(line=621, offs=43)
 */
-ATSINSmove(tmpret9, PMVtmpltcst(g0int_lte<S2Evar(tk(5332))>)(arg0, tmp10)) ;
+ATSINSmove(tmpret9, PMVtmpltcst(g0int_lte<S2Evar(tk(5334))>)(arg0, tmp10)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret9) ;
@@ -1285,9 +1290,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1326,9 +1331,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1367,9 +1372,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1408,9 +1413,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1449,9 +1454,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1592,9 +1597,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1633,9 +1638,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1674,9 +1679,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -1715,9 +1720,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2083,8 +2088,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -2102,12 +2107,12 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp64, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5347))>)(arg1)) ;
+ATSINSmove(tmp64, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5349))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret63, PMVtmpltcst(g1int_gte<S2Evar(tk(5347))>)(arg0, tmp64)) ;
+ATSINSmove(tmpret63, PMVtmpltcst(g1int_gte<S2Evar(tk(5349))>)(arg0, tmp64)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret63) ;
@@ -2125,9 +2130,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2233,8 +2238,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -2252,12 +2257,12 @@ ATSINSflab(__patsflab_lte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12625(line=654, offs=30) -- 12636(line=654, offs=41)
 */
-ATSINSmove(tmp72, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5341))>)(arg1)) ;
+ATSINSmove(tmp72, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5343))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12607(line=654, offs=12) -- 12638(line=654, offs=43)
 */
-ATSINSmove(tmpret71, PMVtmpltcst(g1int_lte<S2Evar(tk(5341))>)(arg0, tmp72)) ;
+ATSINSmove(tmpret71, PMVtmpltcst(g1int_lte<S2Evar(tk(5343))>)(arg0, tmp72)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret71) ;
@@ -2275,9 +2280,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2762,11 +2767,11 @@ ATSreturn(tmpret99) ;
 } /* end of [looking_at_as_41] */
 
 /*
-build/src/lexer.dats: 4397(line=135, offs=4) -- 4824(line=143, offs=36)
+build/src/lexer.dats: 4397(line=135, offs=4) -- 4866(line=144, offs=39)
 */
 /*
-local: is_kw_boundary_23$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), looking_at_cast_fn_42$0(level=0)
+local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_cast_fn_42$0(level=0)
 local: 
 global: 
 */
@@ -2782,7 +2787,7 @@ ATStmpdec(tmp105, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp106, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp107, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp108, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp109, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp109, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp110, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp111, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp112, atstkind_t0ype(atstype_int)) ;
@@ -2794,176 +2799,194 @@ ATStmpdec(tmp117, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp118, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp119, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp120, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp121, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4397(line=135, offs=4) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4397(line=135, offs=4) -- 4866(line=144, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_cast_fn_42):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp109, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp110, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp108, atspre_g0int_eq_int(tmp109, ATSPMVi0nt(99))) ;
+ATSINSmove(tmp109, atspre_g0int_eq_int(tmp110, ATSPMVi0nt(99))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
+*/
+ATSif(
+tmp109
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
+*/
+ATSINSmove(tmp112, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
+*/
+ATSINSmove(tmp111, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp112, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
+*/
+ATSINSmove(tmp108, atspre_g0int_eq_int(tmp111, ATSPMVi0nt(97))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
+*/
+ATSINSmove(tmp108, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSif(
 tmp108
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp111, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp114, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp110, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp111, arg2)) ;
+ATSINSmove(tmp113, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp114, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp107, atspre_g0int_eq_int(tmp110, ATSPMVi0nt(97))) ;
+ATSINSmove(tmp107, atspre_g0int_eq_int(tmp113, ATSPMVi0nt(115))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSINSmove(tmp107, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSif(
 tmp107
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp113, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp116, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp112, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp113, arg2)) ;
+ATSINSmove(tmp115, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp116, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp106, atspre_g0int_eq_int(tmp112, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp106, atspre_g0int_eq_int(tmp115, ATSPMVi0nt(116))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSINSmove(tmp106, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSif(
 tmp106
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp115, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp118, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp114, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp115, arg2)) ;
+ATSINSmove(tmp117, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp118, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp105, atspre_g0int_eq_int(tmp114, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp105, atspre_g0int_eq_int(tmp117, ATSPMVi0nt(102))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSINSmove(tmp105, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSif(
 tmp105
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp117, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp120, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp116, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp117, arg2)) ;
+ATSINSmove(tmp119, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp120, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp104, atspre_g0int_eq_int(tmp116, ATSPMVi0nt(102))) ;
+ATSINSmove(tmp104, atspre_g0int_eq_int(tmp119, ATSPMVi0nt(110))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSINSmove(tmp104, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSif(
 tmp104
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp119, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp121, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp118, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp119, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
-*/
-ATSINSmove(tmp103, atspre_g0int_eq_int(tmp118, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp103, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp121, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSINSmove(tmp103, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSif(
 tmp103
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
-ATSINSmove(tmp120, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
-*/
-ATSINSmove(tmpret102, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp120, arg2)) ;
+ATSINSmove(tmpret102, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4824(line=143, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4497(line=137, offs=3) -- 4866(line=144, offs=39)
 */
 ATSINSmove(tmpret102, ATSPMVbool_false()) ;
 } /* ATSendif */
@@ -2972,11 +2995,11 @@ ATSreturn(tmpret102) ;
 } /* end of [looking_at_cast_fn_42] */
 
 /*
-build/src/lexer.dats: 4829(line=145, offs=4) -- 5206(line=152, offs=36)
+build/src/lexer.dats: 4871(line=146, offs=4) -- 5290(line=154, offs=39)
 */
 /*
-local: is_kw_boundary_23$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), looking_at_prax_i_43$0(level=0)
+local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_prax_i_43$0(level=0)
 local: 
 global: 
 */
@@ -2985,14 +3008,13 @@ atstkind_t0ype(atstype_bool)
 looking_at_prax_i_43(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret121, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp122, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret122, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp123, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp124, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp125, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp126, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp127, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp128, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp127, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp128, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp129, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp130, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp131, atstkind_t0ype(atstype_int)) ;
@@ -3001,162 +3023,181 @@ ATStmpdec(tmp133, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp134, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp135, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp136, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp137, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp138, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4829(line=145, offs=4) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4871(line=146, offs=4) -- 5290(line=154, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_prax_i_43):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp127, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp129, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp126, atspre_g0int_eq_int(tmp127, ATSPMVi0nt(112))) ;
+ATSINSmove(tmp128, atspre_g0int_eq_int(tmp129, ATSPMVi0nt(112))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSif(
+tmp128
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp131, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp130, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp131, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp127, atspre_g0int_eq_int(tmp130, ATSPMVi0nt(114))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp127, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSif(
+tmp127
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp133, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp132, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp133, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp126, atspre_g0int_eq_int(tmp132, ATSPMVi0nt(97))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
+*/
+ATSINSmove(tmp126, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSif(
 tmp126
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp129, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp135, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp128, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp129, arg2)) ;
+ATSINSmove(tmp134, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp135, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp125, atspre_g0int_eq_int(tmp128, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp125, atspre_g0int_eq_int(tmp134, ATSPMVi0nt(120))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSINSmove(tmp125, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSif(
 tmp125
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp131, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp137, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp130, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp131, arg2)) ;
+ATSINSmove(tmp136, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp137, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp124, atspre_g0int_eq_int(tmp130, ATSPMVi0nt(97))) ;
+ATSINSmove(tmp124, atspre_g0int_eq_int(tmp136, ATSPMVi0nt(105))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSINSmove(tmp124, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSif(
 tmp124
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp133, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp138, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp132, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp133, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSINSmove(tmp123, atspre_g0int_eq_int(tmp132, ATSPMVi0nt(120))) ;
+ATSINSmove(tmp123, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp138, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSINSmove(tmp123, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
 ATSif(
 tmp123
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp135, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSINSmove(tmp134, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp135, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSINSmove(tmp122, atspre_g0int_eq_int(tmp134, ATSPMVi0nt(105))) ;
+ATSINSmove(tmpret122, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 4970(line=148, offs=3) -- 5290(line=154, offs=39)
 */
-ATSINSmove(tmp122, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSif(
-tmp122
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSINSmove(tmp136, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSINSmove(tmpret121, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp136, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 4928(line=147, offs=3) -- 5206(line=152, offs=36)
-*/
-ATSINSmove(tmpret121, ATSPMVbool_false()) ;
+ATSINSmove(tmpret122, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret121) ;
+ATSreturn(tmpret122) ;
 } /* end of [looking_at_prax_i_43] */
 
 /*
-build/src/lexer.dats: 5211(line=154, offs=4) -- 5640(line=162, offs=36)
+build/src/lexer.dats: 5295(line=156, offs=4) -- 5766(line=165, offs=39)
 */
 /*
-local: is_kw_boundary_23$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), looking_at_ext_ern_44$0(level=0)
+local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_ext_ern_44$0(level=0)
 local: 
 global: 
 */
@@ -3165,16 +3206,14 @@ atstkind_t0ype(atstype_bool)
 looking_at_ext_ern_44(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret137, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp138, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp139, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret139, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp140, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp141, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp142, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp143, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp144, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp145, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp146, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp144, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp145, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp146, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp147, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp148, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp149, atstkind_t0ype(atstype_int)) ;
@@ -3184,189 +3223,209 @@ ATStmpdec(tmp152, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp153, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp154, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp155, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp156, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp157, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp158, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5211(line=154, offs=4) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5295(line=156, offs=4) -- 5766(line=165, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_ext_ern_44):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp144, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp147, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp143, atspre_g0int_eq_int(tmp144, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp146, atspre_g0int_eq_int(tmp147, ATSPMVi0nt(101))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSif(
+tmp146
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp149, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp148, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp149, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp145, atspre_g0int_eq_int(tmp148, ATSPMVi0nt(120))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp145, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSif(
+tmp145
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp151, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp150, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp151, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp144, atspre_g0int_eq_int(tmp150, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp144, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSif(
+tmp144
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp153, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp152, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp153, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp143, atspre_g0int_eq_int(tmp152, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
+*/
+ATSINSmove(tmp143, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSif(
 tmp143
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp146, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp155, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp145, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp146, arg2)) ;
+ATSINSmove(tmp154, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp155, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp142, atspre_g0int_eq_int(tmp145, ATSPMVi0nt(120))) ;
+ATSINSmove(tmp142, atspre_g0int_eq_int(tmp154, ATSPMVi0nt(114))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSINSmove(tmp142, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSif(
 tmp142
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp148, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp157, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp147, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp148, arg2)) ;
+ATSINSmove(tmp156, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp157, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp141, atspre_g0int_eq_int(tmp147, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp141, atspre_g0int_eq_int(tmp156, ATSPMVi0nt(110))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSINSmove(tmp141, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSif(
 tmp141
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp150, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp158, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp149, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp150, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp140, atspre_g0int_eq_int(tmp149, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp140, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp158, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSINSmove(tmp140, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
 ATSif(
 tmp140
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp152, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp151, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp152, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp139, atspre_g0int_eq_int(tmp151, ATSPMVi0nt(114))) ;
+ATSINSmove(tmpret139, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5395(line=158, offs=3) -- 5766(line=165, offs=39)
 */
-ATSINSmove(tmp139, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSif(
-tmp139
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp154, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp153, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp154, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp138, atspre_g0int_eq_int(tmp153, ATSPMVi0nt(110))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp138, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSif(
-tmp138
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmp155, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmpret137, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp155, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5311(line=156, offs=3) -- 5640(line=162, offs=36)
-*/
-ATSINSmove(tmpret137, ATSPMVbool_false()) ;
+ATSINSmove(tmpret139, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret137) ;
+ATSreturn(tmpret139) ;
 } /* end of [looking_at_ext_ern_44] */
 
 /*
-build/src/lexer.dats: 5645(line=164, offs=4) -- 6073(line=172, offs=36)
+build/src/lexer.dats: 5771(line=167, offs=4) -- 6241(line=176, offs=39)
 */
 /*
-local: is_kw_boundary_23$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), looking_at_assu_me_45$0(level=0)
+local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_assu_me_45$0(level=0)
 local: 
 global: 
 */
@@ -3375,17 +3434,14 @@ atstkind_t0ype(atstype_bool)
 looking_at_assu_me_45(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret156, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp157, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp158, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp159, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret159, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp160, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp161, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp162, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp163, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp164, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp165, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp166, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp163, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp164, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp165, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp166, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp167, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp168, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp169, atstkind_t0ype(atstype_int)) ;
@@ -3394,185 +3450,206 @@ ATStmpdec(tmp171, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp172, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp173, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp174, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp175, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp176, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp177, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp178, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5645(line=164, offs=4) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5771(line=167, offs=4) -- 6241(line=176, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_assu_me_45):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp163, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp167, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp162, atspre_g0int_eq_int(tmp163, ATSPMVi0nt(97))) ;
+ATSINSmove(tmp166, atspre_g0int_eq_int(tmp167, ATSPMVi0nt(97))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSif(
+tmp166
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp169, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp168, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp169, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp165, atspre_g0int_eq_int(tmp168, ATSPMVi0nt(115))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp165, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSif(
+tmp165
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp171, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp170, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp171, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp164, atspre_g0int_eq_int(tmp170, ATSPMVi0nt(115))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp164, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSif(
+tmp164
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp173, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp172, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp173, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp163, atspre_g0int_eq_int(tmp172, ATSPMVi0nt(117))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp163, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSif(
+tmp163
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp175, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp174, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp175, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp162, atspre_g0int_eq_int(tmp174, ATSPMVi0nt(109))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
+*/
+ATSINSmove(tmp162, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
 ATSif(
 tmp162
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp165, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp177, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp164, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp165, arg2)) ;
+ATSINSmove(tmp176, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp177, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp161, atspre_g0int_eq_int(tmp164, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp161, atspre_g0int_eq_int(tmp176, ATSPMVi0nt(101))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
 ATSINSmove(tmp161, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
 ATSif(
 tmp161
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp167, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp178, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp166, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp167, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp160, atspre_g0int_eq_int(tmp166, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp160, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp178, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
 ATSINSmove(tmp160, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
 ATSif(
 tmp160
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp169, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp168, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp169, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp159, atspre_g0int_eq_int(tmp168, ATSPMVi0nt(117))) ;
+ATSINSmove(tmpret159, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 5871(line=169, offs=3) -- 6241(line=176, offs=39)
 */
-ATSINSmove(tmp159, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSif(
-tmp159
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp171, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp170, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp171, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp158, atspre_g0int_eq_int(tmp170, ATSPMVi0nt(109))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp158, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSif(
-tmp158
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp173, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp172, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp173, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp157, atspre_g0int_eq_int(tmp172, ATSPMVi0nt(101))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp157, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSif(
-tmp157
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmp174, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmpret156, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp174, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 5745(line=166, offs=3) -- 6073(line=172, offs=36)
-*/
-ATSINSmove(tmpret156, ATSPMVbool_false()) ;
+ATSINSmove(tmpret159, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret156) ;
+ATSreturn(tmpret159) ;
 } /* end of [looking_at_assu_me_45] */
 
 /*
-build/src/lexer.dats: 6078(line=174, offs=4) -- 6594(line=184, offs=36)
+build/src/lexer.dats: 6246(line=178, offs=4) -- 6762(line=188, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
@@ -3585,19 +3662,15 @@ atstkind_t0ype(atstype_bool)
 looking_at_stld_46(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret175, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp176, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp177, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp178, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp179, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret179, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp180, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp181, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp182, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp183, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp184, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp185, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp186, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp187, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp184, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp185, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp186, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp187, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp188, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp189, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp190, atstkind_t0ype(atstype_int)) ;
@@ -3608,229 +3681,233 @@ ATStmpdec(tmp194, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp195, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp196, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp197, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp198, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp199, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp200, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp201, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6078(line=174, offs=4) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6246(line=178, offs=4) -- 6762(line=188, offs=36)
 */
 ATSINSflab(__patsflab_looking_at_stld_46):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp183, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp187, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSif(
+tmp187
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp188, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp186, atspre_g0int_eq_int(tmp188, ATSPMVi0nt(115))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp186, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSif(
+tmp186
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp190, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp189, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp190, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp185, atspre_g0int_eq_int(tmp189, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp185, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSif(
+tmp185
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp192, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp191, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp192, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp184, atspre_g0int_eq_int(tmp191, ATSPMVi0nt(97))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp184, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSif(
+tmp184
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp194, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp193, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp194, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp183, atspre_g0int_eq_int(tmp193, ATSPMVi0nt(108))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp183, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSif(
 tmp183
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp184, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp196, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp182, atspre_g0int_eq_int(tmp184, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp195, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp196, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
+*/
+ATSINSmove(tmp182, atspre_g0int_eq_int(tmp195, ATSPMVi0nt(111))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSINSmove(tmp182, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSif(
 tmp182
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp186, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp198, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp185, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp186, arg2)) ;
+ATSINSmove(tmp197, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp198, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp181, atspre_g0int_eq_int(tmp185, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp181, atspre_g0int_eq_int(tmp197, ATSPMVi0nt(97))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSINSmove(tmp181, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSif(
 tmp181
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp188, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp200, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp187, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp188, arg2)) ;
+ATSINSmove(tmp199, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp200, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp180, atspre_g0int_eq_int(tmp187, ATSPMVi0nt(97))) ;
+ATSINSmove(tmp180, atspre_g0int_eq_int(tmp199, ATSPMVi0nt(100))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSINSmove(tmp180, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
 ATSif(
 tmp180
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp190, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp201, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp189, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp190, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp179, atspre_g0int_eq_int(tmp189, ATSPMVi0nt(108))) ;
+ATSINSmove(tmpret179, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp201, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6343(line=180, offs=3) -- 6762(line=188, offs=36)
 */
-ATSINSmove(tmp179, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSif(
-tmp179
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp192, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp191, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp192, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp178, atspre_g0int_eq_int(tmp191, ATSPMVi0nt(111))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp178, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSif(
-tmp178
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp194, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp193, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp194, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp177, atspre_g0int_eq_int(tmp193, ATSPMVi0nt(97))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp177, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSif(
-tmp177
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp196, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp195, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp196, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp176, atspre_g0int_eq_int(tmp195, ATSPMVi0nt(100))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp176, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSif(
-tmp176
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmp197, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmpret175, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp197, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6175(line=176, offs=3) -- 6594(line=184, offs=36)
-*/
-ATSINSmove(tmpret175, ATSPMVbool_false()) ;
+ATSINSmove(tmpret179, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret175) ;
+ATSreturn(tmpret179) ;
 } /* end of [looking_at_stld_46] */
 
 /*
-build/src/lexer.dats: 6599(line=186, offs=4) -- 7075(line=195, offs=36)
+build/src/lexer.dats: 6767(line=190, offs=4) -- 7243(line=199, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -3843,18 +3920,14 @@ atstkind_t0ype(atstype_bool)
 looking_at_extval_47(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret198, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp199, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp200, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp201, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp202, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret202, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp203, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp204, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp205, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp206, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp207, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp208, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp209, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp206, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp207, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp208, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp209, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp210, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp211, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp212, atstkind_t0ype(atstype_int)) ;
@@ -3865,212 +3938,216 @@ ATStmpdec(tmp216, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp217, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp218, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp219, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp220, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp221, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp222, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp223, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6599(line=186, offs=4) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6767(line=190, offs=4) -- 7243(line=199, offs=36)
 */
 ATSINSflab(__patsflab_looking_at_extval_47):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp206, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp210, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp205, atspre_g0int_eq_int(tmp206, ATSPMVi0nt(36))) ;
+ATSINSmove(tmp209, atspre_g0int_eq_int(tmp210, ATSPMVi0nt(36))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSif(
+tmp209
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp212, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp211, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp212, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp208, atspre_g0int_eq_int(tmp211, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp208, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSif(
+tmp208
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp214, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp213, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp214, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp207, atspre_g0int_eq_int(tmp213, ATSPMVi0nt(120))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp207, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSif(
+tmp207
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp216, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp215, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp216, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp206, atspre_g0int_eq_int(tmp215, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp206, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSif(
+tmp206
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp218, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp217, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp218, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp205, atspre_g0int_eq_int(tmp217, ATSPMVi0nt(118))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
+*/
+ATSINSmove(tmp205, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
 ATSif(
 tmp205
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp208, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp220, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp207, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp208, arg2)) ;
+ATSINSmove(tmp219, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp220, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp204, atspre_g0int_eq_int(tmp207, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp204, atspre_g0int_eq_int(tmp219, ATSPMVi0nt(97))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
 ATSINSmove(tmp204, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
 ATSif(
 tmp204
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp210, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp222, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp209, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp210, arg2)) ;
+ATSINSmove(tmp221, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp222, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp203, atspre_g0int_eq_int(tmp209, ATSPMVi0nt(120))) ;
+ATSINSmove(tmp203, atspre_g0int_eq_int(tmp221, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
 ATSINSmove(tmp203, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
 ATSif(
 tmp203
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp212, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp223, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp211, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp212, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp202, atspre_g0int_eq_int(tmp211, ATSPMVi0nt(116))) ;
+ATSINSmove(tmpret202, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp223, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 6866(line=192, offs=3) -- 7243(line=199, offs=36)
 */
-ATSINSmove(tmp202, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSif(
-tmp202
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp214, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp213, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp214, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp201, atspre_g0int_eq_int(tmp213, ATSPMVi0nt(118))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp201, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSif(
-tmp201
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp216, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp215, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp216, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp200, atspre_g0int_eq_int(tmp215, ATSPMVi0nt(97))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp200, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSif(
-tmp200
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp218, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp217, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp218, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp199, atspre_g0int_eq_int(tmp217, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp199, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSif(
-tmp199
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmp219, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmpret198, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp219, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 6698(line=188, offs=3) -- 7075(line=195, offs=36)
-*/
-ATSINSmove(tmpret198, ATSPMVbool_false()) ;
+ATSINSmove(tmpret202, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret198) ;
+ATSreturn(tmpret202) ;
 } /* end of [looking_at_extval_47] */
 
 /*
-build/src/lexer.dats: 7080(line=197, offs=4) -- 7657(line=208, offs=36)
+build/src/lexer.dats: 7248(line=201, offs=4) -- 7825(line=212, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -4083,20 +4160,16 @@ atstkind_t0ype(atstype_bool)
 looking_at_extfcall_48(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret220, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp221, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp222, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp223, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp224, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret224, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp225, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp226, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp227, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp228, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp229, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp230, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp231, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp232, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp233, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp230, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp231, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp232, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp233, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp234, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp235, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp236, atstkind_t0ype(atstype_int)) ;
@@ -4111,266 +4184,270 @@ ATStmpdec(tmp244, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp245, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp246, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp247, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp248, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp249, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp250, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp251, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7080(line=197, offs=4) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7248(line=201, offs=4) -- 7825(line=212, offs=36)
 */
 ATSINSflab(__patsflab_looking_at_extfcall_48):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp230, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp234, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp229, atspre_g0int_eq_int(tmp230, ATSPMVi0nt(36))) ;
+ATSINSmove(tmp233, atspre_g0int_eq_int(tmp234, ATSPMVi0nt(36))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSif(
+tmp233
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp236, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp235, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp236, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp232, atspre_g0int_eq_int(tmp235, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp232, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSif(
+tmp232
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp238, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp237, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp238, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp231, atspre_g0int_eq_int(tmp237, ATSPMVi0nt(120))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp231, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSif(
+tmp231
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp240, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp239, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp240, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp230, atspre_g0int_eq_int(tmp239, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp230, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSif(
+tmp230
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp242, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp241, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp242, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp229, atspre_g0int_eq_int(tmp241, ATSPMVi0nt(102))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
+*/
+ATSINSmove(tmp229, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSif(
 tmp229
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp232, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp244, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp231, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp232, arg2)) ;
+ATSINSmove(tmp243, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp244, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp228, atspre_g0int_eq_int(tmp231, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp228, atspre_g0int_eq_int(tmp243, ATSPMVi0nt(99))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSINSmove(tmp228, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSif(
 tmp228
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp234, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp246, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp233, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp234, arg2)) ;
+ATSINSmove(tmp245, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp246, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp227, atspre_g0int_eq_int(tmp233, ATSPMVi0nt(120))) ;
+ATSINSmove(tmp227, atspre_g0int_eq_int(tmp245, ATSPMVi0nt(97))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSINSmove(tmp227, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSif(
 tmp227
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp236, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp248, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp235, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp236, arg2)) ;
+ATSINSmove(tmp247, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp248, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp226, atspre_g0int_eq_int(tmp235, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp226, atspre_g0int_eq_int(tmp247, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSINSmove(tmp226, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSif(
 tmp226
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp238, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp250, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp237, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp238, arg2)) ;
+ATSINSmove(tmp249, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp250, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp225, atspre_g0int_eq_int(tmp237, ATSPMVi0nt(102))) ;
+ATSINSmove(tmp225, atspre_g0int_eq_int(tmp249, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSINSmove(tmp225, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
 ATSif(
 tmp225
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp240, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp251, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp239, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp240, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp224, atspre_g0int_eq_int(tmp239, ATSPMVi0nt(99))) ;
+ATSINSmove(tmpret224, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp251, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7349(line=203, offs=3) -- 7825(line=212, offs=36)
 */
-ATSINSmove(tmp224, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSif(
-tmp224
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp242, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp241, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp242, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp223, atspre_g0int_eq_int(tmp241, ATSPMVi0nt(97))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp223, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSif(
-tmp223
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp244, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp243, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp244, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp222, atspre_g0int_eq_int(tmp243, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp222, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSif(
-tmp222
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp246, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp245, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp246, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp221, atspre_g0int_eq_int(tmp245, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp221, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSif(
-tmp221
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmp247, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmpret220, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp247, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7181(line=199, offs=3) -- 7657(line=208, offs=36)
-*/
-ATSINSmove(tmpret220, ATSPMVbool_false()) ;
+ATSINSmove(tmpret224, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret220) ;
+ATSreturn(tmpret224) ;
 } /* end of [looking_at_extfcall_48] */
 
 /*
-build/src/lexer.dats: 7662(line=210, offs=4) -- 8139(line=219, offs=36)
+build/src/lexer.dats: 7830(line=214, offs=4) -- 8307(line=223, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -4383,18 +4460,14 @@ atstkind_t0ype(atstype_bool)
 looking_at_extype_49(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret248, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp249, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp250, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp251, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp252, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret252, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp253, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp254, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp255, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp256, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp257, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp258, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp259, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp256, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp257, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp258, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp259, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp260, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp261, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp262, atstkind_t0ype(atstype_int)) ;
@@ -4405,212 +4478,216 @@ ATStmpdec(tmp266, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp267, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp268, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp269, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp270, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp271, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp272, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp273, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7662(line=210, offs=4) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7830(line=214, offs=4) -- 8307(line=223, offs=36)
 */
 ATSINSflab(__patsflab_looking_at_extype_49):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp256, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp260, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp255, atspre_g0int_eq_int(tmp256, ATSPMVi0nt(36))) ;
+ATSINSmove(tmp259, atspre_g0int_eq_int(tmp260, ATSPMVi0nt(36))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSif(
+tmp259
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp262, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp261, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp262, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp258, atspre_g0int_eq_int(tmp261, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp258, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSif(
+tmp258
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp264, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp263, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp264, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp257, atspre_g0int_eq_int(tmp263, ATSPMVi0nt(120))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp257, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSif(
+tmp257
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp266, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp265, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp266, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp256, atspre_g0int_eq_int(tmp265, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp256, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSif(
+tmp256
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp268, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp267, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp268, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp255, atspre_g0int_eq_int(tmp267, ATSPMVi0nt(121))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
+*/
+ATSINSmove(tmp255, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
 ATSif(
 tmp255
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp258, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp270, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp257, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp258, arg2)) ;
+ATSINSmove(tmp269, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp270, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp254, atspre_g0int_eq_int(tmp257, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp254, atspre_g0int_eq_int(tmp269, ATSPMVi0nt(112))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
 ATSINSmove(tmp254, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
 ATSif(
 tmp254
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp260, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp272, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp259, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp260, arg2)) ;
+ATSINSmove(tmp271, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp272, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp253, atspre_g0int_eq_int(tmp259, ATSPMVi0nt(120))) ;
+ATSINSmove(tmp253, atspre_g0int_eq_int(tmp271, ATSPMVi0nt(101))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
 ATSINSmove(tmp253, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
 ATSif(
 tmp253
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp262, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp273, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp261, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp262, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp252, atspre_g0int_eq_int(tmp261, ATSPMVi0nt(116))) ;
+ATSINSmove(tmpret252, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp273, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 7929(line=216, offs=3) -- 8307(line=223, offs=36)
 */
-ATSINSmove(tmp252, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSif(
-tmp252
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp264, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp263, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp264, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp251, atspre_g0int_eq_int(tmp263, ATSPMVi0nt(121))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp251, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSif(
-tmp251
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp266, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp265, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp266, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp250, atspre_g0int_eq_int(tmp265, ATSPMVi0nt(112))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp250, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSif(
-tmp250
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp268, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp267, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp268, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp249, atspre_g0int_eq_int(tmp267, ATSPMVi0nt(101))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp249, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSif(
-tmp249
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmp269, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmpret248, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp269, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 7761(line=212, offs=3) -- 8139(line=219, offs=36)
-*/
-ATSINSmove(tmpret248, ATSPMVbool_false()) ;
+ATSINSmove(tmpret252, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret248) ;
+ATSreturn(tmpret252) ;
 } /* end of [looking_at_extype_49] */
 
 /*
-build/src/lexer.dats: 8144(line=221, offs=4) -- 8672(line=231, offs=36)
+build/src/lexer.dats: 8312(line=225, offs=4) -- 8840(line=235, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -4623,19 +4700,15 @@ atstkind_t0ype(atstype_bool)
 looking_at_extkind_50(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret270, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp271, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp272, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp273, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp274, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret274, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp275, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp276, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp277, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp278, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp279, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp280, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp281, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp282, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp279, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp280, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp281, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp282, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp283, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp284, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp285, atstkind_t0ype(atstype_int)) ;
@@ -4648,243 +4721,247 @@ ATStmpdec(tmp291, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp292, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp293, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp294, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp295, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp296, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp297, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp298, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8144(line=221, offs=4) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8312(line=225, offs=4) -- 8840(line=235, offs=36)
 */
 ATSINSflab(__patsflab_looking_at_extkind_50):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp279, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp283, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp278, atspre_g0int_eq_int(tmp279, ATSPMVi0nt(36))) ;
+ATSINSmove(tmp282, atspre_g0int_eq_int(tmp283, ATSPMVi0nt(36))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSif(
+tmp282
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp285, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp284, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp285, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp281, atspre_g0int_eq_int(tmp284, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp281, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSif(
+tmp281
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp287, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp286, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp287, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp280, atspre_g0int_eq_int(tmp286, ATSPMVi0nt(120))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp280, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSif(
+tmp280
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp289, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp288, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp289, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp279, atspre_g0int_eq_int(tmp288, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp279, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSif(
+tmp279
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp291, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp290, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp291, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp278, atspre_g0int_eq_int(tmp290, ATSPMVi0nt(107))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
+*/
+ATSINSmove(tmp278, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSif(
 tmp278
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp281, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp293, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp280, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp281, arg2)) ;
+ATSINSmove(tmp292, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp293, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp277, atspre_g0int_eq_int(tmp280, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp277, atspre_g0int_eq_int(tmp292, ATSPMVi0nt(105))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSINSmove(tmp277, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSif(
 tmp277
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp283, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp295, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp282, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp283, arg2)) ;
+ATSINSmove(tmp294, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp295, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp276, atspre_g0int_eq_int(tmp282, ATSPMVi0nt(120))) ;
+ATSINSmove(tmp276, atspre_g0int_eq_int(tmp294, ATSPMVi0nt(110))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSINSmove(tmp276, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSif(
 tmp276
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp285, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp297, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp284, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp285, arg2)) ;
+ATSINSmove(tmp296, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp297, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp275, atspre_g0int_eq_int(tmp284, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp275, atspre_g0int_eq_int(tmp296, ATSPMVi0nt(100))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSINSmove(tmp275, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
 ATSif(
 tmp275
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp287, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp298, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp286, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp287, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp274, atspre_g0int_eq_int(tmp286, ATSPMVi0nt(107))) ;
+ATSINSmove(tmpret274, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp298, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 8412(line=227, offs=3) -- 8840(line=235, offs=36)
 */
-ATSINSmove(tmp274, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSif(
-tmp274
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp289, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp288, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp289, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp273, atspre_g0int_eq_int(tmp288, ATSPMVi0nt(105))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp273, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSif(
-tmp273
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp291, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp290, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp291, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp272, atspre_g0int_eq_int(tmp290, ATSPMVi0nt(110))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp272, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSif(
-tmp272
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp293, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp292, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp293, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp271, atspre_g0int_eq_int(tmp292, ATSPMVi0nt(100))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp271, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSif(
-tmp271
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmp294, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmpret270, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp294, arg2)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 8244(line=223, offs=3) -- 8672(line=231, offs=36)
-*/
-ATSINSmove(tmpret270, ATSPMVbool_false()) ;
+ATSINSmove(tmpret274, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret270) ;
+ATSreturn(tmpret274) ;
 } /* end of [looking_at_extkind_50] */
 
 /*
-build/src/lexer.dats: 8677(line=233, offs=4) -- 8804(line=235, offs=29)
+build/src/lexer.dats: 8845(line=237, offs=4) -- 9014(line=240, offs=39)
 */
 /*
-local: 
-global: looking_at_mac_hash_51$0(level=0)
+local: is_kw_boundary_before_28$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_mac_hash_51$0(level=0)
 local: 
 global: 
 */
@@ -4893,28 +4970,46 @@ atstkind_t0ype(atstype_bool)
 looking_at_mac_hash_51(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret295, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret299, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp300, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8677(line=233, offs=4) -- 8804(line=235, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 8845(line=237, offs=4) -- 9014(line=240, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_mac_hash_51):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8778(line=235, offs=3) -- 8804(line=235, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 8946(line=239, offs=3) -- 9014(line=240, offs=39)
 */
-ATSINSmove(tmpret295, build_057_src_057_helpers_056_sats__lit_machash(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp300, build_057_src_057_helpers_056_sats__lit_machash(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8946(line=239, offs=3) -- 9014(line=240, offs=39)
+*/
+ATSif(
+tmp300
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8946(line=239, offs=3) -- 9014(line=240, offs=39)
+*/
+ATSINSmove(tmpret299, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 8946(line=239, offs=3) -- 9014(line=240, offs=39)
+*/
+ATSINSmove(tmpret299, ATSPMVbool_false()) ;
+} /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret295) ;
+ATSreturn(tmpret299) ;
 } /* end of [looking_at_mac_hash_51] */
 
 /*
-build/src/lexer.dats: 8809(line=237, offs=4) -- 8936(line=239, offs=29)
+build/src/lexer.dats: 9019(line=242, offs=4) -- 9188(line=245, offs=39)
 */
 /*
-local: 
-global: looking_at_ext_hash_52$0(level=0)
+local: is_kw_boundary_before_28$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_ext_hash_52$0(level=0)
 local: 
 global: 
 */
@@ -4923,24 +5018,42 @@ atstkind_t0ype(atstype_bool)
 looking_at_ext_hash_52(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret296, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret301, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp302, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8809(line=237, offs=4) -- 8936(line=239, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 9019(line=242, offs=4) -- 9188(line=245, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_ext_hash_52):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8910(line=239, offs=3) -- 8936(line=239, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 9120(line=244, offs=3) -- 9188(line=245, offs=39)
 */
-ATSINSmove(tmpret296, build_057_src_057_helpers_056_sats__lit_exthash(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp302, build_057_src_057_helpers_056_sats__lit_exthash(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9120(line=244, offs=3) -- 9188(line=245, offs=39)
+*/
+ATSif(
+tmp302
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9120(line=244, offs=3) -- 9188(line=245, offs=39)
+*/
+ATSINSmove(tmpret301, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9120(line=244, offs=3) -- 9188(line=245, offs=39)
+*/
+ATSINSmove(tmpret301, ATSPMVbool_false()) ;
+} /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret296) ;
+ATSreturn(tmpret301) ;
 } /* end of [looking_at_ext_hash_52] */
 
 /*
-build/src/lexer.dats: 8941(line=241, offs=4) -- 9140(line=245, offs=39)
+build/src/lexer.dats: 9193(line=247, offs=4) -- 9392(line=251, offs=39)
 */
 /*
 local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
@@ -4953,66 +5066,66 @@ atstkind_t0ype(atstype_bool)
 looking_at_fun_53(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret297, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp298, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp299, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp300, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret303, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp304, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp305, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp306, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 8941(line=241, offs=4) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9193(line=247, offs=4) -- 9392(line=251, offs=39)
 */
 ATSINSflab(__patsflab_looking_at_fun_53):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
-ATSINSmove(tmp299, build_057_src_057_helpers_056_sats__lit_fun(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp305, build_057_src_057_helpers_056_sats__lit_fun(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
 ATSif(
-tmp299
+tmp305
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
-ATSINSmove(tmp300, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp306, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
-ATSINSmove(tmp298, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp300, arg2)) ;
+ATSINSmove(tmp304, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp306, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
-ATSINSmove(tmp298, ATSPMVbool_false()) ;
+ATSINSmove(tmp304, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
 ATSif(
-tmp298
+tmp304
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
-ATSINSmove(tmpret297, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmpret303, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9037(line=243, offs=3) -- 9140(line=245, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 9289(line=249, offs=3) -- 9392(line=251, offs=39)
 */
-ATSINSmove(tmpret297, ATSPMVbool_false()) ;
+ATSINSmove(tmpret303, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret297) ;
+ATSreturn(tmpret303) ;
 } /* end of [looking_at_fun_53] */
 
 /*
-build/src/lexer.dats: 9295(line=249, offs=5) -- 10899(line=284, offs=6)
+build/src/lexer.dats: 9547(line=255, offs=5) -- 11151(line=290, offs=6)
 */
 /*
 local: _has_metric_54$0(level=0)
@@ -5029,26 +5142,20 @@ ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret301, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp302, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp305, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp308, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp309, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp310, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp311, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp312, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp313, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret307, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp308, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp311, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp314, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp315, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp316, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp317, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp316, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp317, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp318, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp319, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp320, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp321, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp322, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp323, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp324, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp325, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp326, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp327, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp328, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp323, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp328, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp329, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp330, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp331, atstkind_t0ype(atstype_bool)) ;
@@ -5064,283 +5171,215 @@ ATStmpdec(tmp340, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp341, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp342, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp343, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp344, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp344, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp345, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp346, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp346, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp347, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp348, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp349, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp350, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp351, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp352, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp353, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp354, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9295(line=249, offs=5) -- 10899(line=284, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 9547(line=255, offs=5) -- 11151(line=290, offs=6)
 */
 ATSINSflab(__patsflab__has_metric_54):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9426(line=251, offs=6) -- 9435(line=251, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 9678(line=257, offs=6) -- 9687(line=257, offs=15)
 */
-ATSINSmove(tmp302, ATSLIB_056_prelude__lte_g1int_int__29__2(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp308, ATSLIB_056_prelude__lte_g1int_int__29__2(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9423(line=251, offs=3) -- 10899(line=284, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 9675(line=257, offs=3) -- 11151(line=290, offs=6)
 */
 ATSif(
-tmp302
+tmp308
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9441(line=251, offs=21) -- 9446(line=251, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 9693(line=257, offs=21) -- 9698(line=257, offs=26)
 */
-ATSINSmove(tmpret301, ATSPMVbool_false()) ;
+ATSINSmove(tmpret307, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9457(line=252, offs=11) -- 9467(line=252, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 9709(line=258, offs=11) -- 9719(line=258, offs=21)
 */
-ATSINSmove(tmp305, ATSLIB_056_prelude__gte_g1int_int__24__2(arg1, arg2)) ;
+ATSINSmove(tmp311, ATSLIB_056_prelude__gte_g1int_int__24__2(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9454(line=252, offs=8) -- 10899(line=284, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 9706(line=258, offs=8) -- 11151(line=290, offs=6)
 */
 ATSif(
-tmp305
+tmp311
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9473(line=252, offs=27) -- 9478(line=252, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 9725(line=258, offs=27) -- 9730(line=258, offs=32)
 */
-ATSINSmove(tmpret301, ATSPMVbool_false()) ;
+ATSINSmove(tmpret307, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9486(line=253, offs=8) -- 10899(line=284, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 9738(line=259, offs=8) -- 11151(line=290, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9502(line=254, offs=13) -- 9521(line=254, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 9754(line=260, offs=13) -- 9773(line=260, offs=32)
 */
-ATSINSmove(tmp308, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp314, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9571(line=257, offs=8) -- 9592(line=257, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 9823(line=263, offs=8) -- 9844(line=263, offs=29)
 */
-ATSINSmove(tmp309, atspre_g0int_eq_int(tmp308, ATSPMVi0nt(46))) ;
+ATSINSmove(tmp315, atspre_g0int_eq_int(tmp314, ATSPMVi0nt(46))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9568(line=257, offs=5) -- 10893(line=283, offs=50)
-*/
-ATSif(
-tmp309
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9632(line=258, offs=35) -- 9639(line=258, offs=42)
-*/
-ATSINSmove(tmp312, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9622(line=258, offs=25) -- 9645(line=258, offs=48)
-*/
-ATSINSmove(tmp311, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp312, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9607(line=258, offs=10) -- 9650(line=258, offs=53)
-*/
-ATSINSmove(tmp310, atspre_g0int_eq_int(tmp311, ATSPMVi0nt(60))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9604(line=258, offs=7) -- 9712(line=259, offs=52)
-*/
-ATSif(
-tmp310
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9656(line=258, offs=59) -- 9660(line=258, offs=63)
-*/
-ATSINSmove(tmpret301, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9689(line=259, offs=29) -- 9696(line=259, offs=36)
-*/
-ATSINSmove(tmp313, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9703(line=259, offs=43) -- 9711(line=259, offs=51)
-*/
-ATSINSmove(tmp314, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9672(line=259, offs=12) -- 9712(line=259, offs=52)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp313) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp314) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab__has_metric_54) ;
-ATStailcal_end()
-
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9949(line=264, offs=13) -- 9970(line=264, offs=34)
-*/
-ATSINSmove(tmp315, atspre_g0int_eq_int(tmp308, ATSPMVi0nt(61))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 9946(line=264, offs=10) -- 10893(line=283, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 9820(line=263, offs=5) -- 11145(line=289, offs=50)
 */
 ATSif(
 tmp315
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9976(line=264, offs=40) -- 10544(line=274, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 9884(line=264, offs=35) -- 9891(line=264, offs=42)
+*/
+ATSINSmove(tmp318, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9874(line=264, offs=25) -- 9897(line=264, offs=48)
+*/
+ATSINSmove(tmp317, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp318, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9859(line=264, offs=10) -- 9902(line=264, offs=53)
+*/
+ATSINSmove(tmp316, atspre_g0int_eq_int(tmp317, ATSPMVi0nt(60))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9856(line=264, offs=7) -- 9964(line=265, offs=52)
+*/
+ATSif(
+tmp316
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9908(line=264, offs=59) -- 9912(line=264, offs=63)
+*/
+ATSINSmove(tmpret307, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9941(line=265, offs=29) -- 9948(line=265, offs=36)
+*/
+ATSINSmove(tmp319, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9955(line=265, offs=43) -- 9963(line=265, offs=51)
+*/
+ATSINSmove(tmp320, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 9924(line=265, offs=12) -- 9964(line=265, offs=52)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp319) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, tmp320) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSfgoto(__patsflab__has_metric_54) ;
+ATStailcal_end()
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10201(line=270, offs=13) -- 10222(line=270, offs=34)
+*/
+ATSINSmove(tmp321, atspre_g0int_eq_int(tmp314, ATSPMVi0nt(61))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10198(line=270, offs=10) -- 11145(line=289, offs=50)
+*/
+ATSif(
+tmp321
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10228(line=270, offs=40) -- 10796(line=280, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10001(line=265, offs=22) -- 10008(line=265, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 10253(line=271, offs=22) -- 10260(line=271, offs=29)
 */
-ATSINSmove(tmp317, ATSLIB_056_prelude__gt_g1int_int__57__1(arg1, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp323, ATSLIB_056_prelude__gt_g1int_int__57__1(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9998(line=265, offs=19) -- 10045(line=265, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 10250(line=271, offs=19) -- 10297(line=271, offs=66)
 */
 ATSif(
-tmp317
+tmp323
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10024(line=265, offs=45) -- 10031(line=265, offs=52)
+emit_instr: loc0 = build/src/lexer.dats: 10276(line=271, offs=45) -- 10283(line=271, offs=52)
 */
-ATSINSmove(tmp322, atspre_g1int_sub_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp328, atspre_g1int_sub_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10014(line=265, offs=35) -- 10037(line=265, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 10266(line=271, offs=35) -- 10289(line=271, offs=58)
 */
-ATSINSmove(tmp316, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp322, arg2)) ;
+ATSINSmove(tmp322, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp328, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10043(line=265, offs=64) -- 10045(line=265, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 10295(line=271, offs=64) -- 10297(line=271, offs=66)
 */
-ATSINSmove(tmp316, ATSPMVi0nt(32)) ;
+ATSINSmove(tmp322, ATSPMVi0nt(32)) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10079(line=266, offs=28) -- 10086(line=266, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 10331(line=272, offs=28) -- 10338(line=272, offs=35)
 */
-ATSINSmove(tmp324, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp330, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10069(line=266, offs=18) -- 10092(line=266, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 10321(line=272, offs=18) -- 10344(line=272, offs=41)
 */
-ATSINSmove(tmp323, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp324, arg2)) ;
+ATSINSmove(tmp329, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp330, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10109(line=268, offs=10) -- 10133(line=268, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 10361(line=274, offs=10) -- 10385(line=274, offs=34)
 */
-ATSINSmove(tmp325, atspre_g0int_eq_int(tmp323, ATSPMVi0nt(61))) ;
+ATSINSmove(tmp331, atspre_g0int_eq_int(tmp329, ATSPMVi0nt(61))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10106(line=268, offs=7) -- 10536(line=273, offs=17)
-*/
-ATSif(
-tmp325
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10156(line=268, offs=57) -- 10163(line=268, offs=64)
-*/
-ATSINSmove(tmp326, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10170(line=268, offs=71) -- 10178(line=268, offs=79)
-*/
-ATSINSmove(tmp327, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10139(line=268, offs=40) -- 10179(line=268, offs=80)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp326) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp327) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab__has_metric_54) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10194(line=269, offs=15) -- 10218(line=269, offs=39)
-*/
-ATSINSmove(tmp328, atspre_g0int_eq_int(tmp316, ATSPMVi0nt(60))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10191(line=269, offs=12) -- 10536(line=273, offs=17)
-*/
-ATSif(
-tmp328
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10241(line=269, offs=62) -- 10248(line=269, offs=69)
-*/
-ATSINSmove(tmp329, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10255(line=269, offs=76) -- 10263(line=269, offs=84)
-*/
-ATSINSmove(tmp330, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10224(line=269, offs=45) -- 10264(line=269, offs=85)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp329) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp330) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab__has_metric_54) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10279(line=270, offs=15) -- 10303(line=270, offs=39)
-*/
-ATSINSmove(tmp331, atspre_g0int_eq_int(tmp316, ATSPMVi0nt(62))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 10276(line=270, offs=12) -- 10536(line=273, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 10358(line=274, offs=7) -- 10788(line=279, offs=17)
 */
 ATSif(
 tmp331
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10326(line=270, offs=62) -- 10333(line=270, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 10408(line=274, offs=57) -- 10415(line=274, offs=64)
 */
 ATSINSmove(tmp332, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10340(line=270, offs=76) -- 10348(line=270, offs=84)
+emit_instr: loc0 = build/src/lexer.dats: 10422(line=274, offs=71) -- 10430(line=274, offs=79)
 */
 ATSINSmove(tmp333, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10309(line=270, offs=45) -- 10349(line=270, offs=85)
+emit_instr: loc0 = build/src/lexer.dats: 10391(line=274, offs=40) -- 10431(line=274, offs=80)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -5356,28 +5395,28 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10364(line=271, offs=15) -- 10388(line=271, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 10446(line=275, offs=15) -- 10470(line=275, offs=39)
 */
-ATSINSmove(tmp334, atspre_g0int_eq_int(tmp316, ATSPMVi0nt(61))) ;
+ATSINSmove(tmp334, atspre_g0int_eq_int(tmp322, ATSPMVi0nt(60))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10361(line=271, offs=12) -- 10536(line=273, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 10443(line=275, offs=12) -- 10788(line=279, offs=17)
 */
 ATSif(
 tmp334
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10411(line=271, offs=62) -- 10418(line=271, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 10493(line=275, offs=62) -- 10500(line=275, offs=69)
 */
 ATSINSmove(tmp335, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10425(line=271, offs=76) -- 10433(line=271, offs=84)
+emit_instr: loc0 = build/src/lexer.dats: 10507(line=275, offs=76) -- 10515(line=275, offs=84)
 */
 ATSINSmove(tmp336, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10394(line=271, offs=45) -- 10434(line=271, offs=85)
+emit_instr: loc0 = build/src/lexer.dats: 10476(line=275, offs=45) -- 10516(line=275, offs=85)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -5393,28 +5432,28 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10449(line=272, offs=15) -- 10473(line=272, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 10531(line=276, offs=15) -- 10555(line=276, offs=39)
 */
-ATSINSmove(tmp337, atspre_g0int_eq_int(tmp316, ATSPMVi0nt(33))) ;
+ATSINSmove(tmp337, atspre_g0int_eq_int(tmp322, ATSPMVi0nt(62))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10446(line=272, offs=12) -- 10536(line=273, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 10528(line=276, offs=12) -- 10788(line=279, offs=17)
 */
 ATSif(
 tmp337
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10496(line=272, offs=62) -- 10503(line=272, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 10578(line=276, offs=62) -- 10585(line=276, offs=69)
 */
 ATSINSmove(tmp338, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10510(line=272, offs=76) -- 10518(line=272, offs=84)
+emit_instr: loc0 = build/src/lexer.dats: 10592(line=276, offs=76) -- 10600(line=276, offs=84)
 */
 ATSINSmove(tmp339, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10479(line=272, offs=45) -- 10519(line=272, offs=85)
+emit_instr: loc0 = build/src/lexer.dats: 10561(line=276, offs=45) -- 10601(line=276, offs=85)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -5430,98 +5469,172 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10531(line=273, offs=12) -- 10536(line=273, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 10616(line=277, offs=15) -- 10640(line=277, offs=39)
 */
-ATSINSmove(tmpret301, ATSPMVbool_false()) ;
+ATSINSmove(tmp340, atspre_g0int_eq_int(tmp322, ATSPMVi0nt(61))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10613(line=277, offs=12) -- 10788(line=279, offs=17)
+*/
+ATSif(
+tmp340
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10663(line=277, offs=62) -- 10670(line=277, offs=69)
+*/
+ATSINSmove(tmp341, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10677(line=277, offs=76) -- 10685(line=277, offs=84)
+*/
+ATSINSmove(tmp342, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10646(line=277, offs=45) -- 10686(line=277, offs=85)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp341) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, tmp342) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSfgoto(__patsflab__has_metric_54) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10701(line=278, offs=15) -- 10725(line=278, offs=39)
+*/
+ATSINSmove(tmp343, atspre_g0int_eq_int(tmp322, ATSPMVi0nt(33))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10698(line=278, offs=12) -- 10788(line=279, offs=17)
+*/
+ATSif(
+tmp343
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10748(line=278, offs=62) -- 10755(line=278, offs=69)
+*/
+ATSINSmove(tmp344, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10762(line=278, offs=76) -- 10770(line=278, offs=84)
+*/
+ATSINSmove(tmp345, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10731(line=278, offs=45) -- 10771(line=278, offs=85)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp344) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, tmp345) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSfgoto(__patsflab__has_metric_54) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 10783(line=279, offs=12) -- 10788(line=279, offs=17)
+*/
+ATSINSmove(tmpret307, ATSPMVbool_false()) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9976(line=264, offs=40) -- 10544(line=274, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 10228(line=270, offs=40) -- 10796(line=280, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10631(line=276, offs=13) -- 10652(line=276, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 10883(line=282, offs=13) -- 10904(line=282, offs=34)
 */
-ATSINSmove(tmp340, atspre_g0int_eq_int(tmp308, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp346, atspre_g0int_eq_int(tmp314, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10628(line=276, offs=10) -- 10893(line=283, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 10880(line=282, offs=10) -- 11145(line=289, offs=50)
 */
 ATSif(
-tmp340
+tmp346
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10658(line=276, offs=40) -- 10843(line=282, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 10910(line=282, offs=40) -- 11095(line=288, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10687(line=277, offs=26) -- 10694(line=277, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 10939(line=283, offs=26) -- 10946(line=283, offs=33)
 */
-ATSINSmove(tmp342, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp348, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10677(line=277, offs=16) -- 10700(line=277, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 10929(line=283, offs=16) -- 10952(line=283, offs=39)
 */
-ATSINSmove(tmp341, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp342, arg2)) ;
+ATSINSmove(tmp347, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp348, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10717(line=279, offs=10) -- 10764(line=279, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 10969(line=285, offs=10) -- 11016(line=285, offs=57)
 */
-ATSINSmove(tmp344, atspre_g0int_eq_int(tmp341, ATSPMVi0nt(32))) ;
+ATSINSmove(tmp350, atspre_g0int_eq_int(tmp347, ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10717(line=279, offs=10) -- 10764(line=279, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 10969(line=285, offs=10) -- 11016(line=285, offs=57)
 */
 ATSif(
-tmp344
+tmp350
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10717(line=279, offs=10) -- 10764(line=279, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 10969(line=285, offs=10) -- 11016(line=285, offs=57)
 */
-ATSINSmove(tmp343, ATSPMVbool_true()) ;
+ATSINSmove(tmp349, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10717(line=279, offs=10) -- 10764(line=279, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 10969(line=285, offs=10) -- 11016(line=285, offs=57)
 */
-ATSINSmove(tmp343, atspre_g0int_eq_int(tmp341, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp349, atspre_g0int_eq_int(tmp347, ATSPMVi0nt(9))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10714(line=279, offs=7) -- 10835(line=281, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 10966(line=285, offs=7) -- 11087(line=287, offs=17)
 */
 ATSif(
-tmp343
+tmp349
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10795(line=280, offs=26) -- 10802(line=280, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 11047(line=286, offs=26) -- 11054(line=286, offs=33)
 */
-ATSINSmove(tmp345, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp351, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10809(line=280, offs=40) -- 10817(line=280, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 11061(line=286, offs=40) -- 11069(line=286, offs=48)
 */
-ATSINSmove(tmp346, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp352, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10778(line=280, offs=9) -- 10818(line=280, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 11030(line=286, offs=9) -- 11070(line=286, offs=49)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp345) ;
+ATSINSmove_tlcal(apy1, tmp351) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp346) ;
+ATSINSmove_tlcal(apy3, tmp352) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -5531,35 +5644,35 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10830(line=281, offs=12) -- 10835(line=281, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 11082(line=287, offs=12) -- 11087(line=287, offs=17)
 */
-ATSINSmove(tmpret301, ATSPMVbool_false()) ;
+ATSINSmove(tmpret307, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10658(line=276, offs=40) -- 10843(line=282, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 10910(line=282, offs=40) -- 11095(line=288, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10870(line=283, offs=27) -- 10877(line=283, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 11122(line=289, offs=27) -- 11129(line=289, offs=34)
 */
-ATSINSmove(tmp347, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp353, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10884(line=283, offs=41) -- 10892(line=283, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 11136(line=289, offs=41) -- 11144(line=289, offs=49)
 */
-ATSINSmove(tmp348, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp354, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10853(line=283, offs=10) -- 10893(line=283, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 11105(line=289, offs=10) -- 11145(line=289, offs=50)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp347) ;
+ATSINSmove_tlcal(apy1, tmp353) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp348) ;
+ATSINSmove_tlcal(apy3, tmp354) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -5571,7 +5684,7 @@ ATStailcal_end()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 9486(line=253, offs=8) -- 10899(line=284, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 9738(line=259, offs=8) -- 11151(line=290, offs=6)
 */
 /*
 INSletpop()
@@ -5579,7 +5692,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret301) ;
+ATSreturn(tmpret307) ;
 } /* end of [_has_metric_54] */
 
 /*
@@ -5593,9 +5706,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -5634,9 +5747,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -5676,16 +5789,16 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(5344)
-tmparg = S2Evar(tk(5344))
+imparg = tk(5346)
+tmparg = S2Evar(tk(5346))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__57(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret318, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp319, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret324, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp325, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -5695,15 +5808,15 @@ ATSINSflab(__patsflab_gt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12705(line=659, offs=29) -- 12716(line=659, offs=40)
 */
-ATSINSmove(tmp319, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5344))>)(arg1)) ;
+ATSINSmove(tmp325, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5346))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12688(line=659, offs=12) -- 12718(line=659, offs=42)
 */
-ATSINSmove(tmpret318, PMVtmpltcst(g1int_gt<S2Evar(tk(5344))>)(arg0, tmp319)) ;
+ATSINSmove(tmpret324, PMVtmpltcst(g1int_gt<S2Evar(tk(5346))>)(arg0, tmp325)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret318) ;
+ATSreturn(tmpret324) ;
 } /* end of [ATSLIB_056_prelude__gt_g1int_int__57] */
 #endif // end of [TEMPLATE]
 
@@ -5718,16 +5831,16 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5344)
-tmparg = S2Evar(tk(5344))
-tmpsub = Some(tk(5344) -> S2Eextkind(atstype_int))
+imparg = tk(5346)
+tmparg = S2Evar(tk(5346))
+tmpsub = Some(tk(5346) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__57__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret318__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp319__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret324__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp325__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -5737,19 +5850,19 @@ ATSINSflab(__patsflab_gt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12705(line=659, offs=29) -- 12716(line=659, offs=40)
 */
-ATSINSmove(tmp319__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp325__1, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12688(line=659, offs=12) -- 12718(line=659, offs=42)
 */
-ATSINSmove(tmpret318__1, atspre_g1int_gt_int(arg0, tmp319__1)) ;
+ATSINSmove(tmpret324__1, atspre_g1int_gt_int(arg0, tmp325__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret318__1) ;
+ATSreturn(tmpret324__1) ;
 } /* end of [ATSLIB_056_prelude__gt_g1int_int__57__1] */
 
 /*
-build/src/lexer.dats: 10904(line=286, offs=4) -- 11070(line=289, offs=36)
+build/src/lexer.dats: 11156(line=292, offs=4) -- 11322(line=295, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -5762,48 +5875,48 @@ atstkind_t0ype(atstype_bool)
 _content_starts_prfun_60(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret349, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp350, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp351, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret355, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp356, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp357, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 10904(line=286, offs=4) -- 11070(line=289, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11156(line=292, offs=4) -- 11322(line=295, offs=36)
 */
 ATSINSflab(__patsflab__content_starts_prfun_60):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11007(line=288, offs=3) -- 11070(line=289, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11259(line=294, offs=3) -- 11322(line=295, offs=36)
 */
-ATSINSmove(tmp350, build_057_src_057_helpers_056_sats__lit_prfun(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp356, build_057_src_057_helpers_056_sats__lit_prfun(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11007(line=288, offs=3) -- 11070(line=289, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11259(line=294, offs=3) -- 11322(line=295, offs=36)
 */
 ATSif(
-tmp350
+tmp356
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11007(line=288, offs=3) -- 11070(line=289, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11259(line=294, offs=3) -- 11322(line=295, offs=36)
 */
-ATSINSmove(tmp351, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp357, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11007(line=288, offs=3) -- 11070(line=289, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11259(line=294, offs=3) -- 11322(line=295, offs=36)
 */
-ATSINSmove(tmpret349, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp351, arg2)) ;
+ATSINSmove(tmpret355, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp357, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11007(line=288, offs=3) -- 11070(line=289, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11259(line=294, offs=3) -- 11322(line=295, offs=36)
 */
-ATSINSmove(tmpret349, ATSPMVbool_false()) ;
+ATSINSmove(tmpret355, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret349) ;
+ATSreturn(tmpret355) ;
 } /* end of [_content_starts_prfun_60] */
 
 /*
-build/src/lexer.dats: 11075(line=291, offs=4) -- 11239(line=294, offs=36)
+build/src/lexer.dats: 11327(line=297, offs=4) -- 11491(line=300, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -5816,48 +5929,48 @@ atstkind_t0ype(atstype_bool)
 _content_starts_prfn_61(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret352, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp353, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp354, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret358, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp359, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp360, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11075(line=291, offs=4) -- 11239(line=294, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11327(line=297, offs=4) -- 11491(line=300, offs=36)
 */
 ATSINSflab(__patsflab__content_starts_prfn_61):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11177(line=293, offs=3) -- 11239(line=294, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11429(line=299, offs=3) -- 11491(line=300, offs=36)
 */
-ATSINSmove(tmp353, build_057_src_057_helpers_056_sats__lit_prfn(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp359, build_057_src_057_helpers_056_sats__lit_prfn(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11177(line=293, offs=3) -- 11239(line=294, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11429(line=299, offs=3) -- 11491(line=300, offs=36)
 */
 ATSif(
-tmp353
+tmp359
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11177(line=293, offs=3) -- 11239(line=294, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11429(line=299, offs=3) -- 11491(line=300, offs=36)
 */
-ATSINSmove(tmp354, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp360, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11177(line=293, offs=3) -- 11239(line=294, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11429(line=299, offs=3) -- 11491(line=300, offs=36)
 */
-ATSINSmove(tmpret352, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp354, arg2)) ;
+ATSINSmove(tmpret358, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp360, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11177(line=293, offs=3) -- 11239(line=294, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11429(line=299, offs=3) -- 11491(line=300, offs=36)
 */
-ATSINSmove(tmpret352, ATSPMVbool_false()) ;
+ATSINSmove(tmpret358, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret352) ;
+ATSreturn(tmpret358) ;
 } /* end of [_content_starts_prfn_61] */
 
 /*
-build/src/lexer.dats: 11244(line=296, offs=4) -- 11379(line=298, offs=33)
+build/src/lexer.dats: 11496(line=302, offs=4) -- 11631(line=304, offs=33)
 */
 /*
 local: 
@@ -5870,24 +5983,24 @@ atstkind_t0ype(atstype_bool)
 _looking_at_primplement_62(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret355, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret361, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11244(line=296, offs=4) -- 11379(line=298, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 11496(line=302, offs=4) -- 11631(line=304, offs=33)
 */
 ATSINSflab(__patsflab__looking_at_primplement_62):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11349(line=298, offs=3) -- 11379(line=298, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 11601(line=304, offs=3) -- 11631(line=304, offs=33)
 */
-ATSINSmove(tmpret355, build_057_src_057_helpers_056_sats__lit_primplement(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmpret361, build_057_src_057_helpers_056_sats__lit_primplement(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret355) ;
+ATSreturn(tmpret361) ;
 } /* end of [_looking_at_primplement_62] */
 
 /*
-build/src/lexer.dats: 11384(line=300, offs=4) -- 11553(line=303, offs=36)
+build/src/lexer.dats: 11636(line=306, offs=4) -- 11805(line=309, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0)
@@ -5900,48 +6013,48 @@ atstkind_t0ype(atstype_bool)
 looking_at_no_mangle_63(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret356, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp357, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp358, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret362, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp363, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp364, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11384(line=300, offs=4) -- 11553(line=303, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11636(line=306, offs=4) -- 11805(line=309, offs=36)
 */
 ATSINSflab(__patsflab_looking_at_no_mangle_63):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11486(line=302, offs=3) -- 11553(line=303, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11738(line=308, offs=3) -- 11805(line=309, offs=36)
 */
-ATSINSmove(tmp357, build_057_src_057_helpers_056_sats__lit_no_mangle(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp363, build_057_src_057_helpers_056_sats__lit_no_mangle(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11486(line=302, offs=3) -- 11553(line=303, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11738(line=308, offs=3) -- 11805(line=309, offs=36)
 */
 ATSif(
-tmp357
+tmp363
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11486(line=302, offs=3) -- 11553(line=303, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11738(line=308, offs=3) -- 11805(line=309, offs=36)
 */
-ATSINSmove(tmp358, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp364, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11486(line=302, offs=3) -- 11553(line=303, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11738(line=308, offs=3) -- 11805(line=309, offs=36)
 */
-ATSINSmove(tmpret356, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp358, arg2)) ;
+ATSINSmove(tmpret362, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp364, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11486(line=302, offs=3) -- 11553(line=303, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 11738(line=308, offs=3) -- 11805(line=309, offs=36)
 */
-ATSINSmove(tmpret356, ATSPMVbool_false()) ;
+ATSINSmove(tmpret362, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret356) ;
+ATSreturn(tmpret362) ;
 } /* end of [looking_at_no_mangle_63] */
 
 /*
-build/src/lexer.dats: 11765(line=310, offs=5) -- 12076(line=318, offs=6)
+build/src/lexer.dats: 12017(line=316, offs=5) -- 12328(line=324, offs=6)
 */
 /*
 local: skip_ws_64$0(level=0)
@@ -5958,96 +6071,96 @@ ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret359, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp360, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp363, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp364, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp365, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp366, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp367, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret365, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp366, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp369, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp370, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp371, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp372, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp373, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11765(line=310, offs=5) -- 12076(line=318, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12017(line=316, offs=5) -- 12328(line=324, offs=6)
 */
 ATSINSflab(__patsflab_skip_ws_64):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11896(line=313, offs=6) -- 11905(line=313, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 12148(line=319, offs=6) -- 12157(line=319, offs=15)
 */
-ATSINSmove(tmp360, ATSLIB_056_prelude__lte_g1int_int__29__3(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp366, ATSLIB_056_prelude__lte_g1int_int__29__3(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11893(line=313, offs=3) -- 12076(line=318, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12145(line=319, offs=3) -- 12328(line=324, offs=6)
 */
 ATSif(
-tmp360
+tmp366
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11911(line=313, offs=21) -- 11914(line=313, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 12163(line=319, offs=21) -- 12166(line=319, offs=24)
 */
-ATSINSmove(tmpret359, arg1) ;
+ATSINSmove(tmpret365, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11922(line=314, offs=8) -- 12076(line=318, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12174(line=320, offs=8) -- 12328(line=324, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11934(line=314, offs=20) -- 11953(line=314, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 12186(line=320, offs=20) -- 12205(line=320, offs=39)
 */
-ATSINSmove(tmp363, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp369, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11964(line=315, offs=8) -- 12009(line=315, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 12216(line=321, offs=8) -- 12261(line=321, offs=53)
 */
-ATSINSmove(tmp365, atspre_g0int_eq_int(tmp363, ATSPMVi0nt(32))) ;
+ATSINSmove(tmp371, atspre_g0int_eq_int(tmp369, ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11964(line=315, offs=8) -- 12009(line=315, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 12216(line=321, offs=8) -- 12261(line=321, offs=53)
 */
 ATSif(
-tmp365
+tmp371
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11964(line=315, offs=8) -- 12009(line=315, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 12216(line=321, offs=8) -- 12261(line=321, offs=53)
 */
-ATSINSmove(tmp364, ATSPMVbool_true()) ;
+ATSINSmove(tmp370, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11964(line=315, offs=8) -- 12009(line=315, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 12216(line=321, offs=8) -- 12261(line=321, offs=53)
 */
-ATSINSmove(tmp364, atspre_g0int_eq_int(tmp363, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp370, atspre_g0int_eq_int(tmp369, ATSPMVi0nt(9))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11961(line=315, offs=5) -- 12070(line=317, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 12213(line=321, offs=5) -- 12322(line=323, offs=13)
 */
 ATSif(
-tmp364
+tmp370
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12034(line=316, offs=20) -- 12041(line=316, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 12286(line=322, offs=20) -- 12293(line=322, offs=27)
 */
-ATSINSmove(tmp366, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp372, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12048(line=316, offs=34) -- 12056(line=316, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 12300(line=322, offs=34) -- 12308(line=322, offs=42)
 */
-ATSINSmove(tmp367, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp373, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12021(line=316, offs=7) -- 12057(line=316, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 12273(line=322, offs=7) -- 12309(line=322, offs=43)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp366) ;
+ATSINSmove_tlcal(apy1, tmp372) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp367) ;
+ATSINSmove_tlcal(apy3, tmp373) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -6057,19 +6170,19 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12067(line=317, offs=10) -- 12070(line=317, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 12319(line=323, offs=10) -- 12322(line=323, offs=13)
 */
-ATSINSmove(tmpret359, arg1) ;
+ATSINSmove(tmpret365, arg1) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 11922(line=314, offs=8) -- 12076(line=318, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12174(line=320, offs=8) -- 12328(line=324, offs=6)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret359) ;
+ATSreturn(tmpret365) ;
 } /* end of [skip_ws_64] */
 
 /*
@@ -6083,9 +6196,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6114,17 +6227,131 @@ ATSreturn(tmpret71__3) ;
 } /* end of [ATSLIB_056_prelude__lte_g1int_int__29__3] */
 
 /*
-build/src/lexer.dats: 12131(line=321, offs=5) -- 12483(line=329, offs=6)
+build/src/lexer.dats: 12403(line=327, offs=4) -- 12682(line=332, offs=73)
 */
 /*
-local: skip_to_eol_66$0(level=0)
-global: skip_to_eol_66$0(level=0)
+local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), skip_ws_64$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), skip_ws_64$0(level=0), looking_at_while_66$0(level=0)
+local: 
+global: 
+*/
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+looking_at_while_66(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret374, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp375, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp376, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp377, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp378, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp379, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp380, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp381, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp382, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12403(line=327, offs=4) -- 12682(line=332, offs=73)
+*/
+ATSINSflab(__patsflab_looking_at_while_66):
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp377, build_057_src_057_helpers_056_sats__lit_while(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSif(
+tmp377
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp378, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp376, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp378, arg2)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp376, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSif(
+tmp376
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp375, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp375, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSif(
+tmp375
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp382, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp381, skip_ws_64(ATSPMVrefarg0(arg0), tmp382, arg2, ATSPMVi0nt(256))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp380, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp381, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmp379, atspre_g0int_eq_int(tmp380, ATSPMVi0nt(42))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmpret374, atspre_neg_bool0(tmp379)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 12501(line=329, offs=3) -- 12682(line=332, offs=73)
+*/
+ATSINSmove(tmpret374, ATSPMVbool_false()) ;
+} /* ATSendif */
+ATSfunbody_end()
+ATSreturn(tmpret374) ;
+} /* end of [looking_at_while_66] */
+
+/*
+build/src/lexer.dats: 12737(line=335, offs=5) -- 13089(line=343, offs=6)
+*/
+/*
+local: skip_to_eol_67$0(level=0)
+global: skip_to_eol_67$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_to_eol_66(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+skip_to_eol_67(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -6132,113 +6359,113 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret368, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp369, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp372, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp375, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp376, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp377, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp378, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret383, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp384, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp387, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp390, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp391, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp392, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp393, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12131(line=321, offs=5) -- 12483(line=329, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12737(line=335, offs=5) -- 13089(line=343, offs=6)
 */
-ATSINSflab(__patsflab_skip_to_eol_66):
+ATSINSflab(__patsflab_skip_to_eol_67):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12282(line=324, offs=6) -- 12291(line=324, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 12888(line=338, offs=6) -- 12897(line=338, offs=15)
 */
-ATSINSmove(tmp369, ATSLIB_056_prelude__lte_g1int_int__29__4(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp384, ATSLIB_056_prelude__lte_g1int_int__29__4(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12279(line=324, offs=3) -- 12483(line=329, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12885(line=338, offs=3) -- 13089(line=343, offs=6)
 */
 ATSif(
-tmp369
+tmp384
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12297(line=324, offs=21) -- 12300(line=324, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 12903(line=338, offs=21) -- 12906(line=338, offs=24)
 */
-ATSINSmove(tmpret368, arg1) ;
+ATSINSmove(tmpret383, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12311(line=325, offs=11) -- 12325(line=325, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 12917(line=339, offs=11) -- 12931(line=339, offs=25)
 */
-ATSINSmove(tmp372, ATSLIB_056_prelude__gte_g1int_int__24__3(arg1, arg2)) ;
+ATSINSmove(tmp387, ATSLIB_056_prelude__gte_g1int_int__24__3(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12308(line=325, offs=8) -- 12483(line=329, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12914(line=339, offs=8) -- 13089(line=343, offs=6)
 */
 ATSif(
-tmp372
+tmp387
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12331(line=325, offs=31) -- 12334(line=325, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 12937(line=339, offs=31) -- 12940(line=339, offs=34)
 */
-ATSINSmove(tmpret368, arg1) ;
+ATSINSmove(tmpret383, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12342(line=326, offs=8) -- 12483(line=329, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12948(line=340, offs=8) -- 13089(line=343, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12354(line=326, offs=20) -- 12373(line=326, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 12960(line=340, offs=20) -- 12979(line=340, offs=39)
 */
-ATSINSmove(tmp375, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp390, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12384(line=327, offs=8) -- 12405(line=327, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 12990(line=341, offs=8) -- 13011(line=341, offs=29)
 */
-ATSINSmove(tmp376, atspre_g0int_eq_int(tmp375, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp391, atspre_g0int_eq_int(tmp390, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12381(line=327, offs=5) -- 12477(line=328, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 12987(line=341, offs=5) -- 13083(line=342, offs=59)
 */
 ATSif(
-tmp376
+tmp391
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12411(line=327, offs=35) -- 12418(line=327, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 13017(line=341, offs=35) -- 13024(line=341, offs=42)
 */
-ATSINSmove(tmpret368, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret383, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12445(line=328, offs=27) -- 12452(line=328, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 13051(line=342, offs=27) -- 13058(line=342, offs=34)
 */
-ATSINSmove(tmp377, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp392, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12468(line=328, offs=50) -- 12476(line=328, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 13074(line=342, offs=50) -- 13082(line=342, offs=58)
 */
-ATSINSmove(tmp378, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp393, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12428(line=328, offs=10) -- 12477(line=328, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 13034(line=342, offs=10) -- 13083(line=342, offs=59)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp377) ;
+ATSINSmove_tlcal(apy1, tmp392) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp378) ;
+ATSINSmove_tlcal(apy4, tmp393) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_skip_to_eol_66) ;
+ATSINSfgoto(__patsflab_skip_to_eol_67) ;
 ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12342(line=326, offs=8) -- 12483(line=329, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 12948(line=340, offs=8) -- 13089(line=343, offs=6)
 */
 /*
 INSletpop()
@@ -6246,8 +6473,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret368) ;
-} /* end of [skip_to_eol_66] */
+ATSreturn(tmpret383) ;
+} /* end of [skip_to_eol_67] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -6260,9 +6487,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6301,9 +6528,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6332,118 +6559,118 @@ ATSreturn(tmpret63__3) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__3] */
 
 /*
-build/src/lexer.dats: 12512(line=332, offs=5) -- 12794(line=339, offs=6)
+build/src/lexer.dats: 13118(line=346, offs=5) -- 13400(line=353, offs=6)
 */
 /*
-local: is_ident_byte_0$0(level=0), skip_ident_69$0(level=0)
-global: is_ident_byte_0$0(level=0), skip_ident_69$0(level=0)
+local: is_ident_byte_0$0(level=0), skip_ident_70$0(level=0)
+global: is_ident_byte_0$0(level=0), skip_ident_70$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_ident_69(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
+skip_ident_70(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret379, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp380, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp383, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp384, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp385, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp386, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret394, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp395, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp398, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp399, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp400, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp401, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12512(line=332, offs=5) -- 12794(line=339, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13118(line=346, offs=5) -- 13400(line=353, offs=6)
 */
-ATSINSflab(__patsflab_skip_ident_69):
+ATSINSflab(__patsflab_skip_ident_70):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12646(line=335, offs=6) -- 12655(line=335, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 13252(line=349, offs=6) -- 13261(line=349, offs=15)
 */
-ATSINSmove(tmp380, ATSLIB_056_prelude__lte_g1int_int__29__5(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp395, ATSLIB_056_prelude__lte_g1int_int__29__5(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12643(line=335, offs=3) -- 12794(line=339, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13249(line=349, offs=3) -- 13400(line=353, offs=6)
 */
 ATSif(
-tmp380
+tmp395
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12661(line=335, offs=21) -- 12664(line=335, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 13267(line=349, offs=21) -- 13270(line=349, offs=24)
 */
-ATSINSmove(tmpret379, arg1) ;
+ATSINSmove(tmpret394, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12672(line=336, offs=8) -- 12794(line=339, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13278(line=350, offs=8) -- 13400(line=353, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12684(line=336, offs=20) -- 12703(line=336, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 13290(line=350, offs=20) -- 13309(line=350, offs=39)
 */
-ATSINSmove(tmp383, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp398, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12714(line=337, offs=8) -- 12729(line=337, offs=23)
+emit_instr: loc0 = build/src/lexer.dats: 13320(line=351, offs=8) -- 13335(line=351, offs=23)
 */
-ATSINSmove(tmp384, is_ident_byte_0(tmp383)) ;
+ATSINSmove(tmp399, is_ident_byte_0(tmp398)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12711(line=337, offs=5) -- 12788(line=338, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 13317(line=351, offs=5) -- 13394(line=352, offs=13)
 */
 ATSif(
-tmp384
+tmp399
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12752(line=337, offs=46) -- 12759(line=337, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 13358(line=351, offs=46) -- 13365(line=351, offs=53)
 */
-ATSINSmove(tmp385, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp400, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12766(line=337, offs=60) -- 12774(line=337, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 13372(line=351, offs=60) -- 13380(line=351, offs=68)
 */
-ATSINSmove(tmp386, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp401, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12736(line=337, offs=30) -- 12775(line=337, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 13342(line=351, offs=30) -- 13381(line=351, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp385) ;
+ATSINSmove_tlcal(apy1, tmp400) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp386) ;
+ATSINSmove_tlcal(apy3, tmp401) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab_skip_ident_69) ;
+ATSINSfgoto(__patsflab_skip_ident_70) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12785(line=338, offs=10) -- 12788(line=338, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 13391(line=352, offs=10) -- 13394(line=352, offs=13)
 */
-ATSINSmove(tmpret379, arg1) ;
+ATSINSmove(tmpret394, arg1) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12672(line=336, offs=8) -- 12794(line=339, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13278(line=350, offs=8) -- 13400(line=353, offs=6)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret379) ;
-} /* end of [skip_ident_69] */
+ATSreturn(tmpret394) ;
+} /* end of [skip_ident_70] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -6456,9 +6683,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6487,232 +6714,232 @@ ATSreturn(tmpret71__5) ;
 } /* end of [ATSLIB_056_prelude__lte_g1int_int__29__5] */
 
 /*
-build/src/lexer.dats: 12875(line=342, offs=5) -- 13707(line=358, offs=6)
+build/src/lexer.dats: 13481(line=356, offs=5) -- 14313(line=372, offs=6)
 */
 /*
-local: _skip_to_name_71$0(level=0)
-global: _skip_to_name_71$0(level=0)
+local: _skip_to_name_72$0(level=0)
+global: _skip_to_name_72$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-_skip_to_name_71(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
+_skip_to_name_72(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret387, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp388, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp391, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp394, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp395, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp396, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp397, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp398, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp399, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp400, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp412, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret402, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp403, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp406, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp409, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp410, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp411, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp412, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp413, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp414, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp415, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp415, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp427, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp428, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp429, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp430, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 12875(line=342, offs=5) -- 13707(line=358, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13481(line=356, offs=5) -- 14313(line=372, offs=6)
 */
-ATSINSflab(__patsflab__skip_to_name_71):
+ATSINSflab(__patsflab__skip_to_name_72):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13009(line=344, offs=6) -- 13018(line=344, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 13615(line=358, offs=6) -- 13624(line=358, offs=15)
 */
-ATSINSmove(tmp388, ATSLIB_056_prelude__lte_g1int_int__29__6(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp403, ATSLIB_056_prelude__lte_g1int_int__29__6(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13006(line=344, offs=3) -- 13707(line=358, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13612(line=358, offs=3) -- 14313(line=372, offs=6)
 */
 ATSif(
-tmp388
+tmp403
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13024(line=344, offs=21) -- 13027(line=344, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 13630(line=358, offs=21) -- 13633(line=358, offs=24)
 */
-ATSINSmove(tmpret387, arg1) ;
+ATSINSmove(tmpret402, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13038(line=345, offs=11) -- 13048(line=345, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 13644(line=359, offs=11) -- 13654(line=359, offs=21)
 */
-ATSINSmove(tmp391, ATSLIB_056_prelude__gte_g1int_int__24__4(arg1, arg2)) ;
+ATSINSmove(tmp406, ATSLIB_056_prelude__gte_g1int_int__24__4(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13035(line=345, offs=8) -- 13707(line=358, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13641(line=359, offs=8) -- 14313(line=372, offs=6)
 */
 ATSif(
-tmp391
+tmp406
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13054(line=345, offs=27) -- 13057(line=345, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 13660(line=359, offs=27) -- 13663(line=359, offs=30)
 */
-ATSINSmove(tmpret387, arg1) ;
+ATSINSmove(tmpret402, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13065(line=346, offs=8) -- 13707(line=358, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13671(line=360, offs=8) -- 14313(line=372, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13077(line=346, offs=20) -- 13096(line=346, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 13683(line=360, offs=20) -- 13702(line=360, offs=39)
 */
-ATSINSmove(tmp394, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp409, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
-ATSINSmove(tmp397, atspre_g0int_eq_int(tmp394, ATSPMVi0nt(32))) ;
+ATSINSmove(tmp412, atspre_g0int_eq_int(tmp409, ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
 ATSif(
-tmp397
+tmp412
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
-ATSINSmove(tmp396, ATSPMVbool_true()) ;
+ATSINSmove(tmp411, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
-ATSINSmove(tmp396, atspre_g0int_eq_int(tmp394, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp411, atspre_g0int_eq_int(tmp409, ATSPMVi0nt(9))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
 ATSif(
-tmp396
+tmp411
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
-ATSINSmove(tmp395, ATSPMVbool_true()) ;
+ATSINSmove(tmp410, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13107(line=347, offs=8) -- 13177(line=347, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 13713(line=361, offs=8) -- 13783(line=361, offs=78)
 */
-ATSINSmove(tmp395, atspre_g0int_eq_int(tmp394, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp410, atspre_g0int_eq_int(tmp409, ATSPMVi0nt(10))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13104(line=347, offs=5) -- 13701(line=357, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 13710(line=361, offs=5) -- 14307(line=371, offs=13)
 */
 ATSif(
-tmp395
+tmp410
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13208(line=348, offs=26) -- 13215(line=348, offs=33)
-*/
-ATSINSmove(tmp398, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13222(line=348, offs=40) -- 13230(line=348, offs=48)
-*/
-ATSINSmove(tmp399, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13189(line=348, offs=7) -- 13231(line=348, offs=49)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp398) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp399) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab__skip_to_name_71) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13244(line=349, offs=13) -- 13266(line=349, offs=35)
-*/
-ATSINSmove(tmp400, atspre_g0int_eq_int(tmp394, ATSPMVi0nt(123))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13241(line=349, offs=10) -- 13701(line=357, offs=13)
-*/
-ATSif(
-tmp400
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13272(line=349, offs=41) -- 13688(line=356, offs=87)
-*/
-/*
-letpush(beg)
-*/
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13645(line=356, offs=44) -- 13652(line=356, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 13814(line=362, offs=26) -- 13821(line=362, offs=33)
 */
 ATSINSmove(tmp413, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13659(line=356, offs=58) -- 13667(line=356, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 13828(line=362, offs=40) -- 13836(line=362, offs=48)
 */
 ATSINSmove(tmp414, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13628(line=356, offs=27) -- 13668(line=356, offs=67)
-*/
-ATSINSmove(tmp412, _skip_brace_74(ATSPMVrefarg0(arg0), tmp413, arg2, tmp414)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13675(line=356, offs=74) -- 13683(line=356, offs=82)
-*/
-ATSINSmove(tmp415, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 13609(line=356, offs=8) -- 13684(line=356, offs=83)
+emit_instr: loc0 = build/src/lexer.dats: 13795(line=362, offs=7) -- 13837(line=362, offs=49)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp412) ;
+ATSINSmove_tlcal(apy1, tmp413) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp415) ;
+ATSINSmove_tlcal(apy3, tmp414) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab__skip_to_name_71) ;
+ATSINSfgoto(__patsflab__skip_to_name_72) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 13850(line=363, offs=13) -- 13872(line=363, offs=35)
+*/
+ATSINSmove(tmp415, atspre_g0int_eq_int(tmp409, ATSPMVi0nt(123))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 13847(line=363, offs=10) -- 14307(line=371, offs=13)
+*/
+ATSif(
+tmp415
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 13878(line=363, offs=41) -- 14294(line=370, offs=87)
+*/
+/*
+letpush(beg)
+*/
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 14251(line=370, offs=44) -- 14258(line=370, offs=51)
+*/
+ATSINSmove(tmp428, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 14265(line=370, offs=58) -- 14273(line=370, offs=66)
+*/
+ATSINSmove(tmp429, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 14234(line=370, offs=27) -- 14274(line=370, offs=67)
+*/
+ATSINSmove(tmp427, _skip_brace_75(ATSPMVrefarg0(arg0), tmp428, arg2, tmp429)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 14281(line=370, offs=74) -- 14289(line=370, offs=82)
+*/
+ATSINSmove(tmp430, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 14215(line=370, offs=8) -- 14290(line=370, offs=83)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp427) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, tmp430) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSfgoto(__patsflab__skip_to_name_72) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13272(line=349, offs=41) -- 13688(line=356, offs=87)
+emit_instr: loc0 = build/src/lexer.dats: 13878(line=363, offs=41) -- 14294(line=370, offs=87)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13698(line=357, offs=10) -- 13701(line=357, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 14304(line=371, offs=10) -- 14307(line=371, offs=13)
 */
-ATSINSmove(tmpret387, arg1) ;
+ATSINSmove(tmpret402, arg1) ;
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13065(line=346, offs=8) -- 13707(line=358, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 13671(line=360, offs=8) -- 14313(line=372, offs=6)
 */
 /*
 INSletpop()
@@ -6720,8 +6947,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret387) ;
-} /* end of [_skip_to_name_71] */
+ATSreturn(tmpret402) ;
+} /* end of [_skip_to_name_72] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -6734,9 +6961,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6775,9 +7002,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6806,121 +7033,121 @@ ATSreturn(tmpret63__4) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__4] */
 
 /*
-build/src/lexer.dats: 13311(line=350, offs=11) -- 13601(line=355, offs=49)
+build/src/lexer.dats: 13917(line=364, offs=11) -- 14207(line=369, offs=49)
 */
 /*
-local: _skip_brace_74$0(level=1)
-global: _skip_brace_74$0(level=1)
+local: _skip_brace_75$0(level=1)
+global: _skip_brace_75$0(level=1)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-_skip_brace_74(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
+_skip_brace_75(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret401, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp402, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp405, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp408, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp409, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp410, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp411, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret416, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp417, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp420, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp423, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp424, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp425, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp426, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13311(line=350, offs=11) -- 13601(line=355, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 13917(line=364, offs=11) -- 14207(line=369, offs=49)
 */
-ATSINSflab(__patsflab__skip_brace_74):
+ATSINSflab(__patsflab__skip_brace_75):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13441(line=352, offs=12) -- 13447(line=352, offs=18)
+emit_instr: loc0 = build/src/lexer.dats: 14047(line=366, offs=12) -- 14053(line=366, offs=18)
 */
-ATSINSmove(tmp402, ATSLIB_056_prelude__lte_g1int_int__29__7(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp417, ATSLIB_056_prelude__lte_g1int_int__29__7(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13438(line=352, offs=9) -- 13601(line=355, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 14044(line=366, offs=9) -- 14207(line=369, offs=49)
 */
 ATSif(
-tmp402
+tmp417
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13453(line=352, offs=24) -- 13454(line=352, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 14059(line=366, offs=24) -- 14060(line=366, offs=25)
 */
-ATSINSmove(tmpret401, arg1) ;
+ATSINSmove(tmpret416, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13471(line=353, offs=17) -- 13479(line=353, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 14077(line=367, offs=17) -- 14085(line=367, offs=25)
 */
-ATSINSmove(tmp405, ATSLIB_056_prelude__gte_g1int_int__24__5(arg1, arg2)) ;
+ATSINSmove(tmp420, ATSLIB_056_prelude__gte_g1int_int__24__5(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13468(line=353, offs=14) -- 13601(line=355, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 14074(line=367, offs=14) -- 14207(line=369, offs=49)
 */
 ATSif(
-tmp405
+tmp420
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13485(line=353, offs=31) -- 13486(line=353, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 14091(line=367, offs=31) -- 14092(line=367, offs=32)
 */
-ATSINSmove(tmpret401, arg1) ;
+ATSINSmove(tmpret416, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13518(line=354, offs=32) -- 13535(line=354, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 14124(line=368, offs=32) -- 14141(line=368, offs=49)
 */
-ATSINSmove(tmp409, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp424, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13503(line=354, offs=17) -- 13541(line=354, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 14109(line=368, offs=17) -- 14147(line=368, offs=55)
 */
-ATSINSmove(tmp408, atspre_g0int_eq_int(tmp409, ATSPMVi0nt(125))) ;
+ATSINSmove(tmp423, atspre_g0int_eq_int(tmp424, ATSPMVi0nt(125))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13500(line=354, offs=14) -- 13601(line=355, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 14106(line=368, offs=14) -- 14207(line=369, offs=49)
 */
 ATSif(
-tmp408
+tmp423
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13547(line=354, offs=61) -- 13552(line=354, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 14153(line=368, offs=61) -- 14158(line=368, offs=66)
 */
-ATSINSmove(tmpret401, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret416, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13583(line=355, offs=31) -- 13588(line=355, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 14189(line=369, offs=31) -- 14194(line=369, offs=36)
 */
-ATSINSmove(tmp410, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp425, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13595(line=355, offs=43) -- 13600(line=355, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 14201(line=369, offs=43) -- 14206(line=369, offs=48)
 */
-ATSINSmove(tmp411, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp426, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13566(line=355, offs=14) -- 13601(line=355, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 14172(line=369, offs=14) -- 14207(line=369, offs=49)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp410) ;
+ATSINSmove_tlcal(apy1, tmp425) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp411) ;
+ATSINSmove_tlcal(apy3, tmp426) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab__skip_brace_74) ;
+ATSINSfgoto(__patsflab__skip_brace_75) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret401) ;
-} /* end of [_skip_brace_74] */
+ATSreturn(tmpret416) ;
+} /* end of [_skip_brace_75] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -6933,9 +7160,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6974,9 +7201,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7005,17 +7232,17 @@ ATSreturn(tmpret63__5) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__5] */
 
 /*
-build/src/lexer.dats: 13802(line=361, offs=5) -- 15070(line=385, offs=91)
+build/src/lexer.dats: 14408(line=375, offs=5) -- 15676(line=399, offs=91)
 */
 /*
-local: _looking_at_primplement_62$0(level=0), skip_ident_69$0(level=0), _skip_to_name_71$0(level=0), _has_primplement_77$0(level=0)
-global: is_ident_byte_0$0(level=0), _looking_at_primplement_62$0(level=0), skip_ident_69$0(level=0), _skip_to_name_71$0(level=0), _has_primplement_77$0(level=0)
+local: _looking_at_primplement_62$0(level=0), skip_ident_70$0(level=0), _skip_to_name_72$0(level=0), _has_primplement_78$0(level=0)
+global: is_ident_byte_0$0(level=0), _looking_at_primplement_62$0(level=0), skip_ident_70$0(level=0), _skip_to_name_72$0(level=0), _has_primplement_78$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-_has_primplement_77(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5, atstkind_t0ype(atstype_int) arg6)
+_has_primplement_78(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5, atstkind_t0ype(atstype_int) arg6)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -7025,140 +7252,140 @@ ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy5, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy6, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret416, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp417, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp420, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp423, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp424, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp425, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret431, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp432, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp435, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp438, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp439, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp440, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp441, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp442, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp443, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp444, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp445, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp446, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp447, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp448, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp449, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp455, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp456, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp457, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp458, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp459, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp460, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp461, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp462, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp463, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp464, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13802(line=361, offs=5) -- 15070(line=385, offs=91)
+emit_instr: loc0 = build/src/lexer.dats: 14408(line=375, offs=5) -- 15676(line=399, offs=91)
 */
-ATSINSflab(__patsflab__has_primplement_77):
+ATSINSflab(__patsflab__has_primplement_78):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13996(line=364, offs=6) -- 14005(line=364, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 14602(line=378, offs=6) -- 14611(line=378, offs=15)
 */
-ATSINSmove(tmp417, ATSLIB_056_prelude__lte_g1int_int__29__8(arg6, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp432, ATSLIB_056_prelude__lte_g1int_int__29__8(arg6, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 13993(line=364, offs=3) -- 15070(line=385, offs=91)
+emit_instr: loc0 = build/src/lexer.dats: 14599(line=378, offs=3) -- 15676(line=399, offs=91)
 */
 ATSif(
-tmp417
+tmp432
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14011(line=364, offs=21) -- 14016(line=364, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 14617(line=378, offs=21) -- 14622(line=378, offs=26)
 */
-ATSINSmove(tmpret416, ATSPMVbool_false()) ;
+ATSINSmove(tmpret431, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14027(line=365, offs=11) -- 14046(line=365, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 14633(line=379, offs=11) -- 14652(line=379, offs=30)
 */
-ATSINSmove(tmp420, ATSLIB_056_prelude__gte_g1int_int__24__6(arg5, arg1)) ;
+ATSINSmove(tmp435, ATSLIB_056_prelude__gte_g1int_int__24__6(arg5, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14024(line=365, offs=8) -- 15070(line=385, offs=91)
+emit_instr: loc0 = build/src/lexer.dats: 14630(line=379, offs=8) -- 15676(line=399, offs=91)
 */
 ATSif(
-tmp420
+tmp435
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14052(line=365, offs=36) -- 14057(line=365, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 14658(line=379, offs=36) -- 14663(line=379, offs=41)
 */
-ATSINSmove(tmpret416, ATSPMVbool_false()) ;
+ATSINSmove(tmpret431, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14072(line=367, offs=8) -- 14115(line=367, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 14678(line=381, offs=8) -- 14721(line=381, offs=51)
 */
-ATSINSmove(tmp423, _looking_at_primplement_62(ATSPMVrefarg0(arg0), arg5, arg2)) ;
+ATSINSmove(tmp438, _looking_at_primplement_62(ATSPMVrefarg0(arg0), arg5, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14069(line=367, offs=5) -- 15070(line=385, offs=91)
+emit_instr: loc0 = build/src/lexer.dats: 14675(line=381, offs=5) -- 15676(line=399, offs=91)
 */
 ATSif(
-tmp423
+tmp438
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14121(line=367, offs=57) -- 14979(line=384, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 14727(line=381, offs=57) -- 15585(line=398, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14143(line=368, offs=19) -- 14156(line=368, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 14749(line=382, offs=19) -- 14762(line=382, offs=32)
 */
-ATSINSmove(tmp424, atspre_g1int_add_int(arg5, ATSPMVi0nt(11))) ;
+ATSINSmove(tmp439, atspre_g1int_add_int(arg5, ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14171(line=369, offs=15) -- 14206(line=369, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 14777(line=383, offs=15) -- 14812(line=383, offs=50)
 */
-ATSINSmove(tmp425, _skip_to_name_71(ATSPMVrefarg0(arg0), tmp424, arg2, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp440, _skip_to_name_72(ATSPMVrefarg0(arg0), tmp439, arg2, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14592(line=377, offs=18) -- 14621(line=377, offs=47)
+emit_instr: loc0 = build/src/lexer.dats: 15198(line=391, offs=18) -- 15227(line=391, offs=47)
 */
-ATSINSmove(tmp440, skip_ident_69(ATSPMVrefarg0(arg0), tmp425, arg2, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp455, skip_ident_70(ATSPMVrefarg0(arg0), tmp440, arg2, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14644(line=378, offs=23) -- 14652(line=378, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 15250(line=392, offs=23) -- 15258(line=392, offs=31)
 */
-ATSINSmove(tmp441, atspre_g1int_sub_int(tmp440, tmp425)) ;
+ATSINSmove(tmp456, atspre_g1int_sub_int(tmp455, tmp440)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14669(line=380, offs=10) -- 14704(line=380, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 15275(line=394, offs=10) -- 15310(line=394, offs=45)
 */
-ATSINSmove(tmp442, atspre_g0int_eq_int(tmp441, arg4)) ;
+ATSINSmove(tmp457, atspre_g0int_eq_int(tmp456, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14666(line=380, offs=7) -- 14971(line=383, offs=93)
+emit_instr: loc0 = build/src/lexer.dats: 15272(line=394, offs=7) -- 15577(line=397, offs=93)
 */
 ATSif(
-tmp442
+tmp457
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14721(line=381, offs=12) -- 14773(line=381, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 15327(line=395, offs=12) -- 15379(line=395, offs=64)
 */
-ATSINSmove(tmp443, _names_match_80(ATSPMVrefarg0(arg0), arg3, tmp425, arg4, arg2, arg2)) ;
+ATSINSmove(tmp458, _names_match_81(ATSPMVrefarg0(arg0), arg3, tmp440, arg4, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14718(line=381, offs=9) -- 14878(line=382, offs=95)
+emit_instr: loc0 = build/src/lexer.dats: 15324(line=395, offs=9) -- 15484(line=396, offs=95)
 */
 ATSif(
-tmp443
+tmp458
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14779(line=381, offs=70) -- 14783(line=381, offs=74)
+emit_instr: loc0 = build/src/lexer.dats: 15385(line=395, offs=70) -- 15389(line=395, offs=74)
 */
-ATSINSmove(tmpret416, ATSPMVbool_true()) ;
+ATSINSmove(tmpret431, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14855(line=382, offs=72) -- 14867(line=382, offs=84)
+emit_instr: loc0 = build/src/lexer.dats: 15461(line=396, offs=72) -- 15473(line=396, offs=84)
 */
-ATSINSmove(tmp444, atspre_g1int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp459, atspre_g1int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14869(line=382, offs=86) -- 14877(line=382, offs=94)
+emit_instr: loc0 = build/src/lexer.dats: 15475(line=396, offs=86) -- 15483(line=396, offs=94)
 */
-ATSINSmove(tmp445, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp460, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14797(line=382, offs=14) -- 14878(line=382, offs=95)
+emit_instr: loc0 = build/src/lexer.dats: 15403(line=396, offs=14) -- 15484(line=396, offs=95)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -7166,8 +7393,8 @@ ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
 ATSINSmove_tlcal(apy4, arg4) ;
-ATSINSmove_tlcal(apy5, tmp444) ;
-ATSINSmove_tlcal(apy6, tmp445) ;
+ATSINSmove_tlcal(apy5, tmp459) ;
+ATSINSmove_tlcal(apy6, tmp460) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -7175,23 +7402,23 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab__has_primplement_77) ;
+ATSINSfgoto(__patsflab__has_primplement_78) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14948(line=383, offs=70) -- 14960(line=383, offs=82)
+emit_instr: loc0 = build/src/lexer.dats: 15554(line=397, offs=70) -- 15566(line=397, offs=82)
 */
-ATSINSmove(tmp446, atspre_g1int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp461, atspre_g1int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14962(line=383, offs=84) -- 14970(line=383, offs=92)
+emit_instr: loc0 = build/src/lexer.dats: 15568(line=397, offs=84) -- 15576(line=397, offs=92)
 */
-ATSINSmove(tmp447, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp462, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14890(line=383, offs=12) -- 14971(line=383, offs=93)
+emit_instr: loc0 = build/src/lexer.dats: 15496(line=397, offs=12) -- 15577(line=397, offs=93)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -7199,8 +7426,8 @@ ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
 ATSINSmove_tlcal(apy4, arg4) ;
-ATSINSmove_tlcal(apy5, tmp446) ;
-ATSINSmove_tlcal(apy6, tmp447) ;
+ATSINSmove_tlcal(apy5, tmp461) ;
+ATSINSmove_tlcal(apy6, tmp462) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -7208,29 +7435,29 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab__has_primplement_77) ;
+ATSINSfgoto(__patsflab__has_primplement_78) ;
 ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14121(line=367, offs=57) -- 14979(line=384, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 14727(line=381, offs=57) -- 15585(line=398, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15047(line=385, offs=68) -- 15059(line=385, offs=80)
+emit_instr: loc0 = build/src/lexer.dats: 15653(line=399, offs=68) -- 15665(line=399, offs=80)
 */
-ATSINSmove(tmp448, atspre_g1int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp463, atspre_g1int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15061(line=385, offs=82) -- 15069(line=385, offs=90)
+emit_instr: loc0 = build/src/lexer.dats: 15667(line=399, offs=82) -- 15675(line=399, offs=90)
 */
-ATSINSmove(tmp449, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp464, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14989(line=385, offs=10) -- 15070(line=385, offs=91)
+emit_instr: loc0 = build/src/lexer.dats: 15595(line=399, offs=10) -- 15676(line=399, offs=91)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -7238,8 +7465,8 @@ ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
 ATSINSmove_tlcal(apy4, arg4) ;
-ATSINSmove_tlcal(apy5, tmp448) ;
-ATSINSmove_tlcal(apy6, tmp449) ;
+ATSINSmove_tlcal(apy5, tmp463) ;
+ATSINSmove_tlcal(apy6, tmp464) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -7247,15 +7474,15 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab__has_primplement_77) ;
+ATSINSfgoto(__patsflab__has_primplement_78) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret416) ;
-} /* end of [_has_primplement_77] */
+ATSreturn(tmpret431) ;
+} /* end of [_has_primplement_78] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -7268,9 +7495,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7309,9 +7536,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7340,17 +7567,17 @@ ATSreturn(tmpret63__6) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__6] */
 
 /*
-build/src/lexer.dats: 14217(line=370, offs=11) -- 14574(line=376, offs=19)
+build/src/lexer.dats: 14823(line=384, offs=11) -- 15180(line=390, offs=19)
 */
 /*
-local: _names_match_80$0(level=1)
-global: _names_match_80$0(level=1)
+local: _names_match_81$0(level=1)
+global: _names_match_81$0(level=1)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-_names_match_80(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+_names_match_81(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -7359,125 +7586,125 @@ ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy5, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret426, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp427, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp430, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp433, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp434, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp435, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp436, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp437, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp438, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp439, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret441, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp442, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp445, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp448, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp449, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp450, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp451, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp452, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp453, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp454, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14217(line=370, offs=11) -- 14574(line=376, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 14823(line=384, offs=11) -- 15180(line=390, offs=19)
 */
-ATSINSflab(__patsflab__names_match_80):
+ATSINSflab(__patsflab__names_match_81):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14367(line=372, offs=12) -- 14373(line=372, offs=18)
+emit_instr: loc0 = build/src/lexer.dats: 14973(line=386, offs=12) -- 14979(line=386, offs=18)
 */
-ATSINSmove(tmp427, ATSLIB_056_prelude__lte_g1int_int__29__9(arg5, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp442, ATSLIB_056_prelude__lte_g1int_int__29__9(arg5, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14364(line=372, offs=9) -- 14574(line=376, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 14970(line=386, offs=9) -- 15180(line=390, offs=19)
 */
 ATSif(
-tmp427
+tmp442
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14379(line=372, offs=24) -- 14383(line=372, offs=28)
+emit_instr: loc0 = build/src/lexer.dats: 14985(line=386, offs=24) -- 14989(line=386, offs=28)
 */
-ATSINSmove(tmpret426, ATSPMVbool_true()) ;
+ATSINSmove(tmpret441, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14400(line=373, offs=17) -- 14408(line=373, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 15006(line=387, offs=17) -- 15014(line=387, offs=25)
 */
-ATSINSmove(tmp430, ATSLIB_056_prelude__lte_g0int_int__5__6(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp445, ATSLIB_056_prelude__lte_g0int_int__5__6(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14397(line=373, offs=14) -- 14574(line=376, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 15003(line=387, offs=14) -- 15180(line=390, offs=19)
 */
 ATSif(
-tmp430
+tmp445
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14414(line=373, offs=31) -- 14418(line=373, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 15020(line=387, offs=31) -- 15024(line=387, offs=35)
 */
-ATSINSmove(tmpret426, ATSPMVbool_true()) ;
+ATSINSmove(tmpret441, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14450(line=374, offs=32) -- 14467(line=374, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 15056(line=388, offs=32) -- 15073(line=388, offs=49)
 */
-ATSINSmove(tmp434, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg4)) ;
+ATSINSmove(tmp449, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14469(line=374, offs=51) -- 14486(line=374, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 15075(line=388, offs=51) -- 15092(line=388, offs=68)
 */
-ATSINSmove(tmp435, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg2, arg4)) ;
+ATSINSmove(tmp450, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg2, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14435(line=374, offs=17) -- 14487(line=374, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 15041(line=388, offs=17) -- 15093(line=388, offs=69)
 */
-ATSINSmove(tmp433, atspre_g0int_eq_int(tmp434, tmp435)) ;
+ATSINSmove(tmp448, atspre_g0int_eq_int(tmp449, tmp450)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14432(line=374, offs=14) -- 14574(line=376, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 15038(line=388, offs=14) -- 15180(line=390, offs=19)
 */
 ATSif(
-tmp433
+tmp448
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14521(line=375, offs=29) -- 14526(line=375, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 15127(line=389, offs=29) -- 15132(line=389, offs=34)
 */
-ATSINSmove(tmp436, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp451, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14528(line=375, offs=36) -- 14533(line=375, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 15134(line=389, offs=36) -- 15139(line=389, offs=41)
 */
-ATSINSmove(tmp437, atspre_g1int_add_int(arg2, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp452, atspre_g1int_add_int(arg2, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14535(line=375, offs=43) -- 14542(line=375, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 15141(line=389, offs=43) -- 15148(line=389, offs=50)
 */
-ATSINSmove(tmp438, atspre_g0int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp453, atspre_g0int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14549(line=375, offs=57) -- 14554(line=375, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 15155(line=389, offs=57) -- 15160(line=389, offs=62)
 */
-ATSINSmove(tmp439, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp454, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14503(line=375, offs=11) -- 14555(line=375, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 15109(line=389, offs=11) -- 15161(line=389, offs=63)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp436) ;
-ATSINSmove_tlcal(apy2, tmp437) ;
-ATSINSmove_tlcal(apy3, tmp438) ;
+ATSINSmove_tlcal(apy1, tmp451) ;
+ATSINSmove_tlcal(apy2, tmp452) ;
+ATSINSmove_tlcal(apy3, tmp453) ;
 ATSINSmove_tlcal(apy4, arg4) ;
-ATSINSmove_tlcal(apy5, tmp439) ;
+ATSINSmove_tlcal(apy5, tmp454) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab__names_match_80) ;
+ATSINSfgoto(__patsflab__names_match_81) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 14569(line=376, offs=14) -- 14574(line=376, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 15175(line=390, offs=14) -- 15180(line=390, offs=19)
 */
-ATSINSmove(tmpret426, ATSPMVbool_false()) ;
+ATSINSmove(tmpret441, ATSPMVbool_false()) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret426) ;
-} /* end of [_names_match_80] */
+ATSreturn(tmpret441) ;
+} /* end of [_names_match_81] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -7490,9 +7717,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7531,9 +7758,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7562,172 +7789,172 @@ ATSreturn(tmpret9__6) ;
 } /* end of [ATSLIB_056_prelude__lte_g0int_int__5__6] */
 
 /*
-build/src/lexer.dats: 15102(line=388, offs=5) -- 15473(line=397, offs=6)
+build/src/lexer.dats: 15708(line=402, offs=5) -- 16079(line=411, offs=6)
 */
 /*
-local: skip_nonws_84$0(level=0)
-global: skip_nonws_84$0(level=0)
+local: skip_nonws_85$0(level=0)
+global: skip_nonws_85$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_nonws_84(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
+skip_nonws_85(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret450, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp451, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp454, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp455, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp456, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp457, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp458, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp459, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp460, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret465, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp466, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp469, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp470, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp471, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp472, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp473, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp474, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp475, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15102(line=388, offs=5) -- 15473(line=397, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 15708(line=402, offs=5) -- 16079(line=411, offs=6)
 */
-ATSINSflab(__patsflab_skip_nonws_84):
+ATSINSflab(__patsflab_skip_nonws_85):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15236(line=391, offs=6) -- 15245(line=391, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 15842(line=405, offs=6) -- 15851(line=405, offs=15)
 */
-ATSINSmove(tmp451, ATSLIB_056_prelude__lte_g1int_int__29__10(arg3, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp466, ATSLIB_056_prelude__lte_g1int_int__29__10(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15233(line=391, offs=3) -- 15473(line=397, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 15839(line=405, offs=3) -- 16079(line=411, offs=6)
 */
 ATSif(
-tmp451
+tmp466
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15251(line=391, offs=21) -- 15254(line=391, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 15857(line=405, offs=21) -- 15860(line=405, offs=24)
 */
-ATSINSmove(tmpret450, arg1) ;
+ATSINSmove(tmpret465, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15262(line=392, offs=8) -- 15473(line=397, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 15868(line=406, offs=8) -- 16079(line=411, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15274(line=392, offs=20) -- 15293(line=392, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 15880(line=406, offs=20) -- 15899(line=406, offs=39)
 */
-ATSINSmove(tmp454, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp469, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp458, atspre_g0int_eq_int(tmp454, ATSPMVi0nt(32))) ;
+ATSINSmove(tmp473, atspre_g0int_eq_int(tmp469, ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
 ATSif(
-tmp458
+tmp473
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp457, ATSPMVbool_true()) ;
+ATSINSmove(tmp472, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp457, atspre_g0int_eq_int(tmp454, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp472, atspre_g0int_eq_int(tmp469, ATSPMVi0nt(9))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
 ATSif(
-tmp457
+tmp472
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp456, ATSPMVbool_true()) ;
+ATSINSmove(tmp471, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp456, atspre_g0int_eq_int(tmp454, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp471, atspre_g0int_eq_int(tmp469, ATSPMVi0nt(10))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
 ATSif(
-tmp456
+tmp471
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp455, ATSPMVbool_true()) ;
+ATSINSmove(tmp470, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15304(line=393, offs=8) -- 15405(line=394, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 15910(line=407, offs=8) -- 16011(line=408, offs=53)
 */
-ATSINSmove(tmp455, atspre_g0int_eq_int(tmp454, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp470, atspre_g0int_eq_int(tmp469, ATSPMVi0nt(0))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15301(line=393, offs=5) -- 15467(line=396, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 15907(line=407, offs=5) -- 16073(line=410, offs=49)
 */
 ATSif(
-tmp455
+tmp470
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15415(line=395, offs=10) -- 15418(line=395, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 16021(line=409, offs=10) -- 16024(line=409, offs=13)
 */
-ATSINSmove(tmpret450, arg1) ;
+ATSINSmove(tmpret465, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15444(line=396, offs=26) -- 15451(line=396, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 16050(line=410, offs=26) -- 16057(line=410, offs=33)
 */
-ATSINSmove(tmp459, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp474, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15458(line=396, offs=40) -- 15466(line=396, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 16064(line=410, offs=40) -- 16072(line=410, offs=48)
 */
-ATSINSmove(tmp460, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp475, atspre_g1int_sub_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15428(line=396, offs=10) -- 15467(line=396, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 16034(line=410, offs=10) -- 16073(line=410, offs=49)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp459) ;
+ATSINSmove_tlcal(apy1, tmp474) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp460) ;
+ATSINSmove_tlcal(apy3, tmp475) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSfgoto(__patsflab_skip_nonws_84) ;
+ATSINSfgoto(__patsflab_skip_nonws_85) ;
 ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15262(line=392, offs=8) -- 15473(line=397, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 15868(line=406, offs=8) -- 16079(line=411, offs=6)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret450) ;
-} /* end of [skip_nonws_84] */
+ATSreturn(tmpret465) ;
+} /* end of [skip_nonws_85] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -7740,9 +7967,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7771,180 +7998,180 @@ ATSreturn(tmpret71__10) ;
 } /* end of [ATSLIB_056_prelude__lte_g1int_int__29__10] */
 
 /*
-build/src/lexer.dats: 15525(line=400, offs=4) -- 16063(line=410, offs=26)
+build/src/lexer.dats: 16131(line=414, offs=4) -- 16669(line=424, offs=26)
 */
 /*
-local: put_span_20$0(level=0), skip_to_eol_66$0(level=0)
-global: put_i32_17$0(level=0), put_span_20$0(level=0), skip_to_eol_66$0(level=0), lex_line_comment_86$0(level=0)
+local: put_span_20$0(level=0), skip_to_eol_67$0(level=0)
+global: put_i32_17$0(level=0), put_span_20$0(level=0), skip_to_eol_67$0(level=0), lex_line_comment_87$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_line_comment_86(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_line_comment_87(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret461, postiats_tyrec_0) ;
-ATStmpdec(tmp462, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp463, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp464, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp465, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp466, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp467, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp468) ;
-ATStmpdec(tmp469, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp470, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp471, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp472) ;
-ATStmpdec(tmp473, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret476, postiats_tyrec_0) ;
+ATStmpdec(tmp477, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp478, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp479, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp480, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp481, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp482, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp483) ;
+ATStmpdec(tmp484, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp485, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp486, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp487) ;
+ATStmpdec(tmp488, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15525(line=400, offs=4) -- 16063(line=410, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 16131(line=414, offs=4) -- 16669(line=424, offs=26)
 */
-ATSINSflab(__patsflab_lex_line_comment_86):
+ATSINSflab(__patsflab_lex_line_comment_87):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp465, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp480, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp464, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp465, arg2)) ;
+ATSINSmove(tmp479, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp480, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp463, atspre_g0int_eq_int(tmp464, ATSPMVi0nt(47))) ;
+ATSINSmove(tmp478, atspre_g0int_eq_int(tmp479, ATSPMVi0nt(47))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
 ATSif(
-tmp463
+tmp478
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp467, atspre_g1int_add_int(arg4, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp482, atspre_g1int_add_int(arg4, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp466, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp467, arg2)) ;
+ATSINSmove(tmp481, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp482, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp462, atspre_g0int_eq_int(tmp466, ATSPMVi0nt(47))) ;
+ATSINSmove(tmp477, atspre_g0int_eq_int(tmp481, ATSPMVi0nt(47))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15706(line=403, offs=6) -- 15805(line=404, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 16312(line=417, offs=6) -- 16411(line=418, offs=51)
 */
-ATSINSmove(tmp462, ATSPMVbool_false()) ;
+ATSINSmove(tmp477, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15703(line=403, offs=3) -- 16063(line=410, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 16309(line=417, offs=3) -- 16669(line=424, offs=26)
 */
 ATSif(
-tmp462
+tmp477
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15811(line=404, offs=57) -- 15908(line=406, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 16417(line=418, offs=57) -- 16514(line=420, offs=31)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15828(line=405, offs=14) -- 15877(line=405, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 16434(line=419, offs=14) -- 16483(line=419, offs=63)
 */
-ATSINSmove_void(tmp468, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, arg1, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp483, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, arg1, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15894(line=406, offs=17) -- 15903(line=406, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 16500(line=420, offs=17) -- 16509(line=420, offs=26)
 */
-ATSINSmove(tmp469, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp484, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15883(line=406, offs=6) -- 15904(line=406, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 16489(line=420, offs=6) -- 16510(line=420, offs=27)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret461, postiats_tyrec_0, atslab__0, arg1) ;
-ATSINSstore_fltrec_ofs(tmpret461, postiats_tyrec_0, atslab__1, tmp469) ;
+ATSINSstore_fltrec_ofs(tmpret476, postiats_tyrec_0, atslab__0, arg1) ;
+ATSINSstore_fltrec_ofs(tmpret476, postiats_tyrec_0, atslab__1, tmp484) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15811(line=404, offs=57) -- 15908(line=406, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 16417(line=418, offs=57) -- 16514(line=420, offs=31)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15916(line=407, offs=8) -- 16063(line=410, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 16522(line=421, offs=8) -- 16669(line=424, offs=26)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15950(line=408, offs=31) -- 15959(line=408, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 16556(line=422, offs=31) -- 16565(line=422, offs=40)
 */
-ATSINSmove(tmp471, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp486, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15933(line=408, offs=14) -- 15979(line=408, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 16539(line=422, offs=14) -- 16585(line=422, offs=60)
 */
-ATSINSmove(tmp470, skip_to_eol_66(ATSPMVrefarg0(arg0), tmp471, arg1, arg2, arg2)) ;
+ATSINSmove(tmp485, skip_to_eol_67(ATSPMVrefarg0(arg0), tmp486, arg1, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15993(line=409, offs=14) -- 16037(line=409, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 16599(line=423, offs=14) -- 16643(line=423, offs=58)
 */
-ATSINSmove_void(tmp472, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp470, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp487, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp485, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16049(line=410, offs=12) -- 16058(line=410, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 16655(line=424, offs=12) -- 16664(line=424, offs=21)
 */
-ATSINSmove(tmp473, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp488, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16043(line=410, offs=6) -- 16059(line=410, offs=22)
+emit_instr: loc0 = build/src/lexer.dats: 16649(line=424, offs=6) -- 16665(line=424, offs=22)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret461, postiats_tyrec_0, atslab__0, tmp470) ;
-ATSINSstore_fltrec_ofs(tmpret461, postiats_tyrec_0, atslab__1, tmp473) ;
+ATSINSstore_fltrec_ofs(tmpret476, postiats_tyrec_0, atslab__0, tmp485) ;
+ATSINSstore_fltrec_ofs(tmpret476, postiats_tyrec_0, atslab__1, tmp488) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 15916(line=407, offs=8) -- 16063(line=410, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 16522(line=421, offs=8) -- 16669(line=424, offs=26)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret461) ;
-} /* end of [lex_line_comment_86] */
+ATSreturn(tmpret476) ;
+} /* end of [lex_line_comment_87] */
 
 /*
-build/src/lexer.dats: 16103(line=413, offs=5) -- 16511(line=421, offs=65)
+build/src/lexer.dats: 16709(line=427, offs=5) -- 17117(line=435, offs=65)
 */
 /*
-local: lex_c_comment_inner_88$0(level=0)
-global: lex_c_comment_inner_88$0(level=0)
+local: lex_c_comment_inner_89$0(level=0)
+global: lex_c_comment_inner_89$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_c_comment_inner_88(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+lex_c_comment_inner_89(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -7952,142 +8179,142 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret474, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp475, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp478, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp481, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp482, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp483, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp484, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp485, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp486, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp487, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp488, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret489, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp490, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp493, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp496, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp497, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp498, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp499, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp500, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp501, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp502, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp503, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16103(line=413, offs=5) -- 16511(line=421, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 16709(line=427, offs=5) -- 17117(line=435, offs=65)
 */
-ATSINSflab(__patsflab_lex_c_comment_inner_88):
+ATSINSflab(__patsflab_lex_c_comment_inner_89):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16262(line=416, offs=6) -- 16271(line=416, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 16868(line=430, offs=6) -- 16877(line=430, offs=15)
 */
-ATSINSmove(tmp475, ATSLIB_056_prelude__lte_g1int_int__29__11(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp490, ATSLIB_056_prelude__lte_g1int_int__29__11(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16259(line=416, offs=3) -- 16511(line=421, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 16865(line=430, offs=3) -- 17117(line=435, offs=65)
 */
 ATSif(
-tmp475
+tmp490
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16277(line=416, offs=21) -- 16280(line=416, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 16883(line=430, offs=21) -- 16886(line=430, offs=24)
 */
-ATSINSmove(tmpret474, arg1) ;
+ATSINSmove(tmpret489, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16291(line=417, offs=11) -- 16298(line=417, offs=18)
+emit_instr: loc0 = build/src/lexer.dats: 16897(line=431, offs=11) -- 16904(line=431, offs=18)
 */
-ATSINSmove(tmp481, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp496, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16291(line=417, offs=11) -- 16309(line=417, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 16897(line=431, offs=11) -- 16915(line=431, offs=29)
 */
-ATSINSmove(tmp478, ATSLIB_056_prelude__gte_g1int_int__24__7(tmp481, arg2)) ;
+ATSINSmove(tmp493, ATSLIB_056_prelude__gte_g1int_int__24__7(tmp496, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16288(line=417, offs=8) -- 16511(line=421, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 16894(line=431, offs=8) -- 17117(line=435, offs=65)
 */
 ATSif(
-tmp478
+tmp493
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16315(line=417, offs=35) -- 16322(line=417, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 16921(line=431, offs=35) -- 16928(line=431, offs=42)
 */
-ATSINSmove(tmpret474, arg2) ;
+ATSINSmove(tmpret489, arg2) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
-ATSINSmove(tmp484, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp499, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
-ATSINSmove(tmp483, atspre_g0int_eq_int(tmp484, ATSPMVi0nt(42))) ;
+ATSINSmove(tmp498, atspre_g0int_eq_int(tmp499, ATSPMVi0nt(42))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
 ATSif(
-tmp483
+tmp498
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
-ATSINSmove(tmp486, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp501, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
-ATSINSmove(tmp485, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp486, arg3)) ;
+ATSINSmove(tmp500, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp501, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
-ATSINSmove(tmp482, atspre_g0int_eq_int(tmp485, ATSPMVi0nt(47))) ;
+ATSINSmove(tmp497, atspre_g0int_eq_int(tmp500, ATSPMVi0nt(47))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16333(line=418, offs=11) -- 16429(line=419, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 16939(line=432, offs=11) -- 17035(line=433, offs=54)
 */
-ATSINSmove(tmp482, ATSPMVbool_false()) ;
+ATSINSmove(tmp497, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16330(line=418, offs=8) -- 16511(line=421, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 16936(line=432, offs=8) -- 17117(line=435, offs=65)
 */
 ATSif(
-tmp482
+tmp497
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16439(line=420, offs=5) -- 16446(line=420, offs=12)
+emit_instr: loc0 = build/src/lexer.dats: 17045(line=434, offs=5) -- 17052(line=434, offs=12)
 */
-ATSINSmove(tmpret474, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmpret489, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16479(line=421, offs=33) -- 16486(line=421, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 17085(line=435, offs=33) -- 17092(line=435, offs=40)
 */
-ATSINSmove(tmp487, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp502, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16502(line=421, offs=56) -- 16510(line=421, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 17108(line=435, offs=56) -- 17116(line=435, offs=64)
 */
-ATSINSmove(tmp488, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp503, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16454(line=421, offs=8) -- 16511(line=421, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 17060(line=435, offs=8) -- 17117(line=435, offs=65)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp487) ;
+ATSINSmove_tlcal(apy1, tmp502) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp488) ;
+ATSINSmove_tlcal(apy4, tmp503) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_c_comment_inner_88) ;
+ATSINSfgoto(__patsflab_lex_c_comment_inner_89) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret474) ;
-} /* end of [lex_c_comment_inner_88] */
+ATSreturn(tmpret489) ;
+} /* end of [lex_c_comment_inner_89] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -8100,9 +8327,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__11(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8141,9 +8368,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8172,89 +8399,89 @@ ATSreturn(tmpret63__7) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__7] */
 
 /*
-build/src/lexer.dats: 16516(line=423, offs=4) -- 16838(line=428, offs=24)
+build/src/lexer.dats: 17122(line=437, offs=4) -- 17444(line=442, offs=24)
 */
 /*
-local: put_span_20$0(level=0), lex_c_comment_inner_88$0(level=0)
-global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_c_comment_inner_88$0(level=0), lex_c_comment_91$0(level=0)
+local: put_span_20$0(level=0), lex_c_comment_inner_89$0(level=0)
+global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_c_comment_inner_89$0(level=0), lex_c_comment_92$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_c_comment_91(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_c_comment_92(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret489, postiats_tyrec_0) ;
-ATStmpdec(tmp490, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp491, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp492) ;
-ATStmpdec(tmp493, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret504, postiats_tyrec_0) ;
+ATStmpdec(tmp505, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp506, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp507) ;
+ATStmpdec(tmp508, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16516(line=423, offs=4) -- 16838(line=428, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 17122(line=437, offs=4) -- 17444(line=442, offs=24)
 */
-ATSINSflab(__patsflab_lex_c_comment_91):
+ATSINSflab(__patsflab_lex_c_comment_92):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16689(line=425, offs=85) -- 16838(line=428, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 17295(line=439, offs=85) -- 17444(line=442, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16729(line=426, offs=37) -- 16738(line=426, offs=46)
+emit_instr: loc0 = build/src/lexer.dats: 17335(line=440, offs=37) -- 17344(line=440, offs=46)
 */
-ATSINSmove(tmp491, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp506, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16704(line=426, offs=12) -- 16758(line=426, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 17310(line=440, offs=12) -- 17364(line=440, offs=66)
 */
-ATSINSmove(tmp490, lex_c_comment_inner_88(ATSPMVrefarg0(arg0), tmp491, arg1, arg2, arg2)) ;
+ATSINSmove(tmp505, lex_c_comment_inner_89(ATSPMVrefarg0(arg0), tmp506, arg1, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16770(line=427, offs=12) -- 16814(line=427, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 17376(line=441, offs=12) -- 17420(line=441, offs=56)
 */
-ATSINSmove_void(tmp492, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp490, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp507, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp505, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16824(line=428, offs=10) -- 16833(line=428, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 17430(line=442, offs=10) -- 17439(line=442, offs=19)
 */
-ATSINSmove(tmp493, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp508, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16818(line=428, offs=4) -- 16834(line=428, offs=20)
+emit_instr: loc0 = build/src/lexer.dats: 17424(line=442, offs=4) -- 17440(line=442, offs=20)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret489, postiats_tyrec_0, atslab__0, tmp490) ;
-ATSINSstore_fltrec_ofs(tmpret489, postiats_tyrec_0, atslab__1, tmp493) ;
+ATSINSstore_fltrec_ofs(tmpret504, postiats_tyrec_0, atslab__0, tmp505) ;
+ATSINSstore_fltrec_ofs(tmpret504, postiats_tyrec_0, atslab__1, tmp508) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16689(line=425, offs=85) -- 16838(line=428, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 17295(line=439, offs=85) -- 17444(line=442, offs=24)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret489) ;
-} /* end of [lex_c_comment_91] */
+ATSreturn(tmpret504) ;
+} /* end of [lex_c_comment_92] */
 
 /*
-build/src/lexer.dats: 16888(line=431, offs=5) -- 17602(line=447, offs=6)
+build/src/lexer.dats: 17494(line=445, offs=5) -- 18208(line=461, offs=6)
 */
 /*
-local: lex_ml_comment_inner_92$0(level=0)
-global: lex_ml_comment_inner_92$0(level=0)
+local: lex_ml_comment_inner_93$0(level=0)
+global: lex_ml_comment_inner_93$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_ml_comment_inner_92(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_ml_comment_inner_93(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -8263,269 +8490,269 @@ ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy5, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret494, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp495, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp498, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp501, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp504, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp505, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp506, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp507, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp508, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp509, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp510, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp511, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp512, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret509, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp510, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp513, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp514, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp515, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp516, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp517, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp518, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp516, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp519, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp520, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp521, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp522, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp523, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp524, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp525, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp526, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp527, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp528, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp529, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp530, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp531, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp532, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp533, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp534, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 16888(line=431, offs=5) -- 17602(line=447, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 17494(line=445, offs=5) -- 18208(line=461, offs=6)
 */
-ATSINSflab(__patsflab_lex_ml_comment_inner_92):
+ATSINSflab(__patsflab_lex_ml_comment_inner_93):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17060(line=434, offs=6) -- 17069(line=434, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 17666(line=448, offs=6) -- 17675(line=448, offs=15)
 */
-ATSINSmove(tmp495, ATSLIB_056_prelude__lte_g1int_int__29__12(arg5, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp510, ATSLIB_056_prelude__lte_g1int_int__29__12(arg5, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17057(line=434, offs=3) -- 17602(line=447, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 17663(line=448, offs=3) -- 18208(line=461, offs=6)
 */
 ATSif(
-tmp495
+tmp510
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17075(line=434, offs=21) -- 17078(line=434, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 17681(line=448, offs=21) -- 17684(line=448, offs=24)
 */
-ATSINSmove(tmpret494, arg1) ;
+ATSINSmove(tmpret509, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17089(line=435, offs=11) -- 17099(line=435, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 17695(line=449, offs=11) -- 17705(line=449, offs=21)
 */
-ATSINSmove(tmp498, ATSLIB_056_prelude__lte_g0int_int__5__7(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp513, ATSLIB_056_prelude__lte_g0int_int__5__7(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17086(line=435, offs=8) -- 17602(line=447, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 17692(line=449, offs=8) -- 18208(line=461, offs=6)
 */
 ATSif(
-tmp498
+tmp513
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17105(line=435, offs=27) -- 17108(line=435, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 17711(line=449, offs=27) -- 17714(line=449, offs=30)
 */
-ATSINSmove(tmpret494, arg1) ;
+ATSINSmove(tmpret509, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17119(line=436, offs=11) -- 17126(line=436, offs=18)
+emit_instr: loc0 = build/src/lexer.dats: 17725(line=450, offs=11) -- 17732(line=450, offs=18)
 */
-ATSINSmove(tmp504, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp519, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17119(line=436, offs=11) -- 17137(line=436, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 17725(line=450, offs=11) -- 17743(line=450, offs=29)
 */
-ATSINSmove(tmp501, ATSLIB_056_prelude__gte_g1int_int__24__8(tmp504, arg2)) ;
+ATSINSmove(tmp516, ATSLIB_056_prelude__gte_g1int_int__24__8(tmp519, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17116(line=436, offs=8) -- 17602(line=447, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 17722(line=450, offs=8) -- 18208(line=461, offs=6)
 */
 ATSif(
-tmp501
+tmp516
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17143(line=436, offs=35) -- 17150(line=436, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 17749(line=450, offs=35) -- 17756(line=450, offs=42)
 */
-ATSINSmove(tmpret494, arg2) ;
+ATSINSmove(tmpret509, arg2) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17158(line=437, offs=8) -- 17602(line=447, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 17764(line=451, offs=8) -- 18208(line=461, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17175(line=438, offs=14) -- 17194(line=438, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 17781(line=452, offs=14) -- 17800(line=452, offs=33)
 */
-ATSINSmove(tmp505, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp520, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17218(line=439, offs=24) -- 17225(line=439, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 17824(line=453, offs=24) -- 17831(line=453, offs=31)
 */
-ATSINSmove(tmp507, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp522, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17208(line=439, offs=14) -- 17231(line=439, offs=37)
+emit_instr: loc0 = build/src/lexer.dats: 17814(line=453, offs=14) -- 17837(line=453, offs=37)
 */
-ATSINSmove(tmp506, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp507, arg3)) ;
+ATSINSmove(tmp521, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp522, arg3)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17244(line=441, offs=8) -- 17292(line=441, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 17850(line=455, offs=8) -- 17898(line=455, offs=56)
 */
-ATSINSmove(tmp509, atspre_g0int_eq_int(tmp505, ATSPMVi0nt(40))) ;
+ATSINSmove(tmp524, atspre_g0int_eq_int(tmp520, ATSPMVi0nt(40))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17244(line=441, offs=8) -- 17292(line=441, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 17850(line=455, offs=8) -- 17898(line=455, offs=56)
 */
 ATSif(
-tmp509
+tmp524
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17244(line=441, offs=8) -- 17292(line=441, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 17850(line=455, offs=8) -- 17898(line=455, offs=56)
 */
-ATSINSmove(tmp508, atspre_g0int_eq_int(tmp506, ATSPMVi0nt(42))) ;
+ATSINSmove(tmp523, atspre_g0int_eq_int(tmp521, ATSPMVi0nt(42))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17244(line=441, offs=8) -- 17292(line=441, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 17850(line=455, offs=8) -- 17898(line=455, offs=56)
 */
-ATSINSmove(tmp508, ATSPMVbool_false()) ;
+ATSINSmove(tmp523, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17241(line=441, offs=5) -- 17596(line=446, offs=72)
+emit_instr: loc0 = build/src/lexer.dats: 17847(line=455, offs=5) -- 18202(line=460, offs=72)
 */
 ATSif(
-tmp508
+tmp523
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17330(line=442, offs=33) -- 17337(line=442, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 17936(line=456, offs=33) -- 17943(line=456, offs=40)
 */
-ATSINSmove(tmp510, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp525, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17353(line=442, offs=56) -- 17362(line=442, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 17959(line=456, offs=56) -- 17968(line=456, offs=65)
 */
-ATSINSmove(tmp511, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp526, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17364(line=442, offs=67) -- 17372(line=442, offs=75)
+emit_instr: loc0 = build/src/lexer.dats: 17970(line=456, offs=67) -- 17978(line=456, offs=75)
 */
-ATSINSmove(tmp512, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp527, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17304(line=442, offs=7) -- 17373(line=442, offs=76)
+emit_instr: loc0 = build/src/lexer.dats: 17910(line=456, offs=7) -- 17979(line=456, offs=76)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp510) ;
+ATSINSmove_tlcal(apy1, tmp525) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp511) ;
-ATSINSmove_tlcal(apy5, tmp512) ;
+ATSINSmove_tlcal(apy4, tmp526) ;
+ATSINSmove_tlcal(apy5, tmp527) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_lex_ml_comment_inner_92) ;
+ATSINSfgoto(__patsflab_lex_ml_comment_inner_93) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17386(line=443, offs=13) -- 17434(line=443, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 17992(line=457, offs=13) -- 18040(line=457, offs=61)
 */
-ATSINSmove(tmp514, atspre_g0int_eq_int(tmp505, ATSPMVi0nt(42))) ;
+ATSINSmove(tmp529, atspre_g0int_eq_int(tmp520, ATSPMVi0nt(42))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17386(line=443, offs=13) -- 17434(line=443, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 17992(line=457, offs=13) -- 18040(line=457, offs=61)
 */
 ATSif(
-tmp514
+tmp529
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17386(line=443, offs=13) -- 17434(line=443, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 17992(line=457, offs=13) -- 18040(line=457, offs=61)
 */
-ATSINSmove(tmp513, atspre_g0int_eq_int(tmp506, ATSPMVi0nt(41))) ;
+ATSINSmove(tmp528, atspre_g0int_eq_int(tmp521, ATSPMVi0nt(41))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17386(line=443, offs=13) -- 17434(line=443, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 17992(line=457, offs=13) -- 18040(line=457, offs=61)
 */
-ATSINSmove(tmp513, ATSPMVbool_false()) ;
+ATSINSmove(tmp528, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17383(line=443, offs=10) -- 17596(line=446, offs=72)
+emit_instr: loc0 = build/src/lexer.dats: 17989(line=457, offs=10) -- 18202(line=460, offs=72)
 */
 ATSif(
-tmp513
+tmp528
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17472(line=444, offs=33) -- 17479(line=444, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 18078(line=458, offs=33) -- 18085(line=458, offs=40)
 */
-ATSINSmove(tmp515, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp530, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17495(line=444, offs=56) -- 17504(line=444, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 18101(line=458, offs=56) -- 18110(line=458, offs=65)
 */
-ATSINSmove(tmp516, atspre_g0int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp531, atspre_g0int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17506(line=444, offs=67) -- 17514(line=444, offs=75)
+emit_instr: loc0 = build/src/lexer.dats: 18112(line=458, offs=67) -- 18120(line=458, offs=75)
 */
-ATSINSmove(tmp517, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp532, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17446(line=444, offs=7) -- 17515(line=444, offs=76)
+emit_instr: loc0 = build/src/lexer.dats: 18052(line=458, offs=7) -- 18121(line=458, offs=76)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp515) ;
+ATSINSmove_tlcal(apy1, tmp530) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp516) ;
-ATSINSmove_tlcal(apy5, tmp517) ;
+ATSINSmove_tlcal(apy4, tmp531) ;
+ATSINSmove_tlcal(apy5, tmp532) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_lex_ml_comment_inner_92) ;
+ATSINSfgoto(__patsflab_lex_ml_comment_inner_93) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17557(line=446, offs=33) -- 17564(line=446, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 18163(line=460, offs=33) -- 18170(line=460, offs=40)
 */
-ATSINSmove(tmp518, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp533, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17587(line=446, offs=63) -- 17595(line=446, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 18193(line=460, offs=63) -- 18201(line=460, offs=71)
 */
-ATSINSmove(tmp519, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp534, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17531(line=446, offs=7) -- 17596(line=446, offs=72)
+emit_instr: loc0 = build/src/lexer.dats: 18137(line=460, offs=7) -- 18202(line=460, offs=72)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp518) ;
+ATSINSmove_tlcal(apy1, tmp533) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
 ATSINSmove_tlcal(apy4, arg4) ;
-ATSINSmove_tlcal(apy5, tmp519) ;
+ATSINSmove_tlcal(apy5, tmp534) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_lex_ml_comment_inner_92) ;
+ATSINSfgoto(__patsflab_lex_ml_comment_inner_93) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17158(line=437, offs=8) -- 17602(line=447, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 17764(line=451, offs=8) -- 18208(line=461, offs=6)
 */
 /*
 INSletpop()
@@ -8534,8 +8761,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret494) ;
-} /* end of [lex_ml_comment_inner_92] */
+ATSreturn(tmpret509) ;
+} /* end of [lex_ml_comment_inner_93] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -8548,9 +8775,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8589,9 +8816,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8630,9 +8857,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8661,89 +8888,89 @@ ATSreturn(tmpret63__8) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__8] */
 
 /*
-build/src/lexer.dats: 17607(line=449, offs=4) -- 17934(line=454, offs=24)
+build/src/lexer.dats: 18213(line=463, offs=4) -- 18540(line=468, offs=24)
 */
 /*
-local: put_span_20$0(level=0), lex_ml_comment_inner_92$0(level=0)
-global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_ml_comment_inner_92$0(level=0), lex_ml_comment_96$0(level=0)
+local: put_span_20$0(level=0), lex_ml_comment_inner_93$0(level=0)
+global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_ml_comment_inner_93$0(level=0), lex_ml_comment_97$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_ml_comment_96(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_ml_comment_97(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret520, postiats_tyrec_0) ;
-ATStmpdec(tmp521, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp522, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp523) ;
-ATStmpdec(tmp524, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret535, postiats_tyrec_0) ;
+ATStmpdec(tmp536, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp537, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp538) ;
+ATStmpdec(tmp539, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17607(line=449, offs=4) -- 17934(line=454, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 18213(line=463, offs=4) -- 18540(line=468, offs=24)
 */
-ATSINSflab(__patsflab_lex_ml_comment_96):
+ATSINSflab(__patsflab_lex_ml_comment_97):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17781(line=451, offs=85) -- 17934(line=454, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 18387(line=465, offs=85) -- 18540(line=468, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17822(line=452, offs=38) -- 17831(line=452, offs=47)
+emit_instr: loc0 = build/src/lexer.dats: 18428(line=466, offs=38) -- 18437(line=466, offs=47)
 */
-ATSINSmove(tmp522, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp537, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17796(line=452, offs=12) -- 17854(line=452, offs=70)
+emit_instr: loc0 = build/src/lexer.dats: 18402(line=466, offs=12) -- 18460(line=466, offs=70)
 */
-ATSINSmove(tmp521, lex_ml_comment_inner_92(ATSPMVrefarg0(arg0), tmp522, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
+ATSINSmove(tmp536, lex_ml_comment_inner_93(ATSPMVrefarg0(arg0), tmp537, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17866(line=453, offs=12) -- 17910(line=453, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 18472(line=467, offs=12) -- 18516(line=467, offs=56)
 */
-ATSINSmove_void(tmp523, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp521, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp538, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp536, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17920(line=454, offs=10) -- 17929(line=454, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 18526(line=468, offs=10) -- 18535(line=468, offs=19)
 */
-ATSINSmove(tmp524, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp539, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17914(line=454, offs=4) -- 17930(line=454, offs=20)
+emit_instr: loc0 = build/src/lexer.dats: 18520(line=468, offs=4) -- 18536(line=468, offs=20)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret520, postiats_tyrec_0, atslab__0, tmp521) ;
-ATSINSstore_fltrec_ofs(tmpret520, postiats_tyrec_0, atslab__1, tmp524) ;
+ATSINSstore_fltrec_ofs(tmpret535, postiats_tyrec_0, atslab__0, tmp536) ;
+ATSINSstore_fltrec_ofs(tmpret535, postiats_tyrec_0, atslab__1, tmp539) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17781(line=451, offs=85) -- 17934(line=454, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 18387(line=465, offs=85) -- 18540(line=468, offs=24)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret520) ;
-} /* end of [lex_ml_comment_96] */
+ATSreturn(tmpret535) ;
+} /* end of [lex_ml_comment_97] */
 
 /*
-build/src/lexer.dats: 17987(line=457, offs=5) -- 18449(line=467, offs=6)
+build/src/lexer.dats: 18593(line=471, offs=5) -- 19055(line=481, offs=6)
 */
 /*
-local: lex_string_inner_97$0(level=0)
-global: lex_string_inner_97$0(level=0)
+local: lex_string_inner_98$0(level=0)
+global: lex_string_inner_98$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_string_inner_97(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+lex_string_inner_98(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -8751,156 +8978,156 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret525, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp526, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp529, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp532, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp533, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp534, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp535, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp536, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp537, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp538, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret540, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp541, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp544, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp547, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp548, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp549, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp550, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp551, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp552, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp553, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 17987(line=457, offs=5) -- 18449(line=467, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 18593(line=471, offs=5) -- 19055(line=481, offs=6)
 */
-ATSINSflab(__patsflab_lex_string_inner_97):
+ATSINSflab(__patsflab_lex_string_inner_98):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18143(line=460, offs=6) -- 18152(line=460, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 18749(line=474, offs=6) -- 18758(line=474, offs=15)
 */
-ATSINSmove(tmp526, ATSLIB_056_prelude__lte_g1int_int__29__13(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp541, ATSLIB_056_prelude__lte_g1int_int__29__13(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18140(line=460, offs=3) -- 18449(line=467, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 18746(line=474, offs=3) -- 19055(line=481, offs=6)
 */
 ATSif(
-tmp526
+tmp541
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18158(line=460, offs=21) -- 18161(line=460, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 18764(line=474, offs=21) -- 18767(line=474, offs=24)
 */
-ATSINSmove(tmpret525, arg1) ;
+ATSINSmove(tmpret540, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18172(line=461, offs=11) -- 18186(line=461, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 18778(line=475, offs=11) -- 18792(line=475, offs=25)
 */
-ATSINSmove(tmp529, ATSLIB_056_prelude__gte_g1int_int__24__9(arg1, arg2)) ;
+ATSINSmove(tmp544, ATSLIB_056_prelude__gte_g1int_int__24__9(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18169(line=461, offs=8) -- 18449(line=467, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 18775(line=475, offs=8) -- 19055(line=481, offs=6)
 */
 ATSif(
-tmp529
+tmp544
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18192(line=461, offs=31) -- 18195(line=461, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 18798(line=475, offs=31) -- 18801(line=475, offs=34)
 */
-ATSINSmove(tmpret525, arg1) ;
+ATSINSmove(tmpret540, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18203(line=462, offs=8) -- 18449(line=467, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 18809(line=476, offs=8) -- 19055(line=481, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18215(line=462, offs=20) -- 18234(line=462, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 18821(line=476, offs=20) -- 18840(line=476, offs=39)
 */
-ATSINSmove(tmp532, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp547, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18245(line=463, offs=8) -- 18266(line=463, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 18851(line=477, offs=8) -- 18872(line=477, offs=29)
 */
-ATSINSmove(tmp533, atspre_g0int_eq_int(tmp532, ATSPMVi0nt(92))) ;
+ATSINSmove(tmp548, atspre_g0int_eq_int(tmp547, ATSPMVi0nt(92))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18242(line=463, offs=5) -- 18443(line=466, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 18848(line=477, offs=5) -- 19049(line=480, offs=64)
 */
 ATSif(
-tmp533
+tmp548
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18300(line=464, offs=29) -- 18307(line=464, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 18906(line=478, offs=29) -- 18913(line=478, offs=36)
 */
-ATSINSmove(tmp534, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp549, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18323(line=464, offs=52) -- 18331(line=464, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 18929(line=478, offs=52) -- 18937(line=478, offs=60)
 */
-ATSINSmove(tmp535, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp550, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18278(line=464, offs=7) -- 18332(line=464, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 18884(line=478, offs=7) -- 18938(line=478, offs=61)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp534) ;
+ATSINSmove_tlcal(apy1, tmp549) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp535) ;
+ATSINSmove_tlcal(apy4, tmp550) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_string_inner_97) ;
+ATSINSfgoto(__patsflab_lex_string_inner_98) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18345(line=465, offs=13) -- 18366(line=465, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 18951(line=479, offs=13) -- 18972(line=479, offs=34)
 */
-ATSINSmove(tmp536, atspre_g0int_eq_int(tmp532, ATSPMVi0nt(34))) ;
+ATSINSmove(tmp551, atspre_g0int_eq_int(tmp547, ATSPMVi0nt(34))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18342(line=465, offs=10) -- 18443(line=466, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 18948(line=479, offs=10) -- 19049(line=480, offs=64)
 */
 ATSif(
-tmp536
+tmp551
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18372(line=465, offs=40) -- 18379(line=465, offs=47)
+emit_instr: loc0 = build/src/lexer.dats: 18978(line=479, offs=40) -- 18985(line=479, offs=47)
 */
-ATSINSmove(tmpret525, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret540, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18411(line=466, offs=32) -- 18418(line=466, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 19017(line=480, offs=32) -- 19024(line=480, offs=39)
 */
-ATSINSmove(tmp537, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp552, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18434(line=466, offs=55) -- 18442(line=466, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 19040(line=480, offs=55) -- 19048(line=480, offs=63)
 */
-ATSINSmove(tmp538, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp553, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18389(line=466, offs=10) -- 18443(line=466, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 18995(line=480, offs=10) -- 19049(line=480, offs=64)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp537) ;
+ATSINSmove_tlcal(apy1, tmp552) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp538) ;
+ATSINSmove_tlcal(apy4, tmp553) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_string_inner_97) ;
+ATSINSfgoto(__patsflab_lex_string_inner_98) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18203(line=462, offs=8) -- 18449(line=467, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 18809(line=476, offs=8) -- 19055(line=481, offs=6)
 */
 /*
 INSletpop()
@@ -8908,8 +9135,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret525) ;
-} /* end of [lex_string_inner_97] */
+ATSreturn(tmpret540) ;
+} /* end of [lex_string_inner_98] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -8922,9 +9149,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8963,9 +9190,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8994,216 +9221,216 @@ ATSreturn(tmpret63__9) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__9] */
 
 /*
-build/src/lexer.dats: 18454(line=469, offs=4) -- 18770(line=474, offs=24)
+build/src/lexer.dats: 19060(line=483, offs=4) -- 19376(line=488, offs=24)
 */
 /*
-local: put_span_20$0(level=0), lex_string_inner_97$0(level=0)
-global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_string_inner_97$0(level=0), lex_string_100$0(level=0)
+local: put_span_20$0(level=0), lex_string_inner_98$0(level=0)
+global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_string_inner_98$0(level=0), lex_string_101$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_string_100(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_string_101(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret539, postiats_tyrec_0) ;
-ATStmpdec(tmp540, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp541, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp542) ;
-ATStmpdec(tmp543, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret554, postiats_tyrec_0) ;
+ATStmpdec(tmp555, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp556, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp557) ;
+ATStmpdec(tmp558, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18454(line=469, offs=4) -- 18770(line=474, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 19060(line=483, offs=4) -- 19376(line=488, offs=24)
 */
-ATSINSflab(__patsflab_lex_string_100):
+ATSINSflab(__patsflab_lex_string_101):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18624(line=471, offs=85) -- 18770(line=474, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 19230(line=485, offs=85) -- 19376(line=488, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18661(line=472, offs=34) -- 18670(line=472, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 19267(line=486, offs=34) -- 19276(line=486, offs=43)
 */
-ATSINSmove(tmp541, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp556, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18639(line=472, offs=12) -- 18690(line=472, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 19245(line=486, offs=12) -- 19296(line=486, offs=63)
 */
-ATSINSmove(tmp540, lex_string_inner_97(ATSPMVrefarg0(arg0), tmp541, arg1, arg2, arg2)) ;
+ATSINSmove(tmp555, lex_string_inner_98(ATSPMVrefarg0(arg0), tmp556, arg1, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18702(line=473, offs=12) -- 18746(line=473, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 19308(line=487, offs=12) -- 19352(line=487, offs=56)
 */
-ATSINSmove_void(tmp542, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp540, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp557, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp555, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18756(line=474, offs=10) -- 18765(line=474, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 19362(line=488, offs=10) -- 19371(line=488, offs=19)
 */
-ATSINSmove(tmp543, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp558, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18750(line=474, offs=4) -- 18766(line=474, offs=20)
+emit_instr: loc0 = build/src/lexer.dats: 19356(line=488, offs=4) -- 19372(line=488, offs=20)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret539, postiats_tyrec_0, atslab__0, tmp540) ;
-ATSINSstore_fltrec_ofs(tmpret539, postiats_tyrec_0, atslab__1, tmp543) ;
+ATSINSstore_fltrec_ofs(tmpret554, postiats_tyrec_0, atslab__0, tmp555) ;
+ATSINSstore_fltrec_ofs(tmpret554, postiats_tyrec_0, atslab__1, tmp558) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18624(line=471, offs=85) -- 18770(line=474, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 19230(line=485, offs=85) -- 19376(line=488, offs=24)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret539) ;
-} /* end of [lex_string_100] */
+ATSreturn(tmpret554) ;
+} /* end of [lex_string_101] */
 
 /*
-build/src/lexer.dats: 18804(line=477, offs=4) -- 19262(line=485, offs=24)
+build/src/lexer.dats: 19410(line=491, offs=4) -- 19868(line=499, offs=24)
 */
 /*
 local: put_span_20$0(level=0)
-global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_char_lit_101$0(level=0)
+global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_char_lit_102$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_char_lit_101(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_char_lit_102(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret544, postiats_tyrec_0) ;
-ATStmpdec(tmp545, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp546, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp547, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp548, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp549, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp550, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp551, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp552) ;
-ATStmpdec(tmp553, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret559, postiats_tyrec_0) ;
+ATStmpdec(tmp560, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp561, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp562, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp563, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp564, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp565, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp566, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp567) ;
+ATStmpdec(tmp568, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18804(line=477, offs=4) -- 19262(line=485, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 19410(line=491, offs=4) -- 19868(line=499, offs=24)
 */
-ATSINSflab(__patsflab_lex_char_lit_101):
+ATSINSflab(__patsflab_lex_char_lit_102):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18976(line=479, offs=85) -- 19262(line=485, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 19582(line=493, offs=85) -- 19868(line=499, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18991(line=480, offs=12) -- 19000(line=480, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 19597(line=494, offs=12) -- 19606(line=494, offs=21)
 */
-ATSINSmove(tmp545, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp560, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19012(line=481, offs=12) -- 19030(line=481, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 19618(line=495, offs=12) -- 19636(line=495, offs=30)
 */
-ATSINSmove(tmp546, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp545, arg2)) ;
+ATSINSmove(tmp561, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp560, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19046(line=482, offs=16) -- 19068(line=482, offs=38)
+emit_instr: loc0 = build/src/lexer.dats: 19652(line=496, offs=16) -- 19674(line=496, offs=38)
 */
-ATSINSmove(tmp548, atspre_g0int_eq_int(tmp546, ATSPMVi0nt(92))) ;
+ATSINSmove(tmp563, atspre_g0int_eq_int(tmp561, ATSPMVi0nt(92))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19043(line=482, offs=13) -- 19092(line=482, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 19649(line=496, offs=13) -- 19698(line=496, offs=62)
 */
 ATSif(
-tmp548
+tmp563
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19074(line=482, offs=44) -- 19080(line=482, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 19680(line=496, offs=44) -- 19686(line=496, offs=50)
 */
-ATSINSmove(tmp547, atspre_g1int_add_int(tmp545, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp562, atspre_g1int_add_int(tmp560, ATSPMVi0nt(2))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19086(line=482, offs=56) -- 19092(line=482, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 19692(line=496, offs=56) -- 19698(line=496, offs=62)
 */
-ATSINSmove(tmp547, atspre_g1int_add_int(tmp545, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp562, atspre_g1int_add_int(tmp560, ATSPMVi0nt(1))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19131(line=483, offs=31) -- 19149(line=483, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 19737(line=497, offs=31) -- 19755(line=497, offs=49)
 */
-ATSINSmove(tmp551, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp547, arg2)) ;
+ATSINSmove(tmp566, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp562, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19116(line=483, offs=16) -- 19154(line=483, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 19722(line=497, offs=16) -- 19760(line=497, offs=54)
 */
-ATSINSmove(tmp550, atspre_g0int_eq_int(tmp551, ATSPMVi0nt(39))) ;
+ATSINSmove(tmp565, atspre_g0int_eq_int(tmp566, ATSPMVi0nt(39))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19113(line=483, offs=13) -- 19174(line=483, offs=74)
+emit_instr: loc0 = build/src/lexer.dats: 19719(line=497, offs=13) -- 19780(line=497, offs=74)
 */
 ATSif(
-tmp550
+tmp565
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19160(line=483, offs=60) -- 19166(line=483, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 19766(line=497, offs=60) -- 19772(line=497, offs=66)
 */
-ATSINSmove(tmp549, atspre_g1int_add_int(tmp547, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp564, atspre_g1int_add_int(tmp562, ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19172(line=483, offs=72) -- 19174(line=483, offs=74)
+emit_instr: loc0 = build/src/lexer.dats: 19778(line=497, offs=72) -- 19780(line=497, offs=74)
 */
-ATSINSmove(tmp549, tmp547) ;
+ATSINSmove(tmp564, tmp562) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19194(line=484, offs=12) -- 19238(line=484, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 19800(line=498, offs=12) -- 19844(line=498, offs=56)
 */
-ATSINSmove_void(tmp552, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp549, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp567, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp564, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19248(line=485, offs=10) -- 19257(line=485, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 19854(line=499, offs=10) -- 19863(line=499, offs=19)
 */
-ATSINSmove(tmp553, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp568, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19242(line=485, offs=4) -- 19258(line=485, offs=20)
+emit_instr: loc0 = build/src/lexer.dats: 19848(line=499, offs=4) -- 19864(line=499, offs=20)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret544, postiats_tyrec_0, atslab__0, tmp549) ;
-ATSINSstore_fltrec_ofs(tmpret544, postiats_tyrec_0, atslab__1, tmp553) ;
+ATSINSstore_fltrec_ofs(tmpret559, postiats_tyrec_0, atslab__0, tmp564) ;
+ATSINSstore_fltrec_ofs(tmpret559, postiats_tyrec_0, atslab__1, tmp568) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 18976(line=479, offs=85) -- 19262(line=485, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 19582(line=493, offs=85) -- 19868(line=499, offs=24)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret544) ;
-} /* end of [lex_char_lit_101] */
+ATSreturn(tmpret559) ;
+} /* end of [lex_char_lit_102] */
 
 /*
-build/src/lexer.dats: 19296(line=488, offs=5) -- 19701(line=496, offs=63)
+build/src/lexer.dats: 19902(line=502, offs=5) -- 20307(line=510, offs=63)
 */
 /*
-local: lex_extcode_inner_102$0(level=0)
-global: lex_extcode_inner_102$0(level=0)
+local: lex_extcode_inner_103$0(level=0)
+global: lex_extcode_inner_103$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_extcode_inner_102(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+lex_extcode_inner_103(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -9211,142 +9438,142 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret554, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp555, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp558, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp561, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp562, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp563, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp564, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp565, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp566, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp567, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp568, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret569, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp570, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp573, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp576, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp577, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp578, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp579, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp580, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp581, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp582, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp583, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19296(line=488, offs=5) -- 19701(line=496, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 19902(line=502, offs=5) -- 20307(line=510, offs=63)
 */
-ATSINSflab(__patsflab_lex_extcode_inner_102):
+ATSINSflab(__patsflab_lex_extcode_inner_103):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19453(line=491, offs=6) -- 19462(line=491, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 20059(line=505, offs=6) -- 20068(line=505, offs=15)
 */
-ATSINSmove(tmp555, ATSLIB_056_prelude__lte_g1int_int__29__14(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp570, ATSLIB_056_prelude__lte_g1int_int__29__14(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19450(line=491, offs=3) -- 19701(line=496, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 20056(line=505, offs=3) -- 20307(line=510, offs=63)
 */
 ATSif(
-tmp555
+tmp570
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19468(line=491, offs=21) -- 19471(line=491, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 20074(line=505, offs=21) -- 20077(line=505, offs=24)
 */
-ATSINSmove(tmpret554, arg1) ;
+ATSINSmove(tmpret569, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19482(line=492, offs=11) -- 19489(line=492, offs=18)
+emit_instr: loc0 = build/src/lexer.dats: 20088(line=506, offs=11) -- 20095(line=506, offs=18)
 */
-ATSINSmove(tmp561, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp576, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19482(line=492, offs=11) -- 19500(line=492, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 20088(line=506, offs=11) -- 20106(line=506, offs=29)
 */
-ATSINSmove(tmp558, ATSLIB_056_prelude__gte_g1int_int__24__10(tmp561, arg2)) ;
+ATSINSmove(tmp573, ATSLIB_056_prelude__gte_g1int_int__24__10(tmp576, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19479(line=492, offs=8) -- 19701(line=496, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 20085(line=506, offs=8) -- 20307(line=510, offs=63)
 */
 ATSif(
-tmp558
+tmp573
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19506(line=492, offs=35) -- 19513(line=492, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 20112(line=506, offs=35) -- 20119(line=506, offs=42)
 */
-ATSINSmove(tmpret554, arg2) ;
+ATSINSmove(tmpret569, arg2) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
-ATSINSmove(tmp564, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp579, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
-ATSINSmove(tmp563, atspre_g0int_eq_int(tmp564, ATSPMVi0nt(37))) ;
+ATSINSmove(tmp578, atspre_g0int_eq_int(tmp579, ATSPMVi0nt(37))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
 ATSif(
-tmp563
+tmp578
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
-ATSINSmove(tmp566, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp581, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
-ATSINSmove(tmp565, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp566, arg3)) ;
+ATSINSmove(tmp580, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp581, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
-ATSINSmove(tmp562, atspre_g0int_eq_int(tmp565, ATSPMVi0nt(125))) ;
+ATSINSmove(tmp577, atspre_g0int_eq_int(tmp580, ATSPMVi0nt(125))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19524(line=493, offs=11) -- 19621(line=494, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 20130(line=507, offs=11) -- 20227(line=508, offs=55)
 */
-ATSINSmove(tmp562, ATSPMVbool_false()) ;
+ATSINSmove(tmp577, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19521(line=493, offs=8) -- 19701(line=496, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 20127(line=507, offs=8) -- 20307(line=510, offs=63)
 */
 ATSif(
-tmp562
+tmp577
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19631(line=495, offs=5) -- 19638(line=495, offs=12)
+emit_instr: loc0 = build/src/lexer.dats: 20237(line=509, offs=5) -- 20244(line=509, offs=12)
 */
-ATSINSmove(tmpret554, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmpret569, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19669(line=496, offs=31) -- 19676(line=496, offs=38)
+emit_instr: loc0 = build/src/lexer.dats: 20275(line=510, offs=31) -- 20282(line=510, offs=38)
 */
-ATSINSmove(tmp567, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp582, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19692(line=496, offs=54) -- 19700(line=496, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 20298(line=510, offs=54) -- 20306(line=510, offs=62)
 */
-ATSINSmove(tmp568, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp583, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19646(line=496, offs=8) -- 19701(line=496, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 20252(line=510, offs=8) -- 20307(line=510, offs=63)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp567) ;
+ATSINSmove_tlcal(apy1, tmp582) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp568) ;
+ATSINSmove_tlcal(apy4, tmp583) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_extcode_inner_102) ;
+ATSINSfgoto(__patsflab_lex_extcode_inner_103) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret554) ;
-} /* end of [lex_extcode_inner_102] */
+ATSreturn(tmpret569) ;
+} /* end of [lex_extcode_inner_103] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -9359,9 +9586,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__14(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9400,9 +9627,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9431,205 +9658,205 @@ ATSreturn(tmpret63__10) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__10] */
 
 /*
-build/src/lexer.dats: 19706(line=498, offs=4) -- 20400(line=511, offs=24)
+build/src/lexer.dats: 20312(line=512, offs=4) -- 21006(line=525, offs=24)
 */
 /*
-local: put_span_20$0(level=0), lex_extcode_inner_102$0(level=0)
-global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_extcode_inner_102$0(level=0), lex_extcode_105$0(level=0)
+local: put_span_20$0(level=0), lex_extcode_inner_103$0(level=0)
+global: put_i32_17$0(level=0), put_span_20$0(level=0), lex_extcode_inner_103$0(level=0), lex_extcode_106$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_extcode_105(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_extcode_106(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret569, postiats_tyrec_0) ;
-ATStmpdec(tmp570, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp571, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp572, postiats_tyrec_0) ;
-ATStmpdec(tmp573, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp574, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp575, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp576, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp577, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp578, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp579, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp580, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp581, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp582, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp583, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp586) ;
-ATStmpdec(tmp587, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret584, postiats_tyrec_0) ;
+ATStmpdec(tmp585, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp586, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp587, postiats_tyrec_0) ;
+ATStmpdec(tmp588, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp589, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp590, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp591, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp592, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp593, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp594, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp595, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp596, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp597, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp598, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp601) ;
+ATStmpdec(tmp602, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19706(line=498, offs=4) -- 20400(line=511, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 20312(line=512, offs=4) -- 21006(line=525, offs=24)
 */
-ATSINSflab(__patsflab_lex_extcode_105):
+ATSINSflab(__patsflab_lex_extcode_106):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19877(line=500, offs=85) -- 20400(line=511, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 20483(line=514, offs=85) -- 21006(line=525, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19900(line=501, offs=20) -- 19909(line=501, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 20506(line=515, offs=20) -- 20515(line=515, offs=29)
 */
-ATSINSmove(tmp570, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp585, atspre_g1int_add_int(arg4, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19921(line=502, offs=12) -- 19947(line=502, offs=38)
+emit_instr: loc0 = build/src/lexer.dats: 20527(line=516, offs=12) -- 20553(line=516, offs=38)
 */
-ATSINSmove(tmp571, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp570, arg2)) ;
+ATSINSmove(tmp586, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp585, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19980(line=504, offs=9) -- 20002(line=504, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 20586(line=518, offs=9) -- 20608(line=518, offs=31)
 */
-ATSINSmove(tmp573, atspre_g0int_eq_int(tmp571, ATSPMVi0nt(94))) ;
+ATSINSmove(tmp588, atspre_g0int_eq_int(tmp586, ATSPMVi0nt(94))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19977(line=504, offs=6) -- 20179(line=507, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 20583(line=518, offs=6) -- 20785(line=521, offs=27)
 */
 ATSif(
-tmp573
+tmp588
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20013(line=504, offs=42) -- 20027(line=504, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 20619(line=518, offs=42) -- 20633(line=518, offs=56)
 */
-ATSINSmove(tmp574, atspre_g1int_add_int(tmp570, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp589, atspre_g1int_add_int(tmp585, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20008(line=504, offs=37) -- 20028(line=504, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 20614(line=518, offs=37) -- 20634(line=518, offs=57)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__0, ATSPMVi0nt(1)) ;
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__1, tmp574) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__0, ATSPMVi0nt(1)) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__1, tmp589) ;
 ATSINSmove_fltrec_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20042(line=505, offs=14) -- 20064(line=505, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 20648(line=519, offs=14) -- 20670(line=519, offs=36)
 */
-ATSINSmove(tmp575, atspre_g0int_eq_int(tmp571, ATSPMVi0nt(36))) ;
+ATSINSmove(tmp590, atspre_g0int_eq_int(tmp586, ATSPMVi0nt(36))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20039(line=505, offs=11) -- 20179(line=507, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 20645(line=519, offs=11) -- 20785(line=521, offs=27)
 */
 ATSif(
-tmp575
+tmp590
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20075(line=505, offs=47) -- 20089(line=505, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 20681(line=519, offs=47) -- 20695(line=519, offs=61)
 */
-ATSINSmove(tmp576, atspre_g1int_add_int(tmp570, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp591, atspre_g1int_add_int(tmp585, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20070(line=505, offs=42) -- 20090(line=505, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 20676(line=519, offs=42) -- 20696(line=519, offs=62)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__0, ATSPMVi0nt(2)) ;
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__1, tmp576) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__0, ATSPMVi0nt(2)) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__1, tmp591) ;
 ATSINSmove_fltrec_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20104(line=506, offs=14) -- 20126(line=506, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 20710(line=520, offs=14) -- 20732(line=520, offs=36)
 */
-ATSINSmove(tmp577, atspre_g0int_eq_int(tmp571, ATSPMVi0nt(35))) ;
+ATSINSmove(tmp592, atspre_g0int_eq_int(tmp586, ATSPMVi0nt(35))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20101(line=506, offs=11) -- 20179(line=507, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 20707(line=520, offs=11) -- 20785(line=521, offs=27)
 */
 ATSif(
-tmp577
+tmp592
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20137(line=506, offs=47) -- 20151(line=506, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 20743(line=520, offs=47) -- 20757(line=520, offs=61)
 */
-ATSINSmove(tmp578, atspre_g1int_add_int(tmp570, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp593, atspre_g1int_add_int(tmp585, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20132(line=506, offs=42) -- 20152(line=506, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 20738(line=520, offs=42) -- 20758(line=520, offs=62)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__0, ATSPMVi0nt(3)) ;
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__1, tmp578) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__0, ATSPMVi0nt(3)) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__1, tmp593) ;
 ATSINSmove_fltrec_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20163(line=507, offs=11) -- 20179(line=507, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 20769(line=521, offs=11) -- 20785(line=521, offs=27)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__0, ATSPMVi0nt(0)) ;
-ATSINSstore_fltrec_ofs(tmp572, postiats_tyrec_0, atslab__1, tmp570) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__0, ATSPMVi0nt(0)) ;
+ATSINSstore_fltrec_ofs(tmp587, postiats_tyrec_0, atslab__1, tmp585) ;
 ATSINSmove_fltrec_end()
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19956(line=503, offs=9) -- 19960(line=503, offs=13)
+emit_instr: loc0 = build/src/lexer.dats: 20562(line=517, offs=9) -- 20566(line=517, offs=13)
 */
-ATSINSmove(tmp579, ATSSELfltrec(tmp572, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp594, ATSSELfltrec(tmp587, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19962(line=503, offs=15) -- 19968(line=503, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 20568(line=517, offs=15) -- 20574(line=517, offs=21)
 */
-ATSINSmove(tmp580, ATSSELfltrec(tmp572, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp595, ATSSELfltrec(tmp587, postiats_tyrec_0, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20207(line=508, offs=12) -- 20256(line=508, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 20813(line=522, offs=12) -- 20862(line=522, offs=61)
 */
-ATSINSmove(tmp581, lex_extcode_inner_102(ATSPMVrefarg0(arg0), tmp580, arg1, arg2, arg2)) ;
+ATSINSmove(tmp596, lex_extcode_inner_103(ATSPMVrefarg0(arg0), tmp595, arg1, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20274(line=509, offs=18) -- 20281(line=509, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 20880(line=523, offs=18) -- 20887(line=523, offs=25)
 */
-ATSINSmove(tmp583, ATSLIB_056_prelude__gte_g1int_int__24__11(tmp581, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp598, ATSLIB_056_prelude__gte_g1int_int__24__11(tmp596, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20271(line=509, offs=15) -- 20301(line=509, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 20877(line=523, offs=15) -- 20907(line=523, offs=45)
 */
 ATSif(
-tmp583
+tmp598
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20287(line=509, offs=31) -- 20293(line=509, offs=37)
+emit_instr: loc0 = build/src/lexer.dats: 20893(line=523, offs=31) -- 20899(line=523, offs=37)
 */
-ATSINSmove(tmp582, atspre_g1int_sub_int(tmp581, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp597, atspre_g1int_sub_int(tmp596, ATSPMVi0nt(2))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20299(line=509, offs=43) -- 20301(line=509, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 20905(line=523, offs=43) -- 20907(line=523, offs=45)
 */
-ATSINSmove(tmp582, tmp581) ;
+ATSINSmove(tmp597, tmp596) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20321(line=510, offs=12) -- 20376(line=510, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 20927(line=524, offs=12) -- 20982(line=524, offs=67)
 */
-ATSINSmove_void(tmp586, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(6), ATSPMVi0nt(0), arg4, tmp581, tmp580, tmp582, tmp579, ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp601, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(6), ATSPMVi0nt(0), arg4, tmp596, tmp595, tmp597, tmp594, ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20386(line=511, offs=10) -- 20395(line=511, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 20992(line=525, offs=10) -- 21001(line=525, offs=19)
 */
-ATSINSmove(tmp587, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp602, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20380(line=511, offs=4) -- 20396(line=511, offs=20)
+emit_instr: loc0 = build/src/lexer.dats: 20986(line=525, offs=4) -- 21002(line=525, offs=20)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret569, postiats_tyrec_0, atslab__0, tmp581) ;
-ATSINSstore_fltrec_ofs(tmpret569, postiats_tyrec_0, atslab__1, tmp587) ;
+ATSINSstore_fltrec_ofs(tmpret584, postiats_tyrec_0, atslab__0, tmp596) ;
+ATSINSstore_fltrec_ofs(tmpret584, postiats_tyrec_0, atslab__1, tmp602) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 19877(line=500, offs=85) -- 20400(line=511, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 20483(line=514, offs=85) -- 21006(line=525, offs=24)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret569) ;
-} /* end of [lex_extcode_105] */
+ATSreturn(tmpret584) ;
+} /* end of [lex_extcode_106] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12757(line=663, offs=3) -- 12797(line=663, offs=43)
@@ -9642,9 +9869,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__11(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9673,334 +9900,334 @@ ATSreturn(tmpret63__11) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__11] */
 
 /*
-build/src/lexer.dats: 20445(line=514, offs=4) -- 21268(line=530, offs=24)
+build/src/lexer.dats: 21051(line=528, offs=4) -- 21874(line=544, offs=24)
 */
 /*
-local: put_span_20$0(level=0), looking_at_as_41$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), skip_nonws_84$0(level=0)
-global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), looking_at_as_41$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), skip_nonws_84$0(level=0), lex_hash_use_107$0(level=0)
+local: put_span_20$0(level=0), looking_at_as_41$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), skip_nonws_85$0(level=0)
+global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), looking_at_as_41$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), skip_nonws_85$0(level=0), lex_hash_use_108$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_hash_use_107(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_hash_use_108(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret588, postiats_tyrec_0) ;
-ATStmpdec(tmp589, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp590, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp591, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp592, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp593, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp594, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp595, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp596, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp597, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp598, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp599, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp600, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp601) ;
-ATStmpdec(tmp602, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp603, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret603, postiats_tyrec_0) ;
+ATStmpdec(tmp604, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp605, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp606, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp607, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp608, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp609, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp610, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp611, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp612, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp613, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp614, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp615, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp616) ;
+ATStmpdec(tmp617, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp618, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20445(line=514, offs=4) -- 21268(line=530, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 21051(line=528, offs=4) -- 21874(line=544, offs=24)
 */
-ATSINSflab(__patsflab_lex_hash_use_107):
+ATSINSflab(__patsflab_lex_hash_use_108):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20617(line=516, offs=85) -- 21268(line=530, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 21223(line=530, offs=85) -- 21874(line=544, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20645(line=517, offs=25) -- 20654(line=517, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 21251(line=531, offs=25) -- 21260(line=531, offs=34)
 */
-ATSINSmove(tmp590, atspre_g1int_add_int(arg4, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp605, atspre_g1int_add_int(arg4, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20632(line=517, offs=12) -- 20665(line=517, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 21238(line=531, offs=12) -- 21271(line=531, offs=45)
 */
-ATSINSmove(tmp589, skip_ws_64(ATSPMVrefarg0(arg0), tmp590, arg2, ATSPMVi0nt(256))) ;
-
-/* (*nothing*) */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20703(line=519, offs=17) -- 20733(line=519, offs=47)
-*/
-ATSINSmove(tmp591, skip_nonws_84(ATSPMVrefarg0(arg0), tmp589, arg2, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20745(line=520, offs=12) -- 20776(line=520, offs=43)
-*/
-ATSINSmove(tmp592, skip_ws_64(ATSPMVrefarg0(arg0), tmp591, arg2, ATSPMVi0nt(256))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20792(line=521, offs=16) -- 20819(line=521, offs=43)
-*/
-ATSINSmove(tmp594, looking_at_as_41(ATSPMVrefarg0(arg0), tmp592, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20789(line=521, offs=13) -- 20839(line=521, offs=63)
-*/
-ATSif(
-tmp594
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20825(line=521, offs=49) -- 20831(line=521, offs=55)
-*/
-ATSINSmove(tmp593, atspre_g1int_add_int(tmp592, ATSPMVi0nt(2))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20837(line=521, offs=61) -- 20839(line=521, offs=63)
-*/
-ATSINSmove(tmp593, tmp592) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 20859(line=522, offs=12) -- 20885(line=522, offs=38)
-*/
-ATSINSmove(tmp595, skip_ws_64(ATSPMVrefarg0(arg0), tmp593, arg2, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp604, skip_ws_64(ATSPMVrefarg0(arg0), tmp605, arg2, ATSPMVi0nt(256))) ;
 
 /* (*nothing*) */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20927(line=524, offs=19) -- 20957(line=524, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 21309(line=533, offs=17) -- 21339(line=533, offs=47)
 */
-ATSINSmove(tmp596, skip_ident_69(ATSPMVrefarg0(arg0), tmp595, arg2, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp606, skip_nonws_85(ATSPMVrefarg0(arg0), tmp604, arg2, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20969(line=525, offs=12) -- 21002(line=525, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 21351(line=534, offs=12) -- 21382(line=534, offs=43)
 */
-ATSINSmove(tmp597, skip_ws_64(ATSPMVrefarg0(arg0), tmp596, arg2, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp607, skip_ws_64(ATSPMVrefarg0(arg0), tmp606, arg2, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21022(line=526, offs=20) -- 21056(line=526, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 21398(line=535, offs=16) -- 21425(line=535, offs=43)
 */
-ATSINSmove(tmp599, looking_at_no_mangle_63(ATSPMVrefarg0(arg0), tmp597, arg2)) ;
+ATSINSmove(tmp609, looking_at_as_41(ATSPMVrefarg0(arg0), tmp607, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21019(line=526, offs=17) -- 21070(line=526, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 21395(line=535, offs=13) -- 21445(line=535, offs=63)
 */
 ATSif(
-tmp599
+tmp609
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21062(line=526, offs=60) -- 21063(line=526, offs=61)
+emit_instr: loc0 = build/src/lexer.dats: 21431(line=535, offs=49) -- 21437(line=535, offs=55)
 */
-ATSINSmove(tmp598, ATSPMVi0nt(0)) ;
+ATSINSmove(tmp608, atspre_g1int_add_int(tmp607, ATSPMVi0nt(2))) ;
+
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21069(line=526, offs=67) -- 21070(line=526, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 21443(line=535, offs=61) -- 21445(line=535, offs=63)
 */
-ATSINSmove(tmp598, ATSPMVi0nt(1)) ;
+ATSINSmove(tmp608, tmp607) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21088(line=527, offs=12) -- 21127(line=527, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 21465(line=536, offs=12) -- 21491(line=536, offs=38)
 */
-ATSINSmove(tmp600, skip_to_eol_66(ATSPMVrefarg0(arg0), tmp597, arg1, arg2, arg2)) ;
+ATSINSmove(tmp610, skip_ws_64(ATSPMVrefarg0(arg0), tmp608, arg2, ATSPMVi0nt(256))) ;
+
+/* (*nothing*) */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21533(line=538, offs=19) -- 21563(line=538, offs=49)
+*/
+ATSINSmove(tmp611, skip_ident_70(ATSPMVrefarg0(arg0), tmp610, arg2, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21158(line=528, offs=31) -- 21168(line=528, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 21575(line=539, offs=12) -- 21608(line=539, offs=45)
 */
-ATSINSmove(tmp602, atspre_g0int_add_int(tmp598, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp612, skip_ws_64(ATSPMVrefarg0(arg0), tmp611, arg2, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21139(line=528, offs=12) -- 21244(line=529, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 21628(line=540, offs=20) -- 21662(line=540, offs=54)
 */
-ATSINSmove_void(tmp601, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(1), tmp602, arg4, tmp600, tmp589, tmp591, tmp595, tmp596)) ;
+ATSINSmove(tmp614, looking_at_no_mangle_63(ATSPMVrefarg0(arg0), tmp612, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21625(line=540, offs=17) -- 21676(line=540, offs=68)
+*/
+ATSif(
+tmp614
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21668(line=540, offs=60) -- 21669(line=540, offs=61)
+*/
+ATSINSmove(tmp613, ATSPMVi0nt(0)) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21675(line=540, offs=67) -- 21676(line=540, offs=68)
+*/
+ATSINSmove(tmp613, ATSPMVi0nt(1)) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21694(line=541, offs=12) -- 21733(line=541, offs=51)
+*/
+ATSINSmove(tmp615, skip_to_eol_67(ATSPMVrefarg0(arg0), tmp612, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21764(line=542, offs=31) -- 21774(line=542, offs=41)
+*/
+ATSINSmove(tmp617, atspre_g0int_add_int(tmp613, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 21745(line=542, offs=12) -- 21850(line=543, offs=64)
+*/
+ATSINSmove_void(tmp616, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(1), tmp617, arg4, tmp615, tmp604, tmp606, tmp610, tmp611)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21254(line=530, offs=10) -- 21263(line=530, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 21860(line=544, offs=10) -- 21869(line=544, offs=19)
 */
-ATSINSmove(tmp603, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp618, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21248(line=530, offs=4) -- 21264(line=530, offs=20)
+emit_instr: loc0 = build/src/lexer.dats: 21854(line=544, offs=4) -- 21870(line=544, offs=20)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret588, postiats_tyrec_0, atslab__0, tmp600) ;
-ATSINSstore_fltrec_ofs(tmpret588, postiats_tyrec_0, atslab__1, tmp603) ;
+ATSINSstore_fltrec_ofs(tmpret603, postiats_tyrec_0, atslab__0, tmp615) ;
+ATSINSstore_fltrec_ofs(tmpret603, postiats_tyrec_0, atslab__1, tmp618) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 20617(line=516, offs=85) -- 21268(line=530, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 21223(line=530, offs=85) -- 21874(line=544, offs=24)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret588) ;
-} /* end of [lex_hash_use_107] */
+ATSreturn(tmpret603) ;
+} /* end of [lex_hash_use_108] */
 
 /*
-build/src/lexer.dats: 21314(line=533, offs=4) -- 22063(line=551, offs=4)
+build/src/lexer.dats: 21920(line=547, offs=4) -- 22669(line=565, offs=4)
 */
 /*
-local: put_span_20$0(level=0), skip_ident_69$0(level=0)
-global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), skip_ident_69$0(level=0), lex_qualified_108$0(level=0)
+local: put_span_20$0(level=0), skip_ident_70$0(level=0)
+global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), skip_ident_70$0(level=0), lex_qualified_109$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_1
-lex_qualified_108(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_qualified_109(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret604, postiats_tyrec_1) ;
-ATStmpdec(tmp605, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp606, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp607, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp608, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp609, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp610, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp611, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp614) ;
-ATStmpdec(tmp615, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret619, postiats_tyrec_1) ;
+ATStmpdec(tmp620, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp621, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp622, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp623, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp624, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp625, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp626, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp629) ;
+ATStmpdec(tmp630, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21314(line=533, offs=4) -- 22063(line=551, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 21920(line=547, offs=4) -- 22669(line=565, offs=4)
 */
-ATSINSflab(__patsflab_lex_qualified_108):
+ATSINSflab(__patsflab_lex_qualified_109):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21493(line=535, offs=91) -- 22063(line=551, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 22099(line=549, offs=91) -- 22669(line=565, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21517(line=536, offs=21) -- 21526(line=536, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 22123(line=550, offs=21) -- 22132(line=550, offs=30)
 */
-ATSINSmove(tmp605, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp620, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21545(line=537, offs=19) -- 21584(line=537, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 22151(line=551, offs=19) -- 22190(line=551, offs=58)
 */
-ATSINSmove(tmp606, skip_ident_69(ATSPMVrefarg0(arg0), tmp605, arg2, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp621, skip_ident_70(ATSPMVrefarg0(arg0), tmp620, arg2, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21602(line=538, offs=18) -- 21627(line=538, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 22208(line=552, offs=18) -- 22233(line=552, offs=43)
 */
-ATSINSmove(tmp607, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp606, arg2)) ;
+ATSINSmove(tmp622, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp621, arg2)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21636(line=540, offs=6) -- 21664(line=540, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 22242(line=554, offs=6) -- 22270(line=554, offs=34)
 */
-ATSINSmove(tmp608, atspre_g0int_eq_int(tmp607, ATSPMVi0nt(46))) ;
+ATSINSmove(tmp623, atspre_g0int_eq_int(tmp622, ATSPMVi0nt(46))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21633(line=540, offs=3) -- 22059(line=550, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 22239(line=554, offs=3) -- 22665(line=564, offs=30)
 */
 ATSif(
-tmp608
+tmp623
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21670(line=540, offs=40) -- 22029(line=549, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22276(line=554, offs=40) -- 22635(line=563, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21697(line=541, offs=24) -- 21710(line=541, offs=37)
+emit_instr: loc0 = build/src/lexer.dats: 22303(line=555, offs=24) -- 22316(line=555, offs=37)
 */
-ATSINSmove(tmp609, atspre_g1int_add_int(tmp606, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp624, atspre_g1int_add_int(tmp621, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21732(line=542, offs=22) -- 21772(line=542, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 22338(line=556, offs=22) -- 22378(line=556, offs=62)
 */
-ATSINSmove(tmp610, skip_ident_69(ATSPMVrefarg0(arg0), tmp609, arg2, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp625, skip_ident_70(ATSPMVrefarg0(arg0), tmp624, arg2, ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21785(line=544, offs=8) -- 21810(line=544, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 22391(line=558, offs=8) -- 22416(line=558, offs=33)
 */
-ATSINSmove(tmp611, ATSLIB_056_prelude__gt_g1int_int__57__2(tmp610, tmp609)) ;
+ATSINSmove(tmp626, ATSLIB_056_prelude__gt_g1int_int__57__2(tmp625, tmp624)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21782(line=544, offs=5) -- 22023(line=548, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 22388(line=558, offs=5) -- 22629(line=562, offs=32)
 */
 ATSif(
-tmp611
+tmp626
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21816(line=544, offs=39) -- 21991(line=547, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 22422(line=558, offs=39) -- 22597(line=561, offs=42)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21835(line=545, offs=16) -- 21949(line=546, offs=74)
+emit_instr: loc0 = build/src/lexer.dats: 22441(line=559, offs=16) -- 22555(line=560, offs=74)
 */
-ATSINSmove_void(tmp614, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(3), ATSPMVi0nt(0), arg4, tmp610, tmp605, tmp606, tmp609, tmp610)) ;
+ATSINSmove_void(tmp629, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(3), ATSPMVi0nt(0), arg4, tmp625, tmp620, tmp621, tmp624, tmp625)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21971(line=547, offs=22) -- 21980(line=547, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 22577(line=561, offs=22) -- 22586(line=561, offs=31)
 */
-ATSINSmove(tmp615, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp630, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21957(line=547, offs=8) -- 21987(line=547, offs=38)
+emit_instr: loc0 = build/src/lexer.dats: 22563(line=561, offs=8) -- 22593(line=561, offs=38)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__0, tmp610) ;
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__1, tmp615) ;
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__0, tmp625) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__1, tmp630) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21816(line=544, offs=39) -- 21991(line=547, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 22422(line=558, offs=39) -- 22597(line=561, offs=42)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22001(line=548, offs=10) -- 22023(line=548, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 22607(line=562, offs=10) -- 22629(line=562, offs=32)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__1, arg5) ;
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__1, arg5) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
 ATSINSmove_fltrec_end()
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21670(line=540, offs=40) -- 22029(line=549, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22276(line=554, offs=40) -- 22635(line=563, offs=6)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22037(line=550, offs=8) -- 22059(line=550, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 22643(line=564, offs=8) -- 22665(line=564, offs=30)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__1, arg5) ;
-ATSINSstore_fltrec_ofs(tmpret604, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__1, arg5) ;
+ATSINSstore_fltrec_ofs(tmpret619, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
 ATSINSmove_fltrec_end()
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 21493(line=535, offs=91) -- 22063(line=551, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 22099(line=549, offs=91) -- 22669(line=565, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret604) ;
-} /* end of [lex_qualified_108] */
+ATSreturn(tmpret619) ;
+} /* end of [lex_qualified_109] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12679(line=659, offs=3) -- 12718(line=659, offs=42)
@@ -10013,16 +10240,16 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5344)
-tmparg = S2Evar(tk(5344))
-tmpsub = Some(tk(5344) -> S2Eextkind(atstype_int))
+imparg = tk(5346)
+tmparg = S2Evar(tk(5346))
+tmpsub = Some(tk(5346) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__57__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret318__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp319__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret324__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp325__2, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10032,29 +10259,29 @@ ATSINSflab(__patsflab_gt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12705(line=659, offs=29) -- 12716(line=659, offs=40)
 */
-ATSINSmove(tmp319__2, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp325__2, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12688(line=659, offs=12) -- 12718(line=659, offs=42)
 */
-ATSINSmove(tmpret318__2, atspre_g1int_gt_int(arg0, tmp319__2)) ;
+ATSINSmove(tmpret324__2, atspre_g1int_gt_int(arg0, tmp325__2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret318__2) ;
+ATSreturn(tmpret324__2) ;
 } /* end of [ATSLIB_056_prelude__gt_g1int_int__57__2] */
 
 /*
-build/src/lexer.dats: 22105(line=554, offs=5) -- 22534(line=564, offs=6)
+build/src/lexer.dats: 22711(line=568, offs=5) -- 23140(line=578, offs=6)
 */
 /*
-local: is_blank_line_110$0(level=0)
-global: is_blank_line_110$0(level=0)
+local: is_blank_line_111$0(level=0)
+global: is_blank_line_111$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-is_blank_line_110(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+is_blank_line_111(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -10062,148 +10289,148 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret616, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp617, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp620, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp623, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp624, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp625, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp626, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp627, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp628, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret631, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp632, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp635, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp638, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp639, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp640, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp641, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp642, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp643, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22105(line=554, offs=5) -- 22534(line=564, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22711(line=568, offs=5) -- 23140(line=578, offs=6)
 */
-ATSINSflab(__patsflab_is_blank_line_110):
+ATSINSflab(__patsflab_is_blank_line_111):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22257(line=557, offs=6) -- 22266(line=557, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 22863(line=571, offs=6) -- 22872(line=571, offs=15)
 */
-ATSINSmove(tmp617, ATSLIB_056_prelude__lte_g1int_int__29__15(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp632, ATSLIB_056_prelude__lte_g1int_int__29__15(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22254(line=557, offs=3) -- 22534(line=564, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22860(line=571, offs=3) -- 23140(line=578, offs=6)
 */
 ATSif(
-tmp617
+tmp632
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22272(line=557, offs=21) -- 22276(line=557, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 22878(line=571, offs=21) -- 22882(line=571, offs=25)
 */
-ATSINSmove(tmpret616, ATSPMVbool_true()) ;
+ATSINSmove(tmpret631, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22287(line=558, offs=11) -- 22301(line=558, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 22893(line=572, offs=11) -- 22907(line=572, offs=25)
 */
-ATSINSmove(tmp620, ATSLIB_056_prelude__gte_g1int_int__24__12(arg1, arg2)) ;
+ATSINSmove(tmp635, ATSLIB_056_prelude__gte_g1int_int__24__12(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22284(line=558, offs=8) -- 22534(line=564, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22890(line=572, offs=8) -- 23140(line=578, offs=6)
 */
 ATSif(
-tmp620
+tmp635
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22307(line=558, offs=31) -- 22311(line=558, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 22913(line=572, offs=31) -- 22917(line=572, offs=35)
 */
-ATSINSmove(tmpret616, ATSPMVbool_true()) ;
+ATSINSmove(tmpret631, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22319(line=559, offs=8) -- 22534(line=564, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22925(line=573, offs=8) -- 23140(line=578, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22331(line=559, offs=20) -- 22350(line=559, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 22937(line=573, offs=20) -- 22956(line=573, offs=39)
 */
-ATSINSmove(tmp623, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp638, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22361(line=560, offs=8) -- 22382(line=560, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 22967(line=574, offs=8) -- 22988(line=574, offs=29)
 */
-ATSINSmove(tmp624, atspre_g0int_eq_int(tmp623, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp639, atspre_g0int_eq_int(tmp638, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22358(line=560, offs=5) -- 22528(line=563, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 22964(line=574, offs=5) -- 23134(line=577, offs=15)
 */
 ATSif(
-tmp624
+tmp639
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22388(line=560, offs=35) -- 22392(line=560, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 22994(line=574, offs=35) -- 22998(line=574, offs=39)
 */
-ATSINSmove(tmpret616, ATSPMVbool_true()) ;
+ATSINSmove(tmpret631, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22405(line=561, offs=13) -- 22450(line=561, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 23011(line=575, offs=13) -- 23056(line=575, offs=58)
 */
-ATSINSmove(tmp626, atspre_g0int_eq_int(tmp623, ATSPMVi0nt(32))) ;
+ATSINSmove(tmp641, atspre_g0int_eq_int(tmp638, ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22405(line=561, offs=13) -- 22450(line=561, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 23011(line=575, offs=13) -- 23056(line=575, offs=58)
 */
 ATSif(
-tmp626
+tmp641
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22405(line=561, offs=13) -- 22450(line=561, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 23011(line=575, offs=13) -- 23056(line=575, offs=58)
 */
-ATSINSmove(tmp625, ATSPMVbool_true()) ;
+ATSINSmove(tmp640, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22405(line=561, offs=13) -- 22450(line=561, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 23011(line=575, offs=13) -- 23056(line=575, offs=58)
 */
-ATSINSmove(tmp625, atspre_g0int_eq_int(tmp623, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp640, atspre_g0int_eq_int(tmp638, ATSPMVi0nt(9))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22402(line=561, offs=10) -- 22528(line=563, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23008(line=575, offs=10) -- 23134(line=577, offs=15)
 */
 ATSif(
-tmp625
+tmp640
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22481(line=562, offs=26) -- 22488(line=562, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 23087(line=576, offs=26) -- 23094(line=576, offs=33)
 */
-ATSINSmove(tmp627, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp642, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22504(line=562, offs=49) -- 22512(line=562, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 23110(line=576, offs=49) -- 23118(line=576, offs=57)
 */
-ATSINSmove(tmp628, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp643, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22462(line=562, offs=7) -- 22513(line=562, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 23068(line=576, offs=7) -- 23119(line=576, offs=58)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp627) ;
+ATSINSmove_tlcal(apy1, tmp642) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp628) ;
+ATSINSmove_tlcal(apy4, tmp643) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_is_blank_line_110) ;
+ATSINSfgoto(__patsflab_is_blank_line_111) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22523(line=563, offs=10) -- 22528(line=563, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23129(line=577, offs=10) -- 23134(line=577, offs=15)
 */
-ATSINSmove(tmpret616, ATSPMVbool_false()) ;
+ATSINSmove(tmpret631, ATSPMVbool_false()) ;
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22319(line=559, offs=8) -- 22534(line=564, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 22925(line=573, offs=8) -- 23140(line=578, offs=6)
 */
 /*
 INSletpop()
@@ -10211,8 +10438,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret616) ;
-} /* end of [is_blank_line_110] */
+ATSreturn(tmpret631) ;
+} /* end of [is_blank_line_111] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -10225,9 +10452,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__15(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10266,9 +10493,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10297,17 +10524,17 @@ ATSreturn(tmpret63__12) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__12] */
 
 /*
-build/src/lexer.dats: 22587(line=567, offs=5) -- 25412(line=626, offs=6)
+build/src/lexer.dats: 23193(line=581, offs=5) -- 26018(line=640, offs=6)
 */
 /*
-local: is_kw_boundary_23$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), skip_to_eol_66$0(level=0), is_blank_line_110$0(level=0), lex_pub_lines_113$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), skip_to_eol_66$0(level=0), is_blank_line_110$0(level=0), lex_pub_lines_113$0(level=0)
+local: is_kw_boundary_23$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), skip_to_eol_67$0(level=0), is_blank_line_111$0(level=0), lex_pub_lines_114$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), skip_to_eol_67$0(level=0), is_blank_line_111$0(level=0), lex_pub_lines_114$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_pub_lines_113(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+lex_pub_lines_114(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -10315,35 +10542,20 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret629, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp630, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp633, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp636, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp637, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp640, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret644, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp645, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp648, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp651, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp652, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp653, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp654, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp655, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp656, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp661, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp662, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp663, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp664, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp665, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp666, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp667, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp667, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp668, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp669, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp670, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp671, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp672, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp673, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp674, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp675, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp676, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp677, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp676, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp677, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp678, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp679, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp680, atstkind_t0ype(atstype_int)) ;
@@ -10352,8 +10564,8 @@ ATStmpdec(tmp682, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp683, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp684, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp685, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp686, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp687, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp686, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp687, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp688, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp689, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp690, atstkind_t0ype(atstype_bool)) ;
@@ -10367,9 +10579,9 @@ ATStmpdec(tmp697, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp698, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp699, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp700, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp701, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp702, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp703, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp701, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp702, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp703, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp704, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp705, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp706, atstkind_t0ype(atstype_bool)) ;
@@ -10379,923 +10591,938 @@ ATStmpdec(tmp709, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp710, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp711, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp712, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp713, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp714, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp715, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp716, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp717, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp718, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp719, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp720, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp721, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp722, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp713, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp714, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp715, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp716, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp717, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp718, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp719, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp720, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp721, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp722, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp723, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp724, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp725, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp726, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp725, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp726, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp727, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp728, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp729, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp730, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp731, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp732, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp733, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp734, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp735, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp736, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp737, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp738, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp739, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp740, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp741, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp742, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp743, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp744, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22587(line=567, offs=5) -- 25412(line=626, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 23193(line=581, offs=5) -- 26018(line=640, offs=6)
 */
-ATSINSflab(__patsflab_lex_pub_lines_113):
+ATSINSflab(__patsflab_lex_pub_lines_114):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22740(line=570, offs=6) -- 22749(line=570, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23346(line=584, offs=6) -- 23355(line=584, offs=15)
 */
-ATSINSmove(tmp630, ATSLIB_056_prelude__lte_g1int_int__29__16(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp645, ATSLIB_056_prelude__lte_g1int_int__29__16(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22737(line=570, offs=3) -- 25412(line=626, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 23343(line=584, offs=3) -- 26018(line=640, offs=6)
 */
 ATSif(
-tmp630
+tmp645
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22755(line=570, offs=21) -- 22758(line=570, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 23361(line=584, offs=21) -- 23364(line=584, offs=24)
 */
-ATSINSmove(tmpret629, arg1) ;
+ATSINSmove(tmpret644, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22769(line=571, offs=11) -- 22783(line=571, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 23375(line=585, offs=11) -- 23389(line=585, offs=25)
 */
-ATSINSmove(tmp633, ATSLIB_056_prelude__gte_g1int_int__24__13(arg1, arg2)) ;
+ATSINSmove(tmp648, ATSLIB_056_prelude__gte_g1int_int__24__13(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22766(line=571, offs=8) -- 25412(line=626, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 23372(line=585, offs=8) -- 26018(line=640, offs=6)
 */
 ATSif(
-tmp633
+tmp648
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22789(line=571, offs=31) -- 22792(line=571, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 23395(line=585, offs=31) -- 23398(line=585, offs=34)
 */
-ATSINSmove(tmpret629, arg1) ;
+ATSINSmove(tmpret644, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22800(line=572, offs=8) -- 25412(line=626, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 23406(line=586, offs=8) -- 26018(line=640, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22818(line=573, offs=15) -- 22858(line=573, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 23424(line=587, offs=15) -- 23464(line=587, offs=55)
 */
-ATSINSmove(tmp636, skip_to_eol_66(ATSPMVrefarg0(arg0), arg1, arg2, arg3, arg3)) ;
+ATSINSmove(tmp651, skip_to_eol_67(ATSPMVrefarg0(arg0), arg1, arg2, arg3, arg3)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22871(line=575, offs=8) -- 22885(line=575, offs=22)
+emit_instr: loc0 = build/src/lexer.dats: 23477(line=589, offs=8) -- 23491(line=589, offs=22)
 */
-ATSINSmove(tmp637, ATSLIB_056_prelude__gte_g1int_int__24__14(tmp636, arg2)) ;
+ATSINSmove(tmp652, ATSLIB_056_prelude__gte_g1int_int__24__14(tmp651, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22868(line=575, offs=5) -- 25406(line=625, offs=8)
-*/
-ATSif(
-tmp637
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 22891(line=575, offs=28) -- 22894(line=575, offs=31)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 22907(line=576, offs=13) -- 22949(line=576, offs=55)
-*/
-ATSINSmove(tmp640, is_blank_line_110(ATSPMVrefarg0(arg0), tmp636, arg2, arg3, ATSPMVi0nt(256))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 22904(line=576, offs=10) -- 25406(line=625, offs=8)
-*/
-ATSif(
-tmp640
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 22955(line=576, offs=61) -- 23745(line=594, offs=8)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23377(line=585, offs=18) -- 23416(line=585, offs=57)
-*/
-ATSINSmove(tmp651, skip_blanks_117(ATSPMVrefarg0(arg0), tmp636, arg2, arg3, ATSPMVi0nt(64))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp656, ATSLIB_056_prelude__lt_g1int_int__120__1(tmp651, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSif(
-tmp656
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp661, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp655, atspre_g0int_eq_int(tmp661, ATSPMVi0nt(97))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp655, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSif(
-tmp655
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp663, atspre_g1int_add_int(tmp651, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp662, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp663, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp654, atspre_g0int_eq_int(tmp662, ATSPMVi0nt(110))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp654, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSif(
-tmp654
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp665, atspre_g1int_add_int(tmp651, ATSPMVi0nt(2))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp664, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp665, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp653, atspre_g0int_eq_int(tmp664, ATSPMVi0nt(100))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp653, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSif(
-tmp653
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp666, atspre_g1int_add_int(tmp651, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp652, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp666, arg3)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23433(line=587, offs=10) -- 23663(line=591, offs=44)
-*/
-ATSINSmove(tmp652, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23430(line=587, offs=7) -- 23737(line=593, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23474(line=589, offs=5) -- 26012(line=639, offs=8)
 */
 ATSif(
 tmp652
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23713(line=592, offs=50) -- 23721(line=592, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 23497(line=589, offs=28) -- 23500(line=589, offs=31)
 */
-ATSINSmove(tmp667, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23675(line=592, offs=12) -- 23722(line=592, offs=59)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp636) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp667) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_pub_lines_113) ;
-ATStailcal_end()
-
+ATSINSmove(tmpret644, tmp651) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23734(line=593, offs=12) -- 23737(line=593, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23513(line=590, offs=13) -- 23555(line=590, offs=55)
 */
-ATSINSmove(tmpret629, tmp636) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 22955(line=576, offs=61) -- 23745(line=594, offs=8)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23758(line=595, offs=13) -- 23787(line=595, offs=42)
-*/
-ATSINSmove(tmp668, looking_at_pub_33(ATSPMVrefarg0(arg0), tmp636, arg3)) ;
+ATSINSmove(tmp655, is_blank_line_111(ATSPMVrefarg0(arg0), tmp651, arg2, arg3, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23755(line=595, offs=10) -- 25406(line=625, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 23510(line=590, offs=10) -- 26012(line=639, offs=8)
 */
 ATSif(
-tmp668
+tmp655
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23793(line=595, offs=48) -- 23796(line=595, offs=51)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23809(line=596, offs=13) -- 23838(line=596, offs=42)
-*/
-ATSINSmove(tmp669, looking_at_use_34(ATSPMVrefarg0(arg0), tmp636, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23806(line=596, offs=10) -- 25406(line=625, offs=8)
-*/
-ATSif(
-tmp669
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23844(line=596, offs=48) -- 23847(line=596, offs=51)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23860(line=597, offs=13) -- 23892(line=597, offs=45)
-*/
-ATSINSmove(tmp670, looking_at_target_35(ATSPMVrefarg0(arg0), tmp636, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23857(line=597, offs=10) -- 25406(line=625, offs=8)
-*/
-ATSif(
-tmp670
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23898(line=597, offs=51) -- 23901(line=597, offs=54)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23914(line=598, offs=13) -- 23946(line=598, offs=45)
-*/
-ATSINSmove(tmp671, looking_at_unsafe_36(ATSPMVrefarg0(arg0), tmp636, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23911(line=598, offs=10) -- 25406(line=625, offs=8)
-*/
-ATSif(
-tmp671
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23952(line=598, offs=51) -- 23955(line=598, offs=54)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23968(line=599, offs=13) -- 24002(line=599, offs=47)
-*/
-ATSINSmove(tmp672, looking_at_unittest_37(ATSPMVrefarg0(arg0), tmp636, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 23965(line=599, offs=10) -- 25406(line=625, offs=8)
-*/
-ATSif(
-tmp672
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24008(line=599, offs=53) -- 24011(line=599, offs=56)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24021(line=600, offs=10) -- 25406(line=625, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 23561(line=590, offs=61) -- 24351(line=608, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24033(line=600, offs=22) -- 24052(line=600, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 23983(line=599, offs=18) -- 24022(line=599, offs=57)
 */
-ATSINSmove(tmp673, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp636, arg3)) ;
+ATSINSmove(tmp666, skip_blanks_118(ATSPMVrefarg0(arg0), tmp651, arg2, arg3, ATSPMVi0nt(64))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp675, atspre_g0int_eq_int(tmp673, ATSPMVi0nt(102))) ;
+ATSINSmove(tmp671, ATSLIB_056_prelude__lt_g1int_int__121__1(tmp666, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
 ATSif(
-tmp675
+tmp671
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp679, atspre_g1int_add_int(tmp636, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp676, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp666, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp678, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp679, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSINSmove(tmp677, atspre_g0int_eq_int(tmp678, ATSPMVi0nt(117))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSif(
-tmp677
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSINSmove(tmp681, atspre_g1int_add_int(tmp636, ATSPMVi0nt(2))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSINSmove(tmp680, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp681, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSINSmove(tmp676, atspre_g0int_eq_int(tmp680, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp670, atspre_g0int_eq_int(tmp676, ATSPMVi0nt(97))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp676, ATSPMVbool_false()) ;
+ATSINSmove(tmp670, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
 ATSif(
-tmp676
+tmp670
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp682, atspre_g1int_add_int(tmp636, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp678, atspre_g1int_add_int(tmp666, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp674, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp682, arg3)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSINSmove(tmp674, ATSPMVbool_false()) ;
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24065(line=601, offs=10) -- 24251(line=604, offs=45)
-*/
-ATSINSmove(tmp674, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24062(line=601, offs=7) -- 25398(line=624, offs=59)
-*/
-ATSif(
-tmp674
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24257(line=604, offs=51) -- 24260(line=604, offs=54)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
-*/
-ATSINSmove(tmp685, atspre_g0int_eq_int(tmp673, ATSPMVi0nt(102))) ;
+ATSINSmove(tmp677, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp678, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSif(
-tmp685
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
-*/
-ATSINSmove(tmp687, atspre_g1int_add_int(tmp636, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
-*/
-ATSINSmove(tmp686, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp687, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
-*/
-ATSINSmove(tmp684, atspre_g0int_eq_int(tmp686, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp669, atspre_g0int_eq_int(tmp677, ATSPMVi0nt(110))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp684, ATSPMVbool_false()) ;
+ATSINSmove(tmp669, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
 ATSif(
-tmp684
+tmp669
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp688, atspre_g1int_add_int(tmp636, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp680, atspre_g1int_add_int(tmp666, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp683, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp688, arg3)) ;
+ATSINSmove(tmp679, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp680, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
+*/
+ATSINSmove(tmp668, atspre_g0int_eq_int(tmp679, ATSPMVi0nt(100))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24275(line=605, offs=15) -- 24410(line=607, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp683, ATSPMVbool_false()) ;
+ATSINSmove(tmp668, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24272(line=605, offs=12) -- 25398(line=624, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
 ATSif(
-tmp683
+tmp668
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24416(line=607, offs=54) -- 24419(line=607, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp692, atspre_g0int_eq_int(tmp673, ATSPMVi0nt(118))) ;
+ATSINSmove(tmp681, atspre_g1int_add_int(tmp666, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSif(
-tmp692
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp694, atspre_g1int_add_int(tmp636, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp693, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp694, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp691, atspre_g0int_eq_int(tmp693, ATSPMVi0nt(97))) ;
+ATSINSmove(tmp667, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp681, arg3)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24039(line=601, offs=10) -- 24269(line=605, offs=44)
 */
-ATSINSmove(tmp691, ATSPMVbool_false()) ;
+ATSINSmove(tmp667, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24036(line=601, offs=7) -- 24343(line=607, offs=15)
 */
 ATSif(
-tmp691
+tmp667
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 24319(line=606, offs=50) -- 24327(line=606, offs=58)
 */
-ATSINSmove(tmp696, atspre_g1int_add_int(tmp636, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp682, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp695, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp696, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp690, atspre_g0int_eq_int(tmp695, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp690, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSif(
-tmp690
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp697, atspre_g1int_add_int(tmp636, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp689, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp697, arg3)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24434(line=608, offs=15) -- 24630(line=611, offs=48)
-*/
-ATSINSmove(tmp689, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24431(line=608, offs=12) -- 25398(line=624, offs=59)
-*/
-ATSif(
-tmp689
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24636(line=611, offs=54) -- 24639(line=611, offs=57)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp707, atspre_g0int_eq_int(tmp673, ATSPMVi0nt(105))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp707
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp709, atspre_g1int_add_int(tmp636, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp708, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp709, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp706, atspre_g0int_eq_int(tmp708, ATSPMVi0nt(109))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp706, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp706
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp711, atspre_g1int_add_int(tmp636, ATSPMVi0nt(2))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp710, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp711, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp705, atspre_g0int_eq_int(tmp710, ATSPMVi0nt(112))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp705, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp705
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp713, atspre_g1int_add_int(tmp636, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp712, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp713, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp704, atspre_g0int_eq_int(tmp712, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp704, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp704
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp715, atspre_g1int_add_int(tmp636, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp714, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp715, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp703, atspre_g0int_eq_int(tmp714, ATSPMVi0nt(101))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp703, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp703
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp717, atspre_g1int_add_int(tmp636, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp716, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp717, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp702, atspre_g0int_eq_int(tmp716, ATSPMVi0nt(109))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp702, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp702
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp719, atspre_g1int_add_int(tmp636, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp718, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp719, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp701, atspre_g0int_eq_int(tmp718, ATSPMVi0nt(101))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp701, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp701
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp721, atspre_g1int_add_int(tmp636, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp720, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp721, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp700, atspre_g0int_eq_int(tmp720, ATSPMVi0nt(110))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp700, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp700
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp723, atspre_g1int_add_int(tmp636, ATSPMVi0nt(8))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp722, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp723, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp699, atspre_g0int_eq_int(tmp722, ATSPMVi0nt(116))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp699, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSif(
-tmp699
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp724, atspre_g1int_add_int(tmp636, ATSPMVi0nt(9))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp698, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp724, arg3)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24654(line=612, offs=15) -- 25223(line=621, offs=48)
-*/
-ATSINSmove(tmp698, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 24651(line=612, offs=12) -- 25398(line=624, offs=59)
-*/
-ATSif(
-tmp698
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25229(line=621, offs=54) -- 25232(line=621, offs=57)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25247(line=622, offs=15) -- 25330(line=623, offs=59)
-*/
-ATSINSmove(tmp726, atspre_g0int_eq_int(tmp673, ATSPMVi0nt(37))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25247(line=622, offs=15) -- 25330(line=623, offs=59)
-*/
-ATSif(
-tmp726
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25247(line=622, offs=15) -- 25330(line=623, offs=59)
-*/
-ATSINSmove(tmp728, atspre_g1int_add_int(tmp636, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25247(line=622, offs=15) -- 25330(line=623, offs=59)
-*/
-ATSINSmove(tmp727, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp728, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25247(line=622, offs=15) -- 25330(line=623, offs=59)
-*/
-ATSINSmove(tmp725, atspre_g0int_eq_int(tmp727, ATSPMVi0nt(123))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25247(line=622, offs=15) -- 25330(line=623, offs=59)
-*/
-ATSINSmove(tmp725, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25244(line=622, offs=12) -- 25398(line=624, offs=59)
-*/
-ATSif(
-tmp725
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25336(line=623, offs=65) -- 25339(line=623, offs=68)
-*/
-ATSINSmove(tmpret629, tmp636) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25389(line=624, offs=50) -- 25397(line=624, offs=58)
-*/
-ATSINSmove(tmp729, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 25351(line=624, offs=12) -- 25398(line=624, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 24281(line=606, offs=12) -- 24328(line=606, offs=59)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp636) ;
+ATSINSmove_tlcal(apy1, tmp651) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp729) ;
+ATSINSmove_tlcal(apy4, tmp682) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_pub_lines_113) ;
+ATSINSfgoto(__patsflab_lex_pub_lines_114) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24340(line=607, offs=12) -- 24343(line=607, offs=15)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 23561(line=590, offs=61) -- 24351(line=608, offs=8)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24364(line=609, offs=13) -- 24393(line=609, offs=42)
+*/
+ATSINSmove(tmp683, looking_at_pub_33(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24361(line=609, offs=10) -- 26012(line=639, offs=8)
+*/
+ATSif(
+tmp683
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24399(line=609, offs=48) -- 24402(line=609, offs=51)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24415(line=610, offs=13) -- 24444(line=610, offs=42)
+*/
+ATSINSmove(tmp684, looking_at_use_34(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24412(line=610, offs=10) -- 26012(line=639, offs=8)
+*/
+ATSif(
+tmp684
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24450(line=610, offs=48) -- 24453(line=610, offs=51)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24466(line=611, offs=13) -- 24498(line=611, offs=45)
+*/
+ATSINSmove(tmp685, looking_at_target_35(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24463(line=611, offs=10) -- 26012(line=639, offs=8)
+*/
+ATSif(
+tmp685
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24504(line=611, offs=51) -- 24507(line=611, offs=54)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24520(line=612, offs=13) -- 24552(line=612, offs=45)
+*/
+ATSINSmove(tmp686, looking_at_unsafe_36(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24517(line=612, offs=10) -- 26012(line=639, offs=8)
+*/
+ATSif(
+tmp686
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24558(line=612, offs=51) -- 24561(line=612, offs=54)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24574(line=613, offs=13) -- 24608(line=613, offs=47)
+*/
+ATSINSmove(tmp687, looking_at_unittest_37(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24571(line=613, offs=10) -- 26012(line=639, offs=8)
+*/
+ATSif(
+tmp687
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24614(line=613, offs=53) -- 24617(line=613, offs=56)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24627(line=614, offs=10) -- 26012(line=639, offs=8)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24639(line=614, offs=22) -- 24658(line=614, offs=41)
+*/
+ATSINSmove(tmp688, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp651, arg3)) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp690, atspre_g0int_eq_int(tmp688, ATSPMVi0nt(102))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSif(
+tmp690
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp694, atspre_g1int_add_int(tmp651, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp693, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp694, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp692, atspre_g0int_eq_int(tmp693, ATSPMVi0nt(117))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSif(
+tmp692
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp696, atspre_g1int_add_int(tmp651, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp695, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp696, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp691, atspre_g0int_eq_int(tmp695, ATSPMVi0nt(110))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp691, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSif(
+tmp691
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp697, atspre_g1int_add_int(tmp651, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp689, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp697, arg3)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp689, ATSPMVbool_false()) ;
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24671(line=615, offs=10) -- 24857(line=618, offs=45)
+*/
+ATSINSmove(tmp689, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24668(line=615, offs=7) -- 26004(line=638, offs=59)
+*/
+ATSif(
+tmp689
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24863(line=618, offs=51) -- 24866(line=618, offs=54)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp700, atspre_g0int_eq_int(tmp688, ATSPMVi0nt(102))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSif(
+tmp700
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp702, atspre_g1int_add_int(tmp651, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp701, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp702, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp699, atspre_g0int_eq_int(tmp701, ATSPMVi0nt(110))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp699, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSif(
+tmp699
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp703, atspre_g1int_add_int(tmp651, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp698, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp703, arg3)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24881(line=619, offs=15) -- 25016(line=621, offs=48)
+*/
+ATSINSmove(tmp698, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 24878(line=619, offs=12) -- 26004(line=638, offs=59)
+*/
+ATSif(
+tmp698
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25022(line=621, offs=54) -- 25025(line=621, offs=57)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp707, atspre_g0int_eq_int(tmp688, ATSPMVi0nt(118))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSif(
+tmp707
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp709, atspre_g1int_add_int(tmp651, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp708, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp709, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp706, atspre_g0int_eq_int(tmp708, ATSPMVi0nt(97))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp706, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSif(
+tmp706
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp711, atspre_g1int_add_int(tmp651, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp710, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp711, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp705, atspre_g0int_eq_int(tmp710, ATSPMVi0nt(108))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp705, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSif(
+tmp705
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp712, atspre_g1int_add_int(tmp651, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp704, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp712, arg3)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25040(line=622, offs=15) -- 25236(line=625, offs=48)
+*/
+ATSINSmove(tmp704, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25037(line=622, offs=12) -- 26004(line=638, offs=59)
+*/
+ATSif(
+tmp704
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25242(line=625, offs=54) -- 25245(line=625, offs=57)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp722, atspre_g0int_eq_int(tmp688, ATSPMVi0nt(105))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp722
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp724, atspre_g1int_add_int(tmp651, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp723, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp724, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp721, atspre_g0int_eq_int(tmp723, ATSPMVi0nt(109))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp721, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp721
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp726, atspre_g1int_add_int(tmp651, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp725, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp726, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp720, atspre_g0int_eq_int(tmp725, ATSPMVi0nt(112))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp720, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp720
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp728, atspre_g1int_add_int(tmp651, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp727, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp728, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp719, atspre_g0int_eq_int(tmp727, ATSPMVi0nt(108))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp719, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp719
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp730, atspre_g1int_add_int(tmp651, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp729, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp730, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp718, atspre_g0int_eq_int(tmp729, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp718, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp718
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp732, atspre_g1int_add_int(tmp651, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp731, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp732, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp717, atspre_g0int_eq_int(tmp731, ATSPMVi0nt(109))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp717, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp717
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp734, atspre_g1int_add_int(tmp651, ATSPMVi0nt(6))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp733, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp734, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp716, atspre_g0int_eq_int(tmp733, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp716, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp716
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp736, atspre_g1int_add_int(tmp651, ATSPMVi0nt(7))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp735, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp736, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp715, atspre_g0int_eq_int(tmp735, ATSPMVi0nt(110))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp715, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp715
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp738, atspre_g1int_add_int(tmp651, ATSPMVi0nt(8))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp737, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp738, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp714, atspre_g0int_eq_int(tmp737, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp714, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSif(
+tmp714
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp739, atspre_g1int_add_int(tmp651, ATSPMVi0nt(9))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp713, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp739, arg3)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25260(line=626, offs=15) -- 25829(line=635, offs=48)
+*/
+ATSINSmove(tmp713, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25257(line=626, offs=12) -- 26004(line=638, offs=59)
+*/
+ATSif(
+tmp713
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25835(line=635, offs=54) -- 25838(line=635, offs=57)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25853(line=636, offs=15) -- 25936(line=637, offs=59)
+*/
+ATSINSmove(tmp741, atspre_g0int_eq_int(tmp688, ATSPMVi0nt(37))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25853(line=636, offs=15) -- 25936(line=637, offs=59)
+*/
+ATSif(
+tmp741
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25853(line=636, offs=15) -- 25936(line=637, offs=59)
+*/
+ATSINSmove(tmp743, atspre_g1int_add_int(tmp651, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25853(line=636, offs=15) -- 25936(line=637, offs=59)
+*/
+ATSINSmove(tmp742, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp743, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25853(line=636, offs=15) -- 25936(line=637, offs=59)
+*/
+ATSINSmove(tmp740, atspre_g0int_eq_int(tmp742, ATSPMVi0nt(123))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25853(line=636, offs=15) -- 25936(line=637, offs=59)
+*/
+ATSINSmove(tmp740, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25850(line=636, offs=12) -- 26004(line=638, offs=59)
+*/
+ATSif(
+tmp740
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25942(line=637, offs=65) -- 25945(line=637, offs=68)
+*/
+ATSINSmove(tmpret644, tmp651) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25995(line=638, offs=50) -- 26003(line=638, offs=58)
+*/
+ATSINSmove(tmp744, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 25957(line=638, offs=12) -- 26004(line=638, offs=59)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp651) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, arg3) ;
+ATSINSmove_tlcal(apy4, tmp744) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSfgoto(__patsflab_lex_pub_lines_114) ;
 ATStailcal_end()
 
 } /* ATSendif */
@@ -11304,7 +11531,7 @@ ATStailcal_end()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 24021(line=600, offs=10) -- 25406(line=625, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 24627(line=614, offs=10) -- 26012(line=639, offs=8)
 */
 /*
 INSletpop()
@@ -11317,7 +11544,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 22800(line=572, offs=8) -- 25412(line=626, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 23406(line=586, offs=8) -- 26018(line=640, offs=6)
 */
 /*
 INSletpop()
@@ -11325,8 +11552,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret629) ;
-} /* end of [lex_pub_lines_113] */
+ATSreturn(tmpret644) ;
+} /* end of [lex_pub_lines_114] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -11339,9 +11566,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__16(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11380,9 +11607,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11421,9 +11648,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__14(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11452,17 +11679,17 @@ ATSreturn(tmpret63__14) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__14] */
 
 /*
-build/src/lexer.dats: 23050(line=578, offs=11) -- 23359(line=584, offs=15)
+build/src/lexer.dats: 23656(line=592, offs=11) -- 23965(line=598, offs=15)
 */
 /*
-local: skip_to_eol_66$0(level=0), is_blank_line_110$0(level=0), skip_blanks_117$0(level=1)
-global: skip_to_eol_66$0(level=0), is_blank_line_110$0(level=0), skip_blanks_117$0(level=1)
+local: skip_to_eol_67$0(level=0), is_blank_line_111$0(level=0), skip_blanks_118$0(level=1)
+global: skip_to_eol_67$0(level=0), is_blank_line_111$0(level=0), skip_blanks_118$0(level=1)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-skip_blanks_117(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+skip_blanks_118(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -11470,99 +11697,99 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret641, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp642, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp645, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp648, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp649, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp650, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret656, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp657, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp660, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp663, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp664, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp665, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23050(line=578, offs=11) -- 23359(line=584, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23656(line=592, offs=11) -- 23965(line=598, offs=15)
 */
-ATSINSflab(__patsflab_skip_blanks_117):
+ATSINSflab(__patsflab_skip_blanks_118):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23177(line=580, offs=12) -- 23184(line=580, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 23783(line=594, offs=12) -- 23790(line=594, offs=19)
 */
-ATSINSmove(tmp642, ATSLIB_056_prelude__lte_g1int_int__29__17(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp657, ATSLIB_056_prelude__lte_g1int_int__29__17(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23174(line=580, offs=9) -- 23359(line=584, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23780(line=594, offs=9) -- 23965(line=598, offs=15)
 */
 ATSif(
-tmp642
+tmp657
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23190(line=580, offs=25) -- 23191(line=580, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 23796(line=594, offs=25) -- 23797(line=594, offs=26)
 */
-ATSINSmove(tmpret641, arg1) ;
+ATSINSmove(tmpret656, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23208(line=581, offs=17) -- 23215(line=581, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 23814(line=595, offs=17) -- 23821(line=595, offs=24)
 */
-ATSINSmove(tmp645, ATSLIB_056_prelude__gte_g1int_int__24__15(arg1, arg2)) ;
+ATSINSmove(tmp660, ATSLIB_056_prelude__gte_g1int_int__24__15(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23205(line=581, offs=14) -- 23359(line=584, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23811(line=595, offs=14) -- 23965(line=598, offs=15)
 */
 ATSif(
-tmp645
+tmp660
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23221(line=581, offs=30) -- 23222(line=581, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 23827(line=595, offs=30) -- 23828(line=595, offs=31)
 */
-ATSINSmove(tmpret641, arg1) ;
+ATSINSmove(tmpret656, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23239(line=582, offs=17) -- 23270(line=582, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 23845(line=596, offs=17) -- 23876(line=596, offs=48)
 */
-ATSINSmove(tmp648, is_blank_line_110(ATSPMVrefarg0(arg0), arg1, arg2, arg3, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp663, is_blank_line_111(ATSPMVrefarg0(arg0), arg1, arg2, arg3, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23236(line=582, offs=14) -- 23359(line=584, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23842(line=596, offs=14) -- 23965(line=598, offs=15)
 */
 ATSif(
-tmp648
+tmp663
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23301(line=583, offs=26) -- 23328(line=583, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 23907(line=597, offs=26) -- 23934(line=597, offs=53)
 */
-ATSINSmove(tmp649, skip_to_eol_66(ATSPMVrefarg0(arg0), arg1, arg2, arg3, arg3)) ;
+ATSINSmove(tmp664, skip_to_eol_67(ATSPMVrefarg0(arg0), arg1, arg2, arg3, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23337(line=583, offs=62) -- 23343(line=583, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 23943(line=597, offs=62) -- 23949(line=597, offs=68)
 */
-ATSINSmove(tmp650, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp665, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23286(line=583, offs=11) -- 23344(line=583, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 23892(line=597, offs=11) -- 23950(line=597, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp649) ;
+ATSINSmove_tlcal(apy1, tmp664) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp650) ;
+ATSINSmove_tlcal(apy4, tmp665) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_skip_blanks_117) ;
+ATSINSfgoto(__patsflab_skip_blanks_118) ;
 ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 23358(line=584, offs=14) -- 23359(line=584, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 23964(line=598, offs=14) -- 23965(line=598, offs=15)
 */
-ATSINSmove(tmpret641, arg1) ;
+ATSINSmove(tmpret656, arg1) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret641) ;
-} /* end of [skip_blanks_117] */
+ATSreturn(tmpret656) ;
+} /* end of [skip_blanks_118] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -11575,9 +11802,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__17(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11616,9 +11843,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__15(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11652,22 +11879,22 @@ $(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650
 */
 /*
 local: 
-global: lt_g1int_int$120$0(level=0)
+global: lt_g1int_int$121$0(level=0)
 local: 
 global: 
 */
 ATSextern()
 /*
-imparg = tk(5338)
-tmparg = S2Evar(tk(5338))
+imparg = tk(5340)
+tmparg = S2Evar(tk(5340))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lt_g1int_int__121(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret657, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp658, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret672, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp673, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -11677,16 +11904,16 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp658, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5338))>)(arg1)) ;
+ATSINSmove(tmp673, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(5340))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret657, PMVtmpltcst(g1int_lt<S2Evar(tk(5338))>)(arg0, tmp658)) ;
+ATSINSmove(tmpret672, PMVtmpltcst(g1int_lt<S2Evar(tk(5340))>)(arg0, tmp673)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret657) ;
-} /* end of [ATSLIB_056_prelude__lt_g1int_int__120] */
+ATSreturn(tmpret672) ;
+} /* end of [ATSLIB_056_prelude__lt_g1int_int__121] */
 #endif // end of [TEMPLATE]
 
 /*
@@ -11694,22 +11921,22 @@ $(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650
 */
 /*
 local: 
-global: lt_g1int_int$120$1(level=1)
+global: lt_g1int_int$121$1(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = tk(5338)
-tmparg = S2Evar(tk(5338))
-tmpsub = Some(tk(5338) -> S2Eextkind(atstype_int))
+imparg = tk(5340)
+tmparg = S2Evar(tk(5340))
+tmpsub = Some(tk(5340) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lt_g1int_int__121__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret657__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp658__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret672__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp673__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -11719,173 +11946,173 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp658__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp673__1, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret657__1, atspre_g1int_lt_int(arg0, tmp658__1)) ;
+ATSINSmove(tmpret672__1, atspre_g1int_lt_int(arg0, tmp673__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret657__1) ;
-} /* end of [ATSLIB_056_prelude__lt_g1int_int__120__1] */
+ATSreturn(tmpret672__1) ;
+} /* end of [ATSLIB_056_prelude__lt_g1int_int__121__1] */
 
 /*
-build/src/lexer.dats: 25439(line=629, offs=4) -- 25638(line=633, offs=36)
+build/src/lexer.dats: 26045(line=643, offs=4) -- 26244(line=647, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_let_123$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_let_124$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-looking_at_let_123(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
+looking_at_let_124(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret730, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp731, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp732, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp733, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret745, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp746, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp747, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp748, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25439(line=629, offs=4) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26045(line=643, offs=4) -- 26244(line=647, offs=36)
 */
-ATSINSflab(__patsflab_looking_at_let_123):
+ATSINSflab(__patsflab_looking_at_let_124):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
-ATSINSmove(tmp732, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp747, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
 ATSif(
-tmp732
+tmp747
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
-ATSINSmove(tmp731, build_057_src_057_helpers_056_sats__lit_let(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp746, build_057_src_057_helpers_056_sats__lit_let(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
-ATSINSmove(tmp731, ATSPMVbool_false()) ;
+ATSINSmove(tmp746, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
 ATSif(
-tmp731
+tmp746
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
-ATSINSmove(tmp733, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp748, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
-ATSINSmove(tmpret730, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp733, arg2)) ;
+ATSINSmove(tmpret745, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp748, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25535(line=631, offs=3) -- 25638(line=633, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26141(line=645, offs=3) -- 26244(line=647, offs=36)
 */
-ATSINSmove(tmpret730, ATSPMVbool_false()) ;
+ATSINSmove(tmpret745, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret730) ;
-} /* end of [looking_at_let_123] */
+ATSreturn(tmpret745) ;
+} /* end of [looking_at_let_124] */
 
 /*
-build/src/lexer.dats: 25643(line=635, offs=4) -- 25846(line=639, offs=36)
+build/src/lexer.dats: 26249(line=649, offs=4) -- 26452(line=653, offs=36)
 */
 /*
 local: is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_local_124$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_local_125$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-looking_at_local_124(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
+looking_at_local_125(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret734, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp735, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp736, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp737, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret749, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp750, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp751, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp752, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25643(line=635, offs=4) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26249(line=649, offs=4) -- 26452(line=653, offs=36)
 */
-ATSINSflab(__patsflab_looking_at_local_124):
+ATSINSflab(__patsflab_looking_at_local_125):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
-ATSINSmove(tmp736, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp751, is_kw_boundary_before_28(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
 ATSif(
-tmp736
+tmp751
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
-ATSINSmove(tmp735, build_057_src_057_helpers_056_sats__lit_local(ATSPMVrefarg0(arg0), arg1, arg2)) ;
+ATSINSmove(tmp750, build_057_src_057_helpers_056_sats__lit_local(ATSPMVrefarg0(arg0), arg1, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
-ATSINSmove(tmp735, ATSPMVbool_false()) ;
+ATSINSmove(tmp750, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
 ATSif(
-tmp735
+tmp750
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
-ATSINSmove(tmp737, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp752, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
-ATSINSmove(tmpret734, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp737, arg2)) ;
+ATSINSmove(tmpret749, is_kw_boundary_23(ATSPMVrefarg0(arg0), tmp752, arg2)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25741(line=637, offs=3) -- 25846(line=639, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 26347(line=651, offs=3) -- 26452(line=653, offs=36)
 */
-ATSINSmove(tmpret734, ATSPMVbool_false()) ;
+ATSINSmove(tmpret749, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret734) ;
-} /* end of [looking_at_local_124] */
+ATSreturn(tmpret749) ;
+} /* end of [looking_at_local_125] */
 
 /*
-build/src/lexer.dats: 25852(line=641, offs=5) -- 26618(line=655, offs=64)
+build/src/lexer.dats: 26458(line=655, offs=5) -- 27224(line=669, offs=64)
 */
 /*
-local: looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0)
-global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0)
+local: looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0)
+global: is_ident_byte_0$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-find_end_kw_125(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+find_end_kw_126(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -11894,294 +12121,294 @@ ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy5, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret738, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp739, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp742, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp745, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp746, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp749, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp750, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp751, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp752, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp753, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp754, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp755, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp756, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp757, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp758, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp759, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret753, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp754, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp757, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp760, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp761, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp762, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp763, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp761, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp764, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp765, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp766, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp767, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp768, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp769, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp770, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp771, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp772, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp773, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp774, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp775, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp776, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp777, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp778, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp779, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp780, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 25852(line=641, offs=5) -- 26618(line=655, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 26458(line=655, offs=5) -- 27224(line=669, offs=64)
 */
-ATSINSflab(__patsflab_find_end_kw_125):
+ATSINSflab(__patsflab_find_end_kw_126):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26015(line=644, offs=6) -- 26024(line=644, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 26621(line=658, offs=6) -- 26630(line=658, offs=15)
 */
-ATSINSmove(tmp739, ATSLIB_056_prelude__lte_g1int_int__29__18(arg5, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp754, ATSLIB_056_prelude__lte_g1int_int__29__18(arg5, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26012(line=644, offs=3) -- 26618(line=655, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 26618(line=658, offs=3) -- 27224(line=669, offs=64)
 */
 ATSif(
-tmp739
+tmp754
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26030(line=644, offs=21) -- 26037(line=644, offs=28)
+emit_instr: loc0 = build/src/lexer.dats: 26636(line=658, offs=21) -- 26643(line=658, offs=28)
 */
-ATSINSmove(tmpret738, arg2) ;
+ATSINSmove(tmpret753, arg2) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26048(line=645, offs=11) -- 26062(line=645, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 26654(line=659, offs=11) -- 26668(line=659, offs=25)
 */
-ATSINSmove(tmp742, ATSLIB_056_prelude__gte_g1int_int__24__16(arg1, arg2)) ;
+ATSINSmove(tmp757, ATSLIB_056_prelude__gte_g1int_int__24__16(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26045(line=645, offs=8) -- 26618(line=655, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 26651(line=659, offs=8) -- 27224(line=669, offs=64)
 */
 ATSif(
-tmp742
+tmp757
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26068(line=645, offs=31) -- 26075(line=645, offs=38)
+emit_instr: loc0 = build/src/lexer.dats: 26674(line=659, offs=31) -- 26681(line=659, offs=38)
 */
-ATSINSmove(tmpret738, arg2) ;
+ATSINSmove(tmpret753, arg2) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26086(line=646, offs=11) -- 26115(line=646, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 26692(line=660, offs=11) -- 26721(line=660, offs=40)
 */
-ATSINSmove(tmp745, looking_at_end_40(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp760, looking_at_end_40(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26083(line=646, offs=8) -- 26618(line=655, offs=64)
-*/
-ATSif(
-tmp745
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26129(line=647, offs=9) -- 26139(line=647, offs=19)
-*/
-ATSINSmove(tmp746, ATSLIB_056_prelude__lte_g0int_int__5__8(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26126(line=647, offs=6) -- 26219(line=648, offs=71)
-*/
-ATSif(
-tmp746
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26145(line=647, offs=25) -- 26148(line=647, offs=28)
-*/
-ATSINSmove(tmpret738, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26176(line=648, offs=28) -- 26183(line=648, offs=35)
-*/
-ATSINSmove(tmp749, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26199(line=648, offs=51) -- 26208(line=648, offs=60)
-*/
-ATSINSmove(tmp750, atspre_g0int_sub_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26210(line=648, offs=62) -- 26218(line=648, offs=70)
-*/
-ATSINSmove(tmp751, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26159(line=648, offs=11) -- 26219(line=648, offs=71)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp749) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp750) ;
-ATSINSmove_tlcal(apy5, tmp751) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_find_end_kw_125) ;
-ATStailcal_end()
-
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26231(line=649, offs=11) -- 26262(line=649, offs=42)
-*/
-ATSINSmove(tmp752, looking_at_begin_39(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26228(line=649, offs=8) -- 26618(line=655, offs=64)
-*/
-ATSif(
-tmp752
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26289(line=650, offs=22) -- 26296(line=650, offs=29)
-*/
-ATSINSmove(tmp753, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26312(line=650, offs=45) -- 26321(line=650, offs=54)
-*/
-ATSINSmove(tmp754, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26323(line=650, offs=56) -- 26331(line=650, offs=64)
-*/
-ATSINSmove(tmp755, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26272(line=650, offs=5) -- 26332(line=650, offs=65)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp753) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp754) ;
-ATSINSmove_tlcal(apy5, tmp755) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_find_end_kw_125) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26343(line=651, offs=11) -- 26372(line=651, offs=40)
-*/
-ATSINSmove(tmp756, looking_at_let_123(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26340(line=651, offs=8) -- 26618(line=655, offs=64)
-*/
-ATSif(
-tmp756
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26399(line=652, offs=22) -- 26406(line=652, offs=29)
-*/
-ATSINSmove(tmp757, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26422(line=652, offs=45) -- 26431(line=652, offs=54)
-*/
-ATSINSmove(tmp758, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26433(line=652, offs=56) -- 26441(line=652, offs=64)
-*/
-ATSINSmove(tmp759, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26382(line=652, offs=5) -- 26442(line=652, offs=65)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp757) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp758) ;
-ATSINSmove_tlcal(apy5, tmp759) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_find_end_kw_125) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26453(line=653, offs=11) -- 26484(line=653, offs=42)
-*/
-ATSINSmove(tmp760, looking_at_local_124(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26450(line=653, offs=8) -- 26618(line=655, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 26689(line=660, offs=8) -- 27224(line=669, offs=64)
 */
 ATSif(
 tmp760
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26511(line=654, offs=22) -- 26518(line=654, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 26735(line=661, offs=9) -- 26745(line=661, offs=19)
 */
-ATSINSmove(tmp761, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp761, ATSLIB_056_prelude__lte_g0int_int__5__8(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26534(line=654, offs=45) -- 26543(line=654, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 26732(line=661, offs=6) -- 26825(line=662, offs=71)
 */
-ATSINSmove(tmp762, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
-
+ATSif(
+tmp761
+) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26545(line=654, offs=56) -- 26553(line=654, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 26751(line=661, offs=25) -- 26754(line=661, offs=28)
 */
-ATSINSmove(tmp763, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26494(line=654, offs=5) -- 26554(line=654, offs=65)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp761) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp762) ;
-ATSINSmove_tlcal(apy5, tmp763) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_find_end_kw_125) ;
-ATStailcal_end()
-
+ATSINSmove(tmpret753, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26579(line=655, offs=25) -- 26586(line=655, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 26782(line=662, offs=28) -- 26789(line=662, offs=35)
 */
-ATSINSmove(tmp764, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp764, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26609(line=655, offs=55) -- 26617(line=655, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 26805(line=662, offs=51) -- 26814(line=662, offs=60)
 */
-ATSINSmove(tmp765, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp765, atspre_g0int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 26562(line=655, offs=8) -- 26618(line=655, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 26816(line=662, offs=62) -- 26824(line=662, offs=70)
+*/
+ATSINSmove(tmp766, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26765(line=662, offs=11) -- 26825(line=662, offs=71)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, tmp764) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, arg4) ;
-ATSINSmove_tlcal(apy5, tmp765) ;
+ATSINSmove_tlcal(apy4, tmp765) ;
+ATSINSmove_tlcal(apy5, tmp766) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab_find_end_kw_125) ;
+ATSINSfgoto(__patsflab_find_end_kw_126) ;
+ATStailcal_end()
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26837(line=663, offs=11) -- 26868(line=663, offs=42)
+*/
+ATSINSmove(tmp767, looking_at_begin_39(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26834(line=663, offs=8) -- 27224(line=669, offs=64)
+*/
+ATSif(
+tmp767
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26895(line=664, offs=22) -- 26902(line=664, offs=29)
+*/
+ATSINSmove(tmp768, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26918(line=664, offs=45) -- 26927(line=664, offs=54)
+*/
+ATSINSmove(tmp769, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26929(line=664, offs=56) -- 26937(line=664, offs=64)
+*/
+ATSINSmove(tmp770, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26878(line=664, offs=5) -- 26938(line=664, offs=65)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp768) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, arg3) ;
+ATSINSmove_tlcal(apy4, tmp769) ;
+ATSINSmove_tlcal(apy5, tmp770) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSfgoto(__patsflab_find_end_kw_126) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26949(line=665, offs=11) -- 26978(line=665, offs=40)
+*/
+ATSINSmove(tmp771, looking_at_let_124(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26946(line=665, offs=8) -- 27224(line=669, offs=64)
+*/
+ATSif(
+tmp771
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27005(line=666, offs=22) -- 27012(line=666, offs=29)
+*/
+ATSINSmove(tmp772, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27028(line=666, offs=45) -- 27037(line=666, offs=54)
+*/
+ATSINSmove(tmp773, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27039(line=666, offs=56) -- 27047(line=666, offs=64)
+*/
+ATSINSmove(tmp774, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 26988(line=666, offs=5) -- 27048(line=666, offs=65)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp772) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, arg3) ;
+ATSINSmove_tlcal(apy4, tmp773) ;
+ATSINSmove_tlcal(apy5, tmp774) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSfgoto(__patsflab_find_end_kw_126) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27059(line=667, offs=11) -- 27090(line=667, offs=42)
+*/
+ATSINSmove(tmp775, looking_at_local_125(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27056(line=667, offs=8) -- 27224(line=669, offs=64)
+*/
+ATSif(
+tmp775
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27117(line=668, offs=22) -- 27124(line=668, offs=29)
+*/
+ATSINSmove(tmp776, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27140(line=668, offs=45) -- 27149(line=668, offs=54)
+*/
+ATSINSmove(tmp777, atspre_g0int_add_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27151(line=668, offs=56) -- 27159(line=668, offs=64)
+*/
+ATSINSmove(tmp778, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27100(line=668, offs=5) -- 27160(line=668, offs=65)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp776) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, arg3) ;
+ATSINSmove_tlcal(apy4, tmp777) ;
+ATSINSmove_tlcal(apy5, tmp778) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSfgoto(__patsflab_find_end_kw_126) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27185(line=669, offs=25) -- 27192(line=669, offs=32)
+*/
+ATSINSmove(tmp779, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27215(line=669, offs=55) -- 27223(line=669, offs=63)
+*/
+ATSINSmove(tmp780, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27168(line=669, offs=8) -- 27224(line=669, offs=64)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, tmp779) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, arg3) ;
+ATSINSmove_tlcal(apy4, arg4) ;
+ATSINSmove_tlcal(apy5, tmp780) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSfgoto(__patsflab_find_end_kw_126) ;
 ATStailcal_end()
 
 } /* ATSendif */
@@ -12191,8 +12418,8 @@ ATStailcal_end()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret738) ;
-} /* end of [find_end_kw_125] */
+ATSreturn(tmpret753) ;
+} /* end of [find_end_kw_126] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -12205,9 +12432,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__18(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12246,9 +12473,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__16(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12287,9 +12514,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5332)
-tmparg = S2Evar(tk(5332))
-tmpsub = Some(tk(5332) -> S2Eextkind(atstype_int))
+imparg = tk(5334)
+tmparg = S2Evar(tk(5334))
+tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__5__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12318,677 +12545,677 @@ ATSreturn(tmpret9__8) ;
 } /* end of [ATSLIB_056_prelude__lte_g0int_int__5__8] */
 
 /*
-build/src/lexer.dats: 26623(line=657, offs=4) -- 27519(line=678, offs=4)
+build/src/lexer.dats: 27229(line=671, offs=4) -- 28125(line=692, offs=4)
 */
 /*
-local: put_span_20$0(level=0), looking_at_begin_39$0(level=0), skip_ws_64$0(level=0), skip_ident_69$0(level=0), find_end_kw_125$0(level=0)
-global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), skip_ws_64$0(level=0), skip_ident_69$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0), lex_unsafe_dispatch_129$0(level=0)
+local: put_span_20$0(level=0), looking_at_begin_39$0(level=0), skip_ws_64$0(level=0), skip_ident_70$0(level=0), find_end_kw_126$0(level=0)
+global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), skip_ws_64$0(level=0), skip_ident_70$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0), lex_unsafe_dispatch_130$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_1
-lex_unsafe_dispatch_129(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_unsafe_dispatch_130(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret766, postiats_tyrec_1) ;
-ATStmpdec(tmp767, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp768, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp769, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp770, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp771, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp772) ;
-ATStmpdec(tmp773, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp774, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp775, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp776, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp777, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp778, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp779, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp782) ;
+ATStmpdec(tmpret781, postiats_tyrec_1) ;
+ATStmpdec(tmp782, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp783, atstkind_t0ype(atstype_int)) ;
-/* tmpvardeclst(end) */
-ATSfunbody_beg()
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26623(line=657, offs=4) -- 27519(line=678, offs=4)
-*/
-ATSINSflab(__patsflab_lex_unsafe_dispatch_129):
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26808(line=659, offs=91) -- 27519(line=678, offs=4)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26826(line=660, offs=15) -- 26835(line=660, offs=24)
-*/
-ATSINSmove(tmp767, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26849(line=661, offs=14) -- 26870(line=661, offs=35)
-*/
-ATSINSmove(tmp768, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp767, arg2)) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26879(line=663, offs=6) -- 26903(line=663, offs=30)
-*/
-ATSINSmove(tmp769, atspre_g0int_eq_int(tmp768, ATSPMVi0nt(46))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26876(line=663, offs=3) -- 27515(line=677, offs=6)
-*/
-ATSif(
-tmp769
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26909(line=663, offs=36) -- 27074(line=666, offs=39)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26949(line=664, offs=37) -- 26958(line=664, offs=46)
-*/
-ATSINSmove(tmp771, atspre_g1int_add_int(tmp767, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26933(line=664, offs=21) -- 26970(line=664, offs=58)
-*/
-ATSINSmove(tmp770, skip_ident_69(ATSPMVrefarg0(arg0), tmp771, arg2, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26984(line=665, offs=14) -- 27035(line=665, offs=65)
-*/
-ATSINSmove_void(tmp772, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp770, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27054(line=666, offs=19) -- 27063(line=666, offs=28)
-*/
-ATSINSmove(tmp773, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27041(line=666, offs=6) -- 27070(line=666, offs=35)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__0, tmp770) ;
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__1, tmp773) ;
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
-ATSINSmove_fltrec_end()
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26909(line=663, offs=36) -- 27074(line=666, offs=39)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27082(line=667, offs=8) -- 27515(line=677, offs=6)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27099(line=668, offs=14) -- 27128(line=668, offs=43)
-*/
-ATSINSmove(tmp774, skip_ws_64(ATSPMVrefarg0(arg0), tmp767, arg2, ATSPMVi0nt(256))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27141(line=670, offs=8) -- 27171(line=670, offs=38)
-*/
-ATSINSmove(tmp775, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp774, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27138(line=670, offs=5) -- 27509(line=676, offs=32)
-*/
-ATSif(
-tmp775
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27177(line=670, offs=44) -- 27477(line=675, offs=34)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27208(line=671, offs=28) -- 27214(line=671, offs=34)
-*/
-ATSINSmove(tmp776, atspre_g1int_add_int(tmp774, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27235(line=672, offs=21) -- 27289(line=672, offs=75)
-*/
-ATSINSmove(tmp777, find_end_kw_125(ATSPMVrefarg0(arg0), tmp776, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27309(line=673, offs=20) -- 27326(line=673, offs=37)
-*/
-ATSINSmove(tmp779, ATSLIB_056_prelude__lt_g1int_int__120__2(tmp777, arg1)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27306(line=673, offs=17) -- 27356(line=673, offs=67)
-*/
-ATSif(
-tmp779
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27332(line=673, offs=43) -- 27343(line=673, offs=54)
-*/
-ATSINSmove(tmp778, atspre_g1int_add_int(tmp777, ATSPMVi0nt(3))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27349(line=673, offs=60) -- 27356(line=673, offs=67)
-*/
-ATSINSmove(tmp778, tmp777) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27380(line=674, offs=16) -- 27443(line=674, offs=79)
-*/
-ATSINSmove_void(tmp782, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(4), ATSPMVi0nt(0), arg4, tmp778, tmp776, tmp777, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27457(line=675, offs=14) -- 27466(line=675, offs=23)
-*/
-ATSINSmove(tmp783, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27451(line=675, offs=8) -- 27473(line=675, offs=30)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__0, tmp778) ;
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__1, tmp783) ;
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
-ATSINSmove_fltrec_end()
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27177(line=670, offs=44) -- 27477(line=675, offs=34)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27487(line=676, offs=10) -- 27509(line=676, offs=32)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__1, arg5) ;
-ATSINSstore_fltrec_ofs(tmpret766, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
-ATSINSmove_fltrec_end()
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27082(line=667, offs=8) -- 27515(line=677, offs=6)
-*/
-/*
-INSletpop()
-*/
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 26808(line=659, offs=91) -- 27519(line=678, offs=4)
-*/
-/*
-INSletpop()
-*/
-ATSfunbody_end()
-ATSreturn(tmpret766) ;
-} /* end of [lex_unsafe_dispatch_129] */
-
-/*
-$(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650, offs=42)
-*/
-/*
-local: 
-global: lt_g1int_int$120$2(level=1)
-local: 
-global: 
-*/
-ATSstatic()
-/*
-imparg = tk(5338)
-tmparg = S2Evar(tk(5338))
-tmpsub = Some(tk(5338) -> S2Eextkind(atstype_int))
-*/
-atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
-{
-/* tmpvardeclst(beg) */
-ATStmpdec(tmpret657__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp658__2, atstkind_t0ype(atstype_int)) ;
-/* tmpvardeclst(end) */
-ATSfunbody_beg()
-/*
-emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12505(line=649, offs=1) -- 12559(line=650, offs=42)
-*/
-ATSINSflab(__patsflab_lt_g1int_int):
-/*
-emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
-*/
-ATSINSmove(tmp658__2, atspre_g1int2int_int_int(arg1)) ;
-
-/*
-emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
-*/
-ATSINSmove(tmpret657__2, atspre_g1int_lt_int(arg0, tmp658__2)) ;
-
-ATSfunbody_end()
-ATSreturn(tmpret657__2) ;
-} /* end of [ATSLIB_056_prelude__lt_g1int_int__120__2] */
-
-/*
-build/src/lexer.dats: 27524(line=680, offs=4) -- 28835(line=709, offs=4)
-*/
-/*
-local: put_span_20$0(level=0), looking_at_begin_39$0(level=0), skip_ws_64$0(level=0), find_end_kw_125$0(level=0)
-global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), skip_ws_64$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0), lex_unittest_dispatch_131$0(level=0)
-local: 
-global: 
-*/
-ATSstatic()
-postiats_tyrec_1
-lex_unittest_dispatch_131(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
-{
-/* tmpvardeclst(beg) */
-ATStmpdec(tmpret784, postiats_tyrec_1) ;
+ATStmpdec(tmp784, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp785, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp786, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp787, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp787) ;
 ATStmpdec(tmp788, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp789, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp789, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp790, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp791, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp791, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp792, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp793, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp794, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp795, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp796, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp797, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp794, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp797) ;
 ATStmpdec(tmp798, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp799, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp800, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp801, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp802, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp803, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp804, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp807) ;
-ATStmpdec(tmp808, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp809, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp810, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp811, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp812, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp813, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp816) ;
-ATStmpdec(tmp817, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27524(line=680, offs=4) -- 28835(line=709, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 27229(line=671, offs=4) -- 28125(line=692, offs=4)
 */
-ATSINSflab(__patsflab_lex_unittest_dispatch_131):
+ATSINSflab(__patsflab_lex_unsafe_dispatch_130):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27711(line=682, offs=91) -- 28835(line=709, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 27414(line=673, offs=91) -- 28125(line=692, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27729(line=683, offs=15) -- 27738(line=683, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 27432(line=674, offs=15) -- 27441(line=674, offs=24)
 */
-ATSINSmove(tmp785, atspre_g1int_add_int(arg4, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp782, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27750(line=684, offs=12) -- 27779(line=684, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 27455(line=675, offs=14) -- 27476(line=675, offs=35)
 */
-ATSINSmove(tmp786, skip_ws_64(ATSPMVrefarg0(arg0), tmp785, arg2, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp783, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp782, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27810(line=685, offs=31) -- 27828(line=685, offs=49)
+letpush(end)
 */
-ATSINSmove(tmp788, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp786, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27795(line=685, offs=16) -- 27833(line=685, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 27485(line=677, offs=6) -- 27509(line=677, offs=30)
 */
-ATSINSmove(tmp787, atspre_g0int_eq_int(tmp788, ATSPMVi0nt(46))) ;
+ATSINSmove(tmp784, atspre_g0int_eq_int(tmp783, ATSPMVi0nt(46))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27482(line=677, offs=3) -- 28121(line=691, offs=6)
 */
 ATSif(
-tmp787
+tmp784
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27515(line=677, offs=36) -- 27680(line=680, offs=39)
 */
-ATSINSmove(tmp793, atspre_g1int_add_int(tmp786, ATSPMVi0nt(1))) ;
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27555(line=678, offs=37) -- 27564(line=678, offs=46)
+*/
+ATSINSmove(tmp786, atspre_g1int_add_int(tmp782, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27539(line=678, offs=21) -- 27576(line=678, offs=58)
 */
-ATSINSmove(tmp792, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp793, arg2)) ;
+ATSINSmove(tmp785, skip_ident_70(ATSPMVrefarg0(arg0), tmp786, arg2, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27590(line=679, offs=14) -- 27641(line=679, offs=65)
 */
-ATSINSmove(tmp791, atspre_g0int_eq_int(tmp792, ATSPMVi0nt(114))) ;
+ATSINSmove_void(tmp787, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp785, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27660(line=680, offs=19) -- 27669(line=680, offs=28)
+*/
+ATSINSmove(tmp788, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27647(line=680, offs=6) -- 27676(line=680, offs=35)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__0, tmp785) ;
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__1, tmp788) ;
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
+ATSINSmove_fltrec_end()
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27515(line=677, offs=36) -- 27680(line=680, offs=39)
+*/
+/*
+INSletpop()
+*/
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27688(line=681, offs=8) -- 28121(line=691, offs=6)
 */
-ATSINSmove(tmp791, ATSPMVbool_false()) ;
-} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+letpush(beg)
 */
-ATSif(
-tmp791
-) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27705(line=682, offs=14) -- 27734(line=682, offs=43)
 */
-ATSINSmove(tmp795, atspre_g1int_add_int(tmp786, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp789, skip_ws_64(ATSPMVrefarg0(arg0), tmp782, arg2, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+letpush(end)
 */
-ATSINSmove(tmp794, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp795, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27747(line=684, offs=8) -- 27777(line=684, offs=38)
 */
-ATSINSmove(tmp790, atspre_g0int_eq_int(tmp794, ATSPMVi0nt(117))) ;
+ATSINSmove(tmp790, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp789, arg2)) ;
 
-} ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
-*/
-ATSINSmove(tmp790, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27744(line=684, offs=5) -- 28115(line=690, offs=32)
 */
 ATSif(
 tmp790
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27783(line=684, offs=44) -- 28083(line=689, offs=34)
 */
-ATSINSmove(tmp797, atspre_g1int_add_int(tmp786, ATSPMVi0nt(3))) ;
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27814(line=685, offs=28) -- 27820(line=685, offs=34)
+*/
+ATSINSmove(tmp791, atspre_g1int_add_int(tmp789, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27841(line=686, offs=21) -- 27895(line=686, offs=75)
 */
-ATSINSmove(tmp796, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp797, arg2)) ;
+ATSINSmove(tmp792, find_end_kw_126(ATSPMVrefarg0(arg0), tmp791, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27915(line=687, offs=20) -- 27932(line=687, offs=37)
 */
-ATSINSmove(tmp789, atspre_g0int_eq_int(tmp796, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp794, ATSLIB_056_prelude__lt_g1int_int__121__2(tmp792, arg1)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27912(line=687, offs=17) -- 27962(line=687, offs=67)
+*/
+ATSif(
+tmp794
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27938(line=687, offs=43) -- 27949(line=687, offs=54)
+*/
+ATSINSmove(tmp793, atspre_g1int_add_int(tmp792, ATSPMVi0nt(3))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27849(line=686, offs=16) -- 28008(line=689, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 27955(line=687, offs=60) -- 27962(line=687, offs=67)
 */
-ATSINSmove(tmp789, ATSPMVbool_false()) ;
+ATSINSmove(tmp793, tmp792) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27986(line=688, offs=16) -- 28049(line=688, offs=79)
+*/
+ATSINSmove_void(tmp797, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(4), ATSPMVi0nt(0), arg4, tmp793, tmp791, tmp792, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28063(line=689, offs=14) -- 28072(line=689, offs=23)
+*/
+ATSINSmove(tmp798, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28057(line=689, offs=8) -- 28079(line=689, offs=30)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__0, tmp793) ;
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__1, tmp798) ;
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
+ATSINSmove_fltrec_end()
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27783(line=684, offs=44) -- 28083(line=689, offs=34)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28093(line=690, offs=10) -- 28115(line=690, offs=32)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__1, arg5) ;
+ATSINSstore_fltrec_ofs(tmpret781, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
+ATSINSmove_fltrec_end()
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27688(line=681, offs=8) -- 28121(line=691, offs=6)
+*/
+/*
+INSletpop()
+*/
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 27414(line=673, offs=91) -- 28125(line=692, offs=4)
+*/
+/*
+INSletpop()
+*/
+ATSfunbody_end()
+ATSreturn(tmpret781) ;
+} /* end of [lex_unsafe_dispatch_130] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650, offs=42)
+*/
+/*
+local: 
+global: lt_g1int_int$121$2(level=1)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(5340)
+tmparg = S2Evar(tk(5340))
+tmpsub = Some(tk(5340) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__lt_g1int_int__121__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret672__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp673__2, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12505(line=649, offs=1) -- 12559(line=650, offs=42)
+*/
+ATSINSflab(__patsflab_lt_g1int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
+*/
+ATSINSmove(tmp673__2, atspre_g1int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
+*/
+ATSINSmove(tmpret672__2, atspre_g1int_lt_int(arg0, tmp673__2)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret672__2) ;
+} /* end of [ATSLIB_056_prelude__lt_g1int_int__121__2] */
+
+/*
+build/src/lexer.dats: 28130(line=694, offs=4) -- 29441(line=723, offs=4)
+*/
+/*
+local: put_span_20$0(level=0), looking_at_begin_39$0(level=0), skip_ws_64$0(level=0), find_end_kw_126$0(level=0)
+global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), skip_ws_64$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0), lex_unittest_dispatch_132$0(level=0)
+local: 
+global: 
+*/
+ATSstatic()
+postiats_tyrec_1
+lex_unittest_dispatch_132(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret799, postiats_tyrec_1) ;
+ATStmpdec(tmp800, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp801, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp802, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp803, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp804, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp805, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp806, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp807, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp808, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp809, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp810, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp811, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp812, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp813, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp814, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp815, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp816, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp817, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp818, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp819, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp822) ;
+ATStmpdec(tmp823, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp824, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp825, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp826, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp827, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp828, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp831) ;
+ATStmpdec(tmp832, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28130(line=694, offs=4) -- 29441(line=723, offs=4)
+*/
+ATSINSflab(__patsflab_lex_unittest_dispatch_132):
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28317(line=696, offs=91) -- 29441(line=723, offs=4)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28335(line=697, offs=15) -- 28344(line=697, offs=24)
+*/
+ATSINSmove(tmp800, atspre_g1int_add_int(arg4, ATSPMVi0nt(9))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28356(line=698, offs=12) -- 28385(line=698, offs=41)
+*/
+ATSINSmove(tmp801, skip_ws_64(ATSPMVrefarg0(arg0), tmp800, arg2, ATSPMVi0nt(256))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28416(line=699, offs=31) -- 28434(line=699, offs=49)
+*/
+ATSINSmove(tmp803, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp801, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28401(line=699, offs=16) -- 28439(line=699, offs=54)
+*/
+ATSINSmove(tmp802, atspre_g0int_eq_int(tmp803, ATSPMVi0nt(46))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSif(
+tmp802
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp808, atspre_g1int_add_int(tmp801, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp807, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp808, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp806, atspre_g0int_eq_int(tmp807, ATSPMVi0nt(114))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp806, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSif(
+tmp806
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp810, atspre_g1int_add_int(tmp801, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp809, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp810, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp805, atspre_g0int_eq_int(tmp809, ATSPMVi0nt(117))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp805, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSif(
+tmp805
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp812, atspre_g1int_add_int(tmp801, ATSPMVi0nt(3))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp811, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp812, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp804, atspre_g0int_eq_int(tmp811, ATSPMVi0nt(110))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28455(line=700, offs=16) -- 28614(line=703, offs=48)
+*/
+ATSINSmove(tmp804, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28014(line=691, offs=3) -- 28831(line=708, offs=30)
-*/
-ATSif(
-tmp789
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28029(line=691, offs=18) -- 28464(line=701, offs=6)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28059(line=692, offs=27) -- 28065(line=692, offs=33)
-*/
-ATSINSmove(tmp799, atspre_g1int_add_int(tmp786, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28046(line=692, offs=14) -- 28076(line=692, offs=44)
-*/
-ATSINSmove(tmp798, skip_ws_64(ATSPMVrefarg0(arg0), tmp799, arg2, ATSPMVi0nt(256))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28089(line=694, offs=8) -- 28119(line=694, offs=38)
-*/
-ATSINSmove(tmp800, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp798, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28086(line=694, offs=5) -- 28458(line=700, offs=32)
-*/
-ATSif(
-tmp800
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28125(line=694, offs=44) -- 28426(line=699, offs=34)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28156(line=695, offs=28) -- 28162(line=695, offs=34)
-*/
-ATSINSmove(tmp801, atspre_g1int_add_int(tmp798, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28183(line=696, offs=21) -- 28237(line=696, offs=75)
-*/
-ATSINSmove(tmp802, find_end_kw_125(ATSPMVrefarg0(arg0), tmp801, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28257(line=697, offs=20) -- 28274(line=697, offs=37)
-*/
-ATSINSmove(tmp804, ATSLIB_056_prelude__lt_g1int_int__120__3(tmp802, arg1)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28254(line=697, offs=17) -- 28304(line=697, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 28620(line=705, offs=3) -- 29437(line=722, offs=30)
 */
 ATSif(
 tmp804
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28280(line=697, offs=43) -- 28291(line=697, offs=54)
-*/
-ATSINSmove(tmp803, atspre_g1int_add_int(tmp802, ATSPMVi0nt(3))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28297(line=697, offs=60) -- 28304(line=697, offs=67)
-*/
-ATSINSmove(tmp803, tmp802) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28328(line=698, offs=16) -- 28392(line=698, offs=80)
-*/
-ATSINSmove_void(tmp807, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(10), ATSPMVi0nt(0), arg4, tmp803, tmp801, tmp802, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28406(line=699, offs=14) -- 28415(line=699, offs=23)
-*/
-ATSINSmove(tmp808, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28400(line=699, offs=8) -- 28422(line=699, offs=30)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__0, tmp803) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__1, tmp808) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
-ATSINSmove_fltrec_end()
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28125(line=694, offs=44) -- 28426(line=699, offs=34)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28436(line=700, offs=10) -- 28458(line=700, offs=32)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__1, arg5) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
-ATSINSmove_fltrec_end()
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28029(line=691, offs=18) -- 28464(line=701, offs=6)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28475(line=702, offs=11) -- 28505(line=702, offs=41)
-*/
-ATSINSmove(tmp809, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp786, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28472(line=702, offs=8) -- 28831(line=708, offs=30)
-*/
-ATSif(
-tmp809
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28511(line=702, offs=47) -- 28801(line=707, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 28635(line=705, offs=18) -- 29070(line=715, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28540(line=703, offs=26) -- 28546(line=703, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 28665(line=706, offs=27) -- 28671(line=706, offs=33)
 */
-ATSINSmove(tmp810, atspre_g1int_add_int(tmp786, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp814, atspre_g1int_add_int(tmp801, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28565(line=704, offs=19) -- 28619(line=704, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 28652(line=706, offs=14) -- 28682(line=706, offs=44)
 */
-ATSINSmove(tmp811, find_end_kw_125(ATSPMVrefarg0(arg0), tmp810, arg1, arg2, ATSPMVi0nt(0), arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28637(line=705, offs=18) -- 28654(line=705, offs=35)
-*/
-ATSINSmove(tmp813, ATSLIB_056_prelude__lt_g1int_int__120__4(tmp811, arg1)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28634(line=705, offs=15) -- 28684(line=705, offs=65)
-*/
-ATSif(
-tmp813
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28660(line=705, offs=41) -- 28671(line=705, offs=52)
-*/
-ATSINSmove(tmp812, atspre_g1int_add_int(tmp811, ATSPMVi0nt(3))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28677(line=705, offs=58) -- 28684(line=705, offs=65)
-*/
-ATSINSmove(tmp812, tmp811) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 28706(line=706, offs=14) -- 28769(line=706, offs=77)
-*/
-ATSINSmove_void(tmp816, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(8), ATSPMVi0nt(0), arg4, tmp812, tmp810, tmp811, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove(tmp813, skip_ws_64(ATSPMVrefarg0(arg0), tmp814, arg2, ATSPMVi0nt(256))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28781(line=707, offs=12) -- 28790(line=707, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 28695(line=708, offs=8) -- 28725(line=708, offs=38)
 */
-ATSINSmove(tmp817, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp815, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp813, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28775(line=707, offs=6) -- 28797(line=707, offs=28)
+emit_instr: loc0 = build/src/lexer.dats: 28692(line=708, offs=5) -- 29064(line=714, offs=32)
+*/
+ATSif(
+tmp815
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28731(line=708, offs=44) -- 29032(line=713, offs=34)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28762(line=709, offs=28) -- 28768(line=709, offs=34)
+*/
+ATSINSmove(tmp816, atspre_g1int_add_int(tmp813, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28789(line=710, offs=21) -- 28843(line=710, offs=75)
+*/
+ATSINSmove(tmp817, find_end_kw_126(ATSPMVrefarg0(arg0), tmp816, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28863(line=711, offs=20) -- 28880(line=711, offs=37)
+*/
+ATSINSmove(tmp819, ATSLIB_056_prelude__lt_g1int_int__121__3(tmp817, arg1)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28860(line=711, offs=17) -- 28910(line=711, offs=67)
+*/
+ATSif(
+tmp819
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28886(line=711, offs=43) -- 28897(line=711, offs=54)
+*/
+ATSINSmove(tmp818, atspre_g1int_add_int(tmp817, ATSPMVi0nt(3))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28903(line=711, offs=60) -- 28910(line=711, offs=67)
+*/
+ATSINSmove(tmp818, tmp817) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28934(line=712, offs=16) -- 28998(line=712, offs=80)
+*/
+ATSINSmove_void(tmp822, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(10), ATSPMVi0nt(0), arg4, tmp818, tmp816, tmp817, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29012(line=713, offs=14) -- 29021(line=713, offs=23)
+*/
+ATSINSmove(tmp823, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29006(line=713, offs=8) -- 29028(line=713, offs=30)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__0, tmp812) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__1, tmp817) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__0, tmp818) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__1, tmp823) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28511(line=702, offs=47) -- 28801(line=707, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 28731(line=708, offs=44) -- 29032(line=713, offs=34)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28809(line=708, offs=8) -- 28831(line=708, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 29042(line=714, offs=10) -- 29064(line=714, offs=32)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__1, arg5) ;
-ATSINSstore_fltrec_ofs(tmpret784, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__1, arg5) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
+ATSINSmove_fltrec_end()
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 28635(line=705, offs=18) -- 29070(line=715, offs=6)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29081(line=716, offs=11) -- 29111(line=716, offs=41)
+*/
+ATSINSmove(tmp824, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp801, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29078(line=716, offs=8) -- 29437(line=722, offs=30)
+*/
+ATSif(
+tmp824
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29117(line=716, offs=47) -- 29407(line=721, offs=32)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29146(line=717, offs=26) -- 29152(line=717, offs=32)
+*/
+ATSINSmove(tmp825, atspre_g1int_add_int(tmp801, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29171(line=718, offs=19) -- 29225(line=718, offs=73)
+*/
+ATSINSmove(tmp826, find_end_kw_126(ATSPMVrefarg0(arg0), tmp825, arg1, arg2, ATSPMVi0nt(0), arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29243(line=719, offs=18) -- 29260(line=719, offs=35)
+*/
+ATSINSmove(tmp828, ATSLIB_056_prelude__lt_g1int_int__121__4(tmp826, arg1)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29240(line=719, offs=15) -- 29290(line=719, offs=65)
+*/
+ATSif(
+tmp828
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29266(line=719, offs=41) -- 29277(line=719, offs=52)
+*/
+ATSINSmove(tmp827, atspre_g1int_add_int(tmp826, ATSPMVi0nt(3))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29283(line=719, offs=58) -- 29290(line=719, offs=65)
+*/
+ATSINSmove(tmp827, tmp826) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29312(line=720, offs=14) -- 29375(line=720, offs=77)
+*/
+ATSINSmove_void(tmp831, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(8), ATSPMVi0nt(0), arg4, tmp827, tmp825, tmp826, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29387(line=721, offs=12) -- 29396(line=721, offs=21)
+*/
+ATSINSmove(tmp832, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29381(line=721, offs=6) -- 29403(line=721, offs=28)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__0, tmp827) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__1, tmp832) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__2, ATSPMVbool_true()) ;
+ATSINSmove_fltrec_end()
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29117(line=716, offs=47) -- 29407(line=721, offs=32)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 29415(line=722, offs=8) -- 29437(line=722, offs=30)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__1, arg5) ;
+ATSINSstore_fltrec_ofs(tmpret799, postiats_tyrec_1, atslab__2, ATSPMVbool_false()) ;
 ATSINSmove_fltrec_end()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 27711(line=682, offs=91) -- 28835(line=709, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 28317(line=696, offs=91) -- 29441(line=723, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret784) ;
-} /* end of [lex_unittest_dispatch_131] */
+ATSreturn(tmpret799) ;
+} /* end of [lex_unittest_dispatch_132] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650, offs=42)
 */
 /*
 local: 
-global: lt_g1int_int$120$3(level=1)
+global: lt_g1int_int$121$3(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = tk(5338)
-tmparg = S2Evar(tk(5338))
-tmpsub = Some(tk(5338) -> S2Eextkind(atstype_int))
+imparg = tk(5340)
+tmparg = S2Evar(tk(5340))
+tmpsub = Some(tk(5340) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lt_g1int_int__121__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret657__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp658__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret672__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp673__3, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -12998,38 +13225,38 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp658__3, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp673__3, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret657__3, atspre_g1int_lt_int(arg0, tmp658__3)) ;
+ATSINSmove(tmpret672__3, atspre_g1int_lt_int(arg0, tmp673__3)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret657__3) ;
-} /* end of [ATSLIB_056_prelude__lt_g1int_int__120__3] */
+ATSreturn(tmpret672__3) ;
+} /* end of [ATSLIB_056_prelude__lt_g1int_int__121__3] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650, offs=42)
 */
 /*
 local: 
-global: lt_g1int_int$120$4(level=1)
+global: lt_g1int_int$121$4(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = tk(5338)
-tmparg = S2Evar(tk(5338))
-tmpsub = Some(tk(5338) -> S2Eextkind(atstype_int))
+imparg = tk(5340)
+tmparg = S2Evar(tk(5340))
+tmpsub = Some(tk(5340) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lt_g1int_int__121__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret657__4, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp658__4, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret672__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp673__4, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13039,282 +13266,282 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp658__4, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp673__4, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret657__4, atspre_g1int_lt_int(arg0, tmp658__4)) ;
+ATSINSmove(tmpret672__4, atspre_g1int_lt_int(arg0, tmp673__4)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret657__4) ;
-} /* end of [ATSLIB_056_prelude__lt_g1int_int__120__4] */
+ATSreturn(tmpret672__4) ;
+} /* end of [ATSLIB_056_prelude__lt_g1int_int__121__4] */
 
 /*
-build/src/lexer.dats: 28840(line=711, offs=4) -- 30272(line=739, offs=4)
+build/src/lexer.dats: 29446(line=725, offs=4) -- 30878(line=753, offs=4)
 */
 /*
-local: put_span_20$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), find_end_kw_125$0(level=0)
-global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0), lex_target_decl_134$0(level=0)
+local: put_span_20$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), skip_ws_64$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), find_end_kw_126$0(level=0)
+global: is_ident_byte_0$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), skip_ws_64$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0), lex_target_decl_135$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_target_decl_134(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+lex_target_decl_135(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818, postiats_tyrec_0) ;
-ATStmpdec(tmp819, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp820, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp821, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp822, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp823, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp824, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp825, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp826, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp827, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp828, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp829, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp830, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp833) ;
+ATStmpdec(tmpret833, postiats_tyrec_0) ;
 ATStmpdec(tmp834, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp835, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp835, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp836, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp837, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp838) ;
+ATStmpdec(tmp838, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp839, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp840, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp841) ;
+ATStmpdec(tmp841, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp842, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp843, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp844, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp845, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp848) ;
+ATStmpdec(tmp849, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp850, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp851, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp852, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp853) ;
+ATStmpdec(tmp854, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp855, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp856) ;
+ATStmpdec(tmp857, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 28840(line=711, offs=4) -- 30272(line=739, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 29446(line=725, offs=4) -- 30878(line=753, offs=4)
 */
-ATSINSflab(__patsflab_lex_target_decl_134):
+ATSINSflab(__patsflab_lex_target_decl_135):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29015(line=713, offs=85) -- 30272(line=739, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 29621(line=727, offs=85) -- 30878(line=753, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29043(line=714, offs=25) -- 29052(line=714, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 29649(line=728, offs=25) -- 29658(line=728, offs=34)
 */
-ATSINSmove(tmp820, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp835, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29030(line=714, offs=12) -- 29063(line=714, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 29636(line=728, offs=12) -- 29669(line=728, offs=45)
 */
-ATSINSmove(tmp819, skip_ws_64(ATSPMVrefarg0(arg0), tmp820, arg2, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp834, skip_ws_64(ATSPMVrefarg0(arg0), tmp835, arg2, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29082(line=715, offs=19) -- 29112(line=715, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 29688(line=729, offs=19) -- 29718(line=729, offs=49)
 */
-ATSINSmove(tmp821, skip_ident_69(ATSPMVrefarg0(arg0), tmp819, arg2, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp836, skip_ident_70(ATSPMVrefarg0(arg0), tmp834, arg2, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29147(line=716, offs=35) -- 29165(line=716, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 29753(line=730, offs=35) -- 29771(line=730, offs=53)
 */
-ATSINSmove(tmp824, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp819, arg2)) ;
+ATSINSmove(tmp839, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp834, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29132(line=716, offs=20) -- 29171(line=716, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 29738(line=730, offs=20) -- 29777(line=730, offs=59)
 */
-ATSINSmove(tmp823, atspre_g0int_eq_int(tmp824, ATSPMVi0nt(119))) ;
+ATSINSmove(tmp838, atspre_g0int_eq_int(tmp839, ATSPMVi0nt(119))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29129(line=716, offs=17) -- 29185(line=716, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 29735(line=730, offs=17) -- 29791(line=730, offs=73)
 */
 ATSif(
-tmp823
+tmp838
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29177(line=716, offs=65) -- 29178(line=716, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 29783(line=730, offs=65) -- 29784(line=730, offs=66)
 */
-ATSINSmove(tmp822, ATSPMVi0nt(1)) ;
+ATSINSmove(tmp837, ATSPMVi0nt(1)) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29184(line=716, offs=72) -- 29185(line=716, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 29790(line=730, offs=72) -- 29791(line=730, offs=73)
 */
-ATSINSmove(tmp822, ATSPMVi0nt(0)) ;
+ATSINSmove(tmp837, ATSPMVi0nt(0)) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29258(line=718, offs=12) -- 29291(line=718, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 29864(line=732, offs=12) -- 29897(line=732, offs=45)
 */
-ATSINSmove(tmp825, skip_ws_64(ATSPMVrefarg0(arg0), tmp821, arg2, ATSPMVi0nt(256))) ;
+ATSINSmove(tmp840, skip_ws_64(ATSPMVrefarg0(arg0), tmp836, arg2, ATSPMVi0nt(256))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29300(line=720, offs=6) -- 29330(line=720, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 29906(line=734, offs=6) -- 29936(line=734, offs=36)
 */
-ATSINSmove(tmp826, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp825, arg2)) ;
+ATSINSmove(tmp841, looking_at_begin_39(ATSPMVrefarg0(arg0), tmp840, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29297(line=720, offs=3) -- 30268(line=738, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 29903(line=734, offs=3) -- 30874(line=752, offs=26)
 */
 ATSif(
-tmp826
+tmp841
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29336(line=720, offs=42) -- 29774(line=727, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 29942(line=734, offs=42) -- 30380(line=741, offs=26)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29426(line=722, offs=26) -- 29432(line=722, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 30032(line=736, offs=26) -- 30038(line=736, offs=32)
 */
-ATSINSmove(tmp827, atspre_g1int_add_int(tmp825, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp842, atspre_g1int_add_int(tmp840, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29451(line=723, offs=19) -- 29505(line=723, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 30057(line=737, offs=19) -- 30111(line=737, offs=73)
 */
-ATSINSmove(tmp828, find_end_kw_125(ATSPMVrefarg0(arg0), tmp827, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
+ATSINSmove(tmp843, find_end_kw_126(ATSPMVrefarg0(arg0), tmp842, arg1, arg2, ATSPMVi0nt(1), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29523(line=724, offs=18) -- 29540(line=724, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 30129(line=738, offs=18) -- 30146(line=738, offs=35)
 */
-ATSINSmove(tmp830, ATSLIB_056_prelude__lt_g1int_int__120__5(tmp828, arg1)) ;
+ATSINSmove(tmp845, ATSLIB_056_prelude__lt_g1int_int__121__5(tmp843, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29520(line=724, offs=15) -- 29570(line=724, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 30126(line=738, offs=15) -- 30176(line=738, offs=65)
 */
 ATSif(
-tmp830
+tmp845
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29546(line=724, offs=41) -- 29557(line=724, offs=52)
+emit_instr: loc0 = build/src/lexer.dats: 30152(line=738, offs=41) -- 30163(line=738, offs=52)
 */
-ATSINSmove(tmp829, atspre_g1int_add_int(tmp828, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp844, atspre_g1int_add_int(tmp843, ATSPMVi0nt(3))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29563(line=724, offs=58) -- 29570(line=724, offs=65)
+emit_instr: loc0 = build/src/lexer.dats: 30169(line=738, offs=58) -- 30176(line=738, offs=65)
 */
-ATSINSmove(tmp829, tmp828) ;
+ATSINSmove(tmp844, tmp843) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29679(line=726, offs=14) -- 29748(line=726, offs=83)
+emit_instr: loc0 = build/src/lexer.dats: 30285(line=740, offs=14) -- 30354(line=740, offs=83)
 */
-ATSINSmove_void(tmp833, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(11), ATSPMVi0nt(0), arg4, tmp829, tmp822, tmp827, tmp828, ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp848, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(11), ATSPMVi0nt(0), arg4, tmp844, tmp837, tmp842, tmp843, ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29760(line=727, offs=12) -- 29769(line=727, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 30366(line=741, offs=12) -- 30375(line=741, offs=21)
 */
-ATSINSmove(tmp834, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp849, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29754(line=727, offs=6) -- 29770(line=727, offs=22)
+emit_instr: loc0 = build/src/lexer.dats: 30360(line=741, offs=6) -- 30376(line=741, offs=22)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret818, postiats_tyrec_0, atslab__0, tmp829) ;
-ATSINSstore_fltrec_ofs(tmpret818, postiats_tyrec_0, atslab__1, tmp834) ;
+ATSINSstore_fltrec_ofs(tmpret833, postiats_tyrec_0, atslab__0, tmp844) ;
+ATSINSstore_fltrec_ofs(tmpret833, postiats_tyrec_0, atslab__1, tmp849) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29336(line=720, offs=42) -- 29774(line=727, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 29942(line=734, offs=42) -- 30380(line=741, offs=26)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29785(line=728, offs=11) -- 29816(line=728, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 30391(line=742, offs=11) -- 30422(line=742, offs=42)
 */
-ATSINSmove(tmp835, looking_at_binary_38(ATSPMVrefarg0(arg0), tmp825, arg2)) ;
+ATSINSmove(tmp850, looking_at_binary_38(ATSPMVrefarg0(arg0), tmp840, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29782(line=728, offs=8) -- 30268(line=738, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 30388(line=742, offs=8) -- 30874(line=752, offs=26)
 */
 ATSif(
-tmp835
+tmp850
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29822(line=728, offs=48) -- 30068(line=733, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 30428(line=742, offs=48) -- 30674(line=747, offs=26)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29906(line=730, offs=31) -- 29912(line=730, offs=37)
+emit_instr: loc0 = build/src/lexer.dats: 30512(line=744, offs=31) -- 30518(line=744, offs=37)
 */
-ATSINSmove(tmp837, atspre_g1int_add_int(tmp825, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp852, atspre_g1int_add_int(tmp840, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29889(line=730, offs=14) -- 29932(line=730, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 30495(line=744, offs=14) -- 30538(line=744, offs=57)
 */
-ATSINSmove(tmp836, skip_to_eol_66(ATSPMVrefarg0(arg0), tmp837, arg1, arg2, arg2)) ;
+ATSINSmove(tmp851, skip_to_eol_67(ATSPMVrefarg0(arg0), tmp852, arg1, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29998(line=732, offs=14) -- 30042(line=732, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 30604(line=746, offs=14) -- 30648(line=746, offs=58)
 */
-ATSINSmove_void(tmp838, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(7), ATSPMVi0nt(2), arg4, tmp836, ATSPMVi0nt(2), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp853, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(7), ATSPMVi0nt(2), arg4, tmp851, ATSPMVi0nt(2), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30054(line=733, offs=12) -- 30063(line=733, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 30660(line=747, offs=12) -- 30669(line=747, offs=21)
 */
-ATSINSmove(tmp839, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp854, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30048(line=733, offs=6) -- 30064(line=733, offs=22)
+emit_instr: loc0 = build/src/lexer.dats: 30654(line=747, offs=6) -- 30670(line=747, offs=22)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret818, postiats_tyrec_0, atslab__0, tmp836) ;
-ATSINSstore_fltrec_ofs(tmpret818, postiats_tyrec_0, atslab__1, tmp839) ;
+ATSINSstore_fltrec_ofs(tmpret833, postiats_tyrec_0, atslab__0, tmp851) ;
+ATSINSstore_fltrec_ofs(tmpret833, postiats_tyrec_0, atslab__1, tmp854) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29822(line=728, offs=48) -- 30068(line=733, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 30428(line=742, offs=48) -- 30674(line=747, offs=26)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30076(line=734, offs=8) -- 30268(line=738, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 30682(line=748, offs=8) -- 30874(line=752, offs=26)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30133(line=736, offs=14) -- 30179(line=736, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 30739(line=750, offs=14) -- 30785(line=750, offs=60)
 */
-ATSINSmove(tmp840, skip_to_eol_66(ATSPMVrefarg0(arg0), tmp821, arg1, arg2, arg2)) ;
+ATSINSmove(tmp855, skip_to_eol_67(ATSPMVrefarg0(arg0), tmp836, arg1, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30193(line=737, offs=14) -- 30242(line=737, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 30799(line=751, offs=14) -- 30848(line=751, offs=63)
 */
-ATSINSmove_void(tmp841, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(7), ATSPMVi0nt(2), arg4, tmp840, tmp822, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp856, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(7), ATSPMVi0nt(2), arg4, tmp855, tmp837, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30254(line=738, offs=12) -- 30263(line=738, offs=21)
+emit_instr: loc0 = build/src/lexer.dats: 30860(line=752, offs=12) -- 30869(line=752, offs=21)
 */
-ATSINSmove(tmp842, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp857, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30248(line=738, offs=6) -- 30264(line=738, offs=22)
+emit_instr: loc0 = build/src/lexer.dats: 30854(line=752, offs=6) -- 30870(line=752, offs=22)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret818, postiats_tyrec_0, atslab__0, tmp840) ;
-ATSINSstore_fltrec_ofs(tmpret818, postiats_tyrec_0, atslab__1, tmp842) ;
+ATSINSstore_fltrec_ofs(tmpret833, postiats_tyrec_0, atslab__0, tmp855) ;
+ATSINSstore_fltrec_ofs(tmpret833, postiats_tyrec_0, atslab__1, tmp857) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30076(line=734, offs=8) -- 30268(line=738, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 30682(line=748, offs=8) -- 30874(line=752, offs=26)
 */
 /*
 INSletpop()
@@ -13322,36 +13549,36 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 29015(line=713, offs=85) -- 30272(line=739, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 29621(line=727, offs=85) -- 30878(line=753, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret818) ;
-} /* end of [lex_target_decl_134] */
+ATSreturn(tmpret833) ;
+} /* end of [lex_target_decl_135] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12520(line=650, offs=3) -- 12559(line=650, offs=42)
 */
 /*
 local: 
-global: lt_g1int_int$120$5(level=1)
+global: lt_g1int_int$121$5(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = tk(5338)
-tmparg = S2Evar(tk(5338))
-tmpsub = Some(tk(5338) -> S2Eextkind(atstype_int))
+imparg = tk(5340)
+tmparg = S2Evar(tk(5340))
+tmpsub = Some(tk(5340) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__lt_g1int_int__120__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__lt_g1int_int__121__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret657__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp658__5, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret672__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp673__5, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13361,29 +13588,29 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp658__5, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp673__5, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret657__5, atspre_g1int_lt_int(arg0, tmp658__5)) ;
+ATSINSmove(tmpret672__5, atspre_g1int_lt_int(arg0, tmp673__5)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret657__5) ;
-} /* end of [ATSLIB_056_prelude__lt_g1int_int__120__5] */
+ATSreturn(tmpret672__5) ;
+} /* end of [ATSLIB_056_prelude__lt_g1int_int__121__5] */
 
 /*
-build/src/lexer.dats: 30440(line=745, offs=5) -- 31741(line=772, offs=6)
+build/src/lexer.dats: 31046(line=759, offs=5) -- 32512(line=789, offs=6)
 */
 /*
-local: is_ident_start_12$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_fun_53$0(level=0), lex_passthrough_scan_136$0(level=0)
-global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_fun_53$0(level=0), lex_passthrough_scan_136$0(level=0)
+local: is_ident_start_12$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_mac_hash_51$0(level=0), looking_at_ext_hash_52$0(level=0), looking_at_fun_53$0(level=0), looking_at_while_66$0(level=0), lex_passthrough_scan_137$0(level=0)
+global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_mac_hash_51$0(level=0), looking_at_ext_hash_52$0(level=0), looking_at_fun_53$0(level=0), skip_ws_64$0(level=0), looking_at_while_66$0(level=0), lex_passthrough_scan_137$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-lex_passthrough_scan_136(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+lex_passthrough_scan_137(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -13391,467 +13618,518 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret843, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp844, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp847, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp850, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp851, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp852, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp853, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp854, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp855, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp856, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp857, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp858, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret858, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp859, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp860, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp861, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp862, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp863, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp864, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp865, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp866, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp867, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp865, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp866, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp867, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp868, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp869, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp870, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp871, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp872, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp873, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp874, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp875, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp874, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp875, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp876, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp877, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp878, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp879, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp880, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp881, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp882, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp883, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp884, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp885, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp886, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp887, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp888, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp889, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp890, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp891, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp892, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp893, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30440(line=745, offs=5) -- 31741(line=772, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 31046(line=759, offs=5) -- 32512(line=789, offs=6)
 */
-ATSINSflab(__patsflab_lex_passthrough_scan_136):
+ATSINSflab(__patsflab_lex_passthrough_scan_137):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30600(line=748, offs=6) -- 30609(line=748, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 31206(line=762, offs=6) -- 31215(line=762, offs=15)
 */
-ATSINSmove(tmp844, ATSLIB_056_prelude__lte_g1int_int__29__19(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp859, ATSLIB_056_prelude__lte_g1int_int__29__19(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30597(line=748, offs=3) -- 31741(line=772, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 31203(line=762, offs=3) -- 32512(line=789, offs=6)
 */
 ATSif(
-tmp844
+tmp859
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30615(line=748, offs=21) -- 30618(line=748, offs=24)
+emit_instr: loc0 = build/src/lexer.dats: 31221(line=762, offs=21) -- 31224(line=762, offs=24)
 */
-ATSINSmove(tmpret843, arg1) ;
+ATSINSmove(tmpret858, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30629(line=749, offs=11) -- 30643(line=749, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 31235(line=763, offs=11) -- 31249(line=763, offs=25)
 */
-ATSINSmove(tmp847, ATSLIB_056_prelude__gte_g1int_int__24__17(arg1, arg2)) ;
+ATSINSmove(tmp862, ATSLIB_056_prelude__gte_g1int_int__24__17(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30626(line=749, offs=8) -- 31741(line=772, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 31232(line=763, offs=8) -- 32512(line=789, offs=6)
 */
 ATSif(
-tmp847
+tmp862
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30649(line=749, offs=31) -- 30652(line=749, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 31255(line=763, offs=31) -- 31258(line=763, offs=34)
 */
-ATSINSmove(tmpret843, arg1) ;
+ATSINSmove(tmpret858, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30660(line=750, offs=8) -- 31741(line=772, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 31266(line=764, offs=8) -- 32512(line=789, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30676(line=751, offs=13) -- 30695(line=751, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 31282(line=765, offs=13) -- 31301(line=765, offs=32)
 */
-ATSINSmove(tmp850, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp865, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg1, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30719(line=752, offs=24) -- 30726(line=752, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 31325(line=766, offs=24) -- 31332(line=766, offs=31)
 */
-ATSINSmove(tmp852, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp867, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30709(line=752, offs=14) -- 30732(line=752, offs=37)
+emit_instr: loc0 = build/src/lexer.dats: 31315(line=766, offs=14) -- 31338(line=766, offs=37)
 */
-ATSINSmove(tmp851, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp852, arg3)) ;
+ATSINSmove(tmp866, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp867, arg3)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
 */
-ATSINSmove(tmp854, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(47))) ;
+ATSINSmove(tmp869, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(47))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
-*/
-ATSif(
-tmp854
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
-*/
-ATSINSmove(tmp855, atspre_g0int_eq_int(tmp851, ATSPMVi0nt(47))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
-*/
-ATSif(
-tmp855
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
-*/
-ATSINSmove(tmp853, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
-*/
-ATSINSmove(tmp853, atspre_g0int_eq_int(tmp851, ATSPMVi0nt(42))) ;
-
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30745(line=754, offs=8) -- 30820(line=754, offs=83)
-*/
-ATSINSmove(tmp853, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30742(line=754, offs=5) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp853
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30830(line=755, offs=10) -- 30833(line=755, offs=13)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30846(line=756, offs=13) -- 30893(line=756, offs=60)
-*/
-ATSINSmove(tmp857, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(40))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30846(line=756, offs=13) -- 30893(line=756, offs=60)
-*/
-ATSif(
-tmp857
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30846(line=756, offs=13) -- 30893(line=756, offs=60)
-*/
-ATSINSmove(tmp856, atspre_g0int_eq_int(tmp851, ATSPMVi0nt(42))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30846(line=756, offs=13) -- 30893(line=756, offs=60)
-*/
-ATSINSmove(tmp856, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30843(line=756, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp856
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30899(line=756, offs=66) -- 30902(line=756, offs=69)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30915(line=757, offs=13) -- 30936(line=757, offs=34)
-*/
-ATSINSmove(tmp858, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(34))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30912(line=757, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp858
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30942(line=757, offs=40) -- 30945(line=757, offs=43)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30958(line=758, offs=13) -- 30979(line=758, offs=34)
-*/
-ATSINSmove(tmp859, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(39))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30955(line=758, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp859
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30985(line=758, offs=40) -- 30988(line=758, offs=43)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31001(line=759, offs=13) -- 31049(line=759, offs=61)
-*/
-ATSINSmove(tmp861, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(37))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31001(line=759, offs=13) -- 31049(line=759, offs=61)
-*/
-ATSif(
-tmp861
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31001(line=759, offs=13) -- 31049(line=759, offs=61)
-*/
-ATSINSmove(tmp860, atspre_g0int_eq_int(tmp851, ATSPMVi0nt(123))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31001(line=759, offs=13) -- 31049(line=759, offs=61)
-*/
-ATSINSmove(tmp860, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 30998(line=759, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp860
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31055(line=759, offs=67) -- 31058(line=759, offs=70)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp863, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(35))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSif(
-tmp863
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp865, looking_at_pub_33(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSif(
-tmp865
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp864, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp864, looking_at_use_34(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSif(
-tmp864
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp862, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp862, looking_at_target_35(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31071(line=760, offs=13) -- 31209(line=762, offs=41)
-*/
-ATSINSmove(tmp862, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31068(line=760, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp862
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31215(line=762, offs=47) -- 31218(line=762, offs=50)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31231(line=763, offs=13) -- 31273(line=763, offs=55)
-*/
-ATSINSmove(tmp867, atspre_g0int_eq_int(tmp850, ATSPMVi0nt(36))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31231(line=763, offs=13) -- 31273(line=763, offs=55)
-*/
-ATSif(
-tmp867
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31231(line=763, offs=13) -- 31273(line=763, offs=55)
-*/
-ATSINSmove(tmp866, is_ident_start_12(tmp851)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31231(line=763, offs=13) -- 31273(line=763, offs=55)
-*/
-ATSINSmove(tmp866, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31228(line=763, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp866
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31280(line=763, offs=62) -- 31283(line=763, offs=65)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31358(line=765, offs=13) -- 31391(line=765, offs=46)
-*/
-ATSINSmove(tmp868, looking_at_cast_fn_42(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31355(line=765, offs=10) -- 31735(line=771, offs=68)
-*/
-ATSif(
-tmp868
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31397(line=765, offs=52) -- 31400(line=765, offs=55)
-*/
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31413(line=766, offs=13) -- 31445(line=766, offs=45)
-*/
-ATSINSmove(tmp869, looking_at_prax_i_43(ATSPMVrefarg0(arg0), arg1, arg3)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31410(line=766, offs=10) -- 31735(line=771, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
 */
 ATSif(
 tmp869
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31451(line=766, offs=51) -- 31454(line=766, offs=54)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
 */
-ATSINSmove(tmpret843, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 31467(line=767, offs=13) -- 31500(line=767, offs=46)
-*/
-ATSINSmove(tmp870, looking_at_ext_ern_44(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp870, atspre_g0int_eq_int(tmp866, ATSPMVi0nt(47))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31464(line=767, offs=10) -- 31735(line=771, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
 */
 ATSif(
 tmp870
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31506(line=767, offs=52) -- 31509(line=767, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
 */
-ATSINSmove(tmpret843, arg1) ;
+ATSINSmove(tmp868, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31522(line=768, offs=13) -- 31555(line=768, offs=46)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
 */
-ATSINSmove(tmp871, looking_at_assu_me_45(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp868, atspre_g0int_eq_int(tmp866, ATSPMVi0nt(42))) ;
 
+} /* ATSendif */
+} ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31519(line=768, offs=10) -- 31735(line=771, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 31351(line=768, offs=8) -- 31426(line=768, offs=83)
+*/
+ATSINSmove(tmp868, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31348(line=768, offs=5) -- 32506(line=788, offs=68)
 */
 ATSif(
-tmp871
+tmp868
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31561(line=768, offs=52) -- 31564(line=768, offs=55)
+emit_instr: loc0 = build/src/lexer.dats: 31436(line=769, offs=10) -- 31439(line=769, offs=13)
 */
-ATSINSmove(tmpret843, arg1) ;
+ATSINSmove(tmpret858, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31577(line=769, offs=13) -- 31606(line=769, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 31452(line=770, offs=13) -- 31499(line=770, offs=60)
 */
-ATSINSmove(tmp872, looking_at_fun_53(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp872, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(40))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31574(line=769, offs=10) -- 31735(line=771, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 31452(line=770, offs=13) -- 31499(line=770, offs=60)
 */
 ATSif(
 tmp872
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31612(line=769, offs=48) -- 31615(line=769, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 31452(line=770, offs=13) -- 31499(line=770, offs=60)
 */
-ATSINSmove(tmpret843, arg1) ;
+ATSINSmove(tmp871, atspre_g0int_eq_int(tmp866, ATSPMVi0nt(42))) ;
+
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31628(line=770, offs=13) -- 31658(line=770, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 31452(line=770, offs=13) -- 31499(line=770, offs=60)
 */
-ATSINSmove(tmp873, looking_at_stld_46(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+ATSINSmove(tmp871, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31449(line=770, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp871
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31505(line=770, offs=66) -- 31508(line=770, offs=69)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31521(line=771, offs=13) -- 31542(line=771, offs=34)
+*/
+ATSINSmove(tmp873, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(34))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31625(line=770, offs=10) -- 31735(line=771, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 31518(line=771, offs=10) -- 32506(line=788, offs=68)
 */
 ATSif(
 tmp873
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31664(line=770, offs=49) -- 31667(line=770, offs=52)
+emit_instr: loc0 = build/src/lexer.dats: 31548(line=771, offs=40) -- 31551(line=771, offs=43)
 */
-ATSINSmove(tmpret843, arg1) ;
+ATSINSmove(tmpret858, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31703(line=771, offs=36) -- 31710(line=771, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 31564(line=772, offs=13) -- 31585(line=772, offs=34)
 */
-ATSINSmove(tmp874, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp874, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(39))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31726(line=771, offs=59) -- 31734(line=771, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 31561(line=772, offs=10) -- 32506(line=788, offs=68)
 */
-ATSINSmove(tmp875, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSif(
+tmp874
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31591(line=772, offs=40) -- 31594(line=772, offs=43)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31607(line=773, offs=13) -- 31655(line=773, offs=61)
+*/
+ATSINSmove(tmp876, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(37))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31677(line=771, offs=10) -- 31735(line=771, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 31607(line=773, offs=13) -- 31655(line=773, offs=61)
+*/
+ATSif(
+tmp876
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31607(line=773, offs=13) -- 31655(line=773, offs=61)
+*/
+ATSINSmove(tmp875, atspre_g0int_eq_int(tmp866, ATSPMVi0nt(123))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31607(line=773, offs=13) -- 31655(line=773, offs=61)
+*/
+ATSINSmove(tmp875, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31604(line=773, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp875
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31661(line=773, offs=67) -- 31664(line=773, offs=70)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp878, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(35))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSif(
+tmp878
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp880, looking_at_pub_33(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSif(
+tmp880
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp879, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp879, looking_at_use_34(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSif(
+tmp879
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp877, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp877, looking_at_target_35(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31677(line=774, offs=13) -- 31815(line=776, offs=41)
+*/
+ATSINSmove(tmp877, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31674(line=774, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp877
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31821(line=776, offs=47) -- 31824(line=776, offs=50)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31837(line=777, offs=13) -- 31879(line=777, offs=55)
+*/
+ATSINSmove(tmp882, atspre_g0int_eq_int(tmp865, ATSPMVi0nt(36))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31837(line=777, offs=13) -- 31879(line=777, offs=55)
+*/
+ATSif(
+tmp882
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31837(line=777, offs=13) -- 31879(line=777, offs=55)
+*/
+ATSINSmove(tmp881, is_ident_start_12(tmp866)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31837(line=777, offs=13) -- 31879(line=777, offs=55)
+*/
+ATSINSmove(tmp881, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31834(line=777, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp881
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31886(line=777, offs=62) -- 31889(line=777, offs=65)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31964(line=779, offs=13) -- 31997(line=779, offs=46)
+*/
+ATSINSmove(tmp883, looking_at_cast_fn_42(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 31961(line=779, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp883
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32003(line=779, offs=52) -- 32006(line=779, offs=55)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32019(line=780, offs=13) -- 32051(line=780, offs=45)
+*/
+ATSINSmove(tmp884, looking_at_prax_i_43(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32016(line=780, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp884
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32057(line=780, offs=51) -- 32060(line=780, offs=54)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32073(line=781, offs=13) -- 32106(line=781, offs=46)
+*/
+ATSINSmove(tmp885, looking_at_ext_ern_44(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32070(line=781, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp885
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32112(line=781, offs=52) -- 32115(line=781, offs=55)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32128(line=782, offs=13) -- 32161(line=782, offs=46)
+*/
+ATSINSmove(tmp886, looking_at_assu_me_45(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32125(line=782, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp886
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32167(line=782, offs=52) -- 32170(line=782, offs=55)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32183(line=783, offs=13) -- 32217(line=783, offs=47)
+*/
+ATSINSmove(tmp887, looking_at_mac_hash_51(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32180(line=783, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp887
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32223(line=783, offs=53) -- 32226(line=783, offs=56)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32239(line=784, offs=13) -- 32273(line=784, offs=47)
+*/
+ATSINSmove(tmp888, looking_at_ext_hash_52(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32236(line=784, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp888
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32279(line=784, offs=53) -- 32282(line=784, offs=56)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32295(line=785, offs=13) -- 32326(line=785, offs=44)
+*/
+ATSINSmove(tmp889, looking_at_while_66(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32292(line=785, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp889
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32332(line=785, offs=50) -- 32335(line=785, offs=53)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32348(line=786, offs=13) -- 32377(line=786, offs=42)
+*/
+ATSINSmove(tmp890, looking_at_fun_53(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32345(line=786, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp890
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32383(line=786, offs=48) -- 32386(line=786, offs=51)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32399(line=787, offs=13) -- 32429(line=787, offs=43)
+*/
+ATSINSmove(tmp891, looking_at_stld_46(ATSPMVrefarg0(arg0), arg1, arg3)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32396(line=787, offs=10) -- 32506(line=788, offs=68)
+*/
+ATSif(
+tmp891
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32435(line=787, offs=49) -- 32438(line=787, offs=52)
+*/
+ATSINSmove(tmpret858, arg1) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32474(line=788, offs=36) -- 32481(line=788, offs=43)
+*/
+ATSINSmove(tmp892, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32497(line=788, offs=59) -- 32505(line=788, offs=67)
+*/
+ATSINSmove(tmp893, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32448(line=788, offs=10) -- 32506(line=788, offs=68)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp874) ;
+ATSINSmove_tlcal(apy1, tmp892) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp875) ;
+ATSINSmove_tlcal(apy4, tmp893) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab_lex_passthrough_scan_136) ;
+ATSINSfgoto(__patsflab_lex_passthrough_scan_137) ;
 ATStailcal_end()
 
 } /* ATSendif */
@@ -13867,8 +14145,11 @@ ATStailcal_end()
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
+} /* ATSendif */
+} /* ATSendif */
+} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 30660(line=750, offs=8) -- 31741(line=772, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 31266(line=764, offs=8) -- 32512(line=789, offs=6)
 */
 /*
 INSletpop()
@@ -13876,8 +14157,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret843) ;
-} /* end of [lex_passthrough_scan_136] */
+ATSreturn(tmpret858) ;
+} /* end of [lex_passthrough_scan_137] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -13890,9 +14171,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__19(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -13931,9 +14212,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__17(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -13962,17 +14243,17 @@ ATSreturn(tmpret63__17) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__17] */
 
 /*
-build/src/lexer.dats: 31899(line=778, offs=5) -- 39402(line=941, offs=6)
+build/src/lexer.dats: 32670(line=795, offs=5) -- 40624(line=966, offs=6)
 */
 /*
-local: is_ident_start_12$0(level=0), put_span_20$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), _skip_to_name_71$0(level=0), _has_primplement_77$0(level=0), lex_line_comment_86$0(level=0), lex_c_comment_91$0(level=0), lex_ml_comment_96$0(level=0), lex_string_100$0(level=0), lex_char_lit_101$0(level=0), lex_extcode_105$0(level=0), lex_hash_use_107$0(level=0), lex_qualified_108$0(level=0), lex_pub_lines_113$0(level=0), lex_unsafe_dispatch_129$0(level=0), lex_unittest_dispatch_131$0(level=0), lex_target_decl_134$0(level=0), lex_passthrough_scan_136$0(level=0), lex_main_139$0(level=0)
-global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_as_41$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), _looking_at_primplement_62$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), _skip_to_name_71$0(level=0), _has_primplement_77$0(level=0), skip_nonws_84$0(level=0), lex_line_comment_86$0(level=0), lex_c_comment_inner_88$0(level=0), lex_c_comment_91$0(level=0), lex_ml_comment_inner_92$0(level=0), lex_ml_comment_96$0(level=0), lex_string_inner_97$0(level=0), lex_string_100$0(level=0), lex_char_lit_101$0(level=0), lex_extcode_inner_102$0(level=0), lex_extcode_105$0(level=0), lex_hash_use_107$0(level=0), lex_qualified_108$0(level=0), is_blank_line_110$0(level=0), lex_pub_lines_113$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0), lex_unsafe_dispatch_129$0(level=0), lex_unittest_dispatch_131$0(level=0), lex_target_decl_134$0(level=0), lex_passthrough_scan_136$0(level=0), lex_main_139$0(level=0)
+local: is_ident_start_12$0(level=0), put_span_20$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_mac_hash_51$0(level=0), looking_at_ext_hash_52$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), skip_ws_64$0(level=0), looking_at_while_66$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), _skip_to_name_72$0(level=0), _has_primplement_78$0(level=0), lex_line_comment_87$0(level=0), lex_c_comment_92$0(level=0), lex_ml_comment_97$0(level=0), lex_string_101$0(level=0), lex_char_lit_102$0(level=0), lex_extcode_106$0(level=0), lex_hash_use_108$0(level=0), lex_qualified_109$0(level=0), lex_pub_lines_114$0(level=0), lex_unsafe_dispatch_130$0(level=0), lex_unittest_dispatch_132$0(level=0), lex_target_decl_135$0(level=0), lex_passthrough_scan_137$0(level=0), lex_main_140$0(level=0)
+global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_as_41$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_mac_hash_51$0(level=0), looking_at_ext_hash_52$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), _looking_at_primplement_62$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), looking_at_while_66$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), _skip_to_name_72$0(level=0), _has_primplement_78$0(level=0), skip_nonws_85$0(level=0), lex_line_comment_87$0(level=0), lex_c_comment_inner_89$0(level=0), lex_c_comment_92$0(level=0), lex_ml_comment_inner_93$0(level=0), lex_ml_comment_97$0(level=0), lex_string_inner_98$0(level=0), lex_string_101$0(level=0), lex_char_lit_102$0(level=0), lex_extcode_inner_103$0(level=0), lex_extcode_106$0(level=0), lex_hash_use_108$0(level=0), lex_qualified_109$0(level=0), is_blank_line_111$0(level=0), lex_pub_lines_114$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0), lex_unsafe_dispatch_130$0(level=0), lex_unittest_dispatch_132$0(level=0), lex_target_decl_135$0(level=0), lex_passthrough_scan_137$0(level=0), lex_main_140$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 postiats_tyrec_0
-lex_main_139(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5, atstkind_t0ype(atstype_int) arg6)
+lex_main_140(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5, atstkind_t0ype(atstype_int) arg6)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -13982,541 +14263,317 @@ ATStmpdec(apy3, atsrefarg0_type(atstype_boxed)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy5, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy6, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret876, postiats_tyrec_0) ;
-ATStmpdec(tmp877, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp880, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp883, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp884, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp885, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp886, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp887, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp888, postiats_tyrec_0) ;
-ATStmpdec(tmp889, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp890, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp891, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp892, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp893, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp894, postiats_tyrec_0) ;
-ATStmpdec(tmp895, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp896, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp897, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret894, postiats_tyrec_0) ;
+ATStmpdec(tmp895, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp898, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp899, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp900, postiats_tyrec_0) ;
 ATStmpdec(tmp901, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp902, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp903, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp904, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp905, postiats_tyrec_0) ;
-ATStmpdec(tmp906, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp905, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp906, postiats_tyrec_0) ;
 ATStmpdec(tmp907, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp908, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp909, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp910, postiats_tyrec_0) ;
-ATStmpdec(tmp911, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp912, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp909, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp910, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp911, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp912, postiats_tyrec_0) ;
 ATStmpdec(tmp913, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp914, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp915, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp916, postiats_tyrec_0) ;
-ATStmpdec(tmp917, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp918, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp914, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp915, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp916, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp917, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp918, postiats_tyrec_0) ;
 ATStmpdec(tmp919, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp920, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp920, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp921, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp922, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp923, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp924, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp925, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp922, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp923, postiats_tyrec_0) ;
+ATStmpdec(tmp924, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp925, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp926, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp927, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp928, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp928, postiats_tyrec_0) ;
 ATStmpdec(tmp929, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp930, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp931, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp932, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp932, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp933, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp934) ;
+ATStmpdec(tmp934, postiats_tyrec_0) ;
 ATStmpdec(tmp935, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp936, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp937, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp938, postiats_tyrec_0) ;
+ATStmpdec(tmp937, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp938, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp939, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp940, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp941, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp942, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp943, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp944) ;
-ATStmpdec(tmp945, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp943, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp944, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp945, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp946, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp947, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp947, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp948, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp949) ;
+ATStmpdec(tmp949, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp950, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp951, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp952, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp951, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp952) ;
 ATStmpdec(tmp953, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp954) ;
-ATStmpdec(tmp955, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp956, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp957, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp954, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp955, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp956, postiats_tyrec_0) ;
+ATStmpdec(tmp957, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp958, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp959) ;
-ATStmpdec(tmp960, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp959, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp960, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp961, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp962, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp963, postiats_tyrec_1) ;
+// ATStmpdec_void(tmp962) ;
+ATStmpdec(tmp963, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp964, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp965, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp966, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp967, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp965, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp966, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp967) ;
 ATStmpdec(tmp968, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp969, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp970) ;
+ATStmpdec(tmp970, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp971, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp972, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp973, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp974, postiats_tyrec_1) ;
-ATStmpdec(tmp975, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp972) ;
+ATStmpdec(tmp973, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp974, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp975, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp976, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp977, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp977) ;
 ATStmpdec(tmp978, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp979, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp980, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp981) ;
+ATStmpdec(tmp980, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp981, postiats_tyrec_1) ;
 ATStmpdec(tmp982, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp983, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp984, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp985, postiats_tyrec_0) ;
+ATStmpdec(tmp985, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp986, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp987, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp988, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp989, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp990, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp991, postiats_tyrec_1) ;
-ATStmpdec(tmp992, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp988) ;
+ATStmpdec(tmp989, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp990, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp991, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp992, postiats_tyrec_1) ;
 ATStmpdec(tmp993, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp994, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp995, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp994, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp995, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp996, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp997, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp998) ;
-ATStmpdec(tmp999, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp998, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp999) ;
 ATStmpdec(tmp1000, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1001, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1002, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1003, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1001, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1002, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1003, postiats_tyrec_0) ;
 ATStmpdec(tmp1004, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1005, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1006) ;
-ATStmpdec(tmp1007, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1008, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1009, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1010) ;
+ATStmpdec(tmp1006, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1007, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1008, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1009, postiats_tyrec_1) ;
+ATStmpdec(tmp1010, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1011, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1012, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1013, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1012, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1013, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1014, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1015) ;
-ATStmpdec(tmp1016, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1015, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1016) ;
 ATStmpdec(tmp1017, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1018, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1019, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1020) ;
-ATStmpdec(tmp1021, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1018, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1019, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1020, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1021, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1022, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1023, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1024, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1025) ;
+ATStmpdec(tmp1023, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1024) ;
+ATStmpdec(tmp1025, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1026, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1027, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1028, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1028) ;
 ATStmpdec(tmp1029, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1030) ;
-ATStmpdec(tmp1031, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1030, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1031, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1032, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1033, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1033) ;
 ATStmpdec(tmp1034, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1035, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1036) ;
+ATStmpdec(tmp1036, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1037, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1038, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1038) ;
 ATStmpdec(tmp1039, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1040, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1041) ;
+ATStmpdec(tmp1041, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1042, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1043, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1043) ;
+ATStmpdec(tmp1044, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1045, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1046, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1047, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1048) ;
+ATStmpdec(tmp1049, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1050, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1051, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1052, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1053, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1054) ;
+ATStmpdec(tmp1055, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1056, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1057, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1058, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1059) ;
+ATStmpdec(tmp1060, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1061, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1062, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1063, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1064, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1065) ;
+ATStmpdec(tmp1066, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1067, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1068, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1069, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1070) ;
+ATStmpdec(tmp1071, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1072, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 31899(line=778, offs=5) -- 39402(line=941, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 32670(line=795, offs=5) -- 40624(line=966, offs=6)
 */
-ATSINSflab(__patsflab_lex_main_139):
+ATSINSflab(__patsflab_lex_main_140):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32108(line=782, offs=6) -- 32117(line=782, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 32879(line=799, offs=6) -- 32888(line=799, offs=15)
 */
-ATSINSmove(tmp877, ATSLIB_056_prelude__lte_g1int_int__29__20(arg6, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp895, ATSLIB_056_prelude__lte_g1int_int__29__20(arg6, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32105(line=782, offs=3) -- 39402(line=941, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 32876(line=799, offs=3) -- 40624(line=966, offs=6)
 */
 ATSif(
-tmp877
+tmp895
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32123(line=782, offs=21) -- 32136(line=782, offs=34)
+emit_instr: loc0 = build/src/lexer.dats: 32894(line=799, offs=21) -- 32907(line=799, offs=34)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret876, postiats_tyrec_0, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret876, postiats_tyrec_0, atslab__1, arg5) ;
+ATSINSstore_fltrec_ofs(tmpret894, postiats_tyrec_0, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret894, postiats_tyrec_0, atslab__1, arg5) ;
 ATSINSmove_fltrec_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32147(line=783, offs=11) -- 32161(line=783, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 32918(line=800, offs=11) -- 32932(line=800, offs=25)
 */
-ATSINSmove(tmp880, ATSLIB_056_prelude__gte_g1int_int__24__18(arg4, arg1)) ;
+ATSINSmove(tmp898, ATSLIB_056_prelude__gte_g1int_int__24__18(arg4, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32144(line=783, offs=8) -- 39402(line=941, offs=6)
-*/
-ATSif(
-tmp880
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32167(line=783, offs=31) -- 32180(line=783, offs=44)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret876, postiats_tyrec_0, atslab__0, arg4) ;
-ATSINSstore_fltrec_ofs(tmpret876, postiats_tyrec_0, atslab__1, arg5) ;
-ATSINSmove_fltrec_end()
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32188(line=784, offs=8) -- 39402(line=941, offs=6)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32205(line=785, offs=14) -- 32224(line=785, offs=33)
-*/
-ATSINSmove(tmp883, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32248(line=786, offs=24) -- 32255(line=786, offs=31)
-*/
-ATSINSmove(tmp885, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32238(line=786, offs=14) -- 32261(line=786, offs=37)
-*/
-ATSINSmove(tmp884, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp885, arg2)) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32300(line=789, offs=8) -- 32348(line=789, offs=56)
-*/
-ATSINSmove(tmp887, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(47))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32300(line=789, offs=8) -- 32348(line=789, offs=56)
-*/
-ATSif(
-tmp887
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32300(line=789, offs=8) -- 32348(line=789, offs=56)
-*/
-ATSINSmove(tmp886, atspre_g0int_eq_int(tmp884, ATSPMVi0nt(47))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32300(line=789, offs=8) -- 32348(line=789, offs=56)
-*/
-ATSINSmove(tmp886, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32297(line=789, offs=5) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp886
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32354(line=789, offs=62) -- 32498(line=791, offs=64)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32380(line=790, offs=23) -- 32434(line=790, offs=77)
-*/
-ATSINSmove(tmp888, lex_line_comment_86(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32370(line=790, offs=13) -- 32372(line=790, offs=15)
-*/
-ATSINSmove(tmp889, ATSSELfltrec(tmp888, postiats_tyrec_0, atslab__0)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32374(line=790, offs=17) -- 32376(line=790, offs=19)
-*/
-ATSINSmove(tmp890, ATSSELfltrec(tmp888, postiats_tyrec_0, atslab__1)) ;
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32485(line=791, offs=51) -- 32493(line=791, offs=59)
-*/
-ATSINSmove(tmp891, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32442(line=791, offs=8) -- 32494(line=791, offs=60)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp889) ;
-ATSINSmove_tlcal(apy5, tmp890) ;
-ATSINSmove_tlcal(apy6, tmp891) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32354(line=789, offs=62) -- 32498(line=791, offs=64)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32535(line=794, offs=13) -- 32583(line=794, offs=61)
-*/
-ATSINSmove(tmp893, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(47))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32535(line=794, offs=13) -- 32583(line=794, offs=61)
-*/
-ATSif(
-tmp893
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32535(line=794, offs=13) -- 32583(line=794, offs=61)
-*/
-ATSINSmove(tmp892, atspre_g0int_eq_int(tmp884, ATSPMVi0nt(42))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32535(line=794, offs=13) -- 32583(line=794, offs=61)
-*/
-ATSINSmove(tmp892, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32532(line=794, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp892
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32589(line=794, offs=67) -- 32730(line=796, offs=64)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32615(line=795, offs=23) -- 32666(line=795, offs=74)
-*/
-ATSINSmove(tmp894, lex_c_comment_91(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32605(line=795, offs=13) -- 32607(line=795, offs=15)
-*/
-ATSINSmove(tmp895, ATSSELfltrec(tmp894, postiats_tyrec_0, atslab__0)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32609(line=795, offs=17) -- 32611(line=795, offs=19)
-*/
-ATSINSmove(tmp896, ATSSELfltrec(tmp894, postiats_tyrec_0, atslab__1)) ;
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32717(line=796, offs=51) -- 32725(line=796, offs=59)
-*/
-ATSINSmove(tmp897, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32674(line=796, offs=8) -- 32726(line=796, offs=60)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp895) ;
-ATSINSmove_tlcal(apy5, tmp896) ;
-ATSINSmove_tlcal(apy6, tmp897) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32589(line=794, offs=67) -- 32730(line=796, offs=64)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32776(line=799, offs=13) -- 32824(line=799, offs=61)
-*/
-ATSINSmove(tmp899, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(40))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32776(line=799, offs=13) -- 32824(line=799, offs=61)
-*/
-ATSif(
-tmp899
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32776(line=799, offs=13) -- 32824(line=799, offs=61)
-*/
-ATSINSmove(tmp898, atspre_g0int_eq_int(tmp884, ATSPMVi0nt(42))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32776(line=799, offs=13) -- 32824(line=799, offs=61)
-*/
-ATSINSmove(tmp898, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32773(line=799, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 32915(line=800, offs=8) -- 40624(line=966, offs=6)
 */
 ATSif(
 tmp898
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32830(line=799, offs=67) -- 32972(line=801, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 32938(line=800, offs=31) -- 32951(line=800, offs=44)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret894, postiats_tyrec_0, atslab__0, arg4) ;
+ATSINSstore_fltrec_ofs(tmpret894, postiats_tyrec_0, atslab__1, arg5) ;
+ATSINSmove_fltrec_end()
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 32959(line=801, offs=8) -- 40624(line=966, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32856(line=800, offs=23) -- 32908(line=800, offs=75)
+emit_instr: loc0 = build/src/lexer.dats: 32976(line=802, offs=14) -- 32995(line=802, offs=33)
 */
-ATSINSmove(tmp900, lex_ml_comment_96(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+ATSINSmove(tmp901, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), arg4, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32846(line=800, offs=13) -- 32848(line=800, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 33019(line=803, offs=24) -- 33026(line=803, offs=31)
 */
-ATSINSmove(tmp901, ATSSELfltrec(tmp900, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp903, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32850(line=800, offs=17) -- 32852(line=800, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 33009(line=803, offs=14) -- 33032(line=803, offs=37)
 */
-ATSINSmove(tmp902, ATSSELfltrec(tmp900, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp902, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp903, arg2)) ;
+
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32959(line=801, offs=51) -- 32967(line=801, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 33071(line=806, offs=8) -- 33119(line=806, offs=56)
 */
-ATSINSmove(tmp903, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp905, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(47))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32916(line=801, offs=8) -- 32968(line=801, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 33071(line=806, offs=8) -- 33119(line=806, offs=56)
 */
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp901) ;
-ATSINSmove_tlcal(apy5, tmp902) ;
-ATSINSmove_tlcal(apy6, tmp903) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
+ATSif(
+tmp905
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 33071(line=806, offs=8) -- 33119(line=806, offs=56)
+*/
+ATSINSmove(tmp904, atspre_g0int_eq_int(tmp902, ATSPMVi0nt(47))) ;
 
-/*
-emit_instr: loc0 = build/src/lexer.dats: 32830(line=799, offs=67) -- 32972(line=801, offs=64)
-*/
-/*
-INSletpop()
-*/
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33005(line=804, offs=13) -- 33027(line=804, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 33071(line=806, offs=8) -- 33119(line=806, offs=56)
 */
-ATSINSmove(tmp904, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(34))) ;
-
+ATSINSmove(tmp904, ATSPMVbool_false()) ;
+} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33002(line=804, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 33068(line=806, offs=5) -- 40618(line=965, offs=71)
 */
 ATSif(
 tmp904
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33033(line=804, offs=41) -- 33171(line=806, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 33125(line=806, offs=62) -- 33269(line=808, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33059(line=805, offs=23) -- 33107(line=805, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 33151(line=807, offs=23) -- 33205(line=807, offs=77)
 */
-ATSINSmove(tmp905, lex_string_100(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+ATSINSmove(tmp906, lex_line_comment_87(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33049(line=805, offs=13) -- 33051(line=805, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 33141(line=807, offs=13) -- 33143(line=807, offs=15)
 */
-ATSINSmove(tmp906, ATSSELfltrec(tmp905, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp907, ATSSELfltrec(tmp906, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33053(line=805, offs=17) -- 33055(line=805, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 33145(line=807, offs=17) -- 33147(line=807, offs=19)
 */
-ATSINSmove(tmp907, ATSSELfltrec(tmp905, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp908, ATSSELfltrec(tmp906, postiats_tyrec_0, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33158(line=806, offs=51) -- 33166(line=806, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 33256(line=808, offs=51) -- 33264(line=808, offs=59)
 */
-ATSINSmove(tmp908, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp909, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33115(line=806, offs=8) -- 33167(line=806, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 33213(line=808, offs=8) -- 33265(line=808, offs=60)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp906) ;
-ATSINSmove_tlcal(apy5, tmp907) ;
-ATSINSmove_tlcal(apy6, tmp908) ;
+ATSINSmove_tlcal(apy4, tmp907) ;
+ATSINSmove_tlcal(apy5, tmp908) ;
+ATSINSmove_tlcal(apy6, tmp909) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -14524,66 +14581,83 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33033(line=804, offs=41) -- 33171(line=806, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 33125(line=806, offs=62) -- 33269(line=808, offs=64)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33202(line=809, offs=13) -- 33224(line=809, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 33306(line=811, offs=13) -- 33354(line=811, offs=61)
 */
-ATSINSmove(tmp909, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(39))) ;
+ATSINSmove(tmp911, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(47))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33199(line=809, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 33306(line=811, offs=13) -- 33354(line=811, offs=61)
 */
 ATSif(
-tmp909
+tmp911
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33230(line=809, offs=41) -- 33370(line=811, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 33306(line=811, offs=13) -- 33354(line=811, offs=61)
+*/
+ATSINSmove(tmp910, atspre_g0int_eq_int(tmp902, ATSPMVi0nt(42))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 33306(line=811, offs=13) -- 33354(line=811, offs=61)
+*/
+ATSINSmove(tmp910, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 33303(line=811, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp910
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 33360(line=811, offs=67) -- 33501(line=813, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33256(line=810, offs=23) -- 33306(line=810, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 33386(line=812, offs=23) -- 33437(line=812, offs=74)
 */
-ATSINSmove(tmp910, lex_char_lit_101(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+ATSINSmove(tmp912, lex_c_comment_92(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33246(line=810, offs=13) -- 33248(line=810, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 33376(line=812, offs=13) -- 33378(line=812, offs=15)
 */
-ATSINSmove(tmp911, ATSSELfltrec(tmp910, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp913, ATSSELfltrec(tmp912, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33250(line=810, offs=17) -- 33252(line=810, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 33380(line=812, offs=17) -- 33382(line=812, offs=19)
 */
-ATSINSmove(tmp912, ATSSELfltrec(tmp910, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp914, ATSSELfltrec(tmp912, postiats_tyrec_0, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33357(line=811, offs=51) -- 33365(line=811, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 33488(line=813, offs=51) -- 33496(line=813, offs=59)
 */
-ATSINSmove(tmp913, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp915, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33314(line=811, offs=8) -- 33366(line=811, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 33445(line=813, offs=8) -- 33497(line=813, offs=60)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp911) ;
-ATSINSmove_tlcal(apy5, tmp912) ;
-ATSINSmove_tlcal(apy6, tmp913) ;
+ATSINSmove_tlcal(apy4, tmp913) ;
+ATSINSmove_tlcal(apy5, tmp914) ;
+ATSINSmove_tlcal(apy6, tmp915) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -14591,83 +14665,83 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33230(line=809, offs=41) -- 33370(line=811, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 33360(line=811, offs=67) -- 33501(line=813, offs=64)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33405(line=814, offs=13) -- 33454(line=814, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 33547(line=816, offs=13) -- 33595(line=816, offs=61)
 */
-ATSINSmove(tmp915, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(37))) ;
+ATSINSmove(tmp917, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(40))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33405(line=814, offs=13) -- 33454(line=814, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 33547(line=816, offs=13) -- 33595(line=816, offs=61)
 */
 ATSif(
-tmp915
+tmp917
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33405(line=814, offs=13) -- 33454(line=814, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 33547(line=816, offs=13) -- 33595(line=816, offs=61)
 */
-ATSINSmove(tmp914, atspre_g0int_eq_int(tmp884, ATSPMVi0nt(123))) ;
+ATSINSmove(tmp916, atspre_g0int_eq_int(tmp902, ATSPMVi0nt(42))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33405(line=814, offs=13) -- 33454(line=814, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 33547(line=816, offs=13) -- 33595(line=816, offs=61)
 */
-ATSINSmove(tmp914, ATSPMVbool_false()) ;
+ATSINSmove(tmp916, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33402(line=814, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 33544(line=816, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp914
+tmp916
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33460(line=814, offs=68) -- 33599(line=816, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 33601(line=816, offs=67) -- 33743(line=818, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33486(line=815, offs=23) -- 33535(line=815, offs=72)
+emit_instr: loc0 = build/src/lexer.dats: 33627(line=817, offs=23) -- 33679(line=817, offs=75)
 */
-ATSINSmove(tmp916, lex_extcode_105(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+ATSINSmove(tmp918, lex_ml_comment_97(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33476(line=815, offs=13) -- 33478(line=815, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 33617(line=817, offs=13) -- 33619(line=817, offs=15)
 */
-ATSINSmove(tmp917, ATSSELfltrec(tmp916, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp919, ATSSELfltrec(tmp918, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33480(line=815, offs=17) -- 33482(line=815, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 33621(line=817, offs=17) -- 33623(line=817, offs=19)
 */
-ATSINSmove(tmp918, ATSSELfltrec(tmp916, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp920, ATSSELfltrec(tmp918, postiats_tyrec_0, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33586(line=816, offs=51) -- 33594(line=816, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 33730(line=818, offs=51) -- 33738(line=818, offs=59)
 */
-ATSINSmove(tmp919, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp921, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33543(line=816, offs=8) -- 33595(line=816, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 33687(line=818, offs=8) -- 33739(line=818, offs=60)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp917) ;
-ATSINSmove_tlcal(apy5, tmp918) ;
-ATSINSmove_tlcal(apy6, tmp919) ;
+ATSINSmove_tlcal(apy4, tmp919) ;
+ATSINSmove_tlcal(apy5, tmp920) ;
+ATSINSmove_tlcal(apy6, tmp921) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -14675,269 +14749,217 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33460(line=814, offs=68) -- 33599(line=816, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 33601(line=816, offs=67) -- 33743(line=818, offs=64)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33640(line=819, offs=13) -- 33669(line=819, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 33776(line=821, offs=13) -- 33798(line=821, offs=35)
 */
-ATSINSmove(tmp920, looking_at_pub_33(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp922, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(34))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33637(line=819, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 33773(line=821, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp920
+tmp922
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33675(line=819, offs=48) -- 34597(line=837, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 33804(line=821, offs=41) -- 33942(line=823, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33707(line=820, offs=29) -- 33714(line=820, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 33830(line=822, offs=23) -- 33878(line=822, offs=71)
 */
-ATSINSmove(tmp922, atspre_g1int_add_int(arg4, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp923, lex_string_101(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33694(line=820, offs=16) -- 33725(line=820, offs=47)
+emit_instr: loc0 = build/src/lexer.dats: 33820(line=822, offs=13) -- 33822(line=822, offs=15)
 */
-ATSINSmove(tmp921, skip_ws_64(ATSPMVrefarg0(arg0), tmp922, arg2, ATSPMVi0nt(256))) ;
-
-/* (*nothing*) */
+ATSINSmove(tmp924, ATSSELfltrec(tmp923, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33771(line=822, offs=16) -- 33812(line=822, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 33824(line=822, offs=17) -- 33826(line=822, offs=19)
 */
-ATSINSmove(tmp923, lex_pub_lines_113(ATSPMVrefarg0(arg0), tmp921, arg1, arg2, arg2)) ;
-
+ATSINSmove(tmp925, ATSSELfltrec(tmp923, postiats_tyrec_0, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33834(line=823, offs=22) -- 33881(line=823, offs=69)
+letpush(end)
 */
-ATSINSmove(tmp924, _content_starts_prfun_60(ATSPMVrefarg0(arg0), tmp921, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33902(line=824, offs=21) -- 33976(line=824, offs=95)
+emit_instr: loc0 = build/src/lexer.dats: 33929(line=823, offs=51) -- 33937(line=823, offs=59)
 */
-ATSif(
-tmp924
-) ATSthen() {
+ATSINSmove(tmp926, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33919(line=824, offs=38) -- 33924(line=824, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 33886(line=823, offs=8) -- 33938(line=823, offs=60)
 */
-ATSINSmove(tmp925, ATSPMVbool_false()) ;
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp924) ;
+ATSINSmove_tlcal(apy5, tmp925) ;
+ATSINSmove_tlcal(apy6, tmp926) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 33804(line=821, offs=41) -- 33942(line=823, offs=64)
+*/
+/*
+INSletpop()
+*/
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 33930(line=824, offs=49) -- 33976(line=824, offs=95)
+emit_instr: loc0 = build/src/lexer.dats: 33973(line=826, offs=13) -- 33995(line=826, offs=35)
 */
-ATSINSmove(tmp925, _content_starts_prfn_61(ATSPMVrefarg0(arg0), tmp921, arg2)) ;
+ATSINSmove(tmp927, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(39))) ;
 
-} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34010(line=826, offs=12) -- 34029(line=826, offs=31)
-*/
-ATSif(
-tmp924
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34010(line=826, offs=12) -- 34029(line=826, offs=31)
-*/
-ATSINSmove(tmp927, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34010(line=826, offs=12) -- 34029(line=826, offs=31)
-*/
-ATSINSmove(tmp927, tmp925) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34007(line=826, offs=9) -- 34446(line=835, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 33970(line=826, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
 tmp927
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34035(line=826, offs=37) -- 34431(line=834, offs=12)
+emit_instr: loc0 = build/src/lexer.dats: 34001(line=826, offs=41) -- 34141(line=828, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34063(line=827, offs=25) -- 34088(line=827, offs=50)
+emit_instr: loc0 = build/src/lexer.dats: 34027(line=827, offs=23) -- 34077(line=827, offs=73)
 */
-ATSif(
-tmp924
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34080(line=827, offs=42) -- 34081(line=827, offs=43)
-*/
-ATSINSmove(tmp928, ATSPMVi0nt(5)) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34087(line=827, offs=49) -- 34088(line=827, offs=50)
-*/
-ATSINSmove(tmp928, ATSPMVi0nt(4)) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34166(line=828, offs=45) -- 34189(line=828, offs=68)
-*/
-ATSINSmove(tmp930, atspre_g1int_add_int(tmp921, tmp928)) ;
+ATSINSmove(tmp928, lex_char_lit_102(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34147(line=828, offs=26) -- 34200(line=828, offs=79)
+emit_instr: loc0 = build/src/lexer.dats: 34017(line=827, offs=13) -- 34019(line=827, offs=15)
 */
-ATSINSmove(tmp929, _skip_to_name_71(ATSPMVrefarg0(arg0), tmp930, arg2, ATSPMVi0nt(256))) ;
-
+ATSINSmove(tmp929, ATSSELfltrec(tmp928, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34226(line=829, offs=26) -- 34262(line=829, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 34021(line=827, offs=17) -- 34023(line=827, offs=19)
 */
-ATSINSmove(tmp931, skip_ident_69(ATSPMVrefarg0(arg0), tmp929, arg2, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34288(line=830, offs=26) -- 34307(line=830, offs=45)
-*/
-ATSINSmove(tmp932, atspre_g1int_sub_int(tmp931, tmp929)) ;
-
+ATSINSmove(tmp930, ATSSELfltrec(tmp928, postiats_tyrec_0, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34332(line=832, offs=14) -- 34395(line=832, offs=77)
+emit_instr: loc0 = build/src/lexer.dats: 34128(line=828, offs=51) -- 34136(line=828, offs=59)
 */
-ATSINSmove(tmp933, _has_primplement_77(ATSPMVrefarg0(arg0), arg1, arg2, tmp929, tmp932, ATSPMVi0nt(0), arg2)) ;
+ATSINSmove(tmp931, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34329(line=832, offs=11) -- 34419(line=833, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 34085(line=828, offs=8) -- 34137(line=828, offs=60)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp929) ;
+ATSINSmove_tlcal(apy5, tmp930) ;
+ATSINSmove_tlcal(apy6, tmp931) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34001(line=826, offs=41) -- 34141(line=828, offs=64)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34176(line=831, offs=13) -- 34225(line=831, offs=62)
+*/
+ATSINSmove(tmp933, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(37))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34176(line=831, offs=13) -- 34225(line=831, offs=62)
 */
 ATSif(
 tmp933
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34401(line=832, offs=83) -- 34402(line=832, offs=84)
+emit_instr: loc0 = build/src/lexer.dats: 34176(line=831, offs=13) -- 34225(line=831, offs=62)
 */
-ATSINSmove(tmp926, ATSPMVi0nt(2)) ;
+ATSINSmove(tmp932, atspre_g0int_eq_int(tmp902, ATSPMVi0nt(123))) ;
+
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34418(line=833, offs=16) -- 34419(line=833, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 34176(line=831, offs=13) -- 34225(line=831, offs=62)
 */
-ATSINSmove(tmp926, ATSPMVi0nt(5)) ;
+ATSINSmove(tmp932, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34035(line=826, offs=37) -- 34431(line=834, offs=12)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34445(line=835, offs=14) -- 34446(line=835, offs=15)
-*/
-ATSINSmove(tmp926, ATSPMVi0nt(2)) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34462(line=836, offs=16) -- 34526(line=836, offs=80)
-*/
-ATSINSmove_void(tmp934, put_span_20(ATSPMVrefarg0(arg3), tmp926, ATSPMVi0nt(1), arg4, tmp923, tmp921, tmp923, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34573(line=837, offs=47) -- 34582(line=837, offs=56)
-*/
-ATSINSmove(tmp935, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34584(line=837, offs=58) -- 34592(line=837, offs=66)
-*/
-ATSINSmove(tmp936, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34534(line=837, offs=8) -- 34593(line=837, offs=67)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp923) ;
-ATSINSmove_tlcal(apy5, tmp935) ;
-ATSINSmove_tlcal(apy6, tmp936) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 33675(line=819, offs=48) -- 34597(line=837, offs=71)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34629(line=840, offs=13) -- 34661(line=840, offs=45)
-*/
-ATSINSmove(tmp937, looking_at_target_35(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34626(line=840, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 34173(line=831, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp937
+tmp932
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34667(line=840, offs=51) -- 34810(line=842, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 34231(line=831, offs=68) -- 34370(line=833, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34693(line=841, offs=23) -- 34746(line=841, offs=76)
+emit_instr: loc0 = build/src/lexer.dats: 34257(line=832, offs=23) -- 34306(line=832, offs=72)
 */
-ATSINSmove(tmp938, lex_target_decl_134(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+ATSINSmove(tmp934, lex_extcode_106(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34683(line=841, offs=13) -- 34685(line=841, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 34247(line=832, offs=13) -- 34249(line=832, offs=15)
 */
-ATSINSmove(tmp939, ATSSELfltrec(tmp938, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp935, ATSSELfltrec(tmp934, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34687(line=841, offs=17) -- 34689(line=841, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 34251(line=832, offs=17) -- 34253(line=832, offs=19)
 */
-ATSINSmove(tmp940, ATSSELfltrec(tmp938, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp936, ATSSELfltrec(tmp934, postiats_tyrec_0, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34797(line=842, offs=51) -- 34805(line=842, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 34357(line=833, offs=51) -- 34365(line=833, offs=59)
 */
-ATSINSmove(tmp941, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp937, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34754(line=842, offs=8) -- 34806(line=842, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 34314(line=833, offs=8) -- 34366(line=833, offs=60)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp939) ;
-ATSINSmove_tlcal(apy5, tmp940) ;
-ATSINSmove_tlcal(apy6, tmp941) ;
+ATSINSmove_tlcal(apy4, tmp935) ;
+ATSINSmove_tlcal(apy5, tmp936) ;
+ATSINSmove_tlcal(apy6, tmp937) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -14945,615 +14967,670 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34667(line=840, offs=51) -- 34810(line=842, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 34231(line=831, offs=68) -- 34370(line=833, offs=64)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34894(line=845, offs=13) -- 34926(line=845, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 34411(line=836, offs=13) -- 34440(line=836, offs=42)
 */
-ATSINSmove(tmp942, looking_at_extval_47(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp938, looking_at_pub_33(ATSPMVrefarg0(arg0), arg4, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34891(line=845, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 34408(line=836, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp938
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34446(line=836, offs=48) -- 35368(line=854, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34478(line=837, offs=29) -- 34485(line=837, offs=36)
+*/
+ATSINSmove(tmp940, atspre_g1int_add_int(arg4, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34465(line=837, offs=16) -- 34496(line=837, offs=47)
+*/
+ATSINSmove(tmp939, skip_ws_64(ATSPMVrefarg0(arg0), tmp940, arg2, ATSPMVi0nt(256))) ;
+
+/* (*nothing*) */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34542(line=839, offs=16) -- 34583(line=839, offs=57)
+*/
+ATSINSmove(tmp941, lex_pub_lines_114(ATSPMVrefarg0(arg0), tmp939, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34605(line=840, offs=22) -- 34652(line=840, offs=69)
+*/
+ATSINSmove(tmp942, _content_starts_prfun_60(ATSPMVrefarg0(arg0), tmp939, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34673(line=841, offs=21) -- 34747(line=841, offs=95)
 */
 ATSif(
 tmp942
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 34932(line=845, offs=51) -- 35087(line=848, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 34690(line=841, offs=38) -- 34695(line=841, offs=43)
 */
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34951(line=846, offs=16) -- 34958(line=846, offs=23)
-*/
-ATSINSmove(tmp943, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34974(line=847, offs=16) -- 35016(line=847, offs=58)
-*/
-ATSINSmove_void(tmp944, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp943, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35063(line=848, offs=47) -- 35072(line=848, offs=56)
-*/
-ATSINSmove(tmp945, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35074(line=848, offs=58) -- 35082(line=848, offs=66)
-*/
-ATSINSmove(tmp946, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35024(line=848, offs=8) -- 35083(line=848, offs=67)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp943) ;
-ATSINSmove_tlcal(apy5, tmp945) ;
-ATSINSmove_tlcal(apy6, tmp946) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 34932(line=845, offs=51) -- 35087(line=848, offs=71)
-*/
-/*
-INSletpop()
-*/
+ATSINSmove(tmp943, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 35100(line=849, offs=13) -- 35134(line=849, offs=47)
+emit_instr: loc0 = build/src/lexer.dats: 34701(line=841, offs=49) -- 34747(line=841, offs=95)
 */
-ATSINSmove(tmp947, looking_at_extfcall_48(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp943, _content_starts_prfn_61(ATSPMVrefarg0(arg0), tmp939, arg2)) ;
 
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35097(line=849, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp947
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35140(line=849, offs=53) -- 35295(line=852, offs=71)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35159(line=850, offs=16) -- 35166(line=850, offs=23)
-*/
-ATSINSmove(tmp948, atspre_g1int_add_int(arg4, ATSPMVi0nt(9))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35182(line=851, offs=16) -- 35224(line=851, offs=58)
-*/
-ATSINSmove_void(tmp949, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp948, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35271(line=852, offs=47) -- 35280(line=852, offs=56)
-*/
-ATSINSmove(tmp950, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35282(line=852, offs=58) -- 35290(line=852, offs=66)
-*/
-ATSINSmove(tmp951, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35232(line=852, offs=8) -- 35291(line=852, offs=67)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp948) ;
-ATSINSmove_tlcal(apy5, tmp950) ;
-ATSINSmove_tlcal(apy6, tmp951) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35140(line=849, offs=53) -- 35295(line=852, offs=71)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35308(line=853, offs=13) -- 35340(line=853, offs=45)
-*/
-ATSINSmove(tmp952, looking_at_extype_49(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35305(line=853, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp952
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35346(line=853, offs=51) -- 35501(line=856, offs=71)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35365(line=854, offs=16) -- 35372(line=854, offs=23)
-*/
-ATSINSmove(tmp953, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35388(line=855, offs=16) -- 35430(line=855, offs=58)
-*/
-ATSINSmove_void(tmp954, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp953, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35477(line=856, offs=47) -- 35486(line=856, offs=56)
-*/
-ATSINSmove(tmp955, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35488(line=856, offs=58) -- 35496(line=856, offs=66)
-*/
-ATSINSmove(tmp956, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35438(line=856, offs=8) -- 35497(line=856, offs=67)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp953) ;
-ATSINSmove_tlcal(apy5, tmp955) ;
-ATSINSmove_tlcal(apy6, tmp956) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35346(line=853, offs=51) -- 35501(line=856, offs=71)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35514(line=857, offs=13) -- 35547(line=857, offs=46)
-*/
-ATSINSmove(tmp957, looking_at_extkind_50(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35511(line=857, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp957
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35553(line=857, offs=52) -- 35708(line=860, offs=71)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35572(line=858, offs=16) -- 35579(line=858, offs=23)
-*/
-ATSINSmove(tmp958, atspre_g1int_add_int(arg4, ATSPMVi0nt(8))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35595(line=859, offs=16) -- 35637(line=859, offs=58)
-*/
-ATSINSmove_void(tmp959, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp958, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35684(line=860, offs=47) -- 35693(line=860, offs=56)
-*/
-ATSINSmove(tmp960, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35695(line=860, offs=58) -- 35703(line=860, offs=66)
-*/
-ATSINSmove(tmp961, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35645(line=860, offs=8) -- 35704(line=860, offs=67)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp958) ;
-ATSINSmove_tlcal(apy5, tmp960) ;
-ATSINSmove_tlcal(apy6, tmp961) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35553(line=857, offs=52) -- 35708(line=860, offs=71)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35740(line=863, offs=13) -- 35772(line=863, offs=45)
-*/
-ATSINSmove(tmp962, looking_at_unsafe_36(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35737(line=863, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp962
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35778(line=863, offs=51) -- 36179(line=871, offs=8)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35813(line=864, offs=32) -- 35870(line=864, offs=89)
-*/
-ATSINSmove(tmp963, lex_unsafe_dispatch_129(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35794(line=864, offs=13) -- 35796(line=864, offs=15)
-*/
-ATSINSmove(tmp964, ATSSELfltrec(tmp963, postiats_tyrec_1, atslab__0)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35798(line=864, offs=17) -- 35800(line=864, offs=19)
-*/
-ATSINSmove(tmp965, ATSSELfltrec(tmp963, postiats_tyrec_1, atslab__1)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35802(line=864, offs=21) -- 35809(line=864, offs=28)
-*/
-ATSINSmove(tmp966, ATSSELfltrec(tmp963, postiats_tyrec_1, atslab__2)) ;
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35884(line=866, offs=7) -- 36171(line=870, offs=73)
-*/
-ATSif(
-tmp966
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35943(line=866, offs=66) -- 35951(line=866, offs=74)
-*/
-ATSINSmove(tmp967, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35900(line=866, offs=23) -- 35952(line=866, offs=75)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp964) ;
-ATSINSmove_tlcal(apy5, tmp965) ;
-ATSINSmove_tlcal(apy6, tmp967) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35964(line=867, offs=12) -- 36171(line=870, offs=73)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36011(line=868, offs=44) -- 36018(line=868, offs=51)
-*/
-ATSINSmove(tmp969, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35985(line=868, offs=18) -- 36038(line=868, offs=71)
-*/
-ATSINSmove(tmp968, lex_passthrough_scan_136(ATSPMVrefarg0(arg0), tmp969, arg1, arg2, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36056(line=869, offs=18) -- 36098(line=869, offs=60)
-*/
-ATSINSmove_void(tmp970, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp968, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36147(line=870, offs=49) -- 36156(line=870, offs=58)
-*/
-ATSINSmove(tmp971, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36158(line=870, offs=60) -- 36166(line=870, offs=68)
-*/
-ATSINSmove(tmp972, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36108(line=870, offs=10) -- 36167(line=870, offs=69)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp968) ;
-ATSINSmove_tlcal(apy5, tmp971) ;
-ATSINSmove_tlcal(apy6, tmp972) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 35964(line=867, offs=12) -- 36171(line=870, offs=73)
-*/
-/*
-INSletpop()
-*/
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 35778(line=863, offs=51) -- 36179(line=871, offs=8)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36213(line=874, offs=13) -- 36247(line=874, offs=47)
-*/
-ATSINSmove(tmp973, looking_at_unittest_37(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36210(line=874, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 34781(line=843, offs=12) -- 34800(line=843, offs=31)
 */
 ATSif(
-tmp973
+tmp942
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36253(line=874, offs=53) -- 36656(line=882, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 34781(line=843, offs=12) -- 34800(line=843, offs=31)
 */
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36288(line=875, offs=32) -- 36347(line=875, offs=91)
-*/
-ATSINSmove(tmp974, lex_unittest_dispatch_131(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36269(line=875, offs=13) -- 36271(line=875, offs=15)
-*/
-ATSINSmove(tmp975, ATSSELfltrec(tmp974, postiats_tyrec_1, atslab__0)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36273(line=875, offs=17) -- 36275(line=875, offs=19)
-*/
-ATSINSmove(tmp976, ATSSELfltrec(tmp974, postiats_tyrec_1, atslab__1)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36277(line=875, offs=21) -- 36284(line=875, offs=28)
-*/
-ATSINSmove(tmp977, ATSSELfltrec(tmp974, postiats_tyrec_1, atslab__2)) ;
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36361(line=877, offs=7) -- 36648(line=881, offs=73)
-*/
-ATSif(
-tmp977
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36420(line=877, offs=66) -- 36428(line=877, offs=74)
-*/
-ATSINSmove(tmp978, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36377(line=877, offs=23) -- 36429(line=877, offs=75)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp975) ;
-ATSINSmove_tlcal(apy5, tmp976) ;
-ATSINSmove_tlcal(apy6, tmp978) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
+ATSINSmove(tmp945, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36441(line=878, offs=12) -- 36648(line=881, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 34781(line=843, offs=12) -- 34800(line=843, offs=31)
 */
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36488(line=879, offs=44) -- 36495(line=879, offs=51)
-*/
-ATSINSmove(tmp980, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36462(line=879, offs=18) -- 36515(line=879, offs=71)
-*/
-ATSINSmove(tmp979, lex_passthrough_scan_136(ATSPMVrefarg0(arg0), tmp980, arg1, arg2, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36533(line=880, offs=18) -- 36575(line=880, offs=60)
-*/
-ATSINSmove_void(tmp981, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp979, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36624(line=881, offs=49) -- 36633(line=881, offs=58)
-*/
-ATSINSmove(tmp982, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36635(line=881, offs=60) -- 36643(line=881, offs=68)
-*/
-ATSINSmove(tmp983, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36585(line=881, offs=10) -- 36644(line=881, offs=69)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp979) ;
-ATSINSmove_tlcal(apy5, tmp982) ;
-ATSINSmove_tlcal(apy6, tmp983) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36441(line=878, offs=12) -- 36648(line=881, offs=73)
-*/
-/*
-INSletpop()
-*/
+ATSINSmove(tmp945, tmp943) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36253(line=874, offs=53) -- 36656(line=882, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 34778(line=843, offs=9) -- 35217(line=852, offs=15)
+*/
+ATSif(
+tmp945
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34806(line=843, offs=37) -- 35202(line=851, offs=12)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34834(line=844, offs=25) -- 34859(line=844, offs=50)
+*/
+ATSif(
+tmp942
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34851(line=844, offs=42) -- 34852(line=844, offs=43)
+*/
+ATSINSmove(tmp946, ATSPMVi0nt(5)) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34858(line=844, offs=49) -- 34859(line=844, offs=50)
+*/
+ATSINSmove(tmp946, ATSPMVi0nt(4)) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34937(line=845, offs=45) -- 34960(line=845, offs=68)
+*/
+ATSINSmove(tmp948, atspre_g1int_add_int(tmp939, tmp946)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34918(line=845, offs=26) -- 34971(line=845, offs=79)
+*/
+ATSINSmove(tmp947, _skip_to_name_72(ATSPMVrefarg0(arg0), tmp948, arg2, ATSPMVi0nt(256))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34997(line=846, offs=26) -- 35033(line=846, offs=62)
+*/
+ATSINSmove(tmp949, skip_ident_70(ATSPMVrefarg0(arg0), tmp947, arg2, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35059(line=847, offs=26) -- 35078(line=847, offs=45)
+*/
+ATSINSmove(tmp950, atspre_g1int_sub_int(tmp949, tmp947)) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35103(line=849, offs=14) -- 35166(line=849, offs=77)
+*/
+ATSINSmove(tmp951, _has_primplement_78(ATSPMVrefarg0(arg0), arg1, arg2, tmp947, tmp950, ATSPMVi0nt(0), arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35100(line=849, offs=11) -- 35190(line=850, offs=17)
+*/
+ATSif(
+tmp951
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35172(line=849, offs=83) -- 35173(line=849, offs=84)
+*/
+ATSINSmove(tmp944, ATSPMVi0nt(2)) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35189(line=850, offs=16) -- 35190(line=850, offs=17)
+*/
+ATSINSmove(tmp944, ATSPMVi0nt(5)) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34806(line=843, offs=37) -- 35202(line=851, offs=12)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36685(line=885, offs=13) -- 36714(line=885, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 35216(line=852, offs=14) -- 35217(line=852, offs=15)
 */
-ATSINSmove(tmp984, looking_at_use_34(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp944, ATSPMVi0nt(2)) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35233(line=853, offs=16) -- 35297(line=853, offs=80)
+*/
+ATSINSmove_void(tmp952, put_span_20(ATSPMVrefarg0(arg3), tmp944, ATSPMVi0nt(1), arg4, tmp941, tmp939, tmp941, ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36682(line=885, offs=10) -- 39396(line=940, offs=71)
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35344(line=854, offs=47) -- 35353(line=854, offs=56)
+*/
+ATSINSmove(tmp953, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35355(line=854, offs=58) -- 35363(line=854, offs=66)
+*/
+ATSINSmove(tmp954, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35305(line=854, offs=8) -- 35364(line=854, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp941) ;
+ATSINSmove_tlcal(apy5, tmp953) ;
+ATSINSmove_tlcal(apy6, tmp954) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 34446(line=836, offs=48) -- 35368(line=854, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35400(line=857, offs=13) -- 35432(line=857, offs=45)
+*/
+ATSINSmove(tmp955, looking_at_target_35(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35397(line=857, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp955
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35438(line=857, offs=51) -- 35581(line=859, offs=64)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35464(line=858, offs=23) -- 35517(line=858, offs=76)
+*/
+ATSINSmove(tmp956, lex_target_decl_135(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35454(line=858, offs=13) -- 35456(line=858, offs=15)
+*/
+ATSINSmove(tmp957, ATSSELfltrec(tmp956, postiats_tyrec_0, atslab__0)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35458(line=858, offs=17) -- 35460(line=858, offs=19)
+*/
+ATSINSmove(tmp958, ATSSELfltrec(tmp956, postiats_tyrec_0, atslab__1)) ;
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35568(line=859, offs=51) -- 35576(line=859, offs=59)
+*/
+ATSINSmove(tmp959, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35525(line=859, offs=8) -- 35577(line=859, offs=60)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp957) ;
+ATSINSmove_tlcal(apy5, tmp958) ;
+ATSINSmove_tlcal(apy6, tmp959) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35438(line=857, offs=51) -- 35581(line=859, offs=64)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35665(line=862, offs=13) -- 35697(line=862, offs=45)
+*/
+ATSINSmove(tmp960, looking_at_extval_47(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35662(line=862, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp960
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35703(line=862, offs=51) -- 35858(line=865, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35722(line=863, offs=16) -- 35729(line=863, offs=23)
+*/
+ATSINSmove(tmp961, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35745(line=864, offs=16) -- 35787(line=864, offs=58)
+*/
+ATSINSmove_void(tmp962, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp961, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35834(line=865, offs=47) -- 35843(line=865, offs=56)
+*/
+ATSINSmove(tmp963, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35845(line=865, offs=58) -- 35853(line=865, offs=66)
+*/
+ATSINSmove(tmp964, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35795(line=865, offs=8) -- 35854(line=865, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp961) ;
+ATSINSmove_tlcal(apy5, tmp963) ;
+ATSINSmove_tlcal(apy6, tmp964) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35703(line=862, offs=51) -- 35858(line=865, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35871(line=866, offs=13) -- 35905(line=866, offs=47)
+*/
+ATSINSmove(tmp965, looking_at_extfcall_48(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35868(line=866, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp965
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35911(line=866, offs=53) -- 36066(line=869, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35930(line=867, offs=16) -- 35937(line=867, offs=23)
+*/
+ATSINSmove(tmp966, atspre_g1int_add_int(arg4, ATSPMVi0nt(9))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35953(line=868, offs=16) -- 35995(line=868, offs=58)
+*/
+ATSINSmove_void(tmp967, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp966, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36042(line=869, offs=47) -- 36051(line=869, offs=56)
+*/
+ATSINSmove(tmp968, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36053(line=869, offs=58) -- 36061(line=869, offs=66)
+*/
+ATSINSmove(tmp969, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36003(line=869, offs=8) -- 36062(line=869, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp966) ;
+ATSINSmove_tlcal(apy5, tmp968) ;
+ATSINSmove_tlcal(apy6, tmp969) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 35911(line=866, offs=53) -- 36066(line=869, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36079(line=870, offs=13) -- 36111(line=870, offs=45)
+*/
+ATSINSmove(tmp970, looking_at_extype_49(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36076(line=870, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp970
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36117(line=870, offs=51) -- 36272(line=873, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36136(line=871, offs=16) -- 36143(line=871, offs=23)
+*/
+ATSINSmove(tmp971, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36159(line=872, offs=16) -- 36201(line=872, offs=58)
+*/
+ATSINSmove_void(tmp972, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp971, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36248(line=873, offs=47) -- 36257(line=873, offs=56)
+*/
+ATSINSmove(tmp973, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36259(line=873, offs=58) -- 36267(line=873, offs=66)
+*/
+ATSINSmove(tmp974, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36209(line=873, offs=8) -- 36268(line=873, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp971) ;
+ATSINSmove_tlcal(apy5, tmp973) ;
+ATSINSmove_tlcal(apy6, tmp974) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36117(line=870, offs=51) -- 36272(line=873, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36285(line=874, offs=13) -- 36318(line=874, offs=46)
+*/
+ATSINSmove(tmp975, looking_at_extkind_50(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36282(line=874, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp975
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36324(line=874, offs=52) -- 36479(line=877, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36343(line=875, offs=16) -- 36350(line=875, offs=23)
+*/
+ATSINSmove(tmp976, atspre_g1int_add_int(arg4, ATSPMVi0nt(8))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36366(line=876, offs=16) -- 36408(line=876, offs=58)
+*/
+ATSINSmove_void(tmp977, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp976, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36455(line=877, offs=47) -- 36464(line=877, offs=56)
+*/
+ATSINSmove(tmp978, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36466(line=877, offs=58) -- 36474(line=877, offs=66)
+*/
+ATSINSmove(tmp979, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36416(line=877, offs=8) -- 36475(line=877, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp976) ;
+ATSINSmove_tlcal(apy5, tmp978) ;
+ATSINSmove_tlcal(apy6, tmp979) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36324(line=874, offs=52) -- 36479(line=877, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36511(line=880, offs=13) -- 36543(line=880, offs=45)
+*/
+ATSINSmove(tmp980, looking_at_unsafe_36(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36508(line=880, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp980
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36549(line=880, offs=51) -- 36950(line=888, offs=8)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36584(line=881, offs=32) -- 36641(line=881, offs=89)
+*/
+ATSINSmove(tmp981, lex_unsafe_dispatch_130(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36565(line=881, offs=13) -- 36567(line=881, offs=15)
+*/
+ATSINSmove(tmp982, ATSSELfltrec(tmp981, postiats_tyrec_1, atslab__0)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36569(line=881, offs=17) -- 36571(line=881, offs=19)
+*/
+ATSINSmove(tmp983, ATSSELfltrec(tmp981, postiats_tyrec_1, atslab__1)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36573(line=881, offs=21) -- 36580(line=881, offs=28)
+*/
+ATSINSmove(tmp984, ATSSELfltrec(tmp981, postiats_tyrec_1, atslab__2)) ;
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36655(line=883, offs=7) -- 36942(line=887, offs=73)
 */
 ATSif(
 tmp984
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36720(line=885, offs=48) -- 36860(line=887, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 36714(line=883, offs=66) -- 36722(line=883, offs=74)
+*/
+ATSINSmove(tmp985, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36671(line=883, offs=23) -- 36723(line=883, offs=75)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp982) ;
+ATSINSmove_tlcal(apy5, tmp983) ;
+ATSINSmove_tlcal(apy6, tmp985) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36735(line=884, offs=12) -- 36942(line=887, offs=73)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36746(line=886, offs=23) -- 36796(line=886, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 36782(line=885, offs=44) -- 36789(line=885, offs=51)
 */
-ATSINSmove(tmp985, lex_hash_use_107(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+ATSINSmove(tmp987, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36736(line=886, offs=13) -- 36738(line=886, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 36756(line=885, offs=18) -- 36809(line=885, offs=71)
 */
-ATSINSmove(tmp986, ATSSELfltrec(tmp985, postiats_tyrec_0, atslab__0)) ;
+ATSINSmove(tmp986, lex_passthrough_scan_137(ATSPMVrefarg0(arg0), tmp987, arg1, arg2, arg2)) ;
+
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36740(line=886, offs=17) -- 36742(line=886, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 36827(line=886, offs=18) -- 36869(line=886, offs=60)
 */
-ATSINSmove(tmp987, ATSSELfltrec(tmp985, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove_void(tmp988, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp986, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36847(line=887, offs=51) -- 36855(line=887, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 36918(line=887, offs=49) -- 36927(line=887, offs=58)
 */
-ATSINSmove(tmp988, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp989, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36804(line=887, offs=8) -- 36856(line=887, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 36929(line=887, offs=60) -- 36937(line=887, offs=68)
+*/
+ATSINSmove(tmp990, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 36879(line=887, offs=10) -- 36938(line=887, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -15561,8 +15638,8 @@ ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
 ATSINSmove_tlcal(apy4, tmp986) ;
-ATSINSmove_tlcal(apy5, tmp987) ;
-ATSINSmove_tlcal(apy6, tmp988) ;
+ATSINSmove_tlcal(apy5, tmp989) ;
+ATSINSmove_tlcal(apy6, tmp990) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -15570,248 +15647,205 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36720(line=885, offs=48) -- 36860(line=887, offs=64)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36914(line=890, offs=13) -- 36957(line=890, offs=56)
-*/
-ATSINSmove(tmp990, atspre_g0int_eq_int(tmp883, ATSPMVi0nt(36))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36914(line=890, offs=13) -- 36957(line=890, offs=56)
-*/
-ATSif(
-tmp990
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36914(line=890, offs=13) -- 36957(line=890, offs=56)
-*/
-ATSINSmove(tmp989, is_ident_start_12(tmp884)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36914(line=890, offs=13) -- 36957(line=890, offs=56)
-*/
-ATSINSmove(tmp989, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36911(line=890, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp989
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36964(line=890, offs=63) -- 37359(line=898, offs=8)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36999(line=891, offs=32) -- 37050(line=891, offs=83)
-*/
-ATSINSmove(tmp991, lex_qualified_108(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36980(line=891, offs=13) -- 36982(line=891, offs=15)
-*/
-ATSINSmove(tmp992, ATSSELfltrec(tmp991, postiats_tyrec_1, atslab__0)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36984(line=891, offs=17) -- 36986(line=891, offs=19)
-*/
-ATSINSmove(tmp993, ATSSELfltrec(tmp991, postiats_tyrec_1, atslab__1)) ;
-/*
-emit_instr: loc0 = build/src/lexer.dats: 36988(line=891, offs=21) -- 36995(line=891, offs=28)
-*/
-ATSINSmove(tmp994, ATSSELfltrec(tmp991, postiats_tyrec_1, atslab__2)) ;
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37064(line=893, offs=7) -- 37351(line=897, offs=73)
-*/
-ATSif(
-tmp994
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37123(line=893, offs=66) -- 37131(line=893, offs=74)
-*/
-ATSINSmove(tmp995, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37080(line=893, offs=23) -- 37132(line=893, offs=75)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp992) ;
-ATSINSmove_tlcal(apy5, tmp993) ;
-ATSINSmove_tlcal(apy6, tmp995) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37144(line=894, offs=12) -- 37351(line=897, offs=73)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37191(line=895, offs=44) -- 37198(line=895, offs=51)
-*/
-ATSINSmove(tmp997, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37165(line=895, offs=18) -- 37218(line=895, offs=71)
-*/
-ATSINSmove(tmp996, lex_passthrough_scan_136(ATSPMVrefarg0(arg0), tmp997, arg1, arg2, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37236(line=896, offs=18) -- 37278(line=896, offs=60)
-*/
-ATSINSmove_void(tmp998, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp996, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
-/*
-letpush(end)
-*/
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37327(line=897, offs=49) -- 37336(line=897, offs=58)
-*/
-ATSINSmove(tmp999, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37338(line=897, offs=60) -- 37346(line=897, offs=68)
-*/
-ATSINSmove(tmp1000, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37288(line=897, offs=10) -- 37347(line=897, offs=69)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp996) ;
-ATSINSmove_tlcal(apy5, tmp999) ;
-ATSINSmove_tlcal(apy6, tmp1000) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37144(line=894, offs=12) -- 37351(line=897, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 36735(line=884, offs=12) -- 36942(line=887, offs=73)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 36964(line=890, offs=63) -- 37359(line=898, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 36549(line=880, offs=51) -- 36950(line=888, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37439(line=901, offs=13) -- 37468(line=901, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 36984(line=891, offs=13) -- 37018(line=891, offs=47)
 */
-ATSINSmove(tmp1001, looking_at_fun_53(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp991, looking_at_unittest_37(ATSPMVrefarg0(arg0), arg4, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37436(line=901, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 36981(line=891, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp1001
+tmp991
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37474(line=901, offs=48) -- 37947(line=912, offs=8)
+emit_instr: loc0 = build/src/lexer.dats: 37024(line=891, offs=53) -- 37427(line=899, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37496(line=902, offs=19) -- 37503(line=902, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 37059(line=892, offs=32) -- 37118(line=892, offs=91)
 */
-ATSINSmove(tmp1002, atspre_g1int_add_int(arg4, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp992, lex_unittest_dispatch_132(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37040(line=892, offs=13) -- 37042(line=892, offs=15)
+*/
+ATSINSmove(tmp993, ATSSELfltrec(tmp992, postiats_tyrec_1, atslab__0)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37044(line=892, offs=17) -- 37046(line=892, offs=19)
+*/
+ATSINSmove(tmp994, ATSSELfltrec(tmp992, postiats_tyrec_1, atslab__1)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37048(line=892, offs=21) -- 37055(line=892, offs=28)
+*/
+ATSINSmove(tmp995, ATSSELfltrec(tmp992, postiats_tyrec_1, atslab__2)) ;
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37132(line=894, offs=7) -- 37419(line=898, offs=73)
+*/
+ATSif(
+tmp995
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37191(line=894, offs=66) -- 37199(line=894, offs=74)
+*/
+ATSINSmove(tmp996, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37148(line=894, offs=23) -- 37200(line=894, offs=75)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp993) ;
+ATSINSmove_tlcal(apy5, tmp994) ;
+ATSINSmove_tlcal(apy6, tmp996) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37212(line=895, offs=12) -- 37419(line=898, offs=73)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37259(line=896, offs=44) -- 37266(line=896, offs=51)
+*/
+ATSINSmove(tmp998, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37233(line=896, offs=18) -- 37286(line=896, offs=71)
+*/
+ATSINSmove(tmp997, lex_passthrough_scan_137(ATSPMVrefarg0(arg0), tmp998, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37304(line=897, offs=18) -- 37346(line=897, offs=60)
+*/
+ATSINSmove_void(tmp999, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp997, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37520(line=904, offs=10) -- 37553(line=904, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 37395(line=898, offs=49) -- 37404(line=898, offs=58)
 */
-ATSINSmove(tmp1003, _has_metric_54(ATSPMVrefarg0(arg0), tmp1002, arg2, arg2)) ;
+ATSINSmove(tmp1000, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37517(line=904, offs=7) -- 37939(line=911, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 37406(line=898, offs=60) -- 37414(line=898, offs=68)
+*/
+ATSINSmove(tmp1001, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37356(line=898, offs=10) -- 37415(line=898, offs=69)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp997) ;
+ATSINSmove_tlcal(apy5, tmp1000) ;
+ATSINSmove_tlcal(apy6, tmp1001) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37212(line=895, offs=12) -- 37419(line=898, offs=73)
+*/
+/*
+INSletpop()
+*/
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37024(line=891, offs=53) -- 37427(line=899, offs=8)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37456(line=902, offs=13) -- 37485(line=902, offs=42)
+*/
+ATSINSmove(tmp1002, looking_at_use_34(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37453(line=902, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp1003
+tmp1002
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37559(line=904, offs=49) -- 37766(line=907, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 37491(line=902, offs=48) -- 37631(line=904, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37606(line=905, offs=44) -- 37613(line=905, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 37517(line=903, offs=23) -- 37567(line=903, offs=73)
 */
-ATSINSmove(tmp1005, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1003, lex_hash_use_108(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37580(line=905, offs=18) -- 37633(line=905, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 37507(line=903, offs=13) -- 37509(line=903, offs=15)
 */
-ATSINSmove(tmp1004, lex_passthrough_scan_136(ATSPMVrefarg0(arg0), tmp1005, arg1, arg2, arg2)) ;
-
+ATSINSmove(tmp1004, ATSSELfltrec(tmp1003, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37651(line=906, offs=18) -- 37693(line=906, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 37511(line=903, offs=17) -- 37513(line=903, offs=19)
 */
-ATSINSmove_void(tmp1006, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp1004, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
+ATSINSmove(tmp1005, ATSSELfltrec(tmp1003, postiats_tyrec_0, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37742(line=907, offs=49) -- 37751(line=907, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 37618(line=904, offs=51) -- 37626(line=904, offs=59)
 */
-ATSINSmove(tmp1007, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1006, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37753(line=907, offs=60) -- 37761(line=907, offs=68)
-*/
-ATSINSmove(tmp1008, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37703(line=907, offs=10) -- 37762(line=907, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 37575(line=904, offs=8) -- 37627(line=904, offs=60)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -15819,8 +15853,8 @@ ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
 ATSINSmove_tlcal(apy4, tmp1004) ;
-ATSINSmove_tlcal(apy5, tmp1007) ;
-ATSINSmove_tlcal(apy6, tmp1008) ;
+ATSINSmove_tlcal(apy5, tmp1005) ;
+ATSINSmove_tlcal(apy6, tmp1006) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -15828,57 +15862,93 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37559(line=904, offs=49) -- 37766(line=907, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 37491(line=902, offs=48) -- 37631(line=904, offs=64)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37778(line=908, offs=12) -- 37939(line=911, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 37685(line=907, offs=13) -- 37728(line=907, offs=56)
+*/
+ATSINSmove(tmp1008, atspre_g0int_eq_int(tmp901, ATSPMVi0nt(36))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37685(line=907, offs=13) -- 37728(line=907, offs=56)
+*/
+ATSif(
+tmp1008
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37685(line=907, offs=13) -- 37728(line=907, offs=56)
+*/
+ATSINSmove(tmp1007, is_ident_start_12(tmp902)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37685(line=907, offs=13) -- 37728(line=907, offs=56)
+*/
+ATSINSmove(tmp1007, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37682(line=907, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp1007
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37735(line=907, offs=63) -- 38130(line=915, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37799(line=909, offs=18) -- 37806(line=909, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 37770(line=908, offs=32) -- 37821(line=908, offs=83)
 */
-ATSINSmove(tmp1009, atspre_g1int_add_int(arg4, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp1009, lex_qualified_109(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(arg3), arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37824(line=910, offs=18) -- 37866(line=910, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 37751(line=908, offs=13) -- 37753(line=908, offs=15)
 */
-ATSINSmove_void(tmp1010, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1009, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
-
+ATSINSmove(tmp1010, ATSSELfltrec(tmp1009, postiats_tyrec_1, atslab__0)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37755(line=908, offs=17) -- 37757(line=908, offs=19)
+*/
+ATSINSmove(tmp1011, ATSSELfltrec(tmp1009, postiats_tyrec_1, atslab__1)) ;
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37759(line=908, offs=21) -- 37766(line=908, offs=28)
+*/
+ATSINSmove(tmp1012, ATSSELfltrec(tmp1009, postiats_tyrec_1, atslab__2)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37915(line=911, offs=49) -- 37924(line=911, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 37835(line=910, offs=7) -- 38122(line=914, offs=73)
 */
-ATSINSmove(tmp1011, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSif(
+tmp1012
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37894(line=910, offs=66) -- 37902(line=910, offs=74)
+*/
+ATSINSmove(tmp1013, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 37926(line=911, offs=60) -- 37934(line=911, offs=68)
-*/
-ATSINSmove(tmp1012, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37876(line=911, offs=10) -- 37935(line=911, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 37851(line=910, offs=23) -- 37903(line=910, offs=75)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1009) ;
+ATSINSmove_tlcal(apy4, tmp1010) ;
 ATSINSmove_tlcal(apy5, tmp1011) ;
-ATSINSmove_tlcal(apy6, tmp1012) ;
+ATSINSmove_tlcal(apy6, tmp1013) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -15886,66 +15956,47 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37778(line=908, offs=12) -- 37939(line=911, offs=73)
-*/
-/*
-INSletpop()
-*/
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/lexer.dats: 37474(line=901, offs=48) -- 37947(line=912, offs=8)
-*/
-/*
-INSletpop()
-*/
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38011(line=915, offs=13) -- 38044(line=915, offs=46)
-*/
-ATSINSmove(tmp1013, looking_at_cast_fn_42(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38008(line=915, offs=10) -- 39396(line=940, offs=71)
-*/
-ATSif(
-tmp1013
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38050(line=915, offs=52) -- 38205(line=918, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 37915(line=911, offs=12) -- 38122(line=914, offs=73)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38069(line=916, offs=16) -- 38076(line=916, offs=23)
+emit_instr: loc0 = build/src/lexer.dats: 37962(line=912, offs=44) -- 37969(line=912, offs=51)
 */
-ATSINSmove(tmp1014, atspre_g1int_add_int(arg4, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp1015, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38092(line=917, offs=16) -- 38134(line=917, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 37936(line=912, offs=18) -- 37989(line=912, offs=71)
 */
-ATSINSmove_void(tmp1015, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1014, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1014, lex_passthrough_scan_137(ATSPMVrefarg0(arg0), tmp1015, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38007(line=913, offs=18) -- 38049(line=913, offs=60)
+*/
+ATSINSmove_void(tmp1016, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp1014, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38181(line=918, offs=47) -- 38190(line=918, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 38098(line=914, offs=49) -- 38107(line=914, offs=58)
 */
-ATSINSmove(tmp1016, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1017, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38192(line=918, offs=58) -- 38200(line=918, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 38109(line=914, offs=60) -- 38117(line=914, offs=68)
 */
-ATSINSmove(tmp1017, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1018, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38142(line=918, offs=8) -- 38201(line=918, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 38059(line=914, offs=10) -- 38118(line=914, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -15953,8 +16004,8 @@ ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
 ATSINSmove_tlcal(apy4, tmp1014) ;
-ATSINSmove_tlcal(apy5, tmp1016) ;
-ATSINSmove_tlcal(apy6, tmp1017) ;
+ATSINSmove_tlcal(apy5, tmp1017) ;
+ATSINSmove_tlcal(apy6, tmp1018) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -15962,137 +16013,106 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38050(line=915, offs=52) -- 38205(line=918, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 37915(line=911, offs=12) -- 38122(line=914, offs=73)
+*/
+/*
+INSletpop()
+*/
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 37735(line=907, offs=63) -- 38130(line=915, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38218(line=919, offs=13) -- 38250(line=919, offs=45)
+emit_instr: loc0 = build/src/lexer.dats: 38210(line=918, offs=13) -- 38239(line=918, offs=42)
 */
-ATSINSmove(tmp1018, looking_at_prax_i_43(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp1019, looking_at_fun_53(ATSPMVrefarg0(arg0), arg4, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38215(line=919, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38207(line=918, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp1018
+tmp1019
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38256(line=919, offs=51) -- 38411(line=922, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38245(line=918, offs=48) -- 38718(line=929, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38275(line=920, offs=16) -- 38282(line=920, offs=23)
+emit_instr: loc0 = build/src/lexer.dats: 38267(line=919, offs=19) -- 38274(line=919, offs=26)
 */
-ATSINSmove(tmp1019, atspre_g1int_add_int(arg4, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38298(line=921, offs=16) -- 38340(line=921, offs=58)
-*/
-ATSINSmove_void(tmp1020, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1019, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1020, atspre_g1int_add_int(arg4, ATSPMVi0nt(3))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38387(line=922, offs=47) -- 38396(line=922, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 38291(line=921, offs=10) -- 38324(line=921, offs=43)
 */
-ATSINSmove(tmp1021, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1021, _has_metric_54(ATSPMVrefarg0(arg0), tmp1020, arg2, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38398(line=922, offs=58) -- 38406(line=922, offs=66)
-*/
-ATSINSmove(tmp1022, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38348(line=922, offs=8) -- 38407(line=922, offs=67)
-*/
-ATStailcal_beg()
-ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, arg1) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1019) ;
-ATSINSmove_tlcal(apy5, tmp1021) ;
-ATSINSmove_tlcal(apy6, tmp1022) ;
-ATSINSargmove_tlcal(arg0, apy0) ;
-ATSINSargmove_tlcal(arg1, apy1) ;
-ATSINSargmove_tlcal(arg2, apy2) ;
-ATSINSargmove_tlcal(arg3, apy3) ;
-ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
-ATStailcal_end()
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38256(line=919, offs=51) -- 38411(line=922, offs=71)
-*/
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38424(line=923, offs=13) -- 38457(line=923, offs=46)
-*/
-ATSINSmove(tmp1023, looking_at_ext_ern_44(ATSPMVrefarg0(arg0), arg4, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 38421(line=923, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38288(line=921, offs=7) -- 38710(line=928, offs=73)
 */
 ATSif(
-tmp1023
+tmp1021
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38463(line=923, offs=52) -- 38618(line=926, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38330(line=921, offs=49) -- 38537(line=924, offs=73)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38482(line=924, offs=16) -- 38489(line=924, offs=23)
+emit_instr: loc0 = build/src/lexer.dats: 38377(line=922, offs=44) -- 38384(line=922, offs=51)
 */
-ATSINSmove(tmp1024, atspre_g1int_add_int(arg4, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp1023, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38505(line=925, offs=16) -- 38547(line=925, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 38351(line=922, offs=18) -- 38404(line=922, offs=71)
 */
-ATSINSmove_void(tmp1025, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1024, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1022, lex_passthrough_scan_137(ATSPMVrefarg0(arg0), tmp1023, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38422(line=923, offs=18) -- 38464(line=923, offs=60)
+*/
+ATSINSmove_void(tmp1024, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp1022, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38594(line=926, offs=47) -- 38603(line=926, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 38513(line=924, offs=49) -- 38522(line=924, offs=58)
 */
-ATSINSmove(tmp1026, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1025, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38605(line=926, offs=58) -- 38613(line=926, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 38524(line=924, offs=60) -- 38532(line=924, offs=68)
 */
-ATSINSmove(tmp1027, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1026, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38555(line=926, offs=8) -- 38614(line=926, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 38474(line=924, offs=10) -- 38533(line=924, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1024) ;
-ATSINSmove_tlcal(apy5, tmp1026) ;
-ATSINSmove_tlcal(apy6, tmp1027) ;
+ATSINSmove_tlcal(apy4, tmp1022) ;
+ATSINSmove_tlcal(apy5, tmp1025) ;
+ATSINSmove_tlcal(apy6, tmp1026) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -16100,68 +16120,133 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38463(line=923, offs=52) -- 38618(line=926, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38330(line=921, offs=49) -- 38537(line=924, offs=73)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38631(line=927, offs=13) -- 38664(line=927, offs=46)
+emit_instr: loc0 = build/src/lexer.dats: 38549(line=925, offs=12) -- 38710(line=928, offs=73)
 */
-ATSINSmove(tmp1028, looking_at_assu_me_45(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38570(line=926, offs=18) -- 38577(line=926, offs=25)
+*/
+ATSINSmove(tmp1027, atspre_g1int_add_int(arg4, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38628(line=927, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38595(line=927, offs=18) -- 38637(line=927, offs=60)
+*/
+ATSINSmove_void(tmp1028, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1027, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38686(line=928, offs=49) -- 38695(line=928, offs=58)
+*/
+ATSINSmove(tmp1029, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38697(line=928, offs=60) -- 38705(line=928, offs=68)
+*/
+ATSINSmove(tmp1030, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38647(line=928, offs=10) -- 38706(line=928, offs=69)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp1027) ;
+ATSINSmove_tlcal(apy5, tmp1029) ;
+ATSINSmove_tlcal(apy6, tmp1030) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38549(line=925, offs=12) -- 38710(line=928, offs=73)
+*/
+/*
+INSletpop()
+*/
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38245(line=918, offs=48) -- 38718(line=929, offs=8)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38782(line=932, offs=13) -- 38815(line=932, offs=46)
+*/
+ATSINSmove(tmp1031, looking_at_cast_fn_42(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 38779(line=932, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp1028
+tmp1031
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38670(line=927, offs=52) -- 38825(line=930, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38821(line=932, offs=52) -- 38976(line=935, offs=71)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38689(line=928, offs=16) -- 38696(line=928, offs=23)
+emit_instr: loc0 = build/src/lexer.dats: 38840(line=933, offs=16) -- 38847(line=933, offs=23)
 */
-ATSINSmove(tmp1029, atspre_g1int_add_int(arg4, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp1032, atspre_g1int_add_int(arg4, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38712(line=929, offs=16) -- 38754(line=929, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 38863(line=934, offs=16) -- 38905(line=934, offs=58)
 */
-ATSINSmove_void(tmp1030, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1029, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp1033, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1032, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38801(line=930, offs=47) -- 38810(line=930, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 38952(line=935, offs=47) -- 38961(line=935, offs=56)
 */
-ATSINSmove(tmp1031, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1034, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38812(line=930, offs=58) -- 38820(line=930, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 38963(line=935, offs=58) -- 38971(line=935, offs=66)
 */
-ATSINSmove(tmp1032, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1035, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38762(line=930, offs=8) -- 38821(line=930, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 38913(line=935, offs=8) -- 38972(line=935, offs=67)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1029) ;
-ATSINSmove_tlcal(apy5, tmp1031) ;
-ATSINSmove_tlcal(apy6, tmp1032) ;
+ATSINSmove_tlcal(apy4, tmp1032) ;
+ATSINSmove_tlcal(apy5, tmp1034) ;
+ATSINSmove_tlcal(apy6, tmp1035) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -16169,73 +16254,68 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38670(line=927, offs=52) -- 38825(line=930, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38821(line=932, offs=52) -- 38976(line=935, offs=71)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38925(line=932, offs=13) -- 38955(line=932, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 38989(line=936, offs=13) -- 39021(line=936, offs=45)
 */
-ATSINSmove(tmp1033, looking_at_stld_46(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+ATSINSmove(tmp1036, looking_at_prax_i_43(ATSPMVrefarg0(arg0), arg4, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38922(line=932, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 38986(line=936, offs=10) -- 40618(line=965, offs=71)
 */
 ATSif(
-tmp1033
+tmp1036
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38961(line=932, offs=49) -- 39154(line=935, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 39027(line=936, offs=51) -- 39182(line=939, offs=71)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38997(line=933, offs=33) -- 39004(line=933, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 39046(line=937, offs=16) -- 39053(line=937, offs=23)
 */
-ATSINSmove(tmp1035, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp1037, atspre_g1int_add_int(arg4, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38980(line=933, offs=16) -- 39024(line=933, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 39069(line=938, offs=16) -- 39111(line=938, offs=58)
 */
-ATSINSmove(tmp1034, skip_to_eol_66(ATSPMVrefarg0(arg0), tmp1035, arg1, arg2, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 39040(line=934, offs=16) -- 39083(line=934, offs=59)
-*/
-ATSINSmove_void(tmp1036, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(12), ATSPMVi0nt(2), arg4, tmp1034, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp1038, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1037, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39130(line=935, offs=47) -- 39139(line=935, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 39158(line=939, offs=47) -- 39167(line=939, offs=56)
 */
-ATSINSmove(tmp1037, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1039, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39141(line=935, offs=58) -- 39149(line=935, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 39169(line=939, offs=58) -- 39177(line=939, offs=66)
 */
-ATSINSmove(tmp1038, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1040, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39091(line=935, offs=8) -- 39150(line=935, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 39119(line=939, offs=8) -- 39178(line=939, offs=67)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1034) ;
-ATSINSmove_tlcal(apy5, tmp1037) ;
-ATSINSmove_tlcal(apy6, tmp1038) ;
+ATSINSmove_tlcal(apy4, tmp1037) ;
+ATSINSmove_tlcal(apy5, tmp1039) ;
+ATSINSmove_tlcal(apy6, tmp1040) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -16243,62 +16323,68 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 38961(line=932, offs=49) -- 39154(line=935, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 39027(line=936, offs=51) -- 39182(line=939, offs=71)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39195(line=937, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 39195(line=940, offs=13) -- 39228(line=940, offs=46)
+*/
+ATSINSmove(tmp1041, looking_at_ext_ern_44(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39192(line=940, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp1041
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39234(line=940, offs=52) -- 39389(line=943, offs=71)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39240(line=938, offs=42) -- 39247(line=938, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 39253(line=941, offs=16) -- 39260(line=941, offs=23)
 */
-ATSINSmove(tmp1040, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1042, atspre_g1int_add_int(arg4, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39214(line=938, offs=16) -- 39267(line=938, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 39276(line=942, offs=16) -- 39318(line=942, offs=58)
 */
-ATSINSmove(tmp1039, lex_passthrough_scan_136(ATSPMVrefarg0(arg0), tmp1040, arg1, arg2, arg2)) ;
-
-/*
-emit_instr: loc0 = build/src/lexer.dats: 39283(line=939, offs=16) -- 39325(line=939, offs=58)
-*/
-ATSINSmove_void(tmp1041, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp1039, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp1043, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1042, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39372(line=940, offs=47) -- 39381(line=940, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 39365(line=943, offs=47) -- 39374(line=943, offs=56)
 */
-ATSINSmove(tmp1042, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1044, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39383(line=940, offs=58) -- 39391(line=940, offs=66)
+emit_instr: loc0 = build/src/lexer.dats: 39376(line=943, offs=58) -- 39384(line=943, offs=66)
 */
-ATSINSmove(tmp1043, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1045, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39333(line=940, offs=8) -- 39392(line=940, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 39326(line=943, offs=8) -- 39385(line=943, offs=67)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1039) ;
-ATSINSmove_tlcal(apy5, tmp1042) ;
-ATSINSmove_tlcal(apy6, tmp1043) ;
+ATSINSmove_tlcal(apy4, tmp1042) ;
+ATSINSmove_tlcal(apy5, tmp1044) ;
+ATSINSmove_tlcal(apy6, tmp1045) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -16306,11 +16392,372 @@ ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
 ATSINSargmove_tlcal(arg6, apy6) ;
-ATSINSfgoto(__patsflab_lex_main_139) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39195(line=937, offs=10) -- 39396(line=940, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 39234(line=940, offs=52) -- 39389(line=943, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39402(line=944, offs=13) -- 39435(line=944, offs=46)
+*/
+ATSINSmove(tmp1046, looking_at_assu_me_45(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39399(line=944, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp1046
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39441(line=944, offs=52) -- 39596(line=947, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39460(line=945, offs=16) -- 39467(line=945, offs=23)
+*/
+ATSINSmove(tmp1047, atspre_g1int_add_int(arg4, ATSPMVi0nt(6))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39483(line=946, offs=16) -- 39525(line=946, offs=58)
+*/
+ATSINSmove_void(tmp1048, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1047, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39572(line=947, offs=47) -- 39581(line=947, offs=56)
+*/
+ATSINSmove(tmp1049, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39583(line=947, offs=58) -- 39591(line=947, offs=66)
+*/
+ATSINSmove(tmp1050, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39533(line=947, offs=8) -- 39592(line=947, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp1047) ;
+ATSINSmove_tlcal(apy5, tmp1049) ;
+ATSINSmove_tlcal(apy6, tmp1050) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39441(line=944, offs=52) -- 39596(line=947, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39609(line=948, offs=13) -- 39681(line=948, offs=85)
+*/
+ATSINSmove(tmp1052, looking_at_mac_hash_51(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39609(line=948, offs=13) -- 39681(line=948, offs=85)
+*/
+ATSif(
+tmp1052
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39609(line=948, offs=13) -- 39681(line=948, offs=85)
+*/
+ATSINSmove(tmp1051, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39609(line=948, offs=13) -- 39681(line=948, offs=85)
+*/
+ATSINSmove(tmp1051, looking_at_ext_hash_52(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39606(line=948, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp1051
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39687(line=948, offs=91) -- 39842(line=951, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39706(line=949, offs=16) -- 39713(line=949, offs=23)
+*/
+ATSINSmove(tmp1053, atspre_g1int_add_int(arg4, ATSPMVi0nt(4))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39729(line=950, offs=16) -- 39771(line=950, offs=58)
+*/
+ATSINSmove_void(tmp1054, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1053, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39818(line=951, offs=47) -- 39827(line=951, offs=56)
+*/
+ATSINSmove(tmp1055, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39829(line=951, offs=58) -- 39837(line=951, offs=66)
+*/
+ATSINSmove(tmp1056, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39779(line=951, offs=8) -- 39838(line=951, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp1053) ;
+ATSINSmove_tlcal(apy5, tmp1055) ;
+ATSINSmove_tlcal(apy6, tmp1056) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39687(line=948, offs=91) -- 39842(line=951, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39855(line=952, offs=13) -- 39886(line=952, offs=44)
+*/
+ATSINSmove(tmp1057, looking_at_while_66(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39852(line=952, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp1057
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39892(line=952, offs=50) -- 40047(line=955, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39911(line=953, offs=16) -- 39918(line=953, offs=23)
+*/
+ATSINSmove(tmp1058, atspre_g1int_add_int(arg4, ATSPMVi0nt(5))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39934(line=954, offs=16) -- 39976(line=954, offs=58)
+*/
+ATSINSmove_void(tmp1059, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(5), ATSPMVi0nt(0), arg4, tmp1058, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40023(line=955, offs=47) -- 40032(line=955, offs=56)
+*/
+ATSINSmove(tmp1060, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40034(line=955, offs=58) -- 40042(line=955, offs=66)
+*/
+ATSINSmove(tmp1061, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39984(line=955, offs=8) -- 40043(line=955, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp1058) ;
+ATSINSmove_tlcal(apy5, tmp1060) ;
+ATSINSmove_tlcal(apy6, tmp1061) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 39892(line=952, offs=50) -- 40047(line=955, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40147(line=957, offs=13) -- 40177(line=957, offs=43)
+*/
+ATSINSmove(tmp1062, looking_at_stld_46(ATSPMVrefarg0(arg0), arg4, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40144(line=957, offs=10) -- 40618(line=965, offs=71)
+*/
+ATSif(
+tmp1062
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40183(line=957, offs=49) -- 40376(line=960, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40219(line=958, offs=33) -- 40226(line=958, offs=40)
+*/
+ATSINSmove(tmp1064, atspre_g1int_add_int(arg4, ATSPMVi0nt(7))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40202(line=958, offs=16) -- 40246(line=958, offs=60)
+*/
+ATSINSmove(tmp1063, skip_to_eol_67(ATSPMVrefarg0(arg0), tmp1064, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40262(line=959, offs=16) -- 40305(line=959, offs=59)
+*/
+ATSINSmove_void(tmp1065, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(12), ATSPMVi0nt(2), arg4, tmp1063, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40352(line=960, offs=47) -- 40361(line=960, offs=56)
+*/
+ATSINSmove(tmp1066, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40363(line=960, offs=58) -- 40371(line=960, offs=66)
+*/
+ATSINSmove(tmp1067, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40313(line=960, offs=8) -- 40372(line=960, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp1063) ;
+ATSINSmove_tlcal(apy5, tmp1066) ;
+ATSINSmove_tlcal(apy6, tmp1067) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40183(line=957, offs=49) -- 40376(line=960, offs=71)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40417(line=962, offs=10) -- 40618(line=965, offs=71)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40462(line=963, offs=42) -- 40469(line=963, offs=49)
+*/
+ATSINSmove(tmp1069, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40436(line=963, offs=16) -- 40489(line=963, offs=69)
+*/
+ATSINSmove(tmp1068, lex_passthrough_scan_137(ATSPMVrefarg0(arg0), tmp1069, arg1, arg2, arg2)) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40505(line=964, offs=16) -- 40547(line=964, offs=58)
+*/
+ATSINSmove_void(tmp1070, put_span_20(ATSPMVrefarg0(arg3), ATSPMVi0nt(0), ATSPMVi0nt(0), arg4, tmp1068, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40594(line=965, offs=47) -- 40603(line=965, offs=56)
+*/
+ATSINSmove(tmp1071, atspre_g0int_add_int(arg5, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40605(line=965, offs=58) -- 40613(line=965, offs=66)
+*/
+ATSINSmove(tmp1072, atspre_g1int_sub_int(arg6, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40555(line=965, offs=8) -- 40614(line=965, offs=67)
+*/
+ATStailcal_beg()
+ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, arg2) ;
+ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
+ATSINSmove_tlcal(apy4, tmp1068) ;
+ATSINSmove_tlcal(apy5, tmp1071) ;
+ATSINSmove_tlcal(apy6, tmp1072) ;
+ATSINSargmove_tlcal(arg0, apy0) ;
+ATSINSargmove_tlcal(arg1, apy1) ;
+ATSINSargmove_tlcal(arg2, apy2) ;
+ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
+ATSINSargmove_tlcal(arg5, apy5) ;
+ATSINSargmove_tlcal(arg6, apy6) ;
+ATSINSfgoto(__patsflab_lex_main_140) ;
+ATStailcal_end()
+
+/*
+emit_instr: loc0 = build/src/lexer.dats: 40417(line=962, offs=10) -- 40618(line=965, offs=71)
 */
 /*
 INSletpop()
@@ -16337,8 +16784,10 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
+} /* ATSendif */
+} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 32188(line=784, offs=8) -- 39402(line=941, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 32959(line=801, offs=8) -- 40624(line=966, offs=6)
 */
 /*
 INSletpop()
@@ -16346,8 +16795,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret876) ;
-} /* end of [lex_main_139] */
+ATSreturn(tmpret894) ;
+} /* end of [lex_main_140] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -16360,9 +16809,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__20(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -16401,9 +16850,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__18(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -16432,17 +16881,17 @@ ATSreturn(tmpret63__18) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__18] */
 
 /*
-build/src/lexer.dats: 39755(line=950, offs=5) -- 40110(line=956, offs=69)
+build/src/lexer.dats: 40977(line=975, offs=5) -- 41332(line=981, offs=69)
 */
 /*
-local: _has_target_blocks_142$0(level=0)
-global: _has_target_blocks_142$0(level=0)
+local: _has_target_blocks_143$0(level=0)
+global: _has_target_blocks_143$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-_has_target_blocks_142(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
+_has_target_blocks_143(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstkind_t0ype(atstype_int) arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -16450,111 +16899,111 @@ ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret1044, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1045, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1048, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1051, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1052, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1053, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1054, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1055, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1073, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1074, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1077, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1080, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1081, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1082, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1083, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1084, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39755(line=950, offs=5) -- 40110(line=956, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 40977(line=975, offs=5) -- 41332(line=981, offs=69)
 */
-ATSINSflab(__patsflab__has_target_blocks_142):
+ATSINSflab(__patsflab__has_target_blocks_143):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39915(line=953, offs=6) -- 39924(line=953, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 41137(line=978, offs=6) -- 41146(line=978, offs=15)
 */
-ATSINSmove(tmp1045, ATSLIB_056_prelude__lte_g1int_int__29__21(arg4, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1074, ATSLIB_056_prelude__lte_g1int_int__29__21(arg4, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39912(line=953, offs=3) -- 40110(line=956, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 41134(line=978, offs=3) -- 41332(line=981, offs=69)
 */
 ATSif(
-tmp1045
+tmp1074
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39930(line=953, offs=21) -- 39935(line=953, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 41152(line=978, offs=21) -- 41157(line=978, offs=26)
 */
-ATSINSmove(tmpret1044, ATSPMVbool_false()) ;
+ATSINSmove(tmpret1073, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39946(line=954, offs=11) -- 39963(line=954, offs=28)
+emit_instr: loc0 = build/src/lexer.dats: 41168(line=979, offs=11) -- 41185(line=979, offs=28)
 */
-ATSINSmove(tmp1048, ATSLIB_056_prelude__gte_g0int_int__1__6(arg3, arg2)) ;
+ATSINSmove(tmp1077, ATSLIB_056_prelude__gte_g0int_int__1__6(arg3, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39943(line=954, offs=8) -- 40110(line=956, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 41165(line=979, offs=8) -- 41332(line=981, offs=69)
 */
 ATSif(
-tmp1048
+tmp1077
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39969(line=954, offs=34) -- 39974(line=954, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 41191(line=979, offs=34) -- 41196(line=979, offs=39)
 */
-ATSINSmove(tmpret1044, ATSPMVbool_false()) ;
+ATSINSmove(tmpret1073, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40012(line=955, offs=38) -- 40020(line=955, offs=46)
+emit_instr: loc0 = build/src/lexer.dats: 41234(line=980, offs=38) -- 41242(line=980, offs=46)
 */
-ATSINSmove(tmp1053, atspre_g1int_mul_int(arg3, ATSPMVi0nt(28))) ;
+ATSINSmove(tmp1082, atspre_g1int_mul_int(arg3, ATSPMVi0nt(28))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40000(line=955, offs=26) -- 40026(line=955, offs=52)
+emit_instr: loc0 = build/src/lexer.dats: 41222(line=980, offs=26) -- 41248(line=980, offs=52)
 */
-ATSINSmove(tmp1052, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp1053, arg1)) ;
+ATSINSmove(tmp1081, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp1082, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39985(line=955, offs=11) -- 40031(line=955, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 41207(line=980, offs=11) -- 41253(line=980, offs=57)
 */
-ATSINSmove(tmp1051, atspre_g0int_eq_int(tmp1052, ATSPMVi0nt(11))) ;
+ATSINSmove(tmp1080, atspre_g0int_eq_int(tmp1081, ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 39982(line=955, offs=8) -- 40110(line=956, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 41204(line=980, offs=8) -- 41332(line=981, offs=69)
 */
 ATSif(
-tmp1051
+tmp1080
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40037(line=955, offs=63) -- 40041(line=955, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 41259(line=980, offs=63) -- 41263(line=980, offs=67)
 */
-ATSINSmove(tmpret1044, ATSPMVbool_true()) ;
+ATSINSmove(tmpret1073, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40092(line=956, offs=51) -- 40099(line=956, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 41314(line=981, offs=51) -- 41321(line=981, offs=58)
 */
-ATSINSmove(tmp1054, atspre_g1int_add_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1083, atspre_g1int_add_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40101(line=956, offs=60) -- 40109(line=956, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 41323(line=981, offs=60) -- 41331(line=981, offs=68)
 */
-ATSINSmove(tmp1055, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1084, atspre_g1int_sub_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40049(line=956, offs=8) -- 40110(line=956, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 41271(line=981, offs=8) -- 41332(line=981, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp1054) ;
-ATSINSmove_tlcal(apy4, tmp1055) ;
+ATSINSmove_tlcal(apy3, tmp1083) ;
+ATSINSmove_tlcal(apy4, tmp1084) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
-ATSINSfgoto(__patsflab__has_target_blocks_142) ;
+ATSINSfgoto(__patsflab__has_target_blocks_143) ;
 ATStailcal_end()
 
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret1044) ;
-} /* end of [_has_target_blocks_142] */
+ATSreturn(tmpret1073) ;
+} /* end of [_has_target_blocks_143] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -16567,9 +17016,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__21(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -16608,9 +17057,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -16639,17 +17088,17 @@ ATSreturn(tmpret5__6) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__1__6] */
 
 /*
-build/src/lexer.dats: 40174(line=959, offs=5) -- 40581(line=967, offs=73)
+build/src/lexer.dats: 41396(line=984, offs=5) -- 41803(line=992, offs=73)
 */
 /*
-local: _copy_span_bytes_146$0(level=0)
-global: _copy_span_bytes_146$0(level=0)
+local: _copy_span_bytes_147$0(level=0)
+global: _copy_span_bytes_147$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atsvoid_t0ype
-_copy_span_bytes_146(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
+_copy_span_bytes_147(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstype_boxed) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -16658,108 +17107,108 @@ ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atsrefarg0_type(atstype_boxed)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy5, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmpret1056) ;
-ATStmpdec(tmp1057, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1060, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1063, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1064, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1065) ;
-ATStmpdec(tmp1066, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1067, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmpret1085) ;
+ATStmpdec(tmp1086, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1089, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1092, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1093, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1094) ;
+ATStmpdec(tmp1095, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1096, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40174(line=959, offs=5) -- 40581(line=967, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 41396(line=984, offs=5) -- 41803(line=992, offs=73)
 */
-ATSINSflab(__patsflab__copy_span_bytes_146):
+ATSINSflab(__patsflab__copy_span_bytes_147):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40369(line=962, offs=6) -- 40378(line=962, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 41591(line=987, offs=6) -- 41600(line=987, offs=15)
 */
-ATSINSmove(tmp1057, ATSLIB_056_prelude__lte_g1int_int__29__22(arg5, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1086, ATSLIB_056_prelude__lte_g1int_int__29__22(arg5, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40366(line=962, offs=3) -- 40581(line=967, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 41588(line=987, offs=3) -- 41803(line=992, offs=73)
 */
 ATSif(
-tmp1057
+tmp1086
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40384(line=962, offs=21) -- 40386(line=962, offs=23)
+emit_instr: loc0 = build/src/lexer.dats: 41606(line=987, offs=21) -- 41608(line=987, offs=23)
 */
-ATSINSmove_void(tmpret1056, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1085, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40397(line=963, offs=11) -- 40411(line=963, offs=25)
+emit_instr: loc0 = build/src/lexer.dats: 41619(line=988, offs=11) -- 41633(line=988, offs=25)
 */
-ATSINSmove(tmp1060, ATSLIB_056_prelude__gte_g1int_int__24__19(arg4, ATSPMVi0nt(28))) ;
+ATSINSmove(tmp1089, ATSLIB_056_prelude__gte_g1int_int__24__19(arg4, ATSPMVi0nt(28))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40394(line=963, offs=8) -- 40581(line=967, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 41616(line=988, offs=8) -- 41803(line=992, offs=73)
 */
 ATSif(
-tmp1060
+tmp1089
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40417(line=963, offs=31) -- 40419(line=963, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 41639(line=988, offs=31) -- 41641(line=988, offs=33)
 */
-ATSINSmove_void(tmpret1056, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1085, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40427(line=964, offs=8) -- 40581(line=967, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 41649(line=989, offs=8) -- 41803(line=992, offs=73)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40455(line=965, offs=25) -- 40470(line=965, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 41677(line=990, offs=25) -- 41692(line=990, offs=40)
 */
-ATSINSmove(tmp1064, atspre_g1int_add_int(arg1, arg4)) ;
+ATSINSmove(tmp1093, atspre_g1int_add_int(arg1, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40443(line=965, offs=13) -- 40476(line=965, offs=46)
+emit_instr: loc0 = build/src/lexer.dats: 41665(line=990, offs=13) -- 41698(line=990, offs=46)
 */
-ATSINSmove(tmp1063, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp1064, arg2)) ;
+ATSINSmove(tmp1092, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg0), tmp1093, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40490(line=966, offs=14) -- 40508(line=966, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 41712(line=991, offs=14) -- 41730(line=991, offs=32)
 */
-ATSINSmove_void(tmp1065, build_057_src_057_helpers_056_sats__put_char_v(ATSPMVrefarg0(arg3), tmp1063)) ;
+ATSINSmove_void(tmp1094, build_057_src_057_helpers_056_sats__put_char_v(ATSPMVrefarg0(arg3), tmp1092)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40554(line=967, offs=46) -- 40566(line=967, offs=58)
+emit_instr: loc0 = build/src/lexer.dats: 41776(line=992, offs=46) -- 41788(line=992, offs=58)
 */
-ATSINSmove(tmp1066, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1095, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40568(line=967, offs=60) -- 40576(line=967, offs=68)
+emit_instr: loc0 = build/src/lexer.dats: 41790(line=992, offs=60) -- 41798(line=992, offs=68)
 */
-ATSINSmove(tmp1067, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1096, atspre_g1int_sub_int(arg5, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40514(line=967, offs=6) -- 40577(line=967, offs=69)
+emit_instr: loc0 = build/src/lexer.dats: 41736(line=992, offs=6) -- 41799(line=992, offs=69)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, arg1) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
-ATSINSmove_tlcal(apy4, tmp1066) ;
-ATSINSmove_tlcal(apy5, tmp1067) ;
+ATSINSmove_tlcal(apy4, tmp1095) ;
+ATSINSmove_tlcal(apy5, tmp1096) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
 ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSargmove_tlcal(arg5, apy5) ;
-ATSINSfgoto(__patsflab__copy_span_bytes_146) ;
+ATSINSfgoto(__patsflab__copy_span_bytes_147) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40427(line=964, offs=8) -- 40581(line=967, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 41649(line=989, offs=8) -- 41803(line=992, offs=73)
 */
 /*
 INSletpop()
@@ -16767,8 +17216,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn_void(tmpret1056) ;
-} /* end of [_copy_span_bytes_146] */
+ATSreturn_void(tmpret1085) ;
+} /* end of [_copy_span_bytes_147] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -16781,9 +17230,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__22(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -16822,9 +17271,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5347)
-tmparg = S2Evar(tk(5347))
-tmpsub = Some(tk(5347) -> S2Eextkind(atstype_int))
+imparg = tk(5349)
+tmparg = S2Evar(tk(5349))
+tmpsub = Some(tk(5349) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__24__19(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -16853,17 +17302,17 @@ ATSreturn(tmpret63__19) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__24__19] */
 
 /*
-build/src/lexer.dats: 40668(line=970, offs=5) -- 42225(line=1001, offs=6)
+build/src/lexer.dats: 41890(line=995, offs=5) -- 43447(line=1026, offs=6)
 */
 /*
-local: put_span_20$0(level=0), lex_main_139$0(level=0), _copy_span_bytes_146$0(level=0), _expand_target_blocks_149$0(level=0)
-global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_as_41$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), _looking_at_primplement_62$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), _skip_to_name_71$0(level=0), _has_primplement_77$0(level=0), skip_nonws_84$0(level=0), lex_line_comment_86$0(level=0), lex_c_comment_inner_88$0(level=0), lex_c_comment_91$0(level=0), lex_ml_comment_inner_92$0(level=0), lex_ml_comment_96$0(level=0), lex_string_inner_97$0(level=0), lex_string_100$0(level=0), lex_char_lit_101$0(level=0), lex_extcode_inner_102$0(level=0), lex_extcode_105$0(level=0), lex_hash_use_107$0(level=0), lex_qualified_108$0(level=0), is_blank_line_110$0(level=0), lex_pub_lines_113$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0), lex_unsafe_dispatch_129$0(level=0), lex_unittest_dispatch_131$0(level=0), lex_target_decl_134$0(level=0), lex_passthrough_scan_136$0(level=0), lex_main_139$0(level=0), _copy_span_bytes_146$0(level=0), _expand_target_blocks_149$0(level=0)
+local: put_span_20$0(level=0), lex_main_140$0(level=0), _copy_span_bytes_147$0(level=0), _expand_target_blocks_150$0(level=0)
+global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_as_41$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_mac_hash_51$0(level=0), looking_at_ext_hash_52$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), _looking_at_primplement_62$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), looking_at_while_66$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), _skip_to_name_72$0(level=0), _has_primplement_78$0(level=0), skip_nonws_85$0(level=0), lex_line_comment_87$0(level=0), lex_c_comment_inner_89$0(level=0), lex_c_comment_92$0(level=0), lex_ml_comment_inner_93$0(level=0), lex_ml_comment_97$0(level=0), lex_string_inner_98$0(level=0), lex_string_101$0(level=0), lex_char_lit_102$0(level=0), lex_extcode_inner_103$0(level=0), lex_extcode_106$0(level=0), lex_hash_use_108$0(level=0), lex_qualified_109$0(level=0), is_blank_line_111$0(level=0), lex_pub_lines_114$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0), lex_unsafe_dispatch_130$0(level=0), lex_unittest_dispatch_132$0(level=0), lex_target_decl_135$0(level=0), lex_passthrough_scan_137$0(level=0), lex_main_140$0(level=0), _copy_span_bytes_147$0(level=0), _expand_target_blocks_150$0(level=0)
 local: 
 global: 
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
-_expand_target_blocks_149(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstkind_type(atstype_ptrk)) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5, atstkind_t0ype(atstype_int) arg6, atsrefarg0_type(atstype_boxed) arg7, atstkind_t0ype(atstype_int) arg8, atstkind_t0ype(atstype_int) arg9)
+_expand_target_blocks_150(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atsrefarg0_type(atstkind_type(atstype_ptrk)) arg3, atstkind_t0ype(atstype_int) arg4, atstkind_t0ype(atstype_int) arg5, atstkind_t0ype(atstype_int) arg6, atsrefarg0_type(atstype_boxed) arg7, atstkind_t0ype(atstype_int) arg8, atstkind_t0ype(atstype_int) arg9)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
@@ -16876,211 +17325,211 @@ ATStmpdec(apy6, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy7, atsrefarg0_type(atstype_boxed)) ;
 ATStmpdec(apy8, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy9, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret1068, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1069, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1072, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1075, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1076, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1077, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1078, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1079, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1080, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1081, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1082, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1083, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1084, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1085, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1086, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1087, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1088, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1089) ;
-ATStmpdec(tmp1090, postiats_tyrec_0) ;
-ATStmpdec(tmp1091, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1092) ;
-ATStmpdec(tmp1093, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1094, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1095, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1096, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1097) ;
-ATStmpdec(tmp1098, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1099, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1100, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1101, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1097, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1098, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1101, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1104, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1105, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1106, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1107, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1108, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1109, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1110, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1111, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1112, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1113, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1114, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1115, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1116, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1117, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1118) ;
+ATStmpdec(tmp1119, postiats_tyrec_0) ;
+ATStmpdec(tmp1120, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1121) ;
+ATStmpdec(tmp1122, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1123, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1124, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1125, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1126) ;
+ATStmpdec(tmp1127, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1128, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1129, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1130, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40668(line=970, offs=5) -- 42225(line=1001, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 41890(line=995, offs=5) -- 43447(line=1026, offs=6)
 */
-ATSINSflab(__patsflab__expand_target_blocks_149):
+ATSINSflab(__patsflab__expand_target_blocks_150):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40977(line=976, offs=6) -- 40986(line=976, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 42199(line=1001, offs=6) -- 42208(line=1001, offs=15)
 */
-ATSINSmove(tmp1069, ATSLIB_056_prelude__lte_g1int_int__29__23(arg9, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1098, ATSLIB_056_prelude__lte_g1int_int__29__23(arg9, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40974(line=976, offs=3) -- 42225(line=1001, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 42196(line=1001, offs=3) -- 43447(line=1026, offs=6)
 */
 ATSif(
-tmp1069
+tmp1098
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 40992(line=976, offs=21) -- 41001(line=976, offs=30)
+emit_instr: loc0 = build/src/lexer.dats: 42214(line=1001, offs=21) -- 42223(line=1001, offs=30)
 */
-ATSINSmove(tmpret1068, arg8) ;
+ATSINSmove(tmpret1097, arg8) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41012(line=977, offs=11) -- 41029(line=977, offs=28)
+emit_instr: loc0 = build/src/lexer.dats: 42234(line=1002, offs=11) -- 42251(line=1002, offs=28)
 */
-ATSINSmove(tmp1072, ATSLIB_056_prelude__gte_g0int_int__1__7(arg6, arg5)) ;
+ATSINSmove(tmp1101, ATSLIB_056_prelude__gte_g0int_int__1__7(arg6, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41009(line=977, offs=8) -- 42225(line=1001, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 42231(line=1002, offs=8) -- 43447(line=1026, offs=6)
 */
 ATSif(
-tmp1072
+tmp1101
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41035(line=977, offs=34) -- 41044(line=977, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 42257(line=1002, offs=34) -- 42266(line=1002, offs=43)
 */
-ATSINSmove(tmpret1068, arg8) ;
+ATSINSmove(tmpret1097, arg8) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41052(line=978, offs=8) -- 42225(line=1001, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 42274(line=1003, offs=8) -- 43447(line=1026, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41083(line=979, offs=28) -- 41091(line=979, offs=36)
+emit_instr: loc0 = build/src/lexer.dats: 42305(line=1004, offs=28) -- 42313(line=1004, offs=36)
 */
-ATSINSmove(tmp1076, atspre_g1int_mul_int(arg6, ATSPMVi0nt(28))) ;
+ATSINSmove(tmp1105, atspre_g1int_mul_int(arg6, ATSPMVi0nt(28))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41071(line=979, offs=16) -- 41102(line=979, offs=47)
+emit_instr: loc0 = build/src/lexer.dats: 42293(line=1004, offs=16) -- 42324(line=1004, offs=47)
 */
-ATSINSmove(tmp1075, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg3), tmp1076, arg4)) ;
+ATSINSmove(tmp1104, build_057_src_057_helpers_056_sats__peek(ATSPMVrefarg0(arg3), tmp1105, arg4)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41115(line=981, offs=8) -- 41139(line=981, offs=32)
+emit_instr: loc0 = build/src/lexer.dats: 42337(line=1006, offs=8) -- 42361(line=1006, offs=32)
 */
-ATSINSmove(tmp1077, atspre_g0int_eq_int(tmp1075, ATSPMVi0nt(11))) ;
+ATSINSmove(tmp1106, atspre_g0int_eq_int(tmp1104, ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41112(line=981, offs=5) -- 42219(line=1000, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 42334(line=1006, offs=5) -- 43441(line=1025, offs=64)
 */
 ATSif(
-tmp1077
+tmp1106
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41145(line=981, offs=38) -- 41957(line=995, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 42367(line=1006, offs=38) -- 43179(line=1020, offs=78)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41166(line=982, offs=18) -- 41174(line=982, offs=26)
+emit_instr: loc0 = build/src/lexer.dats: 42388(line=1007, offs=18) -- 42396(line=1007, offs=26)
 */
-ATSINSmove(tmp1078, atspre_g1int_mul_int(arg6, ATSPMVi0nt(28))) ;
+ATSINSmove(tmp1107, atspre_g1int_mul_int(arg6, ATSPMVi0nt(28))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41206(line=983, offs=32) -- 41214(line=983, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 42428(line=1008, offs=32) -- 42436(line=1008, offs=40)
 */
-ATSINSmove(tmp1080, atspre_g1int_add_int(tmp1078, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp1109, atspre_g1int_add_int(tmp1107, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41190(line=983, offs=16) -- 41225(line=983, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 42412(line=1008, offs=16) -- 42447(line=1008, offs=51)
 */
-ATSINSmove(tmp1079, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1080, arg4)) ;
+ATSINSmove(tmp1108, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1109, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41257(line=984, offs=32) -- 41265(line=984, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 42479(line=1009, offs=32) -- 42487(line=1009, offs=40)
 */
-ATSINSmove(tmp1082, atspre_g1int_add_int(tmp1078, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp1111, atspre_g1int_add_int(tmp1107, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41241(line=984, offs=16) -- 41276(line=984, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 42463(line=1009, offs=16) -- 42498(line=1009, offs=51)
 */
-ATSINSmove(tmp1081, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1082, arg4)) ;
+ATSINSmove(tmp1110, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1111, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41318(line=985, offs=42) -- 41327(line=985, offs=51)
+emit_instr: loc0 = build/src/lexer.dats: 42540(line=1010, offs=42) -- 42549(line=1010, offs=51)
 */
-ATSINSmove(tmp1084, atspre_g1int_add_int(tmp1078, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp1113, atspre_g1int_add_int(tmp1107, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41302(line=985, offs=26) -- 41338(line=985, offs=62)
+emit_instr: loc0 = build/src/lexer.dats: 42524(line=1010, offs=26) -- 42560(line=1010, offs=62)
 */
-ATSINSmove(tmp1083, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1084, arg4)) ;
+ATSINSmove(tmp1112, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1113, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41370(line=986, offs=32) -- 41379(line=986, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 42592(line=1011, offs=32) -- 42601(line=1011, offs=41)
 */
-ATSINSmove(tmp1086, atspre_g1int_add_int(tmp1078, ATSPMVi0nt(14))) ;
+ATSINSmove(tmp1115, atspre_g1int_add_int(tmp1107, ATSPMVi0nt(14))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41354(line=986, offs=16) -- 41390(line=986, offs=52)
+emit_instr: loc0 = build/src/lexer.dats: 42576(line=1011, offs=16) -- 42612(line=1011, offs=52)
 */
-ATSINSmove(tmp1085, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1086, arg4)) ;
+ATSINSmove(tmp1114, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1115, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41422(line=987, offs=32) -- 41431(line=987, offs=41)
+emit_instr: loc0 = build/src/lexer.dats: 42644(line=1012, offs=32) -- 42653(line=1012, offs=41)
 */
-ATSINSmove(tmp1088, atspre_g1int_add_int(tmp1078, ATSPMVi0nt(18))) ;
+ATSINSmove(tmp1117, atspre_g1int_add_int(tmp1107, ATSPMVi0nt(18))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41406(line=987, offs=16) -- 41442(line=987, offs=52)
+emit_instr: loc0 = build/src/lexer.dats: 42628(line=1012, offs=16) -- 42664(line=1012, offs=52)
 */
-ATSINSmove(tmp1087, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1088, arg4)) ;
+ATSINSmove(tmp1116, build_057_src_057_helpers_056_sats__span_i32(ATSPMVrefarg0(arg3), tmp1117, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41521(line=989, offs=16) -- 41572(line=989, offs=67)
+emit_instr: loc0 = build/src/lexer.dats: 42743(line=1014, offs=16) -- 42794(line=1014, offs=67)
 */
-ATSINSmove_void(tmp1089, put_span_20(ATSPMVrefarg0(arg7), ATSPMVi0nt(13), ATSPMVi0nt(0), tmp1079, tmp1085, tmp1083, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp1118, put_span_20(ATSPMVrefarg0(arg7), ATSPMVi0nt(13), ATSPMVi0nt(0), tmp1108, tmp1114, tmp1112, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41658(line=991, offs=31) -- 41697(line=991, offs=70)
+emit_instr: loc0 = build/src/lexer.dats: 42880(line=1016, offs=31) -- 42919(line=1016, offs=70)
 */
-ATSINSmove(tmp1090, lex_main_139(ATSPMVrefarg0(arg0), tmp1087, arg2, ATSPMVrefarg0(arg7), tmp1085, ATSPMVi0nt(0), arg2)) ;
+ATSINSmove(tmp1119, lex_main_140(ATSPMVrefarg0(arg0), tmp1116, arg2, ATSPMVrefarg0(arg7), tmp1114, ATSPMVi0nt(0), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41643(line=991, offs=16) -- 41654(line=991, offs=27)
+emit_instr: loc0 = build/src/lexer.dats: 42865(line=1016, offs=16) -- 42876(line=1016, offs=27)
 */
-ATSINSmove(tmp1091, ATSSELfltrec(tmp1090, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp1120, ATSSELfltrec(tmp1119, postiats_tyrec_0, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41774(line=993, offs=16) -- 41814(line=993, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 42996(line=1018, offs=16) -- 43036(line=1018, offs=56)
 */
-ATSINSmove_void(tmp1092, put_span_20(ATSPMVrefarg0(arg7), ATSPMVi0nt(14), ATSPMVi0nt(0), tmp1087, tmp1081, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
+ATSINSmove_void(tmp1121, put_span_20(ATSPMVrefarg0(arg7), ATSPMVi0nt(14), ATSPMVi0nt(0), tmp1116, tmp1110, ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0), ATSPMVi0nt(0))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41901(line=995, offs=22) -- 41908(line=995, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 43123(line=1020, offs=22) -- 43130(line=1020, offs=29)
 */
-ATSINSmove(tmp1093, atspre_g1int_add_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1122, atspre_g1int_add_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41915(line=995, offs=36) -- 41938(line=995, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 43137(line=1020, offs=36) -- 43160(line=1020, offs=59)
 */
-ATSINSmove(tmp1095, atspre_g0int_add_int(arg8, tmp1091)) ;
+ATSINSmove(tmp1124, atspre_g0int_add_int(arg8, tmp1120)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41915(line=995, offs=36) -- 41942(line=995, offs=63)
+emit_instr: loc0 = build/src/lexer.dats: 43137(line=1020, offs=36) -- 43164(line=1020, offs=63)
 */
-ATSINSmove(tmp1094, atspre_g0int_add_int(tmp1095, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp1123, atspre_g0int_add_int(tmp1124, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41944(line=995, offs=65) -- 41952(line=995, offs=73)
+emit_instr: loc0 = build/src/lexer.dats: 43166(line=1020, offs=65) -- 43174(line=1020, offs=73)
 */
-ATSINSmove(tmp1096, atspre_g1int_sub_int(arg9, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1125, atspre_g1int_sub_int(arg9, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41822(line=994, offs=8) -- 41953(line=995, offs=74)
+emit_instr: loc0 = build/src/lexer.dats: 43044(line=1019, offs=8) -- 43175(line=1020, offs=74)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -17089,10 +17538,10 @@ ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
 ATSINSmove_tlcal(apy4, arg4) ;
 ATSINSmove_tlcal(apy5, arg5) ;
-ATSINSmove_tlcal(apy6, tmp1093) ;
+ATSINSmove_tlcal(apy6, tmp1122) ;
 ATSINSmove_tlcal(apy7, ATSPMVrefarg0(arg7)) ;
-ATSINSmove_tlcal(apy8, tmp1094) ;
-ATSINSmove_tlcal(apy9, tmp1096) ;
+ATSINSmove_tlcal(apy8, tmp1123) ;
+ATSINSmove_tlcal(apy9, tmp1125) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -17103,53 +17552,53 @@ ATSINSargmove_tlcal(arg6, apy6) ;
 ATSINSargmove_tlcal(arg7, apy7) ;
 ATSINSargmove_tlcal(arg8, apy8) ;
 ATSINSargmove_tlcal(arg9, apy9) ;
-ATSINSfgoto(__patsflab__expand_target_blocks_149) ;
+ATSINSfgoto(__patsflab__expand_target_blocks_150) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41145(line=981, offs=38) -- 41957(line=995, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 42367(line=1006, offs=38) -- 43179(line=1020, offs=78)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41967(line=996, offs=10) -- 42219(line=1000, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 43189(line=1021, offs=10) -- 43441(line=1025, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42059(line=998, offs=40) -- 42067(line=998, offs=48)
+emit_instr: loc0 = build/src/lexer.dats: 43281(line=1023, offs=40) -- 43289(line=1023, offs=48)
 */
-ATSINSmove(tmp1098, atspre_g1int_mul_int(arg6, ATSPMVi0nt(28))) ;
+ATSINSmove(tmp1127, atspre_g1int_mul_int(arg6, ATSPMVi0nt(28))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42035(line=998, offs=16) -- 42090(line=998, offs=71)
+emit_instr: loc0 = build/src/lexer.dats: 43257(line=1023, offs=16) -- 43312(line=1023, offs=71)
 */
-ATSINSmove_void(tmp1097, _copy_span_bytes_146(ATSPMVrefarg0(arg3), tmp1098, arg4, ATSPMVrefarg0(arg7), ATSPMVi0nt(0), ATSPMVi0nt(28))) ;
+ATSINSmove_void(tmp1126, _copy_span_bytes_147(ATSPMVrefarg0(arg3), tmp1127, arg4, ATSPMVrefarg0(arg7), ATSPMVi0nt(0), ATSPMVi0nt(28))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42177(line=1000, offs=22) -- 42184(line=1000, offs=29)
+emit_instr: loc0 = build/src/lexer.dats: 43399(line=1025, offs=22) -- 43406(line=1025, offs=29)
 */
-ATSINSmove(tmp1099, atspre_g1int_add_int(arg6, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1128, atspre_g1int_add_int(arg6, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42191(line=1000, offs=36) -- 42204(line=1000, offs=49)
+emit_instr: loc0 = build/src/lexer.dats: 43413(line=1025, offs=36) -- 43426(line=1025, offs=49)
 */
-ATSINSmove(tmp1100, atspre_g0int_add_int(arg8, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1129, atspre_g0int_add_int(arg8, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42206(line=1000, offs=51) -- 42214(line=1000, offs=59)
+emit_instr: loc0 = build/src/lexer.dats: 43428(line=1025, offs=51) -- 43436(line=1025, offs=59)
 */
-ATSINSmove(tmp1101, atspre_g1int_sub_int(arg9, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp1130, atspre_g1int_sub_int(arg9, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42098(line=999, offs=8) -- 42215(line=1000, offs=60)
+emit_instr: loc0 = build/src/lexer.dats: 43320(line=1024, offs=8) -- 43437(line=1025, offs=60)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -17158,10 +17607,10 @@ ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, ATSPMVrefarg0(arg3)) ;
 ATSINSmove_tlcal(apy4, arg4) ;
 ATSINSmove_tlcal(apy5, arg5) ;
-ATSINSmove_tlcal(apy6, tmp1099) ;
+ATSINSmove_tlcal(apy6, tmp1128) ;
 ATSINSmove_tlcal(apy7, ATSPMVrefarg0(arg7)) ;
-ATSINSmove_tlcal(apy8, tmp1100) ;
-ATSINSmove_tlcal(apy9, tmp1101) ;
+ATSINSmove_tlcal(apy8, tmp1129) ;
+ATSINSmove_tlcal(apy9, tmp1130) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -17172,18 +17621,18 @@ ATSINSargmove_tlcal(arg6, apy6) ;
 ATSINSargmove_tlcal(arg7, apy7) ;
 ATSINSargmove_tlcal(arg8, apy8) ;
 ATSINSargmove_tlcal(arg9, apy9) ;
-ATSINSfgoto(__patsflab__expand_target_blocks_149) ;
+ATSINSfgoto(__patsflab__expand_target_blocks_150) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41967(line=996, offs=10) -- 42219(line=1000, offs=64)
+emit_instr: loc0 = build/src/lexer.dats: 43189(line=1021, offs=10) -- 43441(line=1025, offs=64)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 41052(line=978, offs=8) -- 42225(line=1001, offs=6)
+emit_instr: loc0 = build/src/lexer.dats: 42274(line=1003, offs=8) -- 43447(line=1026, offs=6)
 */
 /*
 INSletpop()
@@ -17191,8 +17640,8 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret1068) ;
-} /* end of [_expand_target_blocks_149] */
+ATSreturn(tmpret1097) ;
+} /* end of [_expand_target_blocks_150] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12598(line=654, offs=3) -- 12638(line=654, offs=43)
@@ -17205,9 +17654,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5341)
-tmparg = S2Evar(tk(5341))
-tmpsub = Some(tk(5341) -> S2Eextkind(atstype_int))
+imparg = tk(5343)
+tmparg = S2Evar(tk(5343))
+tmpsub = Some(tk(5343) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__29__23(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -17246,9 +17695,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(5334)
-tmparg = S2Evar(tk(5334))
-tmpsub = Some(tk(5334) -> S2Eextkind(atstype_int))
+imparg = tk(5336)
+tmparg = S2Evar(tk(5336))
+tmpsub = Some(tk(5336) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__1__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -17277,11 +17726,11 @@ ATSreturn(tmpret5__7) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__1__7] */
 
 /*
-build/src/lexer.dats: 42277(line=1008, offs=18) -- 43029(line=1026, offs=4)
+build/src/lexer.dats: 43499(line=1033, offs=18) -- 44251(line=1051, offs=4)
 */
 /*
-local: lex_main_139$0(level=0), _has_target_blocks_142$0(level=0), _expand_target_blocks_149$0(level=0)
-global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_as_41$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), _looking_at_primplement_62$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), skip_to_eol_66$0(level=0), skip_ident_69$0(level=0), _skip_to_name_71$0(level=0), _has_primplement_77$0(level=0), skip_nonws_84$0(level=0), lex_line_comment_86$0(level=0), lex_c_comment_inner_88$0(level=0), lex_c_comment_91$0(level=0), lex_ml_comment_inner_92$0(level=0), lex_ml_comment_96$0(level=0), lex_string_inner_97$0(level=0), lex_string_100$0(level=0), lex_char_lit_101$0(level=0), lex_extcode_inner_102$0(level=0), lex_extcode_105$0(level=0), lex_hash_use_107$0(level=0), lex_qualified_108$0(level=0), is_blank_line_110$0(level=0), lex_pub_lines_113$0(level=0), looking_at_let_123$0(level=0), looking_at_local_124$0(level=0), find_end_kw_125$0(level=0), lex_unsafe_dispatch_129$0(level=0), lex_unittest_dispatch_131$0(level=0), lex_target_decl_134$0(level=0), lex_passthrough_scan_136$0(level=0), lex_main_139$0(level=0), _has_target_blocks_142$0(level=0), _copy_span_bytes_146$0(level=0), _expand_target_blocks_149$0(level=0), do_lex$152$0(level=0)
+local: lex_main_140$0(level=0), _has_target_blocks_143$0(level=0), _expand_target_blocks_150$0(level=0)
+global: is_ident_byte_0$0(level=0), is_ident_start_12$0(level=0), put_i32_17$0(level=0), put_span_20$0(level=0), is_kw_boundary_23$0(level=0), is_kw_boundary_before_28$0(level=0), looking_at_pub_33$0(level=0), looking_at_use_34$0(level=0), looking_at_target_35$0(level=0), looking_at_unsafe_36$0(level=0), looking_at_unittest_37$0(level=0), looking_at_binary_38$0(level=0), looking_at_begin_39$0(level=0), looking_at_end_40$0(level=0), looking_at_as_41$0(level=0), looking_at_cast_fn_42$0(level=0), looking_at_prax_i_43$0(level=0), looking_at_ext_ern_44$0(level=0), looking_at_assu_me_45$0(level=0), looking_at_stld_46$0(level=0), looking_at_extval_47$0(level=0), looking_at_extfcall_48$0(level=0), looking_at_extype_49$0(level=0), looking_at_extkind_50$0(level=0), looking_at_mac_hash_51$0(level=0), looking_at_ext_hash_52$0(level=0), looking_at_fun_53$0(level=0), _has_metric_54$0(level=0), _content_starts_prfun_60$0(level=0), _content_starts_prfn_61$0(level=0), _looking_at_primplement_62$0(level=0), looking_at_no_mangle_63$0(level=0), skip_ws_64$0(level=0), looking_at_while_66$0(level=0), skip_to_eol_67$0(level=0), skip_ident_70$0(level=0), _skip_to_name_72$0(level=0), _has_primplement_78$0(level=0), skip_nonws_85$0(level=0), lex_line_comment_87$0(level=0), lex_c_comment_inner_89$0(level=0), lex_c_comment_92$0(level=0), lex_ml_comment_inner_93$0(level=0), lex_ml_comment_97$0(level=0), lex_string_inner_98$0(level=0), lex_string_101$0(level=0), lex_char_lit_102$0(level=0), lex_extcode_inner_103$0(level=0), lex_extcode_106$0(level=0), lex_hash_use_108$0(level=0), lex_qualified_109$0(level=0), is_blank_line_111$0(level=0), lex_pub_lines_114$0(level=0), looking_at_let_124$0(level=0), looking_at_local_125$0(level=0), find_end_kw_126$0(level=0), lex_unsafe_dispatch_130$0(level=0), lex_unittest_dispatch_132$0(level=0), lex_target_decl_135$0(level=0), lex_passthrough_scan_137$0(level=0), lex_main_140$0(level=0), _has_target_blocks_143$0(level=0), _copy_span_bytes_147$0(level=0), _expand_target_blocks_150$0(level=0), do_lex$153$0(level=0)
 local: 
 global: 
 */
@@ -17290,212 +17739,212 @@ postiats_tyrec_2
 build_057_src_057_lexer_056_sats__do_lex(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1102, postiats_tyrec_2) ;
-ATStmpdec(tmpref1103, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1104, postiats_tyrec_0) ;
-ATStmpdec(tmp1105, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1106, postiats_tyrec_4) ;
-ATStmpdec(tmp1107, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1108, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1109, postiats_tyrec_3) ;
-ATStmpdec(tmp1112, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1113, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1114, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmpref1115, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1116, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1117) ;
-// ATStmpdec_void(tmp1120) ;
-ATStmpdec(tmp1123, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1126, postiats_tyrec_4) ;
-ATStmpdec(tmp1127, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1128, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1129) ;
-ATStmpdec(tmp1131, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1131, postiats_tyrec_2) ;
+ATStmpdec(tmpref1132, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1133, postiats_tyrec_0) ;
+ATStmpdec(tmp1134, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1135, postiats_tyrec_4) ;
+ATStmpdec(tmp1136, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1137, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1138, postiats_tyrec_3) ;
+ATStmpdec(tmp1141, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1142, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1143, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpref1144, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1145, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1146) ;
+// ATStmpdec_void(tmp1149) ;
+ATStmpdec(tmp1152, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1155, postiats_tyrec_4) ;
+ATStmpdec(tmp1156, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1157, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1158) ;
+ATStmpdec(tmp1160, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42270(line=1008, offs=11) -- 43029(line=1026, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 43492(line=1033, offs=11) -- 44251(line=1051, offs=4)
 */
 ATSINSflab(__patsflab_do_lex):
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42299(line=1008, offs=40) -- 43029(line=1026, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 43521(line=1033, offs=40) -- 44251(line=1051, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42309(line=1009, offs=7) -- 42321(line=1009, offs=19)
+emit_instr: loc0 = build/src/lexer.dats: 43531(line=1034, offs=7) -- 43543(line=1034, offs=19)
 */
 /*
-ATSINStmpdec(tmpref1103) ;
+ATSINStmpdec(tmpref1132) ;
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42324(line=1009, offs=22) -- 42335(line=1009, offs=33)
+emit_instr: loc0 = build/src/lexer.dats: 43546(line=1034, offs=22) -- 43557(line=1034, offs=33)
 */
-ATSINSmove(tmpref1103, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__create()) ;
+ATSINSmove(tmpref1132, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__create()) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42361(line=1010, offs=26) -- 42413(line=1010, offs=78)
+emit_instr: loc0 = build/src/lexer.dats: 43583(line=1035, offs=26) -- 43635(line=1035, offs=78)
 */
-ATSINSmove(tmp1104, lex_main_139(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(tmpref1103), ATSPMVi0nt(0), ATSPMVi0nt(0), arg2)) ;
+ATSINSmove(tmp1133, lex_main_140(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(tmpref1132), ATSPMVi0nt(0), ATSPMVi0nt(0), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42347(line=1010, offs=12) -- 42357(line=1010, offs=22)
+emit_instr: loc0 = build/src/lexer.dats: 43569(line=1035, offs=12) -- 43579(line=1035, offs=22)
 */
-ATSINSmove(tmp1105, ATSSELfltrec(tmp1104, postiats_tyrec_0, atslab__1)) ;
+ATSINSmove(tmp1134, ATSSELfltrec(tmp1133, postiats_tyrec_0, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42448(line=1011, offs=35) -- 42470(line=1011, offs=57)
+emit_instr: loc0 = build/src/lexer.dats: 43670(line=1036, offs=35) -- 43692(line=1036, offs=57)
 */
-ATSINSmove(tmp1106, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__to_arr(tmpref1103)) ;
+ATSINSmove(tmp1135, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__to_arr(tmpref1132)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42422(line=1011, offs=9) -- 42430(line=1011, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 43644(line=1036, offs=9) -- 43652(line=1036, offs=17)
 */
-ATSINSmove(tmp1107, ATSSELfltrec(tmp1106, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp1136, ATSSELfltrec(tmp1135, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42432(line=1011, offs=19) -- 42444(line=1011, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 43654(line=1036, offs=19) -- 43666(line=1036, offs=31)
 */
-ATSINSmove(tmp1108, ATSSELfltrec(tmp1106, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp1137, ATSSELfltrec(tmp1135, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42490(line=1012, offs=19) -- 42514(line=1012, offs=43)
+emit_instr: loc0 = build/src/lexer.dats: 43712(line=1037, offs=19) -- 43736(line=1037, offs=43)
 */
-ATSINSmove(tmp1109, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153__1(tmp1107)) ;
+ATSINSmove(tmp1138, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154__1(tmp1136)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42480(line=1012, offs=9) -- 42482(line=1012, offs=11)
+emit_instr: loc0 = build/src/lexer.dats: 43702(line=1037, offs=9) -- 43704(line=1037, offs=11)
 */
-ATSINSmove(tmp1112, ATSSELfltrec(tmp1109, postiats_tyrec_3, atslab__0)) ;
+ATSINSmove(tmp1141, ATSSELfltrec(tmp1138, postiats_tyrec_3, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42484(line=1012, offs=13) -- 42486(line=1012, offs=15)
+emit_instr: loc0 = build/src/lexer.dats: 43706(line=1037, offs=13) -- 43708(line=1037, offs=15)
 */
-ATSINSmove(tmp1113, ATSSELfltrec(tmp1109, postiats_tyrec_3, atslab__1)) ;
+ATSINSmove(tmp1142, ATSSELfltrec(tmp1138, postiats_tyrec_3, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42524(line=1014, offs=6) -- 42574(line=1014, offs=56)
+emit_instr: loc0 = build/src/lexer.dats: 43746(line=1039, offs=6) -- 43796(line=1039, offs=56)
 */
-ATSINSmove(tmp1114, _has_target_blocks_142(ATSPMVrefarg0(tmp1113), ATSPMVi0nt(524288), tmp1105, ATSPMVi0nt(0), arg2)) ;
+ATSINSmove(tmp1143, _has_target_blocks_143(ATSPMVrefarg0(tmp1142), ATSPMVi0nt(524288), tmp1134, ATSPMVi0nt(0), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42521(line=1014, offs=3) -- 43025(line=1025, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 43743(line=1039, offs=3) -- 44247(line=1050, offs=42)
 */
 ATSif(
-tmp1114
+tmp1143
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42580(line=1014, offs=62) -- 42905(line=1021, offs=44)
+emit_instr: loc0 = build/src/lexer.dats: 43802(line=1039, offs=62) -- 44127(line=1046, offs=44)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42592(line=1015, offs=9) -- 42600(line=1015, offs=17)
+emit_instr: loc0 = build/src/lexer.dats: 43814(line=1040, offs=9) -- 43822(line=1040, offs=17)
 */
 /*
-ATSINStmpdec(tmpref1115) ;
+ATSINStmpdec(tmpref1144) ;
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42603(line=1015, offs=20) -- 42614(line=1015, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 43825(line=1040, offs=20) -- 43836(line=1040, offs=31)
 */
-ATSINSmove(tmpref1115, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__create()) ;
+ATSINSmove(tmpref1144, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__create()) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42635(line=1016, offs=21) -- 42726(line=1017, offs=39)
+emit_instr: loc0 = build/src/lexer.dats: 43857(line=1041, offs=21) -- 43948(line=1042, offs=39)
 */
-ATSINSmove(tmp1116, _expand_target_blocks_149(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(tmp1113), ATSPMVi0nt(524288), tmp1105, ATSPMVi0nt(0), ATSPMVrefarg0(tmpref1115), ATSPMVi0nt(0), arg2)) ;
+ATSINSmove(tmp1145, _expand_target_blocks_150(ATSPMVrefarg0(arg0), arg1, arg2, ATSPMVrefarg0(tmp1142), ATSPMVi0nt(524288), tmp1134, ATSPMVi0nt(0), ATSPMVrefarg0(tmpref1144), ATSPMVi0nt(0), arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42740(line=1018, offs=14) -- 42761(line=1018, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 43962(line=1043, offs=14) -- 43983(line=1043, offs=35)
 */
-ATSINSmove_void(tmp1117, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__1(ATSPMVrefarg0(tmp1112), tmp1113)) ;
+ATSINSmove_void(tmp1146, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__1(ATSPMVrefarg0(tmp1141), tmp1142)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42789(line=1019, offs=28) -- 42805(line=1019, offs=44)
+emit_instr: loc0 = build/src/lexer.dats: 44011(line=1044, offs=28) -- 44027(line=1044, offs=44)
 */
-ATSINSmove(tmp1123, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__1(tmp1112)) ;
+ATSINSmove(tmp1152, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__1(tmp1141)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42775(line=1019, offs=14) -- 42807(line=1019, offs=46)
+emit_instr: loc0 = build/src/lexer.dats: 43997(line=1044, offs=14) -- 44029(line=1044, offs=46)
 */
-ATSINSmove_void(tmp1120, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157__1(tmp1123)) ;
+ATSINSmove_void(tmp1149, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158__1(tmp1152)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42842(line=1020, offs=35) -- 42860(line=1020, offs=53)
+emit_instr: loc0 = build/src/lexer.dats: 44064(line=1045, offs=35) -- 44082(line=1045, offs=53)
 */
-ATSINSmove(tmp1126, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__to_arr(tmpref1115)) ;
+ATSINSmove(tmp1155, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__to_arr(tmpref1144)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42818(line=1020, offs=11) -- 42825(line=1020, offs=18)
+emit_instr: loc0 = build/src/lexer.dats: 44040(line=1045, offs=11) -- 44047(line=1045, offs=18)
 */
-ATSINSmove(tmp1127, ATSSELfltrec(tmp1126, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp1156, ATSSELfltrec(tmp1155, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42827(line=1020, offs=20) -- 42838(line=1020, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 44049(line=1045, offs=20) -- 44060(line=1045, offs=31)
 */
-ATSINSmove(tmp1128, ATSSELfltrec(tmp1126, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp1157, ATSSELfltrec(tmp1155, postiats_tyrec_4, atslab__1)) ;
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42867(line=1021, offs=6) -- 42901(line=1021, offs=40)
+emit_instr: loc0 = build/src/lexer.dats: 44089(line=1046, offs=6) -- 44123(line=1046, offs=40)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1102, postiats_tyrec_2, atslab__0, tmp1127) ;
-ATSINSstore_fltrec_ofs(tmpret1102, postiats_tyrec_2, atslab__1, tmp1128) ;
-ATSINSstore_fltrec_ofs(tmpret1102, postiats_tyrec_2, atslab__2, tmp1116) ;
+ATSINSstore_fltrec_ofs(tmpret1131, postiats_tyrec_2, atslab__0, tmp1156) ;
+ATSINSstore_fltrec_ofs(tmpret1131, postiats_tyrec_2, atslab__1, tmp1157) ;
+ATSINSstore_fltrec_ofs(tmpret1131, postiats_tyrec_2, atslab__2, tmp1145) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42580(line=1014, offs=62) -- 42905(line=1021, offs=44)
+emit_instr: loc0 = build/src/lexer.dats: 43802(line=1039, offs=62) -- 44127(line=1046, offs=44)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42913(line=1022, offs=8) -- 43025(line=1025, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 44135(line=1047, offs=8) -- 44247(line=1050, offs=42)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42930(line=1023, offs=14) -- 42951(line=1023, offs=35)
+emit_instr: loc0 = build/src/lexer.dats: 44152(line=1048, offs=14) -- 44173(line=1048, offs=35)
 */
-ATSINSmove_void(tmp1129, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__2(ATSPMVrefarg0(tmp1112), tmp1113)) ;
+ATSINSmove_void(tmp1158, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__2(ATSPMVrefarg0(tmp1141), tmp1142)) ;
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42966(line=1024, offs=15) -- 42982(line=1024, offs=31)
+emit_instr: loc0 = build/src/lexer.dats: 44188(line=1049, offs=15) -- 44204(line=1049, offs=31)
 */
-ATSINSmove(tmp1131, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__2(tmp1112)) ;
+ATSINSmove(tmp1160, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__2(tmp1141)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42989(line=1025, offs=6) -- 43021(line=1025, offs=38)
+emit_instr: loc0 = build/src/lexer.dats: 44211(line=1050, offs=6) -- 44243(line=1050, offs=38)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1102, postiats_tyrec_2, atslab__0, tmp1131) ;
-ATSINSstore_fltrec_ofs(tmpret1102, postiats_tyrec_2, atslab__1, tmp1108) ;
-ATSINSstore_fltrec_ofs(tmpret1102, postiats_tyrec_2, atslab__2, tmp1105) ;
+ATSINSstore_fltrec_ofs(tmpret1131, postiats_tyrec_2, atslab__0, tmp1160) ;
+ATSINSstore_fltrec_ofs(tmpret1131, postiats_tyrec_2, atslab__1, tmp1137) ;
+ATSINSstore_fltrec_ofs(tmpret1131, postiats_tyrec_2, atslab__2, tmp1134) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42913(line=1022, offs=8) -- 43025(line=1025, offs=42)
+emit_instr: loc0 = build/src/lexer.dats: 44135(line=1047, offs=8) -- 44247(line=1050, offs=42)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/lexer.dats: 42299(line=1008, offs=40) -- 43029(line=1026, offs=4)
+emit_instr: loc0 = build/src/lexer.dats: 43521(line=1033, offs=40) -- 44251(line=1051, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret1102) ;
+ATSreturn(tmpret1131) ;
 } /* end of [build_057_src_057_lexer_056_sats__do_lex] */
 
 #if(0)
@@ -17504,21 +17953,21 @@ build/bats_modules/array/src/lib.dats: 5403(line=417, offs=13) -- 5422(line=417,
 */
 /*
 local: 
-global: freeze$153$0(level=0)
+global: freeze$154$0(level=0)
 local: 
 global: 
 */
 ATSextern()
 /*
-imparg = a(9249)
-tmparg = S2Evar(a(9249))
+imparg = a(9251)
+tmparg = S2Evar(a(9251))
 tmpsub = None()
 */
 postiats_tyrec_3
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1110, postiats_tyrec_3) ;
+ATStmpdec(tmpret1139, postiats_tyrec_3) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17529,12 +17978,12 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5411(line=417, offs=21) -- 5422(line=417, offs=32)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1110, postiats_tyrec_3, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret1110, postiats_tyrec_3, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret1139, postiats_tyrec_3, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret1139, postiats_tyrec_3, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret1110) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153] */
+ATSreturn(tmpret1139) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154] */
 #endif // end of [TEMPLATE]
 
 /*
@@ -17542,21 +17991,21 @@ build/bats_modules/array/src/lib.dats: 5403(line=417, offs=13) -- 5422(line=417,
 */
 /*
 local: 
-global: freeze$153$1(level=1)
+global: freeze$154$1(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = a(9249)
-tmparg = S2Evar(a(9249))
-tmpsub = Some(a(9249) -> S2Ecst(byte_t0ype))
+imparg = a(9251)
+tmparg = S2Evar(a(9251))
+tmpsub = Some(a(9251) -> S2Ecst(byte_t0ype))
 */
 postiats_tyrec_3
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153__1(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154__1(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1110__1, postiats_tyrec_3) ;
+ATStmpdec(tmpret1139__1, postiats_tyrec_3) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17567,12 +18016,12 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5411(line=417, offs=21) -- 5422(line=417, offs=32)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret1110__1, postiats_tyrec_3, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret1110__1, postiats_tyrec_3, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret1139__1, postiats_tyrec_3, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret1139__1, postiats_tyrec_3, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret1110__1) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__153__1] */
+ATSreturn(tmpret1139__1) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__154__1] */
 
 #if(0)
 /*
@@ -17580,21 +18029,21 @@ build/bats_modules/array/src/lib.dats: 5519(line=426, offs=14) -- 5530(line=426,
 */
 /*
 local: 
-global: drop$155$0(level=0)
+global: drop$156$0(level=0)
 local: 
 global: 
 */
 ATSextern()
 /*
-imparg = a(9271)
-tmparg = S2Evar(a(9271))
+imparg = a(9273)
+tmparg = S2Evar(a(9273))
 tmpsub = None()
 */
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1118) ;
+// ATStmpdec_void(tmpret1147) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17604,10 +18053,10 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5528(line=426, offs=23) -- 5530(line=426, offs=25)
 */
-ATSINSmove_void(tmpret1118, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1147, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1118) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155] */
+ATSreturn_void(tmpret1147) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156] */
 #endif // end of [TEMPLATE]
 
 /*
@@ -17615,21 +18064,21 @@ build/bats_modules/array/src/lib.dats: 5519(line=426, offs=14) -- 5530(line=426,
 */
 /*
 local: 
-global: drop$155$1(level=1)
+global: drop$156$1(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = a(9271)
-tmparg = S2Evar(a(9271))
-tmpsub = Some(a(9271) -> S2Ecst(byte_t0ype))
+imparg = a(9273)
+tmparg = S2Evar(a(9273))
+tmpsub = Some(a(9273) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1118__1) ;
+// ATStmpdec_void(tmpret1147__1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17639,10 +18088,10 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5528(line=426, offs=23) -- 5530(line=426, offs=25)
 */
-ATSINSmove_void(tmpret1118__1, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1147__1, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1118__1) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__1] */
+ATSreturn_void(tmpret1147__1) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__1] */
 
 #if(0)
 /*
@@ -17650,21 +18099,21 @@ build/bats_modules/array/src/lib.dats: 4920(line=389, offs=11) -- 4959(line=390,
 */
 /*
 local: 
-global: free$157$0(level=0)
+global: free$158$0(level=0)
 local: 
 global: 
 */
 ATSextern()
 /*
-imparg = a(9207)
-tmparg = S2Evar(a(9207))
+imparg = a(9209)
+tmparg = S2Evar(a(9209))
 tmpsub = None()
 */
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1121) ;
+// ATStmpdec_void(tmpret1150) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17674,10 +18123,10 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 4931(line=390, offs=4) -- 4959(line=390, offs=32)
 */
-ATSINSmove_void(tmpret1121, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret1150, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1121) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157] */
+ATSreturn_void(tmpret1150) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158] */
 #endif // end of [TEMPLATE]
 
 /*
@@ -17685,21 +18134,21 @@ build/bats_modules/array/src/lib.dats: 4920(line=389, offs=11) -- 4959(line=390,
 */
 /*
 local: 
-global: free$157$1(level=1)
+global: free$158$1(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = a(9207)
-tmparg = S2Evar(a(9207))
-tmpsub = Some(a(9207) -> S2Ecst(byte_t0ype))
+imparg = a(9209)
+tmparg = S2Evar(a(9209))
+tmpsub = Some(a(9209) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157__1(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158__1(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1121__1) ;
+// ATStmpdec_void(tmpret1150__1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17709,10 +18158,10 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 4931(line=390, offs=4) -- 4959(line=390, offs=32)
 */
-ATSINSmove_void(tmpret1121__1, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret1150__1, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1121__1) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__157__1] */
+ATSreturn_void(tmpret1150__1) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__158__1] */
 
 #if(0)
 /*
@@ -17720,21 +18169,21 @@ build/bats_modules/array/src/lib.dats: 5447(line=420, offs=11) -- 5454(line=420,
 */
 /*
 local: 
-global: thaw$159$0(level=0)
+global: thaw$160$0(level=0)
 local: 
 global: 
 */
 ATSextern()
 /*
-imparg = a(9255)
-tmparg = S2Evar(a(9255))
+imparg = a(9257)
+tmparg = S2Evar(a(9257))
 tmpsub = None()
 */
 atstkind_type(atstype_ptrk)
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1124, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1153, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17744,10 +18193,10 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5453(line=420, offs=17) -- 5454(line=420, offs=18)
 */
-ATSINSmove(tmpret1124, arg0) ;
+ATSINSmove(tmpret1153, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret1124) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159] */
+ATSreturn(tmpret1153) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160] */
 #endif // end of [TEMPLATE]
 
 /*
@@ -17755,21 +18204,21 @@ build/bats_modules/array/src/lib.dats: 5447(line=420, offs=11) -- 5454(line=420,
 */
 /*
 local: 
-global: thaw$159$1(level=1)
+global: thaw$160$1(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = a(9255)
-tmparg = S2Evar(a(9255))
-tmpsub = Some(a(9255) -> S2Ecst(byte_t0ype))
+imparg = a(9257)
+tmparg = S2Evar(a(9257))
+tmpsub = Some(a(9257) -> S2Ecst(byte_t0ype))
 */
 atstkind_type(atstype_ptrk)
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__1(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__1(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1124__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1153__1, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17779,31 +18228,31 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5453(line=420, offs=17) -- 5454(line=420, offs=18)
 */
-ATSINSmove(tmpret1124__1, arg0) ;
+ATSINSmove(tmpret1153__1, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret1124__1) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__1] */
+ATSreturn(tmpret1153__1) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__1] */
 
 /*
 build/bats_modules/array/src/lib.dats: 5519(line=426, offs=14) -- 5530(line=426, offs=25)
 */
 /*
 local: 
-global: drop$155$2(level=1)
+global: drop$156$2(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = a(9271)
-tmparg = S2Evar(a(9271))
-tmpsub = Some(a(9271) -> S2Ecst(byte_t0ype))
+imparg = a(9273)
+tmparg = S2Evar(a(9273))
+tmpsub = Some(a(9273) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1118__2) ;
+// ATStmpdec_void(tmpret1147__2) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17813,31 +18262,31 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5528(line=426, offs=23) -- 5530(line=426, offs=25)
 */
-ATSINSmove_void(tmpret1118__2, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1147__2, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret1118__2) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__155__2] */
+ATSreturn_void(tmpret1147__2) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__156__2] */
 
 /*
 build/bats_modules/array/src/lib.dats: 5447(line=420, offs=11) -- 5454(line=420, offs=18)
 */
 /*
 local: 
-global: thaw$159$2(level=1)
+global: thaw$160$2(level=1)
 local: 
 global: 
 */
 ATSstatic()
 /*
-imparg = a(9255)
-tmparg = S2Evar(a(9255))
-tmpsub = Some(a(9255) -> S2Ecst(byte_t0ype))
+imparg = a(9257)
+tmparg = S2Evar(a(9257))
+tmpsub = Some(a(9257) -> S2Ecst(byte_t0ype))
 */
 atstkind_type(atstype_ptrk)
-build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__2(atstkind_type(atstype_ptrk) arg0)
+build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__2(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1124__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret1153__2, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17847,10 +18296,10 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 5453(line=420, offs=17) -- 5454(line=420, offs=18)
 */
-ATSINSmove(tmpret1124__2, arg0) ;
+ATSINSmove(tmpret1153__2, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret1124__2) ;
-} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__159__2] */
+ATSreturn(tmpret1153__2) ;
+} /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__160__2] */
 
 /*
 ** for initialization(dynloading)

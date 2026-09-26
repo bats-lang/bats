@@ -55,7 +55,7 @@ bats uses `--only <value>` (repeatable) instead of the old Rust bats' `--release
 
 ## Safety Enforcement
 
-Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `fun` without termination metric, `#pub prfun`/`prfn` without `primplement`) are detected by the lexer (span kind 5) and **enforced** by the emitter. They are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
+Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun` without termination metric, `#pub prfun`/`prfn` without `primplement`) are detected by the lexer (span kind 5) and **enforced** by the emitter. They are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
 
 ## Problem Resolution
 
