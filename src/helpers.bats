@@ -479,6 +479,13 @@ implement lit_target_wasm_binary(src, pos, max) = let
   var c = @[char][18]('t', 'a', 'r', 'g', 'e', 't', ' ', 'w', 'a', 's', 'm', ' ', 'b', 'i', 'n', 'a', 'r', 'y')
 in lit_at(src, pos, max, c, 18) end
 
+#pub fn lit_while {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool
+
+implement lit_while(src, pos, max) = let
+  var c = @[char][5]('w', 'h', 'i', 'l', 'e')
+in lit_at(src, pos, max, c, 5) end
+
 (* ============================================================
    Byte-level helpers
    ============================================================ *)

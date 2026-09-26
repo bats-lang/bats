@@ -140,7 +140,8 @@ fn looking_at_cast_fn {l:agz}{n:pos}
   $AR.eq_int_int(peek(src, pos + 3, max), 116) &&
   $AR.eq_int_int(peek(src, pos + 4, max), 102) &&
   $AR.eq_int_int(peek(src, pos + 5, max), 110) &&
-  is_kw_boundary(src, pos + 6, max)
+  is_kw_boundary(src, pos + 6, max) &&
+  is_kw_boundary_before(src, pos, max)
 
 fn looking_at_prax_i {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
@@ -149,7 +150,8 @@ fn looking_at_prax_i {l:agz}{n:pos}
   $AR.eq_int_int(peek(src, pos + 2, max), 97) &&
   $AR.eq_int_int(peek(src, pos + 3, max), 120) &&
   $AR.eq_int_int(peek(src, pos + 4, max), 105) &&
-  is_kw_boundary(src, pos + 5, max)
+  is_kw_boundary(src, pos + 5, max) &&
+  is_kw_boundary_before(src, pos, max)
 
 fn looking_at_ext_ern {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
@@ -159,7 +161,8 @@ fn looking_at_ext_ern {l:agz}{n:pos}
   $AR.eq_int_int(peek(src, pos + 3, max), 101) &&
   $AR.eq_int_int(peek(src, pos + 4, max), 114) &&
   $AR.eq_int_int(peek(src, pos + 5, max), 110) &&
-  is_kw_boundary(src, pos + 6, max)
+  is_kw_boundary(src, pos + 6, max) &&
+  is_kw_boundary_before(src, pos, max)
 
 fn looking_at_assu_me {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
@@ -169,7 +172,8 @@ fn looking_at_assu_me {l:agz}{n:pos}
   $AR.eq_int_int(peek(src, pos + 3, max), 117) &&
   $AR.eq_int_int(peek(src, pos + 4, max), 109) &&
   $AR.eq_int_int(peek(src, pos + 5, max), 101) &&
-  is_kw_boundary(src, pos + 6, max)
+  is_kw_boundary(src, pos + 6, max) &&
+  is_kw_boundary_before(src, pos, max)
 
 fn looking_at_stld {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
@@ -232,11 +236,13 @@ fn looking_at_extkind {l:agz}{n:pos}
 
 fn looking_at_mac_hash {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
-  lit_machash(src, pos, max)
+  lit_machash(src, pos, max) &&
+  is_kw_boundary_before(src, pos, max)
 
 fn looking_at_ext_hash {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
-  lit_exthash(src, pos, max)
+  lit_exthash(src, pos, max) &&
+  is_kw_boundary_before(src, pos, max)
 
 fn looking_at_fun {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
@@ -316,6 +322,14 @@ fun skip_ws {l:agz}{n:pos}{fuel:nat} .<fuel>.
       skip_ws(src, pos + 1, max, fuel - 1)
     else pos
   end
+
+(* while is unsafe (no termination proof); while* carries a metric *)
+fn looking_at_while {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  lit_while(src, pos, max) &&
+  is_kw_boundary(src, pos + 5, max) &&
+  is_kw_boundary_before(src, pos, max) &&
+  ~($AR.eq_int_int(peek(src, skip_ws(src, pos + 5, max, 256), max), 42))
 
 (* Skip to end of line, including the newline *)
 fun skip_to_eol {l:agz}{n:pos}{fuel:nat} .<fuel>.
@@ -766,6 +780,9 @@ fun lex_passthrough_scan {l:agz}{n:pos}{fuel:nat} .<fuel>.
     else if looking_at_prax_i(src, pos, max) then pos
     else if looking_at_ext_ern(src, pos, max) then pos
     else if looking_at_assu_me(src, pos, max) then pos
+    else if looking_at_mac_hash(src, pos, max) then pos
+    else if looking_at_ext_hash(src, pos, max) then pos
+    else if looking_at_while(src, pos, max) then pos
     else if looking_at_fun(src, pos, max) then pos
     else if looking_at_stld(src, pos, max) then pos
     else lex_passthrough_scan(src, pos + 1, src_len, max, fuel - 1)
@@ -926,6 +943,14 @@ fun lex_main {l:agz}{n:pos}{fuel:nat} .<fuel>.
     in lex_main(src, src_len, max, spans, ep, count + 1, fuel - 1) end
     else if looking_at_assu_me(src, pos, max) then let
       val ep = pos + 6
+      val () = put_span(spans, 5, 0, pos, ep, 0, 0, 0, 0)
+    in lex_main(src, src_len, max, spans, ep, count + 1, fuel - 1) end
+    else if looking_at_mac_hash(src, pos, max) || looking_at_ext_hash(src, pos, max) then let
+      val ep = pos + 4
+      val () = put_span(spans, 5, 0, pos, ep, 0, 0, 0, 0)
+    in lex_main(src, src_len, max, spans, ep, count + 1, fuel - 1) end
+    else if looking_at_while(src, pos, max) then let
+      val ep = pos + 5
       val () = put_span(spans, 5, 0, pos, ep, 0, 0, 0, 0)
     in lex_main(src, src_len, max, spans, ep, count + 1, fuel - 1) end
     (* staload lines: kind=12, go to both .sats and .dats with .bats→.sats rename *)
