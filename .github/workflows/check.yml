@@ -24,24 +24,12 @@ jobs:
           mkdir -p ~/.bats
           ln -sf ~/.ats2/ATS2-Postiats-int-0.4.2 ~/.bats/ats2
 
-      - name: Cache bats compiler
-        id: cache-bats
-        uses: actions/cache@v4
-        with:
-          path: ~/bats-bin
-          key: bats-from-c-v2-${{ runner.os }}-${{ hashFiles('.github/workflows/check.yml') }}
-
-      - name: Build bats from C
-        if: steps.cache-bats.outputs.cache-hit != 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Build seed compiler from bootstrap/c
         run: |
-          RUN_ID=$(gh run list --repo bats-lang/bats --branch main --status success --workflow check --limit 1 --json databaseId --jq '.[0].databaseId')
-          gh run download "$RUN_ID" --repo bats-lang/bats --name bats-c --dir ~/bats-c
-          cd ~/bats-c
-          make PATSHOME=$HOME/.ats2/ATS2-Postiats-int-0.4.2
+          cp -R bootstrap/c ~/seed
+          make -j$(nproc) -C ~/seed PATSHOME=$HOME/.ats2/ATS2-Postiats-int-0.4.2 debug/bats
           mkdir -p ~/bats-bin
-          cp debug/bats ~/bats-bin/bats
+          cp ~/seed/debug/bats ~/bats-bin/bats
 
       - name: Fetch deps from lock
         run: |
@@ -63,12 +51,20 @@ jobs:
           export PATH=~/bats-bin:$PATH
           bats build --repository ~/repository
 
-      - name: bats build --to-c
+      - name: Verify bootstrap/c matches sources
         run: |
-          dist/debug/bats build --to-c dist/c --repository ~/repository
+          scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen
+          if ! diff -r bootstrap/c /tmp/regen > /tmp/bootstrap.diff; then
+            head -50 /tmp/bootstrap.diff
+            echo "::error::bootstrap/c is stale. Run: scripts/bootstrap-c.sh dist/debug/bats <repository> and commit bootstrap/c"
+            exit 1
+          fi
 
-      - name: Upload C output
-        uses: actions/upload-artifact@v4
-        with:
-          name: bats-c
-          path: dist/c/
+      - name: Verify fixpoint (compiler built by itself emits the same C)
+        run: |
+          mkdir -p ~/stage2
+          cp dist/debug/bats ~/stage2/bats
+          rm -rf build dist
+          ~/stage2/bats build --repository ~/repository
+          scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen2
+          diff -r bootstrap/c /tmp/regen2
