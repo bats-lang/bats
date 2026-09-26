@@ -299,6 +299,7 @@ in
                    check, then resolve_deps, once before the builds *)
                 if ~bin_package() then ()
                 else if ~resolve_deps(bv_repo, repo_len) then ()
+                else if ~validate_project() then ()
                 else if only_mask = 0 then let
                   val () = do_build(0, 0, bv_tc, tc_len)
                   val () = do_build(1, 0, bv_tc, tc_len)
@@ -329,7 +330,7 @@ in
               else if cmd_code = 1 then let (* check *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in if resolve_deps(bv_repo, repo_len) then do_check() else () end
+              in if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_check() else () end
               else if cmd_code = 2 then let (* clean *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
@@ -359,7 +360,8 @@ in
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
                 val () = (if ~bin_package() then ()
-                  else if resolve_deps(bv_repo, repo_len) then
+                  else if ~resolve_deps(bv_repo, repo_len) then ()
+                  else if validate_project() then
                   do_run(run_release, bv_bin, bin_len, bv_extra, extra_len) else ())
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
@@ -381,7 +383,7 @@ in
               else if cmd_code = 6 then let (* test *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in if resolve_deps(bv_repo, repo_len) then do_test() else () end
+              in if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_test() else () end
               else if cmd_code = 7 then let (* tree *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
