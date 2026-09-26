@@ -73,134 +73,87 @@ staload S = "str/src/lib.sats"
 
 implement join {la}{na}{lb}{nb}{lo}{mo}
   (base, base_len, name, name_len, out, max) = let
-  (* Total needed: base_len + 1 (for /) + name_len *)
-  val total = $AR.add_int_int($AR.add_int_int(base_len, 1), name_len)
+  val total = $AR.add_g1($AR.add_g1(base_len, name_len), 1)
 
-  (* Copy base bytes *)
-  fun copy_base {lo:agz}{mo:pos}{la:agz}{na:pos}{i:nat | i <= na} .<na - i>.
-    (out: !$A.arr(byte, lo, mo), max: int mo,
+  fun copy_base {lo:agz}{mo:pos}{la:agz}{na:pos | na < mo}{i:nat | i <= na} .<na - i>.
+    (out: !$A.arr(byte, lo, mo),
      base: !$A.borrow(byte, la, na), base_len: int na,
      i: int i): void =
     if i >= base_len then ()
     else let
-      val gi = g1ofg0(i)
-    in
-      if gi >= 0 then
-        if gi < max then let
-          val b = $A.read<byte>(base, i)
-          val () = $A.set<byte>(out, gi, b)
-        in copy_base(out, max, base, base_len, i + 1) end
-        else ()
-      else ()
-    end
+      val b = $A.read<byte>(base, i)
+      val () = $A.set<byte>(out, i, b)
+    in copy_base(out, base, base_len, $AR.add_g1(i, 1)) end
 
-  (* Copy name bytes starting at offset *)
-  fun copy_name {lo:agz}{mo:pos}{lb:agz}{nb:pos}{i:nat | i <= nb} .<nb - i>.
-    (out: !$A.arr(byte, lo, mo), max: int mo,
+  fun copy_name {lo:agz}{mo:pos}{lb:agz}{nb:pos}{off:nat | off + nb <= mo}{i:nat | i <= nb} .<nb - i>.
+    (out: !$A.arr(byte, lo, mo),
      name: !$A.borrow(byte, lb, nb), name_len: int nb,
-     i: int i, offset: int): void =
+     i: int i, offset: int off): void =
     if i >= name_len then ()
     else let
-      val dst = g1ofg0(offset + i)
-    in
-      if dst >= 0 then
-        if dst < max then let
-          val b = $A.read<byte>(name, i)
-          val () = $A.set<byte>(out, dst, b)
-        in copy_name(out, max, name, name_len, i + 1, offset) end
-        else ()
-      else ()
-    end
+      val b = $A.read<byte>(name, i)
+      val di = $AR.add_g1(offset, i)
+      val () = $A.set<byte>(out, di, b)
+    in copy_name(out, name, name_len, $AR.add_g1(i, 1), offset) end
 in
-  if $AR.gt_int_int(total, max) then 0
+  if $AR.gt_g1(total, max) then 0
   else let
-    val () = copy_base(out, max, base, base_len, 0)
-    (* Write / separator *)
-    val sep_pos = g1ofg0(base_len)
-    val () = (if sep_pos >= 0 then
-      if sep_pos < max then
-        $A.set<byte>(out, sep_pos,
-          $A.int2byte($AR.checked_byte(SLASH)))): void
-    val () = copy_name(out, max, name, name_len, 0, base_len + 1)
-  in total end
+    val () = copy_base(out, base, base_len, 0)
+    val () = $A.set<byte>(out, base_len, $A.int2byte($AR.byte_of_char('/')))
+    val offset = $AR.add_g1(base_len, 1)
+    val () = copy_name(out, name, name_len, 0, offset)
+  in g0ofg1(total) end
 end
 
 (* -- parent -- *)
 
 implement parent {la}{na} (path, path_len) = let
-  (* Scan backwards for last / *)
-  fun loop {la:agz}{na:pos}{k:nat} .<k>.
-    (path: !$A.borrow(byte, la, na), path_len: int na,
-     i: int, rem: int(k)): int =
-    if rem <= 0 then 0
-    else if $AR.lte_int_int(i, 0) then 0
+  fun loop {la:agz}{na:pos}{i:nat | i <= na} .<i>.
+    (path: !$A.borrow(byte, la, na),
+     i: int i): int =
+    if $AR.lte_g1(i, 0) then 0
     else let
-      val idx = i - 1
-      val gi = g1ofg0(idx)
+      val idx = $AR.sub_g1(i, 1)
+      val c = byte2int0($A.read<byte>(path, idx))
     in
-      if gi >= 0 then
-        if gi < path_len then let
-          val c = byte2int0($A.read<byte>(path, gi))
-        in
-          if $AR.eq_int_int(c, SLASH) then idx
-          else loop(path, path_len, idx, rem - 1)
-        end
-        else 0
-      else 0
+      if $AR.eq_int_int(c, SLASH) then g0ofg1(idx)
+      else loop(path, idx)
     end
-in loop(path, path_len, path_len, $AR.checked_nat(path_len)) end
+in loop(path, path_len) end
 
 (* -- filename -- *)
 
 implement filename {la}{na} (path, path_len) = let
-  (* Scan backwards for last / *)
-  fun loop {la:agz}{na:pos}{k:nat} .<k>.
-    (path: !$A.borrow(byte, la, na), path_len: int na,
-     i: int, rem: int(k)): int =
-    if rem <= 0 then 0
-    else if $AR.lte_int_int(i, 0) then 0
+  fun loop {la:agz}{na:pos}{i:nat | i <= na} .<i>.
+    (path: !$A.borrow(byte, la, na),
+     i: int i): int =
+    if $AR.lte_g1(i, 0) then 0
     else let
-      val idx = i - 1
-      val gi = g1ofg0(idx)
+      val idx = $AR.sub_g1(i, 1)
+      val c = byte2int0($A.read<byte>(path, idx))
     in
-      if gi >= 0 then
-        if gi < path_len then let
-          val c = byte2int0($A.read<byte>(path, gi))
-        in
-          if $AR.eq_int_int(c, SLASH) then i
-          else loop(path, path_len, idx, rem - 1)
-        end
-        else 0
-      else 0
+      if $AR.eq_int_int(c, SLASH) then g0ofg1(i)
+      else loop(path, idx)
     end
-in loop(path, path_len, path_len, $AR.checked_nat(path_len)) end
+in loop(path, path_len) end
 
 (* -- extension -- *)
 
 implement extension {la}{na} (path, path_len) = let
-  (* Find filename start first *)
   val fname_start = filename(path, path_len)
-  (* Scan backwards from end for last . after filename start *)
-  fun loop {la:agz}{na:pos}{k:nat} .<k>.
+  fun loop {la:agz}{na:pos}{i:nat | i <= na} .<i>.
     (path: !$A.borrow(byte, la, na), path_len: int na,
-     i: int, fname_start: int, rem: int(k)): int =
-    if rem <= 0 then path_len
-    else if $AR.lte_int_int(i, fname_start) then path_len
+     i: int i, fname_start: int): int =
+    if $AR.lte_g1(i, 0) then g0ofg1(path_len)
+    else if $AR.lte_int_int(g0ofg1(i), fname_start) then g0ofg1(path_len)
     else let
-      val idx = i - 1
-      val gi = g1ofg0(idx)
+      val idx = $AR.sub_g1(i, 1)
+      val c = byte2int0($A.read<byte>(path, idx))
     in
-      if gi >= 0 then
-        if gi < path_len then let
-          val c = byte2int0($A.read<byte>(path, gi))
-        in
-          if $AR.eq_int_int(c, DOT) then i
-          else loop(path, path_len, idx, fname_start, rem - 1)
-        end
-        else path_len
-      else path_len
+      if $AR.eq_int_int(c, DOT) then g0ofg1(i)
+      else loop(path, path_len, idx, fname_start)
     end
-in loop(path, path_len, path_len, fname_start, $AR.checked_nat(path_len)) end
+in loop(path, path_len, path_len, fname_start) end
 
 (* -- is_absolute -- *)
 
@@ -214,15 +167,8 @@ in $AR.eq_int_int(c, SLASH) end
 
 fn _test_parent(): void = let
   (* Test with "/foo/bar" = [47,102,111,111,47,98,97,114] len=8 *)
-  val arr = $A.alloc<byte>(8)
-  val () = $A.set<byte>(arr, 0, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 1, $A.int2byte($AR.checked_byte(102)))
-  val () = $A.set<byte>(arr, 2, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 3, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 4, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 5, $A.int2byte($AR.checked_byte(98)))
-  val () = $A.set<byte>(arr, 6, $A.int2byte($AR.checked_byte(97)))
-  val () = $A.set<byte>(arr, 7, $A.int2byte($AR.checked_byte(114)))
+  var chars = @[char][8]('/', 'f', 'o', 'o', '/', 'b', 'a', 'r')
+  val arr = $S.from_char_array(chars, 8)
   val @(fz, bw) = $A.freeze<byte>(arr)
   val p = parent(bw, 8)
   val () = $A.drop<byte>(fz, bw)
@@ -231,15 +177,8 @@ fn _test_parent(): void = let
 in end
 
 fn _test_filename(): void = let
-  val arr = $A.alloc<byte>(8)
-  val () = $A.set<byte>(arr, 0, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 1, $A.int2byte($AR.checked_byte(102)))
-  val () = $A.set<byte>(arr, 2, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 3, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 4, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 5, $A.int2byte($AR.checked_byte(98)))
-  val () = $A.set<byte>(arr, 6, $A.int2byte($AR.checked_byte(97)))
-  val () = $A.set<byte>(arr, 7, $A.int2byte($AR.checked_byte(114)))
+  var chars = @[char][8]('/', 'f', 'o', 'o', '/', 'b', 'a', 'r')
+  val arr = $S.from_char_array(chars, 8)
   val @(fz, bw) = $A.freeze<byte>(arr)
   val f = filename(bw, 8)
   val () = $A.drop<byte>(fz, bw)
@@ -248,11 +187,8 @@ fn _test_filename(): void = let
 in end
 
 fn _test_is_absolute(): void = let
-  val arr = $A.alloc<byte>(4)
-  val () = $A.set<byte>(arr, 0, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 1, $A.int2byte($AR.checked_byte(102)))
-  val () = $A.set<byte>(arr, 2, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 3, $A.int2byte($AR.checked_byte(111)))
+  var chars = @[char][4]('/', 'f', 'o', 'o')
+  val arr = $S.from_char_array(chars, 4)
   val @(fz, bw) = $A.freeze<byte>(arr)
   val b = is_absolute(bw, 4)
   val () = $A.drop<byte>(fz, bw)
@@ -261,15 +197,10 @@ fn _test_is_absolute(): void = let
 in end
 
 fn _test_join(): void = let
-  (* base = "foo" = [102, 111, 111], name = "bar" = [98, 97, 114] *)
-  val base = $A.alloc<byte>(3)
-  val () = $A.set<byte>(base, 0, $A.int2byte($AR.checked_byte(102)))
-  val () = $A.set<byte>(base, 1, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(base, 2, $A.int2byte($AR.checked_byte(111)))
-  val name = $A.alloc<byte>(3)
-  val () = $A.set<byte>(name, 0, $A.int2byte($AR.checked_byte(98)))
-  val () = $A.set<byte>(name, 1, $A.int2byte($AR.checked_byte(97)))
-  val () = $A.set<byte>(name, 2, $A.int2byte($AR.checked_byte(114)))
+  var bchars = @[char][3]('f', 'o', 'o')
+  val base = $S.from_char_array(bchars, 3)
+  var nchars = @[char][3]('b', 'a', 'r')
+  val name = $S.from_char_array(nchars, 3)
   val out = $A.alloc<byte>(7)
   val @(fzb, bwb) = $A.freeze<byte>(base)
   val @(fzn, bwn) = $A.freeze<byte>(name)
@@ -285,19 +216,8 @@ in end
 
 fn _test_extension(): void = let
   (* "/foo/bar.txt" = [47,102,111,111,47,98,97,114,46,116,120,116] len=12 *)
-  val arr = $A.alloc<byte>(12)
-  val () = $A.set<byte>(arr, 0, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 1, $A.int2byte($AR.checked_byte(102)))
-  val () = $A.set<byte>(arr, 2, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 3, $A.int2byte($AR.checked_byte(111)))
-  val () = $A.set<byte>(arr, 4, $A.int2byte($AR.checked_byte(47)))
-  val () = $A.set<byte>(arr, 5, $A.int2byte($AR.checked_byte(98)))
-  val () = $A.set<byte>(arr, 6, $A.int2byte($AR.checked_byte(97)))
-  val () = $A.set<byte>(arr, 7, $A.int2byte($AR.checked_byte(114)))
-  val () = $A.set<byte>(arr, 8, $A.int2byte($AR.checked_byte(46)))
-  val () = $A.set<byte>(arr, 9, $A.int2byte($AR.checked_byte(116)))
-  val () = $A.set<byte>(arr, 10, $A.int2byte($AR.checked_byte(120)))
-  val () = $A.set<byte>(arr, 11, $A.int2byte($AR.checked_byte(116)))
+  var chars = @[char][12]('/', 'f', 'o', 'o', '/', 'b', 'a', 'r', '.', 't', 'x', 't')
+  val arr = $S.from_char_array(chars, 12)
   val @(fz, bw) = $A.freeze<byte>(arr)
   val e = extension(bw, 12)
   val () = $A.drop<byte>(fz, bw)

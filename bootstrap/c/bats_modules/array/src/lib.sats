@@ -18,6 +18,11 @@ absvtype borrow(a:t@ype, l:addr, n:int)
 
 
 
+
+
+
+
+
 fun{a:t@ype}
 alloc
   {n:pos | n <= 1048576}
@@ -296,6 +301,11 @@ fun arena_destroy
   {l:agz}{max:nat}
   (ar: arena(l, max, 0))
   : void
+
+
+
+
+
 
 
 

@@ -135,15 +135,6 @@ fn text_of_chars
 
 
 
-fun chars_match_borrow
-  {l:agz}{n:pos}{lp:agz}{np:pos}
-  (src: !$A.borrow(byte, l, n), p: int, max: int n,
-   pat: !$A.borrow(byte, lp, np), pi: int, plen: int np): bool
-
-
-
-
-
 fn has_suffix
   {l:agz}{n:pos}{k:nat | k <= n}{lp:agz}{np:pos}
   (ent: !$A.arr(byte, l, n), len: int k, max: int n,
@@ -419,35 +410,6 @@ fn name_eq
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn borrow_byte {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: int, max: int n): int
-
-
-
-
-
-
-
-
-
-
 fn match_at {l:agz}{n:pos}{lp:agz}{np:pos}{p:nat | p + np <= n}
   (src: !$A.borrow(byte, l, n), p: int p,
    pat: !$A.borrow(byte, lp, np), np: int np): bool
@@ -466,8 +428,6 @@ fn match_at {l:agz}{n:pos}{lp:agz}{np:pos}{p:nat | p + np <= n}
 fn match_at_arr {l:agz}{n:pos}{lp:agz}{np:pos}{p:nat | p + np <= n}
   (src: !$A.arr(byte, l, n), p: int p,
    pat: !$A.borrow(byte, lp, np), np: int np): bool
-
-
 
 
 
@@ -503,33 +463,6 @@ fn find_null_at {l:agz}{n:pos}{p:nat | p <= n}
 fn find_null_bv_at {l:agz}{n:pos}{p:nat | p <= n}
   (bv: !$A.borrow(byte, l, n), p: int p, n: int n)
   : [r:int | p <= r; r <= n] int r
-
-
-
-
-
-
-
-
-
-
-
-fun find_null {l:agz}{n:pos}{fuel:nat}
-  (buf: !$A.arr(byte, l, n), pos: int, max: int n,
-   fuel: int fuel): int
-
-
-
-
-
-
-
-
-
-
-fun find_null_bv {l:agz}{n:pos}{fuel:nat}
-  (bv: !$A.borrow(byte, l, n), pos: int, max: int n,
-   fuel: int fuel): int
 
 
 
