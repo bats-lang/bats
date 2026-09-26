@@ -56,22 +56,6 @@ set
 
 
 fun{a:t@ype}
-split
-  {l:agz}{n,m:nat | m <= n}
-  (arr: arr(a, l, n), m: int m)
-  : @(arr(a, l, m), arr(a, l+m, n-m))
-
-fun{a:t@ype}
-join
-  {l:agz}{n,m:nat}
-  (left: arr(a, l, n), right: arr(a, l+n, m))
-  : arr(a, l, n+m)
-
-
-
-
-
-fun{a:t@ype}
 freeze
   {l:agz}{n:nat}
   (arr: arr(a, l, n))
@@ -205,6 +189,8 @@ fun write_u16le
   {l:agz}{n:nat}{i:nat | i + 2 <= n}{v:nat | v < 65536}
   (arr: !arr(byte, l, n), i: int i, v: int v): void
 
+
+
 fun write_i32
   {l:agz}{n:nat}{i:nat | i + 4 <= n}
   (arr: !arr(byte, l, n), i: int i, v: int): void
@@ -268,71 +254,6 @@ fun write_content_text
   {ld:agz}{ls:agz}{m:nat}{n:nat}{off:nat | off + n <= m}
   (dst: !arr(byte, ld, m), off: int off,
    src: !content_text(ls, n), len: int n): void
-
-
-
-
-
-absvtype arena(l:addr, max:int, k:int)
-
-absvtype arena_token(la:addr, l:addr, n:int)
-
-fun arena_create
-  {max:pos | max <= 268435456}
-  (max_size: int max)
-  : [l:agz] arena(l, max, 0)
-
-fun{a:t@ype}
-arena_alloc
-  {la:agz}{max:pos}{k:nat}{n:pos}
-  (ar: !arena(la, max, k) >> arena(la, max, k+1),
-   n: int n)
-  : [l:agz] @(arena_token(la, l, n), arr(a, l, n))
-
-fun{a:t@ype}
-arena_return
-  {la:agz}{max:pos}{k:pos}{l:agz}{n:pos}
-  (ar: !arena(la, max, k) >> arena(la, max, k-1),
-   token: arena_token(la, l, n),
-   v: arr(a, l, n))
-  : void
-
-fun arena_destroy
-  {l:agz}{max:nat}
-  (ar: arena(l, max, 0))
-  : void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
