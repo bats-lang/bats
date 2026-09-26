@@ -225,6 +225,26 @@ fn preprocess_one
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn do_clean(): void
 
 
@@ -1634,6 +1654,13 @@ fn check_wasm_binary {l:agz}
 
 
 fn do_build(release: int, build_target: int): void
+
+
+
+
+
+
+
 
 
 
