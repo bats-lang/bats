@@ -130,9 +130,9 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
 
 (* The value of a string option copied to buf, and its length; 0 when
    the option was not given. *)
-fn opt_string_copy {l:agz}
-  (r: !$AP.parse_result, h: $AP.arg($AP.string_val), buf: !$A.arr(byte, l, 4096)): int =
-  if $AP.is_present(r, h) then $AP.get_string_copy(r, h, buf, 4096) else 0
+fn opt_string_copy {l:agz}{n:pos}
+  (r: !$AP.parse_result, h: $AP.arg($AP.string_val), buf: !$A.arr(byte, l, n), n: int n): int =
+  if $AP.is_present(r, h) then $AP.get_string_copy(r, h, buf, n) else 0
 
 (* ============================================================
    Main: read argv (args_read: NUL-separated), dispatch
@@ -232,7 +232,7 @@ in
               (* --repository: passed to the commands that use it; length 0
                  when absent *)
               val repo_buf = $A.alloc<byte>(4096)
-              val repo_len = opt_string_copy(r, h_repository, repo_buf)
+              val repo_len = opt_string_copy(r, h_repository, repo_buf, 4096)
               val @(fz_repo, bv_repo) = $A.freeze<byte>(repo_buf)
               (* Handle --to-c *)
               val () = (if $AP.is_present(r, h_to_c) then let
@@ -307,21 +307,8 @@ in
                 val () = $A.free<byte>(arg_buf)
               in do_lock(lk_dev, lk_dry, bv_repo, repo_len) end
               else if cmd_code = 4 then let (* run *)
-                val () = (if $AP.is_present(r, h_bin) then let
-                  val bin_buf = $A.alloc<byte>(256)
-                  val blen = $AP.get_string_copy(r, h_bin, bin_buf, 256)
-                  val @(fz_bb2, bv_bb2) = $A.freeze<byte>(bin_buf)
-                  var bb2 = $B.create()
-                  val () = copy_to_builder(bv_bb2, 0, blen, 256, bb2, 256)
-                  val () = $B.put_char(bb2, 10)
-                  val () = $A.drop<byte>(fz_bb2, bv_bb2)
-                  val () = $A.free<byte>($A.thaw<byte>(fz_bb2))
-                  val btp = str_to_path_arr("/tmp/_bpoc_bin.txt")
-                  val @(fz_btp, bv_btp) = $A.freeze<byte>(btp)
-                  val _ = write_file_from_builder(bv_btp, 524288, bb2)
-                  val () = $A.drop<byte>(fz_btp, bv_btp)
-                  val () = $A.free<byte>($A.thaw<byte>(fz_btp))
-                in end else ())
+                val bin_buf = $A.alloc<byte>(256)
+                val bin_len = opt_string_copy(r, h_bin, bin_buf, 256)
                 fn check_only_release {l2:agz}
                   (buf: !$A.arr(byte, l2, 32), olen: int): int =
                   if olen = 7 then let
@@ -336,7 +323,10 @@ in
                 in is_rel end): int
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in do_run(run_release) end
+                val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
+                val () = do_run(run_release, bv_bin, bin_len)
+                val () = $A.drop<byte>(fz_bin, bv_bin)
+              in $A.free<byte>($A.thaw<byte>(fz_bin)) end
               else if cmd_code = 5 then let (* init *)
                 val init_claude = (if $AP.get_bool(r, h_claude) then 1 else 0): int
                 val () = $AP.parse_result_free(r)

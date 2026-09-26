@@ -1242,22 +1242,6 @@ implement strip_newline_arr(buf, len) =
   else if len > 4096 then len
   else (if peek_arr(buf, len - 1, 4096) = 10 then len - 1 else len): pos_t
 
-#pub fn strip_newline_arr524288 {l:agz}
-  (buf: !$A.arr(byte, l, 524288), len: pos_t): pos_t
-
-implement strip_newline_arr524288(buf, len) =
-  if len <= 0 then 0
-  else if len > 524288 then len
-  else (if peek_arr(buf, len - 1, 524288) = 10 then len - 1 else len): pos_t
-
-#pub fn strip_newline_arr256 {l:agz}
-  (buf: !$A.arr(byte, l, 256), len: pos_t): pos_t
-
-implement strip_newline_arr256(buf, len) =
-  if len <= 0 then 0
-  else if len > 256 then len
-  else (if peek_arr(buf, len - 1, 256) = 10 then len - 1 else len): pos_t
-
 (* ============================================================
    String constant builders
    ============================================================ *)

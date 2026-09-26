@@ -980,27 +980,9 @@ fun append_run_args(cmd: !$B.builder_v >> $B.builder_v): void
 
 
 
-fn do_run(release: int): void
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn do_run {lb:agz} (release: int, bin: !$A.borrow(byte, lb, 256), blen: int): void
 
 
 

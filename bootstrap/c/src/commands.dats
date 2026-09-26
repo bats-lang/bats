@@ -981,9 +981,11 @@ end
    run: build then execute the binary
    ============================================================ *)
 
+(* bin: the --bin name in bin[0, blen); blen is 0 when it was not
+   given, and the package name is run instead. *)
 
 
-implement do_run(release) = let
+implement do_run {lb} (release, bin, blen) = let
   val () = do_build(release, 0)
   (* Read bats.toml to find the package name *)
   val tp = str_to_path_arr("bats.toml")
@@ -1023,34 +1025,14 @@ in
         in
           case+ nr of
           | ~$R.some(nlen) => let
-              (* Check if --bin was specified (stored in /tmp/_bpoc_bin.txt) *)
-              val bin_path2 = str_to_path_arr("/tmp/_bpoc_bin.txt")
-              val @(fz_bp2, bv_bp2) = $A.freeze<byte>(bin_path2)
-              val bin_or = $F.file_open(bv_bp2, 524288, 0, 0)
-              val () = $A.drop<byte>(fz_bp2, bv_bp2)
-              val () = $A.free<byte>($A.thaw<byte>(fz_bp2))
-              val @(bin_name, bn_len) = (case+ bin_or of
-                | ~$R.ok(bfd2) => let
-                    val bbn = $A.alloc<byte>(256)
-                    val brr = $F.file_read(bfd2, bbn, 256)
-                    val brl = (case+ brr of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
-                    val bcr = $F.file_close(bfd2)
-                    val () = $R.discard<int><int>(bcr)
-                    val brl2 = strip_newline_arr256(bbn, brl)
-                  in @(bbn, brl2) end
-                | ~$R.err(_) => let val bbn = $A.alloc<byte>(256) in @(bbn, 0) end): [lbbn:agz] @($A.arr(byte, lbbn, 256), int)
               var cmd: $B.builder_v = $B.create()
               val () = (if release > 0 then bput_v(cmd, "./dist/release/")
                 else bput_v(cmd, "./dist/debug/"))
-              val () = (if bn_len > 0 then let
-                val @(fz_bn, bv_bn) = $A.freeze<byte>(bin_name)
-                val () = copy_to_builder_v(bv_bn, 0, bn_len, 256, cmd)
-                val () = $A.drop<byte>(fz_bn, bv_bn)
-                val () = $A.free<byte>($A.thaw<byte>(fz_bn))
+              val () = (if blen > 0 then let
+                val () = copy_to_builder_v(bin, 0, blen, 256, cmd)
                 val () = $A.free<byte>(nbuf)
               in end
               else let
-                val () = $A.free<byte>(bin_name)
                 val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, cmd)
                 val () = $A.drop<byte>(fz_nb, bv_nb)
