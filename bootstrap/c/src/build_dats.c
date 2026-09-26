@@ -422,7 +422,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 3027(line=104, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -432,6 +432,7 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 /* flags are file's own values (the O_* stadefs below); the host's
    O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
@@ -446,13 +447,19 @@ static int _file_open(const char *path, int flags, int mode) {
   if (flags & 64) f |= O_CREAT;
   if (flags & 512) f |= O_TRUNC;
   if (flags & 1024) f |= O_APPEND;
-  return open(path, f, mode);
+  int fd = open(path, f, mode);
+  return fd >= 0 ? fd : -errno;
 }
+/* Reads until len bytes or EOF; a failure before any byte is -errno,
+   after some bytes those bytes: the next read reports it. EINTR is
+   retried, as the readers of Rust do. */
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
   while (total < len) {
     int n = (int)read(fd, (char *)buf + total, (unsigned int)(len - total));
-    if (n <= 0) break;
+    if (n < 0 && errno == EINTR) continue;
+    if (n < 0) return total > 0 ? total : -errno;
+    if (n == 0) break;
     total += n;
   }
   return total;
@@ -646,7 +653,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 3027(line=104, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -656,6 +663,7 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 2701(line=97, offs
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 /* flags are file's own values (the O_* stadefs below); the host's
    O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
@@ -670,13 +678,19 @@ static int _file_open(const char *path, int flags, int mode) {
   if (flags & 64) f |= O_CREAT;
   if (flags & 512) f |= O_TRUNC;
   if (flags & 1024) f |= O_APPEND;
-  return open(path, f, mode);
+  int fd = open(path, f, mode);
+  return fd >= 0 ? fd : -errno;
 }
+/* Reads until len bytes or EOF; a failure before any byte is -errno,
+   after some bytes those bytes: the next read reports it. EINTR is
+   retried, as the readers of Rust do. */
 static int _file_read(int fd, void *buf, int len) {
   int total = 0;
   while (total < len) {
     int n = (int)read(fd, (char *)buf + total, (unsigned int)(len - total));
-    if (n <= 0) break;
+    if (n < 0 && errno == EINTR) continue;
+    if (n < 0) return total > 0 ? total : -errno;
+    if (n == 0) break;
     total += n;
   }
   return total;
