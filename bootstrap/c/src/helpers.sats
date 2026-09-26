@@ -528,7 +528,8 @@ fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: pos_
 
 
 
-fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, len: int, max: int n,
+
+fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
    dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void
 
 
@@ -598,8 +599,9 @@ fn put_newline_v(out: !$B.builder_v >> $B.builder_v): void
 
 
 
+
 fn copy_to_builder_v {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), start: pos_t, len: int, max: int n,
+  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
    dst: !$B.builder_v >> $B.builder_v): void
 
 
