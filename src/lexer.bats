@@ -648,11 +648,18 @@ fn looking_at_local {l:agz}{n:pos}
   lit_local(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
+(* The end that closes a block opened before pos at depth, or src_len.
+   C code in %{ ... %} is skipped: a word "end" there (in a comment,
+   say) is not the keyword. *)
 fun find_end_kw {l:agz}{n:pos}{fuel:nat} .<fuel>.
   (src: !$A.borrow(byte, l, n), pos: pos_t, src_len: pos_t, max: int n,
    depth: int, fuel: int fuel): pos_t =
   if fuel <= 0 then src_len
   else if pos >= src_len then src_len
+  else if $AR.eq_int_int(peek(src, pos, max), 37) &&
+          $AR.eq_int_int(peek(src, pos + 1, max), 123) then
+    find_end_kw(src, lex_extcode_inner(src, pos + 2, src_len, max, max),
+                src_len, max, depth, fuel - 1)
   else if looking_at_end(src, pos, max) then
     (if depth <= 1 then pos
      else find_end_kw(src, pos + 3, src_len, max, depth - 1, fuel - 1))
