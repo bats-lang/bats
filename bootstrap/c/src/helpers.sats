@@ -1339,31 +1339,6 @@ fn make_kind {l:agz}{n:pos | n >= 4}
 
 
 
-fn make_proc_cmdline {l:agz}{n:pos | n >= 18}
-  (buf: !$A.arr(byte, l, n)): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

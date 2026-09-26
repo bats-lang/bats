@@ -3,6 +3,7 @@ staload "argparse/src/lib.dats"
 staload "array/src/lib.dats"
 staload "arith/src/lib.dats"
 staload "builder/src/lib.dats"
+staload "env/src/lib.dats"
 staload "file/src/lib.dats"
 staload "str/src/lib.dats"
 staload "process/src/lib.dats"
@@ -15,6 +16,7 @@ staload AP = "argparse/src/lib.sats"
 staload A = "array/src/lib.sats"
 staload AR = "arith/src/lib.sats"
 staload B = "builder/src/lib.sats"
+staload E = "env/src/lib.sats"
 staload F = "file/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload P = "process/src/lib.sats"
@@ -82,7 +84,7 @@ fn print_usage(): void = let
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
 in end
 
-(* Find the position of "--" separator in /proc/self/cmdline buffer. *)
+(* Find the position of "--" separator in the argument buffer. *)
 fun find_dashdash {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   (buf: !$A.arr(byte, l, 4096), pos: int p, len: int): pos_t =
   if pos >= len then ~1
@@ -137,26 +139,15 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   end
 
 (* ============================================================
-   Main: read argv from /proc/self/cmdline, dispatch
+   Main: read argv (args_read: NUL-separated), dispatch
    ============================================================ *)
 
 fn bats_main (): void = let
-  val clp = $A.alloc<byte>(18)
-  val () = make_proc_cmdline(clp)
-  val @(fz_cl, bv_cl) = $A.freeze<byte>(clp)
-  val cl_open = $F.file_open(bv_cl, 18, 0, 0)
-  val () = $A.drop<byte>(fz_cl, bv_cl)
-  val () = $A.free<byte>($A.thaw<byte>(fz_cl))
+  val cl_buf = $A.alloc<byte>(4096)
+  val cl_read = $E.args_read(cl_buf, 4096)
 in
-  case+ cl_open of
-  | ~$R.ok(cl_fd) => let
-      val cl_buf = $A.alloc<byte>(4096)
-      val cl_read = $F.file_read(cl_fd, cl_buf, 4096)
-    in
       case+ cl_read of
-      | ~$R.ok(cl_n) => let
-          val cr = $F.file_close(cl_fd)
-          val () = $R.discard<int><int>(cr)
+      | ~$R.some(cl_n) => let
           val dd_pos = find_dashdash(cl_buf, 0, cl_n)
           val () = save_extra_args(cl_buf, dd_pos, cl_n)
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
@@ -446,14 +437,9 @@ in
               val () = $AP.parse_error_free(e)
             in print_usage() end
         end
-      | ~$R.err(e) => let
-          val cr = $F.file_close(cl_fd)
-          val () = $R.discard<int><int>(cr)
+      | ~$R.none() => let
           val () = $A.free<byte>(cl_buf)
-        in println! ("Cannot read /proc/self/cmdline: ", e) end
-    end
-  | ~$R.err(e) =>
-      println! ("Cannot open /proc/self/cmdline: ", e)
+        in println! ("Cannot read the command line") end
 end
 
 (* Exit non-zero when any command recorded an error, so CI and scripts
