@@ -231,8 +231,10 @@ fn default_trunk (): filled_arr = let
   val a = $S.from_char_array(main_c, 4)
 in @(a, 4, 4) end
 
-(* [package] trunk from bats.toml with its length *)
-fn read_trunk (): filled_arr = let
+(* The [package] value of key in bats.toml with its length, when set
+   (Rust: config::load) *)
+fn package_value {lk:agz}{nk:pos}
+  (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
   val tor = $F.file_open(bv_tp, 524288, 0, 0)
@@ -255,25 +257,34 @@ in
       | ~$R.ok(doc) => let
           var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
           val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
-          var key_c = @[char][5]('t', 'r', 'u', 'n', 'k')
-          val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 5))
           val vbuf = $A.alloc<byte>(256)
-          val vr = $T.get(doc, bv_s, 7, bv_k, 5, vbuf, 256)
-          val () = $A.drop<byte>(fz_k, bv_k)
-          val () = $A.free<byte>($A.thaw<byte>(fz_k))
+          val vr = $T.get(doc, bv_s, 7, key, klen, vbuf, 256)
           val () = $A.drop<byte>(fz_s, bv_s)
           val () = $A.free<byte>($A.thaw<byte>(fz_s))
           val () = $T.toml_free(doc)
         in
           (case+ vr of
-          | ~$R.some(k) => @(vbuf, 256, k)
+          | ~$R.some(k) => $R.some(@(vbuf, 256, k))
           | ~$R.none() => let
               val () = $A.free<byte>(vbuf)
-            in default_trunk() end): filled_arr
+            in $R.none() end): $R.option(filled_arr)
         end
-      | ~$R.err(_) => default_trunk()): filled_arr
+      | ~$R.err(_) => $R.none()): $R.option(filled_arr)
     end
-  | ~$R.err(_) => default_trunk()): filled_arr
+  | ~$R.err(_) => $R.none()): $R.option(filled_arr)
+end
+
+(* [package] trunk from bats.toml with its length *)
+fn read_trunk (): filled_arr = let
+  var key_c = @[char][5]('t', 'r', 'u', 'n', 'k')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 5))
+  val v = package_value(bv_k, 5)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in
+  case+ v of
+  | ~$R.some(a) => a
+  | ~$R.none() => default_trunk()
 end
 
 (* Whether git rev-parse --abbrev-ref HEAD's output out[0, olen) names
@@ -294,6 +305,90 @@ in
   then same_bytes(out, trunk, t, 0)
   else false
 end
+
+(* A byte array with its size and a length *)
+vtypedef version_arr = [l:agz][n:pos] @($A.arr(byte, l, n), int n, int)
+
+(* The version from git: the last commit's date and seconds since
+   midnight, with dev1 off the trunk (Rust: resolve_version) *)
+fn git_version (): version_arr = let
+  (* Get version from git commit timestamp *)
+  val git_exec = str_to_path_arr("git")
+  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  (* Get commit timestamp *)
+  var ts_b1 = $B.create()
+  val () = bput_v(ts_b1, "git")
+  var ts_b2 = $B.create()
+  val () = bput_v(ts_b2, "log")
+  var ts_b3 = $B.create()
+  val () = bput_v(ts_b3, "-1")
+  var ts_b4 = $B.create()
+  val () = bput_v(ts_b4, "--format=%ct")
+  val ts_argv = $L.list_vt_cons(mk_arg(ts_b1),
+    $L.list_vt_cons(mk_arg(ts_b2), $L.list_vt_cons(mk_arg(ts_b3),
+    $L.list_vt_cons(mk_arg(ts_b4), $L.list_vt_nil()))))
+  val ts_out = $A.alloc<byte>(4096)
+  val @(ts_rc, ts_len) = run_cmd_capture(bv_ge, ts_argv, ts_out)
+  val ts = parse_decimal(ts_out, ts_len, 4096)
+  val () = $A.free<byte>(ts_out)
+  val @(yr, mo, dy, secs) = timestamp_to_calver(ts)
+  (* Check if on main branch *)
+  var br_b1 = $B.create()
+  val () = bput_v(br_b1, "git")
+  var br_b2 = $B.create()
+  val () = bput_v(br_b2, "rev-parse")
+  var br_b3 = $B.create()
+  val () = bput_v(br_b3, "--abbrev-ref")
+  var br_b4 = $B.create()
+  val () = bput_v(br_b4, "HEAD")
+  val br_argv = $L.list_vt_cons(mk_arg(br_b1),
+    $L.list_vt_cons(mk_arg(br_b2), $L.list_vt_cons(mk_arg(br_b3),
+    $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
+  val br_out = $A.alloc<byte>(4096)
+  val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
+  val @(trunk, _, tlen) = read_trunk()
+  val is_main = on_trunk(br_out, br_len, trunk, tlen)
+  val () = $A.free<byte>(trunk)
+  val () = $A.free<byte>(br_out)
+  val () = $A.drop<byte>(fz_ge, bv_ge)
+  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  (* Build version string *)
+  var vb_b: $B.builder_v = $B.create()
+  val () = bput_int_v(vb_b, yr)
+  val () = put_char_v(vb_b, 46) (* . *)
+  val () = bput_int_v(vb_b, mo)
+  val () = put_char_v(vb_b, 46)
+  val () = bput_int_v(vb_b, dy)
+  val () = put_char_v(vb_b, 46)
+  val () = bput_int_v(vb_b, secs)
+  val () = (if ~is_main then bput_v(vb_b, "dev1") else bput_v(vb_b, ""))
+  val @(va, vl) = $B.to_arr(vb_b)
+in @(va, 524288, vl) end
+
+(* The upload version (Rust: resolve_version): [package] version when
+   set; otherwise from git, which fails with 1 outside a git repository
+   and 2 on a dirty working tree *)
+fn resolve_version (): $R.result(version_arr, int) = let
+  var key_c = @[char][7]('v', 'e', 'r', 's', 'i', 'o', 'n')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 7))
+  val v = package_value(bv_k, 7)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in
+  case+ v of
+  | ~$R.some(a) => let
+      val @(arr, n, t) = a
+    in $R.ok(@(arr, n, t)) end
+  | ~$R.none() =>
+    if git_dir_rc() > 0 then $R.err(1)
+    else if git_tree_dirty() then $R.err(2)
+    else $R.ok(git_version())
+end
+
+(* Prints resolve_version's error *)
+fn version_error (code: int): void =
+  if code = 1 then prerr! ("error: not a git repository (required for auto-versioning)\n")
+  else prerr! ("error: working tree is dirty (commit or stash changes before upload)\n")
 
 #pub fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
@@ -369,68 +464,16 @@ in
                   val () = $A.free<byte>(nbuf)
                   val () = set_build_err()
                 in println! ("error: upload failed") end
-                else if git_dir_rc() > 0 then let
-                  val () = $A.free<byte>(nbuf)
-                  val () = set_build_err()
-                in prerr! ("error: not a git repository (required for auto-versioning)\n") end
-                else if git_tree_dirty() then let
-                  val () = $A.free<byte>(nbuf)
-                  val () = set_build_err()
-                in prerr! ("error: working tree is dirty (commit or stash changes before upload)\n") end
                 else let
-                (* Get version from git commit timestamp *)
-                val git_exec = str_to_path_arr("git")
-                val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
-                (* Get commit timestamp *)
-                var ts_b1 = $B.create()
-                val () = bput_v(ts_b1, "git")
-                var ts_b2 = $B.create()
-                val () = bput_v(ts_b2, "log")
-                var ts_b3 = $B.create()
-                val () = bput_v(ts_b3, "-1")
-                var ts_b4 = $B.create()
-                val () = bput_v(ts_b4, "--format=%ct")
-                val ts_argv = $L.list_vt_cons(mk_arg(ts_b1),
-                  $L.list_vt_cons(mk_arg(ts_b2), $L.list_vt_cons(mk_arg(ts_b3),
-                  $L.list_vt_cons(mk_arg(ts_b4), $L.list_vt_nil()))))
-                val ts_out = $A.alloc<byte>(4096)
-                val @(ts_rc, ts_len) = run_cmd_capture(bv_ge, ts_argv, ts_out)
-                val ts = parse_decimal(ts_out, ts_len, 4096)
-                val () = $A.free<byte>(ts_out)
-                val @(yr, mo, dy, secs) = timestamp_to_calver(ts)
-                (* Check if on main branch *)
-                var br_b1 = $B.create()
-                val () = bput_v(br_b1, "git")
-                var br_b2 = $B.create()
-                val () = bput_v(br_b2, "rev-parse")
-                var br_b3 = $B.create()
-                val () = bput_v(br_b3, "--abbrev-ref")
-                var br_b4 = $B.create()
-                val () = bput_v(br_b4, "HEAD")
-                val br_argv = $L.list_vt_cons(mk_arg(br_b1),
-                  $L.list_vt_cons(mk_arg(br_b2), $L.list_vt_cons(mk_arg(br_b3),
-                  $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
-                val br_out = $A.alloc<byte>(4096)
-                val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
-                val @(trunk, _, tlen) = read_trunk()
-                val is_main = on_trunk(br_out, br_len, trunk, tlen)
-                val () = $A.free<byte>(trunk)
-                val () = $A.free<byte>(br_out)
-                val () = $A.drop<byte>(fz_ge, bv_ge)
-                val () = $A.free<byte>($A.thaw<byte>(fz_ge))
-                (* Build version string *)
-                var vb_b: $B.builder_v = $B.create()
-                val () = bput_int_v(vb_b, yr)
-                val () = put_char_v(vb_b, 46) (* . *)
-                val () = bput_int_v(vb_b, mo)
-                val () = put_char_v(vb_b, 46)
-                val () = bput_int_v(vb_b, dy)
-                val () = put_char_v(vb_b, 46)
-                val () = bput_int_v(vb_b, secs)
-                val () = (if ~is_main then bput_v(vb_b, "dev1") else bput_v(vb_b, ""))
-                val @(verbuf, verlen) = (let
-                  val @(va, vl) = $B.to_arr(vb_b)
-                in @(va, vl) end): [lvb:agz] @($A.arr(byte, lvb, 524288), int)
+                val vr = resolve_version()
+              in
+                case+ vr of
+                | ~$R.err(code) => let
+                    val () = $A.free<byte>(nbuf)
+                    val () = set_build_err()
+                  in version_error(code) end
+                | ~$R.ok(ver) => let
+                val @(verbuf, vmax, verlen) = ver
                 val @(fz_vb, bv_vb) = $A.freeze<byte>(verbuf)
                 (* Build output zip path: repo/pkg/prefix_ver.bats *)
                 var zip_path: $B.builder_v = $B.create()
@@ -454,7 +497,7 @@ in
                 val @(fz_px, bv_px) = $A.freeze<byte>(pfx_arr)
                 val () = copy_to_builder_v(bv_px, 0, pfx_len, 524288, zip_path)
                 val () = bput_v(zip_path, "_")
-                val () = copy_to_builder_v(bv_vb, 0, verlen, 524288, zip_path)
+                val () = copy_to_builder_v(bv_vb, 0, verlen, vmax, zip_path)
                 val () = bput_v(zip_path, ".bats")
                 val () = put_char_v(zip_path, 0)
                 val @(zpa, zpa_len) = $B.to_arr(zip_path)
@@ -513,6 +556,7 @@ in
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
                 in println! ("uploaded successfully") end
+              end
               end
               end
               else let
