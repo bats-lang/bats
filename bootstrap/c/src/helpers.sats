@@ -1074,3 +1074,83 @@ fn ap_string_pos {sn:pos}{sh:pos}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn dir_next_sorted {lp:agz}{np:pos | np < 1048576}{lq:agz}
+  (path: !$A.borrow(byte, lp, np), path_len: int np,
+   prev: !$A.borrow(byte, lq, 256), prev_len: int)
+  : [lo:agz] @($A.arr(byte, lo, 256), int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

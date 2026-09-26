@@ -1063,3 +1063,83 @@ implement ap_string_pos(p, name, help) = let
   val () = $A.drop<byte>(fzh, bvh)
   val () = $A.free<byte>($A.thaw<byte>(fzh))
 in @(p2, h) end
+
+(* Byte-lexicographic a[0..alen) < b[0..blen) for directory entry names.
+   The index is statically bounded by the 256-byte buffers. *)
+fun name_lt_loop {la:agz}{lb:agz}{i:nat | i <= 256} .<256 - i>.
+  (a: !$A.borrow(byte, la, 256), alen: int,
+   b: !$A.borrow(byte, lb, 256), blen: int, i: int i): bool =
+  if i >= 256 then false
+  else if i >= alen then i < blen
+  else if i >= blen then false
+  else let
+    val ca = byte2int0($A.read<byte>(a, i))
+    val cb = byte2int0($A.read<byte>(b, i))
+  in
+    if ca < cb then true
+    else if ca > cb then false
+    else name_lt_loop(a, alen, b, blen, i + 1)
+  end
+
+fn name_lt {la:agz}{lb:agz}
+  (a: !$A.borrow(byte, la, 256), alen: int,
+   b: !$A.borrow(byte, lb, 256), blen: int): bool =
+  name_lt_loop(a, alen, b, blen, 0)
+
+(* Smallest entry of directory `path` strictly after prev[0..prev_len)
+   (prev_len <= 0: smallest entry overall). Returns the entry buffer and
+   its length, or length -1 when there is none. Walking a directory with
+   this makes generated output independent of readdir order. *)
+#pub fn dir_next_sorted {lp:agz}{np:pos | np < 1048576}{lq:agz}
+  (path: !$A.borrow(byte, lp, np), path_len: int np,
+   prev: !$A.borrow(byte, lq, 256), prev_len: int)
+  : [lo:agz] @($A.arr(byte, lo, 256), int)
+
+implement dir_next_sorted (path, path_len, prev, prev_len) = let
+  fun scan {lq:agz}{lb:agz}{k:nat} .<k>.
+    (d: !$F.dir, prev: !$A.borrow(byte, lq, 256), prev_len: int,
+     best: $A.arr(byte, lb, 256), best_len: int, fuel: int k)
+    : [lo:agz] @($A.arr(byte, lo, 256), int) =
+    if fuel <= 0 then @(best, best_len)
+    else let
+      val e = $A.alloc<byte>(256)
+      val nr = $F.dir_next(d, e, 256)
+      val el = $R.option_unwrap_or<int>(nr, ~1)
+    in
+      if el < 0 then let
+        val () = $A.free<byte>(e)
+      in @(best, best_len) end
+      else let
+        val @(fz_e, bv_e) = $A.freeze<byte>(e)
+        val @(fz_b, bv_b) = $A.freeze<byte>(best)
+        val after_prev = (if prev_len <= 0 then true
+          else name_lt(prev, prev_len, bv_e, el)): bool
+        val beats = (if ~after_prev then false
+          else if best_len < 0 then true
+          else name_lt(bv_e, el, bv_b, best_len)): bool
+        val () = $A.drop<byte>(fz_b, bv_b)
+        val best = $A.thaw<byte>(fz_b)
+        val () = $A.drop<byte>(fz_e, bv_e)
+        val e = $A.thaw<byte>(fz_e)
+      in
+        if beats then let
+          val () = $A.free<byte>(best)
+        in scan(d, prev, prev_len, e, el, fuel - 1) end
+        else let
+          val () = $A.free<byte>(e)
+        in scan(d, prev, prev_len, best, best_len, fuel - 1) end
+      end
+    end
+  val dr = $F.dir_open(path, path_len)
+in
+  case+ dr of
+  | ~$R.ok(d) => let
+      val none = $A.alloc<byte>(256)
+      val r = scan(d, prev, prev_len, none, ~1, 4096)
+      val dcr = $F.dir_close(d)
+      val () = $R.discard<int><int>(dcr)
+    in r end
+  | ~$R.err(_) => let
+      val none = $A.alloc<byte>(256)
+    in @(none, ~1) end
+end
