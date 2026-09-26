@@ -71,15 +71,31 @@ fun band_g1 {a,b:nat}(a: int(a), b: int(b)): [r:nat | r <= b] int(r) = "mac#atsp
 
 
 
-castfn g0_of_g1 {n:int} (x: int(n)): int
-
 castfn checked_pos(x: int): [n:pos] int n
 
 castfn checked_nat(x: int): [n:nat] int n
 
 castfn checked_byte(x: int): [v:nat | v < 256] int v
 
+
+
+fn low_byte(x: int): [v:nat | v < 256] int v
+
+
+
+
+
+
+
+
+
+fn byte_of_char(c: char): [v:nat | v < 256] int v
+
+
+
 castfn checked_arr_size(x: int): [n:pos | n <= 1048576] int n
 
 castfn checked_idx {n:pos} (x: int, len: int n): [i:nat | i < n] int i
+
+castfn checked_text_size(x: int): [n:pos | n < 65536] int n
 

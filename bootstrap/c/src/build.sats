@@ -894,6 +894,10 @@ fn do_lock(dev: int, dry_run: int): void
 
 
 
+
+
+
+
 fn write_wasm_runtime_h(): int
 
 
@@ -1599,6 +1603,10 @@ fn read_unsafe_flag(): int
 
 
 
+
+
+
+
 fn check_wasm_binary {l:agz}
   (path: !$A.borrow(byte, l, 524288)): int
 
@@ -1625,8 +1633,6 @@ fn check_wasm_binary {l:agz}
 
 
 fn do_build(release: int, build_target: int): void
-
-
 
 
 

@@ -23,7 +23,7 @@ datavtype str_option(a:t@ype) =
 fun compare
   {la:agz}{na:pos}{lb:agz}{nb:pos}
   (a: !$A.borrow(byte, la, na), a_len: int na,
-   b: !$A.borrow(byte, lb, nb), b_len: int nb): int
+   b: !$A.borrow(byte, lb, nb), b_len: int nb): [r:int | ~1 <= r; r <= 1] int r
 
 
 
@@ -41,7 +41,7 @@ fun eq
 fun index_of
   {la:agz}{na:pos}
   (haystack: !$A.borrow(byte, la, na), h_len: int na,
-   needle_byte: int): str_option(int)
+   needle_byte: int): str_option([i:nat | i < na] int i)
 
 
 
@@ -76,7 +76,7 @@ fun contains
 
 fun trim_left
   {la:agz}{na:pos}
-  (s: !$A.borrow(byte, la, na), s_len: int na): int
+  (s: !$A.borrow(byte, la, na), s_len: int na): [r:nat | r <= na] int r
 
 
 
@@ -84,7 +84,7 @@ fun trim_left
 
 fun trim_right
   {la:agz}{na:pos}
-  (s: !$A.borrow(byte, la, na), s_len: int na): int
+  (s: !$A.borrow(byte, la, na), s_len: int na): [r:nat | r <= na] int r
 
 
 
@@ -103,8 +103,9 @@ fun to_lower_byte(b: int): int
 
 
 fun int_to_str
-  {l:agz}{n:pos}
-  (buf: !$A.arr(byte, l, n), pos: int, max_len: int n, value: int): int
+  {l:agz}{n:pos}{p:nat | p <= n}{v:int}
+  (buf: !$A.arr(byte, l, n), pos: int p, max_len: int n, value: int v)
+  : [r:int | p <= r; r <= n] int r
 
 
 
@@ -134,166 +135,28 @@ fn text_of_chars
 
 
 
-fun chars_match
-  {l:agz}{n:pos}{sn:nat}
-  (ent: !$A.arr(byte, l, n), p: int, max: int n,
-   pat: string sn, pi: int, plen: int sn): bool
-
-
-
-
-
 fun chars_match_borrow
-  {l:agz}{n:pos}{sn:nat}
+  {l:agz}{n:pos}{lp:agz}{np:pos}
   (src: !$A.borrow(byte, l, n), p: int, max: int n,
-   pat: string sn, pi: int, plen: int sn): bool
+   pat: !$A.borrow(byte, lp, np), pi: int, plen: int np): bool
 
 
 
 
 
 fn has_suffix
-  {l:agz}{n:pos}{sn:nat}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n,
-   suf: string sn, slen: int sn): bool
+  {l:agz}{n:pos}{k:nat | k <= n}{lp:agz}{np:pos}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n,
+   suf: !$A.borrow(byte, lp, np), slen: int np): bool
 
 
 
 
 
 fn name_eq
-  {l:agz}{n:pos}{sn:nat}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n,
-   s: string sn, slen: int sn): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  {l:agz}{n:pos}{k:nat | k <= n}{lp:agz}{np:pos}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n,
+   s: !$A.borrow(byte, lp, np), slen: int np): bool
 
 
 
@@ -559,6 +422,75 @@ fn borrow_byte {l:agz}{n:pos}
 
 
 
+
+
+
+fn match_at {l:agz}{n:pos}{lp:agz}{np:pos}{p:nat | p + np <= n}
+  (src: !$A.borrow(byte, l, n), p: int p,
+   pat: !$A.borrow(byte, lp, np), np: int np): bool
+
+
+
+
+
+
+
+
+
+
+
+
+fn match_at_arr {l:agz}{n:pos}{lp:agz}{np:pos}{p:nat | p + np <= n}
+  (src: !$A.arr(byte, l, n), p: int p,
+   pat: !$A.borrow(byte, lp, np), np: int np): bool
+
+
+
+
+
+
+
+
+
+
+
+
+fn byte_at {l:agz}{n:pos}{p:nat | p < n}
+  (src: !$A.borrow(byte, l, n), p: int p): int
+
+
+
+
+
+
+fn find_null_at {l:agz}{n:pos}{p:nat | p <= n}
+  (buf: !$A.arr(byte, l, n), p: int p, n: int n)
+  : [r:int | p <= r; r <= n] int r
+
+
+
+
+
+
+
+
+
+
+
+fn find_null_bv_at {l:agz}{n:pos}{p:nat | p <= n}
+  (bv: !$A.borrow(byte, l, n), p: int p, n: int n)
+  : [r:int | p <= r; r <= n] int r
+
+
+
+
+
+
+
+
+
+
+
 fun find_null {l:agz}{n:pos}{fuel:nat}
   (buf: !$A.arr(byte, l, n), pos: int, max: int n,
    fuel: int fuel): int
@@ -589,23 +521,75 @@ fun find_null_bv {l:agz}{n:pos}{fuel:nat}
 
 
 
-
-fun fill_exact {l:agz}{n:pos}{sn:nat}{i:nat | i <= sn}{fuel:nat}
-  (arr: !$A.arr(byte, l, n), s: string sn, n: int n, slen: int sn,
-   i: int i, fuel: int fuel): void
-
-
-
+fun copy_from_borrow
+  {lb:agz}{nb:pos}{la:agz}{na:pos}{so:nat}{do_:nat}{c:nat | so+c <= nb; do_+c <= na}
+  (src: !$A.borrow(byte, lb, nb), src_off: int so, src_max: int nb,
+   dst: !$A.arr(byte, la, na), dst_off: int do_, dst_max: int na,
+   count: int c): void
 
 
 
 
 
+fn copy_arr_region
+  {ls:agz}{ns:pos}{ld:agz}{nd:pos}{so:nat}{c:nat | so+c <= ns; c <= nd}
+  (src: $A.arr(byte, ls, ns), src_off: int so, src_max: int ns,
+   dst: !$A.arr(byte, ld, nd), dst_max: int nd,
+   count: int c): $A.arr(byte, ls, ns)
 
 
 
-fn str_to_borrow {sn:pos}
-  (s: string sn): [l:agz][n:pos] @($A.arr(byte, l, n), int n)
+
+
+fun borrow_region_eq
+  {lb:agz}{n:pos}{oa:nat}{ob:nat}{c:nat | oa+c <= n; ob+c <= n}
+  (data: !$A.borrow(byte, lb, n), len: int n,
+   off_a: int oa, off_b: int ob, count: int c): bool
+
+
+
+
+
+
+fn fill_exact {l:agz}{n:pos}{lb:agz}{nb:pos}{i:nat | i <= nb}
+  (arr: !$A.arr(byte, l, n), src: !$A.borrow(byte, lb, nb), n: int n,
+   slen: int nb, i: int i): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

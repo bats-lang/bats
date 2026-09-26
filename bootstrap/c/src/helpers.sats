@@ -137,50 +137,277 @@ fn is_dot_or_dotdot {l:agz}{n:pos}
 
 
 
-fn has_bats_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+
+
+fn dir_name_len (o: $R.option([k:nat | k <= 256] int k)): [k:int | ~1 <= k; k <= 256] int k
 
 
 
 
-fn has_dats_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+
+
+
+fn ent_has_suffix {l:agz}{n:pos}{k:nat | k <= n}{m:pos | m <= 1048576}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n, sfx: &(@[char][m]), m: int m): bool
 
 
 
 
-fn has_dats_c_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
 
 
 
 
-fn has_dats_o_ext {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+
+fn ent_name_eq {l:agz}{n:pos}{k:nat | k <= n}{m:pos | m <= 1048576}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n, s: &(@[char][m]), m: int m): bool
 
 
 
 
-fn is_lib_bats {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
 
 
 
 
-fn is_lib_dats {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+
+fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n, lit: &(@[char][m]), m: int m): bool
 
 
 
 
-fn is_lib_dats_c {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
 
 
 
 
-fn is_lib_dats_o {l:agz}{n:pos}
-  (ent: !$A.arr(byte, l, n), len: int, max: int n): bool
+fn has_bats_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn has_dats_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn has_dats_c_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn has_dats_o_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn has_sha256_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn has_lib_dats_c_sfx {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn has_lib_dats_o_sfx {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn is_lib_bats {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn is_lib_dats {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn is_lib_dats_c {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+fn is_lib_dats_o {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool
+
+
+
+
+
+
+
+fn lit_as {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_begin {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_binary {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_dollar_UNITTEST {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_dollar_UNSAFE {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_dot_slash {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_end {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_exthash {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_fun {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_hash_pub {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_hash_target {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_hash_use {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_let {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_local {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_machash {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_no_mangle {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_prfn {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_prfun {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_primplement {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_slash_srcslash_libdot_dats {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_staload_dq {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
+
+
+
+
+fn lit_target_wasm_binary {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool
+
 
 
 
@@ -1098,9 +1325,9 @@ fn count_argc {l:agz}
 
 
 
-fn ap_flag {sn:pos}{sh:pos}
-  (p: $AP.parser, name: string sn, sc: int, help: string sh
-  ): @($AP.parser, $AP.arg($AP.bool_val))
+fn ap_flag {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: int, help: &(@[char][nh]), nh: int nh
+  ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.bool_val))
 
 
 
@@ -1112,12 +1339,9 @@ fn ap_flag {sn:pos}{sh:pos}
 
 
 
-
-
-fn ap_string_opt {sn:pos}{sh:pos}
-  (p: $AP.parser, name: string sn, sc: int, help: string sh
-  ): @($AP.parser, $AP.arg($AP.string_val))
-
+fn ap_string_opt {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: int, help: &(@[char][nh]), nh: int nh
+  ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.string_val))
 
 
 
@@ -1129,12 +1353,9 @@ fn ap_string_opt {sn:pos}{sh:pos}
 
 
 
-
-fn ap_string_pos {sn:pos}{sh:pos}
-  (p: $AP.parser, name: string sn, help: string sh
-  ): @($AP.parser, $AP.arg($AP.string_val))
-
-
+fn ap_string_pos {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, help: &(@[char][nh]), nh: int nh
+  ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.string_val))
 
 
 
@@ -1175,7 +1396,7 @@ fn ap_string_pos {sn:pos}{sh:pos}
 fn dir_next_sorted {lp:agz}{np:pos | np < 1048576}{lq:agz}
   (path: !$A.borrow(byte, lp, np), path_len: int np,
    prev: !$A.borrow(byte, lq, 256), prev_len: int)
-  : [lo:agz] @($A.arr(byte, lo, 256), int)
+  : [lo:agz] @($A.arr(byte, lo, 256), [k:int | ~1 <= k; k <= 256] int k)
 
 
 

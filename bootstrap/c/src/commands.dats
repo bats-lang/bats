@@ -58,7 +58,7 @@ in
         else let
           val ent = $A.alloc<byte>(256)
           val nr = $F.dir_next(sd, ent, 256)
-          val elen = $R.option_unwrap_or<int>(nr, ~1)
+          val elen = dir_name_len(nr)
         in
           if elen < 0 then $A.free<byte>(ent)
           else let

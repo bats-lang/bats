@@ -112,7 +112,7 @@ in case+ dr of
         else let
           val e = $A.alloc<byte>(256)
           val nr = $F.dir_next(d, e, 256)
-          val el = $R.option_unwrap_or<int>(nr, ~1)
+          val el = dir_name_len(nr)
         in if el < 0 then $A.free<byte>(e)
           else let
             val is_d = has_dats_ext(e, el, 256)
@@ -176,14 +176,14 @@ in case+ dr of
         else let
           val e = $A.alloc<byte>(256)
           val nr = $F.dir_next(d, e, 256)
-          val el = $R.option_unwrap_or<int>(nr, ~1)
+          val el = dir_name_len(nr)
         in if el < 0 then $A.free<byte>(e)
           else let
-            val is_c = $S.has_suffix(e, el, 256, "_dats.c", 7)
+            val is_c = has_dats_c_ext(e, el, 256)
           in if ~is_c then let val () = $A.free<byte>(e)
             in loop(d, dir_bv, dir_len, ph, phlen, rel, fuel - 1) end
           else let
-            val is_l = $S.has_suffix(e, el, 256, "lib_dats.c", 10)
+            val is_l = has_lib_dats_c_sfx(e, el, 256)
           in if is_l then let val () = $A.free<byte>(e)
             in loop(d, dir_bv, dir_len, ph, phlen, rel, fuel - 1) end
             else let
@@ -298,7 +298,9 @@ in
           val () = $A.free<byte>($A.thaw<byte>(fz_tbl))
         in case+ pr of
           | ~$R.ok(doc) => let
-              val @(dk, dk_sz) = $S.str_to_borrow("dependencies")
+              var dk_c = @[char][12]('d', 'e', 'p', 'e', 'n', 'd', 'e', 'n', 'c', 'i', 'e', 's')
+              val dk = $S.from_char_array(dk_c, 12)
+              val dk_sz = 12
               val @(fz_dk, bv_dk) = $A.freeze<byte>(dk)
               val keys = $A.alloc<byte>(4096)
               val kr = $T.keys(doc, bv_dk, dk_sz, keys, 4096)
@@ -519,11 +521,11 @@ in
                           else let
                             val e = $A.alloc<byte>(256)
                             val nr = $F.dir_next(d, e, 256)
-                            val el = $R.option_unwrap_or<int>(nr, ~1)
+                            val el = dir_name_len(nr)
                           in if el < 0 then $A.free<byte>(e)
                             else let
-                              val ib = $S.has_suffix(e, el, 256, ".bats", 5)
-                              val is = $S.has_suffix(e, el, 256, ".sha256", 7)
+                              val ib = has_bats_ext(e, el, 256)
+                              val is = has_sha256_ext(e, el, 256)
                             in if ib then if is then let val () = $A.free<byte>(e)
                               in scan_v(d, b, bl, f2 - 1) end
                               else let
@@ -703,7 +705,9 @@ in
                               val () = $A.free<byte>($A.thaw<byte>(fz_tb))
                             in case+ pr of
                               | ~$R.ok(doc2) => let
-                                  val @(dka, dksz) = $S.str_to_borrow("dependencies")
+                                  var dka_c = @[char][12]('d', 'e', 'p', 'e', 'n', 'd', 'e', 'n', 'c', 'i', 'e', 's')
+                                  val dka = $S.from_char_array(dka_c, 12)
+                                  val dksz = 12
                                   val @(fz_dka, bv_dka) = $A.freeze<byte>(dka)
                                   val kr2 = $T.keys(doc2, bv_dka, dksz, tk, 4096)
                                   val tkl2 = (case+ kr2 of
@@ -731,7 +735,7 @@ in
                           else let
                             val ce = $A.alloc<byte>(256)
                             val cnr = $F.dir_next(nd, ce, 256)
-                            val cel = $R.option_unwrap_or<int>(cnr, ~1)
+                            val cel = dir_name_len(cnr)
                           in if cel < 0 then let val () = $A.free<byte>(ce) in cnt3 end
                             else let val cdd = is_dot_or_dotdot(ce, cel, 256) in
                               if cdd then let val () = $A.free<byte>(ce)
@@ -761,7 +765,7 @@ in
                           else let
                             val de = $A.alloc<byte>(256)
                             val nr = $F.dir_next(bd, de, 256)
-                            val del = $R.option_unwrap_or<int>(nr, ~1)
+                            val del = dir_name_len(nr)
                           in if del < 0 then let val () = $A.free<byte>(de) in cnt3 end
                             else let val dd = is_dot_or_dotdot(de, del, 256) in
                               if dd then let val () = $A.free<byte>(de) in sdt(bd, tk, rb3, rl3, elb3, el_len3, lb3, cnt3, f3-1) end
@@ -1173,11 +1177,11 @@ implement do_build_wasm(release) = let
           else let
             val e = $A.alloc<byte>(256)
             val nr = $F.dir_next(d, e, 256)
-            val el = $R.option_unwrap_or<int>(nr, ~1)
+            val el = dir_name_len(nr)
           in
             if el < 0 then let val () = $A.free<byte>(e) in lc end
             else let
-              val has_c = $S.has_suffix(e, el, 256, "_dats.c", 7)
+              val has_c = has_dats_c_ext(e, el, 256)
             in
               if has_c then let
                 var pb : $B.builder_v = $B.create()
@@ -1235,7 +1239,7 @@ implement do_build_wasm(release) = let
           else let
             val e = $A.alloc<byte>(256)
             val nr = $F.dir_next(bm_d, e, 256)
-            val el = $R.option_unwrap_or<int>(nr, ~1)
+            val el = dir_name_len(nr)
           in if el < 0 then let val () = $A.free<byte>(e) in lc end
             else let
               val dd = is_dot_or_dotdot(e, el, 256)
@@ -1262,10 +1266,10 @@ implement do_build_wasm(release) = let
                       else let
                         val oe = $A.alloc<byte>(256)
                         val onr = $F.dir_next(sd_d, oe, 256)
-                        val oel = $R.option_unwrap_or<int>(onr, ~1)
+                        val oel = dir_name_len(onr)
                       in if oel < 0 then let val () = $A.free<byte>(oe) in lc end
                         else let
-                          val is_c = $S.has_suffix(oe, oel, 256, "_dats.c", 7)
+                          val is_c = has_dats_c_ext(oe, oel, 256)
                         in if ~is_c then let val () = $A.free<byte>(oe)
                           in compile_dep_c(sd_d, lb2, bv_e2, el2, lc, fuel4 - 1) end
                         else let
@@ -1326,7 +1330,7 @@ implement do_build_wasm(release) = let
                           else let
                             val se = $A.alloc<byte>(256)
                             val snr = $F.dir_next(nsd_d, se, 256)
-                            val sl = $R.option_unwrap_or<int>(snr, ~1)
+                            val sl = dir_name_len(snr)
                           in if sl < 0 then let val () = $A.free<byte>(se) in lc end
                             else let val sdd = is_dot_or_dotdot(se, sl, 256) in
                               if sdd then let val () = $A.free<byte>(se)
@@ -1354,10 +1358,10 @@ implement do_build_wasm(release) = let
                                         else let
                                           val oe2 = $A.alloc<byte>(256)
                                           val onr2 = $F.dir_next(sd2_d, oe2, 256)
-                                          val oel2 = $R.option_unwrap_or<int>(onr2, ~1)
+                                          val oel2 = dir_name_len(onr2)
                                         in if oel2 < 0 then let val () = $A.free<byte>(oe2) in lc end
                                           else let
-                                            val is_c2 = $S.has_suffix(oe2, oel2, 256, "_dats.c", 7)
+                                            val is_c2 = has_dats_c_ext(oe2, oel2, 256)
                                           in if ~is_c2 then let val () = $A.free<byte>(oe2)
                                             in compile_ns_sub_c(sd2_d, lb4, ns2, nl2, sub2, sl2, lc, fuel6 - 1) end
                                           else let
@@ -1445,10 +1449,10 @@ implement do_build_wasm(release) = let
           else let
             val e = $A.alloc<byte>(256)
             val nr = $F.dir_next(sd, e, 256)
-            val el = $R.option_unwrap_or<int>(nr, ~1)
+            val el = dir_name_len(nr)
           in if el < 0 then let val () = $A.free<byte>(e) in lc end
             else let
-              val is_c = $S.has_suffix(e, el, 256, "_dats.c", 7)
+              val is_c = has_dats_c_ext(e, el, 256)
             in if ~is_c then let val () = $A.free<byte>(e)
               in wasm_cc_src(sd, lb, lc, fuel7 - 1) end
             else let
@@ -1497,10 +1501,10 @@ implement do_build_wasm(release) = let
           else let
             val e = $A.alloc<byte>(256)
             val nr = $F.dir_next(bd, e, 256)
-            val el = $R.option_unwrap_or<int>(nr, ~1)
+            val el = dir_name_len(nr)
           in if el < 0 then let val () = $A.free<byte>(e) in lc end
             else let
-              val is_c = $S.has_suffix(e, el, 256, "_dats.c", 7)
+              val is_c = has_dats_c_ext(e, el, 256)
             in if ~is_c then let val () = $A.free<byte>(e)
               in wasm_cc_bin(bd, lb, lc, fuel8 - 1) end
             else let
@@ -1573,9 +1577,13 @@ in case+ r of
       val () = $A.free<byte>($A.thaw<byte>(fz_b))
     in case+ pr of
       | ~$R.ok(doc) => let
-          val @(sk, skl) = $S.str_to_borrow("package")
+          var sk_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+          val sk = $S.from_char_array(sk_c, 7)
+          val skl = 7
           val @(fz_sk, bv_sk) = $A.freeze<byte>(sk)
-          val @(uk, ukl) = $S.str_to_borrow("unsafe")
+          var uk_c = @[char][6]('u', 'n', 's', 'a', 'f', 'e')
+          val uk = $S.from_char_array(uk_c, 6)
+          val ukl = 6
           val @(fz_uk, bv_uk) = $A.freeze<byte>(uk)
           val ubuf = $A.alloc<byte>(32)
           val ur = $T.get(doc, bv_sk, skl, bv_uk, ukl, ubuf, 32)
@@ -1617,7 +1625,7 @@ in case+ r of
          interpreting #target inside the string *)
       val ok = (if bl >= 19 then
         $AR.eq_int_int($S.borrow_byte(bv_buf, 0, 32), 35) &&
-        $S.chars_match_borrow(bv_buf, 1, 32, "target wasm binary", 0, 18)
+        lit_target_wasm_binary(bv_buf, 1, 32)
       else false): bool
       val () = $A.drop<byte>(fz_buf, bv_buf)
       val () = $A.free<byte>($A.thaw<byte>(fz_buf))
@@ -1923,7 +1931,7 @@ in
               else let
                 val ent = $A.alloc<byte>(256)
                 val nr = $F.dir_next(d, ent, 256)
-                val elen = $R.option_unwrap_or<int>(nr, ~1)
+                val elen = dir_name_len(nr)
               in
                 if elen < 0 then $A.free<byte>(ent)
                 else let
@@ -1971,7 +1979,7 @@ in
                               else let
                                 val se = $A.alloc<byte>(256)
                                 val snr = $F.dir_next(nsd2, se, 256)
-                                val sel = $R.option_unwrap_or<int>(snr, ~1)
+                                val sel = dir_name_len(snr)
                               in
                                 if sel < 0 then $A.free<byte>(se)
                                 else let
@@ -2089,7 +2097,7 @@ in
                                             else let
                                               val ent_ns = $A.alloc<byte>(256)
                                               val nr_ns = $F.dir_next(d_ns_ex, ent_ns, 256)
-                                              val elen_ns = $R.option_unwrap_or<int>(nr_ns, ~1)
+                                              val elen_ns = dir_name_len(nr_ns)
                                             in
                                               if elen_ns < 0 then $A.free<byte>(ent_ns)
                                               else let
@@ -2241,7 +2249,7 @@ in
                             else let
                               val ent_ex = $A.alloc<byte>(256)
                               val nr_ex = $F.dir_next(d_ex, ent_ex, 256)
-                              val elen_ex = $R.option_unwrap_or<int>(nr_ex, ~1)
+                              val elen_ex = dir_name_len(nr_ex)
                             in
                               if elen_ex < 0 then $A.free<byte>(ent_ex)
                               else let
@@ -2344,7 +2352,7 @@ in
               else let
                 val ent_sm = $A.alloc<byte>(256)
                 val nr_sm = $F.dir_next(d_sm, ent_sm, 256)
-                val elen_sm = $R.option_unwrap_or<int>(nr_sm, ~1)
+                val elen_sm = dir_name_len(nr_sm)
               in
                 if elen_sm < 0 then $A.free<byte>(ent_sm)
                 else let
@@ -2518,14 +2526,13 @@ in
               else if pos >= nbytes then spos
               else if pos + 9 > nbytes then spos
               else let
-                val is_stal = $S.chars_match_borrow(buf, pos, 524288,
-                  "staload \"", 0, 9)
+                val is_stal = lit_staload_dq(buf, pos, 524288)
               in if ~is_stal then let
                 val next = skip_to_nl(buf, pos, nbytes, 524288)
               in scan_staload_deps(buf, nbytes, seen2, spos, next, fuel_sc - 1) end
               else let
                 val is_self = (if pos + 11 <= nbytes then
-                  $S.chars_match_borrow(buf, pos + 9, 524288, "./", 0, 2)
+                  lit_dot_slash(buf, pos + 9, 524288)
                   else false): bool
               in if is_self then let
                 val next = skip_to_nl(buf, pos + 9, nbytes, 524288)
@@ -2535,8 +2542,7 @@ in
                 val path_start = pos + 9
                 val path_len = qpos - path_start
                 val is_lib_dep = (if path_len > 13 then
-                  $S.chars_match_borrow(buf, qpos - 13, 524288,
-                    "/src/lib.dats", 0, 13)
+                  lit_slash_srcslash_libdot_dats(buf, qpos - 13, 524288)
                   else false): bool
               in if ~is_lib_dep then let
                 val next = skip_to_nl(buf, qpos, nbytes, 524288)
@@ -2639,7 +2645,7 @@ in
                         else let
                           val de = $A.alloc<byte>(256)
                           val nr = $F.dir_next(d_ext2, de, 256)
-                          val dl = $R.option_unwrap_or<int>(nr, ~1)
+                          val dl = dir_name_len(nr)
                         in if dl < 0 then $A.free<byte>(de)
                         else let
                           val is_d = has_dats_ext(de, dl, 256)
@@ -2696,7 +2702,7 @@ in
                 val () = $A.free<byte>(sme)
               in spos end
               else let
-                val is_dats = $S.has_suffix(sme, sel, 256, ".dats", 5)
+                val is_dats = has_dats_ext(sme, sel, 256)
               in if ~is_dats then
                 scan_shared_module_deps(seen2, spos, sme, sel, fuel_sm - 1)
               else let
@@ -2771,11 +2777,11 @@ in
                         else let
                           val le = $A.alloc<byte>(256)
                           val lnr = $F.dir_next(d_ld2, le, 256)
-                          val lel = $R.option_unwrap_or<int>(lnr, ~1)
+                          val lel = dir_name_len(lnr)
                         in if lel < 0 then $A.free<byte>(le)
                         else let
-                          val is_o = $S.has_suffix(le, lel, 256, "_dats.o", 7)
-                          val is_l = $S.has_suffix(le, lel, 256, "lib_dats.o", 10)
+                          val is_o = has_dats_o_ext(le, lel, 256)
+                          val is_l = has_lib_dats_o_sfx(le, lel, 256)
                         in if is_o then
                           if is_l then let
                             val () = $A.free<byte>(le)
@@ -2811,7 +2817,7 @@ in
               else let
                 val ent = $A.alloc<byte>(256)
                 val nr = $F.dir_next(d, ent, 256)
-                val elen = $R.option_unwrap_or<int>(nr, ~1)
+                val elen = dir_name_len(nr)
               in
                 if elen < 0 then $A.free<byte>(ent)
                 else let
@@ -2975,7 +2981,7 @@ in
                             else let
                               val de = $A.alloc<byte>(256)
                               val dnr = $F.dir_next(dd3, de, 256)
-                              val dlen = $R.option_unwrap_or<int>(dnr, ~1)
+                              val dlen = dir_name_len(dnr)
                             in
                               if dlen < 0 then $A.free<byte>(de)
                               else let
@@ -3020,7 +3026,7 @@ in
                                             else let
                                               val sde = $A.alloc<byte>(256)
                                               val snr = $F.dir_next(nsd, sde, 256)
-                                              val sel = $R.option_unwrap_or<int>(snr, ~1)
+                                              val sel = dir_name_len(snr)
                                             in if sel < 0 then $A.free<byte>(sde)
                                               else let val sdd = is_dot_or_dotdot(sde, sel, 256) in
                                                 if sdd then let val () = $A.free<byte>(sde)
@@ -3158,7 +3164,7 @@ in
                                           else let
                                             val de3 = $A.alloc<byte>(256)
                                             val nr3 = $F.dir_next(d_pt, de3, 256)
-                                            val dl3 = $R.option_unwrap_or<int>(nr3, ~1)
+                                            val dl3 = dir_name_len(nr3)
                                           in
                                             if dl3 < 0 then $A.free<byte>(de3)
                                             else let
@@ -3264,7 +3270,7 @@ in
                             else let
                               val de_psm = $A.alloc<byte>(256)
                               val nr_psm = $F.dir_next(d_psm, de_psm, 256)
-                              val dl_psm = $R.option_unwrap_or<int>(nr_psm, ~1)
+                              val dl_psm = dir_name_len(nr_psm)
                             in
                               if dl_psm < 0 then $A.free<byte>(de_psm)
                               else let
@@ -3426,7 +3432,7 @@ in
                             else let
                               val de = $A.alloc<byte>(256)
                               val dnr = $F.dir_next(dd4, de, 256)
-                              val dlen = $R.option_unwrap_or<int>(dnr, ~1)
+                              val dlen = dir_name_len(dnr)
                             in
                               if dlen < 0 then $A.free<byte>(de)
                               else let
@@ -3470,7 +3476,7 @@ in
                                             else let
                                               val sde = $A.alloc<byte>(256)
                                               val snr = $F.dir_next(nscd, sde, 256)
-                                              val sel = $R.option_unwrap_or<int>(snr, ~1)
+                                              val sel = dir_name_len(snr)
                                             in if sel < 0 then $A.free<byte>(sde)
                                               else let val sdd = is_dot_or_dotdot(sde, sel, 256) in
                                                 if sdd then let val () = $A.free<byte>(sde)
@@ -3588,7 +3594,7 @@ in
                                           else let
                                             val de4 = $A.alloc<byte>(256)
                                             val nr4 = $F.dir_next(d_cc, de4, 256)
-                                            val dl4 = $R.option_unwrap_or<int>(nr4, ~1)
+                                            val dl4 = dir_name_len(nr4)
                                           in
                                             if dl4 < 0 then $A.free<byte>(de4)
                                             else let
@@ -3688,7 +3694,7 @@ in
                             else let
                               val de_csm = $A.alloc<byte>(256)
                               val nr_csm = $F.dir_next(d_csm, de_csm, 256)
-                              val dl_csm = $R.option_unwrap_or<int>(nr_csm, ~1)
+                              val dl_csm = dir_name_len(nr_csm)
                             in
                               if dl_csm < 0 then $A.free<byte>(de_csm)
                               else let
@@ -3875,11 +3881,11 @@ in
                                         else let
                                           val ef = $A.alloc<byte>(256)
                                           val enr = $F.dir_next(wd2, ef, 256)
-                                          val el = $R.option_unwrap_or<int>(enr, ~1)
+                                          val el = dir_name_len(enr)
                                         in if el < 0 then let val () = $A.free<byte>(ef) in c end
                                         else let
-                                          val ic = $S.has_suffix(ef, el, 256, "_dats.c", 7)
-                                          val il = $S.has_suffix(ef, el, 256, "lib_dats.c", 10)
+                                          val ic = has_dats_c_ext(ef, el, 256)
+                                          val il = has_lib_dats_c_sfx(ef, el, 256)
                                         in if ic then if il then let val () = $A.free<byte>(ef)
                                           in wcc_ex(wd2, s, dp, dl, lb2, c, fuel2-1) end
                                           else let
@@ -3940,10 +3946,10 @@ in
                               else let
                                 val se = $A.alloc<byte>(256)
                                 val snr = $F.dir_next(d, se, 256)
-                                val sl = $R.option_unwrap_or<int>(snr, ~1)
+                                val sl = dir_name_len(snr)
                               in if sl < 0 then let val () = $A.free<byte>(se) in c end
                               else let
-                                val isc = $S.has_suffix(se, sl, 256, "_dats.c", 7)
+                                val isc = has_dats_c_ext(se, sl, 256)
                               in if ~isc then let val () = $A.free<byte>(se)
                                 in wcc_sm(d, lb, c, fuel3 - 1) end
                               else let
@@ -4114,7 +4120,7 @@ in
                             else let
                               val de_lsm = $A.alloc<byte>(256)
                               val nr_lsm = $F.dir_next(d_lsm, de_lsm, 256)
-                              val dl_lsm = $R.option_unwrap_or<int>(nr_lsm, ~1)
+                              val dl_lsm = dir_name_len(nr_lsm)
                             in
                               if dl_lsm < 0 then $A.free<byte>(de_lsm)
                               else let

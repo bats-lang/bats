@@ -1,7 +1,7 @@
 staload A = "array/src/lib.sats"
 staload AR = "arith/src/lib.sats"
 staload R = "result/src/lib.sats"
-staload E = "env/src/lib.sats"
+
 
 
 
@@ -22,7 +22,8 @@ abst@ype bool_val = int
 abst@ype count_val = int
 
 
-abst@ype arg(a:t@ype) = int
+
+datatype arg(a:t@ype) = {i:nat | i < 64} arg_mk(a) of (int i)
 
 
 
@@ -36,13 +37,12 @@ abst@ype arg(a:t@ype) = int
 
 
 
-datavtype parser =
-  | {ls:agz}{lt:agz}{lsc:agz}
-    parser_mk of (
+datavtype parser(int, int) =
+  | {ls:agz}{lt:agz}{tp:nat | tp <= 8192}{ac:nat | ac <= 64}{gc:nat}
+    parser_mk(tp, ac) of (
       $A.arr(int, ls, 1024),      (* specs: MAX_ARGS * SPEC_STRIDE *)
       $A.arr(byte, lt, 8192),     (* text buffer *)
-      $A.arr(int, lsc, 64),       (* subcmd data *)
-      int, int, int, int, int,    (* arg_count, text_pos, pos_count, subcmd_count, group_count *)
+      int ac, int tp, int gc, int, (* arg_count, text_pos, group_count, subcmd_count *)
       int, int, int, int          (* prog name_off, name_len, help_off, help_len *)
     )
 
@@ -51,14 +51,14 @@ datavtype parser =
 
 
 datavtype parse_result =
-  | {ls:agz}{lm:agz}{li:agz}{lb:agz}{lp:agz}{lt:agz}{lsp:agz}
+  | {ls:agz}{lm:agz}{li:agz}{lb:agz}{lp:agz}{lt:agz}{lsp:agz}{ac:nat | ac <= 64}
     parse_result_mk of (
       $A.arr(byte, ls, 8192),     (* string values *)
       $A.arr(int, lm, 128),       (* string meta: off+len per arg *)
       $A.arr(int, li, 64),        (* int values *)
       $A.arr(int, lb, 64),        (* bool/count values *)
       $A.arr(int, lp, 64),        (* present flags *)
-      int, int, int,              (* arg_count, text_pos, subcmd_idx *)
+      int ac, int, int,           (* arg_count, text_pos, subcmd_idx *)
       $A.arr(byte, lt, 8192),     (* spec text for help *)
       $A.arr(int, lsp, 1024)      (* spec data for help *)
     )
@@ -73,50 +73,53 @@ datavtype parse_error =
   | err_range of (int)
   | err_exclusive of (int)
   | err_choice of (int)
+  (* String values did not fit the 8192-byte value buffer; carries the
+     spec index + 1 of the value that overflowed. *)
+  | err_too_long of (int)
 
 
 
 
 
 fn parser_new
-  {lp:agz}{np:pos}{lh:agz}{nh:pos}
+  {lp:agz}{np:pos}{lh:agz}{nh:pos | np + nh <= 8192}
   (name: !$A.borrow(byte, lp, np), nlen: int np,
-   help: !$A.borrow(byte, lh, nh), hlen: int nh): parser
+   help: !$A.borrow(byte, lh, nh), hlen: int nh): parser(np + nh, 0)
 
 fn add_string
-  {ln:agz}{nn:pos}{lh:agz}{nh:pos}
-  (p: parser, name: !$A.borrow(byte, ln, nn), nlen: int nn,
+  {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
+  (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
    short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh,
-   positional: bool): @(parser, arg(string_val))
+   positional: bool): @(parser(tp + nn + nh, ac + 1), arg(string_val))
 
 fn add_int
-  {ln:agz}{nn:pos}{lh:agz}{nh:pos}
-  (p: parser, name: !$A.borrow(byte, ln, nn), nlen: int nn,
+  {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
+  (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
    short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh,
-   default_val: int, min_val: int, max_val: int): @(parser, arg(int_val))
+   default_val: int, min_val: int, max_val: int): @(parser(tp + nn + nh, ac + 1), arg(int_val))
 
 fn add_flag
-  {ln:agz}{nn:pos}{lh:agz}{nh:pos}
-  (p: parser, name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser, arg(bool_val))
+  {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
+  (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
+   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(bool_val))
 
 fn add_count
-  {ln:agz}{nn:pos}{lh:agz}{nh:pos}
-  (p: parser, name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser, arg(count_val))
+  {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
+  (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
+   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(count_val))
 
 fn add_subcommand
-  {ln:agz}{nn:pos}{lh:agz}{nh:pos}
-  (p: parser, name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser, int)
+  {tp:nat | tp <= 8192}{ac:nat | ac <= 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
+  (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
+   help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac), int)
 
 
 
 
 
 fn parse
-  {la:agz}{na:pos}
-  (p: parser, argv: !$A.borrow(byte, la, na), argv_len: int na,
+  {tp:nat | tp <= 8192}{ac:nat | ac <= 64}{la:agz}{na:pos}
+  (p: parser(tp, ac), argv: !$A.borrow(byte, la, na), argv_len: int na,
    argc: int): $R.result(parse_result, parse_error)
 
 
@@ -148,497 +151,19 @@ fn format_help
   {l:agz}{n:pos}
   (r: !parse_result, buf: !$A.arr(byte, l, n), max_len: int n): int
 
-fn add_exclusive_group(p: parser): @(parser, int)
+fn add_exclusive_group
+  {tp:nat | tp <= 8192}{ac:nat | ac <= 64}
+  (p: parser(tp, ac)): @(parser(tp, ac), int)
 
-fn add_to_group {a:t@ype} (p: parser, group_id: int, handle: arg(a)): parser
+fn add_to_group
+  {tp:nat | tp <= 8192}{ac:nat | ac <= 64}{a:t@ype}
+  (p: parser(tp, ac), group_id: int, handle: arg(a)): parser(tp, ac)
 
 fn parse_result_free(r: parse_result): void
 
 fn parse_error_free(e: parse_error): void
 
-fn parser_free(p: parser): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn parser_free {tp:nat | tp <= 8192}{ac:nat | ac <= 64} (p: parser(tp, ac)): void
 
 
 

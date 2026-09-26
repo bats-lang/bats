@@ -51,9 +51,11 @@ fn file_open
   (path: !$A.borrow(byte, lb, n), path_len: int n,
    flags: int, mode: int): $R.result(fd, int)
 
+
+
 fn file_read
   {l:agz}{n:pos}
-  (f: !fd, buf: !$A.arr(byte, l, n), len: int n): $R.result(int, int)
+  (f: !fd, buf: !$A.arr(byte, l, n), len: int n): $R.result([k:nat | k <= n] int k, int)
 
 fn file_write
   {lb:agz}{n:pos}
@@ -73,9 +75,11 @@ fn dir_open
   {lb:agz}{n:pos | n < 1048576}
   (path: !$A.borrow(byte, lb, n), path_len: int n): $R.result(dir, int)
 
+
+
 fn dir_next
   {l:agz}{n:pos}
-  (d: !dir, name_buf: !$A.arr(byte, l, n), max_len: int n): $R.option(int)
+  (d: !dir, name_buf: !$A.arr(byte, l, n), max_len: int n): $R.option([k:nat | k <= n] int k)
 
 fn dir_close(d: dir): $R.result(int, int)
 
@@ -105,9 +109,12 @@ fn file_mkdir
 
 stadef BUF_SIZE = 4096
 
+
+
+
 datavtype buf_reader =
-  | {lb:agz}
-    buf_reader_mk of (fd, $A.arr(byte, lb, BUF_SIZE), int, int)
+  | {lb:agz}{f,p:nat | p <= f; f <= BUF_SIZE}
+    buf_reader_mk of (fd, $A.arr(byte, lb, BUF_SIZE), int f, int p)
 
 fn buf_reader_create(f: fd): buf_reader
 
@@ -125,13 +132,14 @@ fn buf_reader_close(r: buf_reader): $R.result(int, int)
 
 
 
+
 datavtype buf_writer =
-  | {lb:agz}
-    buf_writer_mk of (fd, $A.arr(byte, lb, BUF_SIZE), int)
+  | {lb:agz}{p:nat | p <= BUF_SIZE}
+    buf_writer_mk of (fd, $A.arr(byte, lb, BUF_SIZE), int p)
 
 fn buf_writer_create(f: fd): buf_writer
 
-fun buf_write
+fn buf_write
   {lb:agz}{n:pos}
   (w: !buf_writer, data: !$A.borrow(byte, lb, n), len: int n): $R.result(int, int)
 
@@ -140,6 +148,43 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, int)
 fn buf_flush(w: !buf_writer): $R.result(int, int)
 
 fn buf_writer_close(w: buf_writer): $R.result(int, int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

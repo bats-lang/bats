@@ -88,46 +88,46 @@ fn is_kw_boundary_before {l:agz}{n:pos}
 
 fn looking_at_pub {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "#pub", 0, 4) &&
+  lit_hash_pub(src, pos, max) &&
   is_kw_boundary(src, pos + 4, max)
 
 fn looking_at_use {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "#use", 0, 4) &&
+  lit_hash_use(src, pos, max) &&
   is_kw_boundary(src, pos + 4, max)
 
 fn looking_at_target {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "#target", 0, 7) &&
+  lit_hash_target(src, pos, max) &&
   is_kw_boundary(src, pos + 7, max)
 
 fn looking_at_unsafe {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "$UNSAFE", 0, 7)
+  lit_dollar_UNSAFE(src, pos, max)
 
 fn looking_at_unittest {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "$UNITTEST", 0, 9)
+  lit_dollar_UNITTEST(src, pos, max)
 
 fn looking_at_binary {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "binary", 0, 6) &&
+  lit_binary(src, pos, max) &&
   is_kw_boundary(src, pos + 6, max)
 
 fn looking_at_begin {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "begin", 0, 5) &&
+  lit_begin(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
 fn looking_at_end {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "end", 0, 3) &&
+  lit_end(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max) &&
   is_kw_boundary_before(src, pos, max)
 
 fn looking_at_as {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "as", 0, 2) &&
+  lit_as(src, pos, max) &&
   is_kw_boundary(src, pos + 2, max)
 
 (* Unsafe construct detectors use manual byte comparisons to avoid
@@ -232,15 +232,15 @@ fn looking_at_extkind {l:agz}{n:pos}
 
 fn looking_at_mac_hash {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "mac#", 0, 4)
+  lit_machash(src, pos, max)
 
 fn looking_at_ext_hash {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "ext#", 0, 4)
+  lit_exthash(src, pos, max)
 
 fn looking_at_fun {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "fun", 0, 3) &&
+  lit_fun(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max) &&
   is_kw_boundary_before(src, pos, max)
 
@@ -285,21 +285,21 @@ fun _has_metric {l:agz}{n:pos}{fuel:nat} .<fuel>.
 
 fn _content_starts_prfun {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "prfun", 0, 5) &&
+  lit_prfun(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
 fn _content_starts_prfn {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "prfn", 0, 4) &&
+  lit_prfn(src, pos, max) &&
   is_kw_boundary(src, pos + 4, max)
 
 fn _looking_at_primplement {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "primplement", 0, 11)
+  lit_primplement(src, pos, max)
 
 fn looking_at_no_mangle {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
-  $S.chars_match_borrow(src, pos, max, "no_mangle", 0, 9) &&
+  lit_no_mangle(src, pos, max) &&
   is_kw_boundary(src, pos + 9, max)
 
 (* ============================================================
@@ -629,13 +629,13 @@ fun lex_pub_lines {l:agz}{n:pos}{fuel:nat} .<fuel>.
 fn looking_at_let {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
   is_kw_boundary_before(src, pos, max) &&
-  $S.chars_match_borrow(src, pos, max, "let", 0, 3) &&
+  lit_let(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max)
 
 fn looking_at_local {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: int, max: int n): bool =
   is_kw_boundary_before(src, pos, max) &&
-  $S.chars_match_borrow(src, pos, max, "local", 0, 5) &&
+  lit_local(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
 fun find_end_kw {l:agz}{n:pos}{fuel:nat} .<fuel>.
