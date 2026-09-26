@@ -24,6 +24,57 @@ fn hash
 
 
 
+datavtype ctx =
+  | {lh,lw,lb:agz}{b:nat | b < 64} ctx_mk of (
+      $A.arr(uint, lh, 8),   (* the hash state *)
+      $A.arr(uint, lw, 64),  (* the message schedule *)
+      $A.arr(byte, lb, 64),  (* the bytes of the block being filled *)
+      int b,                 (* how many of them there are *)
+      uint, uint             (* the bytes hashed so far, high and low words *)
+    )
+
+fn init (): ctx
+
+
+fn update
+  {l:agz}{n:pos}{k:nat | k <= n}
+  (c: !ctx, data: !$A.arr(byte, l, n), len: int k): void
+
+
+fn finish {lo:agz} (c: ctx, out: !$A.arr(byte, lo, 64)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
