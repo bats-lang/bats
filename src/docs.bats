@@ -316,6 +316,39 @@ fun next_path {l:agz}{fuel:nat} .<fuel>.
     val best1 = (if after && better then off else best): pos_t
   in next_path(lst, find_null_bv_from(lst, off, 524288) + 1, len, prev, best1, fuel - 1) end
 
+(* The paths of files[0, len) that order after prev, in order, each
+   NUL-terminated, appended to out *)
+fun put_sorted {l:agz}{fuel:nat} .<fuel>.
+  (files: !$A.borrow(byte, l, 524288), len: int, prev: pos_t,
+   out: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
+  if fuel <= 0 then ()
+  else let
+    val off = next_path(files, 0, len, prev, ~1, 65536)
+  in
+    if off < 0 then ()
+    else let
+      val e = find_null_bv_from(files, off, 524288)
+      val () = copy_to_builder_v(files, off, e + 1, 524288, out)
+    in put_sorted(files, len, off, out, fuel - 1) end
+  end
+
+(* The .bats files under dir, recursively, NUL-separated and sorted as
+   Rust's PathBuf sorts them (project::find_bats_files) *)
+#pub fn sorted_bats_files (dir: $B.builder_v): @([l:agz] $A.arr(byte, l, 524288), int)
+
+implement sorted_bats_files (dir) = let
+  var root = dir
+  val () = put_char_v(root, 0)
+  var files : $B.builder_v = $B.create()
+  val () = walk_levels(root, files, 64)
+  val @(fa, flen) = $B.to_arr(files)
+  val @(fz_f, bv_f) = $A.freeze<byte>(fa)
+  var out : $B.builder_v = $B.create()
+  val () = put_sorted(bv_f, flen, ~1, out, 65536)
+  val () = $A.drop<byte>(fz_f, bv_f)
+  val () = $A.free<byte>($A.thaw<byte>(fz_f))
+in $B.to_arr(out) end
+
 (* ============================================================
    Writing docs/
    ============================================================ *)

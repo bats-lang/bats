@@ -13,7 +13,7 @@ printf '[package]\nname = "latestdep"\nkind = "lib"\n' > "$TMP/dep/bats.toml"
 printf '#pub fun f (): int\n\nimplement f () = 1\n' > "$TMP/dep/src/lib.bats"
 printf 'build/\ndist/\ndocs/\n' > "$TMP/dep/.gitignore"
 printf '[package]\nname = "latestapp"\nkind = "lib"\n\n[dependencies]\n"latestdep" = ""\n' > "$TMP/app/bats.toml"
-printf '#pub fun g (): int\n\nimplement g () = 2\n' > "$TMP/app/src/lib.bats"
+printf '#use latestdep as L\n\n#pub fun g (): int\n\nimplement g () = 2\n' > "$TMP/app/src/lib.bats"
 publish() { # <commit date>: commit dep and upload it
   (cd "$TMP/dep" && git add -A &&
    GIT_COMMITTER_DATE="$1" git -c user.name=t -c user.email=t@t commit -q --allow-empty -m "$1" &&

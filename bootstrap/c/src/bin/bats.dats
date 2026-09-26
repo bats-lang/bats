@@ -25,6 +25,7 @@ staload R = "result/src/lib.sats"
 staload "helpers.sats"
 staload "build.sats"
 staload "commands.sats"
+staload "lock.sats"
 
 (* Match command buffer to dispatch code *)
 (* 0=build 1=check 2=clean 3=lock 4=run 5=init 6=test 7=tree *)

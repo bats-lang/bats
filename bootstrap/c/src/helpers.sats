@@ -1207,77 +1207,6 @@ fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
 
 
 
-
-
-
-
-
-fn dedupe_lock {l:agz}
-  (a: !$A.arr(byte, l, 524288), len: int,
-   out: !$B.builder_v >> $B.builder_v): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 
@@ -1538,5 +1467,113 @@ fn put_file_sha256 {lp:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn put_dev1 (out: !$B.builder_v >> $B.builder_v, dev: bool): void
+
+
+
+
+
+
+
+
+fn parse_version_parts {l:agz}{n:pos}
+  (b: !$A.borrow(byte, l, n), i: pos_t, be: pos_t, n: int n,
+   out: !$B.builder_v >> $B.builder_v): @(pos_t, pos_t)
+
+
+
+
+fn next_dot {l:agz}{n:pos}
+  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n): pos_t
 
 

@@ -1,10 +1,8 @@
-staload AP = "argparse/src/lib.sats"
 staload A = "array/src/lib.sats"
 staload AR = "arith/src/lib.sats"
 staload B = "builder/src/lib.sats"
-staload E = "env/src/lib.sats"
 staload F = "file/src/lib.sats"
-staload S = "str/src/lib.sats"
+staload L = "list/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 
@@ -19,12 +17,9 @@ staload R = "result/src/lib.sats"
 
 
 
-
-
 staload "helpers.sats"
-staload "build.sats"
-staload "commands.sats"
-staload "lock.sats"
+staload "lexer.sats"
+staload "docs.sats"
 
 
 
@@ -448,4 +443,212 @@ staload "lock.sats"
 
 
 
-fun __BATS_main0 (): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn do_lock {lr:agz}
+  (dev: int, dry_run: int, repo: !$A.borrow(byte, lr, 4096), rplen: int): void
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -11,7 +11,7 @@ trap 'rm -rf "$TMP"' EXIT
 if command -v sha256sum >/dev/null 2>&1; then SUM="sha256sum"; else SUM="shasum -a 256"; fi
 mkdir -p "$TMP/app/src"
 printf '[package]\nname = "lockhash"\nkind = "lib"\n\n[dependencies]\n"toml" = ""\n' > "$TMP/app/bats.toml"
-printf '#pub fun f (): int\n\nimplement f () = 1\n' > "$TMP/app/src/lib.bats"
+printf '#use toml as T\n\n#pub fun f (): int\n\nimplement f () = 1\n' > "$TMP/app/src/lib.bats"
 cd "$TMP/app"
 "$BATS" lock --repository "$REPO" > "$TMP/lock.log" 2>&1 || { echo "FAIL: lock"; cat "$TMP/lock.log"; exit 1; }
 [ -s bats.lock ] || { echo "FAIL: empty bats.lock"; exit 1; }
