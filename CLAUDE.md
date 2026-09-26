@@ -15,6 +15,23 @@ dist/debug/bats check --repository /home/moshez/src/bats-lang/repository-prototy
 dist/debug/bats build --repository /home/moshez/src/bats-lang/repository-prototype
 ```
 
+## Bootstrap seed
+
+`bootstrap/c/` is the checked-in C output of the compiler (`bats build --to-c`), normalized by `scripts/bootstrap-c.sh` so it is byte-identical on every machine. It is the only thing needed to get a working `bats` from scratch:
+
+```bash
+cp -R bootstrap/c /tmp/seed && make -C /tmp/seed PATSHOME=$HOME/.bats/ats2 debug/bats
+```
+
+Every change to `src/` or `bats.lock` must regenerate and commit it in the same PR:
+
+```bash
+dist/debug/bats build --repository ../repository-prototype
+scripts/bootstrap-c.sh dist/debug/bats ../repository-prototype
+```
+
+CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result differs. It also checks the fixpoint (the compiler built by itself emits the same C). Never edit `bootstrap/c/` by hand.
+
 ## Architecture
 
 Entry point: `src/bin/bats.bats`

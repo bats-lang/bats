@@ -1,17 +1,28 @@
+staload "./build.sats"
+staload "array/src/lib.dats"
+staload "arith/src/lib.dats"
+staload "builder/src/lib.dats"
+staload "env/src/lib.dats"
+staload "str/src/lib.dats"
+staload "file/src/lib.dats"
+staload "list/src/lib.dats"
+staload "process/src/lib.dats"
+staload "result/src/lib.dats"
+staload "toml/src/lib.dats"
 (* build -- build pipeline for the bats compiler *)
 
 #include "share/atspre_staload.hats"
 
-#use array as A
-#use arith as AR
-#use builder as B
-#use env as E
-#use str as S
-#use file as F
-#use list as L
-#use process as P
-#use result as R
-#use toml as T
+staload A = "array/src/lib.sats"
+staload AR = "arith/src/lib.sats"
+staload B = "builder/src/lib.sats"
+staload E = "env/src/lib.sats"
+staload S = "str/src/lib.sats"
+staload F = "file/src/lib.sats"
+staload L = "list/src/lib.sats"
+staload P = "process/src/lib.sats"
+staload R = "result/src/lib.sats"
+staload T = "toml/src/lib.sats"
 
 staload "helpers.sats"
 staload "lexer.sats"
@@ -19,13 +30,13 @@ staload "emitter.sats"
 
 (* Preprocess one .bats file: read -> lex -> emit -> write .sats + .dats
    All three path borrows must be null-terminated builder arrays (524288) *)
-#pub fn preprocess_one
-  {l1:agz}{l2:agz}{l3:agz}
-  (src_bv: !$A.borrow(byte, l1, 524288),
-   sats_bv: !$A.borrow(byte, l2, 524288),
-   dats_bv: !$A.borrow(byte, l3, 524288),
-   build_target: int, is_unsafe: int,
-   target_changed: bool): int
+
+
+
+
+
+
+
 
 implement preprocess_one
   (src_bv, sats_bv, dats_bv, build_target, is_unsafe, target_changed) = let
@@ -215,7 +226,7 @@ end
 (* ============================================================
    clean: remove build/ and dist/ directories
    ============================================================ *)
-#pub fn do_clean(): void
+
 
 implement do_clean() = let
   val exec = str_to_path_arr("/bin/rm")
@@ -245,7 +256,7 @@ end
 (* ============================================================
    lock: read bats.lock and verify it exists
    ============================================================ *)
-#pub fn do_lock(dev: int, dry_run: int): void
+
 
 implement do_lock(dev, dry_run) = let
   (* Check if --repository was specified (stored in /tmp/_bpoc_repo.txt) *)
@@ -815,7 +826,7 @@ in
 end
 
 (* Write WASM freestanding runtime header *)
-#pub fn write_wasm_runtime_h(): int
+
 
 implement write_wasm_runtime_h() = let
   var b : $B.builder_v = $B.create()
@@ -893,7 +904,7 @@ implement write_wasm_runtime_h() = let
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
 
-#pub fn write_wasm_runtime_c(): int
+
 
 implement write_wasm_runtime_c() = let
   var b : $B.builder_v = $B.create()
@@ -921,7 +932,7 @@ implement write_wasm_runtime_c() = let
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
 
-#pub fn write_wasm_stubs(): int
+
 
 implement write_wasm_stubs() = let
   var mb : $B.builder_v = $B.create()
@@ -978,7 +989,7 @@ fn compile_wasm_runtime(): int = let
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
 in rc end
 
-#pub fn do_build_wasm(release: int): void
+
 
 fn run_wasm_cc {li:agz}{lo:agz}
   (in_bv: !$A.borrow(byte, li, 524288), in_len: int,
@@ -1470,7 +1481,7 @@ implement do_build_wasm(release) = let
   val () = (if lrc <> 0 then println! ("error: wasm-ld failed") else println! ("  built: dist/wasm/app.wasm"))
 in end
 
-#pub fn read_unsafe_flag(): int
+
 
 implement read_unsafe_flag() = let
   val bt = str_to_path_arr("bats.toml")
@@ -1518,8 +1529,8 @@ in case+ r of
 end
 
 (* Check if a .bats source file starts with "#target wasm binary" *)
-#pub fn check_wasm_binary {l:agz}
-  (path: !$A.borrow(byte, l, 524288)): int
+
+
 
 implement check_wasm_binary(path) = let
   val r = $F.file_open(path, 524288, 0, 0)
@@ -1543,7 +1554,7 @@ in case+ r of
   | ~$R.err(_) => 0
 end
 
-#pub fn do_build(release: int, build_target: int): void
+
 
 implement do_build(release, build_target) = let
   val is_unsafe = read_unsafe_flag()

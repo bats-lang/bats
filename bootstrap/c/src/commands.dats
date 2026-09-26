@@ -1,17 +1,28 @@
+staload "./commands.sats"
+staload "array/src/lib.dats"
+staload "arith/src/lib.dats"
+staload "builder/src/lib.dats"
+staload "file/src/lib.dats"
+staload "list/src/lib.dats"
+staload "str/src/lib.dats"
+staload "process/src/lib.dats"
+staload "result/src/lib.dats"
+staload "sha256/src/lib.dats"
+staload "toml/src/lib.dats"
 (* commands -- subcommand implementations for the bats compiler *)
 
 #include "share/atspre_staload.hats"
 
-#use array as A
-#use arith as AR
-#use builder as B
-#use file as F
-#use list as L
-#use str as S
-#use process as P
-#use result as R
-#use sha256 as SHA
-#use toml as T
+staload A = "array/src/lib.sats"
+staload AR = "arith/src/lib.sats"
+staload B = "builder/src/lib.sats"
+staload F = "file/src/lib.sats"
+staload L = "list/src/lib.sats"
+staload S = "str/src/lib.sats"
+staload P = "process/src/lib.sats"
+staload R = "result/src/lib.sats"
+staload SHA = "sha256/src/lib.sats"
+staload T = "toml/src/lib.sats"
 
 staload "helpers.sats"
 staload "build.sats"
@@ -22,7 +33,7 @@ staload "emitter.sats"
    do_test: build and run tests
    ============================================================ *)
 
-#pub fn do_test(): void
+
 
 implement do_test() = let
   (* Enable test mode so emit includes unittest blocks *)
@@ -114,7 +125,7 @@ end
    generate docs: scan lib.bats for #pub and write docs/
    ============================================================ *)
 
-#pub fn do_generate_docs(pkg_name_len: int, kind_is_lib: int): void
+
 
 implement do_generate_docs(pkg_name_len, kind_is_lib) =
   if kind_is_lib = 0 then ()
@@ -228,7 +239,7 @@ implement do_generate_docs(pkg_name_len, kind_is_lib) =
    upload: package library for repository
    ============================================================ *)
 
-#pub fn do_upload(): void
+
 
 implement do_upload() = let
   (* Read bats.toml for package name and verify kind = "lib" *)
@@ -534,7 +545,7 @@ end
    completions: generate shell completion scripts
    ============================================================ *)
 
-#pub fn do_completions(shell: int): void
+
 
 implement do_completions(shell) =
   if shell = 0 then
@@ -547,7 +558,7 @@ implement do_completions(shell) =
 
 (* Check if a file exists by trying to open it *)
 
-#pub fn file_exists {sn:nat | sn < $B.BUILDER_CAP} (path: string sn): bool
+
 
 implement file_exists(path) = let
   val pa = str_to_path_arr(path)
@@ -567,7 +578,7 @@ end
    write_claude_rules: create .claude/rules/bats.md
    ============================================================ *)
 
-#pub fn write_claude_rules(): void
+
 
 implement write_claude_rules() = let
   var cmd = $B.create()
@@ -614,7 +625,7 @@ in end
    init: create a new bats project
    ============================================================ *)
 
-#pub fn do_init(kind: int, claude: int): void
+
 
 implement do_init(kind, claude) = let
   (* Check for existing project *)
@@ -748,7 +759,7 @@ end end
    tree: display dependency tree from bats.lock
    ============================================================ *)
 
-#pub fn do_tree(): void
+
 
 implement do_tree() = let
   val la = str_to_path_arr("bats.lock")
@@ -783,9 +794,9 @@ end
    add: add a dependency to bats.toml
    ============================================================ *)
 
-#pub fn do_add {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), pkg_start: int, pkg_len: int,
-   max: int n): void
+
+
+
 
 implement do_add(bv, pkg_start, pkg_len, max) = let
   (* Read bats.toml *)
@@ -829,9 +840,9 @@ end
    remove: remove a dependency from bats.toml
    ============================================================ *)
 
-#pub fn do_remove {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), pkg_start: int, pkg_len: int,
-   max: int n): void
+
+
+
 
 implement do_remove(bv, pkg_start, pkg_len, max) = let
   val tp = str_to_path_arr("bats.toml")
@@ -884,7 +895,7 @@ end
    Process spawning
    ============================================================ *)
 
-#pub fn run_process_demo(): void
+
 
 implement run_process_demo() = let
   val exec = str_to_path_arr("/bin/echo")
@@ -929,8 +940,8 @@ end
 
 (* Save extra arguments (after --) to /tmp/_bpoc_extra.txt *)
 
-#pub fun save_extra_args {l:agz}
-  (buf: !$A.arr(byte, l, 4096), dd_pos: int, len: int): void
+
+
 
 implement save_extra_args(buf, dd_pos, len) = let
   (* dd_pos points to the "--" token; skip "--\0" to get to first extra arg *)
@@ -969,7 +980,7 @@ end
 
 (* Append saved extra args to a builder (for do_run) *)
 
-#pub fun append_run_args(cmd: !$B.builder_v >> $B.builder_v): void
+
 
 implement append_run_args(cmd) = let
   val ep = str_to_path_arr("/tmp/_bpoc_extra.txt")
@@ -1017,7 +1028,7 @@ end
    run: build then execute the binary
    ============================================================ *)
 
-#pub fn do_run(release: int): void
+
 
 implement do_run(release) = let
   val () = do_build(release, 0)
@@ -1118,7 +1129,7 @@ end
    do_check: preprocess + patsopt, no cc/link
    ============================================================ *)
 
-#pub fn do_check(): void
+
 
 implement do_check() = let
   val () = clear_build_err()
