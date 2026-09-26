@@ -36,6 +36,21 @@ fn get_cstr
 
 
 
+fn args_read
+  {l:agz}{n:pos}
+  (buf: !$A.arr(byte, l, n), max_len: int n)
+  : $R.option([k:nat | k <= n] int k)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1328,31 +1328,6 @@ implement make_kind(buf) =
     val () = $A.write_byte(buf, 3, 100)
   in end
 
-#pub fn make_proc_cmdline {l:agz}{n:pos | n >= 18}
-  (buf: !$A.arr(byte, l, n)): void
-
-implement make_proc_cmdline(buf) =
-  let
-    val () = $A.write_byte(buf, 0, 47)
-    val () = $A.write_byte(buf, 1, 112)
-    val () = $A.write_byte(buf, 2, 114)
-    val () = $A.write_byte(buf, 3, 111)
-    val () = $A.write_byte(buf, 4, 99)
-    val () = $A.write_byte(buf, 5, 47)
-    val () = $A.write_byte(buf, 6, 115)
-    val () = $A.write_byte(buf, 7, 101)
-    val () = $A.write_byte(buf, 8, 108)
-    val () = $A.write_byte(buf, 9, 102)
-    val () = $A.write_byte(buf, 10, 47)
-    val () = $A.write_byte(buf, 11, 99)
-    val () = $A.write_byte(buf, 12, 109)
-    val () = $A.write_byte(buf, 13, 100)
-    val () = $A.write_byte(buf, 14, 108)
-    val () = $A.write_byte(buf, 15, 105)
-    val () = $A.write_byte(buf, 16, 110)
-    val () = $A.write_byte(buf, 17, 101)
-  in end
-
 (* ============================================================
    Argparse helpers
    ============================================================ *)
