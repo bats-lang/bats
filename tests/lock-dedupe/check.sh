@@ -1,8 +1,8 @@
 #!/bin/sh
 # `bats lock` must write one line per package. json and toml share
 # dependencies (arith, array, result, str); a pinned package used to be
-# appended once per dependent and per pass. The second lock, which
-# resolves from the existing bats.lock, is where that showed.
+# appended once per dependent and per pass. The second lock, run with
+# bats_modules already present, is where that showed.
 # usage: tests/lock-dedupe/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
