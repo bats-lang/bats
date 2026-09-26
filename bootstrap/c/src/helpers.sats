@@ -244,6 +244,15 @@ fn ent_name_eq {l:agz}{n:pos}{k:nat | k <= n}{m:pos | m <= 1048576}
 
 
 
+fn is_ident_byte(b: int): bool
+
+
+
+
+
+
+
+
 fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
 

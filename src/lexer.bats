@@ -9,13 +9,6 @@
 
 staload "helpers.sats"
 
-(* Check if a byte is an identifier character *)
-fn is_ident_byte(b: int): bool =
-  (b >= 97 && b <= 122) ||
-  (b >= 65 && b <= 90) ||
-  (b >= 48 && b <= 57) ||
-  $AR.eq_int_int(b, 95)
-
 fn is_ident_start(b: int): bool =
   (b >= 97 && b <= 122) ||
   (b >= 65 && b <= 90) ||
@@ -34,6 +27,8 @@ fn is_ident_start(b: int): bool =
           7=target 8=unittest 9=restricted 10=unittest_run
           11=target_block (opaque, expanded by post-lex pass)
           13=target_begin 14=target_end
+   Passthrough (kind 0) spans of comments, string and char literals
+   have aux1 = 1: they are copied verbatim, never read as code.
    Dests: 0=dats 1=sats 2=both
    ============================================================ *)
 
@@ -411,11 +406,11 @@ fn lex_line_comment {l:agz}{n:pos}
    spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) =
   if $AR.eq_int_int(peek(src, start + 2, max), 47) &&
      $AR.eq_int_int(peek(src, start + 3, max), 47) then let
-    val () = put_span(spans, 0, 0, start, src_len, 0, 0, 0, 0)
+    val () = put_span(spans, 0, 0, start, src_len, 1, 0, 0, 0)
   in @(src_len, count + 1) end
   else let
     val ep = skip_to_eol(src, start + 2, src_len, max, max)
-    val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
+    val () = put_span(spans, 0, 0, start, ep, 1, 0, 0, 0)
   in @(ep, count + 1) end
 
 (* Lex /* ... */ block comment *)
@@ -433,7 +428,7 @@ fn lex_c_comment {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
    spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val ep = lex_c_comment_inner(src, start + 2, src_len, max, max)
-  val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
+  val () = put_span(spans, 0, 0, start, ep, 1, 0, 0, 0)
 in @(ep, count + 1) end
 
 (* Lex (* ... *) ML comment with nesting *)
@@ -459,7 +454,7 @@ fn lex_ml_comment {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
    spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val ep = lex_ml_comment_inner(src, start + 2, src_len, max, 1, max)
-  val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
+  val () = put_span(spans, 0, 0, start, ep, 1, 0, 0, 0)
 in @(ep, count + 1) end
 
 (* Lex string literal "..." with \" escapes *)
@@ -479,7 +474,7 @@ fn lex_string {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), src_len: pos_t, max: int n,
    spans: !$B.builder_v >> $B.builder_v, start: pos_t, count: int): @(pos_t, int) = let
   val ep = lex_string_inner(src, start + 1, src_len, max, max)
-  val () = put_span(spans, 0, 0, start, ep, 0, 0, 0, 0)
+  val () = put_span(spans, 0, 0, start, ep, 1, 0, 0, 0)
 in @(ep, count + 1) end
 
 (* Lex char literal '...' *)
@@ -490,7 +485,7 @@ fn lex_char_lit {l:agz}{n:pos}
   val b1 = peek(src, p1, max)
   val p2 = (if $AR.eq_int_int(b1, 92) then p1 + 2 else p1 + 1): pos_t
   val p3 = (if $AR.eq_int_int(peek(src, p2, max), 39) then p2 + 1 else p2): pos_t
-  val () = put_span(spans, 0, 0, start, p3, 0, 0, 0, 0)
+  val () = put_span(spans, 0, 0, start, p3, 1, 0, 0, 0)
 in @(p3, count + 1) end
 
 (* Lex extcode %{ ... %} *)

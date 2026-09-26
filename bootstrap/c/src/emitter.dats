@@ -144,10 +144,53 @@ fun emit_blanks {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}
   end
 
 (* Builder_v wrappers: compute fuel from remaining capacity *)
+(* Whether this file's "implement main0" has been renamed; set by
+   emit_code_v, read by do_emit *)
+val g_main0_renamed = ref<bool>(false)
+
+(* The first "implement main0" in src[p, e) that is code on its own:
+   no identifier byte right before or after it. ~1 when there is none. *)
+fun find_main0 {l:agz}{n:pos}{fuel:nat} .<fuel>.
+  (src: !$A.borrow(byte, l, n), p: pos_t, e: pos_t, max: int n, fuel: int fuel): pos_t =
+  if fuel <= 0 then ~1
+  else if p + 15 > e then ~1
+  else let
+    var c = @[char][15]('i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't', ' ', 'm', 'a', 'i', 'n', '0')
+    val hit = lit_at(src, p, max, c, 15)
+    val before_ok = (if p <= 0 then true else ~is_ident_byte(peek(src, p - 1, max))): bool
+    val after_ok = ~is_ident_byte(peek(src, p + 15, max))
+  in
+    if hit && before_ok && after_ok then p
+    else find_main0(src, p + 1, e, max, fuel - 1)
+  end
+
 fn emit_range_v {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   emit_range(src, start, end_pos, max, out, 524288 - $B.length(out))
+
+(* The sats declaration of the renamed entry point, when there is one *)
+fn put_main0_decl(out: !$B.builder_v >> $B.builder_v): void =
+  if !g_main0_renamed then bput_v(out, "\nfun __BATS_main0 (): void\n")
+  else ()
+
+(* Code in [ss, se) to the dats, with the file's first "implement main0"
+   renamed to "implement __BATS_main0". Comment and literal spans (aux1 = 1)
+   never come here, so their text is never renamed. *)
+fn emit_code_v {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), ss: pos_t, se: pos_t,
+   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+  if !g_main0_renamed then emit_range_v(src, ss, se, max, out)
+  else let
+    val p = find_main0(src, ss, se, max, max)
+  in
+    if p < 0 then emit_range_v(src, ss, se, max, out)
+    else let
+      val () = emit_range_v(src, ss, p, max, out)
+      val () = bput_v(out, "implement __BATS_main0")
+      val () = emit_range_v(src, p + 15, se, max, out)
+    in !g_main0_renamed := true end
+  end
 
 fn emit_range_stald_v {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
@@ -537,7 +580,9 @@ fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
     (* kind=0: passthrough *)
     else if $AR.eq_int_int(kind, 0) then let
       val () = (if $AR.eq_int_int(dest, 0) || $AR.eq_int_int(dest, 2) then
-                  emit_range_v(src, ss, se, src_max, dats)
+                  (if $AR.eq_int_int(span_aux1(spans, idx, span_max), 1)
+                   then emit_range_v(src, ss, se, src_max, dats)
+                   else emit_code_v(src, ss, se, src_max, dats))
                 else ())
       val () = (if $AR.eq_int_int(dest, 1) || $AR.eq_int_int(dest, 2) then
                   emit_range_v(src, ss, se, src_max, sats)
@@ -798,104 +843,13 @@ implement do_emit (src, src_len, src_max, spans, span_max, span_count, build_tar
   val () = $A.drop<byte>(fz_spre, bv_spre)
   val () = $A.free<byte>($A.thaw<byte>(fz_spre))
 
+  val () = !g_main0_renamed := false
   (* Emit all spans *)
   val emit_errors = emit_spans(src, src_max, spans, span_max, span_count, 0,
     sats_b, dats_b, build_target, is_unsafe, 0, 0, 524288)
 
-  (* Rename the entry point function in the .dats output *)
-  val @(dats_tmp, dats_tmp_len) = $B.to_arr(dats_b)
-  val @(fz_dt, bv_dt) = $A.freeze<byte>(dats_tmp)
-  (* Search for the entry point pattern: 15 chars starting with 'i' *)
-  fun find_impl_main0 {ld:agz}{nd:pos}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, ld, nd), len: int, max: int nd, pos: pos_t, fuel: int fuel): pos_t =
-    if fuel <= 0 then ~1
-    else if pos + 15 > len then ~1
-    else let
-      val p = pos
-      val b0 = peek(bv, p, max)
-      in
-        if $AR.eq_int_int(b0, 105) then let (* 'i' *)
-          val b4 = peek(bv, p + 4, max)
-          val b9 = peek(bv, p + 9, max)
-          val b10 = peek(bv, p + 10, max)
-          val b14 = peek(bv, p + 14, max)
-        in
-          (* Check pattern: e=101@4, ' '=32@9, m=109@10, 0=48@14 *)
-          if $AR.eq_int_int(b4, 101) then
-            if $AR.eq_int_int(b9, 32) then
-              if $AR.eq_int_int(b10, 109) then
-                if $AR.eq_int_int(b14, 48) then let
-                  (* Verify full match: check remaining bytes *)
-                  val b1 = peek(bv, p + 1, max)
-                  val b2 = peek(bv, p + 2, max)
-                  val b3 = peek(bv, p + 3, max)
-                  val b5 = peek(bv, p + 5, max)
-                  val b6 = peek(bv, p + 6, max)
-                  val b7 = peek(bv, p + 7, max)
-                  val b8 = peek(bv, p + 8, max)
-                  val b11 = peek(bv, p + 11, max)
-                  val b12 = peek(bv, p + 12, max)
-                  val b13 = peek(bv, p + 13, max)
-                in
-                  (* m=109 p=112 l=108 e=101 m=109 e=101 n=110 t=116 a=97 i=105 n=110 *)
-                  if $AR.eq_int_int(b1, 109) then
-                    if $AR.eq_int_int(b2, 112) then
-                      if $AR.eq_int_int(b3, 108) then
-                        if $AR.eq_int_int(b5, 109) then
-                          if $AR.eq_int_int(b6, 101) then
-                            if $AR.eq_int_int(b7, 110) then
-                              if $AR.eq_int_int(b8, 116) then
-                                if $AR.eq_int_int(b11, 97) then
-                                  if $AR.eq_int_int(b12, 105) then
-                                    if $AR.eq_int_int(b13, 110) then pos
-                                    else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                                  else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                                else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                              else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                            else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                          else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                        else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                      else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                    else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                  else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-                end
-                else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-              else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-            else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-          else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-        end
-        else find_impl_main0(bv, len, max, pos + 1, fuel - 1)
-      end
-  val main0_pos = find_impl_main0(bv_dt, dats_tmp_len, 524288,
-    0, 524288)
-  val has_main0 = main0_pos >= 0
-
-  (* Convert sats_b to array before the conditional *)
-  val @(sats_tmp, sats_tmp_len) = $B.to_arr(sats_b)
-  val @(fz_st, bv_st) = $A.freeze<byte>(sats_tmp)
-
-  (* Build final dats and sats without branch merge *)
-  val @(dats_final, sats_final) = (if has_main0 then let
-    var df = $B.create()
-    val () = emit_range_v(bv_dt, 0, main0_pos, 524288, df)
-    val () = bput_v(df, "implement __BATS_main0")
-    val after = main0_pos + 15
-    val () = emit_range_v(bv_dt, after, dats_tmp_len, 524288, df)
-    var sf = $B.create()
-    val () = emit_range_v(bv_st, 0, sats_tmp_len, 524288, sf)
-    val () = bput_v(sf, "\nfun __BATS_main0 (): void\n")
-  in @(df, sf) end
-  else let
-    var df = $B.create()
-    val () = emit_range_v(bv_dt, 0, dats_tmp_len, 524288, df)
-    var sf = $B.create()
-    val () = emit_range_v(bv_st, 0, sats_tmp_len, 524288, sf)
-  in @(df, sf) end): @($B.builder_v, $B.builder_v)
-
-  val () = $A.drop<byte>(fz_dt, bv_dt)
-  val () = $A.free<byte>($A.thaw<byte>(fz_dt))
-  val () = $A.drop<byte>(fz_st, bv_st)
-  val () = $A.free<byte>($A.thaw<byte>(fz_st))
-  val @(sats_arr, sats_len) = $B.to_arr(sats_final)
-  val @(dats_arr, dats_len) = $B.to_arr(dats_final)
+  (* The entry point was renamed in the dats (emit_code_v); declare it *)
+  val () = put_main0_decl(sats_b)
+  val @(sats_arr, sats_len) = $B.to_arr(sats_b)
+  val @(dats_arr, dats_len) = $B.to_arr(dats_b)
 in @(sats_arr, sats_len, dats_arr, dats_len, prelude_lines, emit_errors) end

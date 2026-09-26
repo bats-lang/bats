@@ -244,6 +244,15 @@ implement ent_name_eq(ent, len, max, s, m) = let
   val () = $A.free<byte>($A.thaw<byte>(f))
 in r end
 
+(* Whether a byte can be part of an identifier *)
+
+
+implement is_ident_byte(b) =
+  (b >= 97 && b <= 122) ||
+  (b >= 65 && b <= 90) ||
+  (b >= 48 && b <= 57) ||
+  $AR.eq_int_int(b, 95)
+
 (* Whether src[pos, pos + m) spells the chars lit. *)
 
 
