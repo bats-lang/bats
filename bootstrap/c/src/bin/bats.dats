@@ -281,7 +281,9 @@ in
                 val has_release = ((only_mask / 2) mod 2)
                 val has_wasm = ((only_mask / 8) mod 2)
               in
-                if only_mask = 0 then let
+                (* Rust: build::resolve_deps, once before the builds *)
+                if ~resolve_deps(bv_repo, repo_len) then ()
+                else if only_mask = 0 then let
                   val () = do_build(0, 0, bv_tc, tc_len)
                   val () = do_build(1, 0, bv_tc, tc_len)
                   val () = do_build(0, 1, bv_tc, tc_len)
@@ -311,7 +313,7 @@ in
               else if cmd_code = 1 then let (* check *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in do_check() end
+              in if resolve_deps(bv_repo, repo_len) then do_check() else () end
               else if cmd_code = 2 then let (* clean *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
@@ -340,7 +342,8 @@ in
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
-                val () = do_run(run_release, bv_bin, bin_len, bv_extra, extra_len)
+                val () = (if resolve_deps(bv_repo, repo_len) then
+                  do_run(run_release, bv_bin, bin_len, bv_extra, extra_len) else ())
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
               else if cmd_code = 5 then let (* init *)
@@ -361,7 +364,7 @@ in
               else if cmd_code = 6 then let (* test *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in do_test() end
+              in if resolve_deps(bv_repo, repo_len) then do_test() else () end
               else if cmd_code = 7 then let (* tree *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)

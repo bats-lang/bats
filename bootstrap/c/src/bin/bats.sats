@@ -448,4 +448,7 @@ staload "lock.sats"
 
 
 
+
+
+
 fun __BATS_main0 (): void

@@ -1531,6 +1531,134 @@ fun add_pdeps {n,s,m,c:nat} .<n>.
       prval () = fold@(ds)
     in r end
 
+(* ============================================================
+   Missing dependencies (Rust: build::resolve_deps, lock::ensure_deps)
+   ============================================================ *)
+
+(* xs reversed onto acc *)
+fun names_rev {n,m:nat} .<n>. (xs: names(n), acc: names(m)): names(n + m) =
+  case+ xs of
+  | ~names_nil() => acc
+  | ~names_cons(a, k, rest) => names_rev(rest, names_cons(a, k, acc))
+
+fn names_empty {n:nat} (xs: !names(n)): bool =
+  case+ xs of
+  | names_nil() => true
+  | names_cons(_, _, _) => false
+
+(* The names of xs, in order, that are neither path dependencies (pn)
+   nor already in bats_modules *)
+fun names_missing {n,np:nat} .<n>. (xs: names(n), pn: !names(np)): [m:nat] names(m) =
+  case+ xs of
+  | ~names_nil() => names_nil()
+  | ~names_cons(a, k, rest) =>
+    if names_has(pn, a, k) then let
+      val () = $A.free<byte>(a)
+    in names_missing(rest, pn) end
+    else if is_fetched(a, k) then let
+      val () = $A.free<byte>(a)
+    in names_missing(rest, pn) end
+    else names_cons(a, k, names_missing(rest, pn))
+
+(* ", " when sep *)
+fn put_sep (sep: bool, out: !$B.builder_v >> $B.builder_v): void =
+  if sep then bput_v(out, ", ") else bput_v(out, "")
+
+(* The names of xs joined by ", " *)
+fun put_names_list {n:nat} .<n>.
+  (xs: !names(n), sep: bool, out: !$B.builder_v >> $B.builder_v): void =
+  case+ xs of
+  | names_nil() => bput_v(out, "")
+  | @names_cons(a, k, rest) => let
+      val () = put_sep(sep, out)
+      val () = put_name(a, k, out)
+      val () = put_names_list(rest, true, out)
+      prval () = fold@(xs)
+    in end
+
+(* Fetches the newest version of each package of xs that meets cs
+   (Rust: ensure_deps); false after reporting one not found *)
+fun fetch_missing {n,nc:nat}{lr:agz} .<n>.
+  (xs: names(n), cs: !cons(nc), repo: !$A.borrow(byte, lr, 4096), rl: int): bool =
+  case+ xs of
+  | ~names_nil() => true
+  | ~names_cons(a, k, rest) =>
+    (case+ find_latest(repo, rl, a, k, false, cs) of
+     | ~$R.none() => let
+         val () = not_found(repo, rl, a, k)
+         val () = $A.free<byte>(a)
+         val () = names_free(rest)
+       in false end
+     | ~$R.some(v) => let
+         val @(arc, alen) = archive_path(repo, rl, a, k, v)
+         val @(fz_c, bv_c) = $A.freeze<byte>(arc)
+         val () = fetch(bv_c, alen, a, k, v)
+         val () = $A.drop<byte>(fz_c, bv_c)
+         val () = $A.free<byte>($A.thaw<byte>(fz_c))
+         val () = cand_free(v)
+         val () = $A.free<byte>(a)
+       in fetch_missing(rest, cs, repo, rl) end)
+
+(* Fetches missing under the project's constraints, when cst says they
+   were read; otherwise reports err; consumes err *)
+fn fetch_with {nm,nc:nat}{lr:agz}
+  (cst: int, cs: cons(nc), err: $B.builder_v, missing: names(nm),
+   repo: !$A.borrow(byte, lr, 4096), rl: int): bool =
+  if cst < 0 then let
+    val () = cons_free(cs)
+    val () = names_free(missing)
+    var e : $B.builder_v = err
+    val () = put_char_v(e, 10)
+    val () = prerr_builder(e)
+  in false end
+  else let
+    val () = $B.builder_free(err)
+    val ok = fetch_missing(missing, cs, repo, rl)
+    val () = cons_free(cs)
+  in ok end
+
+(* Rust's "missing dependencies: <a, b>. Use --repository <dir> to fetch
+   them."; consumes missing *)
+fn report_missing {nm:nat} (missing: names(nm)): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "error: missing dependencies: ")
+  val () = put_names_list(missing, false, m)
+  val () = bput_v(m, ". Use --repository <dir> to fetch them.\n")
+  val () = names_free(missing)
+in prerr_builder(m) end
+
+(* Before build, check or test: every #use package of src/ that is not a
+   path dependency must be in bats_modules; the missing ones are fetched
+   from the repository repo[0, rplen), or reported when there is none
+   (Rust: build::resolve_deps). false after an error. *)
+#pub fn resolve_deps {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): bool
+
+implement resolve_deps {lr} (repo, rplen) = let
+  var src : $B.builder_v = $B.create()
+  val () = bput_v(src, "src")
+  val pkgs = names_rev(collect_uses(src), names_nil())
+  val ds = project_pdeps()
+  val pn = pdeps_names(ds)
+  val () = pdeps_free(ds)
+  val missing = names_missing(pkgs, pn)
+  val () = names_free(pn)
+in
+  if names_empty(missing) then let
+    val () = names_free(missing)
+  in true end
+  else if rplen <= 0 then let
+    val () = report_missing(missing)
+    val () = set_build_err()
+  in false end
+  else let
+    var err : $B.builder_v = $B.create()
+    val () = bput_v(err, "error: ")
+    val @(cst, cs) = project_cons(err)
+    val ok = fetch_with(cst, cs, err, missing, repo, rplen)
+    val () = (if ok then () else set_build_err())
+  in ok end
+end
+
 (* Resolves the #use packages of src/ under the project's constraints
    cs and writes bats.lock, when cst says they were read; otherwise
    reports err, Rust's message about them; consumes err *)
