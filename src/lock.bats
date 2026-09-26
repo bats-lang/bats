@@ -433,29 +433,29 @@ fun put_cons_of {n:nat}{la:agz} .<n>.
 fn is_space (c: int): bool =
   if c = 32 then true else if c < 9 then false else c <= 13
 
-(* The first position in [i, e) of v that is not whitespace, or e *)
-fun skip_space {lv:agz}{f:nat} .<f>.
-  (v: !$A.borrow(byte, lv, 4096), i: pos_t, e: pos_t, f: int f): pos_t =
+(* The first position in v[i, e) that is not whitespace, or e *)
+fun skip_space {lv:agz}{n:pos}{f:nat} .<f>.
+  (v: !$A.borrow(byte, lv, n), n: int n, i: pos_t, e: pos_t, f: int f): pos_t =
   if f <= 0 then e
   else if i >= e then e
-  else if is_space(peek(v, i, 4096)) then skip_space(v, i + 1, e, f - 1)
+  else if is_space(peek(v, i, n)) then skip_space(v, n, i + 1, e, f - 1)
   else i
 
 (* e without the whitespace that ends v[s, e) *)
-fun trim_end {lv:agz}{f:nat} .<f>.
-  (v: !$A.borrow(byte, lv, 4096), s: pos_t, e: pos_t, f: int f): pos_t =
+fun trim_end {lv:agz}{n:pos}{f:nat} .<f>.
+  (v: !$A.borrow(byte, lv, n), n: int n, s: pos_t, e: pos_t, f: int f): pos_t =
   if f <= 0 then s
   else if e <= s then s
-  else if is_space(peek(v, e - 1, 4096)) then trim_end(v, s, e - 1, f - 1)
+  else if is_space(peek(v, e - 1, n)) then trim_end(v, n, s, e - 1, f - 1)
   else e
 
-(* The first ',' in v[i, e), or e *)
-fun comma_at {lv:agz}{f:nat} .<f>.
-  (v: !$A.borrow(byte, lv, 4096), i: pos_t, e: pos_t, f: int f): pos_t =
+(* The first byte c in v[i, e), or e *)
+fun find_byte {lv:agz}{n:pos}{f:nat} .<f>.
+  (v: !$A.borrow(byte, lv, n), n: int n, i: pos_t, e: pos_t, c: int, f: int f): pos_t =
   if f <= 0 then e
   else if i >= e then e
-  else if peek(v, i, 4096) = 44 then i
-  else comma_at(v, i + 1, e, f - 1)
+  else if peek(v, i, n) = c then i
+  else find_byte(v, n, i + 1, e, c, f - 1)
 
 (* A constraint read from bats.toml: >= (true) or != (false) a version *)
 datavtype con = con_mk of (bool, cand)
@@ -472,7 +472,7 @@ fn parse_con {lv:agz}
   val ne = (if two then (if c0 = 33 then c1 = 61 else false) else false): bool
 in
   if ge || ne then let
-    val vs = skip_space(v, s + 2, e, 4096)
+    val vs = skip_space(v, 4096, s + 2, e, 4096)
     val @(r, bs, bz) = parse_cand(v, 4096, vs, e)
   in
     case+ r of
@@ -515,9 +515,9 @@ fun parse_cons {lv,lp,ls:agz}{n:nat}{f:nat} .<f>.
   if f <= 0 then @(true, acc)
   else if i >= e then @(true, acc)
   else let
-    val ce = comma_at(v, i, e, 4096)
-    val ts = skip_space(v, i, ce, 4096)
-    val te = trim_end(v, ts, ce, 4096)
+    val ce = find_byte(v, 4096, i, e, 44, 4096)
+    val ts = skip_space(v, 4096, i, ce, 4096)
+    val te = trim_end(v, 4096, ts, ce, 4096)
   in
     if ts >= te then parse_cons(v, ce + 1, e, p, pk, src, sk, acc, why, f - 1)
     else case+ parse_con(v, ts, te, why) of
@@ -1017,12 +1017,233 @@ fun resolve_all {s,m,nc:nat}{lr:agz}{f:nat} .<f>.
         end
     end
 
+(* ============================================================
+   bats lock --dry-run (Rust: read_lockfile, print_diff)
+   ============================================================ *)
+
+(* Lock text: bats.lock's bytes or the lines resolve_all wrote *)
+#define LOCK_MAX 524288
+
+(* The next line of t after i: @(its trimmed [start, end), where it
+   ends) (Rust: lines() and trim()) *)
+fn lock_line {lt:agz}
+  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: pos_t, i: pos_t): @(pos_t, pos_t, pos_t) = let
+  val le = find_byte(t, LOCK_MAX, i, tl, 10, LOCK_MAX)
+  val ts = skip_space(t, LOCK_MAX, i, le, LOCK_MAX)
+  val te = trim_end(t, LOCK_MAX, ts, le, LOCK_MAX)
+in @(ts, te, le) end
+
+(* The ends of the package and of the version of the lock line t[s, e):
+   the package ends at the first space, the version at the next one or
+   at e (Rust: splitn(3, ' ')); a line without a space has no version *)
+fn lock_fields {lt:agz}
+  (t: !$A.borrow(byte, lt, LOCK_MAX), s: pos_t, e: pos_t): @(pos_t, pos_t) = let
+  val pe = find_byte(t, LOCK_MAX, s, e, 32, LOCK_MAX)
+  val ve = (if pe < e then find_byte(t, LOCK_MAX, pe + 1, e, 32, LOCK_MAX) else e): pos_t
+in @(pe, ve) end
+
+(* Whether a[i, i + k) = b[j, j + k) *)
+fun lock_bytes_eq {la,lb:agz}{f:nat} .<f>.
+  (a: !$A.borrow(byte, la, LOCK_MAX), i: pos_t, b: !$A.borrow(byte, lb, LOCK_MAX), j: pos_t,
+   k: int, f: int f): bool =
+  if f <= 0 then true
+  else if k <= 0 then true
+  else if peek(a, i, LOCK_MAX) <> peek(b, j, LOCK_MAX) then false
+  else lock_bytes_eq(a, i + 1, b, j + 1, k - 1, f - 1)
+
+(* Whether a[a0, a1) = b[b0, b1) *)
+fn lock_range_eq {la,lb:agz}
+  (a: !$A.borrow(byte, la, LOCK_MAX), a0: pos_t, a1: pos_t,
+   b: !$A.borrow(byte, lb, LOCK_MAX), b0: pos_t, b1: pos_t): bool =
+  if a1 - a0 <> b1 - b0 then false
+  else lock_bytes_eq(a, a0, b, b0, a1 - a0, LOCK_MAX)
+
+(* The version of the first line of t[i, tl) whose package is
+   u[xs, xe), or @(~1, ~1) *)
+fun lock_find {lt,lu:agz}{f:nat} .<f>.
+  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: pos_t, i: pos_t,
+   u: !$A.borrow(byte, lu, LOCK_MAX), xs: pos_t, xe: pos_t, f: int f): @(pos_t, pos_t) =
+  if f <= 0 then @(~1, ~1)
+  else if i >= tl then @(~1, ~1)
+  else let
+    val @(ts, te, le) = lock_line(t, tl, i)
+  in
+    if ts >= te then lock_find(t, tl, le + 1, u, xs, xe, f - 1)
+    else let
+      val @(pe, ve) = lock_fields(t, ts, te)
+    in
+      if pe < te then
+        (if lock_range_eq(t, ts, pe, u, xs, xe) then @(pe + 1, ve)
+         else lock_find(t, tl, le + 1, u, xs, xe, f - 1))
+      else lock_find(t, tl, le + 1, u, xs, xe, f - 1)
+    end
+  end
+
+(* The first line of t[i, tl) without a space, trimmed, or @(~1, ~1)
+   (Rust: read_lockfile's "malformed lockfile line") *)
+fun lock_malformed {lt:agz}{f:nat} .<f>.
+  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: pos_t, i: pos_t, f: int f): @(pos_t, pos_t) =
+  if f <= 0 then @(~1, ~1)
+  else if i >= tl then @(~1, ~1)
+  else let
+    val @(ts, te, le) = lock_line(t, tl, i)
+  in
+    if ts >= te then lock_malformed(t, tl, le + 1, f - 1)
+    else let
+      val @(pe, _) = lock_fields(t, ts, te)
+    in
+      if pe >= te then @(ts, te)
+      else lock_malformed(t, tl, le + 1, f - 1)
+    end
+  end
+
+(* "  + <pkg> v<new>" or "  ~ <pkg> v<old> -> v<new>" for the new lock
+   line u[s, e) against old[0, ol); whether it wrote one *)
+fn note_new {lu,lo:agz}
+  (u: !$A.borrow(byte, lu, LOCK_MAX), s: pos_t, e: pos_t,
+   old: !$A.borrow(byte, lo, LOCK_MAX), ol: pos_t,
+   out: !$B.builder_v >> $B.builder_v): bool = let
+  val @(pe, ve) = lock_fields(u, s, e)
+  val @(os, oe) = lock_find(old, ol, 0, u, s, pe, LOCK_MAX)
+in
+  if os < 0 then let
+    val () = bput_v(out, "  + ")
+    val () = copy_to_builder_v(u, s, pe, LOCK_MAX, out)
+    val () = bput_v(out, " v")
+    val () = copy_to_builder_v(u, pe + 1, ve, LOCK_MAX, out)
+    val () = put_char_v(out, 10)
+  in true end
+  else if lock_range_eq(old, os, oe, u, pe + 1, ve) then let
+    val () = bput_v(out, "")
+  in false end
+  else let
+    val () = bput_v(out, "  ~ ")
+    val () = copy_to_builder_v(u, s, pe, LOCK_MAX, out)
+    val () = bput_v(out, " v")
+    val () = copy_to_builder_v(old, os, oe, LOCK_MAX, out)
+    val () = bput_v(out, " -> v")
+    val () = copy_to_builder_v(u, pe + 1, ve, LOCK_MAX, out)
+    val () = put_char_v(out, 10)
+  in true end
+end
+
+(* "  - <pkg> v<old>" for the old lock line o[s, e) when new[0, nl) has
+   no line for its package; whether it wrote one *)
+fn note_old {lo,ln:agz}
+  (o: !$A.borrow(byte, lo, LOCK_MAX), s: pos_t, e: pos_t,
+   nw: !$A.borrow(byte, ln, LOCK_MAX), nl: pos_t,
+   out: !$B.builder_v >> $B.builder_v): bool = let
+  val @(pe, ve) = lock_fields(o, s, e)
+  val @(ns, _) = lock_find(nw, nl, 0, o, s, pe, LOCK_MAX)
+in
+  if ns >= 0 then let
+    val () = bput_v(out, "")
+  in false end
+  else let
+    val () = bput_v(out, "  - ")
+    val () = copy_to_builder_v(o, s, pe, LOCK_MAX, out)
+    val () = bput_v(out, " v")
+    val () = copy_to_builder_v(o, pe + 1, ve, LOCK_MAX, out)
+    val () = put_char_v(out, 10)
+  in true end
+end
+
+(* note_new or note_old for the trimmed line a[s, e), when not empty *)
+fn note_line {la,lb:agz}
+  (a: !$A.borrow(byte, la, LOCK_MAX), s: pos_t, e: pos_t,
+   b: !$A.borrow(byte, lb, LOCK_MAX), bl: pos_t, fresh: bool,
+   out: !$B.builder_v >> $B.builder_v): bool =
+  if s >= e then let
+    val () = bput_v(out, "")
+  in false end
+  else if fresh then note_new(a, s, e, b, bl, out)
+  else note_old(a, s, e, b, bl, out)
+
+(* Notes each line of a[i, al) against b[0, bl): the new lines with
+   note_new when fresh, the old ones with note_old; whether any note
+   was written *)
+fun lock_notes {la,lb:agz}{f:nat} .<f>.
+  (a: !$A.borrow(byte, la, LOCK_MAX), al: pos_t, i: pos_t,
+   b: !$A.borrow(byte, lb, LOCK_MAX), bl: pos_t, fresh: bool, changed: bool,
+   out: !$B.builder_v >> $B.builder_v, f: int f): bool =
+  if f <= 0 then changed
+  else if i >= al then changed
+  else let
+    val @(ts, te, le) = lock_line(a, al, i)
+    val c = note_line(a, ts, te, b, bl, fresh, out)
+  in lock_notes(a, al, le + 1, b, bl, fresh, (if c then true else changed): bool, out, f - 1) end
+
+(* bats.lock's bytes and their count; none when there is no bats.lock *)
+fn read_old_lock (): @([l:agz] $A.arr(byte, l, LOCK_MAX), pos_t) = let
+  val lp = str_to_path_arr("bats.lock")
+  val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
+  val fr = $F.file_open(bv_lp, 524288, 0, 0)
+  val () = $A.drop<byte>(fz_lp, bv_lp)
+  val () = $A.free<byte>($A.thaw<byte>(fz_lp))
+  val buf = $A.alloc<byte>(LOCK_MAX)
+in
+  case+ fr of
+  | ~$R.err(_) => @(buf, 0)
+  | ~$R.ok(fd) => let
+      val n = (case+ $F.file_read(fd, buf, LOCK_MAX) of
+        | ~$R.ok(k) => k | ~$R.err(_) => 0): pos_t
+      val () = $R.discard<int><int>($F.file_close(fd))
+    in @(buf, n) end
+end
+
+(* Prints out: an error when bad (a malformed bats.lock), otherwise the
+   diff unless quiet, then Rust's "lockfile is stale" when stale;
+   consumes out *)
+fn report_dry (bad: bool, stale: bool, out: $B.builder_v): void =
+  if bad then let
+    val () = prerr_builder(out)
+  in set_build_err() end
+  else let
+    val () = say(out)
+  in
+    if stale then let
+      val () = prerr! ("error: lockfile is stale\n")
+    in set_build_err() end
+    else ()
+  end
+
+(* Compares the resolved lock with bats.lock instead of writing it
+   (Rust: generate with dry_run, print_diff); consumes lock *)
+fn dry_run_lock (lock: $B.builder_v): void = let
+  var nb : $B.builder_v = lock
+  val nl = $B.length(nb)
+  val @(na, _) = $B.to_arr(nb)
+  val @(fz_n, bv_n) = $A.freeze<byte>(na)
+  val @(oa, ol) = read_old_lock()
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val @(ms, me) = lock_malformed(bv_o, ol, 0, LOCK_MAX)
+  var out : $B.builder_v = $B.create()
+  val stale = (if ms >= 0 then let
+      val () = bput_v(out, "error: malformed lockfile line: ")
+      val () = copy_to_builder_v(bv_o, ms, me, LOCK_MAX, out)
+      val () = put_char_v(out, 10)
+    in true end
+    else let
+      val c1 = lock_notes(bv_n, nl, 0, bv_o, ol, true, false, out, LOCK_MAX)
+      val c2 = lock_notes(bv_o, ol, 0, bv_n, nl, false, c1, out, LOCK_MAX)
+      val () = (if c2 then bput_v(out, "") else bput_v(out, "no changes\n"))
+    in c2 end): bool
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+in
+  report_dry(ms >= 0, stale, out)
+end
+
 (* Writes lock to bats.lock and reports it, when st says resolving
-   succeeded (Rust: generate); consumes lock *)
-fn finish_lock (st: int, n: int, lock: $B.builder_v): void =
+   succeeded, or compares it with bats.lock when dry (Rust: generate);
+   consumes lock *)
+fn finish_lock (st: int, n: int, lock: $B.builder_v, dry: bool): void =
   if st < 0 then let
     val () = $B.builder_free(lock)
   in set_build_err() end
+  else if dry then dry_run_lock(lock)
   else let
     val lp = str_to_path_arr("bats.lock")
     val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
@@ -1040,7 +1261,7 @@ fn finish_lock (st: int, n: int, lock: $B.builder_v): void =
    reports err, Rust's message about them; consumes err *)
 fn lock_with {lr:agz}{nc:nat}
   (cst: int, cs: cons(nc), err: $B.builder_v,
-   repo: !$A.borrow(byte, lr, 4096), rplen: int, dev: bool): void =
+   repo: !$A.borrow(byte, lr, 4096), rplen: int, dev: bool, dry: bool): void =
   if cst < 0 then let
     val () = cons_free(cs)
     var e : $B.builder_v = err
@@ -1055,10 +1276,11 @@ fn lock_with {lr:agz}{nc:nat}
     val all = names_copy(pkgs)
     var lock : $B.builder_v = $B.create()
     val @(st, n) = resolve_all(pkgs, all, cs, repo, rplen, dev, lock, 0, 65536)
-  in finish_lock(st, n, lock) end
+  in finish_lock(st, n, lock, dry) end
 
-(* bats lock --repository <repo[0, rplen)> [--dev]: resolves the #use
-   packages of src/ and writes bats.lock (Rust: cmd_lock, generate).
+(* bats lock --repository <repo[0, rplen)> [--dev] [--dry-run]: resolves
+   the #use packages of src/ and writes bats.lock, or with --dry-run
+   compares them with it (Rust: cmd_lock, generate).
    rplen is 0 when --repository was not given. *)
 #pub fn do_lock {lr:agz}
   (dev: int, dry_run: int, repo: !$A.borrow(byte, lr, 4096), rplen: int): void
@@ -1071,4 +1293,4 @@ implement do_lock {lr} (dev, dry_run, repo, rplen) =
     var err : $B.builder_v = $B.create()
     val () = bput_v(err, "error: ")
     val @(cst, cs) = project_cons(err)
-  in lock_with(cst, cs, err, repo, rplen, dev <> 0) end
+  in lock_with(cst, cs, err, repo, rplen, dev <> 0, dry_run <> 0) end
