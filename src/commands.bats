@@ -1025,13 +1025,15 @@ implement do_check() = let
 in
   if has_build_err() then
     println! ("check failed")
-  else if generate_lib_docs() < 0 then let
-    val () = set_build_err()
-  in println! ("check failed") end
   else let
-    val () = println! ("  process: check passed")
-    val () = println! ("  exit code: 0")
+    val kind = generate_lib_docs()
   in
-    println! ("check passed")
+    if kind < 0 then let
+      val () = set_build_err()
+    in println! ("check failed") end
+    (* As the Rust bats's build::check *)
+    else if is_quiet() then ()
+    else if kind > 0 then prerr! ("check passed (library)\n")
+    else prerr! ("check passed (binary)\n")
   end
 end
