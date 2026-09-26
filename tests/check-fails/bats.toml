@@ -1,0 +1,3 @@
+[package]
+name = "check-fails-test"
+kind = "lib"
