@@ -901,8 +901,109 @@ fun extra_arg_list {l:agz}{fuel:nat} .<fuel>.
     val () = copy_to_builder_v(bv, start, e, 4096, wb)
   in extra_arg_list(bv, np + 1, total, $L.list_vt_cons(mk_arg(wb), acc), fuel - 1) end
 
+(* Appends to names, each NUL-terminated and in name order, every NAME
+   of src/bin/NAME.bats for which the build produced dist/<mode>/NAME;
+   returns how many. *)
+fun collect_built {lq:agz}{fuel:nat} .<fuel>.
+  (names: !$B.builder_v >> $B.builder_v, prev: $A.arr(byte, lq, 256), prev_len: int,
+   release: int, count: int, fuel: int fuel): int =
+  if fuel <= 0 then let
+    val () = $A.free<byte>(prev)
+  in count end
+  else let
+    val sb = str_to_path_arr("src/bin")
+    val @(fz_sb, bv_sb) = $A.freeze<byte>(sb)
+    val @(fz_pv, bv_pv) = $A.freeze<byte>(prev)
+    val @(ent, el) = dir_next_sorted(bv_sb, 524288, bv_pv, prev_len)
+    val () = $A.drop<byte>(fz_pv, bv_pv)
+    val () = $A.free<byte>($A.thaw<byte>(fz_pv))
+    val () = $A.drop<byte>(fz_sb, bv_sb)
+    val () = $A.free<byte>($A.thaw<byte>(fz_sb))
+  in
+    if el < 0 then let
+      val () = $A.free<byte>(ent)
+    in count end
+    else if ~has_bats_ext(ent, el, 256) then
+      collect_built(names, ent, el, release, count, fuel - 1)
+    else let
+      val @(fz_e, bv_e) = $A.freeze<byte>(ent)
+      val built = is_built(bv_e, el - 5, release)
+      val () = (if built then add_name(names, bv_e, el - 5) else ())
+      val () = $A.drop<byte>(fz_e, bv_e)
+      val ent = $A.thaw<byte>(fz_e)
+      val inc = (if built then 1 else 0): int
+    in collect_built(names, ent, el, release, count + inc, fuel - 1) end
+  end
+
+(* Whether dist/<mode>/NAME exists, for NAME = ent[0, len). *)
+and is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): bool = let
+  var pb: $B.builder_v = $B.create()
+  val () = (if release > 0 then bput_v(pb, "dist/release/") else bput_v(pb, "dist/debug/"))
+  val () = copy_to_builder_v(ent, 0, len, 256, pb)
+  val () = put_char_v(pb, 0)
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val built = (case+ $F.file_open(bv_p, 524288, 0, 0) of
+    | ~$R.ok(fd) => let val () = $R.discard<int><int>($F.file_close(fd)) in true end
+    | ~$R.err(_) => false): bool
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in built end
+
+and add_name {le:agz}
+  (names: !$B.builder_v >> $B.builder_v, ent: !$A.borrow(byte, le, 256), len: int): void = let
+  val () = copy_to_builder_v(ent, 0, len, 256, names)
+in put_char_v(names, 0) end
+
+(* Appends the chosen binary's name: bin[0, blen) for 0, the first
+   entry of n for 1, nothing otherwise. *)
+fn add_choice {lb,ln:agz}
+  (cmd: !$B.builder_v >> $B.builder_v, choice: int,
+   bin: !$A.borrow(byte, lb, 256), blen: int, n: !$A.borrow(byte, ln, 524288)): void =
+  if choice = 0 then copy_to_builder_v(bin, 0, blen, 256, cmd)
+  else if choice = 1 then copy_to_builder_v(n, 0, find_null_bv_from(n, 0, 524288), 524288, cmd)
+  else bput_v(cmd, "")
+
+(* Whether the entry at n[i, NUL) equals b[0, blen). *)
+fun entry_eq {ln,lb:agz}{fuel:nat} .<fuel>.
+  (n: !$A.borrow(byte, ln, 524288), s: pos_t,
+   b: !$A.borrow(byte, lb, 256), blen: int, i: pos_t, fuel: int fuel): bool =
+  if fuel <= 0 then false
+  else if i >= blen then peek(n, s + i, 524288) = 0
+  else if peek(n, s + i, 524288) <> peek(b, i, 256) then false
+  else entry_eq(n, s, b, blen, i + 1, fuel - 1)
+
+(* Whether some entry of the NUL-terminated list n[s, nlen) is b[0, blen). *)
+fun list_has {ln,lb:agz}{fuel:nat} .<fuel>.
+  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: pos_t,
+   b: !$A.borrow(byte, lb, 256), blen: int, fuel: int fuel): bool =
+  if fuel <= 0 then false
+  else if s >= nlen then false
+  else if entry_eq(n, s, b, blen, 0, 257) then true
+  else list_has(n, nlen, find_null_bv_from(n, s, 524288) + 1, b, blen, fuel - 1)
+
+(* b[i, len) to stderr. *)
+fun prerr_seg {l:agz}{m:pos}{fuel:nat} .<fuel>.
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void =
+  if fuel <= 0 then ()
+  else if i >= len then ()
+  else let
+    val () = prerr_char(int2char0(peek(b, i, m)))
+  in prerr_seg(b, i + 1, len, m, fuel - 1) end
+
+(* The NUL-terminated entries of n[s, nlen) to stderr, ", "-separated. *)
+fun prerr_names {ln:agz}{fuel:nat} .<fuel>.
+  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: pos_t, first: bool, fuel: int fuel): void =
+  if fuel <= 0 then ()
+  else if s >= nlen then ()
+  else let
+    val e = find_null_bv_from(n, s, 524288)
+    val () = (if first then () else prerr! (", "))
+    val () = prerr_seg(n, s, e, 524288, 524288)
+  in prerr_names(n, nlen, e + 1, false, fuel - 1) end
+
 (* bin: the --bin name in bin[0, blen); blen is 0 when it was not
-   given, and the package name is run instead. extra: the arguments
+   given. extra: the arguments
    after "--", NUL-terminated, in extra[0, elen). *)
 
 
@@ -910,81 +1011,58 @@ fun extra_arg_list {l:agz}{fuel:nat} .<fuel>.
 
 implement do_run {lb,le} (release, bin, blen, extra, elen) = let
   val () = do_build(release, 0)
-  (* Read bats.toml to find the package name *)
-  val tp = str_to_path_arr("bats.toml")
-  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+  (* The binaries the build produced, NUL-terminated, in name order *)
+  var names: $B.builder_v = $B.create()
+  val count = collect_built(names, $A.alloc<byte>(256), 0, release, 0, 4096)
+  val @(na, nlen) = $B.to_arr(names)
+  val @(fz_n, bv_n) = $A.freeze<byte>(na)
+  (* As the Rust bats: --bin names one of them; without it there must be
+     exactly one. 0: run --bin's; 1: run the only one; ~1: error. *)
+  val choice = (if blen > 0 then
+      if list_has(bv_n, nlen, 0, bin, blen, 4096) then 0
+      else let
+        val () = prerr! ("error: binary '")
+        val () = prerr_seg(bin, 0, blen, 256, 256)
+        val () = prerr! ("' not found. Available: ")
+        val () = prerr_names(bv_n, nlen, 0, true, 4096)
+        val () = prerr_newline()
+      in ~1 end
+    else if count = 1 then 1
+    else let
+      val () = prerr! ("error: multiple binaries available, specify one with --bin <name>: ")
+      val () = prerr_names(bv_n, nlen, 0, true, 4096)
+      val () = prerr_newline()
+    in ~1 end): int
+  var cmd: $B.builder_v = $B.create()
+  val () = (if release > 0 then bput_v(cmd, "./dist/release/")
+    else bput_v(cmd, "./dist/debug/"))
+  val () = add_choice(cmd, choice, bin, blen, bv_n)
+  val chosen = choice >= 0
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+  val () = put_char_v(cmd, 0)
+  val @(exec_a, exec_len) = $B.to_arr(cmd)
+  val @(fz_ea, bv_ea) = $A.freeze<byte>(exec_a)
 in
-  case+ tor of
-  | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(4096)
-      val trr = $F.file_read(tfd, tbuf, 4096)
-      val tlen = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-      val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><int>(tcr)
-      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, 4096)
-      val () = $A.drop<byte>(fz_tb, bv_tb)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
-    in
-      case+ pr of
-      | ~$R.ok(doc) => let
-          (* Query package.name *)
-          val sec = $A.alloc<byte>(7)
-          val () = make_package(sec)
-          val @(fz_s, bv_s) = $A.freeze<byte>(sec)
-          val kn = $A.alloc<byte>(4)
-          val () = make_name(kn)
-          val @(fz_kn, bv_kn) = $A.freeze<byte>(kn)
-          val nbuf = $A.alloc<byte>(256)
-          val nr = $T.get(doc, bv_s, 7, bv_kn, 4, nbuf, 256)
-          val () = $A.drop<byte>(fz_kn, bv_kn)
-          val () = $A.free<byte>($A.thaw<byte>(fz_kn))
-          val () = $A.drop<byte>(fz_s, bv_s)
-          val () = $A.free<byte>($A.thaw<byte>(fz_s))
-          val () = $T.toml_free(doc)
-        in
-          case+ nr of
-          | ~$R.some(nlen) => let
-              var cmd: $B.builder_v = $B.create()
-              val () = (if release > 0 then bput_v(cmd, "./dist/release/")
-                else bput_v(cmd, "./dist/debug/"))
-              val () = (if blen > 0 then let
-                val () = copy_to_builder_v(bin, 0, blen, 256, cmd)
-                val () = $A.free<byte>(nbuf)
-              in end
-              else let
-                val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
-                val () = copy_to_builder_v(bv_nb, 0, nlen, 256, cmd)
-                val () = $A.drop<byte>(fz_nb, bv_nb)
-                val () = $A.free<byte>($A.thaw<byte>(fz_nb))
-              in end)
-              val () = put_char_v(cmd, 0)
-              val @(exec_a, exec_len) = $B.to_arr(cmd)
-              val @(fz_ea, bv_ea) = $A.freeze<byte>(exec_a)
-              var run_b1 = $B.create()
-              val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
-              val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil(), 4096), $L.list_vt_nil())
-              val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
-              val rc = run_program(bv_ea, run_argv)
-              val () = (if rc < 0 then let
-                val () = print! ("error: cannot run '")
-                val () = print_borrow(bv_ea, 0, exec_len - 1, 524288, 524288)
-                val () = println! ("'")
-              in set_exit_code(1) end
-              else set_exit_code(rc))
-              val () = $A.drop<byte>(fz_ea, bv_ea)
-              val () = $A.free<byte>($A.thaw<byte>(fz_ea))
-            in end
-          | ~$R.none() => let
-              val () = $A.free<byte>(nbuf)
-            in println! ("error: package.name not found in bats.toml") end
-        end
-      | ~$R.err(_) => println! ("error: could not parse bats.toml")
-    end
-  | ~$R.err(_) => println! ("error: could not open bats.toml")
+  if ~chosen then let
+    val () = $A.drop<byte>(fz_ea, bv_ea)
+    val () = $A.free<byte>($A.thaw<byte>(fz_ea))
+  in set_exit_code(1) end
+  else let
+    var run_b1 = $B.create()
+    val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
+    val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil(), 4096), $L.list_vt_nil())
+    val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
+    val rc = run_program(bv_ea, run_argv)
+    val () = (if rc < 0 then let
+      val () = prerr! ("error: cannot run '")
+      val () = prerr_seg(bv_ea, 0, exec_len - 1, 524288, 524288)
+      val () = prerr! ("'")
+      val () = prerr_newline()
+    in set_exit_code(1) end
+    else set_exit_code(rc))
+    val () = $A.drop<byte>(fz_ea, bv_ea)
+  in $A.free<byte>($A.thaw<byte>(fz_ea)) end
 end
 
 (* ============================================================
