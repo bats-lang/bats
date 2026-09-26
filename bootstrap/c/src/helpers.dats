@@ -27,6 +27,72 @@ staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
 
 (* ============================================================
+   Proven byte reads
+   ============================================================ *)
+
+(* A position in a buffer. Indexed, so a read at it is proven in bounds
+   by the comparisons in peek, with no cast. *)
+
+
+(* Byte at p, or 0 outside [0, n). *)
+
+
+
+implement peek (src, p, n) =
+  if p < 0 then 0
+  else if p >= n then 0
+  else byte2int0($A.read<byte>(src, p))
+
+(* Byte at p of an array, or 0 outside [0, n). *)
+
+
+
+implement peek_arr (buf, p, n) =
+  if p < 0 then 0
+  else if p >= n then 0
+  else byte2int0($A.get<byte>(buf, p))
+
+(* Writes byte v at p of an array; does nothing outside [0, n). *)
+
+
+
+implement poke_arr (buf, p, n, v) =
+  if p < 0 then ()
+  else if p >= n then ()
+  else $A.set<byte>(buf, p, int2byte0(v))
+
+(* First NUL at or after p, or p itself when p is outside [0, n]. *)
+
+
+
+implement find_null_from (buf, p, n) =
+  if p < 0 then p
+  else if p > n then p
+  else $S.find_null_at(buf, p, n)
+
+
+
+
+implement find_null_bv_from (bv, p, n) =
+  if p < 0 then p
+  else if p > n then p
+  else $S.find_null_bv_at(bv, p, n)
+
+(* The little-endian 32-bit int at off in a span table, as a proven
+   int: two's complement computed without overflow (the top byte counts
+   as b3 - 256 when its sign bit is set). *)
+
+
+
+implement span_i32 (bv, off, max) = let
+  val b0 = $AR.low_byte(peek(bv, off, max))
+  val b1 = $AR.low_byte(peek(bv, off + 1, max))
+  val b2 = $AR.low_byte(peek(bv, off + 2, max))
+  val b3 = $AR.low_byte(peek(bv, off + 3, max))
+  val hi = (if b3 < 128 then b3 else b3 - 256): [h:int | ~128 <= h; h < 128] int h
+in b0 + b1 * 256 + b2 * 65536 + hi * 16777216 end
+
+(* ============================================================
    Global state using ATS2 refs (replaces C statics)
    ============================================================ *)
 
@@ -119,7 +185,7 @@ implement print_arr(buf, i, len, max, fuel) =
   if fuel <= 0 then ()
   else if i >= len then ()
   else let
-    val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(i, max)))
+    val b = peek_arr(buf, i, max)
     val () = print_char(int2char0(b))
   in print_arr(buf, i + 1, len, max, fuel - 1) end
 
@@ -131,39 +197,8 @@ implement is_dot_or_dotdot(ent, len, max) =
     $AR.eq_int_int(byte2int0($A.get<byte>(ent, 0)), 46)
   else if len = 2 then
     $AR.eq_int_int(byte2int0($A.get<byte>(ent, 0)), 46) &&
-    $AR.eq_int_int(byte2int0($A.get<byte>(ent, $AR.checked_idx(1, max))), 46)
+    $AR.eq_int_int(peek_arr(ent, 1, max), 46)
   else false
-
-(* ============================================================
-   Proven byte reads
-   ============================================================ *)
-
-(* A position in a buffer. Indexed, so a read at it is proven in bounds
-   by the comparisons in peek, with no cast. *)
-
-
-(* Byte at p, or 0 outside [0, n). *)
-
-
-
-implement peek (src, p, n) =
-  if p < 0 then 0
-  else if p >= n then 0
-  else byte2int0($A.read<byte>(src, p))
-
-(* The little-endian 32-bit int at off in a span table, as a proven
-   int: two's complement computed without overflow (the top byte counts
-   as b3 - 256 when its sign bit is set). *)
-
-
-
-implement span_i32 (bv, off, max) = let
-  val b0 = $AR.low_byte(peek(bv, off, max))
-  val b1 = $AR.low_byte(peek(bv, off + 1, max))
-  val b2 = $AR.low_byte(peek(bv, off + 2, max))
-  val b3 = $AR.low_byte(peek(bv, off + 3, max))
-  val hi = (if b3 < 128 then b3 else b3 - 256): [h:int | ~128 <= h; h < 128] int h
-in b0 + b1 * 256 + b2 * 65536 + hi * 16777216 end
 
 (* ============================================================
    Filename matchers
@@ -456,7 +491,7 @@ implement print_borrow(buf, i, len, max, fuel) =
   if fuel <= 0 then ()
   else if i >= len then ()
   else let
-    val b = $S.borrow_byte(buf, i, max)
+    val b = peek(buf, i, max)
     val () = print_char(int2char0(b))
   in print_borrow(buf, i + 1, len, max, fuel - 1) end
 
@@ -471,7 +506,7 @@ implement copy_to_builder(src, start, len, max, dst, fuel) =
   if fuel <= 0 then ()
   else if start >= len then ()
   else let
-    val b = $S.borrow_byte(src, start, max)
+    val b = peek(src, start, max)
     val () = $B.put_char(dst, b)
   in copy_to_builder(src, start + 1, len, max, dst, fuel - 1) end
 
@@ -547,7 +582,7 @@ implement copy_to_builder_v(src, start, len, max, dst) =
 implement find_basename_start(bv, pos, max, last, fuel) =
   if fuel <= 0 then last + 1
   else let
-    val b = $S.borrow_byte(bv, pos, max)
+    val b = peek(bv, pos, max)
   in
     if $AR.eq_int_int(b, 0) then last + 1
     else if $AR.eq_int_int(b, 47) then
@@ -562,7 +597,7 @@ implement wbw_loop(bw, bv, i, lim, fuel) =
   if fuel <= 0 then ()
   else if i >= lim then ()
   else let
-    val b = $S.borrow_byte(bv, i, 524288)
+    val b = peek(bv, i, 524288)
     val wr = $F.buf_write_byte(bw, b)
     val () = $R.discard<int><int>(wr)
   in wbw_loop(bw, bv, i + 1, lim, fuel - 1) end
@@ -600,15 +635,15 @@ implement token_eq_arr(buf, tstart, tend, sarr, si, fuel) =
   else if tstart >= tend then
     if si < 0 then true
     else if si >= 4096 then true
-    else $AR.eq_int_int(byte2int0($A.get<byte>(sarr, $AR.checked_idx(si, 4096))), 0)
+    else $AR.eq_int_int(peek_arr(sarr, si, 4096), 0)
   else
     if tstart < 0 then false
     else if tstart >= 4096 then false
     else if si < 0 then false
     else if si >= 4096 then false
     else let
-      val tb = byte2int0($A.get<byte>(buf, $AR.checked_idx(tstart, 4096)))
-      val sb = byte2int0($A.get<byte>(sarr, $AR.checked_idx(si, 4096)))
+      val tb = peek_arr(buf, tstart, 4096)
+      val sb = peek_arr(sarr, si, 4096)
     in
       if $AR.neq_int_int(tb, sb) then false
       else if $AR.eq_int_int(sb, 0) then false
@@ -624,7 +659,7 @@ implement arr_range_to_builder(src, i, lim, dst, fuel) =
   else if i < 0 then ()
   else if i >= 4096 then ()
   else let
-    val b = byte2int0($A.get<byte>(src, $AR.checked_idx(i, 4096)))
+    val b = peek_arr(src, i, 4096)
     val () = $B.put_char(dst, b)
   in arr_range_to_builder(src, i + 1, lim, dst, fuel - 1) end
 
@@ -643,7 +678,7 @@ implement str_fill_loop(b, s, slen, i, fuel) =
   else if i >= 4096 then ()
   else let
     val c = char2int0(string_get_at(s, i))
-    val () = $A.set<byte>(b, $AR.checked_idx(i, 4096), int2byte0(c))
+    val () = $A.set<byte>(b, i, int2byte0(c))
   in str_fill_loop(b, s, slen, i + 1, fuel - 1) end
 
 
@@ -676,20 +711,20 @@ implement split_null_to_list(b) = let
   val @(arr, total_len) = $B.to_arr(b)
   val @(fz, bv) = $A.freeze<byte>(arr)
   fun find_nul {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), pos: int, total: int,
-     fuel: int fuel): int =
+    (bv: !$A.borrow(byte, lb, 524288), pos: pos_t, total: int,
+     fuel: int fuel): pos_t =
     if fuel <= 0 then pos
     else if pos >= total then pos
-    else if $S.borrow_byte(bv, pos, 524288) = 0 then pos
+    else if peek(bv, pos, 524288) = 0 then pos
     else find_nul(bv, pos + 1, total, fuel - 1)
   fun copy_word {lb:agz}{fuel:nat} .<fuel>.
     (bv: !$A.borrow(byte, lb, 524288),
      dst: !$B.builder_v >> $B.builder_v,
-     soff: int, di: int, seg_len: int, fuel: int fuel): void =
+     soff: pos_t, di: pos_t, seg_len: int, fuel: int fuel): void =
     if fuel <= 0 then ()
     else if di >= seg_len then ()
     else let
-      val c = $S.borrow_byte(bv, soff + di, 524288)
+      val c = peek(bv, soff + di, 524288)
       val () = put_char_v(dst, c)
     in copy_word(bv, dst, soff, di + 1, seg_len, fuel - 1) end
   fun rev_args {n:nat} .<n>.
@@ -699,7 +734,7 @@ implement split_null_to_list(b) = let
     | ~$L.list_vt_nil() => acc
     | ~$L.list_vt_cons(x, tl) => rev_args(tl, $L.list_vt_cons(x, acc))
   fun loop {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), start: int, total: int,
+    (bv: !$A.borrow(byte, lb, 524288), start: pos_t, total: int,
      acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
     if fuel <= 0 then acc
     else if start >= total then acc
@@ -726,27 +761,27 @@ implement split_spaces_to_list(b) = let
   val @(arr, total_len) = $B.to_arr(b)
   val @(fz, bv) = $A.freeze<byte>(arr)
   fun find_space {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), pos: int, total: int,
-     fuel: int fuel): int =
+    (bv: !$A.borrow(byte, lb, 524288), pos: pos_t, total: int,
+     fuel: int fuel): pos_t =
     if fuel <= 0 then pos
     else if pos >= total then pos
-    else if $S.borrow_byte(bv, pos, 524288) = 32 then pos
+    else if peek(bv, pos, 524288) = 32 then pos
     else find_space(bv, pos + 1, total, fuel - 1)
   fun skip_spaces {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), pos: int, total: int,
-     fuel: int fuel): int =
+    (bv: !$A.borrow(byte, lb, 524288), pos: pos_t, total: int,
+     fuel: int fuel): pos_t =
     if fuel <= 0 then pos
     else if pos >= total then pos
-    else if $S.borrow_byte(bv, pos, 524288) <> 32 then pos
+    else if peek(bv, pos, 524288) <> 32 then pos
     else skip_spaces(bv, pos + 1, total, fuel - 1)
   fun copy_word {lb:agz}{fuel:nat} .<fuel>.
     (bv: !$A.borrow(byte, lb, 524288),
      dst: !$B.builder_v >> $B.builder_v,
-     soff: int, di: int, seg_len: int, fuel: int fuel): void =
+     soff: pos_t, di: pos_t, seg_len: int, fuel: int fuel): void =
     if fuel <= 0 then ()
     else if di >= seg_len then ()
     else let
-      val c = $S.borrow_byte(bv, soff + di, 524288)
+      val c = peek(bv, soff + di, 524288)
       val () = put_char_v(dst, c)
     in copy_word(bv, dst, soff, di + 1, seg_len, fuel - 1) end
   fun rev_args {n:nat} .<n>.
@@ -756,7 +791,7 @@ implement split_spaces_to_list(b) = let
     | ~$L.list_vt_nil() => acc
     | ~$L.list_vt_cons(x, tl) => rev_args(tl, $L.list_vt_cons(x, acc))
   fun loop {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), start: int, total: int,
+    (bv: !$A.borrow(byte, lb, 524288), start: pos_t, total: int,
      acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
     if fuel <= 0 then acc
     else if start >= total then acc
@@ -844,12 +879,12 @@ end
 
 implement parse_decimal (buf, len, max) = let
   fun loop {l:agz}{n:pos}{fuel:nat} .<fuel>.
-    (buf: !$A.arr(byte, l, n), max: int n, pos: int, len: int,
+    (buf: !$A.arr(byte, l, n), max: int n, pos: pos_t, len: int,
      acc: int, fuel: int fuel): int =
     if fuel <= 0 then acc
     else if pos >= len then acc
     else let
-      val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, max)))
+      val b = peek_arr(buf, pos, max)
     in
       if b >= 48 then
         if b <= 57 then loop(buf, max, pos + 1, len, acc * 10 + (b - 48), fuel - 1)
@@ -1217,7 +1252,7 @@ in arr end
 implement strip_newline_arr(buf, len) =
   if len <= 0 then 0
   else if len > 4096 then len
-  else (if byte2int0($A.get<byte>(buf, $AR.checked_idx(len - 1, 4096))) = 10 then len - 1 else len): int
+  else (if peek_arr(buf, len - 1, 4096) = 10 then len - 1 else len): pos_t
 
 
 
@@ -1225,7 +1260,7 @@ implement strip_newline_arr(buf, len) =
 implement strip_newline_arr524288(buf, len) =
   if len <= 0 then 0
   else if len > 524288 then len
-  else (if byte2int0($A.get<byte>(buf, $AR.checked_idx(len - 1, 524288))) = 10 then len - 1 else len): int
+  else (if peek_arr(buf, len - 1, 524288) = 10 then len - 1 else len): pos_t
 
 
 
@@ -1233,7 +1268,7 @@ implement strip_newline_arr524288(buf, len) =
 implement strip_newline_arr256(buf, len) =
   if len <= 0 then 0
   else if len > 256 then len
-  else (if byte2int0($A.get<byte>(buf, $AR.checked_idx(len - 1, 256))) = 10 then len - 1 else len): int
+  else (if peek_arr(buf, len - 1, 256) = 10 then len - 1 else len): pos_t
 
 (* ============================================================
    String constant builders
@@ -1343,7 +1378,7 @@ implement count_argc_loop(buf, pos, len, max, count, fuel) =
   else if pos < 0 then count
   else if pos >= max then count
   else let
-    val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, max)))
+    val b = peek_arr(buf, pos, max)
   in
     if $AR.eq_int_int(b, 0) then
       count_argc_loop(buf, pos + 1, len, max, count + 1, fuel - 1)

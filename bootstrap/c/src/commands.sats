@@ -211,33 +211,6 @@ fn do_generate_docs(pkg_name_len: int, kind_is_lib: int): void
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn do_upload(): void
 
 
@@ -794,7 +767,7 @@ fn do_tree(): void
 
 
 fn do_add {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), pkg_start: int, pkg_len: int,
+  (bv: !$A.borrow(byte, l, n), pkg_start: pos_t, pkg_len: int,
    max: int n): void
 
 
@@ -840,7 +813,7 @@ fn do_add {l:agz}{n:pos}
 
 
 fn do_remove {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), pkg_start: int, pkg_len: int,
+  (bv: !$A.borrow(byte, l, n), pkg_start: pos_t, pkg_len: int,
    max: int n): void
 
 
@@ -940,7 +913,7 @@ fn run_process_demo(): void
 
 
 fun save_extra_args {l:agz}
-  (buf: !$A.arr(byte, l, 4096), dd_pos: int, len: int): void
+  (buf: !$A.arr(byte, l, 4096), dd_pos: pos_t, len: int): void
 
 
 

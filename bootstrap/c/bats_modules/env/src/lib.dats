@@ -43,6 +43,8 @@ static int _env_getenv(const char *name, void *buf, int max_len) {
 
 
 
+(* As get, with a NUL-terminated name. The value's length (copied to
+   buf[0, k), truncated to max_len), or none when the variable is unset. *)
 
 
 
@@ -57,7 +59,7 @@ implement get {ln}{nn}{l}{n} (name, name_len, buf, max_len) = let
   val cname = $A.alloc<byte>(name_len + 1)
   val () = $A.write_borrow(cname, 0, name, name_len)
   val () = $A.write_byte(cname, name_len, 0)
-  val len =  $extfcall(int, "_env_getenv",
+  val len =  $extfcall([k:int | k <= n] int k, "_env_getenv",
     $UNSAFE.castvwtp1{ptr}(cname),
     $UNSAFE.castvwtp1{ptr}(buf),
     max_len) 
@@ -68,7 +70,7 @@ in
 end
 
 implement get_cstr {ln}{nn}{l}{n} (name, buf, max_len) = let
-  val len =  $extfcall(int, "_env_getenv",
+  val len =  $extfcall([k:int | k <= n] int k, "_env_getenv",
     $UNSAFE.castvwtp1{ptr}(name),
     $UNSAFE.castvwtp1{ptr}(buf),
     max_len) 

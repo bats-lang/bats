@@ -74,7 +74,7 @@ in
       (* Write .dats - prepend self-staload *)
       var db : $B.builder_v = $B.create()
       val bn_start = find_basename_start(sats_bv, 0, 524288, ~1, 4096)
-      val bn_end = $S.find_null_bv(sats_bv, bn_start, 524288, 4096)
+      val bn_end = find_null_bv_from(sats_bv, bn_start, 524288)
       val () = bput_v(db, "staload \"./")
       val () = copy_to_builder_v(sats_bv, bn_start, bn_end, 524288, db)
       val () = bput_v(db, "\"\n")
@@ -269,7 +269,7 @@ implement do_lock(dev, dry_run) = let
     | ~$R.ok(rfd) => let
         val rb = $A.alloc<byte>(4096)
         val rr2 = $F.file_read(rfd, rb, 4096)
-        val rl = (case+ rr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+        val rl = (case+ rr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
         val rcr = $F.file_close(rfd)
         val () = $R.discard<int><int>(rcr)
         (* strip trailing newline *)
@@ -332,8 +332,8 @@ in
                  Returns (version_start, version_end) in lock buffer, or (-1,-1). *)
               fun lock_find_ver {lel:agz}{lk:agz}{fuel:nat} .<fuel>.
                 (elb: !$A.borrow(byte, lel, 524288), el_len: int,
-                 ks: !$A.arr(byte, lk, 4096), ds: int, de: int,
-                 pos: int, fuel: int fuel): @(int, int) =
+                 ks: !$A.arr(byte, lk, 4096), ds: pos_t, de: pos_t,
+                 pos: pos_t, fuel: int fuel): @(pos_t, pos_t) =
                 if fuel <= 0 then @(~1, ~1)
                 else if pos >= el_len then @(~1, ~1)
                 else let
@@ -341,27 +341,27 @@ in
                   fun match_n {lel2:agz}{lk2:agz}{f2:nat} .<f2>.
                     (elb: !$A.borrow(byte, lel2, 524288),
                      ks: !$A.arr(byte, lk2, 4096),
-                     ei: int, ki: int, rem: int, f2: int f2): bool =
+                     ei: pos_t, ki: pos_t, rem: int, f2: int f2): bool =
                     if f2 <= 0 then true
                     else if rem <= 0 then true
                     else let
-                      val eb = $S.borrow_byte(elb, ei, 524288)
+                      val eb = peek(elb, ei, 524288)
                       val kb = (if ki >= 0 then if ki < 4096 then
-                        byte2int0($A.get<byte>(ks, $AR.checked_idx(ki, 4096)))
+                        peek_arr(ks, ki, 4096)
                         else 0 else 0): int
                     in if $AR.neq_int_int(eb, kb) then false
                       else match_n(elb, ks, ei + 1, ki + 1, rem - 1, f2 - 1)
                     end
-                  val matches = match_n(elb, ks, pos, ds, dl, $AR.checked_nat(dl + 1))
+                  val matches = match_n(elb, ks, pos, ds, dl, 4097)
                   val after = pos + dl
-                  val sp = $S.borrow_byte(elb, after, 524288)
+                  val sp = peek(elb, after, 524288)
                 in
                   if matches && $AR.eq_int_int(sp, 32) then let
                     val vstart = after + 1
                     fun find_sp {lel2:agz}{f2:nat} .<f2>.
-                      (elb: !$A.borrow(byte, lel2, 524288), i: int, f2: int f2): int =
+                      (elb: !$A.borrow(byte, lel2, 524288), i: pos_t, f2: int f2): pos_t =
                       if f2 <= 0 then i
-                      else let val b = $S.borrow_byte(elb, i, 524288)
+                      else let val b = peek(elb, i, 524288)
                       in if $AR.eq_int_int(b, 32) || $AR.eq_int_int(b, 10) || $AR.eq_int_int(b, 0) then i
                         else find_sp(elb, i + 1, f2 - 1)
                       end
@@ -369,9 +369,9 @@ in
                   in @(vstart, vend) end
                   else let
                     fun skip_ln {lel2:agz}{f2:nat} .<f2>.
-                      (elb: !$A.borrow(byte, lel2, 524288), i: int, f2: int f2): int =
+                      (elb: !$A.borrow(byte, lel2, 524288), i: pos_t, f2: int f2): pos_t =
                       if f2 <= 0 then i
-                      else let val b = $S.borrow_byte(elb, i, 524288)
+                      else let val b = peek(elb, i, 524288)
                       in if $AR.eq_int_int(b, 10) then i + 1
                         else skip_ln(elb, i + 1, f2 - 1)
                       end
@@ -380,24 +380,24 @@ in
                 end
               (* Resolve each dependency *)
               fun resolve {lk:agz}{lr:agz}{lel:agz}{fuel:nat} .<fuel>.
-                (ks: !$A.arr(byte, lk, 4096), pos: int, kl: int,
+                (ks: !$A.arr(byte, lk, 4096), pos: pos_t, kl: int,
                  rb: !$A.borrow(byte, lr, 4096), rl: int,
                  elb: !$A.borrow(byte, lel, 524288), el_len: int,
                  lb: !$B.builder_v >> $B.builder_v, cnt: int, fuel: int fuel): int =
                 if fuel <= 0 then cnt
                 else if pos >= kl then cnt
                 else let
-                  val de = $S.find_null(ks, pos, 4096, 4096)
+                  val de = find_null_from(ks, pos, 4096)
                   val dl = de - pos
                 in if dl <= 0 then resolve(ks, de + 1, kl, rb, rl, elb, el_len, lb, cnt, fuel - 1)
                   else let
                     (* Strip quotes from key name *)
                     val first_byte = (if pos >= 0 then if pos < 4096 then
-                      byte2int0($A.get<byte>(ks, $AR.checked_idx(pos, 4096))) else 0 else 0): int
-                    val dep_start = (if $AR.eq_int_int(first_byte, 34) then pos + 1 else pos): int
+                      peek_arr(ks, pos, 4096) else 0 else 0): int
+                    val dep_start = (if $AR.eq_int_int(first_byte, 34) then pos + 1 else pos): pos_t
                     val last_byte = (if de - 1 >= 0 then if de - 1 < 4096 then
-                      byte2int0($A.get<byte>(ks, $AR.checked_idx(de - 1, 4096))) else 0 else 0): int
-                    val dep_end = (if $AR.eq_int_int(last_byte, 34) then de - 1 else de): int
+                      peek_arr(ks, de - 1, 4096) else 0 else 0): int
+                    val dep_end = (if $AR.eq_int_int(last_byte, 34) then de - 1 else de): pos_t
                     val dl = dep_end - dep_start
                     (* Check if already resolved: bats_modules/<dep>/bats.toml exists *)
                     var chk_b : $B.builder_v = $B.create()
@@ -419,7 +419,7 @@ in
                     (* Check existing lock for pinned version *)
                     val @(lock_vs, lock_ve) = (if already then
                       lock_find_ver(elb, el_len, ks, dep_start, dep_end, 0, 524288)
-                      else @(~1, ~1)): @(int, int)
+                      else @(~1, ~1)): @(pos_t, pos_t)
                   in
                     if lock_vs >= 0 then let
                       (* Dep is present and pinned — write lock line, don't bump count *)
@@ -456,32 +456,34 @@ in
                           else let
                             (* Find '_' separator *)
                             fun find_under {la3:agz}{f4:nat} .<f4>.
-                              (a: !$A.arr(byte, la3, 256), i: int, len: int, f4: int f4): int =
-                              if f4 <= 0 then len
-                              else if i >= len then len
-                              else if i < 0 then len
-                              else if $AR.eq_int_int(byte2int0($A.get<byte>(a, $AR.checked_idx(i, 256))), 95) then i
+                              (a: !$A.arr(byte, la3, 256), i: pos_t, len: int, f4: int f4): pos_t =
+                              (* Stops at i = len when there is no '_'; name
+                                 lengths are never negative, so that is len. *)
+                              if f4 <= 0 then i
+                              else if i >= len then i
+                              else if i < 0 then i
+                              else if $AR.eq_int_int(peek_arr(a, i, 256), 95) then i
                               else find_under(a, i + 1, len, f4 - 1)
                             val us = find_under(a, 0, len, 256)
                             (* Parse part: skip to the right dot-separated segment *)
                             fun skip_parts {la3:agz}{f4:nat} .<f4>.
-                              (a: !$A.arr(byte, la3, 256), pos: int, len: int, remaining: int, f4: int f4): int =
+                              (a: !$A.arr(byte, la3, 256), pos: pos_t, len: int, remaining: int, f4: int f4): pos_t =
                               if f4 <= 0 then pos
                               else if remaining <= 0 then pos
                               else if pos >= len then pos
                               else if pos < 0 then pos
-                              else if $AR.eq_int_int(byte2int0($A.get<byte>(a, $AR.checked_idx(pos, 256))), 46) then
+                              else if $AR.eq_int_int(peek_arr(a, pos, 256), 46) then
                                 skip_parts(a, pos + 1, len, remaining - 1, f4 - 1)
                               else skip_parts(a, pos + 1, len, remaining, f4 - 1)
                             val vstart = skip_parts(a, us + 1, len, part, 256)
                             (* Parse decimal at vstart *)
                             fun parse_num {la3:agz}{f4:nat} .<f4>.
-                              (a: !$A.arr(byte, la3, 256), pos: int, len: int, acc: int, f4: int f4): int =
+                              (a: !$A.arr(byte, la3, 256), pos: pos_t, len: int, acc: int, f4: int f4): int =
                               if f4 <= 0 then acc
                               else if pos >= len then acc
                               else if pos < 0 then acc
                               else let
-                                val b = byte2int0($A.get<byte>(a, $AR.checked_idx(pos, 256)))
+                                val b = peek_arr(a, pos, 256)
                               in if b >= 48 then if b <= 57 then parse_num(a, pos + 1, len, acc * 10 + (b - 48), f4 - 1)
                                 else acc else acc
                               end
@@ -549,13 +551,12 @@ in
                               in if newer then let
                                 fun cp_name {ls2:agz}{ld2:agz}{f3:nat} .<f3>.
                                   (s: !$A.arr(byte, ls2, 256), d2: !$A.arr(byte, ld2, 256),
-                                   i: int, l: int, f3: int f3): void =
+                                   i: pos_t, l: int, f3: int f3): void =
                                   if f3 <= 0 then () else if i >= l then ()
                                   else if i < 0 then () else if i >= 256 then ()
                                   else let
-                                    val idx = $AR.checked_idx(i, 256)
-                                    val v = byte2int0($A.get<byte>(s, idx))
-                                    val () = $A.set<byte>(d2, idx, int2byte0(v))
+                                    val v = peek_arr(s, i, 256)
+                                    val () = poke_arr(d2, i, 256, v)
                                   in cp_name(s, d2, i+1, l, f3-1) end
                                 val () = cp_name(e, b, 0, el, 256)
                                 val () = !bl := el
@@ -622,10 +623,10 @@ in
                           (* Version from filename *)
                           var pfx : $B.builder_v = $B.create()
                           fun mkp {ls4:agz}{f4:nat} .<f4>.
-                            (s: !$A.arr(byte, ls4, 4096), i: int, l: int, d3: !$B.builder_v >> $B.builder_v, f4: int f4): void =
+                            (s: !$A.arr(byte, ls4, 4096), i: pos_t, l: int, d3: !$B.builder_v >> $B.builder_v, f4: int f4): void =
                             if f4 <= 0 then () else if i >= l then ()
                             else if i < 0 then () else if i >= 4096 then ()
-                            else let val c = byte2int0($A.get<byte>(s, $AR.checked_idx(i, 4096)))
+                            else let val c = peek_arr(s, i, 4096)
                             in if $AR.eq_int_int(c,47) then let
                               val () = put_char_v(d3,95)
                             in mkp(s, i+1, l, d3, f4-1) end
@@ -833,17 +834,17 @@ in
                     val lc = $F.file_close(lfd)
                     val () = $R.discard<int><int>(lc)
                     fun count_nl {la:agz}{k:nat} .<k>.
-                      (buf: !$A.arr(byte, la, 524288), pos: int, len: int,
+                      (buf: !$A.arr(byte, la, 524288), pos: pos_t, len: int,
                        acc: int, fuel: int k): int =
                       if fuel <= 0 then acc
                       else if pos >= len then acc
                       else if pos < 0 then acc
                       else let
-                        val b = byte2int0($A.get<byte>(buf, $AR.checked_idx(pos, 524288)))
+                        val b = peek_arr(buf, pos, 524288)
                       in if $AR.eq_int_int(b, 10) then
                         count_nl(buf, pos + 1, len, acc + 1, fuel - 1)
                       else count_nl(buf, pos + 1, len, acc, fuel - 1) end
-                    val nc = count_nl(lbuf, 0, ll, 0, $AR.checked_nat(ll))
+                    val nc = count_nl(lbuf, 0, ll, 0, 524288)
                     val () = $A.free<byte>(lbuf)
                   in nc end
                 | ~$R.err(_) => n): int
@@ -1624,7 +1625,7 @@ in case+ r of
       (* Check for '#' then "target wasm binary" — split to avoid lexer
          interpreting #target inside the string *)
       val ok = (if bl >= 19 then
-        $AR.eq_int_int($S.borrow_byte(bv_buf, 0, 32), 35) &&
+        $AR.eq_int_int(peek(bv_buf, 0, 32), 35) &&
         lit_target_wasm_binary(bv_buf, 1, 32)
       else false): bool
       val () = $A.drop<byte>(fz_buf, bv_buf)
@@ -1665,35 +1666,35 @@ in
     val hr = $E.get(bv_hk, 4, phbuf, 512)
     val () = $A.drop<byte>(fz_hk, bv_hk)
     val () = $A.free<byte>($A.thaw<byte>(fz_hk))
-    val hlen = (case+ hr of | ~$R.some(n) => n | ~$R.none() => 0): int
+    val hlen = (case+ hr of | ~$R.some(n) => n | ~$R.none() => 0): [k:nat | k <= 512] int k
     (* Append /.bats/ats2 to HOME *)
     fn append_bats_path {l:agz}
-      (buf: !$A.arr(byte, l, 512), pos: int): int =
+      (buf: !$A.arr(byte, l, 512), pos: pos_t): pos_t =
       if pos < 0 then pos
       else if pos + 10 >= 512 then pos
       else let
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos,512), int2byte0(47))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+1,512), int2byte0(46))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+2,512), int2byte0(98))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+3,512), int2byte0(97))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+4,512), int2byte0(116))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+5,512), int2byte0(115))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+6,512), int2byte0(47))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+7,512), int2byte0(97))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+8,512), int2byte0(116))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+9,512), int2byte0(115))
-        val () = $A.set<byte>(buf, $AR.checked_idx(pos+10,512), int2byte0(50))
+        val () = poke_arr(buf, pos, 512, 47)
+        val () = poke_arr(buf, pos+1, 512, 46)
+        val () = poke_arr(buf, pos+2, 512, 98)
+        val () = poke_arr(buf, pos+3, 512, 97)
+        val () = poke_arr(buf, pos+4, 512, 116)
+        val () = poke_arr(buf, pos+5, 512, 115)
+        val () = poke_arr(buf, pos+6, 512, 47)
+        val () = poke_arr(buf, pos+7, 512, 97)
+        val () = poke_arr(buf, pos+8, 512, 116)
+        val () = poke_arr(buf, pos+9, 512, 115)
+        val () = poke_arr(buf, pos+10, 512, 50)
       in pos + 11 end
     val phlen = append_bats_path(phbuf, hlen)
     (* Check if patsopt exists, install if not — single freeze *)
     (* Copy arr bytes to builder — uses src_byte to avoid !arr in conditional *)
     fun arr_to_builder {l:agz}{fuel:nat} .<fuel>.
-      (buf: !$A.borrow(byte, l, 512), pos: int, len: int,
+      (buf: !$A.borrow(byte, l, 512), pos: pos_t, len: int,
        dst: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
       if fuel <= 0 then ()
       else if pos >= len then ()
       else let
-        val b = $S.borrow_byte(buf, pos, 512)
+        val b = peek(buf, pos, 512)
         val () = put_char_v(dst, b)
       in arr_to_builder(buf, pos + 1, len, dst, fuel - 1) end
     fn ensure_ats2 {l:agz}
@@ -2429,57 +2430,52 @@ in
         | ~$R.ok(d2) => let
             (* === Staload-chain scanning helpers === *)
             fun skip_to_nl {lb2:agz}{fuel_sn:nat} .<fuel_sn>.
-              (buf: !$A.borrow(byte, lb2, 524288), p: int, nb: int,
-               fuel_sn: int fuel_sn): int =
+              (buf: !$A.borrow(byte, lb2, 524288), p: pos_t, nb: int,
+               fuel_sn: int fuel_sn): pos_t =
               if fuel_sn <= 0 then p
               else if p >= nb then p
               else let
-                val b = $S.borrow_byte(buf,
-                  $AR.checked_idx(p, 524288), 524288)
+                val b = peek(buf, p, 524288)
               in if $AR.eq_int_int(b, 10) then p + 1
                 else skip_to_nl(buf, p + 1, nb, fuel_sn - 1) end
 
             fun find_dquote {lb2:agz}{fuel_fq:nat} .<fuel_fq>.
-              (buf: !$A.borrow(byte, lb2, 524288), p: int, nb: int,
-               fuel_fq: int fuel_fq): int =
+              (buf: !$A.borrow(byte, lb2, 524288), p: pos_t, nb: int,
+               fuel_fq: int fuel_fq): pos_t =
               if fuel_fq <= 0 then p
               else if p >= nb then p
               else let
-                val b = $S.borrow_byte(buf,
-                  $AR.checked_idx(p, 524288), 524288)
+                val b = peek(buf, p, 524288)
               in if $AR.eq_int_int(b, 34) then p
                 else find_dquote(buf, p + 1, nb, fuel_fq - 1) end
 
             fun borrow_eq_arr {lb2:agz}{ls2:agz}{fuel_be:nat} .<fuel_be>.
-              (buf: !$A.borrow(byte, lb2, 524288), boff: int,
-               arr2: !$A.arr(byte, ls2, 16384), aoff: int,
+              (buf: !$A.borrow(byte, lb2, 524288), boff: pos_t,
+               arr2: !$A.arr(byte, ls2, 16384), aoff: pos_t,
                len: int, fuel_be: int fuel_be): bool =
               if fuel_be <= 0 then len <= 0
               else if len <= 0 then true
               else let
-                val bb = $S.borrow_byte(buf,
-                  $AR.checked_idx(boff, 524288), 524288)
-                val ab = byte2int0($A.get<byte>(arr2,
-                  $AR.checked_idx(aoff, 16384)))
+                val bb = peek(buf, boff, 524288)
+                val ab = peek_arr(arr2, aoff, 16384)
               in if $AR.eq_int_int(bb, ab) then
                 borrow_eq_arr(buf, boff+1, arr2, aoff+1, len-1, fuel_be-1)
               else false end
 
             fun arr_entry_len {ls2:agz}{fuel_el:nat} .<fuel_el>.
-              (arr2: !$A.arr(byte, ls2, 16384), pos: int,
-               fuel_el: int fuel_el): int =
+              (arr2: !$A.arr(byte, ls2, 16384), pos: pos_t,
+               fuel_el: int fuel_el): pos_t =
               if fuel_el <= 0 then 0
               else if pos >= 16384 then 0
               else let
-                val b = byte2int0($A.get<byte>(arr2,
-                  $AR.checked_idx(pos, 16384)))
+                val b = peek_arr(arr2, pos, 16384)
               in if $AR.eq_int_int(b, 0) then 0
                 else 1 + arr_entry_len(arr2, pos + 1, fuel_el - 1) end
 
             fun is_dep_seen {lb2:agz}{ls2:agz}{fuel_ds:nat} .<fuel_ds>.
-              (buf: !$A.borrow(byte, lb2, 524288), boff: int, blen: int,
-               seen2: !$A.arr(byte, ls2, 16384), spos: int,
-               scan: int, fuel_ds: int fuel_ds): bool =
+              (buf: !$A.borrow(byte, lb2, 524288), boff: pos_t, blen: int,
+               seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
+               scan: pos_t, fuel_ds: int fuel_ds): bool =
               if fuel_ds <= 0 then false
               else if scan >= spos then false
               else let
@@ -2493,35 +2489,32 @@ in
                 scan + elen + 1, fuel_ds - 1) end
 
             fun copy_borrow_to_arr {lb2:agz}{ls2:agz}{fuel_cb:nat} .<fuel_cb>.
-              (buf: !$A.borrow(byte, lb2, 524288), boff: int,
-               dst2: !$A.arr(byte, ls2, 16384), doff: int,
+              (buf: !$A.borrow(byte, lb2, 524288), boff: pos_t,
+               dst2: !$A.arr(byte, ls2, 16384), doff: pos_t,
                len: int, fuel_cb: int fuel_cb): void =
               if fuel_cb <= 0 then ()
               else if len <= 0 then ()
               else let
-                val b = $S.borrow_byte(buf,
-                  $AR.checked_idx(boff, 524288), 524288)
-                val () = $A.set<byte>(dst2,
-                  $AR.checked_idx(doff, 16384), int2byte0(b))
+                val b = peek(buf, boff, 524288)
+                val () = poke_arr(dst2, doff, 16384, b)
               in copy_borrow_to_arr(buf, boff+1, dst2, doff+1, len-1, fuel_cb-1) end
 
             fun copy_arr_to_bld {ls2:agz}{fuel_ca:nat} .<fuel_ca>.
-              (src2: !$A.arr(byte, ls2, 16384), start: int,
+              (src2: !$A.arr(byte, ls2, 16384), start: pos_t,
                len: int, dst2: !$B.builder_v >> $B.builder_v,
                fuel_ca: int fuel_ca): void =
               if fuel_ca <= 0 then ()
               else if len <= 0 then ()
               else let
-                val b = byte2int0($A.get<byte>(src2,
-                  $AR.checked_idx(start, 16384)))
+                val b = peek_arr(src2, start, 16384)
                 val () = put_char_v(dst2, b)
               in copy_arr_to_bld(src2, start+1, len-1, dst2, fuel_ca-1) end
 
             (* Scan .dats buffer for staload dep references, add to seen *)
             fun scan_staload_deps {lb2:agz}{ls2:agz}{fuel_sc:nat} .<fuel_sc>.
               (buf: !$A.borrow(byte, lb2, 524288), nbytes: int,
-               seen2: !$A.arr(byte, ls2, 16384), spos: int,
-               pos: int, fuel_sc: int fuel_sc): int =
+               seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
+               pos: pos_t, fuel_sc: int fuel_sc): pos_t =
               if fuel_sc <= 0 then spos
               else if pos >= nbytes then spos
               else if pos + 9 > nbytes then spos
@@ -2559,9 +2552,7 @@ in
               else let
                 val () = copy_borrow_to_arr(buf, dep_start, seen2,
                   spos, dep_len, 256)
-                val () = $A.set<byte>(seen2,
-                  $AR.checked_idx(spos + dep_len, 16384),
-                  int2byte0(0))
+                val () = poke_arr(seen2, spos + dep_len, 16384, 0)
                 val new_spos = spos + dep_len + 1
                 val next = skip_to_nl(buf, qpos, nbytes, 524288)
               in scan_staload_deps(buf, nbytes, seen2, new_spos, next, fuel_sc - 1) end
@@ -2572,8 +2563,8 @@ in
 
             (* Collect transitive deps by reading each dep's lib.dats *)
             fun collect_trans_deps {ls2:agz}{fuel_ct:nat} .<fuel_ct>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: int,
-               scan_from: int, fuel_ct: int fuel_ct): int =
+              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
+               scan_from: pos_t, fuel_ct: int fuel_ct): pos_t =
               if fuel_ct <= 0 then spos
               else if scan_from >= spos then spos
               else let
@@ -2604,13 +2595,13 @@ in
                       val () = $A.free<byte>($A.thaw<byte>(fz_tb))
                     in ns end
                   | ~$R.err(_) => spos
-                ): int
+                ): pos_t
               in collect_trans_deps(seen2, new_spos, next_scan, fuel_ct - 1) end
 
             (* Emit dynload for each dep in closure + extra .dats shared modules *)
             fun emit_closure_dynloads {ls2:agz}{fuel_ed:nat} .<fuel_ed>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: int,
-               pos: int, eb: !$B.builder_v >> $B.builder_v,
+              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
+               pos: pos_t, eb: !$B.builder_v >> $B.builder_v,
                fuel_ed: int fuel_ed): void =
               if fuel_ed <= 0 then ()
               else if pos >= spos then ()
@@ -2638,7 +2629,7 @@ in
                       fun scan_extra {ls3:agz}{fuel_se:nat} .<fuel_se>.
                         (d_ext2: !$F.dir,
                          seen3: !$A.arr(byte, ls3, 16384),
-                         dep_pos: int, dep_len: int,
+                         dep_pos: pos_t, dep_len: int,
                          eb2: !$B.builder_v >> $B.builder_v,
                          fuel_se: int fuel_se): void =
                         if fuel_se <= 0 then ()
@@ -2683,9 +2674,9 @@ in
             (* Walks build/src in sorted order so the dep list, and hence
                the synthetic entry, does not depend on readdir order. *)
             fun scan_shared_module_deps {ls2:agz}{lq:agz}{fuel_sm:nat} .<fuel_sm>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: int,
+              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
                prev: $A.arr(byte, lq, 256), prev_len: int,
-               fuel_sm: int fuel_sm): int =
+               fuel_sm: int fuel_sm): pos_t =
               if fuel_sm <= 0 then let
                 val () = $A.free<byte>(prev)
               in spos end
@@ -2733,7 +2724,7 @@ in
                       val () = $A.drop<byte>(fz_smb, bv_smb)
                       val () = $A.free<byte>($A.thaw<byte>(fz_smb))
                     in ns end
-                  | ~$R.err(_) => spos): int
+                  | ~$R.err(_) => spos): pos_t
               in scan_shared_module_deps(seen2, new_spos, sme, sel,
                 fuel_sm - 1) end
               end
@@ -2741,8 +2732,8 @@ in
 
             (* Link .o files for deps in the staload-chain closure *)
             fun link_closure_deps {ls2:agz}{fuel_ld:nat} .<fuel_ld>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: int,
-               pos: int, lb: !$B.builder_v >> $B.builder_v,
+              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
+               pos: pos_t, lb: !$B.builder_v >> $B.builder_v,
                fuel_ld: int fuel_ld): void =
               if fuel_ld <= 0 then ()
               else if pos >= spos then ()
@@ -2770,7 +2761,7 @@ in
                       fun link_extra_o {ls3:agz}{fuel_le:nat} .<fuel_le>.
                         (d_ld2: !$F.dir,
                          seen3: !$A.arr(byte, ls3, 16384),
-                         dep_pos: int, dep_len: int,
+                         dep_pos: pos_t, dep_len: int,
                          lb2: !$B.builder_v >> $B.builder_v,
                          fuel_le: int fuel_le): void =
                         if fuel_le <= 0 then ()
@@ -3838,7 +3829,7 @@ in
                             val () = $A.drop<byte>(fz_wbuf, bv_wbuf)
                             val () = $A.free<byte>($A.thaw<byte>(fz_wbuf))
                             fun wcc_deps {ls2:agz}{fuel:nat} .<fuel>.
-                              (seen: !$A.arr(byte, ls2, 16384), spos: int, pos: int,
+                              (seen: !$A.arr(byte, ls2, 16384), spos: pos_t, pos: pos_t,
                                lb: !$B.builder_v >> $B.builder_v, cnt: int, fuel: int fuel): int =
                               if fuel <= 0 then cnt
                               else if pos >= spos then cnt
@@ -3874,7 +3865,7 @@ in
                                   | ~$R.ok(wd) => let
                                       fun wcc_ex {ls3:agz}{fuel2:nat} .<fuel2>.
                                         (wd2: !$F.dir, s: !$A.arr(byte, ls3, 16384),
-                                         dp: int, dl: int,
+                                         dp: pos_t, dl: int,
                                          lb2: !$B.builder_v >> $B.builder_v,
                                          c: int, fuel2: int fuel2): int =
                                         if fuel2 <= 0 then c
@@ -4261,7 +4252,7 @@ in
           | ~$R.ok(tcfd) => let
               val tcb = $A.alloc<byte>(4096)
               val tcr2 = $F.file_read(tcfd, tcb, 4096)
-              val tcl = (case+ tcr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+              val tcl = (case+ tcr2 of | ~$R.ok(n) => n | ~$R.err(_) => 0): pos_t
               val tcc = $F.file_close(tcfd)
               val () = $R.discard<int><int>(tcc)
               val tcl2 = strip_newline_arr(tcb, tcl)
