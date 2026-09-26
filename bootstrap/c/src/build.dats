@@ -283,6 +283,34 @@ in
   else prerr! ("cleaned ", removed, " artifacts\n")
 end
 
+(* The sha256 of the archive rb[0, rl)/<ks[ds, de)>/<name[0, nlen)> into
+   out, as the Rust bats's lock line has it (lock::resolve_all) *)
+fn hash_or_error (ok: bool, out: !$B.builder_v >> $B.builder_v): void =
+  if ok then ()
+  else let
+    val () = set_build_err()
+    val () = prerr! ("error: cannot read an archive to hash it\n")
+  in bput_v(out, "0") end
+
+fn put_archive_sha256 {lr,lk,ln:agz}
+  (rb: !$A.borrow(byte, lr, 4096), rl: int,
+   ks: !$A.arr(byte, lk, 4096), ds: pos_t, de: pos_t,
+   name: !$A.borrow(byte, ln, 256), nlen: int,
+   out: !$B.builder_v >> $B.builder_v): void = let
+  var p: $B.builder_v = $B.create()
+  val () = copy_to_builder_v(rb, 0, rl, 4096, p)
+  val () = bput_v(p, "/")
+  val () = arr_range_to_builder_v(ks, ds, de, p)
+  val () = bput_v(p, "/")
+  val () = copy_to_builder_v(name, 0, nlen, 256, p)
+  val () = put_char_v(p, 0)
+  val @(pa, _) = $B.to_arr(p)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val ok = put_file_sha256(bv_p, out)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in hash_or_error(ok, out) end
+
 (* ============================================================
    lock: read bats.lock and verify it exists
    ============================================================ *)
@@ -575,7 +603,7 @@ in
                         in if vs < ve then let
                           val () = copy_to_builder_v(bv_b, vs, ve, 256, lb)
                           val () = put_char_v(lb, 32)
-                          val () = bput_v(lb, "0")
+                          val () = put_archive_sha256(rb, rl, ks, dep_start, dep_end, bv_b, blen, lb)
                           val () = put_char_v(lb, 10)
                           val () = $A.drop<byte>(fz_b, bv_b)
                           val () = $A.free<byte>($A.thaw<byte>(fz_b))

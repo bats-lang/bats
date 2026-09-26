@@ -9,6 +9,8 @@ staload PA = "path/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
+staload SHA = "sha256/src/lib.sats"
+
 
 
 
@@ -1491,6 +1493,50 @@ fn dir_next_sorted {lp:agz}{np:pos | np < 1048576}{lq:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn put_file_sha256 {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
 
 
 

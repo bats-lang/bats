@@ -13,6 +13,7 @@
 #use process as P
 #use result as R
 #use str as S
+#use sha256 as SHA
 
 (* ============================================================
    Proven byte reads
@@ -1490,3 +1491,47 @@ in
       val none = $A.alloc<byte>(256)
     in @(none, ~1) end
 end
+
+(* dst[i, n) = src[i, n) *)
+fun _copy_prefix {la,lb:agz}{n:pos | n <= 524288}{i:nat | i <= n} .<n - i>.
+  (src: !$A.arr(byte, la, 524288), dst: !$A.arr(byte, lb, n), n: int n, i: int i): void =
+  if i >= n then ()
+  else let
+    val () = $A.set<byte>(dst, i, $A.get<byte>(src, i))
+  in _copy_prefix(src, dst, n, i + 1) end
+
+(* The sha256 of the n bytes read into arc, as 64 hex digits into out *)
+fn _put_sha256_of {la:agz}{n:nat | n <= 524288}
+  (arc: $A.arr(byte, la, 524288), n: int n,
+   out: !$B.builder_v >> $B.builder_v): bool =
+  if n <= 0 then let
+    val () = $A.free<byte>(arc)
+  in false end
+  else let
+    val data = $A.alloc<byte>(n)
+    val () = _copy_prefix(arc, data, n, 0)
+    val () = $A.free<byte>(arc)
+    val hex = $A.alloc<byte>(64)
+    val () = $SHA.hash(data, n, hex)
+    val () = $A.free<byte>(data)
+    val @(fh, bh) = $A.freeze<byte>(hex)
+    val () = copy_to_builder_v(bh, 0, 64, 64, out)
+    val () = $A.drop<byte>(fh, bh)
+    val () = $A.free<byte>($A.thaw<byte>(fh))
+  in true end
+
+(* Appends the sha256 of the file at the NUL-terminated path p to out,
+   as 64 hex digits (Rust: sha256::sha256_hex); false when it cannot be
+   read *)
+#pub fn put_file_sha256 {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+implement put_file_sha256 {lp} (p, out) =
+  case+ $F.file_open(p, 524288, 0, 0) of
+  | ~$R.ok(afd) => let
+      val arc = $A.alloc<byte>(524288)
+      val n = (case+ $F.file_read(afd, arc, 524288) of
+        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
+      val () = $R.discard<int><int>($F.file_close(afd))
+    in _put_sha256_of(arc, n, out) end
+  | ~$R.err(_) => false

@@ -23,8 +23,8 @@ publish() { # <commit date>: commit dep and upload it
 publish "2026-01-01T00:00:10Z"
 cd "$TMP/app"
 "$BATS" lock --repository "$TMP/repo" > /dev/null 2>&1
-grep -qx 'latestdep 2026.1.1.10 0' bats.lock || { echo "FAIL: first lock"; cat bats.lock; exit 1; }
+grep -q '^latestdep 2026.1.1.10 ' bats.lock || { echo "FAIL: first lock"; cat bats.lock; exit 1; }
 publish "2026-01-02T00:00:20Z"
 "$BATS" lock --repository "$TMP/repo" > /dev/null 2>&1
-grep -qx 'latestdep 2026.1.2.20 0' bats.lock || { echo "FAIL: relock kept the old version"; cat bats.lock; exit 1; }
+grep -q '^latestdep 2026.1.2.20 ' bats.lock || { echo "FAIL: relock kept the old version"; cat bats.lock; exit 1; }
 echo "lock-latest: ok"
