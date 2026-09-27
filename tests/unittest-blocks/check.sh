@@ -7,7 +7,7 @@
 #    out;
 #  * a block closes at its own end, not at the first end of a let inside
 #    it (the Rust bats closed it there), and a keyword in a comment or a
-#    string is not one;
+#    string, or at the end of a name (book_begin), is not one;
 #  * a bad $UNITTEST.run target list, or a block with no end, is an
 #    error with Rust's message.
 # A nested #target block keeps its code (it was dropped).
@@ -66,6 +66,17 @@ end
 B
 )
 accept "$body"
+# a name that ends in begin, let or local (book_begin) is not the keyword:
+# it opens nothing, so the block still closes at its own end
+accept '#pub fn book_begin (): int
+implement book_begin () = 1
+#target native begin
+fn outlet (): int = book_begin() + 1
+fn nonlocal (): int = outlet()
+end
+$UNITTEST.run begin
+fn test_b (): bool = book_begin() = 1
+end'
 reject "empty target list in \$UNITTEST.run()" '$UNITTEST.run() begin
 fn test_x (): bool = true
 end'
