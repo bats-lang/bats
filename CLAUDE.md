@@ -65,7 +65,7 @@ The wasm prelude defines `atspre_cloptr_free` (as ATS's `basics.cats` does, with
 
 The wasm prelude defines `atspre_g0int_nmod_int`, `atspre_g1int_nmod_int`, `atspre_g1int_mod_int` and `atspre_neg_bool0`/`atspre_neg_bool1` (as ATS's `integer.cats` and `bool.cats` do). The Rust bats's wasm prelude lacked them, so `nmod` and `~b` in a wasm binary were imported from the host, which stubbed them to return 0 (`tests/wasm-prelude-arith`).
 
-A wasm binary exports `bats_dynload`, the entry's dynload (named with ATS's `ATS_DYNLOADNAME`), which the host calls before `mainats_0_void`. The Rust bats's wasm had no way to run the dynloads, which a native binary's C `main` runs, so no module `val` was ever initialized: a module's `ref<int>(42)` was a null pointer, and reading it read address 0 (`tests/wasm-dynload`).
+A wasm binary exports `bats_dynload`, the entry's dynload (named with ATS's `ATS_DYNLOADNAME`), which the host calls before `mainats_0_void`. The Rust bats's wasm had no way to run the dynloads, which a native binary's C `main` runs, so no module `val` was ever initialized: a module's `ref<int>(42)` was a null pointer, and reading it read address 0 (`tests/wasm-dynload`). The wasm prelude also defines `atspre_ptr_alloc_tsz`, with which `ref` allocates its cell, as ATS's pointer.cats does.
 
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 

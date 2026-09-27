@@ -5,6 +5,9 @@
 # ATS_DYNLOADNAME) and then mainats_0_void. Without it a module's
 # ref<int>(42) is a null pointer, and reading it reads address 0.
 # main0 reports the ref's value to the host, which checks it is 42.
+# The host provides only report: ref<int> allocates its cell with
+# atspre_ptr_alloc_tsz, which the wasm prelude must define (a stub
+# returning 0 put the cell at address 0).
 # usage: tests/wasm-dynload/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -45,7 +48,6 @@ import { readFileSync } from "node:fs";
 const mod = new WebAssembly.Module(readFileSync("dist/debug/web.wasm"));
 let seen = null;
 const env = { report: (v) => { seen = v; } };
-for (const i of WebAssembly.Module.imports(mod)) if (i.kind === "function" && !(i.name in env)) env[i.name] = () => 0;
 const { exports } = new WebAssembly.Instance(mod, { env });
 if (typeof exports.bats_dynload !== "function") { console.log("FAIL: no bats_dynload export"); process.exit(1); }
 exports.bats_dynload();

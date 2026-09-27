@@ -344,7 +344,7 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define atspre_ptr_null() ((void*)0)\n#define atspre_ptr_isnot_null(p) ((p) != 0)\n#define atspre_ptr0_isnot_null atspre_ptr_isnot_null\n")
   val () = bput_v(b, "#define atspre_add_ptr1_bsz(p, n) ((void*)((char*)(p) + (n)))\n#define atspre_g0int_neg_int(x) (-(x))\n#define atspre_g1int_neg_int(x) (-(x))\n")
   val () = bput_v(b, "#define atspre_g1int2uint_int_size(x) ((atstype_size)(x))\n#define atspre_strlen strlen\n")
-  val () = bput_v(b, "#define ATS_MALLOC(sz) malloc(sz)\n#define ATS_MFREE(ptr) free(ptr)\n#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))\n#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)\n#define atspre_cloptr_free(p) ATS_MFREE(p)\n")
+  val () = bput_v(b, "#define ATS_MALLOC(sz) malloc(sz)\n#define ATS_MFREE(ptr) free(ptr)\n#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))\n#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)\n#define atspre_cloptr_free(p) ATS_MFREE(p)\n#define atspre_ptr_alloc_tsz(tsz) ATS_MALLOC(tsz)\n")
   val () = bput_v(b, "#define ATSclosurerize_beg(flab, tenvs, targs, tres)\n#define ATSclosurerize_end()\n#define ATSFCreturn(x) return(x)\n#define ATSFCreturn_void(x) (x); return\n")
   val () = bput_v(b, "#define ATSPMVcfunlab(knd, flab, env) (flab##__closurerize)env\nextern void mainats_0_void(void);\n#define ATSmainats_0_void(err) mainats_0_void()\n")
   val () = bput_v(b, "void *malloc(int size);\nvoid free(void *ptr);\nvoid *memset(void *s, int c, unsigned int n);\nvoid *memcpy(void *dst, const void *src, unsigned int n);\nstatic inline unsigned int strlen(const char *s) { unsigned int n = 0; while (s[n]) n++; return n; }\n")
