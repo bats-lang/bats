@@ -81,6 +81,10 @@ datavtype parse_error =
   | err_unknown_short of (int)
   | err_range of (int)
   | err_exclusive of (int)
+  (* A positional token named no subcommand, while subcommands are
+     registered, none was given yet and no positional argument was left
+     to take it; carries the token's number in argv (the program name
+     is token 0). *)
   | err_choice of (int)
   (* String values did not fit the 8192-byte value buffer; carries the
      spec index + 1 of the value that overflowed. *)
@@ -117,10 +121,13 @@ fn add_count
   (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
    short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(count_val))
 
+
+
+
 fn add_subcommand
-  {tp:nat | tp <= 8192}{ac:nat | ac <= 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
+  {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
   (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac), int)
+   help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), int)
 
 
 
@@ -150,6 +157,9 @@ fn get_count(r: !parse_result, h: arg(count_val)): int
 
 fn is_present {a:t@ype} (r: !parse_result, h: arg(a)): bool
 
+
+
+
 fn get_subcmd(r: !parse_result): int
 
 
@@ -173,6 +183,39 @@ fn parse_result_free(r: parse_result): void
 fn parse_error_free(e: parse_error): void
 
 fn parser_free {tp:nat | tp <= 8192}{ac:nat | ac <= 64} (p: parser(tp, ac)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

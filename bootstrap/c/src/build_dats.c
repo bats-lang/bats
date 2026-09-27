@@ -467,7 +467,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 6061(line=188, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 6802(line=210, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -479,6 +479,7 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 6061(line=188, off
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 /* flags are file's own values (the O_* stadefs below); the host's
    O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
@@ -560,6 +561,9 @@ static int _file_entry_cmp(const void *x, const void *y) {
   if (c != 0) return c;
   return a->len - b->len;
 }
+static void _file_entries_free(void *p);
+/* Null when the directory cannot be opened or read, or when memory for
+   its entries cannot be had; everything allocated so far is freed. */
 static void *_file_dir_read(const char *path) {
   DIR *d = opendir(path);
   _file_entries_t *r;
@@ -567,23 +571,41 @@ static void *_file_dir_read(const char *path) {
   int cap = 16;
   if (!d) return (void *)0;
   r = (_file_entries_t *)malloc(sizeof(_file_entries_t));
+  if (!r) { closedir(d); return (void *)0; }
   r->n = 0;
-  r->es = (_file_entry_t *)malloc(cap * sizeof(_file_entry_t));
-  while ((e = readdir(d)) != 0) {
-    int len = (int)strlen(e->d_name);
-    char *s = (char *)malloc(len > 0 ? len : 1);
+  r->es = (_file_entry_t *)malloc((size_t)cap * sizeof(_file_entry_t));
+  if (!r->es) { free(r); closedir(d); return (void *)0; }
+  for (;;) {
+    int len;
+    char *s;
+    errno = 0;
+    e = readdir(d);
+    if (!e) break;
     if (r->n == cap) {
+      _file_entry_t *es;
+      if ((size_t)cap > ((size_t)INT_MAX / 2) / sizeof(_file_entry_t)) goto fail;
+      es = (_file_entry_t *)realloc(r->es, 2 * (size_t)cap * sizeof(_file_entry_t));
+      if (!es) goto fail;
+      r->es = es;
       cap = 2 * cap;
-      r->es = (_file_entry_t *)realloc(r->es, cap * sizeof(_file_entry_t));
     }
-    memcpy(s, e->d_name, len);
+    len = (int)strlen(e->d_name);
+    s = (char *)malloc(len > 0 ? (size_t)len : 1);
+    if (!s) goto fail;
+    memcpy(s, e->d_name, (size_t)len);
     r->es[r->n].name = s;
     r->es[r->n].len = len;
     r->n++;
   }
+  /* readdir returns null at the end and on an error, which sets errno. */
+  if (errno != 0) goto fail;
   closedir(d);
-  qsort(r->es, r->n, sizeof(_file_entry_t), _file_entry_cmp);
+  qsort(r->es, (size_t)r->n, sizeof(_file_entry_t), _file_entry_cmp);
   return (void *)r;
+fail:
+  closedir(d);
+  _file_entries_free(r);
+  return (void *)0;
 }
 static int _file_entries_count(void *p) {
   return ((_file_entries_t *)p)->n;
@@ -806,7 +828,7 @@ _arr_arena_destroy(void *arena) {
 }
 #endif /* _ARR_RUNTIME_DEFINED */
 /*
-build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 6061(line=188, offs=3)
+build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 6802(line=210, offs=3)
 */
 
 #ifndef _FILE_RUNTIME_DEFINED
@@ -818,6 +840,7 @@ build/bats_modules/file/src/lib.dats: 624(line=20, offs=1) -- 6061(line=188, off
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 /* flags are file's own values (the O_* stadefs below); the host's
    O_* bits differ between systems (O_CREAT is 64 on Linux, 512 on
@@ -899,6 +922,9 @@ static int _file_entry_cmp(const void *x, const void *y) {
   if (c != 0) return c;
   return a->len - b->len;
 }
+static void _file_entries_free(void *p);
+/* Null when the directory cannot be opened or read, or when memory for
+   its entries cannot be had; everything allocated so far is freed. */
 static void *_file_dir_read(const char *path) {
   DIR *d = opendir(path);
   _file_entries_t *r;
@@ -906,23 +932,41 @@ static void *_file_dir_read(const char *path) {
   int cap = 16;
   if (!d) return (void *)0;
   r = (_file_entries_t *)malloc(sizeof(_file_entries_t));
+  if (!r) { closedir(d); return (void *)0; }
   r->n = 0;
-  r->es = (_file_entry_t *)malloc(cap * sizeof(_file_entry_t));
-  while ((e = readdir(d)) != 0) {
-    int len = (int)strlen(e->d_name);
-    char *s = (char *)malloc(len > 0 ? len : 1);
+  r->es = (_file_entry_t *)malloc((size_t)cap * sizeof(_file_entry_t));
+  if (!r->es) { free(r); closedir(d); return (void *)0; }
+  for (;;) {
+    int len;
+    char *s;
+    errno = 0;
+    e = readdir(d);
+    if (!e) break;
     if (r->n == cap) {
+      _file_entry_t *es;
+      if ((size_t)cap > ((size_t)INT_MAX / 2) / sizeof(_file_entry_t)) goto fail;
+      es = (_file_entry_t *)realloc(r->es, 2 * (size_t)cap * sizeof(_file_entry_t));
+      if (!es) goto fail;
+      r->es = es;
       cap = 2 * cap;
-      r->es = (_file_entry_t *)realloc(r->es, cap * sizeof(_file_entry_t));
     }
-    memcpy(s, e->d_name, len);
+    len = (int)strlen(e->d_name);
+    s = (char *)malloc(len > 0 ? (size_t)len : 1);
+    if (!s) goto fail;
+    memcpy(s, e->d_name, (size_t)len);
     r->es[r->n].name = s;
     r->es[r->n].len = len;
     r->n++;
   }
+  /* readdir returns null at the end and on an error, which sets errno. */
+  if (errno != 0) goto fail;
   closedir(d);
-  qsort(r->es, r->n, sizeof(_file_entry_t), _file_entry_cmp);
+  qsort(r->es, (size_t)r->n, sizeof(_file_entry_t), _file_entry_cmp);
   return (void *)r;
+fail:
+  closedir(d);
+  _file_entries_free(r);
+  return (void *)0;
 }
 static int _file_entries_count(void *p) {
   return ((_file_entries_t *)p)->n;
@@ -11737,8 +11781,8 @@ build/src/build.dats: 28714(line=450, offs=6) -- 29093(line=458, offs=12)
 /*
 local: 
 global: write_stub_104$0(level=1)
-local: stub$6202(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
-global: stub$6202(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
+local: stub$6209(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
+global: stub$6209(1)(HSEapp(HSEcst(atstkind_type); HSEs2exp(S2Eextkind(atstype_ptrk))))
 */
 ATSstatic()
 atstkind_t0ype(atstype_int)
@@ -28327,8 +28371,8 @@ build/src/build.dats: 58046(line=1071, offs=17) -- 84276(line=1445, offs=18)
 /*
 local: scan_deps_307$0(level=1)
 global: scan_deps_307$0(level=1)
-local: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -29971,8 +30015,8 @@ build/src/build.dats: 60473(line=1115, offs=33) -- 75178(line=1302, offs=34)
 /*
 local: scan_ns_321$0(level=2)
 global: scan_ns_321$0(level=2)
-local: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -32085,8 +32129,8 @@ build/src/build.dats: 68228(line=1220, offs=47) -- 74496(line=1291, offs=48)
 /*
 local: scan_ns_extra_351$0(level=3)
 global: scan_ns_extra_351$0(level=3)
-local: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -33992,8 +34036,8 @@ build/src/build.dats: 78665(line=1362, offs=31) -- 83436(line=1429, offs=32)
 /*
 local: scan_extra_bats_388$0(level=2)
 global: scan_extra_bats_388$0(level=2)
-local: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -35936,8 +35980,8 @@ build/src/build.dats: 84806(line=1459, offs=17) -- 88166(line=1519, offs=18)
 /*
 local: scan_src_modules_427$0(level=1)
 global: scan_src_modules_427$0(level=1)
-local: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6390(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6390(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6397(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6397(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype
@@ -37422,8 +37466,8 @@ build/src/build.dats: 88689(line=1533, offs=17) -- 169179(line=2705, offs=18)
 /*
 local: patsopt_dir_extra_36$0(level=0), cc_dir_extra_63$0(level=0), compile_wasm_runtime_109$0(level=0), wasm_cc_file_119$0(level=0), put_dep_dynloads_150$0(level=0), put_dep_objects_151$0(level=0), put_dep_wasm_objects_152$0(level=0), scan_bins_454$0(level=1)
 global: patsopt_dir_extra_36$0(level=0), cc_dir_extra_63$0(level=0), compile_wasm_runtime_109$0(level=0), wasm_cc_file_119$0(level=0), put_dep_dynloads_150$0(level=0), put_dep_objects_151$0(level=0), put_dep_wasm_objects_152$0(level=0), scan_bins_454$0(level=1)
-local: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6390(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
-global: build_target$6387(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6390(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6498(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+local: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6397(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
+global: build_target$6394(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), is_unsafe$6397(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_int)))), target_changed$6505(1)(HSEapp(HSEcst(atstkind_t0ype); HSEs2exp(S2Eextkind(atstype_bool))))
 */
 ATSstatic()
 atsvoid_t0ype

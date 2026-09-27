@@ -21,10 +21,10 @@ cat > "$TMP/p/src/bin/runio.bats" <<'PROG'
    when it is not. *)
 implement main0 () = let
   val () = println! ("hello from the program")
-  var n = @[char][15]('B', 'A', 'T', 'S', '_', 'R', 'U', 'N', '_', 'P', 'R', 'O', 'B', 'E', '\000')
-  val name = $S.from_char_array(n, 15)
+  var n = @[char][14]('B', 'A', 'T', 'S', '_', 'R', 'U', 'N', '_', 'P', 'R', 'O', 'B', 'E')
+  val name = $S.from_char_array(n, 14)
   val buf = $A.alloc<byte>(16)
-  val found = (case+ $E.get_cstr(name, buf, 16) of | ~$R.some(_) => true | ~$R.none() => false): bool
+  val found = (case+ $E.get_cstr(name, 14, buf, 16) of | ~$R.some(_) => true | ~$R.none() => false): bool
   val () = $A.free<byte>(buf)
   val () = $A.free<byte>(name)
 in exit_void (if found then 7 else 8) end
