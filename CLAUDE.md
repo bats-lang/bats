@@ -35,7 +35,7 @@ CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result 
 ## Architecture
 
 Entry point: `src/bin/bats.bats`
-Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`
+Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/closure.bats`
 
 Dependencies: argparse, array, arith, builder, env, file, path, process, result, sha256, str, toml
 

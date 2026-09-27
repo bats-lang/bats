@@ -16,6 +16,7 @@
 staload "helpers.sats"
 staload "lexer.sats"
 staload "emitter.sats"
+staload "closure.sats"
 
 (* Preprocess one .bats file: read -> lex -> emit -> write .sats + .dats
    All three path borrows must be null-terminated builder arrays (524288) *)
@@ -506,6 +507,134 @@ fn wasm_cc_file {l:agz}
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in rc end
 
+(* ============================================================
+   The dependency closure's dynloads, objects and wasm objects
+   ============================================================ *)
+
+(* A dependency's source directory entry, i of n: kind 0 its lib, 1 an
+   extra file of the suffix sought, 2 anything else *)
+fn extra_kind {l:agz}{k:nat | k <= 256} (e: !$A.arr(byte, l, 256), el: int k, want: int): int =
+  if want = 0 then (if ~has_dats_ext(e, el, 256) then 2 else if is_lib_dats(e, el, 256) then 0 else 1)
+  else if want = 1 then (if ~has_dats_o_ext(e, el, 256) then 2 else if has_lib_dats_o_sfx(e, el, 256) then 0 else 1)
+  else (if ~has_dats_c_ext(e, el, 256) then 2 else if has_lib_dats_c_sfx(e, el, 256) then 0 else 1)
+
+(* For each extra file of dependency d's build/bats_modules/<d>/src (want
+   0: .dats, as dynloads to eb; 1: _dats.o, as link objects to eb; 2:
+   _dats.c, compiled to wasm objects whose paths go to eb): the count of
+   wasm objects added to c *)
+fun dep_extras {n,i:nat | i <= n} .<n - i>.
+  (es: !$F.entries(n), i: int i, n: int n, d: !dep, want: int,
+   eb: !$B.builder_v >> $B.builder_v, c: int): int =
+  if i >= n then c
+  else let
+    val e = $A.alloc<byte>(256)
+    val el = $F.entries_name(es, i, e, 256)
+    val kind = extra_kind(e, el, want)
+    val @(fz_e, bv_e) = $A.freeze<byte>(e)
+    val c2 = (if kind <> 1 then c
+      else if want = 0 then let
+        val () = bput_v(eb, "dynload \"./bats_modules/")
+        val () = put_dep(eb, d)
+        val () = bput_v(eb, "/src/")
+        val () = copy_to_builder_v(bv_e, 0, el, 256, eb)
+        val () = bput_v(eb, "\"\n")
+      in c end
+      else if want = 1 then let
+        val () = bput_v(eb, " build/bats_modules/")
+        val () = put_dep(eb, d)
+        val () = bput_v(eb, "/src/")
+        val () = copy_to_builder_v(bv_e, 0, el, 256, eb)
+      in c end
+      else let
+        var wp : $B.builder_v = $B.create()
+        val () = bput_v(wp, "build/bats_modules/")
+        val () = put_dep(wp, d)
+        val () = bput_v(wp, "/src/")
+        val () = copy_to_builder_v(bv_e, 0, el, 256, wp)
+        val () = put_char_v(wp, 0)
+        val @(wpa, wp_len) = $B.to_arr(wp)
+        val @(fz_wp, bv_wp) = $A.freeze<byte>(wpa)
+        val rc = wasm_cc_file(bv_wp, wp_len)
+        val c3 = (if rc = 0 then let
+          val () = copy_to_builder_v(bv_wp, 0, wp_len - 2, 524288, eb)
+          val () = bput_v(eb, "wasm.o")
+          val () = put_char_v(eb, 0)
+        in c + 1 end else c): int
+        val () = $A.drop<byte>(fz_wp, bv_wp)
+        val () = $A.free<byte>($A.thaw<byte>(fz_wp))
+      in c3 end): int
+    val () = $A.drop<byte>(fz_e, bv_e)
+    val () = $A.free<byte>($A.thaw<byte>(fz_e))
+  in dep_extras(es, i + 1, n, d, want, eb, c2) end
+
+(* The extra files of d (as dep_extras) *)
+fn dep_dir_extras (d: !dep, want: int, eb: !$B.builder_v >> $B.builder_v, c: int): int = let
+  var pb : $B.builder_v = $B.create()
+  val () = bput_v(pb, "build/bats_modules/")
+  val () = put_dep(pb, d)
+  val () = bput_v(pb, "/src")
+  val () = put_char_v(pb, 0)
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val dr = $F.dir_read(bv_p, 524288)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in
+  case+ dr of
+  | ~$R.ok(es) => let
+      val c2 = dep_extras(es, 0, $F.entries_count(es), d, want, eb, c)
+      val () = $F.entries_free(es)
+    in c2 end
+  | ~$R.err(_) => c
+end
+
+(* The dynloads of the dependencies xs and of their extra modules *)
+fun put_dep_dynloads {k:nat} .<k>. (xs: !deps(k), eb: !$B.builder_v >> $B.builder_v): void =
+  case+ xs of
+  | deps_nil() => ()
+  | deps_cons(d, tl) => let
+      val () = bput_v(eb, "dynload \"./bats_modules/")
+      val () = put_dep(eb, d)
+      val () = bput_v(eb, "/src/lib.dats\"\n")
+      val _ = dep_dir_extras(d, 0, eb, 0)
+    in put_dep_dynloads(tl, eb) end
+
+(* The link objects of the dependencies xs and of their extra modules *)
+fun put_dep_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v): void =
+  case+ xs of
+  | deps_nil() => ()
+  | deps_cons(d, tl) => let
+      val () = bput_v(lb, " build/bats_modules/")
+      val () = put_dep(lb, d)
+      val () = bput_v(lb, "/src/lib_dats.o")
+      val _ = dep_dir_extras(d, 1, lb, 0)
+    in put_dep_objects(tl, lb) end
+
+(* The dependencies xs compiled to wasm objects, their NUL-terminated
+   paths appended to lb; cnt plus how many *)
+fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v, cnt: int): int =
+  case+ xs of
+  | deps_nil() => cnt
+  | deps_cons(d, tl) => let
+      var wdc : $B.builder_v = $B.create()
+      val () = bput_v(wdc, "build/bats_modules/")
+      val () = put_dep(wdc, d)
+      val () = bput_v(wdc, "/src/lib_dats.c")
+      val () = put_char_v(wdc, 0)
+      val @(wdca, wdc_len) = $B.to_arr(wdc)
+      val @(fz_wdc, bv_wdc) = $A.freeze<byte>(wdca)
+      val rc = wasm_cc_file(bv_wdc, wdc_len)
+      val () = $A.drop<byte>(fz_wdc, bv_wdc)
+      val () = $A.free<byte>($A.thaw<byte>(fz_wdc))
+      val cnt2 = (if rc = 0 then let
+          val () = bput_v(lb, "build/bats_modules/")
+          val () = put_dep(lb, d)
+          val () = bput_v(lb, "/src/lib_dats.wasm.o")
+          val () = put_char_v(lb, 0)
+        in cnt + 1 end else cnt): int
+      val cnt3 = dep_dir_extras(d, 2, lb, cnt2)
+    in put_dep_wasm_objects(tl, lb, cnt3) end
+
 #pub fn read_unsafe_flag(): int
 
 implement read_unsafe_flag() = let
@@ -656,27 +785,17 @@ in
       in pos + 11 end
     val phlen = append_bats_path(phbuf, hlen)
     (* Check if patsopt exists, install if not — single freeze *)
-    (* Copy arr bytes to builder — uses src_byte to avoid !arr in conditional *)
-    fun arr_to_builder {l:agz}{fuel:nat} .<fuel>.
-      (buf: !$A.borrow(byte, l, 512), pos: pos_t, len: int,
-       dst: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
-      if fuel <= 0 then ()
-      else if pos >= len then ()
-      else let
-        val b = peek(buf, pos, 512)
-        val () = put_char_v(dst, b)
-      in arr_to_builder(buf, pos + 1, len, dst, fuel - 1) end
     (* The download next to the toolchain, as the Rust bats did:
        <patshome>-postiats-0.4.2.tgz, i.e. ~/.bats/ats2-postiats-0.4.2.tgz *)
     fn ats2_tarball {l:agz}
       (buf: !$A.borrow(byte, l, 512), plen: int, dst: !$B.builder_v >> $B.builder_v): void = let
-      val () = arr_to_builder(buf, 0, plen, dst, 512)
+      val () = copy_to_builder_v(buf, 0, plen, 512, dst)
     in bput_v(dst, "-postiats-0.4.2.tgz") end
     fn ensure_ats2 {l:agz}
       (buf: !$A.borrow(byte, l, 512), plen: int): void = let
       (* Check if patsopt exists by trying to stat it *)
       var test_path : $B.builder_v = $B.create()
-      val () = arr_to_builder(buf, 0, plen, test_path, 512)
+      val () = copy_to_builder_v(buf, 0, plen, 512, test_path)
       val () = bput_v(test_path, "/bin/patsopt")
       val () = put_char_v(test_path, 0)
       val @(tp_arr, _) = $B.to_arr(test_path)
@@ -690,7 +809,7 @@ in
         val () = println! ("ATS2 not found, installing...")
         (* mkdir -p <patshome> *)
         var mkb : $B.builder_v = $B.create()
-        val () = arr_to_builder(buf, 0, plen, mkb, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, mkb)
         val _ = run_mkdir(mkb)
         (* curl -sL <url> -o <tarball> *)
         val curl_exec = str_to_path_arr("curl")
@@ -715,7 +834,7 @@ in
         var ta4 = $B.create() val () = bput_v(ta4, "--strip-components=1")
         var ta5 = $B.create() val () = bput_v(ta5, "-C")
         var ta6 = $B.create()
-        val () = arr_to_builder(buf, 0, plen, ta6, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, ta6)
         val tar_argv = $L.list_vt_cons(mk_arg(ta1), $L.list_vt_cons(mk_arg(ta2),
           $L.list_vt_cons(mk_arg(ta3), $L.list_vt_cons(mk_arg(ta4),
           $L.list_vt_cons(mk_arg(ta5), $L.list_vt_cons(mk_arg(ta6),
@@ -741,12 +860,12 @@ in
         var mk2 = $B.create() val () = bput_v(mk2, "-j4")
         var mk3 = $B.create() val () = bput_v(mk3, "-C")
         var mk4 = $B.create()
-        val () = arr_to_builder(buf, 0, plen, mk4, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, mk4)
         val () = bput_v(mk4, "/src/CBOOT")
         var mk5 = $B.create() val () = bput_v(mk5, "patsopt")
         var mk6 = $B.create()
         val () = bput_v(mk6, "PATSHOME=")
-        val () = arr_to_builder(buf, 0, plen, mk6, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, mk6)
         val make_argv = $L.list_vt_cons(mk_arg(mk1), $L.list_vt_cons(mk_arg(mk2),
           $L.list_vt_cons(mk_arg(mk3), $L.list_vt_cons(mk_arg(mk4),
           $L.list_vt_cons(mk_arg(mk5), $L.list_vt_cons(mk_arg(mk6),
@@ -756,7 +875,7 @@ in
         val () = $A.free<byte>($A.thaw<byte>(fz_me))
         (* mkdir -p <patshome>/bin *)
         var mkb2 : $B.builder_v = $B.create()
-        val () = arr_to_builder(buf, 0, plen, mkb2, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, mkb2)
         val () = bput_v(mkb2, "/bin")
         val _ = run_mkdir(mkb2)
         (* cp <patshome>/src/CBOOT/patsopt <patshome>/bin/patsopt *)
@@ -764,10 +883,10 @@ in
         val @(fz_cpe, bv_cpe) = $A.freeze<byte>(cp_exec)
         var cp1 = $B.create() val () = bput_v(cp1, "cp")
         var cp2 = $B.create()
-        val () = arr_to_builder(buf, 0, plen, cp2, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, cp2)
         val () = bput_v(cp2, "/src/CBOOT/patsopt")
         var cp3 = $B.create()
-        val () = arr_to_builder(buf, 0, plen, cp3, 512)
+        val () = copy_to_builder_v(buf, 0, plen, 512, cp3)
         val () = bput_v(cp3, "/bin/patsopt")
         val cp_argv = $L.list_vt_cons(mk_arg(cp1), $L.list_vt_cons(mk_arg(cp2),
           $L.list_vt_cons(mk_arg(cp3), $L.list_vt_nil())))
@@ -1365,371 +1484,6 @@ in
       val () = $A.free<byte>($A.thaw<byte>(fz_sb))
       val () = (case+ sbdir_r of
         | ~$R.ok(d2) => let
-            (* === Staload-chain scanning helpers === *)
-            fun skip_to_nl {lb2:agz}{fuel_sn:nat} .<fuel_sn>.
-              (buf: !$A.borrow(byte, lb2, 524288), p: pos_t, nb: int,
-               fuel_sn: int fuel_sn): pos_t =
-              if fuel_sn <= 0 then p
-              else if p >= nb then p
-              else let
-                val b = peek(buf, p, 524288)
-              in if $AR.eq_int_int(b, 10) then p + 1
-                else skip_to_nl(buf, p + 1, nb, fuel_sn - 1) end
-
-            fun find_dquote {lb2:agz}{fuel_fq:nat} .<fuel_fq>.
-              (buf: !$A.borrow(byte, lb2, 524288), p: pos_t, nb: int,
-               fuel_fq: int fuel_fq): pos_t =
-              if fuel_fq <= 0 then p
-              else if p >= nb then p
-              else let
-                val b = peek(buf, p, 524288)
-              in if $AR.eq_int_int(b, 34) then p
-                else find_dquote(buf, p + 1, nb, fuel_fq - 1) end
-
-            fun borrow_eq_arr {lb2:agz}{ls2:agz}{fuel_be:nat} .<fuel_be>.
-              (buf: !$A.borrow(byte, lb2, 524288), boff: pos_t,
-               arr2: !$A.arr(byte, ls2, 16384), aoff: pos_t,
-               len: int, fuel_be: int fuel_be): bool =
-              if fuel_be <= 0 then len <= 0
-              else if len <= 0 then true
-              else let
-                val bb = peek(buf, boff, 524288)
-                val ab = peek_arr(arr2, aoff, 16384)
-              in if $AR.eq_int_int(bb, ab) then
-                borrow_eq_arr(buf, boff+1, arr2, aoff+1, len-1, fuel_be-1)
-              else false end
-
-            fun arr_entry_len {ls2:agz}{fuel_el:nat} .<fuel_el>.
-              (arr2: !$A.arr(byte, ls2, 16384), pos: pos_t,
-               fuel_el: int fuel_el): pos_t =
-              if fuel_el <= 0 then 0
-              else if pos >= 16384 then 0
-              else let
-                val b = peek_arr(arr2, pos, 16384)
-              in if $AR.eq_int_int(b, 0) then 0
-                else 1 + arr_entry_len(arr2, pos + 1, fuel_el - 1) end
-
-            fun is_dep_seen {lb2:agz}{ls2:agz}{fuel_ds:nat} .<fuel_ds>.
-              (buf: !$A.borrow(byte, lb2, 524288), boff: pos_t, blen: int,
-               seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
-               scan: pos_t, fuel_ds: int fuel_ds): bool =
-              if fuel_ds <= 0 then false
-              else if scan >= spos then false
-              else let
-                val elen = arr_entry_len(seen2, scan, 256)
-              in if $AR.eq_int_int(elen, blen) then
-                if borrow_eq_arr(buf, boff, seen2, scan, blen,
-                  256) then true
-                else is_dep_seen(buf, boff, blen, seen2, spos,
-                  scan + elen + 1, fuel_ds - 1)
-              else is_dep_seen(buf, boff, blen, seen2, spos,
-                scan + elen + 1, fuel_ds - 1) end
-
-            fun copy_borrow_to_arr {lb2:agz}{ls2:agz}{fuel_cb:nat} .<fuel_cb>.
-              (buf: !$A.borrow(byte, lb2, 524288), boff: pos_t,
-               dst2: !$A.arr(byte, ls2, 16384), doff: pos_t,
-               len: int, fuel_cb: int fuel_cb): void =
-              if fuel_cb <= 0 then ()
-              else if len <= 0 then ()
-              else let
-                val b = peek(buf, boff, 524288)
-                val () = poke_arr(dst2, doff, 16384, b)
-              in copy_borrow_to_arr(buf, boff+1, dst2, doff+1, len-1, fuel_cb-1) end
-
-            fun copy_arr_to_bld {ls2:agz}{fuel_ca:nat} .<fuel_ca>.
-              (src2: !$A.arr(byte, ls2, 16384), start: pos_t,
-               len: int, dst2: !$B.builder_v >> $B.builder_v,
-               fuel_ca: int fuel_ca): void =
-              if fuel_ca <= 0 then ()
-              else if len <= 0 then ()
-              else let
-                val b = peek_arr(src2, start, 16384)
-                val () = put_char_v(dst2, b)
-              in copy_arr_to_bld(src2, start+1, len-1, dst2, fuel_ca-1) end
-
-            (* Scan .dats buffer for staload dep references, add to seen *)
-            fun scan_staload_deps {lb2:agz}{ls2:agz}{fuel_sc:nat} .<fuel_sc>.
-              (buf: !$A.borrow(byte, lb2, 524288), nbytes: int,
-               seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
-               pos: pos_t, fuel_sc: int fuel_sc): pos_t =
-              if fuel_sc <= 0 then spos
-              else if pos >= nbytes then spos
-              else if pos + 9 > nbytes then spos
-              else let
-                val is_stal = lit_staload_dq(buf, pos, 524288)
-              in if ~is_stal then let
-                val next = skip_to_nl(buf, pos, nbytes, 524288)
-              in scan_staload_deps(buf, nbytes, seen2, spos, next, fuel_sc - 1) end
-              else let
-                val is_self = (if pos + 11 <= nbytes then
-                  lit_dot_slash(buf, pos + 9, 524288)
-                  else false): bool
-              in if is_self then let
-                val next = skip_to_nl(buf, pos + 9, nbytes, 524288)
-              in scan_staload_deps(buf, nbytes, seen2, spos, next, fuel_sc - 1) end
-              else let
-                val qpos = find_dquote(buf, pos + 9, nbytes, 524288)
-                val path_start = pos + 9
-                val path_len = qpos - path_start
-                val is_lib_dep = (if path_len > 13 then
-                  lit_slash_srcslash_libdot_dats(buf, qpos - 13, 524288)
-                  else false): bool
-              in if ~is_lib_dep then let
-                val next = skip_to_nl(buf, qpos, nbytes, 524288)
-              in scan_staload_deps(buf, nbytes, seen2, spos, next, fuel_sc - 1) end
-              else let
-                val dep_start = path_start
-                val dep_len = path_len - 13
-                val already = is_dep_seen(buf, dep_start, dep_len,
-                  seen2, spos, 0, 200)
-              in if already then let
-                val next = skip_to_nl(buf, qpos, nbytes, 524288)
-              in scan_staload_deps(buf, nbytes, seen2, spos, next, fuel_sc - 1) end
-              else if spos + dep_len + 1 > 16384 then spos
-              else let
-                val () = copy_borrow_to_arr(buf, dep_start, seen2,
-                  spos, dep_len, 256)
-                val () = poke_arr(seen2, spos + dep_len, 16384, 0)
-                val new_spos = spos + dep_len + 1
-                val next = skip_to_nl(buf, qpos, nbytes, 524288)
-              in scan_staload_deps(buf, nbytes, seen2, new_spos, next, fuel_sc - 1) end
-              end
-              end
-              end
-              end
-
-            (* Collect transitive deps by reading each dep's lib.dats *)
-            fun collect_trans_deps {ls2:agz}{fuel_ct:nat} .<fuel_ct>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
-               scan_from: pos_t, fuel_ct: int fuel_ct): pos_t =
-              if fuel_ct <= 0 then spos
-              else if scan_from >= spos then spos
-              else let
-                val elen = arr_entry_len(seen2, scan_from, 256)
-                val next_scan = scan_from + elen + 1
-                var pb : $B.builder_v = $B.create()
-                val () = bput_v(pb, "build/bats_modules/")
-                val () = copy_arr_to_bld(seen2, scan_from, elen, pb,
-                  256)
-                val () = bput_v(pb, "/src/lib.dats")
-                val () = put_char_v(pb, 0)
-                val @(pba, _) = $B.to_arr(pb)
-                val @(fz_pb, bv_pb) = $A.freeze<byte>(pba)
-                val tor = $F.file_open(bv_pb, 524288, 0, 0)
-                val () = $A.drop<byte>(fz_pb, bv_pb)
-                val () = $A.free<byte>($A.thaw<byte>(fz_pb))
-                val new_spos = (case+ tor of
-                  | ~$R.ok(tfd) => let
-                      val tbuf = $A.alloc<byte>(524288)
-                      val trr = $F.file_read(tfd, tbuf, 524288)
-                      val tn = (case+ trr of
-                        | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                      val tcr = $F.file_close(tfd)
-                      val () = $R.discard<int><int>(tcr)
-                      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-                      val ns = scan_staload_deps(bv_tb, tn, seen2, spos, 0, 500)
-                      val () = $A.drop<byte>(fz_tb, bv_tb)
-                      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
-                    in ns end
-                  | ~$R.err(_) => spos
-                ): pos_t
-              in collect_trans_deps(seen2, new_spos, next_scan, fuel_ct - 1) end
-
-            (* Emit dynload for each dep in closure + extra .dats shared modules *)
-            fun emit_closure_dynloads {ls2:agz}{fuel_ed:nat} .<fuel_ed>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
-               pos: pos_t, eb: !$B.builder_v >> $B.builder_v,
-               fuel_ed: int fuel_ed): void =
-              if fuel_ed <= 0 then ()
-              else if pos >= spos then ()
-              else let
-                val elen = arr_entry_len(seen2, pos, 256)
-                (* dynload "./bats_modules/DEP/src/lib.dats" *)
-                val () = bput_v(eb, "dynload \"./bats_modules/")
-                val () = copy_arr_to_bld(seen2, pos, elen, eb,
-                  256)
-                val () = bput_v(eb, "/src/lib.dats\"\n")
-                (* Scan build/bats_modules/DEP/src/ for extra .dats *)
-                var dsb : $B.builder_v = $B.create()
-                val () = bput_v(dsb, "build/bats_modules/")
-                val () = copy_arr_to_bld(seen2, pos, elen, dsb,
-                  256)
-                val () = bput_v(dsb, "/src")
-                val () = put_char_v(dsb, 0)
-                val @(dsba, _) = $B.to_arr(dsb)
-                val @(fz_dsb, bv_dsb) = $A.freeze<byte>(dsba)
-                val ext_dir = $F.dir_read(bv_dsb, 524288)
-                val () = $A.drop<byte>(fz_dsb, bv_dsb)
-                val () = $A.free<byte>($A.thaw<byte>(fz_dsb))
-                val () = (case+ ext_dir of
-                  | ~$R.ok(d_ext) => let
-                      fun scan_extra {n,i:nat | i <= n}{ls3:agz} .<n - i>.
-                        (d_ext2: !$F.entries(n), i: int i, n: int n,
-                         seen3: !$A.arr(byte, ls3, 16384),
-                         dep_pos: pos_t, dep_len: int,
-                         eb2: !$B.builder_v >> $B.builder_v): void =
-                        if i >= n then ()
-                        else let
-                          val de = $A.alloc<byte>(256)
-                          val dl = $F.entries_name(d_ext2, i, de, 256)
-                        in let
-                          val is_d = has_dats_ext(de, dl, 256)
-                          val is_l = is_lib_dats(de, dl, 256)
-                        in if is_d then
-                          if is_l then let
-                            val () = $A.free<byte>(de)
-                          in scan_extra(d_ext2, i + 1, n, seen3, dep_pos, dep_len, eb2) end
-                          else let
-                            val @(fz_de, bv_de) = $A.freeze<byte>(de)
-                            val () = bput_v(eb2, "dynload \"./bats_modules/")
-                            val () = copy_arr_to_bld(seen3, dep_pos, dep_len, eb2,
-                              256)
-                            val () = bput_v(eb2, "/src/")
-                            val () = copy_to_builder_v(bv_de, 0, dl, 256,
-                              eb2)
-                            val () = bput_v(eb2, "\"\n")
-                            val () = $A.drop<byte>(fz_de, bv_de)
-                            val () = $A.free<byte>($A.thaw<byte>(fz_de))
-                          in scan_extra(d_ext2, i + 1, n, seen3, dep_pos, dep_len, eb2) end
-                        else let
-                          val () = $A.free<byte>(de)
-                        in scan_extra(d_ext2, i + 1, n, seen3, dep_pos, dep_len, eb2) end
-                        end
-                        end
-                      val () = scan_extra(d_ext, 0, $F.entries_count(d_ext), seen2, pos, elen, eb)
-                      val () = $F.entries_free(d_ext)
-                    in end
-                  | ~$R.err(_) => ())
-                val next = pos + elen + 1
-              in emit_closure_dynloads(seen2, spos, next, eb, fuel_ed - 1) end
-
-            (* Scan shared modules (build/src/*.dats) for dep references,
-               in sorted order so the dep list, and hence the synthetic
-               entry, does not depend on readdir order. *)
-            fun scan_shared_module_deps {n,i:nat | i <= n}{ls2:agz} .<n - i>.
-              (es: !$F.entries(n), i: int i, n: int n,
-               seen2: !$A.arr(byte, ls2, 16384), spos: pos_t): pos_t =
-              if i >= n then spos
-              else let
-                val sme = $A.alloc<byte>(256)
-                val sel = $F.entries_name(es, i, sme, 256)
-                val is_dats = has_dats_ext(sme, sel, 256)
-              in if ~is_dats then let
-                val () = $A.free<byte>(sme)
-              in scan_shared_module_deps(es, i + 1, n, seen2, spos) end
-              else let
-                (* Build path: build/src/NAME.dats *)
-                var smpath : $B.builder_v = $B.create()
-                val () = bput_v(smpath, "build/src/")
-                val @(fz_sme, bv_sme) = $A.freeze<byte>(sme)
-                val () = copy_to_builder_v(bv_sme, 0, sel, 256, smpath)
-                val () = $A.drop<byte>(fz_sme, bv_sme)
-                val () = $A.free<byte>($A.thaw<byte>(fz_sme))
-                val () = put_char_v(smpath, 0)
-                val @(smpa, _) = $B.to_arr(smpath)
-                val @(fz_smp, bv_smp) = $A.freeze<byte>(smpa)
-                val smor = $F.file_open(bv_smp, 524288, 0, 0)
-                val () = $A.drop<byte>(fz_smp, bv_smp)
-                val () = $A.free<byte>($A.thaw<byte>(fz_smp))
-                val new_spos = (case+ smor of
-                  | ~$R.ok(smfd) => let
-                      val smbuf = $A.alloc<byte>(524288)
-                      val smrr = $F.file_read(smfd, smbuf, 524288)
-                      val smnb = (case+ smrr of
-                        | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                      val smcr = $F.file_close(smfd)
-                      val () = $R.discard<int><int>(smcr)
-                      val @(fz_smb, bv_smb) = $A.freeze<byte>(smbuf)
-                      val ns = scan_staload_deps(bv_smb, smnb, seen2,
-                        spos, 0, 500)
-                      val () = $A.drop<byte>(fz_smb, bv_smb)
-                      val () = $A.free<byte>($A.thaw<byte>(fz_smb))
-                    in ns end
-                  | ~$R.err(_) => spos): pos_t
-              in scan_shared_module_deps(es, i + 1, n, seen2, new_spos) end
-              end
-
-            fn shared_module_deps {ls2:agz}
-              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t): pos_t = let
-              val smd_arr = str_to_path_arr("build/src")
-              val @(fz_smd, bv_smd) = $A.freeze<byte>(smd_arr)
-              val r = (case+ $F.dir_read(bv_smd, 524288) of
-                | ~$R.ok(es) => let
-                    val r = scan_shared_module_deps(es, 0, $F.entries_count(es), seen2, spos)
-                    val () = $F.entries_free(es)
-                  in r end
-                | ~$R.err(_) => spos): pos_t
-              val () = $A.drop<byte>(fz_smd, bv_smd)
-              val () = $A.free<byte>($A.thaw<byte>(fz_smd))
-            in r end
-
-            (* Link .o files for deps in the staload-chain closure *)
-            fun link_closure_deps {ls2:agz}{fuel_ld:nat} .<fuel_ld>.
-              (seen2: !$A.arr(byte, ls2, 16384), spos: pos_t,
-               pos: pos_t, lb: !$B.builder_v >> $B.builder_v,
-               fuel_ld: int fuel_ld): void =
-              if fuel_ld <= 0 then ()
-              else if pos >= spos then ()
-              else let
-                val elen = arr_entry_len(seen2, pos, 256)
-                (* Add " build/bats_modules/DEP/src/lib_dats.o" *)
-                val () = bput_v(lb, " build/bats_modules/")
-                val () = copy_arr_to_bld(seen2, pos, elen, lb,
-                  256)
-                val () = bput_v(lb, "/src/lib_dats.o")
-                (* Also link extra _dats.o files *)
-                var ldsb : $B.builder_v = $B.create()
-                val () = bput_v(ldsb, "build/bats_modules/")
-                val () = copy_arr_to_bld(seen2, pos, elen, ldsb,
-                  256)
-                val () = bput_v(ldsb, "/src")
-                val () = put_char_v(ldsb, 0)
-                val @(ldsba, _) = $B.to_arr(ldsb)
-                val @(fz_ldsb, bv_ldsb) = $A.freeze<byte>(ldsba)
-                val ld_dir = $F.dir_read(bv_ldsb, 524288)
-                val () = $A.drop<byte>(fz_ldsb, bv_ldsb)
-                val () = $A.free<byte>($A.thaw<byte>(fz_ldsb))
-                val () = (case+ ld_dir of
-                  | ~$R.ok(d_ld) => let
-                      fun link_extra_o {n,i:nat | i <= n}{ls3:agz} .<n - i>.
-                        (d_ld2: !$F.entries(n), i: int i, n: int n,
-                         seen3: !$A.arr(byte, ls3, 16384),
-                         dep_pos: pos_t, dep_len: int,
-                         lb2: !$B.builder_v >> $B.builder_v): void =
-                        if i >= n then ()
-                        else let
-                          val le = $A.alloc<byte>(256)
-                          val lel = $F.entries_name(d_ld2, i, le, 256)
-                        in let
-                          val is_o = has_dats_o_ext(le, lel, 256)
-                          val is_l = has_lib_dats_o_sfx(le, lel, 256)
-                        in if is_o then
-                          if is_l then let
-                            val () = $A.free<byte>(le)
-                          in link_extra_o(d_ld2, i + 1, n, seen3, dep_pos, dep_len, lb2) end
-                          else let
-                            val @(fz_le, bv_le) = $A.freeze<byte>(le)
-                            val () = bput_v(lb2, " build/bats_modules/")
-                            val () = copy_arr_to_bld(seen3, dep_pos, dep_len, lb2,
-                              256)
-                            val () = bput_v(lb2, "/src/")
-                            val () = copy_to_builder_v(bv_le, 0, lel, 256,
-                              lb2)
-                            val () = $A.drop<byte>(fz_le, bv_le)
-                            val () = $A.free<byte>($A.thaw<byte>(fz_le))
-                          in link_extra_o(d_ld2, i + 1, n, seen3, dep_pos, dep_len, lb2) end
-                        else let
-                          val () = $A.free<byte>(le)
-                        in link_extra_o(d_ld2, i + 1, n, seen3, dep_pos, dep_len, lb2) end
-                        end
-                        end
-                      val () = link_extra_o(d_ld, 0, $F.entries_count(d_ld), seen2, pos, elen, lb)
-                      val () = $F.entries_free(d_ld)
-                    in end
-                  | ~$R.err(_) => ())
-                val next = pos + elen + 1
-              in link_closure_deps(seen2, spos, next, lb, fuel_ld - 1) end
-
             fun scan_bins {n,i:nat | i <= n}{lph:agz} .<n - i>.
               (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512),
                phlen: int, rel: int): void =
@@ -1805,29 +1559,9 @@ in
                     val () = copy_to_builder_v(bv_e, 0, stem_len, 256, entry)
                     val () = bput_v(entry, ".sats\"\n")
                     (* dynload deps via staload-chain scanning *)
-                    val dor = $F.file_open(bv_sd, 524288, 0, 0)
-                    val () = (case+ dor of
-                      | ~$R.ok(dfd) => let
-                          val dep_buf = $A.alloc<byte>(524288)
-                          val drr = $F.file_read(dfd, dep_buf, 524288)
-                          val dep_nb = (case+ drr of
-                            | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                          val dcr = $F.file_close(dfd)
-                          val () = $R.discard<int><int>(dcr)
-                          val @(fz_db, bv_db) = $A.freeze<byte>(dep_buf)
-                          val dep_seen = $A.alloc<byte>(16384)
-                          val sp1 = scan_staload_deps(bv_db, dep_nb,
-                            dep_seen, 0, 0, 500)
-                          val () = $A.drop<byte>(fz_db, bv_db)
-                          val () = $A.free<byte>($A.thaw<byte>(fz_db))
-                          (* Also scan shared modules for deps *)
-                          val sp2 = shared_module_deps(dep_seen, sp1)
-                          val fsp = collect_trans_deps(dep_seen, sp2, 0, 200)
-                          val () = emit_closure_dynloads(dep_seen, fsp,
-                            0, entry, 200)
-                          val () = $A.free<byte>(dep_seen)
-                        in end
-                      | ~$R.err(_) => ())
+                    val cl = dep_closure(bv_sd)
+                    val () = put_dep_dynloads(cl, entry)
+                    val () = deps_free(cl)
                     (* dynload src/*.dats shared modules, in sorted order *)
                     fun add_src_dynloads {n,i:nat | i <= n} .<n - i>.
                       (es: !$F.entries(n), i: int i, n: int n,
@@ -2663,108 +2397,10 @@ in
                       val () = bput_v(wl, "_dats.wasm.o") val () = put_char_v(wl, 0)
                       val wl_argc0 = 32
                       (* Compile deps from staload chain and add .o to link *)
-                      val w_dor = $F.file_open(bv_sd, 524288, 0, 0)
-                      val wl_dep_cnt = ref<int>(0)
-                      val () = (case+ w_dor of
-                        | ~$R.ok(w_dfd) => let
-                            val w_buf = $A.alloc<byte>(524288)
-                            val w_rr = $F.file_read(w_dfd, w_buf, 524288)
-                            val w_nb = (case+ w_rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                            val w_cr = $F.file_close(w_dfd)
-                            val () = $R.discard<int><int>(w_cr)
-                            val @(fz_wbuf, bv_wbuf) = $A.freeze<byte>(w_buf)
-                            val w_seen = $A.alloc<byte>(16384)
-                            val w_sp1 = scan_staload_deps(bv_wbuf, w_nb, w_seen, 0, 0, 500)
-                            val () = $A.drop<byte>(fz_wbuf, bv_wbuf)
-                            val () = $A.free<byte>($A.thaw<byte>(fz_wbuf))
-                            fun wcc_deps {ls2:agz}{fuel:nat} .<fuel>.
-                              (seen: !$A.arr(byte, ls2, 16384), spos: pos_t, pos: pos_t,
-                               lb: !$B.builder_v >> $B.builder_v, cnt: int, fuel: int fuel): int =
-                              if fuel <= 0 then cnt
-                              else if pos >= spos then cnt
-                              else let
-                                val elen = arr_entry_len(seen, pos, 256)
-                                var wdc : $B.builder_v = $B.create()
-                                val () = bput_v(wdc, "build/bats_modules/")
-                                val () = copy_arr_to_bld(seen, pos, elen, wdc, 256)
-                                val () = bput_v(wdc, "/src/lib_dats.c")
-                                val () = put_char_v(wdc, 0)
-                                val @(wdca, wdc_len) = $B.to_arr(wdc)
-                                val @(fz_wdc, bv_wdc) = $A.freeze<byte>(wdca)
-                                val rc = wasm_cc_file(bv_wdc, wdc_len)
-                                val () = $A.drop<byte>(fz_wdc, bv_wdc)
-                                val () = $A.free<byte>($A.thaw<byte>(fz_wdc))
-                                val cnt2 = (if rc = 0 then let
-                                  val () = bput_v(lb, "build/bats_modules/")
-                                  val () = copy_arr_to_bld(seen, pos, elen, lb, 256)
-                                  val () = bput_v(lb, "/src/lib_dats.wasm.o")
-                                  val () = put_char_v(lb, 0)
-                                in cnt + 1 end else cnt): int
-                                var wds : $B.builder_v = $B.create()
-                                val () = bput_v(wds, "build/bats_modules/")
-                                val () = copy_arr_to_bld(seen, pos, elen, wds, 256)
-                                val () = bput_v(wds, "/src")
-                                val () = put_char_v(wds, 0)
-                                val @(wdsa, _) = $B.to_arr(wds)
-                                val @(fz_wds, bv_wds) = $A.freeze<byte>(wdsa)
-                                val wd_dr = $F.dir_read(bv_wds, 524288)
-                                val () = $A.drop<byte>(fz_wds, bv_wds)
-                                val () = $A.free<byte>($A.thaw<byte>(fz_wds))
-                                val cnt3 = (case+ wd_dr of
-                                  | ~$R.ok(wd) => let
-                                      fun wcc_ex {n,i:nat | i <= n}{ls3:agz} .<n - i>.
-                                        (wd2: !$F.entries(n), i: int i, n: int n, s: !$A.arr(byte, ls3, 16384),
-                                         dp: pos_t, dl: int,
-                                         lb2: !$B.builder_v >> $B.builder_v,
-                                         c: int): int =
-                                        if i >= n then c
-                                        else let
-                                          val ef = $A.alloc<byte>(256)
-                                          val el = $F.entries_name(wd2, i, ef, 256)
-                                        in let
-                                          val ic = has_dats_c_ext(ef, el, 256)
-                                          val il = has_lib_dats_c_sfx(ef, el, 256)
-                                        in if ic then if il then let val () = $A.free<byte>(ef)
-                                          in wcc_ex(wd2, i + 1, n, s, dp, dl, lb2, c) end
-                                          else let
-                                            val @(fz_ef, bv_ef) = $A.freeze<byte>(ef)
-                                            var wp : $B.builder_v = $B.create()
-                                            val () = bput_v(wp, "build/bats_modules/")
-                                            val () = copy_arr_to_bld(s, dp, dl, wp, 256)
-                                            val () = bput_v(wp, "/src/")
-                                            val () = copy_to_builder_v(bv_ef, 0, el, 256, wp)
-                                            val () = put_char_v(wp, 0)
-                                            val @(wpa, wp_len) = $B.to_arr(wp)
-                                            val @(fz_wp, bv_wp) = $A.freeze<byte>(wpa)
-                                            val rc2 = wasm_cc_file(bv_wp, wp_len)
-                                            val c2 = (if rc2 = 0 then let
-                                              val () = copy_to_builder_v(bv_wp, 0, wp_len - 2, 524288, lb2)
-                                              val () = bput_v(lb2, "wasm.o")
-                                              val () = put_char_v(lb2, 0)
-                                            in c + 1 end else c): int
-                                            val () = $A.drop<byte>(fz_wp, bv_wp)
-                                            val () = $A.free<byte>($A.thaw<byte>(fz_wp))
-                                            val () = $A.drop<byte>(fz_ef, bv_ef)
-                                            val () = $A.free<byte>($A.thaw<byte>(fz_ef))
-                                          in wcc_ex(wd2, i + 1, n, s, dp, dl, lb2, c2) end
-                                        else let val () = $A.free<byte>(ef)
-                                        in wcc_ex(wd2, i + 1, n, s, dp, dl, lb2, c) end
-                                        end
-                                        end
-                                      val cx = wcc_ex(wd, 0, $F.entries_count(wd), seen, pos, elen, lb, cnt2)
-                                      val () = $F.entries_free(wd)
-                                    in cx end
-                                  | ~$R.err(_) => cnt2): int
-                                val next = pos + elen + 1
-                              in wcc_deps(seen, spos, next, lb, cnt3, fuel - 1) end
-                            val w_sp2 = shared_module_deps(w_seen, w_sp1)
-                            val w_fsp = collect_trans_deps(w_seen, w_sp2, 0, 200)
-                            val dc = wcc_deps(w_seen, w_fsp, 0, wl, 0, 200)
-                            val () = !wl_dep_cnt := dc
-                            val () = $A.free<byte>(w_seen)
-                          in end
-                        | ~$R.err(_) => ())
-                      val wl_argc1 = wl_argc0 + !wl_dep_cnt
+                      val w_cl = dep_closure(bv_sd)
+                      val w_dc = put_dep_wasm_objects(w_cl, wl, 0)
+                      val () = deps_free(w_cl)
+                      val wl_argc1 = wl_argc0 + w_dc
                       (* Compile src modules and add .o to link *)
                       val wsm_a = str_to_path_arr("build/src")
                       val @(fz_wsma, bv_wsma) = $A.freeze<byte>(wsm_a)
@@ -2911,29 +2547,9 @@ in
                     val () = copy_to_builder_v(bv_e, 0, stem_len, 256, link)
                     val () = bput_v(link, "_dats.o build/_bats_native_runtime.o")
                     (* Add dep .o files via staload-chain scanning *)
-                    val lk_dor = $F.file_open(bv_sd, 524288, 0, 0)
-                    val () = (case+ lk_dor of
-                      | ~$R.ok(lk_dfd) => let
-                          val lk_dep_buf = $A.alloc<byte>(524288)
-                          val lk_drr = $F.file_read(lk_dfd, lk_dep_buf, 524288)
-                          val lk_dep_nb = (case+ lk_drr of
-                            | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-                          val lk_dcr = $F.file_close(lk_dfd)
-                          val () = $R.discard<int><int>(lk_dcr)
-                          val @(fz_ldb, bv_ldb) = $A.freeze<byte>(lk_dep_buf)
-                          val lk_dep_seen = $A.alloc<byte>(16384)
-                          val lk_sp1 = scan_staload_deps(bv_ldb, lk_dep_nb,
-                            lk_dep_seen, 0, 0, 500)
-                          val () = $A.drop<byte>(fz_ldb, bv_ldb)
-                          val () = $A.free<byte>($A.thaw<byte>(fz_ldb))
-                          (* Also scan shared modules for deps *)
-                          val lk_sp2 = shared_module_deps(lk_dep_seen, lk_sp1)
-                          val lk_fsp = collect_trans_deps(lk_dep_seen, lk_sp2, 0, 200)
-                          val () = link_closure_deps(lk_dep_seen, lk_fsp,
-                            0, link, 200)
-                          val () = $A.free<byte>(lk_dep_seen)
-                        in end
-                      | ~$R.err(_) => bput_v(link, ""))
+                    val lk_cl = dep_closure(bv_sd)
+                    val () = put_dep_objects(lk_cl, link)
+                    val () = deps_free(lk_cl)
                     (* Link src/*.dats shared module .o files *)
                     val lsm_arr = str_to_path_arr("build/src")
                     val @(fz_lsm, bv_lsm) = $A.freeze<byte>(lsm_arr)
