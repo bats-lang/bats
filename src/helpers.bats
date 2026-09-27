@@ -520,7 +520,7 @@ implement copy_to_builder(src, start, stop, max, dst, fuel) =
   else if start >= stop then ()
   else let
     val b = peek(src, start, max)
-    val () = $B.put_char(dst, b)
+    val () = $B.put_char(dst, $AR.low_byte(b))
   in copy_to_builder(src, start + 1, stop, max, dst, fuel - 1) end
 
 (* Builder_v wrappers: compute fuel from remaining capacity *)
@@ -532,7 +532,7 @@ implement put_char_v(out, v) = let
     (out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m),
      v: int, fuel: int fuel): void =
     if fuel <= 0 then ()
-    else $B.put_char(out, v)
+    else $B.put_char(out, $AR.low_byte(v))
 in _put(out, v, 524288 - $B.length(out)) end
 
 #pub fn bput_v {sn:nat}
@@ -546,7 +546,7 @@ implement bput_v(out, s) = let
     else if i >= slen then ()
     else let
       val c = char2int0(string_get_at(s, i))
-      val () = $B.put_char(out, c)
+      val () = $B.put_char(out, $AR.low_byte(c))
     in loop(out, s, slen, i + 1, fuel - 1) end
   val slen_sz = string1_length(s)
   val slen = g1u2i(slen_sz)
@@ -674,7 +674,7 @@ implement arr_range_to_builder(src, i, lim, dst, fuel) =
   else if i >= 4096 then ()
   else let
     val b = peek_arr(src, i, 4096)
-    val () = $B.put_char(dst, b)
+    val () = $B.put_char(dst, $AR.low_byte(b))
   in arr_range_to_builder(src, i + 1, lim, dst, fuel - 1) end
 
 #pub fn arr_range_to_builder_v {l:agz}
