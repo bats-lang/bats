@@ -77,6 +77,8 @@ An `implement` on a call cycle is rejected: one that calls itself, directly or t
 
 A build reuses what an earlier build produced when it is still fresh; the Rust bats rewrote every `.sats` and `.dats` on every build, so its cache (input mtime equal to the recorded one) reran patsopt on everything. A `.bats` is emitted again only when it is newer than its `.dats`; its `.sats` is written only when its bytes change, and then `build/.sats_changed` is written. A module's C is fresh only when newer than both its `.dats` and `build/.sats_changed`, so a change to a `.sats` it staloads rebuilds it; a body-only change rebuilds only its own module (`tests/sats-change`).
 
+A string literal whose last byte is an escaping backslash is an unterminated string, reported as the Rust bats reports any other ("unterminated string literal"); the Rust bats's lexer stepped past the end of the file there and panicked (`tests/unterminated`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement

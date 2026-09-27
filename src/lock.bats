@@ -2624,6 +2624,11 @@ fn add_lex_error {lp,ls:agz}
           val () = bput_v(m, "unknown test target '")
           val () = copy_to_builder_v(src, e1, e2, VMAX, m)
         in bput_v(m, "'; expected 'native' or 'wasm'") end
+        else if code = 4 then bput_v(m, "unterminated C-style block comment")
+        else if code = 5 then bput_v(m, "unterminated ML-style block comment")
+        else if code = 6 then bput_v(m, "unterminated string literal")
+        else if code = 7 then bput_v(m, "unterminated extcode block")
+        else if code = 8 then bput_v(m, "unterminated $UNSAFE begin...end block")
         else if run then bput_v(m, "unterminated $UNITTEST.run begin...end block")
         else bput_v(m, "unterminated $UNITTEST begin...end block")): void
       var fy : $B.builder_v = $B.create()

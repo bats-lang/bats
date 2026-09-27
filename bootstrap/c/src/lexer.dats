@@ -610,29 +610,39 @@ fn lex_line_comment {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   in @(ep, count + 1) end
 
 (* The end of a /* ... */ comment whose body starts at pos: after its
-   close, or m *)
+   close, or m; and whether it was closed *)
 fun lex_c_comment_inner {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   (src: !$A.borrow(byte, l, n), pos: int p, src_len: int m, max: int n)
-  : [q:int | q <= n; p <= q || q == m] int q =
-  if pos + 1 >= src_len then src_len
+  : @([q:int | q <= n; p <= q || q == m] int q, bool) =
+  if pos + 1 >= src_len then @(src_len, false)
   else if $AR.eq_int_int(at(src, pos, max), 42) &&
-          $AR.eq_int_int(at(src, pos + 1, max), 47) then pos + 2
+          $AR.eq_int_int(at(src, pos + 1, max), 47) then @(pos + 2, true)
   else lex_c_comment_inner(src, pos + 1, src_len, max)
+
+(* An unterminated construct at start: Rust's lexer error (code 4 C
+   comment, 5 ML comment, 6 string, 7 extcode, 8 $UNSAFE block), at
+   start; the construct still runs to the end of the file *)
+fn lex_unterminated {n:pos}{s:nat | s < n}
+  (spans: !lexout(n) >> lexout(n), start: int s, code: int): int = let
+  val () = put_typed(spans, SLexError(start, code, start, start, false))
+in 1 end
 
 fn lex_c_comment {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
-  val ep = lex_c_comment_inner(src, adv(start, 2, max), src_len, max)
+  val @(ep, closed) = lex_c_comment_inner(src, adv(start, 2, max), src_len, max)
+  val ne = (if closed then 0 else lex_unterminated(spans, start, 4)): int
   val () = put_typed(spans, SPass(start, ep, true))
-in @(ep, count + 1) end
+in @(ep, count + ne + 1) end
 
 (* The end of a nested (* ... *) comment at depth whose body starts at
-   pos: after the close that brings depth to 0, or m *)
+   pos: after the close that brings depth to 0, or m; and whether it was
+   closed *)
 fun lex_ml_comment_inner {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   (src: !$A.borrow(byte, l, n), pos: int p, src_len: int m, max: int n,
-   depth: int): [q:int | q <= n; p <= q || q == m] int q =
-  if depth <= 0 then pos
-  else if pos + 1 >= src_len then src_len
+   depth: int): @([q:int | q <= n; p <= q || q == m] int q, bool) =
+  if depth <= 0 then @(pos, true)
+  else if pos + 1 >= src_len then @(src_len, false)
   else let
     val b0 = at(src, pos, max)
     val b1 = at(src, pos + 1, max)
@@ -648,27 +658,30 @@ fun lex_ml_comment_inner {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>
 fn lex_ml_comment {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
-  val ep = lex_ml_comment_inner(src, adv(start, 2, max), src_len, max, 1)
+  val @(ep, closed) = lex_ml_comment_inner(src, adv(start, 2, max), src_len, max, 1)
+  val ne = (if closed then 0 else lex_unterminated(spans, start, 5)): int
   val () = put_typed(spans, SPass(start, ep, true))
-in @(ep, count + 1) end
+in @(ep, count + ne + 1) end
 
-(* The end of a string literal whose body starts at pos, with \" escapes *)
+(* The end of a string literal whose body starts at pos, with \" escapes,
+   and whether it was closed *)
 fun lex_string_inner {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   (src: !$A.borrow(byte, l, n), pos: int p, src_len: int m, max: int n)
-  : [q:int | p <= q; q <= n] int q =
-  if pos >= src_len then pos
+  : @([q:int | p <= q; q <= n] int q, bool) =
+  if pos >= src_len then @(pos, false)
   else let val b = at(src, pos, max) in
     if $AR.eq_int_int(b, 92) then lex_string_inner(src, adv(pos, 2, max), src_len, max)
-    else if $AR.eq_int_int(b, 34) then pos + 1
+    else if $AR.eq_int_int(b, 34) then @(pos + 1, true)
     else lex_string_inner(src, pos + 1, src_len, max)
   end
 
 fn lex_string {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
-  val ep = lex_string_inner(src, start + 1, src_len, max)
+  val @(ep, closed) = lex_string_inner(src, start + 1, src_len, max)
+  val ne = (if closed then 0 else lex_unterminated(spans, start, 6)): int
   val () = put_typed(spans, SPass(start, ep, true))
-in @(ep, count + 1) end
+in @(ep, count + ne + 1) end
 
 (* Lex char literal '...' *)
 fn lex_char_lit {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
@@ -683,13 +696,13 @@ fn lex_char_lit {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
 in @(p3, count + 1) end
 
 (* The end of %{ ... %} C code whose body starts at pos: after the %},
-   or m *)
+   or m; and whether it was closed *)
 fun lex_extcode_inner {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   (src: !$A.borrow(byte, l, n), pos: int p, src_len: int m, max: int n)
-  : [q:int | q <= n; p <= q || q == m] int q =
-  if pos + 1 >= src_len then src_len
+  : @([q:int | q <= n; p <= q || q == m] int q, bool) =
+  if pos + 1 >= src_len then @(src_len, false)
   else if $AR.eq_int_int(at(src, pos, max), 37) &&
-          $AR.eq_int_int(at(src, pos + 1, max), 125) then pos + 2
+          $AR.eq_int_int(at(src, pos + 1, max), 125) then @(pos + 2, true)
   else lex_extcode_inner(src, pos + 1, src_len, max)
 
 fn lex_extcode {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
@@ -703,10 +716,11 @@ fn lex_extcode {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
               else 0): int
   val cstart = (if kind > 0 then adv(after_open, 1, max)
                 else after_open): [q:int | s < q; q <= n] int q
-  val ep = lex_extcode_inner(src, cstart, src_len, max)
-  val cend = (if ep >= 2 then ep - 2 else ep): spos(n)
+  val @(ep, closed) = lex_extcode_inner(src, cstart, src_len, max)
+  val ne = (if closed then 0 else lex_unterminated(spans, start, 7)): int
+  val cend = (if closed then (if ep >= 2 then ep - 2 else ep) else ep): spos(n)
   val () = put_typed(spans, SExtcode(start, ep, cstart, cend, kind))
-in @(ep, count + 1) end
+in @(ep, count + ne + 1) end
 
 (* Lex #use pkg as Alias [no_mangle] *)
 fn lex_hash_use {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
@@ -846,23 +860,23 @@ fun find_end_kw {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   if pos >= src_len then src_len
   else if $AR.eq_int_int(at(src, pos, max), 37) &&
           $AR.eq_int_int(at(src, pos + 1, max), 123) then
-    find_end_kw(src, lex_extcode_inner(src, adv(pos, 2, max), src_len, max),
+    find_end_kw(src, (lex_extcode_inner(src, adv(pos, 2, max), src_len, max)).0,
                 src_len, max, depth)
   (* A keyword in a comment, a string or a char literal is text *)
   else if $AR.eq_int_int(at(src, pos, max), 40) &&
           $AR.eq_int_int(at(src, pos + 1, max), 42) then
-    find_end_kw(src, lex_ml_comment_inner(src, adv(pos, 2, max), src_len, max, 1),
+    find_end_kw(src, (lex_ml_comment_inner(src, adv(pos, 2, max), src_len, max, 1)).0,
                 src_len, max, depth)
   else if $AR.eq_int_int(at(src, pos, max), 47) &&
           $AR.eq_int_int(at(src, pos + 1, max), 42) then
-    find_end_kw(src, lex_c_comment_inner(src, adv(pos, 2, max), src_len, max),
+    find_end_kw(src, (lex_c_comment_inner(src, adv(pos, 2, max), src_len, max)).0,
                 src_len, max, depth)
   else if $AR.eq_int_int(at(src, pos, max), 47) &&
           $AR.eq_int_int(at(src, pos + 1, max), 47) then
     find_end_kw(src, skip_to_eol(src, adv(pos, 2, max), src_len, max),
                 src_len, max, depth)
   else if $AR.eq_int_int(at(src, pos, max), 34) then
-    find_end_kw(src, lex_string_inner(src, pos + 1, src_len, max), src_len, max, depth)
+    find_end_kw(src, (lex_string_inner(src, pos + 1, src_len, max)).0, src_len, max, depth)
   (* 'x' and '\x' are char literals; any other ' (x', '(, '[) is not *)
   else if $AR.eq_int_int(at(src, pos, max), 39) then
     (if $AR.eq_int_int(at(src, pos + 1, max), 92) &&
@@ -906,8 +920,9 @@ in
       val contents_start = adv(p0, 5, max)
       val end_pos = find_end_kw(src, contents_start, src_len, max, 1)
       val ep = block_end(end_pos, src_len, max)
+      val ne = (if end_pos >= src_len then lex_unterminated(spans, start, 8) else 0): int
       val () = put_typed(spans, SUnsafeBlock(start, ep, contents_start, end_pos))
-    in @(ep, count + 1) end
+    in @(ep, count + ne + 1) end
     else @(start, count)
   end
 end
