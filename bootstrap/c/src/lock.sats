@@ -2901,6 +2901,24 @@ fn project_kind (): int
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn validate_project (): bool
 
 

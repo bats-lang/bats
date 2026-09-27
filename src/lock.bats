@@ -2642,6 +2642,20 @@ fun pass_lex_errors {lp,ls:agz}{k:nat} .<k>.
       val cnt2 = add_lex_error(p, b0, pl, src, n, sp, cnt, errs)
     in pass_lex_errors(p, b0, pl, src, n, tl, cnt2, errs) end
 
+(* cnt, with an error for the file p[0, pl) added to errs: it is larger
+   than the VMAX bytes a module is read into, so it cannot be read whole *)
+fn add_too_large {lp:agz}
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  var m : $B.builder_v = $B.create()
+  val c = use_color()
+  val () = put_red(m, c)
+  val () = bput_v(m, "error:")
+  val () = put_reset(m, c)
+  val () = put_char_v(m, 32)
+  val () = copy_to_builder_v(p, 0, pl, VMAX, m)
+  val () = bput_v(m, " is larger than 524288 bytes, the most a module can be\n")
+in add_error(cnt, m, errs) end
+
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its
    order), when wanted *)
@@ -2651,7 +2665,11 @@ fn check_file {lp:agz}
   if ~wanted then cnt else
   case+ $F.file_open(p, VMAX, 0, 0) of
   | ~$R.err(_) => cnt
-  | ~$R.ok(fd) => let
+  | ~$R.ok(fd) =>
+    if (case+ $F.fd_size(fd) of | ~$R.ok(z) => z > VMAX | ~$R.err(_) => false) then let
+      val () = $R.discard<int><int>($F.file_close(fd))
+    in add_too_large(p, pl, cnt, errs) end
+    else let
       val buf = $A.alloc<byte>(VMAX)
       val n = (case+ $F.file_read(fd, buf, VMAX) of
         | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= VMAX] int k

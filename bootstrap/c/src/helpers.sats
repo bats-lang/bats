@@ -570,10 +570,9 @@ fn bput_v {sn:nat}
 
 
 
+
+
 fn put_int_v(out: !$B.builder_v >> $B.builder_v, v: int): void
-
-
-
 
 fn put_newline_v(out: !$B.builder_v >> $B.builder_v): void
 
@@ -605,6 +604,13 @@ fn copy_to_builder_v {l:agz}{n:pos}
 
 
 fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void
+
+
+
+
+
+
+
 
 
 
@@ -872,7 +878,6 @@ fn run_cmd {le:agz}
 
 fn parse_decimal {l:agz}{n:pos}
   (buf: !$A.arr(byte, l, n), len: int, max: int n): int
-
 
 
 
@@ -1326,6 +1331,20 @@ fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 
@@ -1478,13 +1497,9 @@ fn ap_string_pos {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn
 
 
 
+
 fn put_file_sha256 {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
-
-
-
-
-
 
 
 
