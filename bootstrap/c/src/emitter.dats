@@ -786,6 +786,165 @@ fun build_prelude_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
         idx + 1, prelude, build_target, target_state, fuel - 1)
   end
 
+(* ============================================================
+   Test functions: each "fn <name> ()" of a $UNITTEST.run block
+   ============================================================ *)
+
+(* Past the space, tabs and newlines at p, before e *)
+fun skip_blank {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int, max: int n): [q:int | p <= q; q <= n] int q =
+  if p >= e then p
+  else if p >= max then p
+  else let val b = byte2int0($A.read<byte>(src, p)) in
+    if b = 32 || b = 9 || b = 10 || b = 13 then skip_blank(src, p + 1, e, max) else p
+  end
+
+(* Past the identifier at p, before e *)
+fun skip_name {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int, max: int n): [q:int | p <= q; q <= n] int q =
+  if p >= e then p
+  else if p >= max then p
+  else if is_ident_byte(byte2int0($A.read<byte>(src, p))) then skip_name(src, p + 1, e, max)
+  else p
+
+(* The byte at p, or ~1 at or past e *)
+fn byte_before {l:agz}{n:pos}{p:nat}
+  (src: !$A.borrow(byte, l, n), p: int p, e: int, max: int n): int =
+  if p >= e then ~1 else if p >= max then ~1 else byte2int0($A.read<byte>(src, p))
+
+(* Each test in the code src[p, e): "fn", a name, "()", appended to out
+   as <bits><name>NUL; the number of them *)
+fun scan_tests {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int, max: int n, bits: int,
+   out: !$B.builder_v >> $B.builder_v, k: int): int =
+  if p >= e then k
+  else if p >= max then k
+  else let
+    val prev = (if p > 0 then byte_before(src, p - 1, e, max) else ~1): int
+    val at_fn = (if is_ident_byte(prev) then false
+                 else if byte_before(src, p, e, max) <> 102 then false
+                 else byte_before(src, p + 1, e, max) = 110): bool
+  in
+    if ~at_fn then scan_tests(src, p + 1, e, max, bits, out, k)
+    else let
+      val q0 = (if p + 2 <= max then p + 2 else max): [q:int | p < q; q <= n] int q
+      val ns = skip_blank(src, q0, e, max)
+      val ne = skip_name(src, ns, e, max)
+      val q1 = skip_blank(src, ne, e, max)
+      val q2 = (if q1 >= max then q1
+                else if byte_before(src, q1, e, max) = 40 then skip_blank(src, q1 + 1, e, max)
+                else q1): [q:nat | q <= n] int q
+      val is_test = (if ns = q0 then false
+                     else if ne = ns then false
+                     else if q2 = q1 then false
+                     else byte_before(src, q2, e, max) = 41): bool
+    in
+      if is_test then let
+        val () = put_char_v(out, bits)
+        val () = copy_to_builder_v(src, ns, ne, max, out)
+        val () = put_char_v(out, 0)
+      in scan_tests(src, ne, e, max, bits, out, k + 1) end
+      else scan_tests(src, q0, e, max, bits, out, k)
+    end
+  end
+
+(* scan_tests over the code span src[ss, se) *)
+fn scan_span {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), ss: pos_t, se: int, max: int n, bits: int,
+   out: !$B.builder_v >> $B.builder_v, k: int): int =
+  if ss < 0 then k
+  else if ss > max then k
+  else scan_tests(src, ss, se, max, bits, out, k)
+
+(* The tests of the $UNITTEST.run blocks among spans[idx, span_count),
+   in order, appended to out as <bits><name>NUL, bits being the block's
+   targets (1 native, 2 wasm); run: the targets of the block the span
+   is in, or 0 *)
+fun collect_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{i:nat | i <= np} .<np - i>.
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
+   spans: !$A.borrow(byte, lp, np), span_max: int np, span_count: int, idx: int i,
+   run: int, out: !$B.builder_v >> $B.builder_v, k: int): int =
+  if idx >= span_count then k
+  else if idx >= span_max then k
+  else let
+    val kind = span_kind(spans, idx, span_max)
+  in
+    if kind = 15 then
+      collect_spans(src, src_max, spans, span_max, span_count, idx + 1,
+        (if span_aux1(spans, idx, span_max) = 1 then span_aux2(spans, idx, span_max) else 0), out, k)
+    else if kind = 16 then
+      collect_spans(src, src_max, spans, span_max, span_count, idx + 1, 0, out, k)
+    else if run > 0 then
+      if kind = 0 then
+        if span_aux1(spans, idx, span_max) = 0 then let
+          val ss = span_start(spans, idx, span_max)
+          val k2 = scan_span(src, ss, span_end(spans, idx, span_max), src_max, run, out, k)
+        in collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k2) end
+        else collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k)
+      else collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k)
+    else collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k)
+  end
+
+(* The test functions of the $UNITTEST.run blocks of src, in order, as
+   <bits><name>NUL entries (bits: the block's targets, 1 native, 2
+   wasm); the number of them. A test is "fn <name> (): bool" in a
+   block's code. *)
+
+
+
+
+
+implement collect_tests (src, src_max, spans, span_max, span_count, out) =
+  collect_spans(src, src_max, spans, span_max, span_count, 0, 0, out, 0)
+
+(* "  if i = <k> then <name> ()\n  else " for each entry of t[p, e) *)
+fun put_dispatch {l:agz}{p:nat | p <= 524288} .<524288 - p>.
+  (t: !$A.borrow(byte, l, 524288), p: int p, e: int, k: int,
+   dats: !$B.builder_v >> $B.builder_v): void =
+  if p >= e then ()
+  else if p >= 524288 then ()
+  else let
+    val ne = find_null_bv_from(t, p + 1, 524288)
+    val () = bput_v(dats, "if i = ")
+    val () = put_int_v(dats, k)
+    val () = bput_v(dats, " then ")
+    val () = copy_to_builder_v(t, p + 1, ne, 524288, dats)
+    val () = bput_v(dats, " ()\n  else ")
+    val nx = ne + 1
+  in
+    if nx <= p then ()
+    else if nx > 524288 then ()
+    else put_dispatch(t, nx, e, k + 1, dats)
+  end
+
+(* When there are k > 0 tests t[0, tlen): the declaration of
+   __bats_test to sats, its implementation to dats *)
+fn put_dispatch_decl {l:agz}
+  (k: int, t: !$A.borrow(byte, l, 524288), tlen: int,
+   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void =
+  if k <= 0 then ()
+  else let
+    val () = bput_v(sats, "\nfun __bats_test (i: int): bool\n")
+    val () = bput_v(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
+    val () = put_dispatch(t, 0, tlen, 0, dats)
+  in bput_v(dats, "false\n") end
+
+(* In check and test mode, a module with tests declares
+   __bats_test (i: int): bool, which runs its i-th test (in source
+   order), for bats test's runner to call *)
+fn put_test_dispatch {ls:agz}{ns:pos}{lp:agz}{np:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
+   spans: !$A.borrow(byte, lp, np), span_max: int np, span_count: int,
+   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void =
+  if ~is_test_mode() then () else let
+  var tb : $B.builder_v = $B.create()
+  val k = collect_tests(src, src_max, spans, span_max, span_count, tb)
+  val @(ta, tlen) = $B.to_arr(tb)
+  val @(fz_t, bv_t) = $A.freeze<byte>(ta)
+  val () = put_dispatch_decl(k, bv_t, tlen, sats, dats)
+  val () = $A.drop<byte>(fz_t, bv_t)
+in $A.free<byte>($A.thaw<byte>(fz_t)) end
+
 (* Top-level emit *)
 
 
@@ -830,6 +989,7 @@ implement do_emit (src, src_len, src_max, spans, span_max, span_count, build_tar
 
   (* The entry point was renamed in the dats (emit_code_v); declare it *)
   val () = put_main0_decl(sats_b)
+  val () = put_test_dispatch(src, src_max, spans, span_max, span_count, sats_b, dats_b)
   val @(sats_arr, sats_len) = $B.to_arr(sats_b)
   val @(dats_arr, dats_len) = $B.to_arr(dats_b)
 in @(sats_arr, sats_len, dats_arr, dats_len, prelude_lines, emit_errors) end

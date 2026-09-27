@@ -375,9 +375,23 @@ in
                 in set_build_err() end
               end
               else if cmd_code = 6 then let (* test *)
+                (* --filter: a substring of the test names to run *)
+                val flt_buf = $A.alloc<byte>(4096)
+                val flt_len = opt_string_copy(r, h_filter, flt_buf, 4096)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in if project_kind() < 0 then () else if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_test() else () end
+                val @(fz_flt, bv_flt) = $A.freeze<byte>(flt_buf)
+                (* --only native|wasm: one target's tests; both without it *)
+                val on = ((only_mask / 4) mod 2)
+                val ow = ((only_mask / 8) mod 2)
+                val any_tgt = (on + ow = 0): bool
+                val () = (if project_kind() < 0 then ()
+                  else if ~resolve_deps(bv_repo, repo_len) then ()
+                  else if validate_project() then
+                    do_test(bv_flt, flt_len, (if any_tgt then true else on > 0), (if any_tgt then true else ow > 0))
+                  else ())
+                val () = $A.drop<byte>(fz_flt, bv_flt)
+              in $A.free<byte>($A.thaw<byte>(fz_flt)) end
               else if cmd_code = 7 then let (* tree *)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
