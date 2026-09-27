@@ -19,8 +19,9 @@ staload S = "str/src/lib.sats"
 #define DOT 46
 
 (* ============================================================
-   join -- join base and name with / separator
-   Returns length of result written to out.
+   join -- join base and name with / separator into out, which must
+   have room for both and the separator: the length written,
+   base_len + 1 + name_len.
    ============================================================ *)
 
 
@@ -73,8 +74,6 @@ staload S = "str/src/lib.sats"
 
 implement join {la}{na}{lb}{nb}{lo}{mo}
   (base, base_len, name, name_len, out, max) = let
-  val total = $AR.add_g1($AR.add_g1(base_len, name_len), 1)
-
   fun copy_base {lo:agz}{mo:pos}{la:agz}{na:pos | na < mo}{i:nat | i <= na} .<na - i>.
     (out: !$A.arr(byte, lo, mo),
      base: !$A.borrow(byte, la, na), base_len: int na,
@@ -95,28 +94,24 @@ implement join {la}{na}{lb}{nb}{lo}{mo}
       val di = $AR.add_g1(offset, i)
       val () = $A.set<byte>(out, di, b)
     in copy_name(out, name, name_len, $AR.add_g1(i, 1), offset) end
-in
-  if $AR.gt_g1(total, max) then 0
-  else let
-    val () = copy_base(out, base, base_len, 0)
-    val () = $A.set<byte>(out, base_len, $A.int2byte($AR.byte_of_char('/')))
-    val offset = $AR.add_g1(base_len, 1)
-    val () = copy_name(out, name, name_len, 0, offset)
-  in g0ofg1(total) end
-end
+  val () = copy_base(out, base, base_len, 0)
+  val () = $A.set<byte>(out, base_len, $A.int2byte($AR.byte_of_char('/')))
+  val offset = $AR.add_g1(base_len, 1)
+  val () = copy_name(out, name, name_len, 0, offset)
+in $AR.add_g1(offset, name_len) end
 
 (* -- parent -- *)
 
 implement parent {la}{na} (path, path_len) = let
   fun loop {la:agz}{na:pos}{i:nat | i <= na} .<i>.
     (path: !$A.borrow(byte, la, na),
-     i: int i): int =
+     i: int i): [r:nat | r < na] int r =
     if $AR.lte_g1(i, 0) then 0
     else let
       val idx = $AR.sub_g1(i, 1)
       val c = byte2int0($A.read<byte>(path, idx))
     in
-      if $AR.eq_int_int(c, SLASH) then g0ofg1(idx)
+      if $AR.eq_int_int(c, SLASH) then idx
       else loop(path, idx)
     end
 in loop(path, path_len) end
@@ -126,13 +121,13 @@ in loop(path, path_len) end
 implement filename {la}{na} (path, path_len) = let
   fun loop {la:agz}{na:pos}{i:nat | i <= na} .<i>.
     (path: !$A.borrow(byte, la, na),
-     i: int i): int =
+     i: int i): [r:nat | r <= na] int r =
     if $AR.lte_g1(i, 0) then 0
     else let
       val idx = $AR.sub_g1(i, 1)
       val c = byte2int0($A.read<byte>(path, idx))
     in
-      if $AR.eq_int_int(c, SLASH) then g0ofg1(i)
+      if $AR.eq_int_int(c, SLASH) then i
       else loop(path, idx)
     end
 in loop(path, path_len) end
@@ -141,16 +136,16 @@ in loop(path, path_len) end
 
 implement extension {la}{na} (path, path_len) = let
   val fname_start = filename(path, path_len)
-  fun loop {la:agz}{na:pos}{i:nat | i <= na} .<i>.
+  fun loop {la:agz}{na:pos}{i:nat | i <= na}{f:nat} .<i>.
     (path: !$A.borrow(byte, la, na), path_len: int na,
-     i: int i, fname_start: int): int =
-    if $AR.lte_g1(i, 0) then g0ofg1(path_len)
-    else if $AR.lte_int_int(g0ofg1(i), fname_start) then g0ofg1(path_len)
+     i: int i, fname_start: int f): [r:nat | r <= na] int r =
+    if $AR.lte_g1(i, 0) then path_len
+    else if $AR.lte_g1(i, fname_start) then path_len
     else let
       val idx = $AR.sub_g1(i, 1)
       val c = byte2int0($A.read<byte>(path, idx))
     in
-      if $AR.eq_int_int(c, DOT) then g0ofg1(i)
+      if $AR.eq_int_int(c, DOT) then i
       else loop(path, path_len, idx, fname_start)
     end
 in loop(path, path_len, path_len, fname_start) end
@@ -224,3 +219,92 @@ fn _test_extension(): void = let
   val arr2 = $A.thaw<byte>(fz)
   val () = $A.free<byte>(arr2)
 in end
+
+(* ============================================================
+   Tests (bats test)
+   ============================================================ *)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

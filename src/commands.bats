@@ -1516,10 +1516,10 @@ fun extra_arg_list {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   in if np >= 4096 then acc2 else extra_arg_list(bv, np + 1, total, acc2) end
 
 (* Whether dist/<mode>/NAME exists, for NAME = ent[0, len). *)
-fn is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): bool = let
+fn is_built {le:agz} (ent: !$A.borrow(byte, le, 1024), len: int, release: int): bool = let
   var pb: $B.builder_v = $B.create()
   val () = (if release > 0 then bput_v(pb, "dist/release/") else bput_v(pb, "dist/debug/"))
-  val () = copy_to_builder_v(ent, 0, len, 256, pb)
+  val () = copy_to_builder_v(ent, 0, len, 1024, pb)
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
@@ -1531,8 +1531,8 @@ fn is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): b
 in built end
 
 fn add_name {le:agz}
-  (names: !$B.builder_v >> $B.builder_v, ent: !$A.borrow(byte, le, 256), len: int): void = let
-  val () = copy_to_builder_v(ent, 0, len, 256, names)
+  (names: !$B.builder_v >> $B.builder_v, ent: !$A.borrow(byte, le, 1024), len: int): void = let
+  val () = copy_to_builder_v(ent, 0, len, 1024, names)
 in put_char_v(names, 0) end
 
 (* Appends to names, each NUL-terminated and in name order, every NAME
@@ -1543,10 +1543,10 @@ fun collect_built_from {n,i:nat | i <= n} .<n - i>.
    names: !$B.builder_v >> $B.builder_v, release: int, count: int): int =
   if i >= n then count
   else let
-    val ent = $A.alloc<byte>(256)
-    val el = $F.entries_name(es, i, ent, 256)
+    val ent = $A.alloc<byte>(1024)
+    val el = $F.entries_name(es, i, ent, 1024)
   in
-    if ~has_bats_ext(ent, el, 256) then let
+    if ~has_bats_ext(ent, el, 1024) then let
       val () = $A.free<byte>(ent)
     in collect_built_from(es, i + 1, n, names, release, count) end
     else let

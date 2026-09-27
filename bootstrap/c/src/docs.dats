@@ -210,10 +210,10 @@ in case+ dr of
          dirs: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void =
         if i >= n then ()
         else let
-          val e = $A.alloc<byte>(256)
-          val el = $F.entries_name(d, i, e, 256)
-          val c0 = peek_arr(e, 0, 256)
-          val c1 = peek_arr(e, 1, 256)
+          val e = $A.alloc<byte>(1024)
+          val el = $F.entries_name(d, i, e, 1024)
+          val c0 = peek_arr(e, 0, 1024)
+          val c1 = peek_arr(e, 1, 1024)
         in
           if el = 0 then let val () = $A.free<byte>(e)
             in loop(d, i + 1, n, dir, dlen, dirs, files) end
@@ -221,12 +221,12 @@ in case+ dr of
             val () = $A.free<byte>(e)
           in loop(d, i + 1, n, dir, dlen, dirs, files) end
           else let
-            val is_bats = has_bats_ext(e, el, 256)
+            val is_bats = has_bats_ext(e, el, 1024)
             val @(fz_e, bv_e) = $A.freeze<byte>(e)
             var cb : $B.builder_v = $B.create()
             val () = copy_to_builder_v(dir, 0, dlen, 524288, cb)
             val () = put_char_v(cb, 47)
-            val () = copy_to_builder_v(bv_e, 0, el, 256, cb)
+            val () = copy_to_builder_v(bv_e, 0, el, 1024, cb)
             val () = $A.drop<byte>(fz_e, bv_e)
             val () = $A.free<byte>($A.thaw<byte>(fz_e))
             val clen = $B.length(cb)
