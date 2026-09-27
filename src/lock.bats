@@ -776,6 +776,10 @@ fun doc_int {f:nat} .<f>. (doc: !$T.toml_doc, i: pos_t, e: int, seen: bool, f: i
     else false
   end
 
+(* The digit c, or nothing for the _ that TOML allows between digits *)
+fn put_digit (c: int, out: !$B.builder_v >> $B.builder_v): void =
+  if c = 95 then bput_v(out, "") else put_char_v(out, c)
+
 (* doc's digits in [i, e), without the _ that TOML allows between them *)
 fun put_digits {f:nat} .<f>.
   (doc: !$T.toml_doc, i: pos_t, e: int, out: !$B.builder_v >> $B.builder_v, f: int f): void =
@@ -786,8 +790,6 @@ fun put_digits {f:nat} .<f>.
     val () = put_digit(c, out)
   in put_digits(doc, i + 1, e, out, f - 1) end
 
-and put_digit (c: int, out: !$B.builder_v >> $B.builder_v): void =
-  if c = 95 then bput_v(out, "") else put_char_v(out, c)
 
 (* What the bare value doc[s, e) is to serde: 1 true, 2 false, 3 a
    sequence, 4 a map, 5 an integer, 6 a float, 0 none of them (the toml
@@ -2295,13 +2297,27 @@ in bput_v(m, "' is not allowed outside of $UNSAFE begin...end block") end
 fn construct_msg {ls:agz}
   (src: !$A.borrow(byte, ls, VMAX), kind: int, s: pos_t, e: pos_t, m: !$B.builder_v >> $B.builder_v): void = let
   var fun_c = @[char][3]('f', 'u', 'n')
+  var fnx_c = @[char][3]('f', 'n', 'x')
+  var and_c = @[char][3]('a', 'n', 'd')
+  var fix_c = @[char][3]('f', 'i', 'x')
+  var val_c = @[char][3]('v', 'a', 'l')
   val we = word_end(src, s, e, VMAX)
-  val is_fun = (if we - s = 3 then lit_at(src, s, VMAX, fun_c, 3) else false): bool
+  val w3 = (we - s = 3): bool
+  val is_fun = (if w3 then lit_at(src, s, VMAX, fun_c, 3) else false): bool
+  val is_rec = (if w3 then lit_at(src, s, VMAX, fnx_c, 3) || lit_at(src, s, VMAX, and_c, 3) ||
+                           lit_at(src, s, VMAX, fix_c, 3) else false): bool
+  val is_val_rec = (if w3 && e > we then lit_at(src, s, VMAX, val_c, 3) else false): bool
 in
   if kind = 6 then bput_v(m, "extcode block outside of $UNSAFE begin...end block")
   else if at_unsafe_kw(src, s) then bput_v(m, "$UNSAFE construct outside of $UNSAFE begin...end block")
   else if is_fun then
     bput_v(m, "'fun' without termination metric is not allowed outside $UNSAFE; use 'fn' or add '.< metric >.'")
+  else if is_rec then let
+    val () = put_char_v(m, 39)
+    val () = copy_to_builder_v(src, s, we, VMAX, m)
+  in bput_v(m, "' without termination metric is not allowed outside $UNSAFE; add '.< metric >.'") end
+  else if is_val_rec then
+    bput_v(m, "'val rec' is not allowed outside of $UNSAFE begin...end block")
   else put_word_msg(src, s, we, m)
 end
 
@@ -2326,6 +2342,23 @@ fun base_start {lp:agz}{f:nat} .<f>. (p: !$A.borrow(byte, lp, VMAX), i: pos_t, f
 (* A span's start and end *)
 fn span_range {lp:agz} (spans: !$A.borrow(byte, lp, VMAX), idx: pos_t): @(pos_t, pos_t) =
   @(span_i32(spans, idx * 28 + 2, VMAX), span_i32(spans, idx * 28 + 6, VMAX))
+
+(* cnt, with Rust's "dependency not found" error added to errs unless found *)
+fn add_missing {lp,ls,ll:agz}
+  (found: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   ss: pos_t, ps: pos_t, pe: pos_t, lib: !$A.borrow(byte, ll, VMAX), lbl: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if found then cnt
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "dependency '")
+    val () = copy_to_builder_v(src, ps, pe, VMAX, m)
+    val () = bput_v(m, "' not found (expected ")
+    val () = copy_to_builder_v(lib, 0, lbl, VMAX, m)
+    val () = put_char_v(m, 41)
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
+  in add_error(cnt, fy, errs) end
 
 (* Rust's "dependency '<pkg>' not found (expected <lib.bats>)" for each
    #use whose package has no bats_modules/<pkg>/src/lib.bats, labeled with
@@ -2355,21 +2388,6 @@ fun pass_uses {lp,ls,lsp:agz}{f:nat} .<f>.
     val () = $A.free<byte>($A.thaw<byte>(fz_l))
   in pass_uses(p, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
 
-and add_missing {lp,ls,ll:agz}
-  (found: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   ss: pos_t, ps: pos_t, pe: pos_t, lib: !$A.borrow(byte, ll, VMAX), lbl: int,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  if found then cnt
-  else let
-    var m : $B.builder_v = $B.create()
-    val () = bput_v(m, "dependency '")
-    val () = copy_to_builder_v(src, ps, pe, VMAX, m)
-    val () = bput_v(m, "' not found (expected ")
-    val () = copy_to_builder_v(lib, 0, lbl, VMAX, m)
-    val () = put_char_v(m, 41)
-    var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
-  in add_error(cnt, fy, errs) end
 
 (* Rust's "$UNSAFE requires `unsafe = true` in bats.toml" for each
    $UNSAFE block, labeled with the file's path (preprocess_one); an
@@ -2390,6 +2408,19 @@ fun pass_unsafe_blocks {lp,ls,lsp:agz}{f:nat} .<f>.
     val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
     val cnt2 = add_error(cnt, fy, errs)
   in pass_unsafe_blocks(p, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+
+(* cnt, with the unsafe construct's error added to errs when hit *)
+fn add_construct {lp,ls:agz}
+  (hit: bool, want_pf: bool, kind: int, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
+   src: !$A.borrow(byte, ls, VMAX), n: pos_t, ss: pos_t, ws: pos_t, se: pos_t,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if ~hit then cnt
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = (if want_pf then prfun_msg(src, ws, se, m) else construct_msg(src, kind, ws, se, m)): void
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
+  in add_error(cnt, fy, errs) end
 
 (* The unsafe constructs, restricted keywords and extcode blocks outside
    $UNSAFE, in order, labeled with the file's name p[b0, pl)
@@ -2415,17 +2446,6 @@ fun pass_constructs {lp,ls,lsp:agz}{f:nat} .<f>.
     val cnt2 = add_construct(hit, want_pf, kind, p, b0, pl, src, n, ss, ws, se, cnt, errs)
   in pass_constructs(p, b0, pl, src, n, spans, idx + 1, count, want_pf, cnt2, errs, f - 1) end
 
-and add_construct {lp,ls:agz}
-  (hit: bool, want_pf: bool, kind: int, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
-   src: !$A.borrow(byte, ls, VMAX), n: pos_t, ss: pos_t, ws: pos_t, se: pos_t,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  if ~hit then cnt
-  else let
-    var m : $B.builder_v = $B.create()
-    val () = (if want_pf then prfun_msg(src, ws, se, m) else construct_msg(src, kind, ws, se, m)): void
-    var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
-  in add_error(cnt, fy, errs) end
 
 (* Whether src[a, a + k) and src[b, b + k) hold the same bytes *)
 fun same_bytes {ls:agz}{f:nat} .<f>.
@@ -2472,6 +2492,21 @@ fun staload_alias {ls:agz}{f:nat} .<f>.
                else peek(src, k2, VMAX) = 61): bool
   in if hit then true else staload_alias(src, i + 1, n, as0, ae, f - 1) end
 
+(* cnt, with Rust's "unknown alias" error added to errs when bad *)
+fn add_alias_error {lp,ls:agz}
+  (bad: bool, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
+   src: !$A.borrow(byte, ls, VMAX), n: pos_t, ss: pos_t, as0: pos_t, ae: pos_t,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if ~bad then cnt
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "unknown alias '")
+    val () = copy_to_builder_v(src, as0, ae, VMAX, m)
+    val () = bput_v(m, "' in qualified access")
+    var fy : $B.builder_v = $B.create()
+    val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
+  in add_error(cnt, fy, errs) end
+
 (* Rust's "unknown alias '<a>' in qualified access" for each $a.member
    whose a no #use names, labeled with the file's name p[b0, pl)
    (emit::validate) *)
@@ -2492,19 +2527,6 @@ fun pass_aliases {lp,ls,lsp:agz}{f:nat} .<f>.
     val cnt2 = add_alias_error(bad, p, b0, pl, src, n, ss, as0, ae, cnt, errs)
   in pass_aliases(p, b0, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
 
-and add_alias_error {lp,ls:agz}
-  (bad: bool, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
-   src: !$A.borrow(byte, ls, VMAX), n: pos_t, ss: pos_t, as0: pos_t, ae: pos_t,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  if ~bad then cnt
-  else let
-    var m : $B.builder_v = $B.create()
-    val () = bput_v(m, "unknown alias '")
-    val () = copy_to_builder_v(src, as0, ae, VMAX, m)
-    val () = bput_v(m, "' in qualified access")
-    var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, b0, pl, src, n, ss, m, fy)
-  in add_error(cnt, fy, errs) end
 
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its

@@ -67,11 +67,13 @@ The wasm prelude defines `atspre_g0int_nmod_int`, `atspre_g1int_nmod_int`, `atsp
 
 A wasm binary exports `bats_dynload`, the entry's dynload (named with ATS's `ATS_DYNLOADNAME`), which the host calls before `mainats_0_void`. The Rust bats's wasm had no way to run the dynloads, which a native binary's C `main` runs, so no module `val` was ever initialized: a module's `ref<int>(42)` was a null pointer, and reading it read address 0 (`tests/wasm-dynload`). The wasm prelude also defines `atspre_ptr_alloc_tsz`, with which `ref` allocates its cell, as ATS's pointer.cats does.
 
+Every recursion needs a termination metric outside `$UNSAFE`, as a `fun` does: `fnx`, the `and` members of a `fun` or `fnx` group, and `fix` lambdas are rejected without `.< metric >.`, and `val rec` (which cannot carry one) is rejected. The Rust bats checked only the `fun` keyword, so these recursed with no termination proof (`tests/recursion-metrics`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement
 
-Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun` without termination metric, `#pub prfun`/`prfn` without `primplement`) are detected by the lexer (span kind 5) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
+Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun`, `fnx`, a `fun` group's `and` member or `fix` without termination metric, `val rec`, `#pub prfun`/`prfn` without `primplement`) are detected by the lexer (span kind 5) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
 
 ## Problem Resolution
 
