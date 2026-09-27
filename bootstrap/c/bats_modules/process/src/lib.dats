@@ -438,7 +438,7 @@ fn _build_from_list(xs: $L.listv(arg_entry)): @($B.builder_v, int) = let
           else let
             val c = byte2int0($A.read<byte>(bv, i))
             val n = $B.length(b)
-            val () = (if n < 524288 - 1 then $B.put_char(b, c) else ())
+            val () = (if n < 524288 - 1 then $B.put_char(b, $AR.low_byte(c)) else ())
           in copy(bv, b, i + 1, len) end
         val () = copy(bv, b, 0, len)
         val n2 = $B.length(b)

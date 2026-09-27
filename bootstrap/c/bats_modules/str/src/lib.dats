@@ -103,6 +103,9 @@ staload AR = "arith/src/lib.sats"
    int_to_str -- write decimal representation into buffer, return new pos
    ============================================================ *)
 
+(* Writes value's decimal digits, with a leading '-' when negative, at
+   buf[pos, r) and returns r: at most 11 bytes (an int is 32 bits: 10
+   digits and the sign), which must fit. *)
 
 
 
@@ -279,17 +282,19 @@ implement to_lower_byte(b) =
 (* -- int_to_str -- *)
 
 (* Writes the decimal form of value at buf[pos..] and returns the
-   position after it, or pos unchanged when it does not fit. Every index
-   and every digit byte is proven in range: the fit test bounds the
-   positions, and nmod bounds each digit to [0, 10).
+   position after it. Every index and every digit byte is proven in
+   range: the caller's p + 11 <= n bounds the positions, and nmod bounds
+   each digit to [0, 10). head = |value| / 10 is below 10^9, so its
+   digits are those of its nine lowest decimal places.
 
    |value| is written as head digits then one last digit, and is never
    computed itself: for the minimum int it does not fit in an int. For
    value < 0, ~(value + 1) = |value| - 1 always fits, and adding the 1
    back carries into head when its last digit is 9. *)
 implement int_to_str {l}{n}{p}{v} (buf, pos, max_len, value) = let
-  fun ndigits {u:nat} .<u>. (u: int u): [k:pos] int k =
-    if u < 10 then 1 else 1 + ndigits(ndiv(u, 10))
+  (* Number of digits of u in its k lowest decimal places *)
+  fun places {u:nat}{k:nat} .<k>. (u: int u, k: int k): [d:nat | d <= k] int d =
+    if k = 0 then 0 else if u = 0 then 0 else 1 + places(ndiv(u, 10), k - 1)
   (* Digits of u into buf[lo..w], least significant at w. *)
   fun write {u:nat}{lo,w:int | lo >= 0; lo - 1 <= w; w < n} .<w - lo + 1>.
     (buf: !$A.arr(byte, l, n), lo: int lo, w: int w, u: int u): void =
@@ -306,16 +311,12 @@ implement int_to_str {l}{n}{p}{v} (buf, pos, max_len, value) = let
     else @(ndiv(value, 10), nmod(value, 10))
   ): [h:nat][d:nat | d < 10] @(int h, int d)
   val sign = (if value < 0 then 1 else 0): [s:nat | s <= 1] int s
-  val hd = (if head > 0 then ndigits(head) else 0): [k:nat] int k
+  val hd = places(head, 9)
   val total = sign + hd + 1
-in
-  if pos + total > max_len then pos
-  else let
-    val () = (if sign > 0 then $A.set<byte>(buf, pos, $A.int2byte(45)) else ())
-    val () = write(buf, pos + sign, pos + sign + hd - 1, head)
-    val () = $A.set<byte>(buf, pos + sign + hd, $A.int2byte(last + 48))
-  in pos + total end
-end
+  val () = (if sign > 0 then $A.set<byte>(buf, pos, $A.int2byte(45)) else ())
+  val () = write(buf, pos + sign, pos + sign + hd - 1, head)
+  val () = $A.set<byte>(buf, pos + sign + hd, $A.int2byte(last + 48))
+in pos + total end
 
 (* -- str_to_int -- *)
 
@@ -507,18 +508,16 @@ in loop(bv, p, n) end
    String to array conversion
    ============================================================ *)
 
-(* Fill array from borrow *)
+(* Copies src[i, nb) to arr[i, nb); src must fit in arr. *)
 
 
 
 
-(* Copies src[i..] into arr[i..], stopping at the end of either. *)
 implement fill_exact {l}{n}{lb}{nb}{i} (arr, src, n, slen, i) = let
   fun loop {j:nat | j <= nb} .<nb - j>.
     (arr: !$A.arr(byte, l, n), src: !$A.borrow(byte, lb, nb),
      n: int n, slen: int nb, j: int j): void =
     if j >= slen then ()
-    else if j >= n then ()
     else let
       val () = $A.set<byte>(arr, j, $A.read<byte>(src, j))
     in loop(arr, src, n, slen, j + 1) end
@@ -526,14 +525,14 @@ in loop(arr, src, n, slen, i) end
 
 (* -- copy_from_borrow -- *)
 
-implement copy_from_borrow(src, src_off, src_max, dst, dst_off, dst_max, count) =
-  if count <= 0 then ()
-  else let
-    val b = $A.read<byte>(src, src_off)
-    val () = $A.set<byte>(dst, dst_off, b)
-  in
-    copy_from_borrow(src, src_off + 1, src_max, dst, dst_off + 1, dst_max, count - 1)
-  end
+implement copy_from_borrow {lb}{nb}{la}{na}{so}{do_}{c} (src, src_off, src_max, dst, dst_off, dst_max, count) = let
+  fun loop {s,d,k:nat | s + k <= nb; d + k <= na} .<k>.
+    (src: !$A.borrow(byte, lb, nb), s: int s, dst: !$A.arr(byte, la, na), d: int d, k: int k): void =
+    if k <= 0 then ()
+    else let
+      val () = $A.set<byte>(dst, d, $A.read<byte>(src, s))
+    in loop(src, s + 1, dst, d + 1, k - 1) end
+in loop(src, src_off, dst, dst_off, count) end
 
 (* -- copy_arr_region -- *)
 
@@ -546,13 +545,11 @@ in $A.thaw<byte>(frozen) end
 
 (* -- borrow_region_eq -- *)
 
-implement borrow_region_eq(data, len, off_a, off_b, count) =
-  if count <= 0 then true
-  else let
-    val a = byte2int0($A.read<byte>(data, off_a))
-    val b = byte2int0($A.read<byte>(data, off_b))
-  in
-    if $AR.neq_int_int(a, b) then false
-    else borrow_region_eq(data, len, off_a + 1, off_b + 1, count - 1)
-  end
+implement borrow_region_eq {lb}{n}{oa}{ob}{c} (data, len, off_a, off_b, count) = let
+  fun loop {a,b,k:nat | a + k <= n; b + k <= n} .<k>.
+    (data: !$A.borrow(byte, lb, n), a: int a, b: int b, k: int k): bool =
+    if k <= 0 then true
+    else if $AR.neq_int_int(byte2int0($A.read<byte>(data, a)), byte2int0($A.read<byte>(data, b))) then false
+    else loop(data, a + 1, b + 1, k - 1)
+in loop(data, off_a, off_b, count) end
 
