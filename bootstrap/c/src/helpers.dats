@@ -570,11 +570,10 @@ implement bput_v(out, s) = let
   val slen = g1u2i(slen_sz)
 in loop(out, s, slen, 0, 524288 - $B.length(out)) end
 
-(* v in decimal appended to out, when there is room for it *)
+(* v in decimal appended to out, as much of it as there is room for, as
+   the other builder_v writers do: a builder_v that drops a byte ends up
+   full, which write_file_from_builder refuses *)
 
-
-implement put_int_v(out, v) =
-  if $B.length(out) + 11 <= 524288 then $B.put_int(out, v) else ()
 
 
 
@@ -606,6 +605,13 @@ end
    when there is none) *)
 (* b's bytes appended to out; consumes b *)
 
+
+implement put_int_v(out, v) =
+  if $B.length(out) + 11 <= 524288 then $B.put_int(out, v)
+  else let
+    var t : $B.builder_v = $B.create()
+    val () = $B.put_int(t, v)
+  in append_builder(out, t) end
 
 implement append_builder (out, b) = let
   val @(ba, bl) = $B.to_arr(b)
@@ -875,20 +881,19 @@ end
 
 
 implement parse_decimal (buf, len, max) = let
-  fun loop {l:agz}{n:pos}{fuel:nat} .<fuel>.
-    (buf: !$A.arr(byte, l, n), max: int n, pos: pos_t, len: int,
-     acc: int, fuel: int fuel): int =
-    if fuel <= 0 then acc
+  fun loop {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+    (buf: !$A.arr(byte, l, n), max: int n, pos: int p, len: int, acc: int): int =
+    if pos >= max then acc
     else if pos >= len then acc
     else let
-      val b = peek_arr(buf, pos, max)
+      val b = byte2int0($A.get<byte>(buf, pos))
     in
       if b >= 48 then
-        if b <= 57 then loop(buf, max, pos + 1, len, acc * 10 + (b - 48), fuel - 1)
+        if b <= 57 then loop(buf, max, pos + 1, len, acc * 10 + (b - 48))
         else acc
       else acc
     end
-in loop(buf, max, 0, len, 0, 65536) end
+in loop(buf, max, 0, len, 0) end
 
 (* Convert unix timestamp to calendar version: @(year, month, day, secs_of_day) *)
 (* Hinnant's civil_from_days algorithm *)
@@ -1313,6 +1318,19 @@ end
 
 implement write_file_from_builder(path_bv, path_len, content_b) = let
   val @(content_arr, content_len) = $B.to_arr(content_b)
+in
+  (* A builder_v drops what does not fit and is then full: its text is
+     cut short, so it is not written *)
+  if content_len >= 524288 then let
+    val () = $A.free<byte>(content_arr)
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "error: the output for '")
+    val () = copy_to_builder_v(path_bv, 0, find_null_bv_from(path_bv, 0, path_len), path_len, m)
+    val () = bput_v(m, "' is larger than 524288 bytes, the most bats can write\n")
+    val () = prerr_builder(m)
+    val () = set_build_err()
+  in ~1 end
+  else let
   val fd_r = $F.file_open(path_bv, path_len, 577, 420)
 in case+ fd_r of
   | ~$R.ok(fd) => let
@@ -1325,6 +1343,7 @@ in case+ fd_r of
       val () = $R.discard<int><int>(cr)
     in 0 end
   | ~$R.err(_) => let val () = $A.free<byte>(content_arr) in ~1 end
+end
 end
 
 
@@ -1466,15 +1485,16 @@ implement ap_string_pos(p, name, nn, help, nh) = let
   val () = $A.free<byte>($A.thaw<byte>(fzh))
 in @(p2, h) end
 
-(* Feeds the rest of the file fd to c, a chunk at a time *)
-fun _hash_chunks {lb:agz}{f:nat} .<f>.
-  (fd: !$F.fd, buf: !$A.arr(byte, lb, 65536), c: !$SHA.ctx, f: int f): void =
-  if f <= 0 then ()
+(* Feeds the r bytes left of the file fd to c, a chunk at a time, until
+   they are read or the file ends first *)
+fun _hash_chunks {lb:agz}{r:int} .<max(r, 0)>.
+  (fd: !$F.fd, buf: !$A.arr(byte, lb, 65536), c: !$SHA.ctx, r: int r): void =
+  if r <= 0 then ()
   else let
     val k = (case+ $F.file_read(fd, buf, 65536) of
       | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 65536] int k
     val () = $SHA.update(c, buf, k)
-  in if k < 65536 then () else _hash_chunks(fd, buf, c, f - 1) end
+  in if k <= 0 then () else _hash_chunks(fd, buf, c, r - k) end
 
 (* Appends the sha256 of the file at the NUL-terminated path p to out,
    as 64 hex digits (Rust: sha256::sha256_hex), reading it in chunks so
@@ -1487,9 +1507,9 @@ implement put_file_sha256 {lp} (p, out) =
   | ~$R.ok(afd) => let
       val buf = $A.alloc<byte>(65536)
       val c = $SHA.init()
-      (* file_read fills the buffer unless the file ends first; fuel for
-         2^40 bytes *)
-      val () = _hash_chunks(afd, buf, c, 16777216)
+      val size = (case+ $F.fd_size(afd) of
+        | ~$R.ok(s) => s | ~$R.err(_) => 0): [s:nat] int s
+      val () = _hash_chunks(afd, buf, c, size)
       val () = $A.free<byte>(buf)
       val () = $R.discard<int><int>($F.file_close(afd))
       val hex = $A.alloc<byte>(64)
@@ -1506,42 +1526,39 @@ implement put_file_sha256 {lp} (p, out) =
    ============================================================ *)
 
 (* The first '.' in [i, e), or e *)
-fun find_dot {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): pos_t =
-  if f <= 0 then e
-  else if i >= e then e
+fun find_dot {l:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
+  (b: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n)
+  : [r:int | min(i, e) <= r; r <= max(i, e)] int r =
+  if i >= e then e
   else if $AR.eq_int_int(peek(b, i, n), 46) then i
-  else find_dot(b, i + 1, e, n, f - 1)
+  else find_dot(b, i + 1, e, n)
 
 (* Whether [i, e) is all ASCII digits *)
-fun all_digits {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): bool =
-  if f <= 0 then false
-  else if i >= e then true
+fun all_digits {l:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
+  (b: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n): bool =
+  if i >= e then true
   else let val c = peek(b, i, n)
-  in if c >= 48 && c <= 57 then all_digits(b, i + 1, e, n, f - 1) else false end
+  in if c >= 48 && c <= 57 then all_digits(b, i + 1, e, n) else false end
 
 (* The first position in [i, e) that is not '0', or e *)
-fun first_nonzero {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): pos_t =
-  if f <= 0 then e
-  else if i >= e then e
-  else if $AR.eq_int_int(peek(b, i, n), 48) then first_nonzero(b, i + 1, e, n, f - 1)
+fun first_nonzero {l:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
+  (b: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n): pos_t =
+  if i >= e then e
+  else if $AR.eq_int_int(peek(b, i, n), 48) then first_nonzero(b, i + 1, e, n)
   else i
 
 (* Whether the digits b[z, z + 10) are at most m[0, 10) *)
-fun digits_le {l:agz}{n:pos}{lm:agz}{f:nat} .<f>.
+fun digits_le {l:agz}{n:pos}{lm:agz}{j:nat | j <= 10} .<10 - j>.
   (b: !$A.borrow(byte, l, n), z: pos_t, n: int n,
-   m: !$A.borrow(byte, lm, 10), j: pos_t, f: int f): bool =
-  if f <= 0 then true
-  else if j >= 10 then true
+   m: !$A.borrow(byte, lm, 10), j: int j): bool =
+  if j >= 10 then true
   else let
     val x = peek(b, z + j, n)
-    val y = peek(m, j, 10)
+    val y = byte2int0($A.read<byte>(m, j))
   in
     if x < y then true
     else if x > y then false
-    else digits_le(b, z, n, m, j + 1, f - 1)
+    else digits_le(b, z, n, m, j + 1)
   end
 
 (* The digits of a u32 part without leading zeros: [z, e), or z = ~1
@@ -1552,28 +1569,26 @@ fn u32_digits {l:agz}{n:pos}
     (if $AR.eq_int_int(peek(b, s, n), 43) then s + 1 else s) else s): pos_t
   var max_c = @[char][10]('4', '2', '9', '4', '9', '6', '7', '2', '9', '5')
   val @(fz_m, bv_m) = $A.freeze<byte>($S.from_char_array(max_c, 10))
-  val z0 = first_nonzero(b, d, e, n, 8192)
+  val z0 = first_nonzero(b, d, e, n)
   val z = (if z0 >= e then e - 1 else z0): pos_t
   val fits = (if e - z < 10 then true
     else if e - z > 10 then false
-    else digits_le(b, z, n, bv_m, 0, 10)): bool
+    else digits_le(b, z, n, bv_m, 0)): bool
   val () = $A.drop<byte>(fz_m, bv_m)
   val () = $A.free<byte>($A.thaw<byte>(fz_m))
 in
   if e - d < 1 then ~1
-  else if ~all_digits(b, d, e, n, 8192) then ~1
+  else if ~all_digits(b, d, e, n) then ~1
   else if fits then z
   else ~1
 end
 
 (* Rust's Version::parse over the parts of b[i, be), rendered into out:
    @(~1, ~1), or the invalid part's [start, end) *)
-fun version_parts {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, be: pos_t, n: int n,
-   out: !$B.builder_v >> $B.builder_v, f: int f): @(pos_t, pos_t) =
-  if f <= 0 then @(~1, ~1)
-  else let
-    val pe = find_dot(b, i, be, n, 8192)
+fun version_parts {l:agz}{n:pos}{i,be:int} .<max(be - i, 0)>.
+  (b: !$A.borrow(byte, l, n), i: int i, be: int be, n: int n,
+   out: !$B.builder_v >> $B.builder_v): @(pos_t, pos_t) = let
+    val pe = find_dot(b, i, be, n)
     val z = u32_digits(b, i, pe, n)
   in
     if z < 0 then @(i, pe)
@@ -1583,7 +1598,7 @@ fun version_parts {l:agz}{n:pos}{f:nat} .<f>.
       if pe >= be then @(~1, ~1)
       else let
         val () = put_char_v(out, 46)
-      in version_parts(b, pe + 1, be, n, out, f - 1) end
+      in version_parts(b, pe + 1, be, n, out) end
     end
   end
 
@@ -1601,10 +1616,10 @@ implement put_dev1 (out, dev) =
 
 
 
-implement parse_version_parts (b, i, be, n, out) = version_parts(b, i, be, n, out, 8192)
+implement parse_version_parts (b, i, be, n, out) = version_parts(b, i, be, n, out)
 
 (* The first '.' in b[i, e), or e *)
 
 
 
-implement next_dot (b, i, e, n) = find_dot(b, i, e, n, 8192)
+implement next_dot (b, i, e, n) = find_dot(b, i, e, n)
