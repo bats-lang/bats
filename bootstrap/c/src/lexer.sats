@@ -1253,6 +1253,21 @@ fun spans_free {n:int}{k:nat} (xs: spans(n, k)): void
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn lex_spans {l:agz}{n:pos}{m:nat | m <= n}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n
   ): [k:nat] spans(n, k)
