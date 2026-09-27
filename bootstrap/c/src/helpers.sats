@@ -188,8 +188,14 @@ fn get_exit_code(): int
 
 
 
-fun print_arr {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), i: pos_t, len: int, max: int n,
-   fuel: int fuel): void
+
+fn print_arr {l:agz}{n:pos}  (buf: !$A.arr(byte, l, n), i: pos_t, len: int, max: int n): void
+
+
+
+
+
+
 
 
 
@@ -498,18 +504,6 @@ fn lit_while {l:agz}{n:pos}
 
 
 
-fun prerr_seg {l:agz}{m:pos}{fuel:nat}
-  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, fuel: int fuel): void
-
-
-
-
-
-
-
-
-fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int n,
-   fuel: int fuel): void
 
 
 
@@ -524,8 +518,33 @@ fun print_borrow {l:agz}{n:pos}{fuel:nat}  (buf: !$A.borrow(byte, l, n), i: pos_
 
 
 
-fun copy_to_builder {l:agz}{n:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
-   dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void
+
+
+
+fn prerr_seg {l:agz}{m:pos}
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m): void
+
+
+
+
+fn print_borrow {l:agz}{n:pos}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int n): void
+
+
+
+
+
+
+
+
+fn copy_to_builder {l:agz}{n:pos}{bn:nat | bn + n <= $B.BUILDER_CAP}  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
+   dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + n] $B.builder(m)): void
+
+
+
+
+
+
+
 
 
 
@@ -595,6 +614,7 @@ fn put_newline_v(out: !$B.builder_v >> $B.builder_v): void
 
 
 
+
 fn copy_to_builder_v {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
    dst: !$B.builder_v >> $B.builder_v): void
@@ -602,8 +622,6 @@ fn copy_to_builder_v {l:agz}{n:pos}
 
 
 
-fun find_basename_start {l:agz}{n:pos}{fuel:nat}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
-   last: pos_t, fuel: int fuel): pos_t
 
 
 
@@ -616,8 +634,38 @@ fun find_basename_start {l:agz}{n:pos}{fuel:nat}  (bv: !$A.borrow(byte, l, n), p
 
 
 
-fun wbw_loop {l:agz}{fuel:nat}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
-   i: pos_t, lim: int, fuel: int fuel): void
+
+
+
+fn find_basename_start {l:agz}{n:pos}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
+   last: pos_t): pos_t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
+   i: pos_t, lim: int): void
+
+
+
+
+
+
 
 
 
@@ -653,40 +701,6 @@ fn freshness_check_bv
 
 
 
-fun token_eq_arr {l:agz}{ls:agz}{fuel:nat}  (buf: !$A.arr(byte, l, 4096), tstart: pos_t, tend: int,
-   sarr: !$A.arr(byte, ls, 4096), si: pos_t, fuel: int fuel): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fun arr_range_to_builder {l:agz}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}  (src: !$A.arr(byte, l, 4096), i: pos_t, lim: int,
-   dst: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void
-
-
-
-
-
-
-
-
-
 
 
 fn arr_range_to_builder_v {l:agz}
@@ -696,7 +710,10 @@ fn arr_range_to_builder_v {l:agz}
 
 
 
-fun str_fill_loop {lb:agz}{sn:nat}{i:nat | i <= sn}{fuel:nat}  (b: !$A.arr(byte, lb, 4096), s: string sn, slen: int sn, i: int i, fuel: int fuel): void
+
+
+
+
 
 
 
@@ -708,6 +725,9 @@ fun str_fill_loop {lb:agz}{sn:nat}{i:nat | i <= sn}{fuel:nat}  (b: !$A.arr(byte,
 
 
 fn str_to_arr4096 {sn:nat} (s: string sn): [ls:agz] $A.arr(byte, ls, 4096)
+
+
+
 
 
 
@@ -1258,15 +1278,11 @@ fn run_patsopt {lph:agz}{lo:agz}{li:agz}
 
 
 
-
-
 fn run_cc {lph:agz}{lo:agz}{li:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int,
    rel: int): int
-
-
 
 
 
@@ -1463,24 +1479,15 @@ fn make_kind {l:agz}{n:pos | n >= 4}
 
 
 
-fun count_argc_loop {l:agz}{n:pos}{fuel:nat}  (buf: !$A.arr(byte, l, n), pos: pos_t, len: int, max: int n,
-   count: int, fuel: int fuel): int
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn count_argc {l:agz}
   (buf: !$A.arr(byte, l, 4096), len: int): int
+
+
+
+
+
+
 
 
 
