@@ -200,17 +200,13 @@ fun scan_lines {l:agz}{n:pos}{p,nb:nat | p <= nb; nb <= n}{u,m:nat} .<nb - p>.
 (* The staloads of the file at the NUL-terminated path p *)
 fn scan_file {lp:agz}{u:nat}
   (p: !$A.borrow(byte, lp, CMAX), unseen: deps(u)): scanned(u) =
-  case+ $F.file_open(p, CMAX, 0, 0) of
-  | ~$R.err(_) => Scanned(unseen, deps_nil(), 0)
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(CMAX)
-      val nb = (case+ $F.file_read(fd, buf, CMAX) of
-        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= CMAX] int k
-      val () = $R.discard<int><int>($F.file_close(fd))
-      val @(fz, bv) = $A.freeze<byte>(buf)
-      val r = scan_lines(bv, CMAX, 0, nb, unseen, deps_nil(), 0)
+  case+ read_whole(p, CMAX) of
+  | ~whole_err(_) => Scanned(unseen, deps_nil(), 0)
+  | ~whole_ok(ar, piece, m, nb) => let
+      val @(fz, bv) = $A.freeze<byte>(piece)
+      val r = scan_lines(bv, m, 0, nb, unseen, deps_nil(), 0)
       val () = $A.drop<byte>(fz, bv)
-      val () = $A.free<byte>($A.thaw<byte>(fz))
+      val () = whole_free(ar, $A.thaw<byte>(fz))
     in r end
 
 (* The staloads of the file whose path is b, NUL-terminated *)

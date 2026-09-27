@@ -1421,6 +1421,159 @@ in case+ fd_r of
 end
 end
 
+(* ============================================================
+   Ropes: text of any length (a module's .sats and .dats)
+   ============================================================ *)
+
+
+
+implement rput(r, v) = $B.rope_put(r, $AR.low_byte(v))
+
+
+
+implement rbput(r, s) = $B.rope_bput(r, s)
+
+(* v in decimal *)
+
+
+implement rput_int(r, v) = let
+  var b : $B.builder_v = $B.create()
+  val () = put_int_v(b, v)
+in $B.rope_append(r, b) end
+
+(* Whether a[0, m) and b[0, m) hold the same bytes, from j on *)
+fun same_bytes {la,lb:agz}{na,nb:pos}{m:nat | m <= na; m <= nb}{j:nat | j <= m} .<m - j>.
+  (a: !$A.borrow(byte, la, na), b: !$A.borrow(byte, lb, nb), m: int m, j: int j): bool =
+  if j >= m then true
+  else if $AR.eq_int_int(byte2int0($A.read<byte>(a, j)), byte2int0($A.read<byte>(b, j)))
+  then same_bytes(a, b, m, j + 1)
+  else false
+
+(* Whether the next bytes of fd are the texts of cs, in order *)
+fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
+  case+ cs of
+  | $B.rope_nil() => true
+  | @$B.rope_cons(a, n, tl) =>
+    if n <= 0 then let
+      val r = fd_has_chunks(fd, tl)
+      prval () = fold@(cs)
+    in r end
+    else let
+      val buf = $A.alloc<byte>(n)
+      val k = (case+ $F.file_read(fd, buf, n) of
+        | ~$R.ok(k) => k | ~$R.err(_) => 0)
+      val @(fz_f, bv_f) = $A.freeze<byte>(buf)
+      val @(fz_a, bv_a) = $A.freeze<byte>(a)
+      val eq = (if $AR.eq_int_int(k, n) then same_bytes(bv_f, bv_a, n, 0) else false): bool
+      val () = $A.drop<byte>(fz_a, bv_a)
+      val () = a := $A.thaw<byte>(fz_a)
+      val () = $A.drop<byte>(fz_f, bv_f)
+      val () = $A.free<byte>($A.thaw<byte>(fz_f))
+      val r = (if eq then fd_has_chunks(fd, tl) else false): bool
+      prval () = fold@(cs)
+    in r end
+
+(* Whether the file at path holds exactly the text of cs *)
+
+
+
+implement file_has_rope (path_bv, cs) =
+  case+ $F.file_open(path_bv, 524288, 0, 0) of
+  | ~$R.ok(fd) => let
+      val same = fd_has_chunks(fd, cs)
+      (* and nothing after them *)
+      val one = $A.alloc<byte>(1)
+      val more = (case+ $F.file_read(fd, one, 1) of
+        | ~$R.ok(k) => k > 0 | ~$R.err(_) => true): bool
+      val () = $A.free<byte>(one)
+      val () = $R.discard<int><int>($F.file_close(fd))
+    in if same then ~more else false end
+  | ~$R.err(_) => false
+
+(* The texts of cs to fd, in order; 0, or ~1 after a failed write *)
+fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): int =
+  case+ cs of
+  | $B.rope_nil() => 0
+  | @$B.rope_cons(a, n, tl) => let
+      val w = (if n <= 0 then 0 else let
+          val @(fz, bv) = $A.freeze<byte>(a)
+          val @(left, right) = $A.borrow_split<byte>(fz, bv, n)
+          val ok = (case+ $F.file_write(fd, left, n) of
+            | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
+          val () = $A.drop<byte>(fz, $A.borrow_join<byte>(fz, left, right))
+          val () = a := $A.thaw<byte>(fz)
+        in ok end): int
+      val r = (if w < 0 then w else fd_write_chunks(fd, tl)): int
+      prval () = fold@(cs)
+    in r end
+
+(* The text of cs written to the file at path (created, or truncated);
+   0, or ~1 when it cannot be opened or written *)
+
+
+
+implement write_file_from_rope (path_bv, cs) =
+  case+ $F.file_open(path_bv, 524288, 577, 420) of
+  | ~$R.ok(fd) => let
+      val w = fd_write_chunks(fd, cs)
+      val c = (case+ $F.file_close(fd) of | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
+    in if w < 0 then w else c end
+  | ~$R.err(_) => ~1
+
+(* ============================================================
+   A file read whole (a module of any size)
+   ============================================================ *)
+
+(* The n bytes of a file, then a NUL (m = n + 1), in the one piece of an
+   arena of its own; or the errno of what failed *)
+
+
+
+
+
+(* The file at the NUL-terminated path read whole: sized first, then
+   read into a piece that holds it (a file that changes size meanwhile
+   is EIO, one too large for an arena EFBIG) *)
+
+
+
+implement read_whole (path, plen) =
+  case+ $F.file_open(path, plen, 0, 0) of
+  | ~$R.err(e) => whole_err(e)
+  | ~$R.ok(fd) =>
+    (case+ $F.fd_size(fd) of
+    | ~$R.err(e) => let
+        val () = $R.discard<int><int>($F.file_close(fd))
+      in whole_err(e) end
+    | ~$R.ok(z) =>
+      if z >= 268435455 then let
+        val () = $R.discard<int><int>($F.file_close(fd))
+      in whole_err(27) end
+      else (case+ $A.arena_create<byte>(z + 1) of
+      | ~$A.arena_none() => let
+          val () = $R.discard<int><int>($F.file_close(fd))
+        in whole_err(12) end
+      | ~$A.arena_some(ar) => let
+          val p = $A.arena_alloc<byte>(ar, z + 1)
+          val k = (case+ $F.file_read(fd, p, z + 1) of
+            | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
+          val () = $R.discard<int><int>($F.file_close(fd))
+        in
+          if k = z then whole_ok(ar, p, z + 1, z)
+          else let
+            val () = $A.arena_return<byte>(ar, p)
+            val () = $A.arena_destroy<byte>(ar)
+          in whole_err(5) end
+        end))
+
+(* Frees what read_whole read *)
+
+
+
+implement whole_free (ar, p) = let
+  val () = $A.arena_return<byte>(ar, p)
+in $A.arena_destroy<byte>(ar) end
+
 
 
 implement str_to_path_arr(s) = let

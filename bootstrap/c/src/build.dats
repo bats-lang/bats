@@ -47,47 +47,38 @@ implement preprocess_one
   val fresh = (if is_newer(dats_bv, src_bv) then ~target_changed else false): bool
 in
   if fresh then 0
-  else let
-  val or = $F.file_open(src_bv, 524288, 0, 0)
-in
-  case+ or of
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(524288)
-      val rr = $F.file_read(fd, buf, 524288)
-      val nbytes = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
-      val cr = $F.file_close(fd)
-      val () = $R.discard<int><int>(cr)
-      val @(fz_src, bv_src) = $A.freeze<byte>(buf)
-      val xs = lex_spans(bv_src, nbytes, 524288)
-      val @(sats_arr, sats_len, dats_arr, dats_len, pre_lines, safety_errors) =
-        do_emit(bv_src, 524288, xs, build_target, is_unsafe)
-      val () = spans_free(xs)
-      val () = $A.drop<byte>(fz_src, bv_src)
-      val () = $A.free<byte>($A.thaw<byte>(fz_src))
-      (* Write .sats, unless it holds these bytes already: every module that
-         staloads it is rebuilt when it changes (touch_sats_stamp) *)
-      val @(fz_s, bv_s) = $A.freeze<byte>(sats_arr)
-      val r1 = (if file_has_bytes(sats_bv, bv_s, sats_len) then 0
-        else let
-          var sb : $B.builder_v = $B.create()
-          val () = copy_to_builder_v(bv_s, 0, sats_len, 524288, sb)
-          val r = write_file_from_builder(sats_bv, 524288, sb)
-          val () = touch_sats_stamp()
-        in r end): int
-      val () = $A.drop<byte>(fz_s, bv_s)
-      val () = $A.free<byte>($A.thaw<byte>(fz_s))
-      (* Write .dats - prepend self-staload *)
-      var db : $B.builder_v = $B.create()
+  else case+ read_whole(src_bv, 524288) of
+  | ~whole_err(_) => ~1
+  | ~whole_ok(ar, piece, m, nbytes) => let
+      val @(fz_src, bv_src) = $A.freeze<byte>(piece)
+      val xs = lex_spans(bv_src, nbytes, m)
+      val sats = $B.rope_create()
+      (* The .dats staloads its own .sats first *)
+      val dats = $B.rope_create()
+      var hb : $B.builder_v = $B.create()
       val bn_start = find_basename_start(sats_bv, 0, 524288, ~1)
       val bn_end = find_null_bv_from(sats_bv, bn_start, 524288)
-      val () = bput_v(db, "staload \"./")
-      val () = copy_to_builder_v(sats_bv, bn_start, bn_end, 524288, db)
-      val () = bput_v(db, "\"\n")
-      val @(fz_d, bv_d) = $A.freeze<byte>(dats_arr)
-      val () = copy_to_builder_v(bv_d, 0, dats_len, 524288, db)
-      val () = $A.drop<byte>(fz_d, bv_d)
-      val () = $A.free<byte>($A.thaw<byte>(fz_d))
-      val r2 = write_file_from_builder(dats_bv, 524288, db)
+      val () = bput_v(hb, "staload \"./")
+      val () = copy_to_builder_v(sats_bv, bn_start, bn_end, 524288, hb)
+      val () = bput_v(hb, "\"\n")
+      val () = $B.rope_append(dats, hb)
+      val @(pre_lines, safety_errors) =
+        do_emit(bv_src, m, xs, build_target, is_unsafe, sats, dats)
+      val () = spans_free(xs)
+      val () = $A.drop<byte>(fz_src, bv_src)
+      val () = whole_free(ar, $A.thaw<byte>(fz_src))
+      (* Write .sats, unless it holds these bytes already: every module that
+         staloads it is rebuilt when it changes (touch_sats_stamp) *)
+      val [ks:int] sc = $B.rope_chunks(sats)
+      val r1 = (if file_has_rope(sats_bv, sc) then 0
+        else let
+          val r = write_file_from_rope(sats_bv, sc)
+          val () = touch_sats_stamp()
+        in r end): int
+      val () = $B.rope_list_free(sc)
+      val [kd:int] dc = $B.rope_chunks(dats)
+      val r2 = write_file_from_rope(dats_bv, dc)
+      val () = $B.rope_list_free(dc)
       (* <dats>.pre: its prelude line count, for mapping patsopt's line
          numbers back to the .bats (Rust: DatsFile.prelude_offset) *)
       var pb : $B.builder_v = $B.create()
@@ -106,8 +97,7 @@ in
       if safety_errors > 0 then safety_errors
       else if r1 = 0 then (if r2 = 0 then 0 else ~1) else ~1
     end
-  | ~$R.err(_) => ~1
-end end
+end
 
 (* ============================================================
    Helpers: run patsopt/cc on all extra .dats/.c files in a dir
@@ -718,19 +708,15 @@ fun has_wasm_target {ns:int}{k:nat} .<k>. (xs: !spans(ns, k)): bool =
     in if w then true else has_wasm_target(tl) end
 
 implement check_wasm_binary(path) =
-  case+ $F.file_open(path, 524288, 0, 0) of
-  | ~$R.err(_) => 0
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(524288)
-      val n = (case+ $F.file_read(fd, buf, 524288) of
-        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
-      val () = $R.discard<int><int>($F.file_close(fd))
-      val @(fz_s, bv_s) = $A.freeze<byte>(buf)
-      val xs = lex_spans(bv_s, n, 524288)
+  case+ read_whole(path, 524288) of
+  | ~whole_err(_) => 0
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+      val xs = lex_spans(bv_s, n, m)
       val w = has_wasm_target(xs)
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_s, bv_s)
-      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = whole_free(ar, $A.thaw<byte>(fz_s))
     in (if w then 1 else 0) end
 
 (* to_c: the --to-c directory in to_c[0, tclen); tclen is 0 when it was

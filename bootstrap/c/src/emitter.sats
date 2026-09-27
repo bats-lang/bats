@@ -515,8 +515,6 @@ staload "lexer.sats"
 
 
 
-
-
 fn collect_tests {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    out: !$B.builder_v >> $B.builder_v): int
@@ -574,35 +572,8 @@ fn collect_tests {ls:agz}{ns:pos}{k:nat}
 
 fn do_emit {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   build_target: int, is_unsafe: int
-  ): @([la:agz] $A.arr(byte, la, 524288), int,
-      [lb:agz] $A.arr(byte, lb, 524288), int, int, int)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+   build_target: int, is_unsafe: int, sats: !$B.rope, dats: !$B.rope
+  ): @(int, int)
 
 
 
