@@ -110,9 +110,14 @@ fn entries_count {n:int} (es: !entries(n)): int n
 
 
 
+
+stadef ENTRY_NAME_MAX = 1024
+
+
+
 fn entries_name
-  {n:int}{i:nat | i < n}{l:agz}{m:pos}
-  (es: !entries(n), i: int i, name_buf: !$A.arr(byte, l, m), max_len: int m): [k:nat | k <= m] int k
+  {n:int}{i:nat | i < n}{l:agz}{m:int | m >= ENTRY_NAME_MAX}
+  (es: !entries(n), i: int i, name_buf: !$A.arr(byte, l, m), max_len: int m): [k:nat | k < ENTRY_NAME_MAX] int k
 
 fn entries_free {n:int} (es: entries(n)): void
 

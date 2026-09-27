@@ -319,8 +319,8 @@ in
 end
 
 (* The version in the file name e[vs, ve), when it parses *)
-fn file_cand {le:agz} (e: !$A.borrow(byte, le, 256), vs: pos_t, ve: pos_t): $R.option(cand) = let
-  val @(c, _, _) = parse_cand(e, 256, vs, ve)
+fn file_cand {le:agz} (e: !$A.borrow(byte, le, 1024), vs: pos_t, ve: pos_t): $R.option(cand) = let
+  val @(c, _, _) = parse_cand(e, 1024, vs, ve)
 in c end
 
 (* best, or c when c orders after it; frees the other *)
@@ -1090,19 +1090,19 @@ in prerr_builder(m) end
 
 (* Whether the file name e[0, el) is <pfx><version>.bats *)
 fn is_archive_of {le,lp:agz}
-  (e: !$A.borrow(byte, le, 256), el: pos_t,
+  (e: !$A.borrow(byte, le, 1024), el: pos_t,
    pfx: !$A.borrow(byte, lp, 524288), pl: pos_t): bool = let
   var b_c = @[char][5]('.', 'b', 'a', 't', 's')
   fun starts {i,pl:int} .<max(pl - i, 0)>.
-    (e: !$A.borrow(byte, le, 256), pfx: !$A.borrow(byte, lp, 524288),
+    (e: !$A.borrow(byte, le, 1024), pfx: !$A.borrow(byte, lp, 524288),
      i: int i, pl: int pl): bool =
     if i >= pl then true
-    else if $AR.eq_int_int(peek(e, i, 256), peek(pfx, i, 524288))
+    else if $AR.eq_int_int(peek(e, i, 1024), peek(pfx, i, 524288))
     then starts(e, pfx, i + 1, pl)
     else false
 in
   if el < pl + 6 then false
-  else if ~lit_at(e, el - 5, 256, b_c, 5) then false
+  else if ~lit_at(e, el - 5, 1024, b_c, 5) then false
   else starts(e, pfx, 0, pl)
 end
 
@@ -1115,8 +1115,8 @@ fun scan_versions {n,i:nat | i <= n}{lp,la:agz}{nc:nat} .<n - i>.
    best: $R.option(cand)): $R.option(cand) =
   if i >= n then best
   else let
-    val e = $A.alloc<byte>(256)
-    val el = $F.entries_name(d, i, e, 256)
+    val e = $A.alloc<byte>(1024)
+    val el = $F.entries_name(d, i, e, 1024)
   in
     let
       val @(fz_e, bv_e) = $A.freeze<byte>(e)
@@ -2033,12 +2033,12 @@ end
 
 (* A NUL-terminated path: a[0, n) + "/" + b[0, bl), and its length *)
 fn child_path {la,lb:agz}
-  (a: !$A.borrow(byte, la, 524288), n: int, b: !$A.borrow(byte, lb, 256), bl: int)
+  (a: !$A.borrow(byte, la, 524288), n: int, b: !$A.borrow(byte, lb, 1024), bl: int)
   : @([l:agz] $A.arr(byte, l, 524288), int) = let
   var p : $B.builder_v = $B.create()
   val () = copy_to_builder_v(a, 0, n, 524288, p)
   val () = put_char_v(p, 47)
-  val () = copy_to_builder_v(b, 0, bl, 256, p)
+  val () = copy_to_builder_v(b, 0, bl, 1024, p)
   val pl = $B.length(p)
   val () = put_char_v(p, 0)
   val @(pa, _) = $B.to_arr(p)
@@ -2073,18 +2073,18 @@ fn copy_file {ls,ld:agz}
 
 (* Whether e[0, el) is ".", "..", or a directory Rust's copy skips:
    build, dist, docs or bats_modules *)
-fn skipped_name {le:agz} (e: !$A.borrow(byte, le, 256), el: int, is_dir: bool): bool = let
+fn skipped_name {le:agz} (e: !$A.borrow(byte, le, 1024), el: int, is_dir: bool): bool = let
   var b_c = @[char][5]('b', 'u', 'i', 'l', 'd')
   var d_c = @[char][4]('d', 'i', 's', 't')
   var o_c = @[char][4]('d', 'o', 'c', 's')
   var m_c = @[char][12]('b', 'a', 't', 's', '_', 'm', 'o', 'd', 'u', 'l', 'e', 's')
 in
-  if el = 1 then peek(e, 0, 256) = 46
-  else if el = 2 then (if peek(e, 0, 256) = 46 then peek(e, 1, 256) = 46 else false)
+  if el = 1 then peek(e, 0, 1024) = 46
+  else if el = 2 then (if peek(e, 0, 1024) = 46 then peek(e, 1, 1024) = 46 else false)
   else if ~is_dir then false
-  else if el = 5 then lit_at(e, 0, 256, b_c, 5)
-  else if el = 4 then (if lit_at(e, 0, 256, d_c, 4) then true else lit_at(e, 0, 256, o_c, 4))
-  else if el = 12 then lit_at(e, 0, 256, m_c, 12)
+  else if el = 5 then lit_at(e, 0, 1024, b_c, 5)
+  else if el = 4 then (if lit_at(e, 0, 1024, d_c, 4) then true else lit_at(e, 0, 1024, o_c, 4))
+  else if el = 12 then lit_at(e, 0, 1024, m_c, 12)
   else false
 end
 
@@ -2104,8 +2104,8 @@ fun copy_entries {n,i:nat | i <= n}{ls,ld:agz}{f:nat} .<f, 0, n - i>.
    d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool =
   if i >= n then true
   else let
-    val e = $A.alloc<byte>(256)
-    val el = $F.entries_name(dir, i, e, 256)
+    val e = $A.alloc<byte>(1024)
+    val el = $F.entries_name(dir, i, e, 1024)
   in
     let
       val @(fz_e, bv_e) = $A.freeze<byte>(e)

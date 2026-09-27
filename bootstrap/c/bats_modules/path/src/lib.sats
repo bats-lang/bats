@@ -22,11 +22,12 @@ staload S = "str/src/lib.sats"
 
 
 
+
 fun join
-  {la:agz}{na:pos}{lb:agz}{nb:pos}{lo:agz}{mo:pos}
+  {la:agz}{na:pos}{lb:agz}{nb:pos}{lo:agz}{mo:pos | na + nb + 1 <= mo}
   (base: !$A.borrow(byte, la, na), base_len: int na,
    name: !$A.borrow(byte, lb, nb), name_len: int nb,
-   out: !$A.arr(byte, lo, mo), max: int mo): int
+   out: !$A.arr(byte, lo, mo), max: int mo): int(na + nb + 1)
 
 
 
@@ -35,7 +36,7 @@ fun join
 
 fun parent
   {la:agz}{na:pos}
-  (path: !$A.borrow(byte, la, na), path_len: int na): int
+  (path: !$A.borrow(byte, la, na), path_len: int na): [r:nat | r < na] int r
 
 
 
@@ -44,7 +45,7 @@ fun parent
 
 fun filename
   {la:agz}{na:pos}
-  (path: !$A.borrow(byte, la, na), path_len: int na): int
+  (path: !$A.borrow(byte, la, na), path_len: int na): [r:nat | r <= na] int r
 
 
 
@@ -54,7 +55,7 @@ fun filename
 
 fun extension
   {la:agz}{na:pos}
-  (path: !$A.borrow(byte, la, na), path_len: int na): int
+  (path: !$A.borrow(byte, la, na), path_len: int na): [r:nat | r <= na] int r
 
 
 
@@ -63,6 +64,89 @@ fun extension
 fun is_absolute
   {la:agz}{na:pos}
   (path: !$A.borrow(byte, la, na), path_len: int na): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
