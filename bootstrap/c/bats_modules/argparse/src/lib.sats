@@ -22,8 +22,17 @@ abst@ype bool_val = int
 abst@ype count_val = int
 
 
+dataprop arg_kind(t@ype) =
+  | kind_string(string_val)
+  | kind_int(int_val)
+  | kind_bool(bool_val)
+  | kind_count(count_val)
 
-datatype arg(a:t@ype) = {i:nat | i < 64} arg_mk(a) of (int i)
+
+
+
+
+typedef arg(a:t@ype) = [i:nat | i < 64] (arg_kind(a) | int i)
 
 
 

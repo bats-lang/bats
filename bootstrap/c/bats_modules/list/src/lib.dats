@@ -4,7 +4,13 @@ staload "./lib.sats"
 #include "share/atspre_staload.hats"
 
 (* ============================================================
-   Types
+   Type
+
+   A list is linear: bats has no GC, so every cell is freed by
+   whoever holds the list last (free, or a consuming ~ pattern).
+   Operations that walk a list borrow it (!); operations that
+   rebuild one (reverse, append, tail) consume it and reuse or free
+   its cells.
    ============================================================ *)
 
 
@@ -14,7 +20,7 @@ staload "./lib.sats"
 
 
 (* ============================================================
-   Construction
+   Construction and freeing
    ============================================================ *)
 
 
@@ -22,27 +28,48 @@ staload "./lib.sats"
 
 
 
-implement {a} nil () = list_nil()
+(* Frees every cell. The elements are values (t@ype); a list of
+   linear elements is consumed with ~ patterns instead. *)
 
-implement {a} cons (x, xs) = list_cons(x, xs)
+
+
+implement {a} nil () = list_vt_nil()
+
+implement {a} cons (x, xs) = list_vt_cons(x, xs)
+
+implement {a} free {n} (xs) = let
+  fun loop {i:nat} .<i>.
+    (xs: list_vt(a, i)): void =
+    case+ xs of
+    | ~list_vt_nil() => ()
+    | ~list_vt_cons(_, tl) => loop(tl)
+in loop(xs) end
 
 (* ============================================================
-   Length
+   Length and is_nil
    ============================================================ *)
+
+
+
 
 
 
 
 implement {a} length {n} (xs) = let
-  fun loop {i:nat} .<i>.
-    (xs: list_t(a, i)): int(i) =
+  fun loop {i:nat}{k:nat} .<i>.
+    (xs: !list_vt(a, i), k: int(k)): int(i+k) =
     case+ xs of
-    | list_nil() => 0
-    | list_cons(_, tl) => 1 + loop(tl)
-in loop(xs) end
+    | list_vt_nil() => k
+    | list_vt_cons(_, tl) => loop(tl, k + 1)
+in loop(xs, 0) end
+
+implement {a} is_nil (xs) =
+  case+ xs of
+  | list_vt_nil() => true
+  | list_vt_cons(_, _) => false
 
 (* ============================================================
-   Reverse
+   Reverse (in place: the cells are reused)
    ============================================================ *)
 
 
@@ -50,11 +77,15 @@ in loop(xs) end
 
 implement {a} reverse (xs) = let
   fun loop {i:nat}{j:nat} .<j>.
-    (acc: list_t(a, i), rest: list_t(a, j)): list_t(a, i+j) =
+    (acc: list_vt(a, i), rest: list_vt(a, j)): list_vt(a, i+j) =
     case+ rest of
-    | list_nil() => acc
-    | list_cons(x, tl) => loop(list_cons(x, acc), tl)
-in loop(list_nil(), xs) end
+    | ~list_vt_nil() => acc
+    | @list_vt_cons(_, tl) => let
+        val next = tl
+        val () = tl := acc
+        prval () = fold@(rest)
+      in loop(rest, next) end
+in loop(list_vt_nil(), xs) end
 
 (* ============================================================
    Head and tail
@@ -63,43 +94,51 @@ in loop(list_nil(), xs) end
 
 
 
+(* Frees the first cell. *)
 
 
 
 implement {a} head (xs) =
-  case+ xs of list_cons(x, _) => x
+  case+ xs of list_vt_cons(x, _) => x
 
 implement {a} tail (xs) =
-  case+ xs of list_cons(_, tl) => tl
+  case+ xs of ~list_vt_cons(_, tl) => tl
 
 (* ============================================================
    Map and fold
+
+   The function is a closure on the caller's stack, passed by
+   reference, so nothing is allocated for it:
+     var f = lam@ (x: int): int =<clo1> x * 10
+     val ys = map<int><int>(xs, f)
    ============================================================ *)
+
+
+
 
 
 
 
 implement {a}{b} map {n} (xs, f) = let
   fun loop {i:nat} .<i>.
-    (xs: list_t(a, i), f: (a) -<cloref1> b): list_t(b, i) =
+    (xs: !list_vt(a, i), f: &(a) -<clo1> b): list_vt(b, i) =
     case+ xs of
-    | list_nil() => list_nil()
-    | list_cons(x, tl) => list_cons(f(x), loop(tl, f))
+    | list_vt_nil() => list_vt_nil()
+    | list_vt_cons(x, tl) => let
+        val y = f(x)
+      in list_vt_cons(y, loop(tl, f)) end
 in loop(xs, f) end
-
-
-
 
 implement {a}{b} foldl {n} (xs, init, f) = let
   fun loop {i:nat} .<i>.
-    (xs: list_t(a, i), acc: b, f: (b, a) -<cloref1> b): b =
+    (xs: !list_vt(a, i), acc: b, f: &(b, a) -<clo1> b): b =
     case+ xs of
-    | list_nil() => acc
-    | list_cons(x, tl) => loop(tl, f(acc, x), f)
+    | list_vt_nil() => acc
+    | list_vt_cons(x, tl) => loop(tl, f(acc, x), f)
 in loop(xs, init, f) end
 
 (* ============================================================
-   Append
+   Append (consumes both lists; the cells of xs are reused)
    ============================================================ *)
 
 
@@ -107,37 +146,53 @@ in loop(xs, init, f) end
 
 implement {a} append {m}{n} (xs, ys) = let
   fun loop {i:nat} .<i>.
-    (xs: list_t(a, i), ys: list_t(a, n)): list_t(a, i+n) =
+    (xs: list_vt(a, i), ys: list_vt(a, n)): list_vt(a, i+n) =
     case+ xs of
-    | list_nil() => ys
-    | list_cons(x, tl) => list_cons(x, loop(tl, ys))
+    | ~list_vt_nil() => ys
+    | @list_vt_cons(_, tl) => let
+        val () = tl := loop(tl, ys)
+        prval () = fold@(xs)
+      in xs end
 in loop(xs, ys) end
-
-(* ============================================================
-   Is_nil
-   ============================================================ *)
-
-
-
-
-implement {a} is_nil (xs) =
-  case+ xs of
-  | list_nil() => true
-  | list_cons(_, _) => false
-
-(* ============================================================
-   Linear list (for holding linear values like arrays)
-   ============================================================ *)
-
-
-
-
-
-
 
 (* ============================================================
    Tests (bats test)
    ============================================================ *)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
