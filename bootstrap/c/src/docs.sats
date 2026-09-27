@@ -3,6 +3,8 @@ staload B = "builder/src/lib.sats"
 staload F = "file/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload T = "toml/src/lib.sats"
+staload S = "str/src/lib.sats"
+
 
 
 
@@ -18,6 +20,29 @@ staload T = "toml/src/lib.sats"
 
 staload "helpers.sats"
 staload "lexer.sats"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -474,12 +499,10 @@ fn sorted_bats_files (dir: $B.builder_v): @([l:agz] $A.arr(byte, l, 524288), int
 
 
 
-
-
-
-
 fn generate_docs {l:agz}{n:pos}
   (name: !$A.borrow(byte, l, n), nlen: int, max: int n): int
+
+
 
 
 

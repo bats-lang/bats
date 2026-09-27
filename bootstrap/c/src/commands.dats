@@ -433,12 +433,11 @@ fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void = 
 in finish_sidecar(ok, sc, zp, zlen) end
 
 (* The end of the line starting at i: the next '\n', or len *)
-fun line_end {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, n: int n, f: int f): pos_t =
-  if f <= 0 then i
-  else if i >= len then i
-  else if $AR.eq_int_int(peek(b, i, n), 10) then i
-  else line_end(b, i + 1, len, n, f - 1)
+fun line_end {l:agz}{n:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
+  (b: !$A.borrow(byte, l, n), i: int i, len: int len): [e:nat | i <= e; e <= len] int e =
+  if i >= len then i
+  else if byte2int0($A.read<byte>(b, i)) = 10 then i
+  else line_end(b, i + 1, len)
 
 (* Whether c is whitespace as Rust's str::trim sees it (ASCII) *)
 fn is_ws (c: int): bool =
@@ -446,61 +445,58 @@ fn is_ws (c: int): bool =
   $AR.eq_int_int(c, 11) || $AR.eq_int_int(c, 12) || $AR.eq_int_int(c, 13)
 
 (* The first non-whitespace position in [i, e), or e *)
-fun skip_ws {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): pos_t =
-  if f <= 0 then i
-  else if i >= e then e
-  else if is_ws(peek(b, i, n)) then skip_ws(b, i + 1, e, n, f - 1)
+fun skip_ws {l:agz}{n:pos}{i,e:nat | i <= e; e <= n} .<e - i>.
+  (b: !$A.borrow(byte, l, n), i: int i, e: int e): [r:nat | i <= r; r <= e] int r =
+  if i >= e then e
+  else if is_ws(byte2int0($A.read<byte>(b, i))) then skip_ws(b, i + 1, e)
   else i
 
 (* The end of [s, e) with trailing whitespace dropped *)
-fun trim_end {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n, f: int f): pos_t =
-  if f <= 0 then e
-  else if e <= s then s
-  else if is_ws(peek(b, e - 1, n)) then trim_end(b, s, e - 1, n, f - 1)
+fun trim_end {l:agz}{n:pos}{s,e:nat | s <= e; e <= n} .<e - s>.
+  (b: !$A.borrow(byte, l, n), s: int s, e: int e): [r:nat | s <= r; r <= e] int r =
+  if e <= s then s
+  else if is_ws(byte2int0($A.read<byte>(b, e - 1))) then trim_end(b, s, e - 1)
   else e
 
 (* Whether [i, e) holds a '=' *)
-fun has_eq {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n, f: int f): bool =
-  if f <= 0 then false
-  else if i >= e then false
-  else if $AR.eq_int_int(peek(b, i, n), 61) then true
-  else has_eq(b, i + 1, e, n, f - 1)
+fun has_eq {l:agz}{n:pos}{i,e:nat | i <= e; e <= n} .<e - i>.
+  (b: !$A.borrow(byte, l, n), i: int i, e: int e): bool =
+  if i >= e then false
+  else if byte2int0($A.read<byte>(b, i)) = 61 then true
+  else has_eq(b, i + 1, e)
 
 (* Rust's inject_version: a line whose trim starts with "version" and
    holds '=' *)
-fn is_version_line {l:agz}{n:pos}
-  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n): bool = let
+fn is_version_line {l:agz}{n:pos}{s,e:nat | s <= e; e <= n}
+  (b: !$A.borrow(byte, l, n), s: int s, e: int e, n: int n): bool = let
   var c = @[char][7]('v', 'e', 'r', 's', 'i', 'o', 'n')
-  val t = skip_ws(b, s, e, n, 8192)
+  val t = skip_ws(b, s, e)
 in
   if t + 7 > e then false
-  else if lit_at(b, t, n, c, 7) then has_eq(b, s, e, n, 8192)
+  else if lit_at(b, t, n, c, 7) then has_eq(b, s, e)
   else false
 end
 
 (* Whether the trimmed line is "[package]" *)
-fn is_package_line {l:agz}{n:pos}
-  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n): bool = let
+fn is_package_line {l:agz}{n:pos}{s,e:nat | s <= e; e <= n}
+  (b: !$A.borrow(byte, l, n), s: int s, e: int e, n: int n): bool = let
   var c = @[char][9]('\[', 'p', 'a', 'c', 'k', 'a', 'g', 'e', ']')
-  val t = skip_ws(b, s, e, n, 8192)
-  val te = trim_end(b, t, e, n, 8192)
+  val t = skip_ws(b, s, e)
+  val te = trim_end(b, t, e)
 in
   if te - t <> 9 then false else lit_at(b, t, n, c, 9)
 end
 
 (* Whether any line of b[i, len) is a version line *)
-fun any_version_line {l:agz}{n:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, n: int n, f: int f): bool =
-  if f <= 0 then false
-  else if i >= len then false
+fun any_version_line {l:agz}{n:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
+  (b: !$A.borrow(byte, l, n), i: int i, len: int len, n: int n): bool =
+  if i >= len then false
   else let
-    val e = line_end(b, i, len, n, 8192)
+    val e = line_end(b, i, len)
   in
     if is_version_line(b, i, e, n) then true
-    else any_version_line(b, e + 1, len, n, f - 1)
+    else if e >= len then false
+    else any_version_line(b, e + 1, len, n)
   end
 
 (* version = "<v>" and a newline *)
@@ -527,24 +523,29 @@ fn inject_line {l:agz}{n:pos}{lv:agz}{nv:pos}
     else ()
   end
 
+(* The end of the line [i, e) without a trailing '\r' *)
+fn chop_cr {l:agz}{n:pos}{i,e:nat | i <= e; e <= n}
+  (b: !$A.borrow(byte, l, n), i: int i, e: int e): [r:nat | i <= r; r <= e] int r =
+  if e <= i then e
+  else if byte2int0($A.read<byte>(b, e - 1)) = 13 then e - 1
+  else e
+
 (* Rust's inject_version over the lines of b[i, len): with a version
    line present (replace), each one becomes the new version line;
    otherwise the version line goes after "[package]". Every line ends
    with '\n' and loses a trailing '\r', as str::lines does. *)
-fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{f:nat} .<f>.
-  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, n: int n, replace: bool,
+fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
+  (b: !$A.borrow(byte, l, n), i: int i, len: int len, n: int n, replace: bool,
    v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
-   out: !$B.builder_v >> $B.builder_v, f: int f): void =
-  if f <= 0 then ()
-  else if i >= len then ()
+   out: !$B.builder_v >> $B.builder_v): void =
+  if i >= len then ()
   else let
-    val e = line_end(b, i, len, n, 8192)
-    val ce = (if e > i then
-      (if $AR.eq_int_int(peek(b, e - 1, n), 13) then e - 1 else e) else e): pos_t
+    val e = line_end(b, i, len)
+    val ce = chop_cr(b, i, e)
     val ver_line = is_version_line(b, i, ce, n)
     val pkg_line = is_package_line(b, i, ce, n)
     val () = inject_line(b, i, ce, n, replace, ver_line, pkg_line, v, vlen, nv, out)
-  in inject_lines(b, e + 1, len, n, replace, v, vlen, nv, out, f - 1) end
+  in if e >= len then () else inject_lines(b, e + 1, len, n, replace, v, vlen, nv, out) end
 
 (* Frees an argument list that will not be run *)
 fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
@@ -569,12 +570,12 @@ in
   | ~$R.ok(tfd) => let
       val tbuf = $A.alloc<byte>(8192)
       val trr = $F.file_read(tfd, tbuf, 8192)
-      val tlen = (case+ trr of | ~$R.ok(k) => k | ~$R.err(_) => 0): int
+      val tlen = (case+ trr of | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
       val () = $R.discard<int><int>($F.file_close(tfd))
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val replace = any_version_line(bv_tb, 0, tlen, 8192, 8192)
+      val replace = any_version_line(bv_tb, 0, tlen, 8192)
       var out: $B.builder_v = $B.create()
-      val () = inject_lines(bv_tb, 0, tlen, 8192, replace, v, vlen, nv, out, 8192)
+      val () = inject_lines(bv_tb, 0, tlen, 8192, replace, v, vlen, nv, out)
       val () = $A.drop<byte>(fz_tb, bv_tb)
       val () = $A.free<byte>($A.thaw<byte>(fz_tb))
       var dir: $B.builder_v = $B.create()
@@ -948,15 +949,15 @@ in
                 val () = bput_v(zip_path, "/")
                 (* Build prefix: replace '/' with '_' in name *)
                 var pfx: $B.builder_v = $B.create()
-                fun copy_replace_slash {l:agz}{fuel:nat} .<fuel>.
-                  (bv: !$A.borrow(byte, l, 256), i: pos_t, len: int,
-                   b: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
-                  if fuel <= 0 then () else if i >= len then ()
+                fun copy_replace_slash {l:agz}{i:nat | i <= 256} .<256 - i>.
+                  (bv: !$A.borrow(byte, l, 256), i: int i, len: int,
+                   b: !$B.builder_v >> $B.builder_v): void =
+                  if i >= len then () else if i >= 256 then ()
                   else let
-                    val byte_val = peek(bv, i, 256)
+                    val byte_val = byte2int0($A.read<byte>(bv, i))
                     val () = put_char_v(b, (if $AR.eq_int_int(byte_val, 47) then 95 else byte_val): int)
-                  in copy_replace_slash(bv, i + 1, len, b, fuel - 1) end
-                val () = copy_replace_slash(bv_nb, 0, nlen, pfx, 256)
+                  in copy_replace_slash(bv, i + 1, len, b) end
+                val () = copy_replace_slash(bv_nb, 0, nlen, pfx)
                 val @(pfx_arr, pfx_len) = $B.to_arr(pfx)
                 val @(fz_px, bv_px) = $A.freeze<byte>(pfx_arr)
                 val () = copy_to_builder_v(bv_px, 0, pfx_len, 524288, zip_path)
@@ -1513,17 +1514,17 @@ end
 
 (* The NUL-terminated strings in bv[start, total) as argv entries,
    empty ones included, reversed onto acc. *)
-fun extra_arg_list {l:agz}{fuel:nat} .<fuel>.
-  (bv: !$A.borrow(byte, l, 4096), start: pos_t, total: int,
-   acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
-  if fuel <= 0 then acc
-  else if start >= total then acc
+fun extra_arg_list {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (bv: !$A.borrow(byte, l, 4096), start: int p, total: int,
+   acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
+  if start >= total then acc
   else let
-    val np = find_null_bv_from(bv, start, 4096)
+    val np = $S.find_null_bv_at(bv, start, 4096)
     val e = (if np < total then np else total): int
     var wb = $B.create()
     val () = copy_to_builder_v(bv, start, e, 4096, wb)
-  in extra_arg_list(bv, np + 1, total, $L.list_vt_cons(mk_arg(wb), acc), fuel - 1) end
+    val acc2 = $L.list_vt_cons(mk_arg(wb), acc)
+  in if np >= 4096 then acc2 else extra_arg_list(bv, np + 1, total, acc2) end
 
 (* Whether dist/<mode>/NAME exists, for NAME = ent[0, len). *)
 fn is_built {le:agz} (ent: !$A.borrow(byte, le, 256), len: int, release: int): bool = let
@@ -1591,35 +1592,36 @@ fn add_choice {lb,ln:agz}
   else if choice = 1 then copy_to_builder_v(n, 0, find_null_bv_from(n, 0, 524288), 524288, cmd)
   else bput_v(cmd, "")
 
-(* Whether the entry at n[i, NUL) equals b[0, blen). *)
-fun entry_eq {ln,lb:agz}{fuel:nat} .<fuel>.
-  (n: !$A.borrow(byte, ln, 524288), s: pos_t,
-   b: !$A.borrow(byte, lb, 256), blen: int, i: pos_t, fuel: int fuel): bool =
-  if fuel <= 0 then false
-  else if i >= blen then peek(n, s + i, 524288) = 0
-  else if peek(n, s + i, 524288) <> peek(b, i, 256) then false
-  else entry_eq(n, s, b, blen, i + 1, fuel - 1)
+(* Whether the entry at n[s, NUL) equals b[0, blen). *)
+fun entry_eq {ln,lb:agz}{s,i:nat | s + i <= 524288; i <= 256} .<256 - i>.
+  (n: !$A.borrow(byte, ln, 524288), s: int s,
+   b: !$A.borrow(byte, lb, 256), blen: int, i: int i): bool =
+  if s + i >= 524288 then false
+  else if i >= blen then byte2int0($A.read<byte>(n, s + i)) = 0
+  else if i >= 256 then false
+  else if byte2int0($A.read<byte>(n, s + i)) <> byte2int0($A.read<byte>(b, i)) then false
+  else entry_eq(n, s, b, blen, i + 1)
 
 (* Whether some entry of the NUL-terminated list n[s, nlen) is b[0, blen). *)
-fun list_has {ln,lb:agz}{fuel:nat} .<fuel>.
-  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: pos_t,
-   b: !$A.borrow(byte, lb, 256), blen: int, fuel: int fuel): bool =
-  if fuel <= 0 then false
-  else if s >= nlen then false
-  else if entry_eq(n, s, b, blen, 0, 257) then true
-  else list_has(n, nlen, find_null_bv_from(n, s, 524288) + 1, b, blen, fuel - 1)
+fun list_has {ln,lb:agz}{s:nat | s <= 524288} .<524288 - s>.
+  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: int s,
+   b: !$A.borrow(byte, lb, 256), blen: int): bool =
+  if s >= nlen then false
+  else if entry_eq(n, s, b, blen, 0) then true
+  else let
+    val e = $S.find_null_bv_at(n, s, 524288)
+  in if e >= 524288 then false else list_has(n, nlen, e + 1, b, blen) end
 
 
 (* The NUL-terminated entries of n[s, nlen) to stderr, ", "-separated. *)
-fun prerr_names {ln:agz}{fuel:nat} .<fuel>.
-  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: pos_t, first: bool, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if s >= nlen then ()
+fun prerr_names {ln:agz}{s:nat | s <= 524288} .<524288 - s>.
+  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: int s, first: bool): void =
+  if s >= nlen then ()
   else let
-    val e = find_null_bv_from(n, s, 524288)
+    val e = $S.find_null_bv_at(n, s, 524288)
     val () = (if first then () else prerr! (", "))
     val () = prerr_seg(n, s, e, 524288)
-  in prerr_names(n, nlen, e + 1, false, fuel - 1) end
+  in if e >= 524288 then () else prerr_names(n, nlen, e + 1, false) end
 
 (* bin: the --bin name in bin[0, blen); blen is 0 when it was not
    given. extra: the arguments
@@ -1638,18 +1640,18 @@ implement do_run {lb,le} (release, bin, blen, extra, elen) = let
   (* As the Rust bats: --bin names one of them; without it there must be
      exactly one. 0: run --bin's; 1: run the only one; ~1: error. *)
   val choice = (if blen > 0 then
-      if list_has(bv_n, nlen, 0, bin, blen, 4096) then 0
+      if list_has(bv_n, nlen, 0, bin, blen) then 0
       else let
         val () = prerr! ("error: binary '")
         val () = prerr_seg(bin, 0, blen, 256)
         val () = prerr! ("' not found. Available: ")
-        val () = prerr_names(bv_n, nlen, 0, true, 4096)
+        val () = prerr_names(bv_n, nlen, 0, true)
         val () = prerr_newline()
       in ~1 end
     else if count = 1 then 1
     else let
       val () = prerr! ("error: multiple binaries available, specify one with --bin <name>: ")
-      val () = prerr_names(bv_n, nlen, 0, true, 4096)
+      val () = prerr_names(bv_n, nlen, 0, true)
       val () = prerr_newline()
     in ~1 end): int
   var cmd: $B.builder_v = $B.create()
@@ -1670,7 +1672,7 @@ in
   else let
     var run_b1 = $B.create()
     val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
-    val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil(), 4096), $L.list_vt_nil())
+    val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil()), $L.list_vt_nil())
     val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
     val rc = run_program(bv_ea, run_argv)
     val () = (if rc < 0 then let

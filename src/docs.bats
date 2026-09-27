@@ -10,6 +10,7 @@
 #use file as F
 #use result as R
 #use toml as T
+#use str as S
 
 staload "helpers.sats"
 staload "lexer.sats"
@@ -26,92 +27,87 @@ fn is_trim_ws(b: int): bool =
 
 (* Start of the line that holds position p: the first q <= p with q = 0
    or a newline at q - 1. *)
-fun line_start {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), p: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then p
-  else if p <= 0 then 0
-  else if peek(src, p - 1, max) = 10 then p
-  else line_start(src, p - 1, max, fuel - 1)
+fun line_start {l:agz}{n:pos}{p:nat | p <= n} .<p>.
+  (src: !$A.borrow(byte, l, n), p: int p): [q:nat | q <= p] int q =
+  if p <= 0 then 0
+  else if byte2int0($A.read<byte>(src, p - 1)) = 10 then p
+  else line_start(src, p - 1)
 
-fun skip_blanks {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), p: pos_t, e: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then p
-  else if p >= e then p
-  else if is_blank(peek(src, p, max)) then skip_blanks(src, p + 1, e, max, fuel - 1)
+fun skip_blanks {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int e): [q:nat | p <= q; q <= e] int q =
+  if p >= e then p
+  else if is_blank(byte2int0($A.read<byte>(src, p))) then skip_blanks(src, p + 1, e)
   else p
 
 (* Where the text of the doc line [ls, le) starts, or ~1 when it is not
    a doc line: after leading blanks it starts with /// but not ////, and
    the text follows the /// and one optional space. *)
-fn doc_body {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), ls: pos_t, le: pos_t, max: int n): pos_t = let
-  val t = skip_blanks(src, ls, le, max, max)
+fn doc_body {l:agz}{n:pos}{ls,le:nat | ls <= le; le <= n}
+  (src: !$A.borrow(byte, l, n), ls: int ls, le: int le): [b:int | b <= le] int b = let
+  val t = skip_blanks(src, ls, le)
 in
   if t + 3 > le then ~1
-  else if peek(src, t, max) <> 47 then ~1
-  else if peek(src, t + 1, max) <> 47 then ~1
-  else if peek(src, t + 2, max) <> 47 then ~1
-  else if t + 3 < le && peek(src, t + 3, max) = 47 then ~1
-  else if t + 3 < le && peek(src, t + 3, max) = 32 then t + 4
-  else t + 3
+  else if byte2int0($A.read<byte>(src, t)) <> 47 then ~1
+  else if byte2int0($A.read<byte>(src, t + 1)) <> 47 then ~1
+  else if byte2int0($A.read<byte>(src, t + 2)) <> 47 then ~1
+  else if t + 3 >= le then t + 3
+  else let
+    val c = byte2int0($A.read<byte>(src, t + 3))
+  in if c = 47 then ~1 else if c = 32 then t + 4 else t + 3 end
 end
 
 (* The first line of the run of doc lines that ends with the newline at
    le, or le + 1 when the line ending at le is not a doc line. *)
-fun doc_top {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), le: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then le + 1
-  else let
-    val ls = line_start(src, le, max, max)
-  in
-    if doc_body(src, ls, le, max) < 0 then le + 1
-    else if ls <= 0 then 0
-    else doc_top(src, ls - 1, max, fuel - 1)
-  end
+fun doc_top {l:agz}{n:pos}{le:nat | le < n} .<le>.
+  (src: !$A.borrow(byte, l, n), le: int le): [r:nat | r <= le + 1] int r = let
+  val ls = line_start(src, le)
+in
+  if doc_body(src, ls, le) < 0 then le + 1
+  else if ls <= 0 then 0
+  else doc_top(src, ls - 1)
+end
 
-fun find_newline {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), p: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then p
-  else if p >= max then p
-  else if peek(src, p, max) = 10 then p
-  else find_newline(src, p + 1, max, fuel - 1)
+fun find_newline {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n): [q:nat | p <= q; q <= n] int q =
+  if p >= max then p
+  else if byte2int0($A.read<byte>(src, p)) = 10 then p
+  else find_newline(src, p + 1, max)
 
 (* The text of the doc line starting at p; returns the position after it *)
-fn put_doc_line {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), p: pos_t, max: int n,
-   out: !$B.builder_v >> $B.builder_v): pos_t = let
-  val le = find_newline(src, p, max, max)
-  val b = doc_body(src, p, le, max)
-  val bs = (if b >= 0 then b else le): pos_t
-  val () = copy_to_builder_v(src, bs, le, max, out)
+fn put_doc_line {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n,
+   out: !$B.builder_v >> $B.builder_v): [r:int | p < r; r <= n + 1] int r = let
+  val le = find_newline(src, p, max)
+  val b = doc_body(src, p, le)
+  val () = (if b >= 0 then copy_to_builder_v(src, b, le, max, out)
+            else copy_to_builder_v(src, le, le, max, out))
 in le + 1 end
 
 (* A newline and the text of each doc line in [p, stop) *)
-fun put_doc_rest {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), p: pos_t, stop: pos_t, max: int n,
-   out: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if p >= stop then ()
+fun put_doc_rest {l:agz}{n:pos}{p:nat | p <= n + 1}{s:nat | s <= n} .<n + 1 - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, stop: int s, max: int n,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if p >= stop then ()
   else let
     val () = put_char_v(out, 10)
     val np = put_doc_line(src, p, max, out)
-  in put_doc_rest(src, np, stop, max, out, fuel - 1) end
+  in put_doc_rest(src, np, stop, max, out) end
 
 (* "\n<doc>\n" for the #pub at ss, when doc lines end right above it:
    the texts of the lines joined with newlines, as in the Rust bats *)
-fn put_doc_comment {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), ss: pos_t, max: int n,
+fn put_doc_comment {l:agz}{n:pos}{s:nat | s <= n}
+  (src: !$A.borrow(byte, l, n), ss: int s, max: int n,
    out: !$B.builder_v >> $B.builder_v): void =
   if ss <= 0 then ()
-  else if peek(src, ss - 1, max) <> 10 then ()
+  else if byte2int0($A.read<byte>(src, ss - 1)) <> 10 then ()
   else let
-    val top = doc_top(src, ss - 1, max, max)
+    val top = doc_top(src, ss - 1)
   in
     if top >= ss then ()
     else let
       val () = put_char_v(out, 10)
       val np = put_doc_line(src, top, max, out)
-      val () = put_doc_rest(src, np, ss, max, out, max)
+      val () = put_doc_rest(src, np, ss, max, out)
     in put_char_v(out, 10) end
   end
 
@@ -246,86 +242,114 @@ in case+ dr of
   | ~$R.err(_) => ()
 end
 
-(* Lists every directory in the NUL-separated list lvl[off, len), then
-   the next level down, until no directories are left. *)
-fun walk_level {l:agz}{fuel:nat} .<fuel>.
-  (lvl: !$A.borrow(byte, l, 524288), off: pos_t, len: int,
-   next: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v,
-   fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if off >= len then ()
+(* Lists every directory in the NUL-separated list lvl[off, len): their
+   subdirectories to next, their .bats files to files *)
+fun walk_level {l:agz}{off:nat | off <= 524288} .<524288 - off>.
+  (lvl: !$A.borrow(byte, l, 524288), off: int off, len: int,
+   next: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void =
+  if off >= len then ()
   else let
-    val e = find_null_bv_from(lvl, off, 524288)
+    val e = $S.find_null_bv_at(lvl, off, 524288)
     val da = path_at(lvl, off)
     val @(fz_d, bv_d) = $A.freeze<byte>(da)
     val () = list_dir(bv_d, e - off, next, files)
     val () = $A.drop<byte>(fz_d, bv_d)
     val () = $A.free<byte>($A.thaw<byte>(fz_d))
-  in walk_level(lvl, e + 1, len, next, files, fuel - 1) end
+  in if e >= 524288 then () else walk_level(lvl, e + 1, len, next, files) end
 
-fun walk_levels {fuel:nat} .<fuel>.
-  (lvl: $B.builder_v, files: !$B.builder_v >> $B.builder_v, fuel: int fuel): void = let
+(* The directories lvl, then the next level down, until no directories
+   are left, at most depth levels (Rust's find_bats_files has no limit,
+   and recursed until its stack overflowed on a directory cycle); deeper
+   directories are an error *)
+fun walk_levels {d:nat} .<d>.
+  (lvl: $B.builder_v, files: !$B.builder_v >> $B.builder_v, depth: int d): void = let
   val @(la, llen) = $B.to_arr(lvl)
 in
-  if fuel <= 0 then $A.free<byte>(la)
-  else if llen <= 0 then $A.free<byte>(la)
+  if llen <= 0 then $A.free<byte>(la)
+  else if depth <= 0 then let
+    val () = $A.free<byte>(la)
+    val () = prerr! ("error: directories nested more than 64 levels deep\n")
+  in set_build_err() end
   else let
     val @(fz_l, bv_l) = $A.freeze<byte>(la)
     var next : $B.builder_v = $B.create()
-    val () = walk_level(bv_l, 0, llen, next, files, 65536)
+    val () = walk_level(bv_l, 0, llen, next, files)
     val () = $A.drop<byte>(fz_l, bv_l)
     val () = $A.free<byte>($A.thaw<byte>(fz_l))
-  in walk_levels(next, files, fuel - 1) end
+  in walk_levels(next, files, depth - 1) end
 end
 
-(* Byte i of the path at a, for ordering: ~1 past its end and 0 for '/',
-   so that paths order component by component, as Rust's PathBuf does. *)
-fn path_key {l:agz} (lst: !$A.borrow(byte, l, 524288), a: pos_t, i: pos_t): int = let
-  val b = peek(lst, a + i, 524288)
-in if b = 0 then ~1 else if b = 47 then 0 else b end
+(* The paths of a NUL-separated list, each by its range [s, e) *)
+datavtype plist(int) =
+  | plist_nil(0) of ()
+  | {k:nat}{s,e:nat | s <= e; e <= 524288} plist_cons(k + 1) of (int s, int e, plist(k))
 
-(* Whether the path at a orders before the path at b *)
-fun path_less {l:agz}{fuel:nat} .<fuel>.
-  (lst: !$A.borrow(byte, l, 524288), a: pos_t, b: pos_t, i: pos_t, fuel: int fuel): bool =
-  if fuel <= 0 then false
+fun plist_free {k:nat} .<k>. (xs: plist(k)): void =
+  case+ xs of
+  | ~plist_nil() => ()
+  | ~plist_cons(_, _, tl) => plist_free(tl)
+
+(* The paths of lst[off, len), onto acc *)
+fun parse_paths {l:agz}{off:nat | off <= 524288}{k:nat} .<524288 - off>.
+  (lst: !$A.borrow(byte, l, 524288), off: int off, len: int, acc: plist(k)): [k2:nat] plist(k2) =
+  if off >= len then acc
   else let
-    val ka = path_key(lst, a, i)
-    val kb = path_key(lst, b, i)
+    val e = $S.find_null_bv_at(lst, off, 524288)
   in
-    if ka < kb then true
-    else if ka > kb then false
-    else if ka < 0 then false
-    else path_less(lst, a, b, i + 1, fuel - 1)
+    if e >= 524288 then plist_cons(off, e, acc)
+    else parse_paths(lst, e + 1, len, plist_cons(off, e, acc))
   end
 
-(* The first path in lst[off, len) after prev (any, when prev < 0), or
-   ~1 when there is none. best: the smallest found so far, or ~1. *)
-fun next_path {l:agz}{fuel:nat} .<fuel>.
-  (lst: !$A.borrow(byte, l, 524288), off: pos_t, len: int,
-   prev: pos_t, best: pos_t, fuel: int fuel): pos_t =
-  if fuel <= 0 then best
-  else if off >= len then best
+(* Byte i of the path [x, xe), for ordering: ~1 past its end and 0 for
+   '/', so that paths order component by component, as Rust's PathBuf
+   does *)
+fn path_key {l:agz}{x,xe,i:nat | x <= xe; xe <= 524288}
+  (lst: !$A.borrow(byte, l, 524288), x: int x, xe: int xe, i: int i): int =
+  if x + i >= xe then ~1
   else let
-    val after = (if prev < 0 then true else path_less(lst, prev, off, 0, 4096)): bool
-    val better = (if best < 0 then true else path_less(lst, off, best, 0, 4096)): bool
-    val best1 = (if after && better then off else best): pos_t
-  in next_path(lst, find_null_bv_from(lst, off, 524288) + 1, len, prev, best1, fuel - 1) end
+    val b = byte2int0($A.read<byte>(lst, x + i))
+  in if b = 47 then 0 else b end
 
-(* The paths of files[0, len) that order after prev, in order, each
-   NUL-terminated, appended to out *)
-fun put_sorted {l:agz}{fuel:nat} .<fuel>.
-  (files: !$A.borrow(byte, l, 524288), len: int, prev: pos_t,
-   out: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else let
-    val off = next_path(files, 0, len, prev, ~1, 65536)
-  in
-    if off < 0 then ()
-    else let
-      val e = find_null_bv_from(files, off, 524288)
-      val () = copy_to_builder_v(files, off, e + 1, 524288, out)
-    in put_sorted(files, len, off, out, fuel - 1) end
-  end
+(* Whether the path [a, ae) orders before the path [b, be) *)
+fun path_less {l:agz}{a,ae,b,be,i:nat | a <= ae; ae <= 524288; b <= be; be <= 524288; i <= ae - a} .<ae - a - i>.
+  (lst: !$A.borrow(byte, l, 524288), a: int a, ae: int ae, b: int b, be: int be, i: int i): bool = let
+  val ka = path_key(lst, a, ae, i)
+  val kb = path_key(lst, b, be, i)
+in
+  if ka < kb then true
+  else if ka > kb then false
+  else if a + i >= ae then false
+  else path_less(lst, a, ae, b, be, i + 1)
+end
+
+(* The path [s, e) inserted into the sorted xs *)
+fun path_insert {l:agz}{s,e:nat | s <= e; e <= 524288}{k:nat} .<k>.
+  (lst: !$A.borrow(byte, l, 524288), s: int s, e: int e, xs: plist(k)): plist(k + 1) =
+  case+ xs of
+  | ~plist_nil() => plist_cons(s, e, plist_nil())
+  | ~plist_cons(s2, e2, tl) =>
+    if path_less(lst, s, e, s2, e2, 0) then plist_cons(s, e, plist_cons(s2, e2, tl))
+    else plist_cons(s2, e2, path_insert(lst, s, e, tl))
+
+fun path_sort {l:agz}{k,j:nat} .<k>.
+  (lst: !$A.borrow(byte, l, 524288), xs: plist(k), acc: plist(j)): plist(k + j) =
+  case+ xs of
+  | ~plist_nil() => acc
+  | ~plist_cons(s, e, tl) => path_sort(lst, tl, path_insert(lst, s, e, acc))
+
+(* The paths of files[0, len), sorted *)
+fn sorted_paths {l:agz} (files: !$A.borrow(byte, l, 524288), len: int): [k:nat] plist(k) =
+  path_sort(files, parse_paths(files, 0, len, plist_nil()), plist_nil())
+
+(* The paths xs of files, each NUL-terminated, appended to out *)
+fun put_paths {l:agz}{k:nat} .<k>.
+  (files: !$A.borrow(byte, l, 524288), xs: !plist(k), out: !$B.builder_v >> $B.builder_v): void =
+  case+ xs of
+  | plist_nil() => ()
+  | plist_cons(s, e, tl) => let
+      val () = copy_to_builder_v(files, s, e, 524288, out)
+      val () = put_char_v(out, 0)
+    in put_paths(files, tl, out) end
 
 (* The .bats files under dir, recursively, NUL-separated and sorted as
    Rust's PathBuf sorts them (project::find_bats_files) *)
@@ -338,8 +362,10 @@ implement sorted_bats_files (dir) = let
   val () = walk_levels(root, files, 64)
   val @(fa, flen) = $B.to_arr(files)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
+  val xs = sorted_paths(bv_f, flen)
   var out : $B.builder_v = $B.create()
-  val () = put_sorted(bv_f, flen, ~1, out, 65536)
+  val () = put_paths(bv_f, xs, out)
+  val () = plist_free(xs)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
 in $B.to_arr(out) end
@@ -348,25 +374,24 @@ in $B.to_arr(out) end
    Writing docs/
    ============================================================ *)
 
-fun prerr_path {l:agz}{fuel:nat} .<fuel>.
-  (lst: !$A.borrow(byte, l, 524288), p: pos_t, e: pos_t, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if p >= e then ()
+fun prerr_path {l:agz}{p,e:nat | p <= e; e <= 524288} .<e - p>.
+  (lst: !$A.borrow(byte, l, 524288), p: int p, e: int e): void =
+  if p >= e then ()
   else let
-    val () = prerr_char(int2char0(peek(lst, p, 524288)))
-  in prerr_path(lst, p + 1, e, fuel - 1) end
+    val () = prerr_char(int2char0(byte2int0($A.read<byte>(lst, p))))
+  in prerr_path(lst, p + 1, e) end
 
 (* Writes page to docs/<module>.md when it has entries (n > 0), the
    module name being files[ns, ne); consumes page. 1 when written, 0
    when there was nothing to write, ~1 on an error (n < 0: the file at
    files[off, e) could not be read). *)
-fn write_page {l:agz}
+fn write_page {l:agz}{off,e:nat | off <= e; e <= 524288}
   (page: $B.builder_v, n: int, files: !$A.borrow(byte, l, 524288),
-   off: pos_t, e: pos_t, ns: pos_t, ne: pos_t): int =
+   off: int off, e: int e, ns: pos_t, ne: pos_t): int =
   if n < 0 then let
     val () = $B.builder_free(page)
     val () = prerr! ("error: cannot read '")
-    val () = prerr_path(files, off, e, 4096)
+    val () = prerr_path(files, off, e)
     val () = prerr! ("'\n")
   in ~1 end
   else if n = 0 then let
@@ -398,19 +423,15 @@ fn write_page {l:agz}
     else 1
   end
 
-(* Writes docs/<module>.md for each file in files[0, len) after prev, in
+(* Writes docs/<module>.md for each file of xs (paths in files), in
    order, adding each written module to idx. Returns count plus the
    modules written, or ~1 on an error. *)
-fun write_modules {l:agz}{fuel:nat} .<fuel>.
-  (files: !$A.borrow(byte, l, 524288), len: int, prev: pos_t,
-   idx: !$B.builder_v >> $B.builder_v, count: int, fuel: int fuel): int =
-  if fuel <= 0 then count
-  else let
-    val off = next_path(files, 0, len, prev, ~1, 65536)
-  in
-    if off < 0 then count
-    else let
-      val e = find_null_bv_from(files, off, 524288)
+fun write_modules {l:agz}{k:nat} .<k>.
+  (files: !$A.borrow(byte, l, 524288), xs: !plist(k),
+   idx: !$B.builder_v >> $B.builder_v, count: int): int =
+  case+ xs of
+  | plist_nil() => count
+  | plist_cons(off, e, tl) => let
       val ns = find_basename_start(files, off, 524288, off - 1)
       val ne = e - 5
       val pa = path_at(files, off)
@@ -425,16 +446,15 @@ fun write_modules {l:agz}{fuel:nat} .<fuel>.
       val r = write_page(page, n, files, off, e, ns, ne)
     in
       if r < 0 then ~1
-      else if r = 0 then write_modules(files, len, off, idx, count, fuel - 1)
+      else if r = 0 then write_modules(files, tl, idx, count)
       else let
         val () = bput_v(idx, "- [")
         val () = copy_to_builder_v(files, ns, ne, 524288, idx)
         val () = bput_v(idx, "](")
         val () = copy_to_builder_v(files, ns, ne, 524288, idx)
         val () = bput_v(idx, ".md)\n")
-      in write_modules(files, len, off, idx, count + 1, fuel - 1) end
+      in write_modules(files, tl, idx, count + 1) end
     end
-  end
 
 (* Writes docs/index.md for the modules listed in idx, the package being
    name[0, nlen); consumes idx. 0, or ~1 on an error. *)
@@ -485,7 +505,9 @@ implement generate_docs(name, nlen, max) = let
   val @(fa, flen) = $B.to_arr(files)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
   var idx : $B.builder_v = $B.create()
-  val count = write_modules(bv_f, flen, ~1, idx, 0, 65536)
+  val xs = sorted_paths(bv_f, flen)
+  val count = write_modules(bv_f, xs, idx, 0)
+  val () = plist_free(xs)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
 in write_index(idx, count, name, nlen, max) end
