@@ -33,23 +33,22 @@ fun _byte_to_col {l:agz}{n:pos}{i:int | i >= ~1}{p:nat | i < p; p <= n} .<i + 1>
    Emitter: copy source range to builder, count newlines
    ============================================================ *)
 
-(* Copy bytes from source borrow to builder. *)
-fun emit_range {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
-   max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if start >= end_pos then ()
+(* Copy bytes from source borrow to builder (put_char_v drops what does
+   not fit, leaving the builder full, which write_file_from_builder
+   refuses). *)
+fun emit_range {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
+  (src: !$A.borrow(byte, ls, ns), start: int s, end_pos: int e,
+   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+  if start >= end_pos then ()
   else let
-    val b = peek(src, start, max)
-    val () = $B.put_char(out, $AR.low_byte(b))
-  in emit_range(src, start + 1, end_pos, max, out, fuel - 1) end
+    val () = put_char_v(out, peek(src, start, max))
+  in emit_range(src, start + 1, end_pos, max, out) end
 
 (* Copy bytes, transforming .bats" → .sats" for staload paths. *)
-fun emit_range_stald {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
-   max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if start >= end_pos then ()
+fun emit_range_stald {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
+  (src: !$A.borrow(byte, ls, ns), start: int s, end_pos: int e,
+   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+  if start >= end_pos then ()
   else let
     val b = peek(src, start, max)
     (* Check for .bats" pattern: 46,98,97,116,115,34 → replace b(98) with s(115) *)
@@ -60,24 +59,19 @@ fun emit_range_stald {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER
       $AR.eq_int_int(peek(src, start + 3, max), 115) &&
       $AR.eq_int_int(peek(src, start + 4, max), 34)
     then 115 else b): int
-    val () = $B.put_char(out, $AR.low_byte(b_out))
-  in emit_range_stald(src, start + 1, end_pos, max, out, fuel - 1) end
+    val () = put_char_v(out, b_out)
+  in emit_range_stald(src, start + 1, end_pos, max, out) end
 
-fun emit_blanks {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
-   max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if start >= end_pos then ()
+(* The newlines of src[start, end_pos), so line numbers stay put *)
+fun emit_blanks {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
+  (src: !$A.borrow(byte, ls, ns), start: int s, end_pos: int e,
+   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+  if start >= end_pos then ()
   else let
     val b = peek(src, start, max)
-  in
-    if $AR.eq_int_int(b, 10) then let
-      val () = $B.put_char(out, 10)
-    in emit_blanks(src, start + 1, end_pos, max, out, fuel - 1) end
-    else emit_blanks(src, start + 1, end_pos, max, out, fuel - 1)
-  end
+    val () = (if $AR.eq_int_int(b, 10) then put_char_v(out, 10) else ())
+  in emit_blanks(src, start + 1, end_pos, max, out) end
 
-(* Builder_v wrappers: compute fuel from remaining capacity *)
 (* Whether this file's "implement main0" has been renamed; set by
    emit_code_v, read by do_emit *)
 val g_main0_renamed = ref<bool>(false)
@@ -98,9 +92,9 @@ fun find_main0 {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
   end
 
 fn emit_range_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
-  emit_range(src, start, end_pos, max, out, 524288 - $B.length(out))
+  emit_range(src, start, end_pos, max, out)
 
 (* The sats declaration of the renamed entry point, when there is one *)
 fn put_main0_decl(out: !$B.builder_v >> $B.builder_v): void =
@@ -126,14 +120,14 @@ fn emit_code_v {ls:agz}{ns:pos}{ss,se:nat | ss <= se; se <= ns}
   end
 
 fn emit_range_stald_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
-  emit_range_stald(src, start, end_pos, max, out, 524288 - $B.length(out))
+  emit_range_stald(src, start, end_pos, max, out)
 
 fn emit_blanks_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
+  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
-  emit_blanks(src, start, end_pos, max, out, 524288 - $B.length(out))
+  emit_blanks(src, start, end_pos, max, out)
 
 (* ============================================================
    Emitter: name mangling (__BATS__<mangled_pkg>_<member>)

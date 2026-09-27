@@ -517,12 +517,6 @@ staload "lexer.sats"
 
 
 
-
-
-
-
-
-
 fn collect_tests {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    out: !$B.builder_v >> $B.builder_v): int

@@ -542,23 +542,14 @@ fn copy_to_builder {l:agz}{n:pos}{bn:nat | bn + n <= $B.BUILDER_CAP}  (src: !$A.
 
 
 
+
 fn put_char_v(out: !$B.builder_v >> $B.builder_v, v: int): void
-
-
-
-
-
 
 
 
 
 fn bput_v {sn:nat}
   (out: !$B.builder_v >> $B.builder_v, s: string sn): void
-
-
-
-
-
 
 
 
