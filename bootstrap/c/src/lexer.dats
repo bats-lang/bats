@@ -143,6 +143,7 @@ fn looking_at_binary {l:agz}{n:pos}
 
 fn looking_at_begin {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
+  is_kw_boundary_before(src, pos, max) &&
   lit_begin(src, pos, max) &&
   is_kw_boundary(src, pos + 5, max)
 
