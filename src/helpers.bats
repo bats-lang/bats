@@ -662,6 +662,71 @@ implement freshness_check_bv(out_b, in_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_i))
 in result end
 
+(* build/.sats_changed is written whenever an emitted .sats changes. A
+   module's C depends on its .dats and on every .sats it staloads, so it
+   is fresh only when newer than both its .dats and this stamp. *)
+fn sats_stamp_path (): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "build/.sats_changed")
+  val () = put_char_v(b, 0)
+in b end
+
+#pub fn touch_sats_stamp (): void
+
+implement touch_sats_stamp () = let
+  val @(pa, _) = $B.to_arr(sats_stamp_path())
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val _ = write_file_from_builder(bv_p, 524288, $B.create())
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in end
+
+(* Whether the C at out_b, patsopt's output for the .dats at in_b, is
+   fresh: newer than the .dats and than the last .sats change *)
+#pub fn c_fresh_bv
+  (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+implement c_fresh_bv(out_b, in_b) = let
+  val @(oa, _) = $B.to_arr(out_b)
+  val @(ia, _) = $B.to_arr(in_b)
+  val @(sa, _) = $B.to_arr(sats_stamp_path())
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val @(fz_i, bv_i) = $A.freeze<byte>(ia)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val result = (if is_newer(bv_o, bv_i) then is_newer(bv_o, bv_s) else false): bool
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_i, bv_i)
+  val () = $A.free<byte>($A.thaw<byte>(fz_i))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in result end
+
+(* Whether the file at path_bv holds exactly bv[0, len) *)
+#pub fn file_has_bytes {lp:agz}{lb:agz}
+  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int): bool
+
+implement file_has_bytes {lp}{lb} (path_bv, bv, len) =
+  case+ $F.file_open(path_bv, 524288, 0, 0) of
+  | ~$R.ok(fd) => let
+      val buf = $A.alloc<byte>(524288)
+      val rr = $F.file_read(fd, buf, 524288)
+      val k = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
+      val cr = $F.file_close(fd)
+      val () = $R.discard<int><int>(cr)
+      fun same {la:agz}{m:nat | m <= 524288}{j:nat | j <= m} .<m - j>.
+        (a: !$A.borrow(byte, la, 524288), bv: !$A.borrow(byte, lb, 524288), m: int m, j: int j): bool =
+        if j >= m then true
+        else if $AR.eq_int_int(byte2int0($A.read<byte>(a, j)), byte2int0($A.read<byte>(bv, j)))
+        then same(a, bv, m, j + 1)
+        else false
+      val @(fz_f, bv_f) = $A.freeze<byte>(buf)
+      val eq = (if $AR.eq_int_int(k, len) then same(bv_f, bv, k, 0) else false): bool
+      val () = $A.drop<byte>(fz_f, bv_f)
+      val () = $A.free<byte>($A.thaw<byte>(fz_f))
+    in eq end
+  | ~$R.err(_) => false
+
 (* src[i, lim) appended to dst, stopping at the end of src or of the
    builder's capacity *)
 #pub fn arr_range_to_builder_v {l:agz}

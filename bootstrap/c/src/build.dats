@@ -41,9 +41,10 @@ staload "closure.sats"
 
 implement preprocess_one
   (src_bv, sats_bv, dats_bv, build_target, is_unsafe, target_changed) = let
-  (* Cache check: if .sats is newer than .bats source AND target hasn't changed,
-     skip preprocessing *)
-  val fresh = (if is_newer(sats_bv, src_bv) then ~target_changed else false): bool
+  (* Cache check: if .dats is newer than .bats source AND target hasn't changed,
+     skip preprocessing. (The .dats is written on every emission; the .sats
+     only when it changes.) *)
+  val fresh = (if is_newer(dats_bv, src_bv) then ~target_changed else false): bool
 in
   if fresh then 0
   else let
@@ -63,13 +64,18 @@ in
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = $A.free<byte>($A.thaw<byte>(fz_src))
-      (* Write .sats *)
-      var sb : $B.builder_v = $B.create()
+      (* Write .sats, unless it holds these bytes already: every module that
+         staloads it is rebuilt when it changes (touch_sats_stamp) *)
       val @(fz_s, bv_s) = $A.freeze<byte>(sats_arr)
-      val () = copy_to_builder_v(bv_s, 0, sats_len, 524288, sb)
+      val r1 = (if file_has_bytes(sats_bv, bv_s, sats_len) then 0
+        else let
+          var sb : $B.builder_v = $B.create()
+          val () = copy_to_builder_v(bv_s, 0, sats_len, 524288, sb)
+          val r = write_file_from_builder(sats_bv, 524288, sb)
+          val () = touch_sats_stamp()
+        in r end): int
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
-      val r1 = write_file_from_builder(sats_bv, 524288, sb)
       (* Write .dats - prepend self-staload *)
       var db : $B.builder_v = $B.create()
       val bn_start = find_basename_start(sats_bv, 0, 524288, ~1)
@@ -162,7 +168,7 @@ in case+ dr of
                 val () = bput_v(fi, "/")
                 val () = copy_to_builder_v(bv_e, 0, el, 256, fi)
                 val () = put_char_v(fi, 0)
-              in freshness_check_bv(fo, fi) end
+              in c_fresh_bv(fo, fi) end
               val rc = (if fresh then 0 else run_patsopt(ph, phlen, bv_o, ol, bv_i, il)): int
               val () = ()
               val () = $A.drop<byte>(fz_o, bv_o)
@@ -1747,7 +1753,7 @@ in
                                     val () = copy_to_builder_v(bv_de, 0, dlen, 256, ib)
                                     val () = bput_v(ib, "/src/lib.dats")
                                     val () = put_char_v(ib, 0)
-                                  in (if freshness_check_bv(ob, ib) then 1 else 0): int end
+                                  in (if c_fresh_bv(ob, ib) then 1 else 0): int end
                                   val () = (if pats_fresh > 0 then ()
                                   else let
                                   var po_b : $B.builder_v = $B.create()
@@ -1819,7 +1825,7 @@ in
                                                     val () = bput_v(fi, "/src/")
                                                     val () = copy_to_builder_v(bv_d3, 0, dl3, 256, fi)
                                                     val () = put_char_v(fi, 0)
-                                                  in (if freshness_check_bv(fo, fi) then 1 else 0): int end
+                                                  in (if c_fresh_bv(fo, fi) then 1 else 0): int end
                                                   val () = (if pf > 0 then ()
                                                   else let
                                                     var eo : $B.builder_v = $B.create()
@@ -1901,7 +1907,7 @@ in
                                     val () = bput_v(fi, "build/src/")
                                     val () = copy_to_builder_v(bv_dpsm, 0, dl_psm, 256, fi)
                                     val () = put_char_v(fi, 0)
-                                  in (if freshness_check_bv(fo, fi) then 1 else 0): int end
+                                  in (if c_fresh_bv(fo, fi) then 1 else 0): int end
                                   val () = (if pf_sm > 0 then ()
                                   else let
                                     var eo_sm : $B.builder_v = $B.create()
@@ -1948,7 +1954,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 256, ib)
                       val () = bput_v(ib, ".dats")
                       val () = put_char_v(ib, 0)
-                    in (if freshness_check_bv(ob, ib) then 1 else 0): int end
+                    in (if c_fresh_bv(ob, ib) then 1 else 0): int end
                     val () = (if bin_pats_fresh > 0 then ()
                     else let
                     var po_b : $B.builder_v = $B.create()
@@ -1984,7 +1990,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 256, ib)
                       val () = bput_v(ib, ".dats")
                       val () = put_char_v(ib, 0)
-                    in (if freshness_check_bv(ob, ib) then 1 else 0): int end
+                    in (if c_fresh_bv(ob, ib) then 1 else 0): int end
                     val () = (if ent_pats_fresh > 0 then ()
                     else let
                     var eo_b : $B.builder_v = $B.create()

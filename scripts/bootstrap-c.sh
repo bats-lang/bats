@@ -23,6 +23,9 @@ trap 'rm -rf "$TMP"' EXIT
 "$BATS" build --to-c "$TMP/c" --repository "$REPO" >/dev/null
 
 find "$TMP/c" -name '*.o' -exec rm -f {} +
+# The build's .sats change stamp is there only when this build wrote a
+# .sats, so it depends on the cache, not on the sources
+rm -f "$TMP/c/.sats_changed"
 
 esc() { printf '%s\n' "$1" | sed -e 's/[]\/$*.^[|]/\\&/g'; }
 root_re=$(esc "$ROOT/")
