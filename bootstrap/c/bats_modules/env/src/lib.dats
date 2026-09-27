@@ -138,8 +138,12 @@ static int _env_args(void *vbuf, int max_len) {
 
 
 
-(* As get, with a NUL-terminated name. The value's length (copied to
-   buf[0, k), truncated to max_len), or none when the variable is unset. *)
+(* As get, with the name in an array of name_len bytes: the name is
+   its bytes up to its first NUL, or all of them when it has none
+   (getenv is handed a NUL-terminated copy, never the array itself).
+   The value's length (copied to buf[0, k), truncated to max_len), or
+   none when the variable is unset. *)
+
 
 
 
@@ -182,11 +186,24 @@ in
   else $R.none()
 end
 
-implement get_cstr {ln}{nn}{l}{n} (name, buf, max_len) = let
+(* Copies src[i, n) to dst[i, n). *)
+fun _copy_from
+  {ls,ld:agz}{n,m:nat | n <= m}{i:nat | i <= n} .<n - i>.
+  (src: !$A.arr(byte, ls, n), dst: !$A.arr(byte, ld, m), n: int n, i: int i)
+  : void =
+  if i < n then let
+    val () = $A.set<byte>(dst, i, $A.get<byte>(src, i))
+  in _copy_from(src, dst, n, i + 1) end
+
+implement get_cstr {ln}{nn}{l}{n} (name, name_len, buf, max_len) = let
+  val cname = $A.alloc<byte>(name_len + 1)
+  val () = _copy_from(name, cname, name_len, 0)
+  val () = $A.write_byte(cname, name_len, 0)
   val len =  $extfcall([k:int | k <= n] int k, "_env_getenv",
-    $UNSAFE.castvwtp1{ptr}(name),
+    $UNSAFE.castvwtp1{ptr}(cname),
     $UNSAFE.castvwtp1{ptr}(buf),
     max_len) 
+  val () = $A.free<byte>(cname)
 in
   if len >= 0 then $R.some(len)
   else $R.none()

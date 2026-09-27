@@ -27,10 +27,14 @@ fn get
 
 
 
+
+
+
 fn get_cstr
-  {ln:agz}{nn:pos}
+  {ln:agz}{nn:pos | nn < 1048576}
   {l:agz}{n:pos}
-  (name: !$A.arr(byte, ln, nn), buf: !$A.arr(byte, l, n), max_len: int n)
+  (name: !$A.arr(byte, ln, nn), name_len: int nn,
+   buf: !$A.arr(byte, l, n), max_len: int n)
   : $R.option([k:nat | k <= n] int k)
 
 
@@ -50,6 +54,19 @@ fn cwd_read
 
 
 fn stderr_is_terminal (): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

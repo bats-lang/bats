@@ -171,6 +171,16 @@ fun text_get
 
 
 
+fun text_lit
+  {n:nat}
+  (s: string n)
+  : text(n)
+
+
+
+
+
+
 datavtype text_result(n:int) =
   | {n:int} text_ok(n) of (text(n))
   | {n:int} text_fail(n) of ()
@@ -309,6 +319,10 @@ arena_destroy
   {la:agz}{max,used:nat}
   (ar: arena(a, la, max, used, 0))
   : void
+
+
+
+
 
 
 
