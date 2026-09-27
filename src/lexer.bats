@@ -815,6 +815,29 @@ fun find_end_kw {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
           $AR.eq_int_int(at(src, pos + 1, max), 123) then
     find_end_kw(src, lex_extcode_inner(src, adv(pos, 2, max), src_len, max),
                 src_len, max, depth)
+  (* A keyword in a comment, a string or a char literal is text *)
+  else if $AR.eq_int_int(at(src, pos, max), 40) &&
+          $AR.eq_int_int(at(src, pos + 1, max), 42) then
+    find_end_kw(src, lex_ml_comment_inner(src, adv(pos, 2, max), src_len, max, 1),
+                src_len, max, depth)
+  else if $AR.eq_int_int(at(src, pos, max), 47) &&
+          $AR.eq_int_int(at(src, pos + 1, max), 42) then
+    find_end_kw(src, lex_c_comment_inner(src, adv(pos, 2, max), src_len, max),
+                src_len, max, depth)
+  else if $AR.eq_int_int(at(src, pos, max), 47) &&
+          $AR.eq_int_int(at(src, pos + 1, max), 47) then
+    find_end_kw(src, skip_to_eol(src, adv(pos, 2, max), src_len, max),
+                src_len, max, depth)
+  else if $AR.eq_int_int(at(src, pos, max), 34) then
+    find_end_kw(src, lex_string_inner(src, pos + 1, src_len, max), src_len, max, depth)
+  (* 'x' and '\x' are char literals; any other ' (x', '(, '[) is not *)
+  else if $AR.eq_int_int(at(src, pos, max), 39) then
+    (if $AR.eq_int_int(at(src, pos + 1, max), 92) &&
+        $AR.eq_int_int(at(src, pos + 3, max), 39) then
+       find_end_kw(src, adv(pos, 4, max), src_len, max, depth)
+     else if $AR.eq_int_int(at(src, pos + 2, max), 39) then
+       find_end_kw(src, adv(pos, 3, max), src_len, max, depth)
+     else find_end_kw(src, pos + 1, src_len, max, depth))
   else if looking_at_end(src, pos, max) then
     (if depth <= 1 then pos
      else find_end_kw(src, adv(pos, 3, max), src_len, max, depth - 1))

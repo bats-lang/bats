@@ -6,7 +6,8 @@
 #    (preprocess_all with check_mode) does, while bats build leaves them
 #    out;
 #  * a block closes at its own end, not at the first end of a let inside
-#    it (the Rust bats closed it there);
+#    it (the Rust bats closed it there), and a keyword in a comment or a
+#    string is not one;
 #  * a bad $UNITTEST.run target list, or a block with no end, is an
 #    error with Rust's message.
 # A nested #target block keeps its code (it was dropped).
@@ -54,6 +55,17 @@ fn test_one (): bool = let
 in x = 1 end
 fn test_two (): bool = one() + one() = 2
 end'
+# a let or begin in a comment, an end in a string, a '"' char, do not count
+body=$(cat <<'B'
+$UNITTEST.run begin
+(* a let, and a begin, in a comment *)
+// begin
+fn test_s (): bool = let val s = "the end" in true end
+fn test_c (): bool = '"' = '"'
+end
+B
+)
+accept "$body"
 reject "empty target list in \$UNITTEST.run()" '$UNITTEST.run() begin
 fn test_x (): bool = true
 end'
