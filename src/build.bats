@@ -30,14 +30,42 @@ staload "closure.sats"
 
 implement preprocess_one
   (src_bv, sats_bv, dats_bv, build_target, is_unsafe, target_changed) = let
-  (* Cache check: if .dats is newer than .bats source AND target hasn't changed,
-     skip preprocessing. (The .dats is written on every emission; the .sats
-     only when it changes.) *)
-  val fresh = (if is_newer(dats_bv, src_bv) then ~target_changed else false): bool
+  (* Cache check: the .dats is fresh when the source still has the sha256
+     it was emitted from (kept in <dats>.src) and the target is the same.
+     An mtime cannot tell: a relocked dependency's files keep their
+     archive's mtimes, older than the .dats emitted from the files they
+     replace. (The .dats is written on every emission; the .sats only when
+     it changes.) *)
+  var hb : $B.builder_v = $B.create()
+  val hashed = put_file_sha256(src_bv, hb)
+  var sb : $B.builder_v = $B.create()
+  val de0 = find_null_bv_from(dats_bv, 0, 524288)
+  val () = copy_to_builder_v(dats_bv, 0, de0, 524288, sb)
+  val () = bput_v(sb, ".src")
+  val () = put_char_v(sb, 0)
+  val @(sa, _) = $B.to_arr(sb)
+  val @(fz_sa, bv_sa) = $A.freeze<byte>(sa)
+  val dats_there = (case+ $F.file_mtime(dats_bv, 524288) of
+    | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+  val @(ha, hlen) = $B.to_arr(hb)
+  val @(fz_ha, bv_ha) = $A.freeze<byte>(ha)
+  val fresh = (if target_changed then false
+    else if ~hashed then false
+    else if ~dats_there then false
+    else file_has_bytes(bv_sa, bv_ha, hlen)): bool
+  (* The hash, for <dats>.src once the .dats is written *)
+  var hs0 : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv_ha, 0, hlen, 524288, hs0)
+  val hs = hs0
+  val () = $A.drop<byte>(fz_ha, bv_ha)
+  val () = $A.free<byte>($A.thaw<byte>(fz_ha))
 in
-  if fresh then 0
+  if fresh then let
+    val () = $B.builder_free(hs)
+    val () = $A.drop<byte>(fz_sa, bv_sa)
+    val () = $A.free<byte>($A.thaw<byte>(fz_sa))
+  in 0 end
   else case+ read_whole(src_bv, 524288) of
-  | ~whole_err(_) => ~1
   | ~whole_ok(ar, piece, m, nbytes) => let
       val @(fz_src, bv_src) = $A.freeze<byte>(piece)
       val xs = lex_spans(bv_src, nbytes, m)
@@ -82,10 +110,25 @@ in
       val _ = write_file_from_builder(bv_pa, 524288, nb)
       val () = $A.drop<byte>(fz_pa, bv_pa)
       val () = $A.free<byte>($A.thaw<byte>(fz_pa))
-    in
-      if safety_errors > 0 then safety_errors
-      else if r1 = 0 then (if r2 = 0 then 0 else ~1) else ~1
-    end
+      val rc = (if safety_errors > 0 then safety_errors
+        else if r1 = 0 then (if r2 = 0 then 0 else ~1) else ~1): int
+      (* <dats>.src: the source's hash when the emission succeeded, else
+         empty, so that a failed emission is never fresh *)
+      val () = (if rc = 0 then let
+          val _ = write_file_from_builder(bv_sa, 524288, hs)
+        in end
+        else let
+          val () = $B.builder_free(hs)
+          val _ = write_file_from_builder(bv_sa, 524288, $B.create())
+        in end): void
+      val () = $A.drop<byte>(fz_sa, bv_sa)
+      val () = $A.free<byte>($A.thaw<byte>(fz_sa))
+    in rc end
+  | ~whole_err(_) => let
+      val () = $B.builder_free(hs)
+      val () = $A.drop<byte>(fz_sa, bv_sa)
+      val () = $A.free<byte>($A.thaw<byte>(fz_sa))
+    in ~1 end
 end
 
 (* ============================================================
