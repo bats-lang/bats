@@ -10,31 +10,20 @@
 staload "helpers.sats"
 staload "lexer.sats"
 
-(* Compute line number from byte offset by counting newlines *)
-fn _byte_to_line {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): int = let
-  fun count {l2:agz}{n2:pos}{fuel:nat} .<fuel>.
-    (src: !$A.borrow(byte, l2, n2), max: int n2,
-     i: pos_t, limit: pos_t, line: int, fuel: int fuel): int =
-    if fuel <= 0 then line
-    else if i >= limit then line
-    else if $AR.eq_int_int(peek(src, i, max), 10)
-    then count(src, max, i + 1, limit, line + 1, fuel - 1)
-    else count(src, max, i + 1, limit, line, fuel - 1)
-in count(src, max, 0, pos, 1, max) end
+(* The line of position pos: 1 plus the newlines of src[i, pos) *)
+fun _byte_to_line {l:agz}{n:pos}{i,p:nat | i <= p; p <= n} .<p - i>.
+  (src: !$A.borrow(byte, l, n), i: int i, pos: int p, line: int): int =
+  if i >= pos then line
+  else if byte2int0($A.read<byte>(src, i)) = 10 then _byte_to_line(src, i + 1, pos, line + 1)
+  else _byte_to_line(src, i + 1, pos, line)
 
-(* Compute column from byte offset by finding last newline before pos *)
-fn _byte_to_col {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): int = let
-  fun scan {l2:agz}{n2:pos}{fuel:nat} .<fuel>.
-    (src: !$A.borrow(byte, l2, n2), max: int n2,
-     i: pos_t, fuel: int fuel): int =
-    if fuel <= 0 then pos + 1
-    else if i < 0 then pos + 1
-    else if $AR.eq_int_int(peek(src, i, max), 10)
-    then pos - i
-    else scan(src, max, i - 1, fuel - 1)
-in scan(src, max, pos - 1, max) end
+(* The column of position pos, looking back from i (< pos) for the
+   newline before it *)
+fun _byte_to_col {l:agz}{n:pos}{i:int | i >= ~1}{p:nat | i < p; p <= n} .<i + 1>.
+  (src: !$A.borrow(byte, l, n), i: int i, pos: int p): int =
+  if i < 0 then pos + 1
+  else if byte2int0($A.read<byte>(src, i)) = 10 then pos - i
+  else _byte_to_col(src, i - 1, pos)
 
 (* ============================================================
    Emitter: read span records
@@ -95,18 +84,17 @@ val g_main0_renamed = ref<bool>(false)
 
 (* The first "implement main0" in src[p, e) that is code on its own:
    no identifier byte right before or after it. ~1 when there is none. *)
-fun find_main0 {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), p: pos_t, e: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then ~1
-  else if p + 15 > e then ~1
+fun find_main0 {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int e, max: int n): pos_t =
+  if p + 15 > e then ~1
   else let
     var c = @[char][15]('i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't', ' ', 'm', 'a', 'i', 'n', '0')
     val hit = lit_at(src, p, max, c, 15)
-    val before_ok = (if p <= 0 then true else ~is_ident_byte(peek(src, p - 1, max))): bool
-    val after_ok = ~is_ident_byte(peek(src, p + 15, max))
+    val before_ok = (if p = 0 then true else ~is_ident_byte(byte2int0($A.read<byte>(src, p - 1)))): bool
+    val after_ok = (if p + 15 >= max then true else ~is_ident_byte(byte2int0($A.read<byte>(src, p + 15)))): bool
   in
     if hit && before_ok && after_ok then p
-    else find_main0(src, p + 1, e, max, fuel - 1)
+    else find_main0(src, p + 1, e, max)
   end
 
 fn emit_range_v {ls:agz}{ns:pos}
@@ -122,12 +110,12 @@ fn put_main0_decl(out: !$B.builder_v >> $B.builder_v): void =
 (* Code in [ss, se) to the dats, with the file's first "implement main0"
    renamed to "implement __BATS_main0". Comment and literal spans (aux1 = 1)
    never come here, so their text is never renamed. *)
-fn emit_code_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), ss: pos_t, se: pos_t,
+fn emit_code_v {ls:agz}{ns:pos}{ss,se:nat | ss <= se; se <= ns}
+  (src: !$A.borrow(byte, ls, ns), ss: int ss, se: int se,
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   if !g_main0_renamed then emit_range_v(src, ss, se, max, out)
   else let
-    val p = find_main0(src, ss, se, max, max)
+    val p = find_main0(src, ss, se, max)
   in
     if p < 0 then emit_range_v(src, ss, se, max, out)
     else let
@@ -267,7 +255,7 @@ fn span_range {n:int} (sp: !span(n)): @(spos(n), spos(n)) =
 fn emit_rejected {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, ss: spos(ns), se: spos(ns),
    sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void = let
-  val () = println! ("error: unsafe construct at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " outside $UNSAFE block")
+  val () = println! ("error: unsafe construct at line ", _byte_to_line(src, 0, ss, 1), " column ", _byte_to_col(src, ss - 1, ss), " outside $UNSAFE block")
   val () = emit_blanks_v(src, ss, se, src_max, dats)
 in emit_blanks_v(src, ss, se, src_max, sats) end
 
@@ -312,7 +300,7 @@ fn emit_code_span {ls:agz}{ns:pos}
       val () = emit_blanks_v(src, ce, se, src_max, sats)
     in 0 end
     else let
-      val () = println! ("error: $UNSAFE block at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " not allowed in safe package")
+      val () = println! ("error: $UNSAFE block at line ", _byte_to_line(src, 0, ss, 1), " column ", _byte_to_col(src, ss - 1, ss), " not allowed in safe package")
       val () = emit_blanks_v(src, ss, se, src_max, dats)
       val () = emit_blanks_v(src, ss, se, src_max, sats)
     in 1 end

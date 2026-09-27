@@ -569,29 +569,9 @@ fn bput_v {sn:nat}
 
 
 
-fn bput_int_v(out: !$B.builder_v >> $B.builder_v, v: int): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 fn put_int_v(out: !$B.builder_v >> $B.builder_v, v: int): void
+
 
 
 
@@ -802,49 +782,7 @@ fn split_null_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
 
 
 
-
 fn split_spaces_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1010,10 +948,6 @@ fn run_cmd_capture {le:agz}{lo:agz}
 
 
 fn prerr_builder (b: $B.builder_v): void
-
-
-
-
 
 
 
