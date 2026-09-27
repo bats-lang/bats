@@ -36,11 +36,11 @@ staload "lexer.sats"
    ============================================================ *)
 
 (* The identifiers a body mentions: src[s, e) each *)
-datavtype occs(int) =
-  | occs_nil(0) of ()
-  | {k:nat}{s,e:nat | s <= e; e <= RMAX} occs_cons(k + 1) of (int s, int e, occs(k))
+datavtype occs(n:int, int) =
+  | occs_nil(n, 0) of ()
+  | {k:nat}{s,e:nat | s <= e; e <= n} occs_cons(n, k + 1) of (int s, int e, occs(n, k))
 
-fun occs_free {k:nat} .<k>. (xs: occs(k)): void =
+fun occs_free {n:int}{k:nat} .<k>. (xs: occs(n, k)): void =
   case+ xs of
   | ~occs_nil() => ()
   | ~occs_cons(_, _, tl) => occs_free(tl)
@@ -49,14 +49,14 @@ fun occs_free {k:nat} .<k>. (xs: occs(k)): void =
    an implement; a fn has one of its own, a fun group one for all its
    members), its keyword's start, its name src[ns, ne) and its body's
    identifiers *)
-datavtype def =
-  | {k:nat} Def of (bool, int, spos(RMAX), spos(RMAX), spos(RMAX), occs(k))
+datavtype def(n:int) =
+  | {k:nat} Def(n) of (bool, int, spos(n), spos(n), spos(n), occs(n, k))
 
-datavtype defs(int) =
-  | defs_nil(0) of ()
-  | {k:nat} defs_cons(k + 1) of (def, defs(k))
+datavtype defs(n:int, int) =
+  | defs_nil(n, 0) of ()
+  | {k:nat} defs_cons(n, k + 1) of (def(n), defs(n, k))
 
-fun defs_free {k:nat} .<k>. (xs: defs(k)): void =
+fun defs_free {n:int}{k:nat} .<k>. (xs: defs(n, k)): void =
   case+ xs of
   | ~defs_nil() => ()
   | ~defs_cons(d, tl) => let
@@ -85,28 +85,30 @@ fun dnames_free {m:nat} .<m>. (xs: dnames(m)): void =
 (* The definition being read, if any: its name, whether it is an
    implement, its group, its keyword's start, its name's range and the
    identifiers of its body so far *)
-datavtype cur =
-  | cur_none of ()
+datavtype cur(n:int) =
+  | cur_none(n) of ()
   | {l:agz}{k:nat | k <= 256}{j:nat}
-    cur_def of ($A.arr(byte, l, 256), int k, bool, int, spos(RMAX), spos(RMAX), spos(RMAX), occs(j))
+    cur_def(n) of ($A.arr(byte, l, 256), int k, bool, int, spos(n), spos(n), spos(n), occs(n, j))
 
 (* What the scan has found: the current file's definitions (k), the
    names of every definition so far (m; m - k of them in earlier
    files), the definition being read, and the last group *)
-datavtype found(int, int) =
-  | {k,m:nat} Found(k, m) of (defs(k), int k, dnames(m), int m, cur, int)
+datavtype found(n:int, int, int) =
+  | {k,m:nat} Found(n, k, m) of (defs(n, k), int k, dnames(m), int m, cur(n), int)
 
 (* The package's files: each one's path (its offset in the file list),
-   its source and its definitions; t of them in all *)
+   its source (read whole, read_whole) and its definitions; t of them in
+   all *)
 datavtype pfiles(int, int) =
+  | {la,l:agz}{n:pos}{k,t,f:nat} pfiles_cons(t + k, f + 1) of
+      (spos(RMAX), $A.arena(byte, la, n, n, 1), $A.arrx(byte, l, n, la), int n, int k, defs(n, k), pfiles(t, f))
   | pfiles_nil(0, 0) of ()
-  | {l:agz}{k,t,f:nat} pfiles_cons(t + k, f + 1) of (spos(RMAX), $A.arr(byte, l, RMAX), int k, defs(k), pfiles(t, f))
 
 fun pfiles_free {t,f:nat} .<f>. (xs: pfiles(t, f)): void =
   case+ xs of
   | ~pfiles_nil() => ()
-  | ~pfiles_cons(_, a, _, ds, tl) => let
-      val () = $A.free<byte>(a)
+  | ~pfiles_cons(_, ar, a, _, _, ds, tl) => let
+      val () = whole_free(ar, a)
       val () = defs_free(ds)
     in pfiles_free(tl) end
 
@@ -118,12 +120,12 @@ fn is_ident_start (b: int): bool =
   (b >= 97 && b <= 122) || (b >= 65 && b <= 90) || b = 95
 
 (* The byte at p *)
-fn rb {l:agz}{p:nat | p < RMAX} (bv: !$A.borrow(byte, l, RMAX), p: int p): int =
+fn rb {n:pos}{l:agz}{p:nat | p < n} (bv: !$A.borrow(byte, l, n), p: int p): int =
   byte2int0($A.read<byte>(bv, p))
 
 (* The end of the identifier that starts at p, within [p, e) *)
-fun ident_end {l:agz}{p,e:nat | p <= e; e <= RMAX} .<e - p>.
-  (bv: !$A.borrow(byte, l, RMAX), p: int p, e: int e): [q:nat | p <= q; q <= e] int q =
+fun ident_end {n:pos}{l:agz}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e): [q:nat | p <= q; q <= e] int q =
   if p >= e then p
   else let
     val c = rb(bv, p)
@@ -134,8 +136,8 @@ fun ident_end {l:agz}{p,e:nat | p <= e; e <= RMAX} .<e - p>.
   end
 
 (* The first position of [p, e) past blanks and {...} groups *)
-fun skip_head {l:agz}{p,e:nat | p <= e; e <= RMAX} .<e - p>.
-  (bv: !$A.borrow(byte, l, RMAX), p: int p, e: int e, depth: int): [q:nat | p <= q; q <= e] int q =
+fun skip_head {n:pos}{l:agz}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, depth: int): [q:nat | p <= q; q <= e] int q =
   if p >= e then p
   else let
     val c = rb(bv, p)
@@ -148,32 +150,32 @@ fun skip_head {l:agz}{p,e:nat | p <= e; e <= RMAX} .<e - p>.
   end
 
 (* src[p, q) is the keyword kw[0, m) *)
-fn word_is {l:agz}{p,q:nat | p <= q; q <= RMAX}{m:pos | m <= 16}
-  (bv: !$A.borrow(byte, l, RMAX), p: int p, q: int q, kw: &(@[char][m]), m: int m): bool =
-  if q - p <> m then false else lit_at(bv, p, RMAX, kw, m)
+fn word_is {n:pos}{l:agz}{p,q:nat | p <= q; q <= n}{m:pos | m <= 16}
+  (bv: !$A.borrow(byte, l, n), sn: int n, p: int p, q: int q, kw: &(@[char][m]), m: int m): bool =
+  if q - p <> m then false else lit_at(bv, p, sn, kw, m)
 
 (* What the word src[p, q) at the start of a line begins: 1 an
    implement, 2 a fn, 3 a fun or fnx (a new group), 4 an and (the
    group goes on), 0 none *)
-fn def_kind {l:agz}{p,q:nat | p <= q; q <= RMAX}
-  (bv: !$A.borrow(byte, l, RMAX), p: int p, q: int q): int = let
+fn def_kind {n:pos}{l:agz}{p,q:nat | p <= q; q <= n}
+  (bv: !$A.borrow(byte, l, n), sn: int n, p: int p, q: int q): int = let
   var impl_c = @[char][9]('i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't')
   var fn_c = @[char][2]('f', 'n')
   var fun_c = @[char][3]('f', 'u', 'n')
   var fnx_c = @[char][3]('f', 'n', 'x')
   var and_c = @[char][3]('a', 'n', 'd')
 in
-  if word_is(bv, p, q, impl_c, 9) then 1
-  else if word_is(bv, p, q, fn_c, 2) then 2
-  else if word_is(bv, p, q, fun_c, 3) then 3
-  else if word_is(bv, p, q, fnx_c, 3) then 3
-  else if word_is(bv, p, q, and_c, 3) then 4
+  if word_is(bv, sn, p, q, impl_c, 9) then 1
+  else if word_is(bv, sn, p, q, fn_c, 2) then 2
+  else if word_is(bv, sn, p, q, fun_c, 3) then 3
+  else if word_is(bv, sn, p, q, fnx_c, 3) then 3
+  else if word_is(bv, sn, p, q, and_c, 3) then 4
   else 0
 end
 
 (* src[s, e) (its first 256 bytes) into a name array *)
-fun copy_name {l,la:agz}{s,e:nat | s <= e; e <= RMAX}{i:nat | i <= 256} .<256 - i>.
-  (bv: !$A.borrow(byte, l, RMAX), s: int s, e: int e, a: !$A.arr(byte, la, 256), i: int i)
+fun copy_name {n:pos}{l,la:agz}{s,e:nat | s <= e; e <= n}{i:nat | i <= 256} .<256 - i>.
+  (bv: !$A.borrow(byte, l, n), s: int s, e: int e, a: !$A.arr(byte, la, 256), i: int i)
   : [k:nat | k <= 256] int k =
   if i >= 256 then i
   else if s + i >= e then i
@@ -182,8 +184,8 @@ fun copy_name {l,la:agz}{s,e:nat | s <= e; e <= RMAX}{i:nat | i <= 256} .<256 - 
   in copy_name(bv, s, e, a, i + 1) end
 
 (* The definition being read, if any, added to the found ones *)
-fn end_def {k,m:nat} (st: found(k, m), fi: spos(RMAX))
-  : [k2,m2:nat | m2 - m == k2 - k] found(k2, m2) = let
+fn end_def {n:pos}{k,m:nat} (st: found(n, k, m), fi: spos(RMAX))
+  : [k2,m2:nat | m2 - m == k2 - k] found(n, k2, m2) = let
   val+ ~Found(ds, kd, nm, km, c, g) = st
 in
   case+ c of
@@ -194,17 +196,17 @@ in
 end
 
 (* The end of the name that starts at p (p itself when none does) *)
-fn name_end {l:agz}{p,e:nat | p <= e; e <= RMAX}
-  (bv: !$A.borrow(byte, l, RMAX), p: int p, e: int e): [r:nat | p <= r; r <= e] int r =
+fn name_end {n:pos}{l:agz}{p,e:nat | p <= e; e <= n}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e): [r:nat | p <= r; r <= e] int r =
   if p >= e then p
   else if is_ident_start(rb(bv, p)) then ident_end(bv, p, e)
   else p
 
 (* A new definition of kind kd (def_kind) whose keyword is src[kw, q),
    its name after it within [q, e); the position after the name *)
-fn start_def {l:agz}{k,m:nat}{kw,q,e:nat | kw <= q; q <= e; e <= RMAX}
-  (bv: !$A.borrow(byte, l, RMAX), st: found(k, m), kind: int, kw: int kw, q: int q, e: int e, fi: spos(RMAX))
-  : [k2,m2:nat | m2 - m == k2 - k] @(found(k2, m2), [r:nat | q <= r; r <= e] int r) = let
+fn start_def {n:pos}{l:agz}{k,m:nat}{kw,q,e:nat | kw <= q; q <= e; e <= n}
+  (bv: !$A.borrow(byte, l, n), st: found(n, k, m), kind: int, kw: int kw, q: int q, e: int e, fi: spos(RMAX))
+  : [k2,m2:nat | m2 - m == k2 - k] @(found(n, k2, m2), [r:nat | q <= r; r <= e] int r) = let
   val st1 = end_def(st, fi)
   val+ ~Found(ds, kd, nm, km, c, g) = st1
   val () = (case+ c of
@@ -223,7 +225,7 @@ in
 end
 
 (* The identifier src[s, e) added to the body being read *)
-fn add_occ {k,m:nat}{s,e:nat | s <= e; e <= RMAX} (st: found(k, m), s: int s, e: int e): found(k, m) = let
+fn add_occ {n:pos}{k,m:nat}{s,e:nat | s <= e; e <= n} (st: found(n, k, m), s: int s, e: int e): found(n, k, m) = let
   val+ ~Found(ds, kd, nm, km, c, g) = st
 in
   case+ c of
@@ -233,55 +235,55 @@ in
 end
 
 (* Whether p starts a line *)
-fn line_start {l:agz}{p:nat | p < RMAX} (bv: !$A.borrow(byte, l, RMAX), p: int p): bool =
+fn line_start {n:pos}{l:agz}{p:nat | p < n} (bv: !$A.borrow(byte, l, n), p: int p): bool =
   if p = 0 then true else rb(bv, p - 1) = 10
 
 (* Whether the byte before p makes an identifier at p part of something
    else: an identifier, a number, a field (.x) or a qualified name ($X) *)
-fn joined {l:agz}{p:nat | p < RMAX} (bv: !$A.borrow(byte, l, RMAX), p: int p): bool =
+fn joined {n:pos}{l:agz}{p:nat | p < n} (bv: !$A.borrow(byte, l, n), p: int p): bool =
   if p = 0 then false
   else let
     val c = rb(bv, p - 1)
   in is_ident_byte(c) || c = 39 || c = 46 || c = 36 end
 
 (* The definitions and identifiers of the code src[p, e) *)
-fun scan_code {l:agz}{k,m:nat}{p,e:nat | p <= e; e <= RMAX} .<e - p>.
-  (bv: !$A.borrow(byte, l, RMAX), p: int p, e: int e, st: found(k, m), fi: spos(RMAX))
-  : [k2,m2:nat | m2 - m == k2 - k] found(k2, m2) =
+fun scan_code {n:pos}{l:agz}{k,m:nat}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (bv: !$A.borrow(byte, l, n), sn: int n, p: int p, e: int e, st: found(n, k, m), fi: spos(RMAX))
+  : [k2,m2:nat | m2 - m == k2 - k] found(n, k2, m2) =
   if p >= e then st
-  else if ~is_ident_start(rb(bv, p)) then scan_code(bv, p + 1, e, st, fi)
-  else if joined(bv, p) then scan_code(bv, ident_end(bv, p + 1, e), e, st, fi)
+  else if ~is_ident_start(rb(bv, p)) then scan_code(bv, sn, p + 1, e, st, fi)
+  else if joined(bv, p) then scan_code(bv, sn, ident_end(bv, p + 1, e), e, st, fi)
   else let
     val q = ident_end(bv, p + 1, e)
-    val kind = (if line_start(bv, p) then def_kind(bv, p, q) else 0): int
+    val kind = (if line_start(bv, p) then def_kind(bv, sn, p, q) else 0): int
   in
     if kind > 0 then let
       val @(st2, r) = start_def(bv, st, kind, p, q, e, fi)
-    in scan_code(bv, r, e, st2, fi) end
-    else scan_code(bv, q, e, add_occ(st, p, q), fi)
+    in scan_code(bv, sn, r, e, st2, fi) end
+    else scan_code(bv, sn, q, e, add_occ(st, p, q), fi)
   end
 
 (* The definitions and identifiers of the span sp: code is read, a
    comment, string, qualified name or construct is not, and anything
    else (a #pub declaration, a #use, a $UNSAFE block, a block's begin or
    end) ends the definition being read *)
-fn scan_span {l:agz}{k,m:nat}
-  (bv: !$A.borrow(byte, l, RMAX), sp: !span(RMAX), st: found(k, m), fi: spos(RMAX))
-  : [k2,m2:nat | m2 - m == k2 - k] found(k2, m2) =
+fn scan_span {n:pos}{l:agz}{k,m:nat}
+  (bv: !$A.borrow(byte, l, n), sn: int n, sp: !span(n), st: found(n, k, m), fi: spos(RMAX))
+  : [k2,m2:nat | m2 - m == k2 - k] found(n, k2, m2) =
   case+ sp of
   | SPass(s, e, verbatim) =>
-    if verbatim then st else scan_code(bv, s, e, st, fi)
+    if verbatim then st else scan_code(bv, sn, s, e, st, fi)
   | SQual(_, _, _, _, _, _) => st
   | SConstruct(_, _) => st
   | SLexError(_, _, _, _, _) => st
   | _ => end_def(st, fi)
 
-fun scan_spans {l:agz}{k,m:nat}{j:nat} .<j>.
-  (bv: !$A.borrow(byte, l, RMAX), xs: !spans(RMAX, j), st: found(k, m), fi: spos(RMAX))
-  : [k2,m2:nat | m2 - m == k2 - k] found(k2, m2) =
+fun scan_spans {n:pos}{l:agz}{k,m:nat}{j:nat} .<j>.
+  (bv: !$A.borrow(byte, l, n), sn: int n, xs: !spans(n, j), st: found(n, k, m), fi: spos(RMAX))
+  : [k2,m2:nat | m2 - m == k2 - k] found(n, k2, m2) =
   case+ xs of
   | spans_nil() => st
-  | spans_cons(sp, tl) => scan_spans(bv, tl, scan_span(bv, sp, st, fi), fi)
+  | spans_cons(sp, tl) => scan_spans(bv, sn, tl, scan_span(bv, sn, sp, st, fi), fi)
 
 (* ============================================================
    The package's files
@@ -295,17 +297,13 @@ datavtype pkg =
 (* pk with the file at the NUL-terminated path p (at fi in the file
    list) *)
 fn add_file {lp:agz} (p: !$A.borrow(byte, lp, RMAX), fi: spos(RMAX), pk: pkg): pkg =
-  case+ $F.file_open(p, RMAX, 0, 0) of
-  | ~$R.err(_) => pk
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(RMAX)
-      val n = (case+ $F.file_read(fd, buf, RMAX) of
-        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= RMAX] int k
-      val () = $R.discard<int><int>($F.file_close(fd))
+  case+ read_whole(p, RMAX) of
+  | ~whole_err(_) => pk
+  | ~whole_ok(ar, piece, sn, n) => let
       val+ ~Pkg(pf, nm, t, g) = pk
-      val @(fz, bv) = $A.freeze<byte>(buf)
-      val xs = lex_spans(bv, n, RMAX)
-      val st = scan_spans(bv, xs, Found(defs_nil(), 0, nm, t, cur_none(), g), fi)
+      val @(fz, bv) = $A.freeze<byte>(piece)
+      val xs = lex_spans(bv, n, sn)
+      val st = scan_spans(bv, sn, xs, Found(defs_nil(), 0, nm, t, cur_none(), g), fi)
       val st2 = end_def(st, fi)
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz, bv)
@@ -315,7 +313,7 @@ fn add_file {lp:agz} (p: !$A.borrow(byte, lp, RMAX), fi: spos(RMAX), pk: pkg): p
         | ~cur_def(a, _, _, _, _, _, _, oc) => let
             val () = $A.free<byte>(a)
           in occs_free(oc) end): void
-    in Pkg(pfiles_cons(fi, $A.thaw<byte>(fz), kd, ds, pf), nm2, t2, g2) end
+    in Pkg(pfiles_cons(fi, ar, $A.thaw<byte>(fz), sn, kd, ds, pf), nm2, t2, g2) end
 
 (* pk with each file of the NUL-separated list files[off, len) *)
 fun add_files {lf:agz}{off:nat | off <= RMAX} .<RMAX - off>.
@@ -366,8 +364,8 @@ fun nodes_free {N:int}{c:nat} .<c>. (xs: nodes(N, c)): void =
     in nodes_free(tl) end
 
 (* Whether a[0, k) and src[s, s + k) hold the same bytes *)
-fun same_bytes {la,l:agz}{k:nat | k <= 256}{s:nat | s + k <= RMAX}{i:nat | i <= k} .<k - i>.
-  (a: !$A.arr(byte, la, 256), k: int k, src: !$A.arr(byte, l, RMAX), s: int s, i: int i): bool =
+fun same_bytes {la,l:agz}{o:addr}{n:int}{k:nat | k <= 256}{s:nat | s + k <= n}{i:nat | i <= k} .<k - i>.
+  (a: !$A.arr(byte, la, 256), k: int k, src: !$A.arrx(byte, l, n, o), s: int s, i: int i): bool =
   if i >= k then true
   else if byte2int0($A.get<byte>(a, i)) = byte2int0($A.get<byte>(src, s + i)) then
     same_bytes(a, k, src, s, i + 1)
@@ -375,8 +373,8 @@ fun same_bytes {la,l:agz}{k:nat | k <= 256}{s:nat | s + k <= RMAX}{i:nat | i <= 
 
 (* Whether the identifier src[s, e) of file fi, in a body of group grp,
    calls the definition d *)
-fn calls {l:agz}{s,e:nat | s <= e; e <= RMAX}
-  (d: !dname, src: !$A.arr(byte, l, RMAX), s: int s, e: int e, fi: spos(RMAX), grp: int): bool = let
+fn calls {l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}
+  (d: !dname, src: !$A.arrx(byte, l, n, o), s: int s, e: int e, fi: spos(RMAX), grp: int): bool = let
   val+ @DName(a, k, global, dfi, dgrp) = d
   val len = (if e - s > 256 then 256 else e - s): [n:nat | n <= 256; n <= e - s] int n
   val r = (if ~global && dfi <> fi then false
@@ -388,8 +386,8 @@ in r end
 
 (* The definitions of nm (ids i, i + 1, ...) that src[s, e) calls,
    added to acc *)
-fun calls_of {N:int}{m,i:nat | i + m == N}{l:agz}{s,e:nat | s <= e; e <= RMAX}{c:nat} .<m>.
-  (nm: !dnames(m), i: int i, src: !$A.arr(byte, l, RMAX), s: int s, e: int e,
+fun calls_of {N:int}{m,i:nat | i + m == N}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat} .<m>.
+  (nm: !dnames(m), i: int i, src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
    fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) =
   case+ nm of
   | dnames_nil() => acc
@@ -398,8 +396,8 @@ fun calls_of {N:int}{m,i:nat | i + m == N}{l:agz}{s,e:nat | s <= e; e <= RMAX}{c
     else calls_of(tl, i + 1, src, s, e, fi, grp, acc)
 
 (* What the identifiers oc of a body in file fi, group grp, call *)
-fun occs_calls {N:nat}{l:agz}{j:nat}{c:nat} .<j>.
-  (oc: !occs(j), nm: !dnames(N), src: !$A.arr(byte, l, RMAX), fi: spos(RMAX), grp: int, acc: elist(N, c))
+fun occs_calls {N:nat}{l:agz}{o:addr}{n:int}{j:nat}{c:nat} .<j>.
+  (oc: !occs(n, j), nm: !dnames(N), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), grp: int, acc: elist(N, c))
   : [c2:nat] elist(N, c2) =
   case+ oc of
   | occs_nil() => acc
@@ -408,8 +406,8 @@ fun occs_calls {N:nat}{l:agz}{j:nat}{c:nat} .<j>.
 
 (* The nodes of the definitions ds of file fi (ids i, i + 1, ...),
    added to acc *)
-fun def_nodes {N:nat}{k,i:nat | i + k <= N}{l:agz}{c:nat} .<k>.
-  (ds: !defs(k), i: int i, nm: !dnames(N), src: !$A.arr(byte, l, RMAX), fi: spos(RMAX), acc: nodes(N, c))
+fun def_nodes {N:nat}{k,i:nat | i + k <= N}{l:agz}{o:addr}{n:int}{c:nat} .<k>.
+  (ds: !defs(n, k), i: int i, nm: !dnames(N), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), acc: nodes(N, c))
   : [c2:nat] nodes(N, c2) =
   case+ ds of
   | defs_nil() => acc
@@ -425,7 +423,7 @@ fun file_nodes {N:nat}{t,f,i:nat | i + t == N}{c:nat} .<f>.
   (pf: !pfiles(t, f), i: int i, nm: !dnames(N), acc: nodes(N, c)): [c2:nat] nodes(N, c2) =
   case+ pf of
   | pfiles_nil() => acc
-  | pfiles_cons(fi, src, k, ds, tl) => let
+  | pfiles_cons(fi, _, src, _, k, ds, tl) => let
       val acc2 = def_nodes(ds, i, nm, src, fi, acc)
     in file_nodes(tl, i + k, nm, acc2) end
 
@@ -586,8 +584,8 @@ implement cycle_hits_free {k} (xs) = let
 in loop(xs) end
 
 (* The hits among the definitions ds of file fi (ids i, i + 1, ...) *)
-fun def_hits {N:nat}{k,i:nat | i + k <= N}{lc:agz}{h:nat} .<k>.
-  (ds: !defs(k), i: int i, fi: spos(RMAX), cyc: !$A.arr(bool, lc, N), acc: cycle_hits(h))
+fun def_hits {N:nat}{n:int}{k,i:nat | i + k <= N}{lc:agz}{h:nat} .<k>.
+  (ds: !defs(n, k), i: int i, fi: spos(RMAX), cyc: !$A.arr(bool, lc, N), acc: cycle_hits(h))
   : [h2:nat] cycle_hits(h2) =
   case+ ds of
   | defs_nil() => acc
@@ -602,7 +600,7 @@ fun file_hits {N:nat}{t,f,i:nat | i + t == N}{lc:agz}{h:nat} .<f>.
   (pf: !pfiles(t, f), i: int i, cyc: !$A.arr(bool, lc, N), acc: cycle_hits(h)): [h2:nat] cycle_hits(h2) =
   case+ pf of
   | pfiles_nil() => acc
-  | pfiles_cons(fi, _, k, ds, tl) => file_hits(tl, i + k, cyc, def_hits(ds, i, fi, cyc, acc))
+  | pfiles_cons(fi, _, _, _, k, ds, tl) => file_hits(tl, i + k, cyc, def_hits(ds, i, fi, cyc, acc))
 
 (* The hits of the N definitions of pf, whose names are nm *)
 fn graph_hits {N:pos | N <= 1048576}{f:nat}

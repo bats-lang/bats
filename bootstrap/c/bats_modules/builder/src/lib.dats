@@ -62,6 +62,43 @@ macdef _BUILDER_CAP = 524288
 
 
 (* ============================================================
+   Rope: text of any length, in builder-sized chunks
+   ============================================================ *)
+
+(* k chunks, each an array of BUILDER_CAP bytes whose first n hold text *)
+
+
+
+
+
+(* Text of any length: the chunks already filled (newest first) and the
+   one being filled. Each chunk is one BUILDER_CAP allocation, so no
+   allocation grows with the text. *)
+
+
+
+
+
+(* Appends the byte v *)
+
+
+(* Appends s *)
+
+
+(* Appends src[start, stop) *)
+
+
+
+(* Appends b's text *)
+
+
+(* The rope's chunks, oldest first: its text is their texts in order *)
+
+
+(* Frees a list of chunks *)
+
+
+(* ============================================================
    Implementations
    ============================================================ *)
 
@@ -138,6 +175,67 @@ implement bput(b, s) = let
     in loop(b, s, slen, i + 1) end
   val slen = g1u2i(string1_length(s))
 in loop(b, s, slen, 0) end
+
+implement rope_create () = Rope(rope_nil(), create())
+
+implement rope_put (r, v) = let
+  val+ @Rope(cs, cur) = r
+  val n = length(cur)
+in
+  if n < _BUILDER_CAP then let
+    val () = put_byte(cur, v)
+    prval () = fold@(r)
+  in end
+  else let
+    val @(arr, len) = to_arr(cur)
+    val () = cs := rope_cons(arr, len, cs)
+    val () = cur := create()
+    val () = put_byte(cur, v)
+    prval () = fold@(r)
+  in end
+end
+
+implement rope_bput (r, s) = let
+  fun loop {sn:nat}{i:nat | i <= sn} .<sn - i>.
+    (r: !rope, s: string sn, slen: int sn, i: int i): void =
+    if i >= slen then ()
+    else let
+      val () = rope_put(r, $AR.byte_of_char(string_get_at(s, i)))
+    in loop(r, s, slen, i + 1) end
+in loop(r, s, g1u2i(string1_length(s)), 0) end
+
+implement rope_copy {l}{n}{i,j} (r, src, start, stop) = let
+  fun loop {k:nat | i <= k; k <= j} .<j - k>.
+    (r: !rope, src: !$A.borrow(byte, l, n), k: int k): void =
+    if k >= stop then ()
+    else let
+      val () = rope_put(r, $AR.low_byte(byte2int0($A.read<byte>(src, k))))
+    in loop(r, src, k + 1) end
+in loop(r, src, start) end
+
+implement rope_append (r, b) = let
+  val @(arr, len) = to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(arr)
+  val () = rope_copy(r, bv, 0, len)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+implement rope_chunks (r) = let
+  val+ ~Rope(cs, cur) = r
+  val @(arr, len) = to_arr(cur)
+  (* cs is newest first: reversed onto acc, it comes out oldest first *)
+  fun rev {a,b:nat} .<a>. (cs: rope_list(a), acc: rope_list(b)): rope_list(a + b) =
+    case+ cs of
+    | ~rope_nil() => acc
+    | ~rope_cons(x, n, tl) => rev(tl, rope_cons(x, n, acc))
+in rev(rope_cons(arr, len, cs), rope_nil()) end
+
+implement rope_list_free (cs) = let
+  fun loop {k:nat} .<k>. (cs: rope_list(k)): void =
+    case+ cs of
+    | ~rope_nil() => ()
+    | ~rope_cons(x, _, tl) => let val () = $A.free<byte>(x) in loop(tl) end
+in loop(cs) end
 
 (* ============================================================
    Static tests

@@ -65,6 +65,104 @@ fn bput {sn:nat}{n:nat | n + sn <= BUILDER_CAP}
 
 
 
+datavtype rope_list(int) =
+  | rope_nil(0)
+  | {k:nat}{lb:agz}{n:nat | n <= BUILDER_CAP}
+    rope_cons(k + 1) of ($A.arr(byte, lb, BUILDER_CAP), int n, rope_list(k))
+
+
+
+
+datavtype rope =
+  | {k:nat} Rope of (rope_list(k), builder_v)
+
+fun rope_create (): rope
+
+
+fun rope_put {v:nat | v < 256} (r: !rope, v: int v): void
+
+
+fun rope_bput {sn:nat} (r: !rope, s: string sn): void
+
+
+fun rope_copy {l:agz}{n:pos}{i,j:nat | i <= j; j <= n}
+  (r: !rope, src: !$A.borrow(byte, l, n), start: int i, stop: int j): void
+
+
+fun rope_append (r: !rope, b: builder_v): void
+
+
+fun rope_chunks (r: rope): [k:nat] rope_list(k)
+
+
+fun rope_list_free {k:nat} (cs: rope_list(k)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

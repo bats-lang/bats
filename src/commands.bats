@@ -28,19 +28,15 @@ staload "docs.sats"
    of them *)
 fn file_tests {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): int =
-  case+ $F.file_open(p, 524288, 0, 0) of
-  | ~$R.err(_) => 0
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(524288)
-      val n = (case+ $F.file_read(fd, buf, 524288) of
-        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
-      val () = $R.discard<int><int>($F.file_close(fd))
-      val @(fz_s, bv_s) = $A.freeze<byte>(buf)
-      val xs = lex_spans(bv_s, n, 524288)
-      val k = collect_tests(bv_s, 524288, xs, out)
+  case+ read_whole(p, 524288) of
+  | ~whole_err(_) => 0
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+      val xs = lex_spans(bv_s, n, m)
+      val k = collect_tests(bv_s, m, xs, out)
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_s, bv_s)
-      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = whole_free(ar, $A.thaw<byte>(fz_s))
     in k end
 
 (* Whether t[p, p + fl) is f[0, fl) *)

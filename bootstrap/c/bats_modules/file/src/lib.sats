@@ -65,8 +65,8 @@ fn file_open
 
 
 fn file_read
-  {l:agz}{n:pos}
-  (f: !fd, buf: !$A.arr(byte, l, n), len: int n): $R.result([k:nat | k <= n] int k, int)
+  {l:agz}{n:pos}{o:addr}
+  (f: !fd, buf: !$A.arrx(byte, l, n, o), len: int n): $R.result([k:nat | k <= n] int k, int)
 
 
 

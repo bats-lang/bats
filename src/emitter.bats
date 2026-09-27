@@ -30,24 +30,22 @@ fun _byte_to_col {l:agz}{n:pos}{i:int | i >= ~1}{p:nat | i < p; p <= n} .<i + 1>
    ============================================================ *)
 
 (* ============================================================
-   Emitter: copy source range to builder, count newlines
+   Emitter: copy source range to a rope, count newlines
    ============================================================ *)
 
-(* Copy bytes from source borrow to builder (put_char_v drops what does
-   not fit, leaving the builder full, which write_file_from_builder
-   refuses). *)
+(* Copy bytes from source borrow to a rope (text of any length) *)
 fun emit_range {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
   (src: !$A.borrow(byte, ls, ns), start: int s, end_pos: int e,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   if start >= end_pos then ()
   else let
-    val () = put_char_v(out, peek(src, start, max))
+    val () = rput(out, peek(src, start, max))
   in emit_range(src, start + 1, end_pos, max, out) end
 
 (* Copy bytes, transforming .bats" → .sats" for staload paths. *)
 fun emit_range_stald {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
   (src: !$A.borrow(byte, ls, ns), start: int s, end_pos: int e,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   if start >= end_pos then ()
   else let
     val b = peek(src, start, max)
@@ -59,17 +57,17 @@ fun emit_range_stald {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
       $AR.eq_int_int(peek(src, start + 3, max), 115) &&
       $AR.eq_int_int(peek(src, start + 4, max), 34)
     then 115 else b): int
-    val () = put_char_v(out, b_out)
+    val () = rput(out, b_out)
   in emit_range_stald(src, start + 1, end_pos, max, out) end
 
 (* The newlines of src[start, end_pos), so line numbers stay put *)
 fun emit_blanks {ls:agz}{ns:pos}{s,e:int} .<max(e - s, 0)>.
   (src: !$A.borrow(byte, ls, ns), start: int s, end_pos: int e,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   if start >= end_pos then ()
   else let
     val b = peek(src, start, max)
-    val () = (if $AR.eq_int_int(b, 10) then put_char_v(out, 10) else ())
+    val () = (if $AR.eq_int_int(b, 10) then rput(out, 10) else ())
   in emit_blanks(src, start + 1, end_pos, max, out) end
 
 (* Whether this file's "implement main0" has been renamed; set by
@@ -93,12 +91,12 @@ fun find_main0 {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
 
 fn emit_range_v {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   emit_range(src, start, end_pos, max, out)
 
 (* The sats declaration of the renamed entry point, when there is one *)
-fn put_main0_decl(out: !$B.builder_v >> $B.builder_v): void =
-  if !g_main0_renamed then bput_v(out, "\nfun __BATS_main0 (): void\n")
+fn put_main0_decl(out: !$B.rope): void =
+  if !g_main0_renamed then rbput(out, "\nfun __BATS_main0 (): void\n")
   else ()
 
 (* Code in [ss, se) to the dats, with the file's first "implement main0"
@@ -106,7 +104,7 @@ fn put_main0_decl(out: !$B.builder_v >> $B.builder_v): void =
    never come here, so their text is never renamed. *)
 fn emit_code_v {ls:agz}{ns:pos}{ss,se:nat | ss <= se; se <= ns}
   (src: !$A.borrow(byte, ls, ns), ss: int ss, se: int se,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   if !g_main0_renamed then emit_range_v(src, ss, se, max, out)
   else let
     val p = find_main0(src, ss, se, max)
@@ -114,19 +112,19 @@ fn emit_code_v {ls:agz}{ns:pos}{ss,se:nat | ss <= se; se <= ns}
     if p < 0 then emit_range_v(src, ss, se, max, out)
     else let
       val () = emit_range_v(src, ss, p, max, out)
-      val () = bput_v(out, "implement __BATS_main0")
+      val () = rbput(out, "implement __BATS_main0")
       val () = emit_range_v(src, p + 15, se, max, out)
     in !g_main0_renamed := true end
   end
 
 fn emit_range_stald_v {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   emit_range_stald(src, start, end_pos, max, out)
 
 fn emit_blanks_v {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
-   max: int ns, out: !$B.builder_v >> $B.builder_v): void =
+   max: int ns, out: !$B.rope): void =
   emit_blanks(src, start, end_pos, max, out)
 
 (* ============================================================
@@ -137,10 +135,10 @@ fn emit_blanks_v {ls:agz}{ns:pos}
 fn emit_qualified {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
    as0: spos(ns), ae: spos(ns), ms: spos(ns), me: spos(ns),
-   out: !$B.builder_v >> $B.builder_v): void = let
-  val () = put_char_v(out, 36)  (* $ *)
+   out: !$B.rope): void = let
+  val () = rput(out, 36)  (* $ *)
   val () = emit_range_v(src, as0, ae, src_max, out)
-  val () = put_char_v(out, 46)  (* . *)
+  val () = rput(out, 46)  (* . *)
 in emit_range_v(src, ms, me, src_max, out) end
 
 (* ============================================================
@@ -151,75 +149,75 @@ in emit_range_v(src, ms, me, src_max, out) end
 fn emit_dep_stld {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
    pkg_s: spos(ns), pkg_e: spos(ns),
-   out: !$B.builder_v >> $B.builder_v): void = let
+   out: !$B.rope): void = let
   (* staload " *)
-  val () = put_char_v(out, 115)
-  val () = put_char_v(out, 116)
-  val () = put_char_v(out, 97)
-  val () = put_char_v(out, 108)
-  val () = put_char_v(out, 111)
-  val () = put_char_v(out, 97)
-  val () = put_char_v(out, 100)
-  val () = put_char_v(out, 32)
-  val () = put_char_v(out, 34)
+  val () = rput(out, 115)
+  val () = rput(out, 116)
+  val () = rput(out, 97)
+  val () = rput(out, 108)
+  val () = rput(out, 111)
+  val () = rput(out, 97)
+  val () = rput(out, 100)
+  val () = rput(out, 32)
+  val () = rput(out, 34)
   (* package path *)
   val () = emit_range_v(src, pkg_s, pkg_e, src_max, out)
   (* /src/lib.dats"\n *)
-  val () = put_char_v(out, 47)   (* / *)
-  val () = put_char_v(out, 115)  (* s *)
-  val () = put_char_v(out, 114)  (* r *)
-  val () = put_char_v(out, 99)   (* c *)
-  val () = put_char_v(out, 47)   (* / *)
-  val () = put_char_v(out, 108)  (* l *)
-  val () = put_char_v(out, 105)  (* i *)
-  val () = put_char_v(out, 98)   (* b *)
-  val () = put_char_v(out, 46)   (* . *)
-  val () = put_char_v(out, 100)  (* d *)
-  val () = put_char_v(out, 97)   (* a *)
-  val () = put_char_v(out, 116)  (* t *)
-  val () = put_char_v(out, 115)  (* s *)
-  val () = put_char_v(out, 34)   (* " *)
-  val () = put_char_v(out, 10)   (* \n *)
+  val () = rput(out, 47)   (* / *)
+  val () = rput(out, 115)  (* s *)
+  val () = rput(out, 114)  (* r *)
+  val () = rput(out, 99)   (* c *)
+  val () = rput(out, 47)   (* / *)
+  val () = rput(out, 108)  (* l *)
+  val () = rput(out, 105)  (* i *)
+  val () = rput(out, 98)   (* b *)
+  val () = rput(out, 46)   (* . *)
+  val () = rput(out, 100)  (* d *)
+  val () = rput(out, 97)   (* a *)
+  val () = rput(out, 116)  (* t *)
+  val () = rput(out, 115)  (* s *)
+  val () = rput(out, 34)   (* " *)
+  val () = rput(out, 10)   (* \n *)
 in end
 
 (* Emit one staload line for .sats: staload ALIAS = "pkg/src/lib.sats" *)
 fn emit_dep_stld_sats {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
    pkg_s: spos(ns), pkg_e: spos(ns), alias_s: spos(ns), alias_e: spos(ns),
-   out: !$B.builder_v >> $B.builder_v): void = let
+   out: !$B.rope): void = let
   (* staload  *)
-  val () = put_char_v(out, 115)
-  val () = put_char_v(out, 116)
-  val () = put_char_v(out, 97)
-  val () = put_char_v(out, 108)
-  val () = put_char_v(out, 111)
-  val () = put_char_v(out, 97)
-  val () = put_char_v(out, 100)
-  val () = put_char_v(out, 32)
+  val () = rput(out, 115)
+  val () = rput(out, 116)
+  val () = rput(out, 97)
+  val () = rput(out, 108)
+  val () = rput(out, 111)
+  val () = rput(out, 97)
+  val () = rput(out, 100)
+  val () = rput(out, 32)
   (* ALIAS = " *)
   val () = emit_range_v(src, alias_s, alias_e, src_max, out)
-  val () = put_char_v(out, 32)   (* space *)
-  val () = put_char_v(out, 61)   (* = *)
-  val () = put_char_v(out, 32)   (* space *)
-  val () = put_char_v(out, 34)   (* " *)
+  val () = rput(out, 32)   (* space *)
+  val () = rput(out, 61)   (* = *)
+  val () = rput(out, 32)   (* space *)
+  val () = rput(out, 34)   (* " *)
   (* package path *)
   val () = emit_range_v(src, pkg_s, pkg_e, src_max, out)
   (* /src/lib.sats"\n *)
-  val () = put_char_v(out, 47)   (* / *)
-  val () = put_char_v(out, 115)  (* s *)
-  val () = put_char_v(out, 114)  (* r *)
-  val () = put_char_v(out, 99)   (* c *)
-  val () = put_char_v(out, 47)   (* / *)
-  val () = put_char_v(out, 108)  (* l *)
-  val () = put_char_v(out, 105)  (* i *)
-  val () = put_char_v(out, 98)   (* b *)
-  val () = put_char_v(out, 46)   (* . *)
-  val () = put_char_v(out, 115)  (* s *)
-  val () = put_char_v(out, 97)   (* a *)
-  val () = put_char_v(out, 116)  (* t *)
-  val () = put_char_v(out, 115)  (* s *)
-  val () = put_char_v(out, 34)   (* " *)
-  val () = put_char_v(out, 10)   (* \n *)
+  val () = rput(out, 47)   (* / *)
+  val () = rput(out, 115)  (* s *)
+  val () = rput(out, 114)  (* r *)
+  val () = rput(out, 99)   (* c *)
+  val () = rput(out, 47)   (* / *)
+  val () = rput(out, 108)  (* l *)
+  val () = rput(out, 105)  (* i *)
+  val () = rput(out, 98)   (* b *)
+  val () = rput(out, 46)   (* . *)
+  val () = rput(out, 115)  (* s *)
+  val () = rput(out, 97)   (* a *)
+  val () = rput(out, 116)  (* t *)
+  val () = rput(out, 115)  (* s *)
+  val () = rput(out, 34)   (* " *)
+  val () = rput(out, 10)   (* \n *)
 in end
 
 (* The target state inside a $UNITTEST block entered at target_state:
@@ -248,7 +246,7 @@ fn span_range {n:int} (sp: !span(n)): @(spos(n), spos(n)) =
 (* An unsafe construct outside $UNSAFE at ss: reported, blanked *)
 fn emit_rejected {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, ss: spos(ns), se: spos(ns),
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void = let
+   sats: !$B.rope, dats: !$B.rope): void = let
   val () = println! ("error: unsafe construct at line ", _byte_to_line(src, 0, ss, 1), " column ", _byte_to_col(src, ss - 1, ss), " outside $UNSAFE block")
   val () = emit_blanks_v(src, ss, se, src_max, dats)
 in emit_blanks_v(src, ss, se, src_max, sats) end
@@ -257,7 +255,7 @@ in emit_blanks_v(src, ss, se, src_max, sats) end
    it adds *)
 fn emit_code_span {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
+   sats: !$B.rope, dats: !$B.rope,
    is_unsafe: int): int =
   case+ sp of
   | SPass(ss, se, verbatim) => let
@@ -339,7 +337,7 @@ fn is_marker {n:int} (sp: !span(n)): bool =
 (* sp blanked in sats and dats *)
 fn emit_blank_span {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void = let
+   sats: !$B.rope, dats: !$B.rope): void = let
   val @(ss, se) = span_range(sp)
   val () = emit_blanks_v(src, ss, se, src_max, sats)
 in emit_blanks_v(src, ss, se, src_max, dats) end
@@ -348,7 +346,7 @@ in emit_blanks_v(src, ss, se, src_max, dats) end
    is a block marker; the number of errors it adds *)
 fn emit_one {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
+   sats: !$B.rope, dats: !$B.rope,
    is_unsafe: int, ts: int): int =
   if ts > 0 then let
     val () = emit_blank_span(src, src_max, sp, sats, dats)
@@ -362,7 +360,7 @@ fn emit_one {ls:agz}{ns:pos}
    for the sats (with its alias) or the dats; 1 when there was one *)
 fn prelude_line {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
-   prelude: !$B.builder_v >> $B.builder_v, ts: int, for_sats: bool): int =
+   prelude: !$B.rope, ts: int, for_sats: bool): int =
   if ts > 0 then 0
   else case+ sp of
     | SUse(_, _, _, ps, pe, as0, ae) =>
@@ -378,7 +376,7 @@ fn prelude_line {ls:agz}{ns:pos}
    errors, added to errors. *)
 fun emit_spans {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
+   sats: !$B.rope, dats: !$B.rope,
    build_target: int, is_unsafe: int, errors: int, ts: int): int =
   case+ xs of
   | spans_nil() => errors
@@ -391,7 +389,7 @@ fun emit_spans {ls:agz}{ns:pos}{k:nat} .<k>.
    blanked block; the number of them *)
 fun build_prelude {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   prelude: !$B.builder_v >> $B.builder_v, build_target: int, ts: int): int =
+   prelude: !$B.rope, build_target: int, ts: int): int =
   case+ xs of
   | spans_nil() => 0
   | spans_cons(sp, tl) => let
@@ -402,7 +400,7 @@ fun build_prelude {ls:agz}{ns:pos}{k:nat} .<k>.
    not in a blanked block *)
 fun build_prelude_sats {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   prelude: !$B.builder_v >> $B.builder_v, build_target: int, ts: int): void =
+   prelude: !$B.rope, build_target: int, ts: int): void =
   case+ xs of
   | spans_nil() => ()
   | spans_cons(sp, tl) => let
@@ -523,41 +521,39 @@ implement collect_tests (src, src_max, xs, out) =
 (* "  if i = <k> then <name> ()\n  else " for each entry of t[p, e) *)
 fun put_dispatch {l:agz}{p:nat | p <= 524288} .<524288 - p>.
   (t: !$A.borrow(byte, l, 524288), p: int p, e: int, k: int,
-   dats: !$B.builder_v >> $B.builder_v): void =
+   dats: !$B.rope): void =
   if p >= e then ()
   else if p >= 524288 then ()
   else let
-    val ne = find_null_bv_from(t, p + 1, 524288)
-    val () = bput_v(dats, "if i = ")
-    val () = put_int_v(dats, k)
-    val () = bput_v(dats, " then ")
-    val () = copy_to_builder_v(t, p + 1, ne, 524288, dats)
-    val () = bput_v(dats, " ()\n  else ")
-    val nx = ne + 1
+    val ne = $S.find_null_bv_at(t, p + 1, 524288)
+    val () = rbput(dats, "if i = ")
+    val () = rput_int(dats, k)
+    val () = rbput(dats, " then ")
+    val () = $B.rope_copy(dats, t, p + 1, ne)
+    val () = rbput(dats, " ()\n  else ")
   in
-    if nx <= p then ()
-    else if nx > 524288 then ()
-    else put_dispatch(t, nx, e, k + 1, dats)
+    if ne >= 524288 then ()
+    else put_dispatch(t, ne + 1, e, k + 1, dats)
   end
 
 (* When there are k > 0 tests t[0, tlen): the declaration of
    __bats_test to sats, its implementation to dats *)
 fn put_dispatch_decl {l:agz}
   (k: int, t: !$A.borrow(byte, l, 524288), tlen: int,
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void =
+   sats: !$B.rope, dats: !$B.rope): void =
   if k <= 0 then ()
   else let
-    val () = bput_v(sats, "\nfun __bats_test (i: int): bool\n")
-    val () = bput_v(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
+    val () = rbput(sats, "\nfun __bats_test (i: int): bool\n")
+    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
     val () = put_dispatch(t, 0, tlen, 0, dats)
-  in bput_v(dats, "false\n") end
+  in rbput(dats, "false\n") end
 
 (* In check and test mode, a module with tests declares
    __bats_test (i: int): bool, which runs its i-th test (in source
    order), for bats test's runner to call *)
 fn put_test_dispatch {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void =
+   sats: !$B.rope, dats: !$B.rope): void =
   if ~is_test_mode() then () else let
   var tb : $B.builder_v = $B.create()
   val k = collect_tests(src, src_max, xs, tb)
@@ -567,47 +563,22 @@ fn put_test_dispatch {ls:agz}{ns:pos}{k:nat}
   val () = $A.drop<byte>(fz_t, bv_t)
 in $A.free<byte>($A.thaw<byte>(fz_t)) end
 
-(* Top-level emit *)
+(* Top-level emit: the module's .sats text appended to sats, its .dats
+   text to dats (which holds its self-staload line); @(the lines of the
+   dats prelude, self-staload included, the number of errors) *)
 #pub fn do_emit {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   build_target: int, is_unsafe: int
-  ): @([la:agz] $A.arr(byte, la, 524288), int,
-      [lb:agz] $A.arr(byte, lb, 524288), int, int, int)
+   build_target: int, is_unsafe: int, sats: !$B.rope, dats: !$B.rope
+  ): @(int, int)
 
-implement do_emit (src, src_max, xs, build_target, is_unsafe) = let
-  var sats_b = $B.create()
-  var dats_b = $B.create()
-  var prelude_b = $B.create()
-  var sats_prelude_b = $B.create()
-
-  (* Build dats prelude: self-stld line is always 1 line *)
-  val dep_count = build_prelude(src, src_max, xs, prelude_b, build_target, 0)
-  val prelude_lines = dep_count + 1
-
-  (* Build sats prelude: staload ALIAS = "pkg/src/lib.sats" *)
-  val () = build_prelude_sats(src, src_max, xs, sats_prelude_b, build_target, 0)
-
-  (* Emit dats prelude *)
-  val @(pre_arr, pre_len) = $B.to_arr(prelude_b)
-  val @(fz_pre, bv_pre) = $A.freeze<byte>(pre_arr)
-  val () = emit_range_v(bv_pre, 0, pre_len, 524288, dats_b)
-  val () = $A.drop<byte>(fz_pre, bv_pre)
-  val () = $A.free<byte>($A.thaw<byte>(fz_pre))
-
-  (* Emit sats prelude *)
-  val @(spre_arr, spre_len) = $B.to_arr(sats_prelude_b)
-  val @(fz_spre, bv_spre) = $A.freeze<byte>(spre_arr)
-  val () = emit_range_v(bv_spre, 0, spre_len, 524288, sats_b)
-  val () = $A.drop<byte>(fz_spre, bv_spre)
-  val () = $A.free<byte>($A.thaw<byte>(fz_spre))
-
+implement do_emit (src, src_max, xs, build_target, is_unsafe, sats, dats) = let
+  (* The staload of each dependency, to the dats (after its self-staload
+     line) and, with its alias, to the sats *)
+  val dep_count = build_prelude(src, src_max, xs, dats, build_target, 0)
+  val () = build_prelude_sats(src, src_max, xs, sats, build_target, 0)
   val () = !g_main0_renamed := false
-  (* Emit all spans *)
-  val emit_errors = emit_spans(src, src_max, xs, sats_b, dats_b, build_target, is_unsafe, 0, 0)
-
+  val emit_errors = emit_spans(src, src_max, xs, sats, dats, build_target, is_unsafe, 0, 0)
   (* The entry point was renamed in the dats (emit_code_v); declare it *)
-  val () = put_main0_decl(sats_b)
-  val () = put_test_dispatch(src, src_max, xs, sats_b, dats_b)
-  val @(sats_arr, sats_len) = $B.to_arr(sats_b)
-  val @(dats_arr, dats_len) = $B.to_arr(dats_b)
-in @(sats_arr, sats_len, dats_arr, dats_len, prelude_lines, emit_errors) end
+  val () = put_main0_decl(sats)
+  val () = put_test_dispatch(src, src_max, xs, sats, dats)
+in @(dep_count + 1, emit_errors) end

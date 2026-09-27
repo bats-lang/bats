@@ -397,7 +397,7 @@ in
   else $R.err(~rawfd)
 end
 
-implement file_read {l}{n} (f, buf, len) = let
+implement file_read {l}{n}{o} (f, buf, len) = let
   val+ @fd_mk(rawfd) = f
   val r =  $extfcall([k:int | k <= n] int k, "_file_read", rawfd,
     $UNSAFE.castvwtp1{ptr}(buf), len) 

@@ -2010,37 +2010,7 @@ staload "recursion.sats"
 
 
 
-
-
-
-
 fn project_kind (): int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

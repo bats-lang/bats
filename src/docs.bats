@@ -157,25 +157,17 @@ fun put_entries {ls:agz}{ns:pos}{k:nat} .<k>.
 (* The entries of the .bats file at path, appended to out; the number of
    them, or ~1 when the file cannot be read. *)
 fn put_file_entries {lp:agz}
-  (path: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): int = let
-  val or = $F.file_open(path, 524288, 0, 0)
-in
-  case+ or of
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(524288)
-      val rr = $F.file_read(fd, buf, 524288)
-      val @(nbytes, ok) = (case+ rr of
-        | ~$R.ok(n) => @(n, true) | ~$R.err(_) => @(0, false)): @([k:nat | k <= 524288] int k, bool)
-      val () = $R.discard<int><int>($F.file_close(fd))
-      val @(fz_src, bv_src) = $A.freeze<byte>(buf)
-      val xs = lex_spans(bv_src, nbytes, 524288)
-      val n = put_entries(bv_src, 524288, xs, out, 0, 0)
+  (path: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): int =
+  case+ read_whole(path, 524288) of
+  | ~whole_ok(ar, piece, m, nbytes) => let
+      val @(fz_src, bv_src) = $A.freeze<byte>(piece)
+      val xs = lex_spans(bv_src, nbytes, m)
+      val n = put_entries(bv_src, m, xs, out, 0, 0)
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
-      val () = $A.free<byte>($A.thaw<byte>(fz_src))
-    in if ok then n else ~1 end
-  | ~$R.err(_) => ~1
-end
+      val () = whole_free(ar, $A.thaw<byte>(fz_src))
+    in n end
+  | ~whole_err(_) => ~1
 
 (* ============================================================
    Finding the src .bats files, in the Rust bats's order

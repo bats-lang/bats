@@ -1420,6 +1420,159 @@ fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
 
 
 
+
+
+
+
+fn rput(r: !$B.rope, v: int): void
+
+
+
+fn rbput {sn:nat} (r: !$B.rope, s: string sn): void
+
+
+
+
+fn rput_int(r: !$B.rope, v: int): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn file_has_rope {lp:agz}{k:nat}
+  (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn write_file_from_rope {lp:agz}{k:nat}
+  (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datavtype whole_file =
+  | {la,l:agz}{m:pos}{n:nat | n < m}
+    whole_ok of ($A.arena(byte, la, m, m, 1), $A.arrx(byte, l, m, la), int m, int n)
+  | whole_err of int
+
+
+
+
+fn read_whole {lp:agz}{np:pos | np < 1048576}
+  (path: !$A.borrow(byte, lp, np), plen: int np): whole_file
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn whole_free {la,l:agz}{m:pos}
+  (ar: $A.arena(byte, la, m, m, 1), p: $A.arrx(byte, l, m, la)): void
+
+
+
+
+
 fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 
