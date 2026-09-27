@@ -71,6 +71,8 @@ Every recursion needs a termination metric outside `$UNSAFE`, as a `fun` does: `
 
 A `$UNITTEST` block is lexed as code, like a `#target` block (a begin span, its contents' spans, an end span), so an unsafe construct in it is rejected as anywhere else; the Rust bats copied a block's text verbatim, unchecked. A block closes at its own `end`, not at the first `end` inside it (a `let`'s), where the Rust bats closed it. A `#target` block inside a `#target` block keeps its code; it was dropped (`tests/unittest-blocks`).
 
+`bats test` runs the tests. The Rust bats's runner called each test from a generated entry that staloads only the modules' `.sats`, where a test (defined in its block, in the `.dats`) is not declared, so it could never compile. In check and test mode each module with tests now declares `__bats_test (i: int): bool` in its `.sats` and implements it in its `.dats`, dispatching to its i-th test; `bats test` builds a runner binary in `build/_bats_test` (the package's `src/*.bats` and one binary whose `main0` calls the selected tests) and runs it, with the Rust bats's `running N native test(s)`, `  PASS <name>`/`  FAIL <name>`, `error: native test failed` and `all tests passed`. A test is `fn <name> (): bool` in a `$UNITTEST.run` block (a test `fun` would need a metric); tests in `src/bin/` are an error (the runner links `src/`'s modules, not the binaries), and so are selected wasm tests, until the wasm runner is there (`tests/test-command`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement

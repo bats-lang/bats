@@ -638,6 +638,16 @@ end
 
 (* One past the last '/' in bv before the NUL at or after pos (last + 1
    when there is none) *)
+(* b's bytes appended to out; consumes b *)
+
+
+implement append_builder (out, b) = let
+  val @(ba, bl) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(ba)
+  val () = copy_to_builder_v(bv, 0, bl, 524288, out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
 
 
 

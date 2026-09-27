@@ -625,6 +625,16 @@ end
 
 (* One past the last '/' in bv before the NUL at or after pos (last + 1
    when there is none) *)
+(* b's bytes appended to out; consumes b *)
+#pub fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void
+
+implement append_builder (out, b) = let
+  val @(ba, bl) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(ba)
+  val () = copy_to_builder_v(bv, 0, bl, 524288, out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
 #pub fn find_basename_start {l:agz}{n:pos}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
    last: pos_t): pos_t
 

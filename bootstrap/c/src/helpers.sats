@@ -637,6 +637,16 @@ fn copy_to_builder_v {l:agz}{n:pos}
 
 
 
+
+fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void
+
+
+
+
+
+
+
+
 fn find_basename_start {l:agz}{n:pos}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
    last: pos_t): pos_t
 

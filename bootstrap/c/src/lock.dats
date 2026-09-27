@@ -662,14 +662,6 @@ in kind end
 
 #define VMAX 524288
 
-(* b's bytes appended to out; consumes b *)
-fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void = let
-  val @(ba, bl) = $B.to_arr(b)
-  val @(fz, bv) = $A.freeze<byte>(ba)
-  val () = copy_to_builder_v(bv, 0, bl, VMAX, out)
-  val () = $A.drop<byte>(fz, bv)
-in $A.free<byte>($A.thaw<byte>(fz)) end
-
 (* The number of decimal digits of n > 0 *)
 fun digits {f:nat} .<f>. (n: int, f: int f): int =
   if f <= 0 then 1 else if n < 10 then 1 else 1 + digits(n / 10, f - 1)
