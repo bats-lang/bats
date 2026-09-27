@@ -35,7 +35,7 @@ CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result 
 ## Architecture
 
 Entry point: `src/bin/bats.bats`
-Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`
+Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`
 
 Dependencies: argparse, array, arith, builder, env, file, path, process, result, sha256, str, toml
 
@@ -73,11 +73,13 @@ A `$UNITTEST` block is lexed as code, like a `#target` block (a begin span, its 
 
 `bats test` runs the tests. The Rust bats's runner called each test from a generated entry that staloads only the modules' `.sats`, where a test (defined in its block, in the `.dats`) is not declared, so it could never compile. In check and test mode each module with tests now declares `__bats_test (i: int): bool` in its `.sats` and implements it in its `.dats`, dispatching to its i-th test; `bats test` builds a runner binary in `build/_bats_test` (the package's `src/*.bats` and one binary whose `main0` calls the selected tests) and runs it, with the Rust bats's `running N native test(s)`, `  PASS <name>`/`  FAIL <name>`, `error: native test failed` and `all tests passed`. A test is `fn <name> (): bool` in a `$UNITTEST.run` block (a test `fun` would need a metric); tests in `src/bin/` are an error (the runner links `src/`'s modules, not the binaries), and so are selected wasm tests, until the wasm runner is there (`tests/test-command`).
 
+An `implement` on a call cycle is rejected: one that calls itself, directly or through other implements or top-level functions, in the package or in a dependency. A metric cannot be given to a function declared in a `.sats`, so ATS never checks an implement's recursion for termination; the Rust bats let it through. The calls are read from the sources (`src/recursion.bats`): a definition calls every definition its body names unqualified, an implement's name being visible in every file and another definition's only in its own, and the calls within a `fun` group, which its metric checks, are left out (`tests/implement-recursion`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement
 
-Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun`, `fnx`, a `fun` group's `and` member or `fix` without termination metric, `val rec`, `#pub prfun`/`prfn` without `primplement`) are detected by the lexer (`SConstruct`, or a rejected `SPub`) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
+Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun`, `fnx`, a `fun` group's `and` member or `fix` without termination metric, `val rec`, `#pub prfun`/`prfn` without `primplement`) are detected by the lexer (`SConstruct`, or a rejected `SPub`) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`), as is the rule that no `implement` is on a call cycle (`src/recursion.bats`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
 
 ## Problem Resolution
 

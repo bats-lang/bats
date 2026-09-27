@@ -26,6 +26,7 @@ staload T = "toml/src/lib.sats"
 staload "helpers.sats"
 staload "lexer.sats"
 staload "docs.sats"
+staload "recursion.sats"
 
 
 
@@ -2725,7 +2726,123 @@ fn project_kind (): int
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn validate_project (): bool
+
+
 
 
 

@@ -27,6 +27,7 @@ staload T = "toml/src/lib.sats"
 staload "helpers.sats"
 staload "lexer.sats"
 staload "docs.sats"
+staload "recursion.sats"
 
 (* ============================================================
    Package names
@@ -2710,6 +2711,120 @@ fn check_dir {sn:nat} (dir: string sn, mode: int, own_unsafe: bool,
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
 in c end
 
+(* ============================================================
+   Recursion through an implement (recursion.bats)
+   ============================================================ *)
+
+(* cnt, with the error for the implement src[ns, ne) of the file at
+   files[fi, NUL), whose keyword is at kw, added to errs *)
+fn add_cycle_error {lf:agz}
+  (files: !$A.borrow(byte, lf, VMAX), fi: pos_t, kw: pos_t, ns: pos_t, ne: pos_t,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val e = find_null_bv_from(files, fi, VMAX)
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(files, fi, e + 1, VMAX, pb)
+  val pl = e - fi
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val c = (case+ $F.file_open(bv_p, VMAX, 0, 0) of
+    | ~$R.err(_) => cnt
+    | ~$R.ok(fd) => let
+        val buf = $A.alloc<byte>(VMAX)
+        val n = (case+ $F.file_read(fd, buf, VMAX) of
+          | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= VMAX] int k
+        val () = $R.discard<int><int>($F.file_close(fd))
+        val @(fz_s, bv_s) = $A.freeze<byte>(buf)
+        var m : $B.builder_v = $B.create()
+        val () = bput_v(m, "'implement ")
+        val () = copy_to_builder_v(bv_s, ns, ne, VMAX, m)
+        val () = bput_v(m, "' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'")
+        var fy : $B.builder_v = $B.create()
+        val () = put_fancy(bv_p, base_start(bv_p, pl, VMAX), pl, bv_s, n, kw, m, fy)
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      in add_error(cnt, fy, errs) end): int
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in c end
+
+fun add_cycle_errors {lf:agz}{k:nat} .<k>.
+  (files: !$A.borrow(byte, lf, VMAX), hs: cycle_hits(k), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ hs of
+  | ~cycle_hits_nil() => cnt
+  | ~cycle_hits_cons(fi, kw, ns, ne, tl) => let
+      val c = add_cycle_error(files, fi, kw, ns, ne, cnt, errs)
+    in add_cycle_errors(files, tl, c, errs) end
+
+(* cnt, with the errors for the implements on a call cycle among the
+   files files[off, len) of one package *)
+fn check_cycles {lf:agz}{off:nat | off <= VMAX}
+  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val+ ~Cycles(hs, too_many) = implement_cycles(files, off, len)
+  val c = add_cycle_errors(files, hs, cnt, errs)
+in
+  if ~too_many then c
+  else let
+    var m : $B.builder_v = $B.create()
+    val () = bput_v(m, "more than 1048576 definitions in one package; they are not checked for recursion through an implement")
+  in add_error(c, m, errs) end
+end
+
+(* Whether files[a, a + k) and files[b, b + k) hold the same bytes *)
+fun same_prefix {lf:agz}{i:nat | i <= VMAX} .<VMAX - i>.
+  (files: !$A.borrow(byte, lf, VMAX), a: pos_t, b: pos_t, i: int i, k: int): bool =
+  if i >= k then true
+  else if i >= VMAX then true
+  else if peek(files, a + i, VMAX) <> peek(files, b + i, VMAX) then false
+  else same_prefix(files, a, b, i + 1, k)
+
+(* The first entry of files[o, len) that does not start with
+   files[g, g + k) (or len) *)
+fun group_end {lf:agz}{o:nat | o <= VMAX} .<VMAX - o>.
+  (files: !$A.borrow(byte, lf, VMAX), o: int o, len: int, g: pos_t, k: int): [r:int | r >= o] int r =
+  if o >= len then o
+  else if ~same_prefix(files, g, o, 0, k) then o
+  else let
+    val e = $S.find_null_bv_at(files, o, VMAX)
+  in if e >= VMAX then e else group_end(files, e + 1, len, g, k) end
+
+(* cnt, with the recursion errors of each dependency package among the
+   files files[off, len) of ./bats_modules, each package's files being
+   together in the list *)
+fun check_dep_cycles {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
+  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if off >= len then cnt
+  else let
+    val e = $S.find_null_bv_at(files, off, VMAX)
+    var pb : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(files, off, e + 1, VMAX, pb)
+    val @(pa, _) = $B.to_arr(pb)
+    val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+    (* ./bats_modules/<pkg>/: the package's root and the slash after it *)
+    val k = dep_root_end(bv_p, 15, e - off, VMAX) + 1
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in
+    if e >= VMAX then check_cycles(files, off, e, cnt, errs)
+    else let
+      val ge = group_end(files, e + 1, len, off, k)
+      val c = check_cycles(files, off, ge, cnt, errs)
+    in
+      if ge >= VMAX then c else check_dep_cycles(files, ge, len, c, errs)
+    end
+  end
+
+(* The recursion errors of the package's own files (dep = false) or of
+   each dependency (the files under ./bats_modules) *)
+fn check_dir_cycles {sn:nat} (dir: string sn, dep: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  var d : $B.builder_v = $B.create()
+  val () = bput_v(d, dir)
+  val @(fa, flen) = sorted_bats_files(d)
+  val @(fz_f, bv_f) = $A.freeze<byte>(fa)
+  val c = (if dep then check_dep_cycles(bv_f, 0, flen, cnt, errs) else check_cycles(bv_f, 0, flen, cnt, errs)): int
+  val () = $A.drop<byte>(fz_f, bv_f)
+  val () = $A.free<byte>($A.thaw<byte>(fz_f))
+in c end
+
 (* Prints cnt errors as Rust does; whether there were none *)
 fn report_errors (cnt: int, errs: $B.builder_v): bool =
   if cnt <= 0 then let val () = $B.builder_free(errs) in true end
@@ -2739,8 +2854,10 @@ implement validate_project () = let
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
   val c4 = check_dir("./src/bin", 2, own_unsafe, c3, errs)
+  val c5 = check_dir_cycles("./bats_modules", true, c4, errs)
+  val c6 = check_dir_cycles("./src", false, c5, errs)
 in
-  report_errors(c4, errs)
+  report_errors(c6, errs)
 end
 
 (* Before build, check or test: every #use package of src/ that is not a

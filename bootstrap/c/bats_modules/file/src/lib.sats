@@ -178,8 +178,9 @@ fn buf_reader_close(r: buf_reader): $R.result(int, int)
 
 
 
+
 datavtype buf_writer =
-  | {lb:agz}{p:nat | p <= BUF_SIZE}
+  | {lb:agz}{p:nat | p < BUF_SIZE}
     buf_writer_mk of (fd, $A.arr(byte, lb, BUF_SIZE), int p)
 
 fn buf_writer_create(f: fd): buf_writer
@@ -193,6 +194,15 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, int)
 fn buf_flush(w: !buf_writer): $R.result(int, int)
 
 fn buf_writer_close(w: buf_writer): $R.result(int, int)
+
+
+
+
+
+
+
+
+
 
 
 
