@@ -1800,6 +1800,13 @@ in
                     else ())
                     (* Step 5: Generate synthetic entry *)
                     var entry : $B.builder_v = $B.create()
+                    (* A wasm module has no C main to run the dynloads, which
+                       initialize every module's vals; patsopt names this
+                       entry's dynload bats_dynload, which the host calls
+                       before mainats_0_void *)
+                    val () = (if is_wasm_bin > 0 then
+                      bput_v(entry, "#define ATS_DYNLOADNAME \"bats_dynload\"\n")
+                      else ())
                     val () = bput_v(entry, "staload \"./src/bin/")
                     val () = copy_to_builder_v(bv_e, 0, stem_len, 256, entry)
                     val () = bput_v(entry, ".sats\"\n")
@@ -2628,6 +2635,7 @@ in
                       val () = bput_v(wl, "stack-size=1048576") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--initial-memory=16777216") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--max-memory=268435456") val () = put_char_v(wl, 0)
+                      val () = bput_v(wl, "--export=bats_dynload") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=mainats_0_void") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=malloc") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=bats_on_event") val () = put_char_v(wl, 0)
