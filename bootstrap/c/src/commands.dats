@@ -73,17 +73,18 @@ fun name_has {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
 
 (* The calls of the selected tests among the entries t[p, e) of module
    Tm, appended to out; the number selected. A test is selected when
-   its block targets native and its name contains the filter. *)
+   its block targets the runner's target (bit 1 native, 2 wasm) and its
+   name contains the filter. *)
 fun put_calls {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int, m: int, k: int,
+  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int, m: int, k: int, bit: int,
    f: !$A.borrow(byte, lf, 4096), fl: int, out: !$B.builder_v >> $B.builder_v, sel: int): int =
   if p >= e then sel
   else if p >= 524288 then sel
   else let
     val bits = byte2int0($A.read<byte>(t, p))
     val ne = find_null_bv_from(t, p + 1, 524288)
-    val native = (bits = 1 || bits = 3): bool
-    val chosen = (if ~native then false else name_has(t, p + 1, ne, f, fl)): bool
+    val targeted = (if bit = 1 then (bits = 1 || bits = 3) else bits >= 2): bool
+    val chosen = (if ~targeted then false else name_has(t, p + 1, ne, f, fl)): bool
     val () = (if chosen then let
         val () = bput_v(out, "  val f = f + __bats_run($T")
         val () = put_int_v(out, m)
@@ -97,25 +98,7 @@ fun put_calls {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
   in
     if nx <= p then sel
     else if nx > 524288 then sel
-    else put_calls(t, nx, e, m, k + 1, f, fl, out, (if chosen then sel + 1 else sel))
-  end
-
-(* The number of the entries t[p, e) whose block targets wasm and whose
-   name contains the filter *)
-fun count_wasm {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int,
-   f: !$A.borrow(byte, lf, 4096), fl: int, c: int): int =
-  if p >= e then c
-  else if p >= 524288 then c
-  else let
-    val bits = byte2int0($A.read<byte>(t, p))
-    val ne = find_null_bv_from(t, p + 1, 524288)
-    val w = (if bits >= 2 then name_has(t, p + 1, ne, f, fl) else false): bool
-    val nx = ne + 1
-  in
-    if nx <= p then c
-    else if nx > 524288 then c
-    else count_wasm(t, nx, e, f, fl, (if w then c + 1 else c))
+    else put_calls(t, nx, e, m, k + 1, bit, f, fl, out, (if chosen then sel + 1 else sel))
   end
 
 (* Whether files[p] starts src/bin/ *)
@@ -125,20 +108,22 @@ in lit_at(files, p, 524288, c, 8) end
 
 (* The module files[p, ne) (src/<stem>.bats) with tests t[0, tlen):
    its staload as Tm appended to stl, the calls of its selected native
-   tests to calls; @(native tests selected, wasm tests selected) *)
+   tests to calls and of its selected wasm tests to wcalls; @(native
+   tests selected, wasm tests selected) *)
 fn add_module {lf,lt,lg:agz}
   (files: !$A.borrow(byte, lf, 524288), p: pos_t, ne: pos_t,
    t: !$A.borrow(byte, lt, 524288), tlen: int, m: int,
    f: !$A.borrow(byte, lg, 4096), fl: int, want_native: bool, want_wasm: bool,
-   stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v): @(int, int) = let
+   stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v,
+   wcalls: !$B.builder_v >> $B.builder_v): @(int, int) = let
   val () = bput_v(stl, "staload T")
   val () = put_int_v(stl, m)
   val () = bput_v(stl, " = \"")
   (* src/<stem>.bats: the module's .sats is <stem>.sats *)
   val () = copy_to_builder_v(files, p + 4, ne - 5, 524288, stl)
   val () = bput_v(stl, ".sats\"\n")
-  val sn = (if want_native then put_calls(t, 0, tlen, m, 0, f, fl, calls, 0) else 0): int
-  val sw = (if want_wasm then count_wasm(t, 0, tlen, f, fl, 0) else 0): int
+  val sn = (if want_native then put_calls(t, 0, tlen, m, 0, 1, f, fl, calls, 0) else 0): int
+  val sw = (if want_wasm then put_calls(t, 0, tlen, m, 0, 2, f, fl, wcalls, 0) else 0): int
 in @(sn, sw) end
 
 (* The file files[p, ne) with k tests t[0, tlen) added to the scan:
@@ -149,6 +134,7 @@ fn add_file {lf,lt,lg:agz}
    t: !$A.borrow(byte, lt, 524288), tlen: int,
    f: !$A.borrow(byte, lg, 4096), fl: int, want_native: bool, want_wasm: bool,
    stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v,
+   wcalls: !$B.builder_v >> $B.builder_v,
    nat: int, was: int, m: int, bins: int): @(int, int, int, int) =
   if k <= 0 then @(nat, was, m, bins)
   else if is_bin then let
@@ -158,7 +144,7 @@ fn add_file {lf,lt,lg:agz}
     val () = prerr! (" cannot run: move them to a module of src/\n")
   in @(nat, was, m, bins + 1) end
   else let
-    val @(sn, sw) = add_module(files, p, ne, t, tlen, m, f, fl, want_native, want_wasm, stl, calls)
+    val @(sn, sw) = add_module(files, p, ne, t, tlen, m, f, fl, want_native, want_wasm, stl, calls, wcalls)
   in @(nat + sn, was + sw, m + 1, bins) end
 
 (* Over the sorted .bats files files[p, e) of src/: for each module of
@@ -169,6 +155,7 @@ fun scan_modules {lf,lt:agz}{p:nat | p <= 524288} .<524288 - p>.
   (files: !$A.borrow(byte, lf, 524288), p: int p, e: int,
    f: !$A.borrow(byte, lt, 4096), fl: int, want_native: bool, want_wasm: bool,
    stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v,
+   wcalls: !$B.builder_v >> $B.builder_v,
    nat: int, was: int, m: int, bins: int): @(int, int, int, int) =
   if p >= e then @(nat, was, m, bins)
   else if p >= 524288 then @(nat, was, m, bins)
@@ -186,14 +173,14 @@ fun scan_modules {lf,lt:agz}{p:nat | p <= 524288} .<524288 - p>.
     val @(fz_t, bv_t) = $A.freeze<byte>(ta)
     val is_bin = in_src_bin(files, p)
     val @(n2, w2, m2, b2) = add_file(k, is_bin, files, p, ne, bv_t, tlen, f, fl,
-      want_native, want_wasm, stl, calls, nat, was, m, bins)
+      want_native, want_wasm, stl, calls, wcalls, nat, was, m, bins)
     val () = $A.drop<byte>(fz_t, bv_t)
     val () = $A.free<byte>($A.thaw<byte>(fz_t))
     val nx = ne + 1
   in
     if nx <= p then @(n2, w2, m2, b2)
     else if nx > 524288 then @(n2, w2, m2, b2)
-    else scan_modules(files, nx, e, f, fl, want_native, want_wasm, stl, calls, n2, w2, m2, b2)
+    else scan_modules(files, nx, e, f, fl, want_native, want_wasm, stl, calls, wcalls, n2, w2, m2, b2)
   end
 
 (* Runs sh -c cmd; its exit status *)
@@ -229,64 +216,134 @@ fn chdir_to {sn:nat | sn < 524288} (s: string sn): bool = let
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in ok end
 
-(* Builds the test runner in build/_bats_test, a copy of the package's
-   src/ modules with one binary whose main0 runs the selected tests, and
-   runs it: stl staloads the modules, calls runs the tests. Whether the
-   tests passed; the error is reported. *)
-fn run_native (stl: $B.builder_v, calls: $B.builder_v, n: int): bool = let
-  val rc = run_sh("rm -rf build/_bats_test && mkdir -p build/_bats_test/src/bin && cp src/*.bats build/_bats_test/src/ && ln -s ../../bats_modules build/_bats_test/bats_modules")
+(* Runs the built native runner; whether its tests passed *)
+fn run_native_runner (n: int): bool = let
+  val () = (if ~is_quiet() then prerr! ("running ", n, " native test(s)\n") else ())
+  val ex = str_to_path_arr("build/_bats_test/dist/debug/_bats_test")
+  val @(fz_x, bv_x) = $A.freeze<byte>(ex)
+  var a0 = $B.create() val () = bput_v(a0, "_bats_test")
+  val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+in
+  if st = 0 then true
+  else let
+    val () = prerr! ("error: native test failed\n")
+  in false end
+end
+
+(* Runs the built wasm runner in Node (Rust: run_wasm_tests); whether its
+   tests passed *)
+fn run_wasm_runner (n: int): bool = let
+  val () = (if ~is_quiet() then prerr! ("running ", n, " wasm test(s)\n") else ())
+  val ex = str_to_path_arr("node")
+  val @(fz_x, bv_x) = $A.freeze<byte>(ex)
+  var a0 = $B.create() val () = bput_v(a0, "node")
+  var a1 = $B.create() val () = bput_v(a1, "build/_bats_test_wasm/_bats_test_harness.mjs")
+  val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil())))
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+in
+  if st = 0 then true
+  else if st < 0 then let
+    val () = prerr! ("error: cannot run node\n")
+  in false end
+  else let
+    val () = prerr! ("error: wasm test failed\n")
+  in false end
+end
+
+(* Writes b to rel in the test runner's directory (build/_bats_test,
+   or build/_bats_test_wasm for wasm) *)
+fn runner_write {sn:nat | sn < 4096} (wasm: bool, rel: string sn, b: $B.builder_v): int = let
+  var pb : $B.builder_v = $B.create()
+  val () = (if wasm then bput_v(pb, "build/_bats_test_wasm/") else bput_v(pb, "build/_bats_test/"))
+  val () = bput_v(pb, rel)
+  val () = put_char_v(pb, 0)
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = write_file_from_builder(bv_p, 524288, b)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in r end
+
+(* Enters the test runner's directory; whether it could *)
+fn runner_enter (wasm: bool): bool =
+  if wasm then chdir_to("build/_bats_test_wasm") else chdir_to("build/_bats_test")
+
+(* The Node harness of the wasm runner: it gives the runner print and
+   exit (the wasm runtime's bats_host_print and bats_host_exit), runs its
+   dynload and main0, and exits with its status *)
+fn wasm_harness (): $B.builder_v = let
+  var h : $B.builder_v = $B.create()
+  val () = bput_v(h, "import { readFileSync, writeSync } from \"node:fs\";\n")
+  val () = bput_v(h, "const bytes = readFileSync(new URL(\"./dist/debug/_bats_test.wasm\", import.meta.url));\n")
+  val () = bput_v(h, "let memory = null;\n")
+  val () = bput_v(h, "const env = {\n  bats_host_print: (p, n) => { writeSync(1, new Uint8Array(memory.buffer, p, n)); },\n  bats_host_exit: (c) => { process.exit(c); },\n};\n")
+  val () = bput_v(h, "const { instance } = await WebAssembly.instantiate(bytes, { env });\n")
+  val () = bput_v(h, "memory = instance.exports.memory;\ninstance.exports.bats_dynload();\ninstance.exports.mainats_0_void();\n")
+in h end
+
+(* Builds the test runner in dir (build/_bats_test, or
+   build/_bats_test_wasm for wasm), a copy of the package's src/ modules
+   with one binary whose main0 runs the selected tests, and runs it
+   (natively, or in Node): stl[0, sl) staloads the modules, calls runs
+   the n tests. Whether the tests passed; the error is reported. *)
+fn run_runner {ls:agz}
+  (wasm: bool, stl: !$A.borrow(byte, ls, 524288), sl: int, calls: $B.builder_v, n: int): bool = let
+  val rc = (if wasm then run_sh("rm -rf build/_bats_test_wasm && mkdir -p build/_bats_test_wasm/src/bin && cp src/*.bats build/_bats_test_wasm/src/ && ln -s ../../bats_modules build/_bats_test_wasm/bats_modules")
+            else run_sh("rm -rf build/_bats_test && mkdir -p build/_bats_test/src/bin && cp src/*.bats build/_bats_test/src/ && ln -s ../../bats_modules build/_bats_test/bats_modules")): int
   var toml : $B.builder_v = $B.create()
   val () = bput_v(toml, "[package]\nname = \"_bats_test\"\nkind = \"bin\"\n")
   val () = (if read_unsafe_flag() > 0 then bput_v(toml, "unsafe = true\n") else ())
-  val w1 = write_to("build/_bats_test/bats.toml", toml)
+  val w1 = runner_write(wasm, "bats.toml", toml)
   var runner : $B.builder_v = $B.create()
+  val () = (if wasm then bput_v(runner, "#target wasm binary\n\n") else ())
   val () = bput_v(runner, "#include \"share/atspre_staload.hats\"\n\n")
-  val () = append_builder(runner, stl)
+  val () = copy_to_builder_v(stl, 0, sl, 524288, runner)
   val () = bput_v(runner, "\n(* 1 when the test failed; its PASS or FAIL line, as the Rust bats's runner prints it *)\n")
   val () = bput_v(runner, "fn __bats_run (ok: bool, name: string): int =\n  if ok then let val () = println! (\"  PASS \", name) in 0 end\n  else let val () = println! (\"  FAIL \", name) in 1 end\n\n")
   val () = bput_v(runner, "implement main0 () = let\n  val f = 0\n")
   val () = append_builder(runner, calls)
+  (* The Rust bats's wasm harness also printed the counts *)
+  val () = (if wasm then let
+      val () = bput_v(runner, "  val () = println! (")
+      val () = put_int_v(runner, n)
+    in bput_v(runner, " - f, \" passed, \", f, \" failed\")\n") end
+    else ())
   val () = bput_v(runner, "in if f > 0 then exit_void(1) else () end\n")
-  val w2 = write_to("build/_bats_test/src/bin/_bats_test.bats", runner)
+  val w2 = runner_write(wasm, "src/bin/_bats_test.bats", runner)
+  val w3 = (if wasm then runner_write(wasm, "_bats_test_harness.mjs", wasm_harness()) else 0): int
 in
   if rc <> 0 then let
-    val () = prerr! ("error: cannot set up build/_bats_test\n")
+    val () = prerr! ("error: cannot set up the test runner in build/\n")
   in false end
   else if w1 <> 0 then let
-    val () = prerr! ("error: cannot write build/_bats_test/bats.toml\n")
+    val () = prerr! ("error: cannot write the test runner's bats.toml\n")
   in false end
   else if w2 <> 0 then let
     val () = prerr! ("error: cannot write the test runner\n")
   in false end
-  else if ~chdir_to("build/_bats_test") then let
-    val () = prerr! ("error: cannot enter build/_bats_test\n")
+  else if w3 <> 0 then let
+    val () = prerr! ("error: cannot write the wasm test harness\n")
+  in false end
+  else if ~runner_enter(wasm) then let
+    val () = prerr! ("error: cannot enter the test runner's directory\n")
   in false end
   else let
     (* The runner is built as any binary, but not announced *)
     val q = is_quiet()
     val () = set_quiet(true)
-    val () = do_build_plain(0, 0)
+    val () = do_build_plain(0, (if wasm then 1 else 0))
     val () = set_quiet(q)
     val back = chdir_to("../..")
   in
     if ~back then let
-      val () = prerr! ("error: cannot leave build/_bats_test\n")
+      val () = prerr! ("error: cannot leave the test runner's directory\n")
     in false end
     else if has_build_err() then false
-    else let
-      val () = (if ~is_quiet() then prerr! ("running ", n, " native test(s)\n") else ())
-      val ex = str_to_path_arr("build/_bats_test/dist/debug/_bats_test")
-      val @(fz_x, bv_x) = $A.freeze<byte>(ex)
-      var a0 = $B.create() val () = bput_v(a0, "_bats_test")
-      val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
-      val () = $A.drop<byte>(fz_x, bv_x)
-      val () = $A.free<byte>($A.thaw<byte>(fz_x))
-    in
-      if st = 0 then true
-      else let
-        val () = prerr! ("error: native test failed\n")
-      in false end
-    end
+    else if wasm then run_wasm_runner(n)
+    else run_native_runner(n)
   end
 end
 
@@ -296,28 +353,32 @@ end
 
 
 (* What the scan found: an error for tests in src/bin/, "no tests found",
-   an error for wasm tests (no wasm runner yet), or the native run *)
-fn finish_test (nn: int, nw: int, bins: int, stl: $B.builder_v, calls: $B.builder_v): void =
+   or the native runner then the wasm runner (Rust: build::test) *)
+fn finish_test (nn: int, nw: int, bins: int, stl: $B.builder_v, calls: $B.builder_v, wcalls: $B.builder_v): void =
   if bins > 0 then let
     val () = $B.builder_free(stl)
     val () = $B.builder_free(calls)
+    val () = $B.builder_free(wcalls)
   in set_build_err() end
   else if nn + nw = 0 then let
     val () = $B.builder_free(stl)
     val () = $B.builder_free(calls)
+    val () = $B.builder_free(wcalls)
   in if is_quiet() then () else prerr! ("no tests found\n") end
-  else if nw > 0 then let
-    (* The wasm runner is not there yet: say so rather than skip them *)
-    val () = $B.builder_free(stl)
-    val () = $B.builder_free(calls)
-    val () = prerr! ("error: ", nw, " wasm test(s) selected, and bats test cannot run wasm tests yet; use --only native\n")
-  in set_build_err() end
   else let
+    val @(sa, sl) = $B.to_arr(stl)
+    val @(fz_s, bv_s) = $A.freeze<byte>(sa)
     val () = set_test_mode(true)
-    val ok = run_native(stl, calls, nn)
+    val ok_n = (if nn > 0 then run_runner(false, bv_s, sl, calls, nn)
+                else let val () = $B.builder_free(calls) in true end): bool
+    val ok_w = (if ~ok_n then let val () = $B.builder_free(wcalls) in false end
+                else if nw > 0 then run_runner(true, bv_s, sl, wcalls, nw)
+                else let val () = $B.builder_free(wcalls) in true end): bool
     val () = set_test_mode(false)
+    val () = $A.drop<byte>(fz_s, bv_s)
+    val () = $A.free<byte>($A.thaw<byte>(fz_s))
   in
-    if ~ok then set_build_err()
+    if ~ok_w then set_build_err()
     else if is_quiet() then ()
     else prerr! ("all tests passed\n")
   end
@@ -329,10 +390,11 @@ implement do_test (f, fl, want_native, want_wasm) = let
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
   var stl : $B.builder_v = $B.create()
   var calls : $B.builder_v = $B.create()
-  val @(nn, nw, _, bins) = scan_modules(bv_f, 0, flen, f, fl, want_native, want_wasm, stl, calls, 0, 0, 0, 0)
+  var wcalls : $B.builder_v = $B.create()
+  val @(nn, nw, _, bins) = scan_modules(bv_f, 0, flen, f, fl, want_native, want_wasm, stl, calls, wcalls, 0, 0, 0, 0)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
-in finish_test(nn, nw, bins, stl, calls) end
+in finish_test(nn, nw, bins, stl, calls, wcalls) end
 
 (* ============================================================
    upload: package library for repository
