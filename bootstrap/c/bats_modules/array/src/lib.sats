@@ -8,9 +8,17 @@
 
 
 
-absvtype arr(a:t@ype, l:addr, n:int)
 
-absvtype frozen(a:t@ype, l:addr, n:int, k:int)
+
+
+
+absvtype arrx(a:t@ype, l:addr, n:int, o:addr)
+
+vtypedef arr(a:t@ype, l:addr, n:int) = arrx(a, l, n, null)
+
+absvtype frozenx(a:t@ype, l:addr, n:int, k:int, o:addr)
+
+vtypedef frozen(a:t@ype, l:addr, n:int, k:int) = frozenx(a, l, n, k, null)
 
 absvtype borrow(a:t@ype, l:addr, n:int)
 
@@ -41,14 +49,14 @@ free
 
 fun{a:t@ype}
 get
-  {l:agz}{n,i:nat | i < n}
-  (arr: !arr(a, l, n), i: int i)
+  {l:agz}{o:addr}{n,i:nat | i < n}
+  (arr: !arrx(a, l, n, o), i: int i)
   : a
 
 fun{a:t@ype}
 set
-  {l:agz}{n,i:nat | i < n}
-  (arr: !arr(a, l, n), i: int i, v: a)
+  {l:agz}{o:addr}{n,i:nat | i < n}
+  (arr: !arrx(a, l, n, o), i: int i, v: a)
   : void
 
 
@@ -57,27 +65,27 @@ set
 
 fun{a:t@ype}
 freeze
-  {l:agz}{n:nat}
-  (arr: arr(a, l, n))
-  : @(frozen(a, l, n, 1), borrow(a, l, n))
+  {l:agz}{o:addr}{n:nat}
+  (arr: arrx(a, l, n, o))
+  : @(frozenx(a, l, n, 1, o), borrow(a, l, n))
 
 fun{a:t@ype}
 thaw
-  {l:agz}{n:nat}
-  (f: frozen(a, l, n, 0))
-  : arr(a, l, n)
+  {l:agz}{o:addr}{n:nat}
+  (f: frozenx(a, l, n, 0, o))
+  : arrx(a, l, n, o)
 
 fun{a:t@ype}
 dup
-  {l:agz}{n:nat}{k:pos}
-  (f: !frozen(a, l, n, k) >> frozen(a, l, n, k+1),
+  {l:agz}{o:addr}{n:nat}{k:pos}
+  (f: !frozenx(a, l, n, k, o) >> frozenx(a, l, n, k+1, o),
    b: !borrow(a, l, n))
   : borrow(a, l, n)
 
 fun{a:t@ype}
 drop
-  {l:agz}{n:nat}{k:pos}
-  (f: !frozen(a, l, n, k) >> frozen(a, l, n, k-1),
+  {l:agz}{o:addr}{n:nat}{k:pos}
+  (f: !frozenx(a, l, n, k, o) >> frozenx(a, l, n, k-1, o),
    b: borrow(a, l, n))
   : void
 
@@ -97,15 +105,15 @@ read
 
 fun{a:t@ype}
 borrow_split
-  {l:agz}{n,m:nat | m <= n}{k:pos}
-  (f: !frozen(a, l, n, k) >> frozen(a, l, n, k+1),
+  {l:agz}{o:addr}{n,m:nat | m <= n}{k:pos}
+  (f: !frozenx(a, l, n, k, o) >> frozenx(a, l, n, k+1, o),
    b: borrow(a, l, n), m: int m)
   : @(borrow(a, l, m), borrow(a, l+m, n-m))
 
 fun{a:t@ype}
 borrow_join
-  {l:agz}{n,m:nat}{k:int | k > 1}
-  (f: !frozen(a, l, n+m, k) >> frozen(a, l, n+m, k-1),
+  {l:agz}{o:addr}{n,m:nat}{k:int | k > 1}
+  (f: !frozenx(a, l, n+m, k, o) >> frozenx(a, l, n+m, k-1, o),
    left: borrow(a, l, n), right: borrow(a, l+n, m))
   : borrow(a, l, n+m)
 
@@ -115,15 +123,15 @@ borrow_join
 
 fun{a:t@ype}
 borrow_at
-  {l:agz}{n:pos}{i:nat | i < n}{k:pos}
-  (f: !frozen(a, l, n, k) >> frozen(a, l, n, k+1),
+  {l:agz}{o:addr}{n:pos}{i:nat | i < n}{k:pos}
+  (f: !frozenx(a, l, n, k, o) >> frozenx(a, l, n, k+1, o),
    b: !borrow(a, l, n), i: int i)
   : borrow(a, l+i, 1)
 
 fun{a:t@ype}
 drop_borrow_at
-  {l:agz}{n:pos}{i:nat | i < n}{k:int | k > 1}
-  (f: !frozen(a, l, n, k) >> frozen(a, l, n, k-1),
+  {l:agz}{o:addr}{n:pos}{i:nat | i < n}{k:int | k > 1}
+  (f: !frozenx(a, l, n, k, o) >> frozenx(a, l, n, k-1, o),
    b: borrow(a, l+i, 1))
   : void
 
@@ -182,27 +190,27 @@ fun int2byte{i:nat | i < 256}(i: int i): byte
 
 
 fun write_byte
-  {l:agz}{n:nat}{i:nat | i < n}{v:nat | v < 256}
-  (arr: !arr(byte, l, n), i: int i, v: int v): void
+  {l:agz}{o:addr}{n:nat}{i:nat | i < n}{v:nat | v < 256}
+  (arr: !arrx(byte, l, n, o), i: int i, v: int v): void
 
 fun write_u16le
-  {l:agz}{n:nat}{i:nat | i + 2 <= n}{v:nat | v < 65536}
-  (arr: !arr(byte, l, n), i: int i, v: int v): void
+  {l:agz}{o:addr}{n:nat}{i:nat | i + 2 <= n}{v:nat | v < 65536}
+  (arr: !arrx(byte, l, n, o), i: int i, v: int v): void
 
 
 
 fun write_i32
-  {l:agz}{n:nat}{i:nat | i + 4 <= n}
-  (arr: !arr(byte, l, n), i: int i, v: int): void
+  {l:agz}{o:addr}{n:nat}{i:nat | i + 4 <= n}
+  (arr: !arrx(byte, l, n, o), i: int i, v: int): void
 
 fun write_borrow
-  {ld:agz}{ls:agz}{m:nat}{n:nat}{off:nat | off + n <= m}
-  (dst: !arr(byte, ld, m), off: int off,
+  {ld:agz}{o:addr}{ls:agz}{m:nat}{n:nat}{off:nat | off + n <= m}
+  (dst: !arrx(byte, ld, m, o), off: int off,
    src: !borrow(byte, ls, n), len: int n): void
 
 fun write_text
-  {l:agz}{m:nat}{n:nat}{off:nat | off + n <= m}
-  (dst: !arr(byte, l, m), off: int off,
+  {l:agz}{o:addr}{m:nat}{n:nat}{off:nat | off + n <= m}
+  (dst: !arrx(byte, l, m, o), off: int off,
    src: text(n), len: int n): void
 
 
@@ -251,9 +259,83 @@ fun text_to_content
   : [l:agz] content_text(l, n)
 
 fun write_content_text
-  {ld:agz}{ls:agz}{m:nat}{n:nat}{off:nat | off + n <= m}
-  (dst: !arr(byte, ld, m), off: int off,
+  {ld:agz}{o:addr}{ls:agz}{m:nat}{n:nat}{off:nat | off + n <= m}
+  (dst: !arrx(byte, ld, m, o), off: int off,
    src: !content_text(ls, n), len: int n): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+absvtype arena(a:t@ype, l:addr, max:int, used:int, k:int)
+
+
+datavtype arena_made(a:t@ype, max:int) =
+  | {l:agz} arena_some(a, max) of arena(a, l, max, 0, 0)
+  | arena_none(a, max) of ()
+
+fun{a:t@ype}
+arena_create
+  {max:pos | max <= 268435456}
+  (max: int max)
+  : arena_made(a, max)
+
+
+fun{a:t@ype}
+arena_alloc
+  {la:agz}{max,used,k:nat}{n:pos | used + n <= max}
+  (ar: !arena(a, la, max, used, k) >> arena(a, la, max, used + n, k + 1),
+   n: int n)
+  : [l:agz] arrx(a, l, n, la)
+
+fun{a:t@ype}
+arena_return
+  {la:agz}{max,used:nat}{k:pos}{l:agz}{n:nat}
+  (ar: !arena(a, la, max, used, k) >> arena(a, la, max, used, k - 1),
+   p: arrx(a, l, n, la))
+  : void
+
+fun{a:t@ype}
+arena_destroy
+  {la:agz}{max,used:nat}
+  (ar: arena(a, la, max, used, 0))
+  : void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
