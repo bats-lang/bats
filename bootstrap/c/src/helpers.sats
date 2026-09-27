@@ -82,20 +82,6 @@ fn find_null_bv_from {l:agz}{n:pos}{p:int}
 
 
 
-fn span_i32 {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

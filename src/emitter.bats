@@ -8,6 +8,7 @@
 #use str as S
 
 staload "helpers.sats"
+staload "lexer.sats"
 
 (* Compute line number from byte offset by counting newlines *)
 fn _byte_to_line {l:agz}{n:pos}
@@ -38,38 +39,6 @@ in scan(src, max, pos - 1, max) end
 (* ============================================================
    Emitter: read span records
    ============================================================ *)
-
-fn span_kind {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): int =
-  peek(spans, idx * 28, max)
-
-fn span_dest {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): int =
-  peek(spans, idx * 28 + 1, max)
-
-fn span_start {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
-  span_i32(spans, idx * 28 + 2, max)
-
-fn span_end {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
-  span_i32(spans, idx * 28 + 6, max)
-
-fn span_aux1 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
-  span_i32(spans, idx * 28 + 10, max)
-
-fn span_aux2 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
-  span_i32(spans, idx * 28 + 14, max)
-
-fn span_aux3 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
-  span_i32(spans, idx * 28 + 18, max)
-
-fn span_aux4 {l:agz}{n:pos}
-  (spans: !$A.borrow(byte, l, n), idx: pos_t, max: int n): pos_t =
-  span_i32(spans, idx * 28 + 22, max)
 
 (* ============================================================
    Emitter: copy source range to builder, count newlines
@@ -104,25 +73,6 @@ fun emit_range_stald {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER
     then 115 else b): int
     val () = $B.put_char(out, $AR.low_byte(b_out))
   in emit_range_stald(src, start + 1, end_pos, max, out, fuel - 1) end
-
-(* Count newlines in source range, emit that many newlines *)
-fun emit_blanks_count {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
-   max: int ns, count: int, fuel: int fuel): int =
-  if fuel <= 0 then count
-  else if start >= end_pos then count
-  else let
-    val b = peek(src, start, max)
-    val new_count = (if $AR.eq_int_int(b, 10) then count + 1 else count): int
-  in emit_blanks_count(src, start + 1, end_pos, max, new_count, fuel - 1) end
-
-fun emit_newlines {bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), count: int, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if count <= 0 then ()
-  else let
-    val () = $B.put_char(out, 10)
-  in emit_newlines(out, count - 1, fuel - 1) end
 
 fun emit_blanks {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
   (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: int,
@@ -197,262 +147,29 @@ fn emit_blanks_v {ls:agz}{ns:pos}
    max: int ns, out: !$B.builder_v >> $B.builder_v): void =
   emit_blanks(src, start, end_pos, max, out, 524288 - $B.length(out))
 
-(* Single-pass: blank [ss,cs), content [cs,ce), blank [ce,se) *)
-fun emit_blank_content_blank {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), pos: pos_t, se: pos_t,
-   cs: pos_t, ce: pos_t, max: int ns,
-   out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if pos >= se then ()
-  else let
-    val b = peek(src, pos, max)
-    val in_content = pos >= cs && pos < ce
-  in
-    if in_content then let
-      val () = $B.put_char(out, $AR.low_byte(b))
-    in emit_blank_content_blank(src, pos + 1, se, cs, ce, max, out, fuel - 1) end
-    else if $AR.eq_int_int(b, 10) then let
-      val () = $B.put_char(out, 10)
-    in emit_blank_content_blank(src, pos + 1, se, cs, ce, max, out, fuel - 1) end
-    else emit_blank_content_blank(src, pos + 1, se, cs, ce, max, out, fuel - 1)
-  end
-
-(* Find matching end keyword for $UNSAFE begin, tracking begin/let/local/end nesting *)
-fun find_matching_end {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), pos: pos_t, src_len: pos_t, max: int ns,
-   depth: int, fuel: int fuel): pos_t =
-  if fuel <= 0 then src_len
-  else if pos >= src_len then src_len
-  else let
-    val b0 = peek(src, pos, max)
-    val b1 = peek(src, pos + 1, max)
-    val b2 = peek(src, pos + 2, max)
-    val b3 = peek(src, pos + 3, max)
-    val bp = peek(src, pos - 1, max)
-    (* Keyword boundary: byte is NOT a-z, A-Z, 0-9, or _ *)
-    val after_boundary = ~($AR.gte_int_int(b3, 97) && $AR.lte_int_int(b3, 122)) &&
-                         ~($AR.gte_int_int(b3, 65) && $AR.lte_int_int(b3, 90)) &&
-                         ~($AR.gte_int_int(b3, 48) && $AR.lte_int_int(b3, 57)) &&
-                         ~$AR.eq_int_int(b3, 95)
-    val before_boundary = ~($AR.gte_int_int(bp, 97) && $AR.lte_int_int(bp, 122)) &&
-                          ~($AR.gte_int_int(bp, 65) && $AR.lte_int_int(bp, 90)) &&
-                          ~($AR.gte_int_int(bp, 48) && $AR.lte_int_int(bp, 57)) &&
-                          ~$AR.eq_int_int(bp, 95)
-  in
-    (* Check for end: e(101) n(110) d(100) with word boundaries *)
-    if $AR.eq_int_int(b0, 101) && $AR.eq_int_int(b1, 110) && $AR.eq_int_int(b2, 100)
-       && after_boundary && before_boundary then
-      (if depth <= 1 then pos
-       else find_matching_end(src, pos + 3, src_len, max, depth - 1, fuel - 1))
-    (* Check for begin: b(98) e(101) g(103) i(105) n(110) with before boundary *)
-    else if $AR.eq_int_int(b0, 98) && $AR.eq_int_int(b1, 101) &&
-            $AR.eq_int_int(b2, 103) && $AR.eq_int_int(b3, 105) &&
-            $AR.eq_int_int(peek(src, pos + 4, max), 110)
-            && before_boundary then
-      find_matching_end(src, pos + 5, src_len, max, depth + 1, fuel - 1)
-    (* Check for let: l(108) e(101) t(116) with word boundaries *)
-    else if $AR.eq_int_int(b0, 108) && $AR.eq_int_int(b1, 101) && $AR.eq_int_int(b2, 116)
-            && after_boundary && before_boundary then
-      find_matching_end(src, pos + 3, src_len, max, depth + 1, fuel - 1)
-    else find_matching_end(src, pos + 1, src_len, max, depth, fuel - 1)
-  end
-
-(* Blank a range then tail-call content processing *)
-fun emit_blank_then_content {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), pos: pos_t, blank_end: int,
-   content_end: int, end_kw_end: int, scan_end: pos_t, overall_end: pos_t,
-   max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if pos < blank_end then let
-    (* Phase 1: blank "$UNSAFE begin" region *)
-    val b = peek(src, pos, max)
-  in
-    if $AR.eq_int_int(b, 10) then let
-      val () = $B.put_char(out, 10)
-    in emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1) end
-    else emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1)
-  end
-  else if pos < content_end then let
-    (* Phase 2: copy inner $UNSAFE content *)
-    val () = $B.put_char(out, $AR.low_byte(peek(src, pos, max)))
-  in emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1) end
-  else if pos < end_kw_end then let
-    (* Phase 3: blank "end" keyword *)
-    val b = peek(src, pos, max)
-  in
-    if $AR.eq_int_int(b, 10) then let
-      val () = $B.put_char(out, 10)
-    in emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1) end
-    else emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1)
-  end
-  else
-    (* Phase 4: continue scanning for more $UNSAFE blocks *)
-    emit_range_process_unsafe(src, pos, scan_end, overall_end, max, out, fuel - 1)
-
-(* Emit range processing $UNSAFE begin...end blocks inside #target content.
-   Scans byte by byte. When $UNSAFE begin is found, blanks it, emits inner
-   content recursively, blanks end. Other content emitted as-is. *)
-and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
-   overall_end: pos_t,
-   max: int ns, out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m), fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if start >= end_pos then
-    (* After content range, blank [end_pos, overall_end) *)
-    emit_blanks(src, end_pos, overall_end, max, out, fuel)
-  else let
-    val b = peek(src, start, max)
-  in
-    if $AR.eq_int_int(b, 36) &&
-       $AR.eq_int_int(peek(src, start + 1, max), 85) &&
-       $AR.eq_int_int(peek(src, start + 2, max), 78) &&
-       $AR.eq_int_int(peek(src, start + 3, max), 83) &&
-       $AR.eq_int_int(peek(src, start + 4, max), 65) &&
-       $AR.eq_int_int(peek(src, start + 5, max), 70) &&
-       $AR.eq_int_int(peek(src, start + 6, max), 69) then let
-      val after = start + 7
-      val next = peek(src, after, max)
-    in
-      if $AR.eq_int_int(next, 46) then let
-        val () = $B.put_char(out, $AR.low_byte(b))
-      in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
-      else let
-        (* Skip whitespace after $UNSAFE *)
-        val p0 = (let fun skip {ls2:agz}{ns2:pos}{f:nat} .<f>.
-          (s: !$A.borrow(byte, ls2, ns2), m: int ns2, p: pos_t, lim: pos_t, f: int f): pos_t =
-          if f <= 0 then p else if p >= lim then p
-          else let val c = peek(s, p, m) in
-            if $AR.eq_int_int(c, 32) || $AR.eq_int_int(c, 10) || $AR.eq_int_int(c, 13) || $AR.eq_int_int(c, 9)
-            then skip(s, m, p + 1, lim, f - 1) else p end
-        in skip(src, max, after, end_pos, 256) end): pos_t
-      in
-        (* Check for begin: 98,101,103,105,110 *)
-        if $AR.eq_int_int(peek(src, p0, max), 98) &&
-           $AR.eq_int_int(peek(src, p0 + 1, max), 101) &&
-           $AR.eq_int_int(peek(src, p0 + 2, max), 103) &&
-           $AR.eq_int_int(peek(src, p0 + 3, max), 105) &&
-           $AR.eq_int_int(peek(src, p0 + 4, max), 110) then let
-          val cs2 = p0 + 5
-          val end2 = find_matching_end(src, cs2, end_pos, max, 1, 524288)
-          val ep2 = (if end2 < end_pos then end2 + 3 else end2): int
-          (* Blank [start, cs2), then process [cs2, end2), then blank [end2, ep2),
-             then continue with [ep2, end_pos). All via tail calls. *)
-        in emit_blank_then_content(src, start, cs2, end2, ep2, end_pos, overall_end, max, out, fuel - 1) end
-        else let
-          val () = $B.put_char(out, $AR.low_byte(b))
-        in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
-      end
-    end
-    else let
-      val b_out = (if $AR.eq_int_int(b, 98) &&
-        $AR.eq_int_int(peek(src, start - 1, max), 46) &&
-        $AR.eq_int_int(peek(src, start + 1, max), 97) &&
-        $AR.eq_int_int(peek(src, start + 2, max), 116) &&
-        $AR.eq_int_int(peek(src, start + 3, max), 115) &&
-        $AR.eq_int_int(peek(src, start + 4, max), 34)
-      then 115 else b): int
-      val () = $B.put_char(out, $AR.low_byte(b_out))
-    in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
-  end
-
-fn emit_range_process_unsafe_v {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
-   overall_end: pos_t, max: int ns, out: !$B.builder_v >> $B.builder_v): void =
-  emit_range_process_unsafe(src, start, end_pos, overall_end, max, out, 524288 - $B.length(out))
-
 (* ============================================================
    Emitter: name mangling (__BATS__<mangled_pkg>_<member>)
    ============================================================ *)
 
-(* Emit __BATS__ prefix: 95,95,66,65,84,83,95,95 *)
-fn emit_bats_prefix(out: !$B.builder_v >> $B.builder_v): void = let
-  val () = put_char_v(out, 95)   (* _ *)
-  val () = put_char_v(out, 95)   (* _ *)
-  val () = put_char_v(out, 66)   (* B *)
-  val () = put_char_v(out, 65)   (* A *)
-  val () = put_char_v(out, 84)   (* T *)
-  val () = put_char_v(out, 83)   (* S *)
-  val () = put_char_v(out, 95)   (* _ *)
-  val () = put_char_v(out, 95)   (* _ *)
-in end
-
-(* Emit hex digit for a nibble *)
-fn emit_hex_nibble(out: !$B.builder_v >> $B.builder_v, v: int): void =
-  if v < 10 then put_char_v(out, v + 48)  (* '0' + v *)
-  else put_char_v(out, v - 10 + 97)  (* 'a' + v-10 *)
-
-(* Mangle a single byte: alnum passes through, / becomes __, else _XX *)
-fn emit_mangled_byte(out: !$B.builder_v >> $B.builder_v, b: int): void =
-  if (b >= 97 && b <= 122) || (b >= 65 && b <= 90) ||
-     (b >= 48 && b <= 57) then
-    put_char_v(out, b)
-  else if $AR.eq_int_int(b, 47) then let  (* '/' -> __ *)
-    val () = put_char_v(out, 95)
-    val () = put_char_v(out, 95)
-  in end
-  else let  (* _XX hex *)
-    val () = put_char_v(out, 95)
-    val () = emit_hex_nibble(out, b / 16)
-    val () = emit_hex_nibble(out, b mod 16)
-  in end
-
-(* Emit mangled package name from source range *)
-fun emit_mangled_pkg {ls:agz}{ns:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), start: pos_t, end_pos: pos_t,
-   max: int ns, out: !$B.builder_v >> $B.builder_v, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if start >= end_pos then ()
-  else let
-    val b = peek(src, start, max)
-    val () = emit_mangled_byte(out, b)
-  in emit_mangled_pkg(src, start + 1, end_pos, max, out, fuel - 1) end
-
-(* Emit qualified access: __BATS__<mangled_pkg>_<member> *)
-fn emit_qualified {ls:agz}{ns:pos}{lp:agz}{np:pos}
+(* $alias.member, as written: src[as0, ae) and src[ms, me) *)
+fn emit_qualified {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_idx: pos_t, span_max: int np,
+   as0: spos(ns), ae: spos(ns), ms: spos(ns), me: spos(ns),
    out: !$B.builder_v >> $B.builder_v): void = let
-  val alias_s = span_aux1(spans, span_idx, span_max)
-  val alias_e = span_aux2(spans, span_idx, span_max)
-  val member_s = span_aux3(spans, span_idx, span_max)
-  val member_e = span_aux4(spans, span_idx, span_max)
-  (* For now, emit $alias.member as-is since we need the use-table
-     to look up which package the alias maps to.
-     TODO: implement use-table lookup for proper mangling *)
   val () = put_char_v(out, 36)  (* $ *)
-  val () = emit_range_v(src, alias_s, alias_e, src_max, out)
+  val () = emit_range_v(src, as0, ae, src_max, out)
   val () = put_char_v(out, 46)  (* . *)
-  val () = emit_range_v(src, member_s, member_e, src_max, out)
-in end
+in emit_range_v(src, ms, me, src_max, out) end
 
 (* ============================================================
    Emitter: generate dats prelude (staload self + dependencies)
    ============================================================ *)
 
-(* Emit: staload "./FILENAME.sats"\n *)
-fn emit_self_stld(out: !$B.builder_v >> $B.builder_v, filename_len: int): void = let
-  (* "staload " = 115,116,97,108,111,97,100,32 *)
-  val () = put_char_v(out, 115)
-  val () = put_char_v(out, 116)
-  val () = put_char_v(out, 97)
-  val () = put_char_v(out, 108)
-  val () = put_char_v(out, 111)
-  val () = put_char_v(out, 97)
-  val () = put_char_v(out, 100)
-  val () = put_char_v(out, 32)
-  (* "./ *)
-  val () = put_char_v(out, 34)
-  val () = put_char_v(out, 46)
-  val () = put_char_v(out, 47)
-in end
-
 (* Emit one staload line for a #use dependency: staload "pkg/src/lib.dats" (no alias) *)
-fn emit_dep_stld {ls:agz}{ns:pos}{lp:agz}{np:pos}
+fn emit_dep_stld {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_idx: pos_t, span_max: int np,
+   pkg_s: spos(ns), pkg_e: spos(ns),
    out: !$B.builder_v >> $B.builder_v): void = let
-  val pkg_s = span_aux1(spans, span_idx, span_max)
-  val pkg_e = span_aux2(spans, span_idx, span_max)
   (* staload " *)
   val () = put_char_v(out, 115)
   val () = put_char_v(out, 116)
@@ -484,14 +201,10 @@ fn emit_dep_stld {ls:agz}{ns:pos}{lp:agz}{np:pos}
 in end
 
 (* Emit one staload line for .sats: staload ALIAS = "pkg/src/lib.sats" *)
-fn emit_dep_stld_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}
+fn emit_dep_stld_sats {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_idx: pos_t, span_max: int np,
+   pkg_s: spos(ns), pkg_e: spos(ns), alias_s: spos(ns), alias_e: spos(ns),
    out: !$B.builder_v >> $B.builder_v): void = let
-  val pkg_s = span_aux1(spans, span_idx, span_max)
-  val pkg_e = span_aux2(spans, span_idx, span_max)
-  val alias_s = span_aux3(spans, span_idx, span_max)
-  val alias_e = span_aux4(spans, span_idx, span_max)
   (* staload  *)
   val () = put_char_v(out, 115)
   val () = put_char_v(out, 116)
@@ -539,247 +252,180 @@ fn unittest_enter (target_state: int): int =
    Emitter: main emit loop
    ============================================================ *)
 
-fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: pos_t,
+(* The range of sp *)
+fn span_range {n:int} (sp: !span(n)): @(spos(n), spos(n)) =
+  case+ sp of
+  | SPass(s, e, _) => @(s, e) | SUse(s, e, _, _, _, _, _) => @(s, e)
+  | SPub(s, e, _, _) => @(s, e) | SQual(s, e, _, _, _, _) => @(s, e)
+  | SUnsafeBlock(s, e, _, _) => @(s, e) | SConstruct(s, e) => @(s, e)
+  | SExtcode(s, e, _, _, _) => @(s, e) | STarget(s, e, _) => @(s, e)
+  | SStaload(s, e) => @(s, e) | STargetBegin(s, e, _) => @(s, e)
+  | STargetEnd(s, e) => @(s, e) | SUnittestBegin(s, e, _, _) => @(s, e)
+  | SUnittestEnd(s, e) => @(s, e) | SLexError(a, _, _, _, _) => @(a, a)
+
+(* An unsafe construct outside $UNSAFE at ss: reported, blanked *)
+fn emit_rejected {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, ss: spos(ns), se: spos(ns),
+   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void = let
+  val () = println! ("error: unsafe construct at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " outside $UNSAFE block")
+  val () = emit_blanks_v(src, ss, se, src_max, dats)
+in emit_blanks_v(src, ss, se, src_max, sats) end
+
+(* sp, outside a blanked block, to sats and dats; the number of errors
+   it adds *)
+fn emit_code_span {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
    sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
-   build_target: int, is_unsafe: int, errors: int,
-   target_state: int, fuel: int fuel): int =
-  if fuel <= 0 then errors
-  else if idx >= span_count then errors
-  else let
-    val kind = span_kind(spans, idx, span_max)
-    val dest = span_dest(spans, idx, span_max)
-    val ss = span_start(spans, idx, span_max)
-    val se = span_end(spans, idx, span_max)
-  in
-    (* kind=13: target_begin - update target state *)
-    if $AR.eq_int_int(kind, 13) then let
-      val block_target = span_aux1(spans, idx, span_max)
+   is_unsafe: int): int =
+  case+ sp of
+  | SPass(ss, se, verbatim) => let
+      val () = (if verbatim then emit_range_v(src, ss, se, src_max, dats)
+                else emit_code_v(src, ss, se, src_max, dats))
       val () = emit_blanks_v(src, ss, se, src_max, sats)
-      val () = emit_blanks_v(src, ss, se, src_max, dats)
-      val new_ts = (if target_state > 0 then target_state + 1
-                    else if $AR.eq_int_int(block_target, build_target) then 0
-                    else 1): int
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, new_ts, fuel - 1) end
-
-    (* kind=15: unittest_begin - its contents are emitted in check and
-       test mode (Rust: emit's check_mode), blanked otherwise, as a
-       non-matching target block's are *)
-    else if $AR.eq_int_int(kind, 15) then let
+    in 0 end
+  (* #use: its staload in the dats, blank in the sats *)
+  | SUse(ss, se, _, ps, pe, as0, ae) => let
       val () = emit_blanks_v(src, ss, se, src_max, sats)
-      val () = emit_blanks_v(src, ss, se, src_max, dats)
-      val new_ts = unittest_enter(target_state)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, new_ts, fuel - 1) end
-
-    (* kind=14: target_end, kind=16: unittest_end - restore target state *)
-    else if $AR.eq_int_int(kind, 14) || $AR.eq_int_int(kind, 16) then let
-      val () = emit_blanks_v(src, ss, se, src_max, sats)
-      val () = emit_blanks_v(src, ss, se, src_max, dats)
-      val new_ts = (if target_state > 0 then target_state - 1 else 0): int
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, new_ts, fuel - 1) end
-
-    (* Inside non-matching target block: blank everything *)
-    else if target_state > 0 then let
-      val () = emit_blanks_v(src, ss, se, src_max, sats)
-      val () = emit_blanks_v(src, ss, se, src_max, dats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=0: passthrough *)
-    else if $AR.eq_int_int(kind, 0) then let
-      val () = (if $AR.eq_int_int(dest, 0) || $AR.eq_int_int(dest, 2) then
-                  (if $AR.eq_int_int(span_aux1(spans, idx, span_max), 1)
-                   then emit_range_v(src, ss, se, src_max, dats)
-                   else emit_code_v(src, ss, se, src_max, dats))
-                else ())
-      val () = (if $AR.eq_int_int(dest, 1) || $AR.eq_int_int(dest, 2) then
-                  emit_range_v(src, ss, se, src_max, sats)
-                else ())
-      val () = (if $AR.eq_int_int(dest, 0) then
-                  emit_blanks_v(src, ss, se, src_max, sats)
-                else ())
-      val () = (if $AR.eq_int_int(dest, 1) then
-                  emit_blanks_v(src, ss, se, src_max, dats)
-                else ())
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=1: hash_use - emit aliased staload in dats, blank in sats *)
-    else if $AR.eq_int_int(kind, 1) then let
-      val () = emit_blanks_v(src, ss, se, src_max, sats)
-      (* In dats: emit staload ALIAS = "pkg/src/lib.sats" at the #use position *)
-      val () = emit_dep_stld_sats(src, src_max, spans, idx, span_max, dats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=2: pub_decl - content to sats, blanks to dats *)
-    else if $AR.eq_int_int(kind, 2) then let
-      val cs = span_aux1(spans, idx, span_max)
-      val ce = span_aux2(spans, idx, span_max)
-      (* Blank the #pub prefix in sats *)
+      val () = emit_dep_stld_sats(src, src_max, ps, pe, as0, ae, dats)
+    in 0 end
+  (* #pub: the declaration to the sats, blank in the dats *)
+  | SPub(ss, se, rejected, cs) =>
+    if rejected then let
+      val () = emit_rejected(src, src_max, ss, se, sats, dats)
+    in 1 end
+    else let
       val () = emit_blanks_v(src, ss, cs, src_max, sats)
-      (* Emit contents to sats *)
-      val () = emit_range_v(src, cs, ce, src_max, sats)
-      (* Blank everything in dats *)
+      val () = emit_range_v(src, cs, se, src_max, sats)
       val () = emit_blanks_v(src, ss, se, src_max, dats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=3: qualified_access - emit $alias.member respecting dest *)
-    else if $AR.eq_int_int(kind, 3) then let
-      val () = (if $AR.eq_int_int(dest, 0) || $AR.eq_int_int(dest, 2) then
-                  emit_qualified(src, src_max, spans, idx, span_max, dats)
-                else ())
-      val () = (if $AR.eq_int_int(dest, 1) || $AR.eq_int_int(dest, 2) then
-                  emit_qualified(src, src_max, spans, idx, span_max, sats)
-                else ())
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=4: unsafe_block - emit contents if unsafe=true, error if unsafe=false *)
-    else if $AR.eq_int_int(kind, 4) then
-      if $AR.gt_int_int(is_unsafe, 0) then let
-        val cs = span_aux1(spans, idx, span_max)
-        val ce = span_aux2(spans, idx, span_max)
-        val () = emit_blanks_v(src, ss, cs, src_max, dats)
-        val () = emit_blanks_v(src, ss, cs, src_max, sats)
-        val () = (if $AR.eq_int_int(dest, 0) || $AR.eq_int_int(dest, 2) then
-                    emit_range_v(src, cs, ce, src_max, dats)
-                  else ())
-        val () = (if $AR.eq_int_int(dest, 1) || $AR.eq_int_int(dest, 2) then
-                    emit_range_v(src, cs, ce, src_max, sats)
-                  else ())
-        val () = emit_blanks_v(src, ce, se, src_max, dats)
-        val () = emit_blanks_v(src, ce, se, src_max, sats)
-      in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                    sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-      else let
-        val () = println! ("error: $UNSAFE block at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " not allowed in safe package")
-        val () = emit_blanks_v(src, ss, se, src_max, dats)
-        val () = emit_blanks_v(src, ss, se, src_max, sats)
-      in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                    sats, dats, build_target, is_unsafe, errors + 1, target_state, fuel - 1) end
-
-    (* kind=5: unsafe_construct outside $UNSAFE block — always error *)
-    else if $AR.eq_int_int(kind, 5) then let
-      val () = println! ("error: unsafe construct at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " outside $UNSAFE block")
+    in 0 end
+  | SQual(_, _, as0, ae, ms, me) => let
+      val () = emit_qualified(src, src_max, as0, ae, ms, me, dats)
+    in 0 end
+  (* $UNSAFE begin...end: its contents in an unsafe package, an error in
+     a safe one *)
+  | SUnsafeBlock(ss, se, cs, ce) =>
+    if is_unsafe > 0 then let
+      val () = emit_blanks_v(src, ss, cs, src_max, dats)
+      val () = emit_blanks_v(src, ss, cs, src_max, sats)
+      val () = emit_range_v(src, cs, ce, src_max, dats)
+      val () = emit_blanks_v(src, ce, se, src_max, dats)
+      val () = emit_blanks_v(src, ce, se, src_max, sats)
+    in 0 end
+    else let
+      val () = println! ("error: $UNSAFE block at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " not allowed in safe package")
       val () = emit_blanks_v(src, ss, se, src_max, dats)
       val () = emit_blanks_v(src, ss, se, src_max, sats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors + 1, target_state, fuel - 1) end
-
-    (* kind=6: extcode_block - emit as-is to dats *)
-    else if $AR.eq_int_int(kind, 6) then let
+    in 1 end
+  | SConstruct(ss, se) => let
+      val () = emit_rejected(src, src_max, ss, se, sats, dats)
+    in 1 end
+  (* %{ ... %}: as is to the dats *)
+  | SExtcode(ss, se, _, _, _) => let
       val () = emit_range_v(src, ss, se, src_max, dats)
       val () = emit_blanks_v(src, ss, se, src_max, sats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=7: target_decl - blank everything *)
-    else if $AR.eq_int_int(kind, 7) then let
-      val () = emit_blanks_v(src, ss, se, src_max, sats)
-      val () = emit_blanks_v(src, ss, se, src_max, dats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-
-    (* kind=9: restricted_keyword — same as kind 5, always error *)
-    else if $AR.eq_int_int(kind, 9) then let
-      val () = println! ("error: unsafe construct at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " outside $UNSAFE block")
-      val () = emit_blanks_v(src, ss, se, src_max, dats)
-      val () = emit_blanks_v(src, ss, se, src_max, sats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors + 1, target_state, fuel - 1) end
-
-    (* kind=12: staload_line - emit to both with .bats→.sats rename *)
-    else if $AR.eq_int_int(kind, 12) then let
+    in 0 end
+  | SStaload(ss, se) => let
       val () = emit_range_stald_v(src, ss, se, src_max, dats)
       val () = emit_range_stald_v(src, ss, se, src_max, sats)
-    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
+    in 0 end
+  (* #target lines, block markers: blank *)
+  | _ => let
+      val @(ss, se) = span_range(sp)
+      val () = emit_blanks_v(src, ss, se, src_max, sats)
+      val () = emit_blanks_v(src, ss, se, src_max, dats)
+    in 0 end
 
-    (* Unknown kind: skip *)
-    else
-      emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                  sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1)
-  end
+(* The target state after sp: entering a #target block for another
+   target, or a $UNITTEST block outside check and test mode, blanks
+   what is in it *)
+fn next_state {n:int} (sp: !span(n), ts: int, build_target: int): int =
+  case+ sp of
+  | STargetBegin(_, _, t) =>
+    if ts > 0 then ts + 1 else if t = build_target then 0 else 1
+  | SUnittestBegin(_, _, _, _) => unittest_enter(ts)
+  | STargetEnd(_, _) => (if ts > 0 then ts - 1 else 0)
+  | SUnittestEnd(_, _) => (if ts > 0 then ts - 1 else 0)
+  | _ => ts
 
-(* Build dats prelude: self-stld + dependency staloads.
-   Skips #use spans inside non-matching target blocks. *)
-fun build_prelude {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: pos_t,
-   prelude: !$B.builder_v >> $B.builder_v,
-   build_target: int, target_state: int, fuel: int fuel): int =
-  if fuel <= 0 then 0
-  else if idx >= span_count then 0
-  else let
-    val kind = span_kind(spans, idx, span_max)
-  in
-    if $AR.eq_int_int(kind, 13) then let
-      val block_target = span_aux1(spans, idx, span_max)
-      val new_ts = (if target_state > 0 then target_state + 1
-                    else if $AR.eq_int_int(block_target, build_target) then 0
-                    else 1): int
-    in build_prelude(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, new_ts, fuel - 1) end
-    else if $AR.eq_int_int(kind, 15) then
-      build_prelude(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, unittest_enter(target_state), fuel - 1)
-    else if $AR.eq_int_int(kind, 14) || $AR.eq_int_int(kind, 16) then let
-      val new_ts = (if target_state > 0 then target_state - 1 else 0): int
-    in build_prelude(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, new_ts, fuel - 1) end
-    else if $AR.eq_int_int(kind, 1) && target_state <= 0 then let
-      val () = emit_dep_stld(src, src_max, spans, idx, span_max, prelude)
-      val rest = build_prelude(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, target_state, fuel - 1)
-    in rest + 1 end
-    else
-      build_prelude(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, target_state, fuel - 1)
-  end
+(* Whether sp opens or closes a block *)
+fn is_marker {n:int} (sp: !span(n)): bool =
+  case+ sp of
+  | STargetBegin(_, _, _) => true | SUnittestBegin(_, _, _, _) => true
+  | STargetEnd(_, _) => true | SUnittestEnd(_, _) => true
+  | _ => false
 
-(* Build sats prelude: staload ALIAS = "pkg/src/lib.sats" for each #use.
-   Skips #use spans inside non-matching target blocks. *)
-fun build_prelude_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: pos_t,
-   prelude: !$B.builder_v >> $B.builder_v,
-   build_target: int, target_state: int, fuel: int fuel): void =
-  if fuel <= 0 then ()
-  else if idx >= span_count then ()
-  else let
-    val kind = span_kind(spans, idx, span_max)
-  in
-    if $AR.eq_int_int(kind, 13) then let
-      val block_target = span_aux1(spans, idx, span_max)
-      val new_ts = (if target_state > 0 then target_state + 1
-                    else if $AR.eq_int_int(block_target, build_target) then 0
-                    else 1): int
-    in build_prelude_sats(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, new_ts, fuel - 1) end
-    else if $AR.eq_int_int(kind, 15) then
-      build_prelude_sats(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, unittest_enter(target_state), fuel - 1)
-    else if $AR.eq_int_int(kind, 14) || $AR.eq_int_int(kind, 16) then let
-      val new_ts = (if target_state > 0 then target_state - 1 else 0): int
-    in build_prelude_sats(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, new_ts, fuel - 1) end
-    else if $AR.eq_int_int(kind, 1) && target_state <= 0 then let
-      val () = emit_dep_stld_sats(src, src_max, spans, idx, span_max, prelude)
-    in build_prelude_sats(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, target_state, fuel - 1) end
-    else
-      build_prelude_sats(src, src_max, spans, span_max, span_count,
-        idx + 1, prelude, build_target, target_state, fuel - 1)
-  end
+(* sp blanked in sats and dats *)
+fn emit_blank_span {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
+   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void = let
+  val @(ss, se) = span_range(sp)
+  val () = emit_blanks_v(src, ss, se, src_max, sats)
+in emit_blanks_v(src, ss, se, src_max, dats) end
+
+(* sp to sats and dats: blanked in a blanked block (ts > 0) or when it
+   is a block marker; the number of errors it adds *)
+fn emit_one {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
+   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
+   is_unsafe: int, ts: int): int =
+  if ts > 0 then let
+    val () = emit_blank_span(src, src_max, sp, sats, dats)
+  in 0 end
+  else if is_marker(sp) then let
+    val () = emit_blank_span(src, src_max, sp, sats, dats)
+  in 0 end
+  else emit_code_span(src, src_max, sp, sats, dats, is_unsafe)
+
+(* The staload of a #use not in a blanked block (ts = 0), to prelude:
+   for the sats (with its alias) or the dats; 1 when there was one *)
+fn prelude_line {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
+   prelude: !$B.builder_v >> $B.builder_v, ts: int, for_sats: bool): int =
+  if ts > 0 then 0
+  else case+ sp of
+    | SUse(_, _, _, ps, pe, as0, ae) =>
+      if for_sats then let
+        val () = emit_dep_stld_sats(src, src_max, ps, pe, as0, ae, prelude)
+      in 1 end
+      else let
+        val () = emit_dep_stld(src, src_max, ps, pe, prelude)
+      in 1 end
+    | _ => 0
+
+(* xs to sats and dats; ts > 0 inside a blanked block. The number of
+   errors, added to errors. *)
+fun emit_spans {ls:agz}{ns:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
+   sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v,
+   build_target: int, is_unsafe: int, errors: int, ts: int): int =
+  case+ xs of
+  | spans_nil() => errors
+  | spans_cons(sp, tl) => let
+      val e1 = emit_one(src, src_max, sp, sats, dats, is_unsafe, ts)
+    in emit_spans(src, src_max, tl, sats, dats, build_target, is_unsafe, errors + e1,
+                  next_state(sp, ts, build_target)) end
+
+(* Build dats prelude: a staload of each #use dependency, not in a
+   blanked block; the number of them *)
+fun build_prelude {ls:agz}{ns:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
+   prelude: !$B.builder_v >> $B.builder_v, build_target: int, ts: int): int =
+  case+ xs of
+  | spans_nil() => 0
+  | spans_cons(sp, tl) => let
+      val c = prelude_line(src, src_max, sp, prelude, ts, false)
+    in c + build_prelude(src, src_max, tl, prelude, build_target, next_state(sp, ts, build_target)) end
+
+(* Build sats prelude: staload ALIAS = "pkg/src/lib.sats" for each #use
+   not in a blanked block *)
+fun build_prelude_sats {ls:agz}{ns:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
+   prelude: !$B.builder_v >> $B.builder_v, build_target: int, ts: int): void =
+  case+ xs of
+  | spans_nil() => ()
+  | spans_cons(sp, tl) => let
+      val _ = prelude_line(src, src_max, sp, prelude, ts, true)
+    in build_prelude_sats(src, src_max, tl, prelude, build_target, next_state(sp, ts, build_target)) end
 
 (* ============================================================
    Test functions: each "fn <name> ()" of a $UNITTEST.run block
@@ -851,46 +497,46 @@ fn scan_span {l:agz}{n:pos}
   else if ss > max then k
   else scan_tests(src, ss, se, max, bits, out, k)
 
-(* The tests of the $UNITTEST.run blocks among spans[idx, span_count),
-   in order, appended to out as <bits><name>NUL, bits being the block's
-   targets (1 native, 2 wasm); run: the targets of the block the span
-   is in, or 0 *)
-fun collect_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{i:nat | i <= np} .<np - i>.
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np, span_count: int, idx: int i,
-   run: int, out: !$B.builder_v >> $B.builder_v, k: int): int =
-  if idx >= span_count then k
-  else if idx >= span_max then k
-  else let
-    val kind = span_kind(spans, idx, span_max)
-  in
-    if kind = 15 then
-      collect_spans(src, src_max, spans, span_max, span_count, idx + 1,
-        (if span_aux1(spans, idx, span_max) = 1 then span_aux2(spans, idx, span_max) else 0), out, k)
-    else if kind = 16 then
-      collect_spans(src, src_max, spans, span_max, span_count, idx + 1, 0, out, k)
-    else if run > 0 then
-      if kind = 0 then
-        if span_aux1(spans, idx, span_max) = 0 then let
-          val ss = span_start(spans, idx, span_max)
-          val k2 = scan_span(src, ss, span_end(spans, idx, span_max), src_max, run, out, k)
-        in collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k2) end
-        else collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k)
-      else collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k)
-    else collect_spans(src, src_max, spans, span_max, span_count, idx + 1, run, out, k)
-  end
+(* The run a span leaves: a $UNITTEST.run block's targets from its
+   begin to its end, else 0 *)
+fn next_run {ns:int} (sp: !span(ns), run: int): int =
+  case+ sp of
+  | SUnittestBegin(_, _, r, bits) => (if r then bits else 0)
+  | SUnittestEnd(_, _) => 0
+  | _ => run
+
+(* The tests sp holds when it is code in a $UNITTEST.run block of the
+   targets run (> 0), appended to out; k plus their number *)
+fn span_tests {ls:agz}{ns:pos}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns), run: int,
+   out: !$B.builder_v >> $B.builder_v, k: int): int =
+  if run <= 0 then k
+  else case+ sp of
+    | SPass(ss, se, v) => (if v then k else scan_tests(src, ss, se, src_max, run, out, k))
+    | _ => k
+
+(* The tests of the $UNITTEST.run blocks among xs, in order, appended
+   to out as <bits><name>NUL, bits being the block's targets (1 native,
+   2 wasm); run: the targets of the block xs starts in, or 0 *)
+fun collect_spans {ls:agz}{ns:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
+   run: int, out: !$B.builder_v >> $B.builder_v, n: int): int =
+  case+ xs of
+  | spans_nil() => n
+  | spans_cons(sp, tl) => let
+      val n2 = span_tests(src, src_max, sp, run, out, n)
+    in collect_spans(src, src_max, tl, next_run(sp, run), out, n2) end
 
 (* The test functions of the $UNITTEST.run blocks of src, in order, as
    <bits><name>NUL entries (bits: the block's targets, 1 native, 2
    wasm); the number of them. A test is "fn <name> (): bool" in a
    block's code. *)
-#pub fn collect_tests {ls:agz}{ns:pos}{lp:agz}{np:pos}
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np, span_count: int,
+#pub fn collect_tests {ls:agz}{ns:pos}{k:nat}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    out: !$B.builder_v >> $B.builder_v): int
 
-implement collect_tests (src, src_max, spans, span_max, span_count, out) =
-  collect_spans(src, src_max, spans, span_max, span_count, 0, 0, out, 0)
+implement collect_tests (src, src_max, xs, out) =
+  collect_spans(src, src_max, xs, 0, out, 0)
 
 (* "  if i = <k> then <name> ()\n  else " for each entry of t[p, e) *)
 fun put_dispatch {l:agz}{p:nat | p <= 524288} .<524288 - p>.
@@ -927,13 +573,12 @@ fn put_dispatch_decl {l:agz}
 (* In check and test mode, a module with tests declares
    __bats_test (i: int): bool, which runs its i-th test (in source
    order), for bats test's runner to call *)
-fn put_test_dispatch {ls:agz}{ns:pos}{lp:agz}{np:pos}
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np, span_count: int,
+fn put_test_dispatch {ls:agz}{ns:pos}{k:nat}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    sats: !$B.builder_v >> $B.builder_v, dats: !$B.builder_v >> $B.builder_v): void =
   if ~is_test_mode() then () else let
   var tb : $B.builder_v = $B.create()
-  val k = collect_tests(src, src_max, spans, span_max, span_count, tb)
+  val k = collect_tests(src, src_max, xs, tb)
   val @(ta, tlen) = $B.to_arr(tb)
   val @(fz_t, bv_t) = $A.freeze<byte>(ta)
   val () = put_dispatch_decl(k, bv_t, tlen, sats, dats)
@@ -941,27 +586,24 @@ fn put_test_dispatch {ls:agz}{ns:pos}{lp:agz}{np:pos}
 in $A.free<byte>($A.thaw<byte>(fz_t)) end
 
 (* Top-level emit *)
-#pub fn do_emit {ls:agz}{ns:pos}{lp:agz}{np:pos}
-  (src: !$A.borrow(byte, ls, ns), src_len: pos_t, src_max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, build_target: int, is_unsafe: int
+#pub fn do_emit {ls:agz}{ns:pos}{k:nat}
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
+   build_target: int, is_unsafe: int
   ): @([la:agz] $A.arr(byte, la, 524288), int,
       [lb:agz] $A.arr(byte, lb, 524288), int, int, int)
 
-implement do_emit (src, src_len, src_max, spans, span_max, span_count, build_target, is_unsafe) = let
+implement do_emit (src, src_max, xs, build_target, is_unsafe) = let
   var sats_b = $B.create()
   var dats_b = $B.create()
   var prelude_b = $B.create()
   var sats_prelude_b = $B.create()
 
   (* Build dats prelude: self-stld line is always 1 line *)
-  val dep_count = build_prelude(src, src_max, spans, span_max,
-    span_count, 0, prelude_b, build_target, 0, 524288)
+  val dep_count = build_prelude(src, src_max, xs, prelude_b, build_target, 0)
   val prelude_lines = dep_count + 1
 
   (* Build sats prelude: staload ALIAS = "pkg/src/lib.sats" *)
-  val () = build_prelude_sats(src, src_max, spans, span_max,
-    span_count, 0, sats_prelude_b, build_target, 0, 524288)
+  val () = build_prelude_sats(src, src_max, xs, sats_prelude_b, build_target, 0)
 
   (* Emit dats prelude *)
   val @(pre_arr, pre_len) = $B.to_arr(prelude_b)
@@ -979,12 +621,11 @@ implement do_emit (src, src_len, src_max, spans, span_max, span_count, build_tar
 
   val () = !g_main0_renamed := false
   (* Emit all spans *)
-  val emit_errors = emit_spans(src, src_max, spans, span_max, span_count, 0,
-    sats_b, dats_b, build_target, is_unsafe, 0, 0, 524288)
+  val emit_errors = emit_spans(src, src_max, xs, sats_b, dats_b, build_target, is_unsafe, 0, 0)
 
   (* The entry point was renamed in the dats (emit_code_v); declare it *)
   val () = put_main0_decl(sats_b)
-  val () = put_test_dispatch(src, src_max, spans, span_max, span_count, sats_b, dats_b)
+  val () = put_test_dispatch(src, src_max, xs, sats_b, dats_b)
   val @(sats_arr, sats_len) = $B.to_arr(sats_b)
   val @(dats_arr, dats_len) = $B.to_arr(dats_b)
 in @(sats_arr, sats_len, dats_arr, dats_len, prelude_lines, emit_errors) end

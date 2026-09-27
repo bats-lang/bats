@@ -67,20 +67,6 @@ implement find_null_bv_from (bv, p, n) =
   else if p > n then p
   else $S.find_null_bv_at(bv, p, n)
 
-(* The little-endian 32-bit int at off in a span table, as a proven
-   int: two's complement computed without overflow (the top byte counts
-   as b3 - 256 when its sign bit is set). *)
-#pub fn span_i32 {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), off: pos_t, max: int n): pos_t
-
-implement span_i32 (bv, off, max) = let
-  val b0 = $AR.low_byte(peek(bv, off, max))
-  val b1 = $AR.low_byte(peek(bv, off + 1, max))
-  val b2 = $AR.low_byte(peek(bv, off + 2, max))
-  val b3 = $AR.low_byte(peek(bv, off + 3, max))
-  val hi = (if b3 < 128 then b3 else b3 - 256): [h:int | ~128 <= h; h < 128] int h
-in b0 + b1 * 256 + b2 * 65536 + hi * 16777216 end
-
 (* ============================================================
    Global state using ATS2 refs (replaces C statics)
    ============================================================ *)

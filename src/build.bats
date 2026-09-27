@@ -45,12 +45,10 @@ in
       val cr = $F.file_close(fd)
       val () = $R.discard<int><int>(cr)
       val @(fz_src, bv_src) = $A.freeze<byte>(buf)
-      val @(span_arr, _span_len, span_count) = do_lex(bv_src, nbytes, 524288)
-      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
+      val xs = lex_spans(bv_src, nbytes, 524288)
       val @(sats_arr, sats_len, dats_arr, dats_len, pre_lines, safety_errors) =
-        do_emit(bv_src, nbytes, 524288, bv_sp, 524288, span_count, build_target, is_unsafe)
-      val () = $A.drop<byte>(fz_sp, bv_sp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+        do_emit(bv_src, 524288, xs, build_target, is_unsafe)
+      val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = $A.free<byte>($A.thaw<byte>(fz_src))
       (* Write .sats *)
@@ -557,15 +555,14 @@ end
 #pub fn check_wasm_binary {l:agz}
   (path: !$A.borrow(byte, l, 524288)): int
 
-(* Whether spans[idx, count) hold a #target line naming wasm (aux1 1,
-   or 2 for "#target wasm binary"), as Rust's lex_target reads it *)
-fun has_wasm_target {lsp:agz}{f:nat} .<f>.
-  (spans: !$A.borrow(byte, lsp, 524288), idx: pos_t, count: int, f: int f): bool =
-  if f <= 0 then false
-  else if idx >= count then false
-  else if peek(spans, idx * 28, 524288) <> 7 then has_wasm_target(spans, idx + 1, count, f - 1)
-  else if span_i32(spans, idx * 28 + 10, 524288) > 0 then true
-  else has_wasm_target(spans, idx + 1, count, f - 1)
+(* Whether xs hold a #target line naming wasm (1, or 2 for
+   "#target wasm binary"), as Rust's lex_target reads it *)
+fun has_wasm_target {ns:int}{k:nat} .<k>. (xs: !spans(ns, k)): bool =
+  case+ xs of
+  | spans_nil() => false
+  | spans_cons(sp, tl) => let
+      val w = (case+ sp of | STarget(_, _, t) => t > 0 | _ => false): bool
+    in if w then true else has_wasm_target(tl) end
 
 implement check_wasm_binary(path) =
   case+ $F.file_open(path, 524288, 0, 0) of
@@ -576,11 +573,9 @@ implement check_wasm_binary(path) =
         | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
       val () = $R.discard<int><int>($F.file_close(fd))
       val @(fz_s, bv_s) = $A.freeze<byte>(buf)
-      val @(span_arr, _, count) = do_lex(bv_s, n, 524288)
-      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
-      val w = has_wasm_target(bv_sp, 0, count, 524288)
-      val () = $A.drop<byte>(fz_sp, bv_sp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+      val xs = lex_spans(bv_s, n, 524288)
+      val w = has_wasm_target(xs)
+      val () = spans_free(xs)
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
     in (if w then 1 else 0) end
