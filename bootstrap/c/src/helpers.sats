@@ -676,6 +676,71 @@ fn freshness_check_bv
 
 
 
+
+
+
+
+
+
+
+fn touch_sats_stamp (): void
+
+
+
+
+
+
+
+
+
+
+
+fn c_fresh_bv
+  (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn file_has_bytes {lp:agz}{lb:agz}
+  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn arr_range_to_builder_v {l:agz}
   (src: !$A.arr(byte, l, 4096), i: pos_t, lim: int,
    dst: !$B.builder_v >> $B.builder_v): void
