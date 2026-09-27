@@ -24,7 +24,8 @@ fn is_ident_start(b: int): bool =
 (* A span of a source of n bytes: the construct and its positions (the
    span's own range first) *)
 #pub datavtype span(n:int) =
-  | SPass(n) of (spos(n), spos(n), bool)             (* verbatim when true: comment, string, char *)
+  | {s,e:nat | s <= e; e <= n}
+    SPass(n) of (int s, int e, bool)                 (* verbatim when true: comment, string, char *)
   | SUse(n) of (spos(n), spos(n), bool, spos(n), spos(n), spos(n), spos(n))
                                                       (* mangled; package, alias *)
   | {s,c,e:nat | s <= c; c <= e; e <= n}

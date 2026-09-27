@@ -15892,7 +15892,7 @@ ATSstatic()
 /*
 imparg = a(6433)
 tmparg = S2Evar(a(6433))
-tmpsub = Some(a(6433) -> S2Eexi(c$17452(24881); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$17452(24881))), S2Eapp(S2Ecst(<); S2Evar(c$17452(24881)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$17452(24881)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$17452(24881)))))
+tmpsub = Some(a(6433) -> S2Eexi(c$17460(24891); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$17460(24891))), S2Eapp(S2Ecst(<); S2Evar(c$17460(24891)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$17460(24891)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$17460(24891)))))
 */
 atstkind_t0ype(atstype_char)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__16__8(atstkind_type(atstype_ptrk) arg0)
@@ -20572,7 +20572,7 @@ ATSstatic()
 /*
 imparg = a(6433)
 tmparg = S2Evar(a(6433))
-tmpsub = Some(a(6433) -> S2Eexi(c$17453(24882); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$17453(24882))), S2Eapp(S2Ecst(<); S2Evar(c$17453(24882)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$17453(24882)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$17453(24882)))))
+tmpsub = Some(a(6433) -> S2Eexi(c$17461(24892); S2Eapp(S2Ecst(<=); S2Eapp(S2Ecst(~); S2Eintinf(128)), S2Evar(c$17461(24892))), S2Eapp(S2Ecst(<); S2Evar(c$17461(24892)), S2Eintinf(128)), S2Eapp(S2Ecst(!=); S2Evar(c$17461(24892)), S2Eintinf(0)); S2Eapp(S2Ecst(char_int_t0ype); S2Evar(c$17461(24892)))))
 */
 atstkind_t0ype(atstype_char)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__16__13(atstkind_type(atstype_ptrk) arg0)

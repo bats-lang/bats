@@ -1,0 +1,30 @@
+error: error: 'implement spin' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'
+ --> lib.bats:3:1
+   |
+ 3 | implement spin () = spin()
+   | ^
+
+error: 'implement outer' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'
+ --> helper.bats:5:1
+   |
+ 5 | implement outer () = helper()
+   | ^
+
+error: 'implement ping' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'
+ --> ping.bats:3:1
+   |
+ 3 | implement ping (n) = if n > 0 then pong(n - 1) else 0
+   | ^
+
+error: 'implement pong' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'
+ --> pong.bats:5:1
+   |
+ 5 | implement pong (n) = ping(n)
+   | ^
+
+error: 'implement down' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'
+ --> self.bats:3:1
+   |
+ 3 | implement down (n) = if n > 0 then down(n - 1) else 0
+   | ^
+
