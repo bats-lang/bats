@@ -528,34 +528,25 @@ in
   else loop(src, start, stop, max, dst)
 end
 
-(* Builder_v wrappers: compute fuel from remaining capacity *)
+(* Builder_v writers: a byte that does not fit is dropped, which leaves
+   the builder full; write_file_from_builder refuses a full builder *)
 
 #pub fn put_char_v(out: !$B.builder_v >> $B.builder_v, v: int): void
 
-implement put_char_v(out, v) = let
-  fun _put {bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} .<fuel>.
-    (out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m),
-     v: int, fuel: int fuel): void =
-    if fuel <= 0 then ()
-    else $B.put_char(out, $AR.low_byte(v))
-in _put(out, v, 524288 - $B.length(out)) end
+implement put_char_v(out, v) =
+  if $B.length(out) < 524288 then $B.put_char(out, $AR.low_byte(v)) else ()
 
 #pub fn bput_v {sn:nat}
   (out: !$B.builder_v >> $B.builder_v, s: string sn): void
 
 implement bput_v(out, s) = let
-  fun loop {bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP}{sl:nat}{i:nat | i <= sl} .<fuel>.
-    (out: !$B.builder(bn) >> [m:nat | bn <= m; m <= bn + fuel] $B.builder(m),
-     s: string sl, slen: int sl, i: int i, fuel: int fuel): void =
-    if fuel <= 0 then ()
-    else if i >= slen then ()
+  fun loop {sl:nat}{i:nat | i <= sl} .<sl - i>.
+    (out: !$B.builder_v >> $B.builder_v, s: string sl, slen: int sl, i: int i): void =
+    if i >= slen then ()
     else let
-      val c = char2int0(string_get_at(s, i))
-      val () = $B.put_char(out, $AR.low_byte(c))
-    in loop(out, s, slen, i + 1, fuel - 1) end
-  val slen_sz = string1_length(s)
-  val slen = g1u2i(slen_sz)
-in loop(out, s, slen, 0, 524288 - $B.length(out)) end
+      val () = put_char_v(out, char2int0(string_get_at(s, i)))
+    in loop(out, s, slen, i + 1) end
+in loop(out, s, g1u2i(string1_length(s)), 0) end
 
 (* v in decimal appended to out, as much of it as there is room for, as
    the other builder_v writers do: a builder_v that drops a byte ends up
