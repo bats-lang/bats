@@ -570,31 +570,11 @@ implement bput_v(out, s) = let
   val slen = g1u2i(slen_sz)
 in loop(out, s, slen, 0, 524288 - $B.length(out)) end
 
+(* v in decimal appended to out, when there is room for it *)
 
 
-implement bput_int_v(out, v) = let
-  fun emit_digits {fuel:nat} .<fuel>.
-    (out: !$B.builder_v >> $B.builder_v, d: int, fuel: int fuel): void =
-    if fuel <= 0 then ()
-    else if d < 10 then put_char_v(out, d + 48)
-    else let
-      val () = emit_digits(out, d / 10, fuel - 1)
-    in put_char_v(out, (d mod 10) + 48) end
-in
-  if v < 0 then let
-    val () = put_char_v(out, 45)
-    val abs_v = ~v
-  in
-    if abs_v < 0 then put_char_v(out, 48)
-    else emit_digits(out, abs_v, 20)
-  end
-  else if v = 0 then put_char_v(out, 48)
-  else emit_digits(out, v, 20)
-end
-
-
-
-implement put_int_v(out, v) = bput_int_v(out, v)
+implement put_int_v(out, v) =
+  if $B.length(out) + 11 <= 524288 then $B.put_int(out, v) else ()
 
 
 
@@ -762,43 +742,42 @@ implement rev_arg_list (xs, acc) = _rev_arg_list(xs, acc)
 (* Split a null-separated builder into a list of arg_entries *)
 
 
+(* The first position of bv[p, t) holding c, or t *)
+fun find_byte {lb:agz}{p,t:nat | p <= t; t <= 524288} .<t - p>.
+  (bv: !$A.borrow(byte, lb, 524288), p: int p, t: int t, c: int): [r:nat | p <= r; r <= t] int r =
+  if p >= t then p
+  else if byte2int0($A.read<byte>(bv, p)) = c then p
+  else find_byte(bv, p + 1, t, c)
+
+(* The first position of bv[p, t) not holding c, or t *)
+fun skip_byte {lb:agz}{p,t:nat | p <= t; t <= 524288} .<t - p>.
+  (bv: !$A.borrow(byte, lb, 524288), p: int p, t: int t, c: int): [r:nat | p <= r; r <= t] int r =
+  if p >= t then p
+  else if byte2int0($A.read<byte>(bv, p)) <> c then p
+  else skip_byte(bv, p + 1, t, c)
+
+(* The words of bv[p, t) separated by sep (runs of sep when skip),
+   onto acc, last first *)
+fun split_words {lb:agz}{p,t:nat | p <= t; t <= 524288} .<t - p>.
+  (bv: !$A.borrow(byte, lb, 524288), p: int p, t: int t, sep: int, skip: bool,
+   acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
+  if p >= t then acc
+  else let
+    val s0 = (if skip then skip_byte(bv, p, t, sep) else p): [r:nat | p <= r; r <= t] int r
+    val we = find_byte(bv, s0, t, sep)
+    val acc2 = (if we > s0 then let
+        var wb = $B.create()
+        val () = copy_to_builder_v(bv, s0, we, 524288, wb)
+      in $L.list_vt_cons(mk_arg(wb), acc) end
+      else acc): $L.listv($P.arg_entry)
+  in
+    if we >= t then acc2 else split_words(bv, we + 1, t, sep, skip, acc2)
+  end
+
 implement split_null_to_list(b) = let
   val @(arr, total_len) = $B.to_arr(b)
   val @(fz, bv) = $A.freeze<byte>(arr)
-  fun find_nul {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), pos: pos_t, total: int,
-     fuel: int fuel): pos_t =
-    if fuel <= 0 then pos
-    else if pos >= total then pos
-    else if peek(bv, pos, 524288) = 0 then pos
-    else find_nul(bv, pos + 1, total, fuel - 1)
-  fun copy_word {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288),
-     dst: !$B.builder_v >> $B.builder_v,
-     soff: pos_t, di: pos_t, seg_len: int, fuel: int fuel): void =
-    if fuel <= 0 then ()
-    else if di >= seg_len then ()
-    else let
-      val c = peek(bv, soff + di, 524288)
-      val () = put_char_v(dst, c)
-    in copy_word(bv, dst, soff, di + 1, seg_len, fuel - 1) end
-  fun loop {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), start: pos_t, total: int,
-     acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
-    if fuel <= 0 then acc
-    else if start >= total then acc
-    else let
-      val np = find_nul(bv, start, total, 524288)
-      val seg_len = np - start
-    in
-      if seg_len <= 0 then loop(bv, np + 1, total, acc, fuel - 1)
-      else let
-        var wb = $B.create()
-        val () = copy_word(bv, wb, start, 0, seg_len, 524288)
-      in loop(bv, np + 1, total,
-           $L.list_vt_cons(mk_arg(wb), acc), fuel - 1) end
-    end
-  val result = loop(bv, 0, total_len, $L.list_vt_nil(), 524288)
+  val result = split_words(bv, 0, total_len, 0, false, $L.list_vt_nil())
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in rev_arg_list(result, $L.list_vt_nil()) end
@@ -809,48 +788,7 @@ in rev_arg_list(result, $L.list_vt_nil()) end
 implement split_spaces_to_list(b) = let
   val @(arr, total_len) = $B.to_arr(b)
   val @(fz, bv) = $A.freeze<byte>(arr)
-  fun find_space {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), pos: pos_t, total: int,
-     fuel: int fuel): pos_t =
-    if fuel <= 0 then pos
-    else if pos >= total then pos
-    else if peek(bv, pos, 524288) = 32 then pos
-    else find_space(bv, pos + 1, total, fuel - 1)
-  fun skip_spaces {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), pos: pos_t, total: int,
-     fuel: int fuel): pos_t =
-    if fuel <= 0 then pos
-    else if pos >= total then pos
-    else if peek(bv, pos, 524288) <> 32 then pos
-    else skip_spaces(bv, pos + 1, total, fuel - 1)
-  fun copy_word {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288),
-     dst: !$B.builder_v >> $B.builder_v,
-     soff: pos_t, di: pos_t, seg_len: int, fuel: int fuel): void =
-    if fuel <= 0 then ()
-    else if di >= seg_len then ()
-    else let
-      val c = peek(bv, soff + di, 524288)
-      val () = put_char_v(dst, c)
-    in copy_word(bv, dst, soff, di + 1, seg_len, fuel - 1) end
-  fun loop {lb:agz}{fuel:nat} .<fuel>.
-    (bv: !$A.borrow(byte, lb, 524288), start: pos_t, total: int,
-     acc: $L.listv($P.arg_entry), fuel: int fuel): $L.listv($P.arg_entry) =
-    if fuel <= 0 then acc
-    else if start >= total then acc
-    else let
-      val pos = skip_spaces(bv, start, total, 524288)
-    in
-      if pos >= total then acc
-      else let
-        val word_end = find_space(bv, pos, total, 524288)
-        val word_len = word_end - pos
-        var wb = $B.create()
-        val () = copy_word(bv, wb, pos, 0, word_len, 524288)
-      in loop(bv, word_end, total,
-           $L.list_vt_cons(mk_arg(wb), acc), fuel - 1) end
-    end
-  val result = loop(bv, 0, total_len, $L.list_vt_nil(), 524288)
+  val result = split_words(bv, 0, total_len, 32, true, $L.list_vt_nil())
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in rev_arg_list(result, $L.list_vt_nil()) end
@@ -1014,27 +952,23 @@ end
 
 implement prerr_builder (b) = let
   val @(ba, bl) = $B.to_arr(b)
-  fun loop {lb:agz}{f:nat} .<f>.
-    (a: !$A.arr(byte, lb, 524288), i: pos_t, n: int, f: int f): void =
-    if f <= 0 then ()
-    else if i >= n then ()
-    else if i < 0 then ()
-    else if i >= 524288 then ()
+  fun loop {lb:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
+    (a: !$A.arr(byte, lb, 524288), i: int i, n: int n): void =
+    if i >= n then ()
     else let
       val () = prerr_char(int2char0(byte2int0($A.get<byte>(a, i))))
-    in loop(a, i + 1, n, f - 1) end
-  val () = loop(ba, 0, bl, 524288)
+    in loop(a, i + 1, n) end
+  val () = loop(ba, 0, bl)
 in $A.free<byte>(ba) end
 
 (* The prelude line count in <in>.pre, written next to the .dats
    in[0, il) by preprocess_one; 0 when there is none *)
-fun digits_val {lb:agz}{f:nat} .<f>.
-  (b: !$A.borrow(byte, lb, 16), i: pos_t, k: int, v: int, f: int f): int =
-  if f <= 0 then v
-  else if i >= k then v
-  else let val c = peek(b, i, 16) in
+fun digits_val {lb:agz}{i,k:nat | i <= k; k <= 16} .<k - i>.
+  (b: !$A.borrow(byte, lb, 16), i: int i, k: int k, v: int): int =
+  if i >= k then v
+  else let val c = byte2int0($A.read<byte>(b, i)) in
     if c < 48 then v else if c > 57 then v
-    else digits_val(b, i + 1, k, v * 10 + (c - 48), f - 1)
+    else digits_val(b, i + 1, k, v * 10 + (c - 48))
   end
 
 fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = let
@@ -1049,10 +983,10 @@ fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = l
     | ~$R.ok(fd) => let
         val buf = $A.alloc<byte>(16)
         val k = (case+ $F.file_read(fd, buf, 16) of
-          | ~$R.ok(k) => k | ~$R.err(_) => 0): int
+          | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 16] int k
         val () = $R.discard<int><int>($F.file_close(fd))
         val @(fz_b, bv_b) = $A.freeze<byte>(buf)
-        val v = digits_val(bv_b, 0, k, 0, 9)
+        val v = digits_val(bv_b, 0, k, 0)
         val () = $A.drop<byte>(fz_b, bv_b)
         val () = $A.free<byte>($A.thaw<byte>(fz_b))
       in v end): int
@@ -1061,61 +995,61 @@ fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = l
 in n end
 
 (* Everything left to read from fd appended to out, up to about 500000
-   bytes (Rust reads patsopt's whole stderr) *)
-fun drain_fd {f:nat} .<f>.
-  (fd: !$F.fd, out: !$B.builder_v >> $B.builder_v, total: int, f: int f): void =
-  if f <= 0 then ()
-  else if total > 500000 then ()
-  else let
-    val buf = $A.alloc<byte>(4096)
-    val k = (case+ $F.file_read(fd, buf, 4096) of
-      | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
-    val @(fz_b, bv_b) = $A.freeze<byte>(buf)
-    val () = copy_to_builder_v(bv_b, 0, k, 4096, out)
-    val () = $A.drop<byte>(fz_b, bv_b)
-    val () = $A.free<byte>($A.thaw<byte>(fz_b))
-  in if k <= 0 then () else drain_fd(fd, out, total + k, f - 1) end
+   bytes (Rust reads patsopt's whole stderr); total bytes read so far *)
+fun drain_fd {t:nat | t <= 500000} .<500000 - t>.
+  (fd: !$F.fd, out: !$B.builder_v >> $B.builder_v, total: int t): void = let
+  val buf = $A.alloc<byte>(4096)
+  val k = (case+ $F.file_read(fd, buf, 4096) of
+    | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
+  val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+  val () = copy_to_builder_v(bv_b, 0, k, 4096, out)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+in
+  if k <= 0 then ()
+  else if total + k > 500000 then ()
+  else drain_fd(fd, out, total + k)
+end
 
 (* The end of the line holding e[i] (its newline, or n) *)
-fun line_end_at {le:agz}{f:nat} .<f>.
-  (e: !$A.borrow(byte, le, 524288), i: pos_t, n: int, f: int f): pos_t =
-  if f <= 0 then i
-  else if i >= n then i
-  else if peek(e, i, 524288) = 10 then i
-  else line_end_at(e, i + 1, n, f - 1)
+fun line_end_at {le:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
+  (e: !$A.borrow(byte, le, 524288), i: int i, n: int n): [j:nat | i <= j; j <= n] int j =
+  if i >= n then i
+  else if byte2int0($A.read<byte>(e, i)) = 10 then i
+  else line_end_at(e, i + 1, n)
 
 (* Whether e[i, j) holds the k bytes of lit somewhere *)
-fun has_lit {le:agz}{m:pos | m <= 16}{f:nat} .<f>.
-  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int,
-   lit: &(@[char][m]), k: int m, f: int f): bool =
-  if f <= 0 then false
-  else if i + k > j then false
+fun has_lit {le:agz}{m:pos | m <= 16}{i,j:nat | i <= j; j <= 524288} .<j - i>.
+  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, lit: &(@[char][m]), k: int m): bool =
+  if i + k > j then false
   else if lit_at(e, i, 524288, lit, k) then true
-  else has_lit(e, i + 1, j, lit, k, f - 1)
+  else has_lit(e, i + 1, j, lit, k)
 
 (* The digits at e[i, j): their end, and their value *)
-fun num_at {le:agz}{f:nat} .<f>.
-  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int, v: int, f: int f): @(pos_t, int) =
-  if f <= 0 then @(i, v)
-  else if i >= j then @(i, v)
-  else let val c = peek(e, i, 524288) in
+fun num_at {le:agz}{i,j:nat | i <= j; j <= 524288} .<j - i>.
+  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, v: int): @([r:nat | i <= r; r <= j] int r, int) =
+  if i >= j then @(i, v)
+  else let val c = byte2int0($A.read<byte>(e, i)) in
     if c < 48 then @(i, v) else if c > 57 then @(i, v)
-    else num_at(e, i + 1, j, v * 10 + (c - 48), f - 1)
+    else num_at(e, i + 1, j, v * 10 + (c - 48))
   end
 
 (* v - off (at least 0) when there were digits *)
 fn put_line_num (out: !$B.builder_v >> $B.builder_v, has: bool, v: int, off: int): void =
   if ~has then bput_v(out, "")
-  else if v > off then bput_int_v(out, v - off)
-  else bput_int_v(out, 0)
+  else if v > off then put_int_v(out, v - off)
+  else put_int_v(out, 0)
+
+(* i + k, but at most j *)
+fn adv_to {i,j:nat | i < j}{k:pos} (i: int i, k: int k, j: int j): [r:int | i < r; r <= j] int r =
+  if i + k <= j then i + k else j
 
 (* e[i, j) with .sats and .dats as .bats and build/ dropped, and, when
    adj, each line=N as line=N-off (at least 0) *)
-fun remap_line {le:agz}{f:nat} .<f>.
-  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int, adj: bool, off: int,
-   out: !$B.builder_v >> $B.builder_v, f: int f): void =
-  if f <= 0 then ()
-  else if i >= j then ()
+fun remap_line {le:agz}{i,j:nat | i <= j; j <= 524288} .<j - i>.
+  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, adj: bool, off: int,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if i >= j then ()
   else let
     var s_c = @[char][5]('.', 's', 'a', 't', 's')
     var d_c = @[char][5]('.', 'd', 'a', 't', 's')
@@ -1130,42 +1064,42 @@ fun remap_line {le:agz}{f:nat} .<f>.
   in
     if ext then let
       val () = bput_v(out, ".bats")
-    in remap_line(e, i + 5, j, adj, off, out, f - 1) end
+    in remap_line(e, adv_to(i, 5, j), j, adj, off, out) end
     else if bld then let
       val () = bput_v(out, "")
-    in remap_line(e, i + 6, j, adj, off, out, f - 1) end
+    in remap_line(e, adv_to(i, 6, j), j, adj, off, out) end
     else if lin then let
       val () = bput_v(out, "line=")
-      val @(ne, v) = num_at(e, i + 5, j, 0, 9)
-      val () = put_line_num(out, ne > i + 5, v, off)
-    in remap_line(e, ne, j, adj, off, out, f - 1) end
+      val ds = adv_to(i, 5, j)
+      val @(ne, v) = num_at(e, ds, j, 0)
+      val () = put_line_num(out, ne > ds, v, off)
+    in remap_line(e, ne, j, adj, off, out) end
     else let
-      val () = put_char_v(out, peek(e, i, 524288))
-    in remap_line(e, i + 1, j, adj, off, out, f - 1) end
+      val () = put_char_v(out, byte2int0($A.read<byte>(e, i)))
+    in remap_line(e, i + 1, j, adj, off, out) end
   end
 
 (* The line e[i, j): as is when keep, else remapped *)
-fn emit_line {le:agz}
-  (e: !$A.borrow(byte, le, 524288), i: pos_t, j: int, keep: bool, adj: bool, off: int,
+fn emit_line {le:agz}{i,j:nat | i <= j; j <= 524288}
+  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, keep: bool, adj: bool, off: int,
    out: !$B.builder_v >> $B.builder_v): void =
   if keep then copy_to_builder_v(e, i, j, 524288, out)
-  else remap_line(e, i, j, adj, off, out, 524288)
+  else remap_line(e, i, j, adj, off, out)
 
 (* Rust's remap_errors of patsopt's stderr e[i, n), line by line *)
-fun remap_errors {le:agz}{f:nat} .<f>.
-  (e: !$A.borrow(byte, le, 524288), i: pos_t, n: int, off: int,
-   out: !$B.builder_v >> $B.builder_v, f: int f): void =
-  if f <= 0 then ()
-  else if i >= n then ()
+fun remap_errors {le:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
+  (e: !$A.borrow(byte, le, 524288), i: int i, n: int n, off: int,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if i >= n then ()
   else let
-    val j = line_end_at(e, i, n, 524288)
+    val j = line_end_at(e, i, n)
     var t_c = @[char][11]('_', 'b', 'a', 't', 's', '_', 'e', 'n', 't', 'r', 'y')
     var d_c = @[char][5]('.', 'd', 'a', 't', 's')
-    val keep = has_lit(e, i, j, t_c, 11, 524288)
-    val adj = has_lit(e, i, j, d_c, 5, 524288)
+    val keep = has_lit(e, i, j, t_c, 11)
+    val adj = has_lit(e, i, j, d_c, 5)
     val () = emit_line(e, i, j, keep, adj, off, out)
     val () = put_char_v(out, 10)
-  in remap_errors(e, j + 1, n, off, out, f - 1) end
+  in if j >= n then () else remap_errors(e, j + 1, n, off, out) end
 
 (* A failed patsopt of in[0, il): its stderr as Rust prints it,
    "error: patsopt error:" and the lines remapped to the .bats *)
@@ -1176,7 +1110,7 @@ fn report_patsopt {li:agz}
   val @(fz_e, bv_e) = $A.freeze<byte>(ea)
   var out : $B.builder_v = $B.create()
   val () = bput_v(out, "error: patsopt error:\n")
-  val () = remap_errors(bv_e, 0, en, off, out, 524288)
+  val () = remap_errors(bv_e, 0, en, off, out)
   val () = put_char_v(out, 10)
   val () = $A.drop<byte>(fz_e, bv_e)
   val () = $A.free<byte>($A.thaw<byte>(fz_e))
@@ -1265,7 +1199,7 @@ in
       (* Read stderr BEFORE waiting — prevents deadlock if child
          writes more than PIPE_BUF (64KB) to stderr *)
       var eb : $B.builder_v = $B.create()
-      val () = drain_fd(err_fd, eb, 0, 1000)
+      val () = drain_fd(err_fd, eb, 0)
       val ecr = $F.file_close(err_fd)
       val () = $R.discard<int><int>(ecr)
       val wr = $P.child_wait(child)

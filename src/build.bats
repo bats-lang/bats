@@ -80,7 +80,7 @@ in
       val @(pa, _) = $B.to_arr(pb)
       val @(fz_pa, bv_pa) = $A.freeze<byte>(pa)
       var nb : $B.builder_v = $B.create()
-      val () = bput_int_v(nb, pre_lines)
+      val () = put_int_v(nb, pre_lines)
       val _ = write_file_from_builder(bv_pa, 524288, nb)
       val () = $A.drop<byte>(fz_pa, bv_pa)
       val () = $A.free<byte>($A.thaw<byte>(fz_pa))
