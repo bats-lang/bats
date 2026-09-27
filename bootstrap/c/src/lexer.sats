@@ -23,12 +23,39 @@ staload "helpers.sats"
 
 
 
+typedef spos(n:int) = [p:nat | p <= n] int p
 
 
 
+datavtype span(n:int) =
+  | SPass(n) of (spos(n), spos(n), bool)             (* verbatim when true: comment, string, char *)
+  | SUse(n) of (spos(n), spos(n), bool, spos(n), spos(n), spos(n), spos(n))
+                                                      (* mangled; package, alias *)
+  | {s,c,e:nat | s <= c; c <= e; e <= n}
+    SPub(n) of (int s, int e, bool, int c)           (* rejected (restricted); contents start *)
+  | SQual(n) of (spos(n), spos(n), spos(n), spos(n), spos(n), spos(n))
+                                                      (* alias, member *)
+  | SUnsafeBlock(n) of (spos(n), spos(n), spos(n), spos(n))
+                                                      (* contents *)
+  | SConstruct(n) of (spos(n), spos(n))              (* an unsafe construct *)
+  | SExtcode(n) of (spos(n), spos(n), spos(n), spos(n), int)
+                                                      (* contents; kind *)
+  | STarget(n) of (spos(n), spos(n), int)            (* #target line: 0 native, 1 wasm, 2 binary *)
+  | SStaload(n) of (spos(n), spos(n))
+  | STargetBegin(n) of (spos(n), spos(n), int)       (* target *)
+  | STargetEnd(n) of (spos(n), spos(n))
+  | SUnittestBegin(n) of (spos(n), spos(n), bool, int)
+                                                      (* $UNITTEST.run; its targets *)
+  | SUnittestEnd(n) of (spos(n), spos(n))
+  | SLexError(n) of (spos(n), int, spos(n), spos(n), bool)
+                                                      (* at; code; e1, e2; .run *)
 
 
+datavtype spans(n:int, int) =
+  | spans_nil(n, 0) of ()
+  | {k:nat} spans_cons(n, k + 1) of (span(n), spans(n, k))
 
+fun spans_free {n:int}{k:nat} (xs: spans(n, k)): void
 
 
 
@@ -1225,10 +1252,9 @@ staload "helpers.sats"
 
 
 
-
-fn do_lex {l:agz}{n:pos}{m:nat | m <= n}
+fn lex_spans {l:agz}{n:pos}{m:nat | m <= n}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n
-  ): @([ls:agz] $A.arr(byte, ls, 524288), int, int)
+  ): [k:nat] spans(n, k)
 
 
 

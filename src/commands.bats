@@ -36,11 +36,9 @@ fn file_tests {lp:agz}
         | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
       val () = $R.discard<int><int>($F.file_close(fd))
       val @(fz_s, bv_s) = $A.freeze<byte>(buf)
-      val @(span_arr, _, count) = do_lex(bv_s, n, 524288)
-      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
-      val k = collect_tests(bv_s, 524288, bv_sp, 524288, count, out)
-      val () = $A.drop<byte>(fz_sp, bv_sp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+      val xs = lex_spans(bv_s, n, 524288)
+      val k = collect_tests(bv_s, 524288, xs, out)
+      val () = spans_free(xs)
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
     in k end

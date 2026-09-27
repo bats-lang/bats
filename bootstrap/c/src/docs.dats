@@ -125,53 +125,44 @@ fn put_doc_comment {l:agz}{n:pos}
    Module pages
    ============================================================ *)
 
-fun trim_start {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), p: pos_t, e: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then p
-  else if p >= e then p
-  else if is_trim_ws(peek(src, p, max)) then trim_start(src, p + 1, e, max, fuel - 1)
+(* Past the whitespace at the start of src[p, e) *)
+fun trim_start {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int e): [q:int | p <= q; q <= e] int q =
+  if p >= e then p
+  else if is_trim_ws(byte2int0($A.read<byte>(src, p))) then trim_start(src, p + 1, e)
   else p
 
-fun trim_end {l:agz}{n:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, max: int n, fuel: int fuel): pos_t =
-  if fuel <= 0 then e
-  else if e <= s then e
-  else if is_trim_ws(peek(src, e - 1, max)) then trim_end(src, s, e - 1, max, fuel - 1)
+(* Before the whitespace at the end of src[s, e) *)
+fun trim_end {l:agz}{n:pos}{s,e:nat | s <= e; e <= n} .<e - s>.
+  (src: !$A.borrow(byte, l, n), s: int s, e: int e): [q:int | s <= q; q <= e] int q =
+  if e <= s then e
+  else if is_trim_ws(byte2int0($A.read<byte>(src, e - 1))) then trim_end(src, s, e - 1)
   else e
 
-(* "\n### `<signature>`\n" and its doc comment for each #pub span from
-   idx on (kind 2, dest 1: contents in [aux1, aux2)); returns count plus
-   the number of them. *)
-fun put_entries {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, ls, ns), max: int ns,
-   spans: !$A.borrow(byte, lp, np), span_max: int np,
-   span_count: int, idx: pos_t,
-   out: !$B.builder_v >> $B.builder_v, count: int, ut: int, fuel: int fuel): int =
-  if fuel <= 0 then count
-  else if idx >= span_count then count
-  else let
-    val base = idx * 28
-    val kind = peek(spans, base, span_max)
-  in
-    (* A $UNITTEST block's declarations are test code, not the API *)
-    if kind = 15 then
-      put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, ut + 1, fuel - 1)
-    else if kind = 16 then
-      put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, (if ut > 0 then ut - 1 else 0), fuel - 1)
-    else if ut > 0 then
-      put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, ut, fuel - 1)
-    else if kind = 2 && peek(spans, base + 1, span_max) = 1 then let
-      val ss = span_i32(spans, base + 2, span_max)
-      val ts = trim_start(src, span_i32(spans, base + 10, span_max),
-                          span_i32(spans, base + 14, span_max), max, max)
-      val te = trim_end(src, ts, span_i32(spans, base + 14, span_max), max, max)
-      val () = bput_v(out, "\n### `")
-      val () = copy_to_builder_v(src, ts, te, max, out)
-      val () = bput_v(out, "`\n")
-      val () = put_doc_comment(src, ss, max, out)
-    in put_entries(src, max, spans, span_max, span_count, idx + 1, out, count + 1, ut, fuel - 1) end
-    else put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, ut, fuel - 1)
-  end
+(* "\n### `<signature>`\n" and its doc comment for each #pub declaration
+   of xs (not in a $UNITTEST block: ut is the depth of those); returns
+   count plus the number of them. *)
+fun put_entries {ls:agz}{ns:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, ls, ns), max: int ns, xs: !spans(ns, k),
+   out: !$B.builder_v >> $B.builder_v, count: int, ut: int): int =
+  case+ xs of
+  | spans_nil() => count
+  | spans_cons(sp, tl) =>
+    (case+ sp of
+     | SUnittestBegin(_, _, _, _) => put_entries(src, max, tl, out, count, ut + 1)
+     | SUnittestEnd(_, _) => put_entries(src, max, tl, out, count, (if ut > 0 then ut - 1 else 0))
+     | SPub(ss, se, rejected, cs) =>
+       if ut > 0 then put_entries(src, max, tl, out, count, ut)
+       else if rejected then put_entries(src, max, tl, out, count, ut)
+       else let
+         val ts = trim_start(src, cs, se)
+         val te = trim_end(src, ts, se)
+         val () = bput_v(out, "\n### `")
+         val () = copy_to_builder_v(src, ts, te, max, out)
+         val () = bput_v(out, "`\n")
+         val () = put_doc_comment(src, ss, max, out)
+       in put_entries(src, max, tl, out, count + 1, ut) end
+     | _ => put_entries(src, max, tl, out, count, ut))
 
 (* The entries of the .bats file at path, appended to out; the number of
    them, or ~1 when the file cannot be read. *)
@@ -187,11 +178,9 @@ in
         | ~$R.ok(n) => @(n, true) | ~$R.err(_) => @(0, false)): @([k:nat | k <= 524288] int k, bool)
       val () = $R.discard<int><int>($F.file_close(fd))
       val @(fz_src, bv_src) = $A.freeze<byte>(buf)
-      val @(span_arr, _, span_count) = do_lex(bv_src, nbytes, 524288)
-      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
-      val n = put_entries(bv_src, 524288, bv_sp, 524288, span_count, 0, out, 0, 0, 524288)
-      val () = $A.drop<byte>(fz_sp, bv_sp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+      val xs = lex_spans(bv_src, nbytes, 524288)
+      val n = put_entries(bv_src, 524288, xs, out, 0, 0)
+      val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = $A.free<byte>($A.thaw<byte>(fz_src))
     in if ok then n else ~1 end

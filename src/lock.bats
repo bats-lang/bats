@@ -87,30 +87,32 @@ fn put_name {la:agz}
    The #use packages of a directory (Rust: collect_packages)
    ============================================================ *)
 
-(* Adds the packages of the #use spans spans[idx, count) of src to seen,
-   newest first, skipping those already there *)
-fun add_uses {l,ls:agz}{n:pos}{m:nat}{fuel:nat} .<fuel>.
-  (src: !$A.borrow(byte, l, n), n: int n,
-   spans: !$A.borrow(byte, ls, 524288), idx: pos_t, count: int,
-   seen: names(m), fuel: int fuel): [m2:nat] names(m2) =
-  if fuel <= 0 then seen
-  else if idx >= count then seen
-  else if peek(spans, idx * 28, 524288) <> 1 then
-    add_uses(src, n, spans, idx + 1, count, seen, fuel - 1)
-  else let
-    val s = span_i32(spans, idx * 28 + 10, 524288)
-    val e = span_i32(spans, idx * 28 + 14, 524288)
-    val a = $A.alloc<byte>(256)
-    val k = copy_name(src, s, e, n, a, 0)
-  in
-    if k <= 0 then let
-      val () = $A.free<byte>(a)
-    in add_uses(src, n, spans, idx + 1, count, seen, fuel - 1) end
-    else if names_has(seen, a, k) then let
-      val () = $A.free<byte>(a)
-    in add_uses(src, n, spans, idx + 1, count, seen, fuel - 1) end
-    else add_uses(src, n, spans, idx + 1, count, names_cons(a, k, seen), fuel - 1)
-  end
+(* seen, with the package of sp added when sp is a #use of a package
+   not already there *)
+fn add_use {l:agz}{n:pos}{m:nat}
+  (src: !$A.borrow(byte, l, n), n: int n, sp: !span(n), seen: names(m)): [m2:nat] names(m2) =
+  case+ sp of
+  | SUse(_, _, _, s, e, _, _) => let
+      val a = $A.alloc<byte>(256)
+      val k = copy_name(src, s, e, n, a, 0)
+    in
+      if k <= 0 then let
+        val () = $A.free<byte>(a)
+      in seen end
+      else if names_has(seen, a, k) then let
+        val () = $A.free<byte>(a)
+      in seen end
+      else names_cons(a, k, seen)
+    end
+  | _ => seen
+
+(* Adds the packages of the #use spans of xs to seen, newest first,
+   skipping those already there *)
+fun add_uses {l:agz}{n:pos}{m:nat}{k:nat} .<k>.
+  (src: !$A.borrow(byte, l, n), n: int n, xs: !spans(n, k), seen: names(m)): [m2:nat] names(m2) =
+  case+ xs of
+  | spans_nil() => seen
+  | spans_cons(sp, tl) => add_uses(src, n, tl, add_use(src, n, sp, seen))
 
 (* Adds the #use packages of the file at the NUL-terminated path p *)
 fn add_file_uses {lp:agz}{m:nat}
@@ -122,11 +124,9 @@ fn add_file_uses {lp:agz}{m:nat}
         | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
       val () = $R.discard<int><int>($F.file_close(fd))
       val @(fz_src, bv_src) = $A.freeze<byte>(buf)
-      val @(span_arr, _, span_count) = do_lex(bv_src, nbytes, 524288)
-      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
-      val seen2 = add_uses(bv_src, 524288, bv_sp, 0, span_count, seen, 1048576)
-      val () = $A.drop<byte>(fz_sp, bv_sp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+      val xs = lex_spans(bv_src, nbytes, 524288)
+      val seen2 = add_uses(bv_src, 524288, xs, seen)
+      val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = $A.free<byte>($A.thaw<byte>(fz_src))
     in seen2 end
@@ -2235,10 +2235,6 @@ fn add_error (cnt: int, fancy: $B.builder_v, errs: !$B.builder_v >> $B.builder_v
   val () = append_builder(errs, fancy)
 in cnt + 1 end
 
-(* The kind of span idx *)
-fn span_kind {lp:agz} (spans: !$A.borrow(byte, lp, VMAX), idx: pos_t): int =
-  peek(spans, idx * 28, VMAX)
-
 fn is_word_byte (c: int): bool =
   if c = 36 then true else if c = 35 then true
   else if c = 95 then true
@@ -2331,10 +2327,6 @@ fun base_start {lp:agz}{f:nat} .<f>. (p: !$A.borrow(byte, lp, VMAX), i: pos_t, f
   else if peek(p, i - 1, VMAX) = 47 then i
   else base_start(p, i - 1, f - 1)
 
-(* A span's start and end *)
-fn span_range {lp:agz} (spans: !$A.borrow(byte, lp, VMAX), idx: pos_t): @(pos_t, pos_t) =
-  @(span_i32(spans, idx * 28 + 2, VMAX), span_i32(spans, idx * 28 + 6, VMAX))
-
 (* cnt, with Rust's "dependency not found" error added to errs unless found *)
 fn add_missing {lp,ls,ll:agz}
   (found: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
@@ -2355,51 +2347,59 @@ fn add_missing {lp,ls,ll:agz}
 (* Rust's "dependency '<pkg>' not found (expected <lib.bats>)" for each
    #use whose package has no bats_modules/<pkg>/src/lib.bats, labeled with
    the file's path p[0, pl) (preprocess_one) *)
-fun pass_uses {lp,ls,lsp:agz}{f:nat} .<f>.
+fn use_missing {lp,ls:agz}
   (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
-  if f <= 0 then cnt
-  else if idx >= count then cnt
-  else if span_kind(spans, idx) <> 1 then pass_uses(p, pl, src, n, spans, idx + 1, count, cnt, errs, f - 1)
-  else let
-    val @(ss, _) = span_range(spans, idx)
-    val ps = span_i32(spans, idx * 28 + 10, VMAX)
-    val pe = span_i32(spans, idx * 28 + 14, VMAX)
-    var lb : $B.builder_v = $B.create()
-    val () = bput_v(lb, "./bats_modules/")
-    val () = copy_to_builder_v(src, ps, pe, VMAX, lb)
-    val () = bput_v(lb, "/src/lib.bats")
-    val lbl = $B.length(lb)
-    val () = put_char_v(lb, 0)
-    val @(la, _) = $B.to_arr(lb)
-    val @(fz_l, bv_l) = $A.freeze<byte>(la)
-    val found = $F.file_exists(bv_l, VMAX)
-    val cnt2 = add_missing(found, p, pl, src, n, ss, ps, pe, bv_l, lbl, cnt, errs)
-    val () = $A.drop<byte>(fz_l, bv_l)
-    val () = $A.free<byte>($A.thaw<byte>(fz_l))
-  in pass_uses(p, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+   sp: !span(VMAX), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ sp of
+  | SUse(ss, _, _, ps, pe, _, _) => let
+      var lb : $B.builder_v = $B.create()
+      val () = bput_v(lb, "./bats_modules/")
+      val () = copy_to_builder_v(src, ps, pe, VMAX, lb)
+      val () = bput_v(lb, "/src/lib.bats")
+      val lbl = $B.length(lb)
+      val () = put_char_v(lb, 0)
+      val @(la, _) = $B.to_arr(lb)
+      val @(fz_l, bv_l) = $A.freeze<byte>(la)
+      val found = $F.file_exists(bv_l, VMAX)
+      val cnt2 = add_missing(found, p, pl, src, n, ss, ps, pe, bv_l, lbl, cnt, errs)
+      val () = $A.drop<byte>(fz_l, bv_l)
+      val () = $A.free<byte>($A.thaw<byte>(fz_l))
+    in cnt2 end
+  | _ => cnt
 
+fun pass_uses {lp,ls:agz}{k:nat} .<k>.
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   xs: !spans(VMAX, k), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ xs of
+  | spans_nil() => cnt
+  | spans_cons(sp, tl) => let
+      val cnt2 = use_missing(p, pl, src, n, sp, cnt, errs)
+    in pass_uses(p, pl, src, n, tl, cnt2, errs) end
 
 (* Rust's "$UNSAFE requires `unsafe = true` in bats.toml" for each
    $UNSAFE block, labeled with the file's path (preprocess_one); an
-   unsafe package passes a count of 0 *)
-fun pass_unsafe_blocks {lp,ls,lsp:agz}{f:nat} .<f>.
+   unsafe package skips this pass *)
+fn unsafe_block_error {lp,ls:agz}
   (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
-  if f <= 0 then cnt
-  else if idx >= count then cnt
-  else if span_kind(spans, idx) <> 4 then
-    pass_unsafe_blocks(p, pl, src, n, spans, idx + 1, count, cnt, errs, f - 1)
-  else let
-    val @(ss, _) = span_range(spans, idx)
-    var m : $B.builder_v = $B.create()
-    val () = bput_v(m, "$UNSAFE requires `unsafe = true` in bats.toml")
-    var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
-    val cnt2 = add_error(cnt, fy, errs)
-  in pass_unsafe_blocks(p, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+   sp: !span(VMAX), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ sp of
+  | SUnsafeBlock(ss, _, _, _) => let
+      var m : $B.builder_v = $B.create()
+      val () = bput_v(m, "$UNSAFE requires `unsafe = true` in bats.toml")
+      var fy : $B.builder_v = $B.create()
+      val () = put_fancy(p, 0, pl, src, n, ss, m, fy)
+    in add_error(cnt, fy, errs) end
+  | _ => cnt
+
+fun pass_unsafe_blocks {lp,ls:agz}{k:nat} .<k>.
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   xs: !spans(VMAX, k), is_unsafe: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if is_unsafe then cnt
+  else case+ xs of
+  | spans_nil() => cnt
+  | spans_cons(sp, tl) => let
+      val cnt2 = unsafe_block_error(p, pl, src, n, sp, cnt, errs)
+    in pass_unsafe_blocks(p, pl, src, n, tl, false, cnt2, errs) end
 
 (* cnt, with the unsafe construct's error added to errs when hit *)
 fn add_construct {lp,ls:agz}
@@ -2418,26 +2418,28 @@ fn add_construct {lp,ls:agz}
    $UNSAFE, in order, labeled with the file's name p[b0, pl)
    (emit::validate); want_pf selects the #pub prfun ones instead, which
    Rust reports after the others *)
-fun pass_constructs {lp,ls,lsp:agz}{f:nat} .<f>.
+fn construct_error {lp,ls:agz}
   (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int, want_pf: bool,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
-  if f <= 0 then cnt
-  else if idx >= count then cnt
-  else let
-    val kind = span_kind(spans, idx)
-    val @(ss, se) = span_range(spans, idx)
-    val is_pub = (if kind = 5 then at_pub_kw(src, ss) else false): bool
-    val ws = (if is_pub then span_i32(spans, idx * 28 + 10, VMAX) else ss): pos_t
-    val is_pf = (if is_pub then at_prfun_kw(src, ws, se) else false): bool
-    val hit = (if want_pf then is_pf
-               else if kind = 6 then true
-               else if kind = 9 then true
-               else if kind = 5 then ~is_pf
-               else false): bool
-    val cnt2 = add_construct(hit, want_pf, kind, p, b0, pl, src, n, ss, ws, se, cnt, errs)
-  in pass_constructs(p, b0, pl, src, n, spans, idx + 1, count, want_pf, cnt2, errs, f - 1) end
+   sp: !span(VMAX), want_pf: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ sp of
+  | SConstruct(ss, se) =>
+    add_construct(~want_pf, want_pf, 5, p, b0, pl, src, n, ss, ss, se, cnt, errs)
+  | SExtcode(ss, se, _, _, _) =>
+    add_construct(~want_pf, want_pf, 6, p, b0, pl, src, n, ss, ss, se, cnt, errs)
+  | SPub(ss, se, restricted, cs) => let
+      val is_pf = (if restricted then at_prfun_kw(src, cs, se) else false): bool
+      val hit = (if ~restricted then false else if want_pf then is_pf else ~is_pf): bool
+    in add_construct(hit, want_pf, 5, p, b0, pl, src, n, ss, cs, se, cnt, errs) end
+  | _ => cnt
 
+fun pass_constructs {lp,ls:agz}{k:nat} .<k>.
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   xs: !spans(VMAX, k), want_pf: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ xs of
+  | spans_nil() => cnt
+  | spans_cons(sp, tl) => let
+      val cnt2 = construct_error(p, b0, pl, src, n, sp, want_pf, cnt, errs)
+    in pass_constructs(p, b0, pl, src, n, tl, want_pf, cnt2, errs) end
 
 (* Whether src[a, a + k) and src[b, b + k) hold the same bytes *)
 fun same_bytes {ls:agz}{f:nat} .<f>.
@@ -2447,20 +2449,36 @@ fun same_bytes {ls:agz}{f:nat} .<f>.
   else if peek(src, a, VMAX) <> peek(src, b, VMAX) then false
   else same_bytes(src, a + 1, b + 1, k - 1, f - 1)
 
-(* Whether a #use span of spans[idx, count) names the alias src[as, ae) *)
-fun alias_known {ls,lsp:agz}{f:nat} .<f>.
-  (src: !$A.borrow(byte, ls, VMAX), spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
-   as0: pos_t, ae: pos_t, f: int f): bool =
-  if f <= 0 then false
-  else if idx >= count then false
-  else if span_kind(spans, idx) <> 1 then alias_known(src, spans, idx + 1, count, as0, ae, f - 1)
-  else let
-    val us = span_i32(spans, idx * 28 + 18, VMAX)
-    val ue = span_i32(spans, idx * 28 + 22, VMAX)
-  in
+(* The alias ranges of the #use spans of a source *)
+datavtype ranges(int) =
+  | ranges_nil(0) of ()
+  | {k:nat} ranges_cons(k + 1) of (spos(VMAX), spos(VMAX), ranges(k))
+
+fun ranges_free {k:nat} .<k>. (rs: ranges(k)): void =
+  case+ rs of
+  | ~ranges_nil() => ()
+  | ~ranges_cons(_, _, tl) => ranges_free(tl)
+
+(* The alias of sp, when it is a #use, onto acc *)
+fn span_alias {j:nat} (sp: !span(VMAX), acc: ranges(j)): [j2:nat] ranges(j2) =
+  case+ sp of
+  | SUse(_, _, _, _, _, as0, ae) => ranges_cons(as0, ae, acc)
+  | _ => acc
+
+(* The aliases of the #use spans of xs, onto acc *)
+fun use_aliases {k,j:nat} .<k>. (xs: !spans(VMAX, k), acc: ranges(j)): [j2:nat] ranges(j2) =
+  case+ xs of
+  | spans_nil() => acc
+  | spans_cons(sp, tl) => use_aliases(tl, span_alias(sp, acc))
+
+(* Whether one of rs is the alias src[as0, ae) *)
+fun alias_known {ls:agz}{k:nat} .<k>.
+  (src: !$A.borrow(byte, ls, VMAX), rs: !ranges(k), as0: pos_t, ae: pos_t): bool =
+  case+ rs of
+  | ranges_nil() => false
+  | ranges_cons(us, ue, tl) =>
     if (if ue - us = ae - as0 then same_bytes(src, us, as0, ae - as0, VMAX) else false) then true
-    else alias_known(src, spans, idx + 1, count, as0, ae, f - 1)
-  end
+    else alias_known(src, tl, as0, ae)
 
 (* Whether src[0, n) binds the alias src[as0, ae) with ATS's
    staload <alias> = "...", which the Rust bats did not accept (an
@@ -2502,60 +2520,63 @@ fn add_alias_error {lp,ls:agz}
 (* Rust's "unknown alias '<a>' in qualified access" for each $a.member
    whose a no #use names, labeled with the file's name p[b0, pl)
    (emit::validate) *)
-fun pass_aliases {lp,ls,lsp:agz}{f:nat} .<f>.
+fn alias_error {lp,ls:agz}{j:nat}
   (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t, count: int,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v, f: int f): int =
-  if f <= 0 then cnt
-  else if idx >= count then cnt
-  else let
-    val is_q = (span_kind(spans, idx) = 3): bool
-    val @(ss, _) = span_range(spans, idx)
-    val as0 = span_i32(spans, idx * 28 + 10, VMAX)
-    val ae = span_i32(spans, idx * 28 + 14, VMAX)
-    val bad = (if ~is_q then false
-               else if alias_known(src, spans, 0, count, as0, ae, VMAX) then false
-               else ~staload_alias(src, 0, n, as0, ae, VMAX)): bool
-    val cnt2 = add_alias_error(bad, p, b0, pl, src, n, ss, as0, ae, cnt, errs)
-  in pass_aliases(p, b0, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
+   sp: !span(VMAX), rs: !ranges(j), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ sp of
+  | SQual(ss, _, as0, ae, _, _) => let
+      val bad = (if alias_known(src, rs, as0, ae) then false
+                 else ~staload_alias(src, 0, n, as0, ae, VMAX)): bool
+    in add_alias_error(bad, p, b0, pl, src, n, ss, as0, ae, cnt, errs) end
+  | _ => cnt
 
-
-(* cnt, with the lex error of span idx (kind 17) added to errs *)
-fn add_lex_error {lp,ls,lsp:agz}
+fun pass_aliases_in {lp,ls:agz}{k,j:nat} .<k>.
   (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
-  val code = span_i32(spans, idx * 28 + 10, VMAX)
-  val e1 = span_i32(spans, idx * 28 + 14, VMAX)
-  val e2 = span_i32(spans, idx * 28 + 18, VMAX)
-  val @(ss, _) = span_range(spans, idx)
-  var m : $B.builder_v = $B.create()
-  val off = (if code = 3 then ss else e1): pos_t
-  val () = (if code = 1 then bput_v(m, "empty target list in $UNITTEST.run()")
-    else if code = 2 then let
-      val () = bput_v(m, "unknown test target '")
-      val () = copy_to_builder_v(src, e1, e2, VMAX, m)
-    in bput_v(m, "'; expected 'native' or 'wasm'") end
-    else if span_i32(spans, idx * 28 + 22, VMAX) = 1 then
-      bput_v(m, "unterminated $UNITTEST.run begin...end block")
-    else bput_v(m, "unterminated $UNITTEST begin...end block")): void
-  var fy : $B.builder_v = $B.create()
-  val () = put_fancy(p, b0, pl, src, n, off, m, fy)
-in add_error(cnt, fy, errs) end
+   xs: !spans(VMAX, k), rs: !ranges(j), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ xs of
+  | spans_nil() => cnt
+  | spans_cons(sp, tl) => let
+      val cnt2 = alias_error(p, b0, pl, src, n, sp, rs, cnt, errs)
+    in pass_aliases_in(p, b0, pl, src, n, tl, rs, cnt2, errs) end
 
-(* The lexer's errors (span kind 17), labeled with the file's name
-   p[b0, pl); Rust's preprocess_one reports them first *)
-fun pass_lex_errors {lp,ls,lsp:agz}{i:nat | i <= VMAX} .<VMAX - i>.
+fn pass_aliases {lp,ls:agz}{k:nat}
   (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
-   spans: !$A.borrow(byte, lsp, VMAX), idx: int i, count: int,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  if idx >= count then cnt
-  else if idx >= VMAX then cnt
-  else if span_kind(spans, idx) <> 17 then
-    pass_lex_errors(p, b0, pl, src, n, spans, idx + 1, count, cnt, errs)
-  else
-    pass_lex_errors(p, b0, pl, src, n, spans, idx + 1, count,
-      add_lex_error(p, b0, pl, src, n, spans, idx, cnt, errs), errs)
+   xs: !spans(VMAX, k), cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val rs = use_aliases(xs, ranges_nil())
+  val c = pass_aliases_in(p, b0, pl, src, n, xs, rs, cnt, errs)
+  val () = ranges_free(rs)
+in c end
+
+(* cnt, with sp's lex error added to errs when it is one *)
+fn add_lex_error {lp,ls:agz}
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   sp: !span(VMAX), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ sp of
+  | SLexError(ss, code, e1, e2, run) => let
+      var m : $B.builder_v = $B.create()
+      val off = (if code = 3 then ss else e1): pos_t
+      val () = (if code = 1 then bput_v(m, "empty target list in $UNITTEST.run()")
+        else if code = 2 then let
+          val () = bput_v(m, "unknown test target '")
+          val () = copy_to_builder_v(src, e1, e2, VMAX, m)
+        in bput_v(m, "'; expected 'native' or 'wasm'") end
+        else if run then bput_v(m, "unterminated $UNITTEST.run begin...end block")
+        else bput_v(m, "unterminated $UNITTEST begin...end block")): void
+      var fy : $B.builder_v = $B.create()
+      val () = put_fancy(p, b0, pl, src, n, off, m, fy)
+    in add_error(cnt, fy, errs) end
+  | _ => cnt
+
+(* The lexer's errors, labeled with the file's name p[b0, pl); Rust's
+   preprocess_one reports them first *)
+fun pass_lex_errors {lp,ls:agz}{k:nat} .<k>.
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   xs: !spans(VMAX, k), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ xs of
+  | spans_nil() => cnt
+  | spans_cons(sp, tl) => let
+      val cnt2 = add_lex_error(p, b0, pl, src, n, sp, cnt, errs)
+    in pass_lex_errors(p, b0, pl, src, n, tl, cnt2, errs) end
 
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its
@@ -2572,17 +2593,15 @@ fn check_file {lp:agz}
         | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= VMAX] int k
       val () = $R.discard<int><int>($F.file_close(fd))
       val @(fz_s, bv_s) = $A.freeze<byte>(buf)
-      val @(span_arr, _, count) = do_lex(bv_s, n, VMAX)
-      val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
+      val xs = lex_spans(bv_s, n, VMAX)
       val b0 = base_start(p, pl, VMAX)
-      val c0 = pass_lex_errors(p, b0, pl, bv_s, n, bv_sp, 0, count, cnt, errs)
-      val c1 = pass_uses(p, pl, bv_s, n, bv_sp, 0, count, c0, errs, VMAX)
-      val c2 = pass_unsafe_blocks(p, pl, bv_s, n, bv_sp, 0, (if is_unsafe then 0 else count): int, c1, errs, VMAX)
-      val c3 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, false, c2, errs, VMAX)
-      val c3a = pass_aliases(p, b0, pl, bv_s, n, bv_sp, 0, count, c3, errs, VMAX)
-      val c4 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, true, c3a, errs, VMAX)
-      val () = $A.drop<byte>(fz_sp, bv_sp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+      val c0 = pass_lex_errors(p, b0, pl, bv_s, n, xs, cnt, errs)
+      val c1 = pass_uses(p, pl, bv_s, n, xs, c0, errs)
+      val c2 = pass_unsafe_blocks(p, pl, bv_s, n, xs, is_unsafe, c1, errs)
+      val c3 = pass_constructs(p, b0, pl, bv_s, n, xs, false, c2, errs)
+      val c3a = pass_aliases(p, b0, pl, bv_s, n, xs, c3, errs)
+      val c4 = pass_constructs(p, b0, pl, bv_s, n, xs, true, c3a, errs)
+      val () = spans_free(xs)
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
     in c4 end
