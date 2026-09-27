@@ -420,35 +420,42 @@ fn _consume_cfg {b:bool} (cfg: stream_config(b)): void =
   | ~dev_null() => ()
   | ~inherit() => ()
 
-fn _build_from_list(xs: $L.listv(arg_entry)): @($B.builder_v, int) = let
+(* The entries of xs, each NUL-terminated, in one builder, and their
+   count; false when they do not all fit (the builder holds 524288
+   bytes, and an entry's array 524288), which spawn reports as E2BIG
+   rather than run the program on a cut-short list *)
+fn _build_from_list(xs: $L.listv(arg_entry)): @($B.builder_v, int, bool) = let
   fun loop {n:nat} .<n>.
     (xs: $L.list_vt(arg_entry, n),
-     b: !$B.builder_v >> $B.builder_v, count: int): int =
+     b: !$B.builder_v >> $B.builder_v, count: int, fits: bool): @(int, bool) =
     case+ xs of
-    | ~$L.list_vt_nil() => count
+    | ~$L.list_vt_nil() => @(count, fits)
     | ~$L.list_vt_cons(@(arr, len), tl) => let
         val @(fz, bv) = $A.freeze<byte>(arr)
-        (* bv[i, len) into b; i < 524288 proves each read *)
+        (* bv[i, len) into b, whether it all fit; i < 524288 proves
+           each read *)
         fun copy {lb:agz}{i:nat | i <= 524288} .<524288 - i>.
           (bv: !$A.borrow(byte, lb, 524288),
            b: !$B.builder_v >> $B.builder_v,
-           i: int i, len: int): void =
-          if i >= 524288 then ()
-          else if i >= len then ()
+           i: int i, len: int): bool =
+          if i >= len then true
+          else if i >= 524288 then false
+          else if $B.length(b) >= 524288 - 1 then false
           else let
-            val c = byte2int0($A.read<byte>(bv, i))
-            val n = $B.length(b)
-            val () = (if n < 524288 - 1 then $B.put_char(b, $AR.low_byte(c)) else ())
+            val () = $B.put_char(b, $AR.low_byte(byte2int0($A.read<byte>(bv, i))))
           in copy(bv, b, i + 1, len) end
-        val () = copy(bv, b, 0, len)
-        val n2 = $B.length(b)
-        val () = (if n2 < 524288 - 1 then $B.put_char(b, 0) else ())
+        val all = copy(bv, b, 0, len)
+        val room = $B.length(b) < 524288 - 1
+        val () = (if room then $B.put_char(b, 0) else ())
         val () = $A.drop<byte>(fz, bv)
         val () = $A.free<byte>($A.thaw<byte>(fz))
-      in loop(tl, b, count + 1) end
+      in loop(tl, b, count + 1, fits && all && room) end
   var b = $B.create()
-  val count = loop(xs, b, 0)
-in @(b, count) end
+  val @(count, fits) = loop(xs, b, 0, true)
+in @(b, count, fits) end
+
+(* E2BIG ("Argument list too long"), 7 on Linux, macOS and the BSDs *)
+#define E2BIG 7
 
 (* ============================================================
    Implementations
@@ -541,16 +548,27 @@ implement pipe_end_close {b} (p) =
   | ~pipe_fd(f) => $R.discard<int><int>($F.file_close(f))
   | ~pipe_none() => ()
 
+(* E2BIG for an argument or environment list that does not fit;
+   consumes the stream configurations as a spawn does *)
+fn _too_big {sin,sout,serr:bool}
+  (stdin_cfg: stream_config(sin), stdout_cfg: stream_config(sout), stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int) = let
+  val () = _consume_cfg(stdin_cfg)
+  val () = _consume_cfg(stdout_cfg)
+  val () = _consume_cfg(stderr_cfg)
+in $R.err(E2BIG) end
+
 implement spawn {sin}{sout}{serr}{lp}
   (path, argv, envp, stdin_cfg, stdout_cfg, stderr_cfg) = let
-  val @(argv_b, argc) = _build_from_list(argv)
+  val @(argv_b, argc, argv_fits) = _build_from_list(argv)
   val @(argv_arr, _) = $B.to_arr(argv_b)
   val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
-  val @(envp_b, envp_c) = _build_from_list(envp)
+  val @(envp_b, envp_c, envp_fits) = _build_from_list(envp)
   val @(envp_arr, _) = $B.to_arr(envp_b)
   val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
-  val r = _spawn_raw(path, bv_a, argc, bv_e, envp_c,
-    stdin_cfg, stdout_cfg, stderr_cfg)
+  val r = (if argv_fits && envp_fits then
+    _spawn_raw(path, bv_a, argc, bv_e, envp_c, stdin_cfg, stdout_cfg, stderr_cfg)
+    else _too_big(stdin_cfg, stdout_cfg, stderr_cfg)): $R.result(spawn_pipes(sin, sout, serr), int)
   val () = $A.drop<byte>(fz_a, bv_a)
   val () = $A.free<byte>($A.thaw<byte>(fz_a))
   val () = $A.drop<byte>(fz_e, bv_e)
@@ -563,14 +581,15 @@ implement spawn_inherit_env {sin}{sout}{serr}{lp}
 
 implement spawn_inherit_env_with {sin}{sout}{serr}{lp}
   (path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
-  val @(argv_b, argc) = _build_from_list(argv)
+  val @(argv_b, argc, argv_fits) = _build_from_list(argv)
   val @(argv_arr, _) = $B.to_arr(argv_b)
   val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
-  val @(envp_b, extra_c) = _build_from_list(extra)
+  val @(envp_b, extra_c, extra_fits) = _build_from_list(extra)
   val @(envp_arr, _) = $B.to_arr(envp_b)
   val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
-  val r = _spawn_raw(path, bv_a, argc, bv_e, ~(extra_c + 1),
-    stdin_cfg, stdout_cfg, stderr_cfg)
+  val r = (if argv_fits && extra_fits then
+    _spawn_raw(path, bv_a, argc, bv_e, ~(extra_c + 1), stdin_cfg, stdout_cfg, stderr_cfg)
+    else _too_big(stdin_cfg, stdout_cfg, stderr_cfg)): $R.result(spawn_pipes(sin, sout, serr), int)
   val () = $A.drop<byte>(fz_a, bv_a)
   val () = $A.free<byte>($A.thaw<byte>(fz_a))
   val () = $A.drop<byte>(fz_e, bv_e)
