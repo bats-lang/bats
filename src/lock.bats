@@ -1974,35 +1974,6 @@ fn child_path {la,lb:agz}
   val @(pa, _) = $B.to_arr(p)
 in @(pa, pl) end
 
-(* Writes buf[0, k) to dst; whether all of it was written; frees buf *)
-fn write_prefix {l:agz}{k:pos | k <= 65536}
-  (dst: !$F.fd, buf: $A.arr(byte, l, 65536), k: int k): bool = let
-  val @(fz, bv) = $A.freeze<byte>(buf)
-  val @(left, right) = $A.borrow_split<byte>(fz, bv, k)
-  val w = (case+ $F.file_write(dst, left, k) of | ~$R.ok(x) => x | ~$R.err(_) => ~1): int
-  val () = $A.drop<byte>(fz, $A.borrow_join<byte>(fz, left, right))
-  val () = $A.free<byte>($A.thaw<byte>(fz))
-in w = k end
-
-(* Writes the bytes read from src to dst, 64 KiB at a time; false on an
-   error *)
-fun copy_bytes {f:nat} .<f>. (src: !$F.fd, dst: !$F.fd, f: int f): bool =
-  if f <= 0 then true
-  else let
-    val buf = $A.alloc<byte>(65536)
-  in
-    case+ $F.file_read(src, buf, 65536) of
-    | ~$R.err(_) => let
-        val () = $A.free<byte>(buf)
-      in false end
-    | ~$R.ok(k) =>
-      if k <= 0 then let
-        val () = $A.free<byte>(buf)
-      in true end
-      else if write_prefix(dst, buf, k) then copy_bytes(src, dst, f - 1)
-      else false
-  end
-
 (* Copies the file at the NUL-terminated path s to d (Rust: fs::copy);
    false on an error *)
 (* Gives d the permission bits of s, as Rust's fs::copy does *)
@@ -2025,7 +1996,7 @@ fn copy_file {ls,ld:agz}
          val () = $R.discard<int><int>($F.file_close(sf))
        in false end
      | ~$R.ok(df) => let
-         val ok = copy_bytes(sf, df, 1048576)
+         val ok = (case+ $F.fd_copy(sf, df) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
          val () = $R.discard<int><int>($F.file_close(sf))
          val () = $R.discard<int><int>($F.file_close(df))
        in if ok then copy_mode(s, d) else false end)

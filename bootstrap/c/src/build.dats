@@ -347,6 +347,8 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define atspre_g0int_mul_int(x, y) ((x) * (y))\n#define atspre_g0int_sub_int(x, y) ((x) - (y))\n#define atspre_g0int_neq_int(x, y) ((x) != (y))\n")
   val () = bput_v(b, "#define atspre_g0int_lt_int(x, y) ((x) < (y))\n#define atspre_g0int_div_int(x, y) ((x) / (y))\n#define atspre_g0int_mod_int(x, y) ((x) % (y))\n")
   val () = bput_v(b, "#define atspre_g1int_div_int(x, y) ((x) / (y))\n#define atspre_g1int_eq_int(x, y) ((x) == (y))\n#define atspre_g1int_neq_int(x, y) ((x) != (y))\n")
+  val () = bput_v(b, "#define atspre_g0int_nmod_int(x, y) ((x) % (y))\n#define atspre_g1int_nmod_int(x, y) ((x) % (y))\n#define atspre_g1int_mod_int(x, y) ((x) % (y))\n")
+  val () = bput_v(b, "#define atspre_neg_bool(b) ((b) ? 0 : 1)\n#define atspre_neg_bool0 atspre_neg_bool\n#define atspre_neg_bool1 atspre_neg_bool\n")
   val () = bput_v(b, "#define atspre_g0int_asl_int(x, n) ((x) << (n))\n#define atspre_g0int_asr_int(x, n) ((x) >> (n))\n")
   val () = bput_v(b, "#define atspre_lor_int_int(x, y) ((x) | (y))\n#define atspre_land_int_int(x, y) ((x) & (y))\n")
   val () = bput_v(b, "#define atspre_byte2int0(b) ((int)(b))\n#define atspre_int2byte0(i) ((atstype_byte)(i))\n#define atspre_char2int0(c) ((int)(c))\n#define atspre_int2char0(i) ((char)(i))\n")

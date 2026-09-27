@@ -68,15 +68,27 @@ fn file_read
   {l:agz}{n:pos}
   (f: !fd, buf: !$A.arr(byte, l, n), len: int n): $R.result([k:nat | k <= n] int k, int)
 
+
+
 fn file_write
   {lb:agz}{n:pos}
-  (f: !fd, buf: !$A.borrow(byte, lb, n), len: int n): $R.result(int, int)
+  (f: !fd, buf: !$A.borrow(byte, lb, n), len: int n): $R.result(int n, int)
 
 fn file_close(f: fd): $R.result(int, int)
 
+
+
 fn file_size
   {lb:agz}{n:pos | n < 1048576}
-  (path: !$A.borrow(byte, lb, n), path_len: int n): $R.result(int, int)
+  (path: !$A.borrow(byte, lb, n), path_len: int n): $R.result([s:nat] int s, int)
+
+
+fn fd_size(f: !fd): $R.result([s:nat] int s, int)
+
+
+
+
+fn fd_copy(src: !fd, dst: !fd): $R.result([c:nat] int c, int)
 
 
 
@@ -181,6 +193,55 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, int)
 fn buf_flush(w: !buf_writer): $R.result(int, int)
 
 fn buf_writer_close(w: buf_writer): $R.result(int, int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

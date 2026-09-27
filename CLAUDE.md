@@ -63,6 +63,8 @@ A dependency's `#pub` names are not renamed. The Rust bats renamed each dependen
 
 The wasm prelude defines `atspre_cloptr_free` (as ATS's `basics.cats` does, with `ATS_MFREE`). The Rust bats's wasm prelude lacked it, so a wasm binary that freed a closure imported it from a host that has none and failed to instantiate (`tests/wasm-cloptr-free`).
 
+The wasm prelude defines `atspre_g0int_nmod_int`, `atspre_g1int_nmod_int`, `atspre_g1int_mod_int` and `atspre_neg_bool0`/`atspre_neg_bool1` (as ATS's `integer.cats` and `bool.cats` do). The Rust bats's wasm prelude lacked them, so `nmod` and `~b` in a wasm binary were imported from the host, which stubbed them to return 0 (`tests/wasm-prelude-arith`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement

@@ -88,7 +88,7 @@ fun emit_range {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER_CAP} 
   else if start >= end_pos then ()
   else let
     val b = peek(src, start, max)
-    val () = $B.put_char(out, b)
+    val () = $B.put_char(out, $AR.low_byte(b))
   in emit_range(src, start + 1, end_pos, max, out, fuel - 1) end
 
 (* Copy bytes, transforming .bats" → .sats" for staload paths. *)
@@ -107,7 +107,7 @@ fun emit_range_stald {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.BUILDER
       $AR.eq_int_int(peek(src, start + 3, max), 115) &&
       $AR.eq_int_int(peek(src, start + 4, max), 34)
     then 115 else b): int
-    val () = $B.put_char(out, b_out)
+    val () = $B.put_char(out, $AR.low_byte(b_out))
   in emit_range_stald(src, start + 1, end_pos, max, out, fuel - 1) end
 
 (* Count newlines in source range, emit that many newlines *)
@@ -214,7 +214,7 @@ fun emit_blank_content_blank {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B
     val in_content = pos >= cs && pos < ce
   in
     if in_content then let
-      val () = $B.put_char(out, b)
+      val () = $B.put_char(out, $AR.low_byte(b))
     in emit_blank_content_blank(src, pos + 1, se, cs, ce, max, out, fuel - 1) end
     else if $AR.eq_int_int(b, 10) then let
       val () = $B.put_char(out, 10)
@@ -279,7 +279,7 @@ fun emit_blank_then_content {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $B.
   end
   else if pos < content_end then let
     (* Phase 2: copy inner $UNSAFE content *)
-    val () = $B.put_char(out, peek(src, pos, max))
+    val () = $B.put_char(out, $AR.low_byte(peek(src, pos, max)))
   in emit_blank_then_content(src, pos + 1, blank_end, content_end, end_kw_end, scan_end, overall_end, max, out, fuel - 1) end
   else if pos < end_kw_end then let
     (* Phase 3: blank "end" keyword *)
@@ -319,7 +319,7 @@ and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $
       val next = peek(src, after, max)
     in
       if $AR.eq_int_int(next, 46) then let
-        val () = $B.put_char(out, b)
+        val () = $B.put_char(out, $AR.low_byte(b))
       in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
       else let
         (* Skip whitespace after $UNSAFE *)
@@ -344,7 +344,7 @@ and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $
              then continue with [ep2, end_pos). All via tail calls. *)
         in emit_blank_then_content(src, start, cs2, end2, ep2, end_pos, overall_end, max, out, fuel - 1) end
         else let
-          val () = $B.put_char(out, b)
+          val () = $B.put_char(out, $AR.low_byte(b))
         in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
       end
     end
@@ -356,7 +356,7 @@ and emit_range_process_unsafe {ls:agz}{ns:pos}{bn:nat}{fuel:nat | bn + fuel <= $
         $AR.eq_int_int(peek(src, start + 3, max), 115) &&
         $AR.eq_int_int(peek(src, start + 4, max), 34)
       then 115 else b): int
-      val () = $B.put_char(out, b_out)
+      val () = $B.put_char(out, $AR.low_byte(b_out))
     in emit_range_process_unsafe(src, start + 1, end_pos, overall_end, max, out, fuel - 1) end
   end
 

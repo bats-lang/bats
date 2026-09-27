@@ -102,10 +102,13 @@ fun to_lower_byte(b: int): int
 
 
 
+
+
+
 fun int_to_str
-  {l:agz}{n:pos}{p:nat | p <= n}{v:int}
+  {l:agz}{n:pos}{p:nat | p + 11 <= n}{v:int}
   (buf: !$A.arr(byte, l, n), pos: int p, max_len: int n, value: int v)
-  : [r:int | p <= r; r <= n] int r
+  : [r:int | p < r; r <= p + 11] int r
 
 
 
@@ -148,8 +151,6 @@ fn name_eq
   {l:agz}{n:pos}{k:nat | k <= n}{lp:agz}{np:pos}
   (ent: !$A.arr(byte, l, n), len: int k, max: int n,
    s: !$A.borrow(byte, lp, np), slen: int np): bool
-
-
 
 
 
@@ -507,13 +508,9 @@ fun borrow_region_eq
 
 
 
-fn fill_exact {l:agz}{n:pos}{lb:agz}{nb:pos}{i:nat | i <= nb}
+fn fill_exact {l:agz}{n:pos}{lb:agz}{nb:pos | nb <= n}{i:nat | i <= nb}
   (arr: !$A.arr(byte, l, n), src: !$A.borrow(byte, lb, nb), n: int n,
    slen: int nb, i: int i): void
-
-
-
-
 
 
 
