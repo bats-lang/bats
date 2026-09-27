@@ -336,7 +336,7 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define atspre_g0int_asl_int(x, n) ((x) << (n))\n#define atspre_g0int_asr_int(x, n) ((x) >> (n))\n")
   val () = bput_v(b, "#define atspre_lor_int_int(x, y) ((x) | (y))\n#define atspre_land_int_int(x, y) ((x) & (y))\n")
   val () = bput_v(b, "#define atspre_byte2int0(b) ((int)(b))\n#define atspre_int2byte0(i) ((atstype_byte)(i))\n#define atspre_char2int0(c) ((int)(c))\n#define atspre_int2char0(i) ((char)(i))\n")
-  val () = bput_v(b, "#define atspre_ptr_null() ((void*)0)\n#define atspre_ptr_isnot_null(p) ((p) != 0)\n#define atspre_ptr0_isnot_null atspre_ptr_isnot_null\n")
+  val () = bput_v(b, "#define atspre_ptr_null() ((void*)0)\n#define atspre_ptr_is_null(p) ((p) == 0)\n#define atspre_ptr0_is_null atspre_ptr_is_null\n#define atspre_ptr1_is_null atspre_ptr_is_null\n#define atspre_ptr_isnot_null(p) ((p) != 0)\n#define atspre_ptr0_isnot_null atspre_ptr_isnot_null\n#define atspre_ptr1_isnot_null atspre_ptr_isnot_null\n")
   val () = bput_v(b, "#define atspre_add_ptr1_bsz(p, n) ((void*)((char*)(p) + (n)))\n#define atspre_g0int_neg_int(x) (-(x))\n#define atspre_g1int_neg_int(x) (-(x))\n")
   val () = bput_v(b, "#define atspre_g1int2uint_int_size(x) ((atstype_size)(x))\n#define atspre_strlen strlen\n")
   val () = bput_v(b, "#define ATS_MALLOC(sz) malloc(sz)\n#define ATS_MFREE(ptr) free(ptr)\n#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))\n#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)\n#define atspre_cloptr_free(p) ATS_MFREE(p)\n#define atspre_ptr_alloc_tsz(tsz) ATS_MALLOC(tsz)\n")
