@@ -49,6 +49,8 @@ Never blocked by another PR — add finishing that PR to the task list instead.
 
 Never ask permission to keep going. Keep going until the success criterion is met.
 
+Never wait. A PR in flight (CI running, a package publishing, a review pending) is never a reason to stop or idle: pick up the next independent task from the task list (this project always has one) and come back to the PR when its event arrives. Stopping is only for a decision that is the user's to make.
+
 ## Allowed Divergences from old Rust bats
 
 bats uses `--only <value>` (repeatable) instead of the old Rust bats' `--release` flag and `--only native|wasm`. Values: `debug`, `release`, `native`, `wasm`. Multiple `--only` flags narrow the build matrix. Default (no `--only`): build all. Example: `--only debug --only native` builds only debug native. The entry point rename (`implement main0` → `implement __BATS_main0`) applies to code only. The Rust bats renamed the first occurrence anywhere in the emitted text, including inside a string literal or a comment, which broke the build (`tests/main0-string`).
