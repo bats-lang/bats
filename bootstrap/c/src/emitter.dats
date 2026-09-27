@@ -532,6 +532,14 @@ fn emit_dep_stld_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}
   val () = put_char_v(out, 10)   (* \n *)
 in end
 
+(* The target state inside a $UNITTEST block entered at target_state:
+   its contents are code in check and test mode, and blanked otherwise
+   (as in a non-matching #target block) *)
+fn unittest_enter (target_state: int): int =
+  if target_state > 0 then target_state + 1
+  else if is_test_mode() then 0
+  else 1
+
 (* ============================================================
    Emitter: main emit loop
    ============================================================ *)
@@ -562,8 +570,18 @@ fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
     in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
                   sats, dats, build_target, is_unsafe, errors, new_ts, fuel - 1) end
 
-    (* kind=14: target_end - restore target state *)
-    else if $AR.eq_int_int(kind, 14) then let
+    (* kind=15: unittest_begin - its contents are emitted in check and
+       test mode (Rust: emit's check_mode), blanked otherwise, as a
+       non-matching target block's are *)
+    else if $AR.eq_int_int(kind, 15) then let
+      val () = emit_blanks_v(src, ss, se, src_max, sats)
+      val () = emit_blanks_v(src, ss, se, src_max, dats)
+      val new_ts = unittest_enter(target_state)
+    in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
+                  sats, dats, build_target, is_unsafe, errors, new_ts, fuel - 1) end
+
+    (* kind=14: target_end, kind=16: unittest_end - restore target state *)
+    else if $AR.eq_int_int(kind, 14) || $AR.eq_int_int(kind, 16) then let
       val () = emit_blanks_v(src, ss, se, src_max, sats)
       val () = emit_blanks_v(src, ss, se, src_max, dats)
       val new_ts = (if target_state > 0 then target_state - 1 else 0): int
@@ -674,28 +692,6 @@ fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
     in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
                   sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
 
-    (* kind=8: unittest_block - emit contents in test mode, blank otherwise *)
-    else if $AR.eq_int_int(kind, 8) then let
-      val cs = span_aux1(spans, idx, span_max)
-      val ce = span_aux2(spans, idx, span_max)
-      val tm8 = if is_test_mode() then 1 else 0
-      val in_test = $AR.gt_int_int(tm8, 0)
-    in
-      if in_test then let
-        val () = emit_blanks_v(src, ss, cs, src_max, dats)
-        val () = emit_blanks_v(src, ss, cs, src_max, sats)
-        val () = emit_range_v(src, cs, ce, src_max, dats)
-        val () = emit_blanks_v(src, ce, se, src_max, dats)
-        val () = emit_blanks_v(src, ss, se, src_max, sats)
-      in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                    sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-      else let
-        val () = emit_blanks_v(src, ss, se, src_max, sats)
-        val () = emit_blanks_v(src, ss, se, src_max, dats)
-      in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                    sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-    end
-
     (* kind=9: restricted_keyword — same as kind 5, always error *)
     else if $AR.eq_int_int(kind, 9) then let
       val () = println! ("error: unsafe construct at line ", _byte_to_line(src, ss, src_max), " column ", _byte_to_col(src, ss, src_max), " outside $UNSAFE block")
@@ -703,28 +699,6 @@ fun emit_spans {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
       val () = emit_blanks_v(src, ss, se, src_max, sats)
     in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
                   sats, dats, build_target, is_unsafe, errors + 1, target_state, fuel - 1) end
-
-    (* kind=10: unittest_run - emit contents in test mode, blank otherwise *)
-    else if $AR.eq_int_int(kind, 10) then let
-      val cs = span_aux1(spans, idx, span_max)
-      val ce = span_aux2(spans, idx, span_max)
-      val tm10 = if is_test_mode() then 1 else 0
-      val in_test = $AR.gt_int_int(tm10, 0)
-    in
-      if in_test then let
-        val () = emit_blanks_v(src, ss, cs, src_max, dats)
-        val () = emit_blanks_v(src, ss, cs, src_max, sats)
-        val () = emit_range_v(src, cs, ce, src_max, dats)
-        val () = emit_blanks_v(src, ce, se, src_max, dats)
-        val () = emit_blanks_v(src, ss, se, src_max, sats)
-      in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                    sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-      else let
-        val () = emit_blanks_v(src, ss, se, src_max, sats)
-        val () = emit_blanks_v(src, ss, se, src_max, dats)
-      in emit_spans(src, src_max, spans, span_max, span_count, idx + 1,
-                    sats, dats, build_target, is_unsafe, errors, target_state, fuel - 1) end
-    end
 
     (* kind=12: staload_line - emit to both with .bats→.sats rename *)
     else if $AR.eq_int_int(kind, 12) then let
@@ -759,7 +733,10 @@ fun build_prelude {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
                     else 1): int
     in build_prelude(src, src_max, spans, span_max, span_count,
         idx + 1, prelude, build_target, new_ts, fuel - 1) end
-    else if $AR.eq_int_int(kind, 14) then let
+    else if $AR.eq_int_int(kind, 15) then
+      build_prelude(src, src_max, spans, span_max, span_count,
+        idx + 1, prelude, build_target, unittest_enter(target_state), fuel - 1)
+    else if $AR.eq_int_int(kind, 14) || $AR.eq_int_int(kind, 16) then let
       val new_ts = (if target_state > 0 then target_state - 1 else 0): int
     in build_prelude(src, src_max, spans, span_max, span_count,
         idx + 1, prelude, build_target, new_ts, fuel - 1) end
@@ -793,7 +770,10 @@ fun build_prelude_sats {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
                     else 1): int
     in build_prelude_sats(src, src_max, spans, span_max, span_count,
         idx + 1, prelude, build_target, new_ts, fuel - 1) end
-    else if $AR.eq_int_int(kind, 14) then let
+    else if $AR.eq_int_int(kind, 15) then
+      build_prelude_sats(src, src_max, spans, span_max, span_count,
+        idx + 1, prelude, build_target, unittest_enter(target_state), fuel - 1)
+    else if $AR.eq_int_int(kind, 14) || $AR.eq_int_int(kind, 16) then let
       val new_ts = (if target_state > 0 then target_state - 1 else 0): int
     in build_prelude_sats(src, src_max, spans, span_max, span_count,
         idx + 1, prelude, build_target, new_ts, fuel - 1) end

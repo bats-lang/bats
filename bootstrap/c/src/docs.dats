@@ -146,13 +146,21 @@ fun put_entries {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
   (src: !$A.borrow(byte, ls, ns), max: int ns,
    spans: !$A.borrow(byte, lp, np), span_max: int np,
    span_count: int, idx: pos_t,
-   out: !$B.builder_v >> $B.builder_v, count: int, fuel: int fuel): int =
+   out: !$B.builder_v >> $B.builder_v, count: int, ut: int, fuel: int fuel): int =
   if fuel <= 0 then count
   else if idx >= span_count then count
   else let
     val base = idx * 28
+    val kind = peek(spans, base, span_max)
   in
-    if peek(spans, base, span_max) = 2 && peek(spans, base + 1, span_max) = 1 then let
+    (* A $UNITTEST block's declarations are test code, not the API *)
+    if kind = 15 then
+      put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, ut + 1, fuel - 1)
+    else if kind = 16 then
+      put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, (if ut > 0 then ut - 1 else 0), fuel - 1)
+    else if ut > 0 then
+      put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, ut, fuel - 1)
+    else if kind = 2 && peek(spans, base + 1, span_max) = 1 then let
       val ss = span_i32(spans, base + 2, span_max)
       val ts = trim_start(src, span_i32(spans, base + 10, span_max),
                           span_i32(spans, base + 14, span_max), max, max)
@@ -161,8 +169,8 @@ fun put_entries {ls:agz}{ns:pos}{lp:agz}{np:pos}{fuel:nat} .<fuel>.
       val () = copy_to_builder_v(src, ts, te, max, out)
       val () = bput_v(out, "`\n")
       val () = put_doc_comment(src, ss, max, out)
-    in put_entries(src, max, spans, span_max, span_count, idx + 1, out, count + 1, fuel - 1) end
-    else put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, fuel - 1)
+    in put_entries(src, max, spans, span_max, span_count, idx + 1, out, count + 1, ut, fuel - 1) end
+    else put_entries(src, max, spans, span_max, span_count, idx + 1, out, count, ut, fuel - 1)
   end
 
 (* The entries of the .bats file at path, appended to out; the number of
@@ -181,7 +189,7 @@ in
       val @(fz_src, bv_src) = $A.freeze<byte>(buf)
       val @(span_arr, _, span_count) = do_lex(bv_src, nbytes, 524288)
       val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
-      val n = put_entries(bv_src, 524288, bv_sp, 524288, span_count, 0, out, 0, 524288)
+      val n = put_entries(bv_src, 524288, bv_sp, 524288, span_count, 0, out, 0, 0, 524288)
       val () = $A.drop<byte>(fz_sp, bv_sp)
       val () = $A.free<byte>($A.thaw<byte>(fz_sp))
       val () = $A.drop<byte>(fz_src, bv_src)

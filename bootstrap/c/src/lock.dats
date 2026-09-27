@@ -2539,6 +2539,43 @@ fun pass_aliases {lp,ls,lsp:agz}{f:nat} .<f>.
   in pass_aliases(p, b0, pl, src, n, spans, idx + 1, count, cnt2, errs, f - 1) end
 
 
+(* cnt, with the lex error of span idx (kind 17) added to errs *)
+fn add_lex_error {lp,ls,lsp:agz}
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   spans: !$A.borrow(byte, lsp, VMAX), idx: pos_t,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val code = span_i32(spans, idx * 28 + 10, VMAX)
+  val e1 = span_i32(spans, idx * 28 + 14, VMAX)
+  val e2 = span_i32(spans, idx * 28 + 18, VMAX)
+  val @(ss, _) = span_range(spans, idx)
+  var m : $B.builder_v = $B.create()
+  val off = (if code = 3 then ss else e1): pos_t
+  val () = (if code = 1 then bput_v(m, "empty target list in $UNITTEST.run()")
+    else if code = 2 then let
+      val () = bput_v(m, "unknown test target '")
+      val () = copy_to_builder_v(src, e1, e2, VMAX, m)
+    in bput_v(m, "'; expected 'native' or 'wasm'") end
+    else if span_i32(spans, idx * 28 + 22, VMAX) = 1 then
+      bput_v(m, "unterminated $UNITTEST.run begin...end block")
+    else bput_v(m, "unterminated $UNITTEST begin...end block")): void
+  var fy : $B.builder_v = $B.create()
+  val () = put_fancy(p, b0, pl, src, n, off, m, fy)
+in add_error(cnt, fy, errs) end
+
+(* The lexer's errors (span kind 17), labeled with the file's name
+   p[b0, pl); Rust's preprocess_one reports them first *)
+fun pass_lex_errors {lp,ls,lsp:agz}{i:nat | i <= VMAX} .<VMAX - i>.
+  (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, VMAX), n: pos_t,
+   spans: !$A.borrow(byte, lsp, VMAX), idx: int i, count: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if idx >= count then cnt
+  else if idx >= VMAX then cnt
+  else if span_kind(spans, idx) <> 17 then
+    pass_lex_errors(p, b0, pl, src, n, spans, idx + 1, count, cnt, errs)
+  else
+    pass_lex_errors(p, b0, pl, src, n, spans, idx + 1, count,
+      add_lex_error(p, b0, pl, src, n, spans, idx, cnt, errs), errs)
+
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its
    order), when wanted *)
@@ -2557,7 +2594,8 @@ fn check_file {lp:agz}
       val @(span_arr, _, count) = do_lex(bv_s, n, VMAX)
       val @(fz_sp, bv_sp) = $A.freeze<byte>(span_arr)
       val b0 = base_start(p, pl, VMAX)
-      val c1 = pass_uses(p, pl, bv_s, n, bv_sp, 0, count, cnt, errs, VMAX)
+      val c0 = pass_lex_errors(p, b0, pl, bv_s, n, bv_sp, 0, count, cnt, errs)
+      val c1 = pass_uses(p, pl, bv_s, n, bv_sp, 0, count, c0, errs, VMAX)
       val c2 = pass_unsafe_blocks(p, pl, bv_s, n, bv_sp, 0, (if is_unsafe then 0 else count): int, c1, errs, VMAX)
       val c3 = pass_constructs(p, b0, pl, bv_s, n, bv_sp, 0, count, false, c2, errs, VMAX)
       val c3a = pass_aliases(p, b0, pl, bv_s, n, bv_sp, 0, count, c3, errs, VMAX)

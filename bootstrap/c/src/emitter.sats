@@ -786,26 +786,6 @@ staload "helpers.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn do_emit {ls:agz}{ns:pos}{lp:agz}{np:pos}
   (src: !$A.borrow(byte, ls, ns), src_len: pos_t, src_max: int ns,
    spans: !$A.borrow(byte, lp, np), span_max: int np,
