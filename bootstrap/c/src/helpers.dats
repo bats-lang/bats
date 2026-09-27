@@ -1129,8 +1129,25 @@ fn finish_patsopt {li:agz}
 
 
 
+(* rm -f the NUL-terminated path out[0, len - 1) *)
+fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void = let
+  val exec = str_to_path_arr("rm")
+  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  var b1 = $B.create()
+  val () = bput_v(b1, "rm")
+  var b2 = $B.create()
+  val () = bput_v(b2, "-f")
+  var b3 = $B.create()
+  val () = copy_to_builder_v(out_bv, 0, out_len - 1, 524288, b3)
+  val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+    $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))))
+  val () = $A.drop<byte>(fz_x, bv_x)
+in $A.free<byte>($A.thaw<byte>(fz_x)) end
+
 (* After a failure, as Rust's build stops at its first error, nothing
-   more runs *)
+   more runs. A failed run's output (patsopt writes its #error line
+   there) is removed, so it is not taken for fresh next time: the Rust
+   bats records a module in its build cache only when patsopt succeeds *)
 implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
   var exec_b = $B.create()
@@ -1201,7 +1218,9 @@ in
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-    in finish_patsopt(ec, in_bv, in_len - 1, eb) end
+      val rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
+      val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
+    in rc end
   | ~$R.err(_) => ~1
 end
 

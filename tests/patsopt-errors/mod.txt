@@ -1,0 +1,8 @@
+error: patsopt error:
+X/src/m.bats: 77(line=5, offs=18) -- 80(line=5, offs=21): error(3): the dynamic expression cannot be assigned the type [S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int))].
+X/src/m.bats: 77(line=5, offs=18) -- 80(line=5, offs=21): error(3): mismatch of static terms (tyleq):
+The actual term is: S2Eapp(S2Ecst(string_int_type); S2Eint(1))
+The needed term is: S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int))
+patsopt(TRANS3): there are [1] errors in total.
+exit(ATS): uncaught exception: _2tmp_2ATS_2dPostiats_2src_2pats_error_2esats__FatalErrorExn(1025)
+
