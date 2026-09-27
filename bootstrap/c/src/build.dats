@@ -816,8 +816,11 @@ in
         | ~$R.err(_) => ~1): int
       val () = $A.drop<byte>(fz_tgtr, bv_tgtr)
       val () = $A.free<byte>($A.thaw<byte>(fz_tgtr))
-      (* If target changed, preprocess_one will force reprocessing *)
-      val target_changed_tgt = ~($AR.eq_int_int(old_target, build_target))
+      (* The marker is the target, plus 2 in check and test mode, whose
+         output also holds the $UNITTEST blocks: a change of either
+         makes preprocess_one reprocess every file *)
+      val mode_mark = (if is_test_mode() then build_target + 2 else build_target): int
+      val target_changed_tgt = ~($AR.eq_int_int(old_target, mode_mark))
       (* Cache buster: when compiler semantics change, bump this ID.
          If the stored ID differs, force reprocessing of all cached files. *)
       val cache_buster_id = 50 (* ASCII '2' — bumped: auto-clean stale .o on target change *)
@@ -849,7 +852,7 @@ in
       val () = $A.free<byte>($A.thaw<byte>(fz_cidp))
       (* Now write new target marker *)
       var tgt_b : $B.builder_v = $B.create()
-      val () = bput_v(tgt_b, (if $AR.eq_int_int(build_target, 1) then "1" else "0"))
+      val () = put_char_v(tgt_b, 48 + mode_mark)
       val tgt_path = str_to_path_arr("build/.bats_target")
       val @(fz_tgtp, bv_tgtp) = $A.freeze<byte>(tgt_path)
       val _ = write_file_from_builder(bv_tgtp, 524288, tgt_b)

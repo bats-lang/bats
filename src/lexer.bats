@@ -24,9 +24,13 @@ fn is_ident_start(b: int): bool =
      [26..27] padding
    Kinds: 0=passthrough 1=hash_use 2=pub_decl 3=qualified
           4=unsafe_block 5=unsafe_construct 6=extcode
-          7=target 8=unittest 9=restricted 10=unittest_run
-          11=target_block (opaque, expanded by post-lex pass)
-          13=target_begin 14=target_end
+          7=target 9=restricted 12=staload
+          13=target_begin (aux1=target: 0 native, 1 wasm) 14=target_end
+          15=unittest_begin (aux1=1 for $UNITTEST.run, aux2=its
+            targets: 1 native, 2 wasm, 3 both) 16=unittest_end
+          17=lex_error, empty, at the construct: aux1=1 empty target
+            list at aux2, 2 unknown test target src[aux2, aux3),
+            3 unterminated $UNITTEST block (aux4=1 for .run)
    Passthrough (kind 0) spans of comments, string and char literals
    have aux1 = 1: they are copied verbatim, never read as code.
    Dests: 0=dats 1=sats 2=both
@@ -811,6 +815,29 @@ fun find_end_kw {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
           $AR.eq_int_int(at(src, pos + 1, max), 123) then
     find_end_kw(src, lex_extcode_inner(src, adv(pos, 2, max), src_len, max),
                 src_len, max, depth)
+  (* A keyword in a comment, a string or a char literal is text *)
+  else if $AR.eq_int_int(at(src, pos, max), 40) &&
+          $AR.eq_int_int(at(src, pos + 1, max), 42) then
+    find_end_kw(src, lex_ml_comment_inner(src, adv(pos, 2, max), src_len, max, 1),
+                src_len, max, depth)
+  else if $AR.eq_int_int(at(src, pos, max), 47) &&
+          $AR.eq_int_int(at(src, pos + 1, max), 42) then
+    find_end_kw(src, lex_c_comment_inner(src, adv(pos, 2, max), src_len, max),
+                src_len, max, depth)
+  else if $AR.eq_int_int(at(src, pos, max), 47) &&
+          $AR.eq_int_int(at(src, pos + 1, max), 47) then
+    find_end_kw(src, skip_to_eol(src, adv(pos, 2, max), src_len, max),
+                src_len, max, depth)
+  else if $AR.eq_int_int(at(src, pos, max), 34) then
+    find_end_kw(src, lex_string_inner(src, pos + 1, src_len, max), src_len, max, depth)
+  (* 'x' and '\x' are char literals; any other ' (x', '(, '[) is not *)
+  else if $AR.eq_int_int(at(src, pos, max), 39) then
+    (if $AR.eq_int_int(at(src, pos + 1, max), 92) &&
+        $AR.eq_int_int(at(src, pos + 3, max), 39) then
+       find_end_kw(src, adv(pos, 4, max), src_len, max, depth)
+     else if $AR.eq_int_int(at(src, pos + 2, max), 39) then
+       find_end_kw(src, adv(pos, 3, max), src_len, max, depth)
+     else find_end_kw(src, pos + 1, src_len, max, depth))
   else if looking_at_end(src, pos, max) then
     (if depth <= 1 then pos
      else find_end_kw(src, adv(pos, 3, max), src_len, max, depth - 1))
@@ -852,36 +879,81 @@ in
   end
 end
 
-(* $UNITTEST: past start when it is $UNITTEST.run begin...end or
-   $UNITTEST begin...end, else start itself *)
-fn lex_unittest_dispatch {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
-  (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, start: int s, count: int)
-  : @([q:int | s <= q; q <= n] int q, int) = let
-  val p0 = skip_ws(src, adv(start, 9, max), max)
-  val is_run = $AR.eq_int_int(at(src, p0, max), 46) &&
-    $AR.eq_int_int(at(src, p0 + 1, max), 114) &&
-    $AR.eq_int_int(at(src, p0 + 2, max), 117) &&
-    $AR.eq_int_int(at(src, p0 + 3, max), 110)
+(* bits (a set of targets: 1 native, 2 wasm) with bit added *)
+fn with_bit (bits: int, bit: int): int =
+  if bit = 1 then (if bits = 0 then 1 else if bits = 2 then 3 else bits)
+  else (if bits = 0 then 2 else if bits = 1 then 3 else bits)
+
+(* The target list of $UNITTEST.run(...), from p inside the parens
+   (Rust: lex_unittest): @(status, bits, q, e) with status 0 and the
+   targets as bits (1 native, 2 wasm) and q past the list, or status 1
+   (an empty list) or 2 (an unknown target, src[q, e)). A list that
+   stops at a non-identifier (no ")") ends there, as in Rust. *)
+fun ut_targets {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n, bits: int, found: bool)
+  : @(int, int, [q:int | p <= q; q <= n] int q, [e:int | e <= n] int e) = let
+  val p1 = skip_ws(src, p, max)
 in
-  if is_run then let
-    val p1 = skip_ws(src, adv(p0, 4, max), max)
+  if $AR.eq_int_int(at(src, p1, max), 41) then
+    (if found then @(0, bits, adv(p1, 1, max), p1) else @(1, bits, p1, p1))
+  else let
+    val ie = skip_ident(src, p1, max)
+    var c_native = @[char][6]('n', 'a', 't', 'i', 'v', 'e')
+    var c_wasm = @[char][4]('w', 'a', 's', 'm')
   in
-    if looking_at_begin(src, p1, max) then let
-      val contents_start = adv(p1, 5, max)
-      val end_pos = find_end_kw(src, contents_start, src_len, max, 1)
-      val ep = block_end(end_pos, src_len, max)
-      val () = put_span(spans, 10, 0, start, ep, contents_start, end_pos, 0, 0)
-    in @(ep, count + 1) end
-    else @(start, count)
+    if ie = p1 then @(0, bits, p1, p1)
+    else let
+      val bit = (if word_is(src, p1, ie, max, c_native, 6) then 1
+                 else if word_is(src, p1, ie, max, c_wasm, 4) then 2
+                 else 0): int
+    in
+      if bit = 0 then @(2, bits, p1, ie)
+      else let
+        val p2 = skip_ws(src, ie, max)
+        val c = at(src, p2, max)
+      in
+        if $AR.eq_int_int(c, 44) then ut_targets(src, adv(p2, 1, max), max, with_bit(bits, bit), true)
+        else if $AR.eq_int_int(c, 41) then @(0, with_bit(bits, bit), adv(p2, 1, max), p2)
+        else ut_targets(src, p2, max, with_bit(bits, bit), true)
+      end
+    end
   end
-  else if looking_at_begin(src, p0, max) then let
-    val contents_start = adv(p0, 5, max)
-    val end_pos = find_end_kw(src, contents_start, src_len, max, 0)
-    val ep = block_end(end_pos, src_len, max)
-    val () = put_span(spans, 8, 0, start, ep, contents_start, end_pos, 0, 0)
-  in @(ep, count + 1) end
-  else @(start, count)
+end
+
+(* The header of a $UNITTEST block at s (Rust: lex_unittest):
+   @(status, is_run, bits, cs, e1, e2). status 1: $UNITTEST[.run[(targets)]]
+   begin, whose contents start at cs; 0: not a unittest block; 2: an
+   empty target list, at e1; 3: an unknown target src[e1, e2). bits
+   are the targets (1 native, 2 wasm): native when there is no list. *)
+fn ut_header {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
+  (src: !$A.borrow(byte, l, n), src_len: int m, max: int n, start: int s)
+  : @(int, int, int, [q:int | s < q; q <= n] int q, int, int) = let
+  val a = adv(start, 9, max)
+  val is_run = $AR.eq_int_int(at(src, a, max), 46) &&
+    $AR.eq_int_int(at(src, a + 1, max), 114) &&
+    $AR.eq_int_int(at(src, a + 2, max), 117) &&
+    $AR.eq_int_int(at(src, a + 3, max), 110)
+  val p0 = (if is_run then adv(a, 4, max) else a): [q:int | s < q; q <= n] int q
+  val run = (if is_run then 1 else 0): int
+in
+  if (if is_run then $AR.eq_int_int(at(src, p0, max), 40) else false) then let
+    val @(st, bits, q, e) = ut_targets(src, adv(p0, 1, max), max, 0, false)
+  in
+    if st = 1 then @(2, run, 0, p0, p0, p0)
+    else if st = 2 then @(3, run, 0, p0, q, e)
+    else let
+      val p1 = skip_ws(src, q, max)
+    in
+      if looking_at_begin(src, p1, max) then @(1, run, bits, adv(p1, 5, max), 0, 0)
+      else @(0, run, 0, p0, 0, 0)
+    end
+  end
+  else let
+    val p1 = skip_ws(src, p0, max)
+  in
+    if looking_at_begin(src, p1, max) then @(1, run, 1, adv(p1, 5, max), 0, 0)
+    else @(0, run, 0, p0, 0, 0)
+  end
 end
 
 (* ============================================================
@@ -955,13 +1027,13 @@ in
 end
 
 (* Lexes src[pos, m) into spans; count is the number so far. A
-   #target ... begin ... end block is expanded (a target_begin span, its
-   contents' spans, a target_end span) when expand; its contents are
-   lexed with expand false, as one opaque target_block span per block. *)
+   #target ... begin ... end block is a target_begin span, its contents'
+   spans and a target_end span; a $UNITTEST block likewise (unittest_begin,
+   its contents' spans, unittest_end), so what is in either is lexed, and
+   checked, as any other code. *)
 fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
-   spans: !$B.builder_v >> $B.builder_v, pos: int p, count: int,
-   expand: bool): int =
+   spans: !$B.builder_v >> $B.builder_v, pos: int p, count: int): int =
   if pos >= src_len then count
   else let
     val b0 = at(src, pos, max)
@@ -971,32 +1043,32 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
     (* // line comment *)
     if $AR.eq_int_int(b0, 47) && $AR.eq_int_int(b1, 47) then let
       val @(np, nc) = lex_line_comment(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* /* C comment *)
     else if $AR.eq_int_int(b0, 47) && $AR.eq_int_int(b1, 42) then let
       val @(np, nc) = lex_c_comment(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* paren-star ML comment *)
     else if $AR.eq_int_int(b0, 40) && $AR.eq_int_int(b1, 42) then let
       val @(np, nc) = lex_ml_comment(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* " string *)
     else if $AR.eq_int_int(b0, 34) then let
       val @(np, nc) = lex_string(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* ' char *)
     else if $AR.eq_int_int(b0, 39) then let
       val @(np, nc) = lex_char_lit(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* %{ extcode *)
     else if $AR.eq_int_int(b0, 37) && $AR.eq_int_int(b1, 123) then let
       val @(np, nc) = lex_extcode(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* #pub declaration *)
     else if looking_at_pub(src, pos, max) then let
@@ -1004,7 +1076,7 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
       val ep = lex_pub_lines(src, contents_start, src_len, max)
       val () = put_span(spans, pub_kind(src, src_len, max, contents_start), 1,
                         pos, ep, contents_start, ep, 0, 0)
-    in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+    in lex_main(src, src_len, max, spans, ep, count + 1) end
 
     (* #target *)
     else if looking_at_target(src, pos, max) then let
@@ -1018,76 +1090,87 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
         val cs = adv(p1, 5, max)
         val ce = find_end_kw(src, cs, src_len, max, 1)
         val ep = block_end(ce, src_len, max)
-      in
-        if expand then let
-          (* target_begin covers [pos, cs), target_end [ce, ep) *)
-          val () = put_span(spans, 13, 0, pos, cs, target, 0, 0, 0)
-          val inner = lex_main(src, ce, max, spans, cs, 0, false)
-          val () = put_span(spans, 14, 0, ce, ep, 0, 0, 0, 0)
-        in lex_main(src, src_len, max, spans, ep, count + inner + 2, expand) end
-        else let
-          (* kind=11: target_block. aux1=target(0=native,1=wasm), aux2/aux3=content range *)
-          val () = put_span(spans, 11, 0, pos, ep, target, cs, ce, 0)
-        in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
-      end
+        (* target_begin covers [pos, cs), target_end [ce, ep) *)
+        val () = put_span(spans, 13, 0, pos, cs, target, 0, 0, 0)
+        val inner = lex_main(src, ce, max, spans, cs, 0)
+        val () = put_span(spans, 14, 0, ce, ep, 0, 0, 0, 0)
+      in lex_main(src, src_len, max, spans, ep, count + inner + 2) end
       else if looking_at_binary(src, p1, max) then let
         (* Binary marker form: #target wasm binary; kind=7, aux1=2 *)
         val ep = skip_to_eol(src, adv(p1, 6, max), src_len, max)
         val () = put_span(spans, 7, 2, pos, ep, 2, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+      in lex_main(src, src_len, max, spans, ep, count + 1) end
       else let
         (* Line form: just the directive *)
         val ep = skip_to_eol(src, ident_end, src_len, max)
         val () = put_span(spans, 7, 2, pos, ep, target, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+      in lex_main(src, src_len, max, spans, ep, count + 1) end
     end
 
     (* $extval, $extfcall, $extype, $extkind — unsafe constructs *)
     else if looking_at_extval(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 7, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 7, max), count + 1)
     else if looking_at_extfcall(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 9, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 9, max), count + 1)
     else if looking_at_extype(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 7, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 7, max), count + 1)
     else if looking_at_extkind(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 8, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 8, max), count + 1)
 
     (* $UNSAFE *)
     else if looking_at_unsafe(src, pos, max) then let
       val @(np, nc) = lex_unsafe_dispatch(src, src_len, max, spans, pos, count)
     in
-      if np > pos then lex_main(src, src_len, max, spans, np, nc, expand)
+      if np > pos then lex_main(src, src_len, max, spans, np, nc)
       else let
         val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
         val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+      in lex_main(src, src_len, max, spans, ep, count + 1) end
     end
 
     (* $UNITTEST *)
     else if looking_at_unittest(src, pos, max) then let
-      val @(np, nc) = lex_unittest_dispatch(src, src_len, max, spans, pos, count)
+      val @(st, run, bits, cs, e1, e2) = ut_header(src, src_len, max, pos)
     in
-      if np > pos then lex_main(src, src_len, max, spans, np, nc, expand)
+      if st = 1 then let
+        val ce = find_end_kw(src, cs, src_len, max, 1)
+        val ep = block_end(ce, src_len, max)
+        (* No "end": Rust's "unterminated ... begin...end block", and the
+           block runs to the end of the file *)
+        val nerr = (if ce >= src_len then let
+            val () = put_span(spans, 17, 0, pos, pos, 3, pos, 0, run)
+          in 1 end else 0): int
+        (* unittest_begin covers [pos, cs), unittest_end [ce, ep) *)
+        val () = put_span(spans, 15, 0, pos, cs, run, bits, 0, 0)
+        val inner = lex_main(src, ce, max, spans, cs, 0)
+        val () = put_span(spans, 16, 0, ce, ep, 0, 0, 0, 0)
+      in lex_main(src, src_len, max, spans, ep, count + nerr + inner + 2) end
       else let
+        (* A bad target list is a lex error (Rust: "empty target list in
+           $UNITTEST.run()", "unknown test target"); the text is then
+           ordinary code, as when it is no unittest block at all *)
+        val nerr = (if st >= 2 then let
+            val () = put_span(spans, 17, 0, pos, pos, st - 1, e1, e2, 0)
+          in 1 end else 0): int
         val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
         val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+      in lex_main(src, src_len, max, spans, ep, count + nerr + 1) end
     end
 
     (* #use *)
     else if looking_at_use(src, pos, max) then let
       val @(np, nc) = lex_hash_use(src, src_len, max, spans, pos, count)
-    in lex_main(src, src_len, max, spans, np, nc, expand) end
+    in lex_main(src, src_len, max, spans, np, nc) end
 
     (* $ident.ident qualified access *)
     else if $AR.eq_int_int(b0, 36) && is_ident_start(b1) then let
       val @(np, nc) = lex_qualified(src, src_len, max, spans, pos, count)
     in
-      if np > pos then lex_main(src, src_len, max, spans, np, nc, expand)
+      if np > pos then lex_main(src, src_len, max, spans, np, nc)
       else let
         val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
         val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+      in lex_main(src, src_len, max, spans, ep, count + 1) end
     end
 
     (* fun without termination metric — unsafe (can diverge) *)
@@ -1095,8 +1178,8 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
       if _has_metric(src, adv(pos, 3, max), max) then let
         val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
         val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
-      else lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 3, max), count + 1, expand)
+      in lex_main(src, src_len, max, spans, ep, count + 1) end
+      else lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 3, max), count + 1)
 
     (* fnx, and in a fun group, fix: recursive, so a termination metric
        is needed as for fun *)
@@ -1105,37 +1188,37 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
       if _has_metric(src, adv(pos, 3, max), max) then let
         val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
         val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
-      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
-      else lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 3, max), count + 1, expand)
+      in lex_main(src, src_len, max, spans, ep, count + 1) end
+      else lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 3, max), count + 1)
 
     (* val rec: a recursive value, with no termination metric *)
     else if vr > pos then let
       val () = put_span(spans, 5, 0, pos, vr, 0, 0, 0, 0)
-    in lex_main(src, src_len, max, spans, vr, count + 1, expand) end
+    in lex_main(src, src_len, max, spans, vr, count + 1) end
 
     (* unsafe keyword constructs detected here *)
     else if looking_at_cast_fn(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 6, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 6, max), count + 1)
     else if looking_at_prax_i(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 5, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 5, max), count + 1)
     else if looking_at_ext_ern(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 6, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 6, max), count + 1)
     else if looking_at_assu_me(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 6, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 6, max), count + 1)
     else if looking_at_mac_hash(src, pos, max) || looking_at_ext_hash(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 4, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 4, max), count + 1)
     else if looking_at_while(src, pos, max) then
-      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 5, max), count + 1, expand)
+      lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 5, max), count + 1)
     (* staload lines: kind=12, go to both .sats and .dats with .bats→.sats rename *)
     else if looking_at_stld(src, pos, max) then let
       val ep = skip_to_eol(src, adv(pos, 7, max), src_len, max)
       val () = put_span(spans, 12, 2, pos, ep, 0, 0, 0, 0)
-    in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+    in lex_main(src, src_len, max, spans, ep, count + 1) end
     (* Default: passthrough *)
     else let
       val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
       val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
-    in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+    in lex_main(src, src_len, max, spans, ep, count + 1) end
   end
 
 (* Top-level lex function *)
@@ -1145,6 +1228,6 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
 
 implement do_lex (src, src_len, max) = let
   var span_builder = $B.create()
-  val span_count = lex_main(src, src_len, max, span_builder, 0, 0, true)
+  val span_count = lex_main(src, src_len, max, span_builder, 0, 0)
   val @(span_arr, span_arr_len) = $B.to_arr(span_builder)
 in @(span_arr, span_arr_len, span_count) end

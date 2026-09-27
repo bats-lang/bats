@@ -1415,8 +1415,12 @@ end
 
 implement do_check() = let
   val () = clear_build_err()
+  (* Check mode: the $UNITTEST blocks are type-checked too (Rust:
+     build::check preprocesses with check_mode) *)
+  val () = set_test_mode(true)
   val () = do_build_plain(0, 0)
   val () = do_build_plain(0, 1)
+  val () = set_test_mode(false)
 in
   (* The error is already reported, as Rust's check reports it *)
   if has_build_err() then ()
