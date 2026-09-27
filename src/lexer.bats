@@ -411,6 +411,150 @@ fun skip_nonws {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
     else skip_nonws(src, pos + 1, max)
   end
 
+(* Whether src[s, e) is the word lit[0, k) *)
+fn word_is {l:agz}{n:pos}{k:pos | k <= 1048576}{s,e:int}
+  (src: !$A.borrow(byte, l, n), s: int s, e: int e, max: int n, lit: &(@[char][k]), k: int k): bool =
+  if e - s = k then lit_at(src, s, max, lit, k) else false
+
+(* Whether the keyword kw[0, k) is at pos, whole *)
+fn looking_at_kw {l:agz}{n:pos}{p:nat | p <= n}{k:pos | k <= 1048576}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n, kw: &(@[char][k]), k: int k): bool =
+  lit_at(src, pos, max, kw, k) && is_kw_boundary(src, pos + k, max) &&
+  is_kw_boundary_before(src, pos, max)
+
+fn looking_at_fnx {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  if $AR.eq_int_int(at(src, pos, max), 102) then let
+    var c = @[char][3]('f', 'n', 'x')
+  in looking_at_kw(src, pos, max, c, 3) end
+  else false
+
+(* fix, fix@: a recursive lambda *)
+fn looking_at_fix {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  if $AR.eq_int_int(at(src, pos, max), 102) then let
+    var c = @[char][3]('f', 'i', 'x')
+  in lit_at(src, pos, max, c, 3) && ~(is_ident_byte(at(src, pos + 3, max))) &&
+     is_kw_boundary_before(src, pos, max) end
+  else false
+
+fn looking_at_and {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  if $AR.eq_int_int(at(src, pos, max), 97) then let
+    var c = @[char][3]('a', 'n', 'd')
+  in looking_at_kw(src, pos, max, c, 3) end
+  else false
+
+(* val rec: a recursive value, with no termination metric; the end of
+   "rec" when it is one, else pos *)
+fn val_rec_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q =
+  if $AR.eq_int_int(at(src, pos, max), 118) then let
+    var v = @[char][3]('v', 'a', 'l')
+    var r = @[char][3]('r', 'e', 'c')
+  in
+    if looking_at_kw(src, pos, max, v, 3) then let
+      val r0 = skip_ws(src, adv(pos, 3, max), max)
+    in
+      if r0 > pos + 3 && looking_at_kw(src, r0, max, r, 3) then adv(r0, 3, max) else pos
+    end
+    else pos
+  end
+  else pos
+
+(* The start of the line holding p *)
+fun line_start {l:agz}{n:pos}{p:nat | p <= n} .<p>.
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n): [q:nat | q <= p] int q =
+  if p = 0 then 0
+  else if $AR.eq_int_int(at(src, p - 1, max), 10) then p
+  else line_start(src, p - 1, max)
+
+(* The kind of declaration the word src[s, e) opens: 1 for fun or fnx,
+   2 for and, 3 for another declaration keyword, 0 for none *)
+fn decl_word {l:agz}{n:pos}{s,e:int}
+  (src: !$A.borrow(byte, l, n), s: int s, e: int e, max: int n): int = let
+  var c_fun = @[char][3]('f', 'u', 'n')
+  var c_fnx = @[char][3]('f', 'n', 'x')
+  var c_and = @[char][3]('a', 'n', 'd')
+  var c_fn = @[char][2]('f', 'n')
+  var c_val = @[char][3]('v', 'a', 'l')
+  var c_var = @[char][3]('v', 'a', 'r')
+  var c_prfun = @[char][5]('p', 'r', 'f', 'u', 'n')
+  var c_prfn = @[char][4]('p', 'r', 'f', 'n')
+  var c_impl = @[char][9]('i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't')
+  var c_primpl = @[char][11]('p', 'r', 'i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't')
+  var c_extern = @[char][6]('e', 'x', 't', 'e', 'r', 'n')
+  var c_pub = @[char][4]('#', 'p', 'u', 'b')
+  var c_local = @[char][5]('l', 'o', 'c', 'a', 'l')
+  var c_dt = @[char][8]('d', 'a', 't', 'a', 't', 'y', 'p', 'e')
+  var c_dvt = @[char][9]('d', 'a', 't', 'a', 'v', 't', 'y', 'p', 'e')
+  var c_dvwt = @[char][12]('d', 'a', 't', 'a', 'v', 'i', 'e', 'w', 't', 'y', 'p', 'e')
+  var c_dp = @[char][8]('d', 'a', 't', 'a', 'p', 'r', 'o', 'p')
+  var c_dv = @[char][8]('d', 'a', 't', 'a', 'v', 'i', 'e', 'w')
+  var c_td = @[char][7]('t', 'y', 'p', 'e', 'd', 'e', 'f')
+  var c_vtd = @[char][8]('v', 't', 'y', 'p', 'e', 'd', 'e', 'f')
+  var c_vwtd = @[char][11]('v', 'i', 'e', 'w', 't', 'y', 'p', 'e', 'd', 'e', 'f')
+  var c_sd = @[char][6]('s', 't', 'a', 'd', 'e', 'f')
+in
+  if word_is(src, s, e, max, c_fun, 3) then 1
+  else if word_is(src, s, e, max, c_fnx, 3) then 1
+  else if word_is(src, s, e, max, c_and, 3) then 2
+  else if word_is(src, s, e, max, c_fn, 2) then 3
+  else if word_is(src, s, e, max, c_val, 3) then 3
+  else if word_is(src, s, e, max, c_var, 3) then 3
+  else if word_is(src, s, e, max, c_prfun, 5) then 3
+  else if word_is(src, s, e, max, c_prfn, 4) then 3
+  else if word_is(src, s, e, max, c_impl, 9) then 3
+  else if word_is(src, s, e, max, c_primpl, 11) then 3
+  else if word_is(src, s, e, max, c_extern, 6) then 3
+  else if word_is(src, s, e, max, c_pub, 4) then 3
+  else if word_is(src, s, e, max, c_local, 5) then 3
+  else if word_is(src, s, e, max, c_dt, 8) then 3
+  else if word_is(src, s, e, max, c_dvt, 9) then 3
+  else if word_is(src, s, e, max, c_dvwt, 12) then 3
+  else if word_is(src, s, e, max, c_dp, 8) then 3
+  else if word_is(src, s, e, max, c_dv, 8) then 3
+  else if word_is(src, s, e, max, c_td, 7) then 3
+  else if word_is(src, s, e, max, c_vtd, 8) then 3
+  else if word_is(src, s, e, max, c_vwtd, 11) then 3
+  else if word_is(src, s, e, max, c_sd, 6) then 3
+  else 0
+end
+
+(* The end of the word (ident bytes and #) at s *)
+fun word_end_at {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n): [q:int | p <= q; q <= n] int q =
+  if p >= max then p
+  else let val b = at(src, p, max) in
+    if is_ident_byte(b) || $AR.eq_int_int(b, 35) then word_end_at(src, p + 1, max)
+    else p
+  end
+
+(* Whether the and whose line starts at ls continues a fun or fnx group:
+   the lines before it are read upward, past those indented deeper than
+   ind or opening no declaration, to the first declaration keyword at
+   indentation ind or less *)
+fun and_in_fun_group {l:agz}{n:pos}{ls:nat | ls <= n} .<ls>.
+  (src: !$A.borrow(byte, l, n), ls: int ls, ind: int, max: int n): bool =
+  if ls = 0 then false
+  else let
+    val prev = line_start(src, ls - 1, max)
+    val fs = skip_ws(src, prev, max)
+    val we = word_end_at(src, fs, max)
+    val kind = (if fs - prev <= ind then decl_word(src, fs, we, max) else 0): int
+  in
+    if kind = 1 then true
+    else if kind = 3 then false
+    else and_in_fun_group(src, prev, ind, max)
+  end
+
+(* Whether the and at pos opens a member of a fun or fnx group *)
+fn and_opens_fun {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool = let
+  val ls = line_start(src, pos, max)
+  val fs = skip_ws(src, ls, max)
+in and_in_fun_group(src, ls, fs - ls, max) end
+
 (* A sub-lexer's result: the end of what it lexed, past its start s, and
    the span count *)
 typedef lexed(s:int, n:int) = @([q:int | s < q; q <= n] int q, int)
@@ -771,6 +915,10 @@ fun lex_passthrough_scan {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>
     else if looking_at_ext_hash(src, pos, max) then pos
     else if looking_at_while(src, pos, max) then pos
     else if looking_at_fun(src, pos, max) then pos
+    else if looking_at_fnx(src, pos, max) then pos
+    else if looking_at_fix(src, pos, max) then pos
+    else if looking_at_and(src, pos, max) then pos
+    else if val_rec_end(src, pos, max) > pos then pos
     else if looking_at_stld(src, pos, max) then pos
     else lex_passthrough_scan(src, pos + 1, src_len, max)
   end
@@ -818,6 +966,7 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
   else let
     val b0 = at(src, pos, max)
     val b1 = at(src, pos + 1, max)
+    val vr = val_rec_end(src, pos, max)
   in
     (* // line comment *)
     if $AR.eq_int_int(b0, 47) && $AR.eq_int_int(b1, 47) then let
@@ -948,6 +1097,21 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
         val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
       in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
       else lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 3, max), count + 1, expand)
+
+    (* fnx, and in a fun group, fix: recursive, so a termination metric
+       is needed as for fun *)
+    else if looking_at_fnx(src, pos, max) || looking_at_fix(src, pos, max) ||
+            (looking_at_and(src, pos, max) && and_opens_fun(src, pos, max)) then
+      if _has_metric(src, adv(pos, 3, max), max) then let
+        val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
+        val () = put_span(spans, 0, 0, pos, ep, 0, 0, 0, 0)
+      in lex_main(src, src_len, max, spans, ep, count + 1, expand) end
+      else lex_main(src, src_len, max, spans, unsafe_kw(spans, pos, 3, max), count + 1, expand)
+
+    (* val rec: a recursive value, with no termination metric *)
+    else if vr > pos then let
+      val () = put_span(spans, 5, 0, pos, vr, 0, 0, 0, 0)
+    in lex_main(src, src_len, max, spans, vr, count + 1, expand) end
 
     (* unsafe keyword constructs detected here *)
     else if looking_at_cast_fn(src, pos, max) then
