@@ -414,7 +414,7 @@ fun write_modules {l:agz}{fuel:nat} .<fuel>.
     if off < 0 then count
     else let
       val e = find_null_bv_from(files, off, 524288)
-      val ns = find_basename_start(files, off, 524288, off - 1, 4096)
+      val ns = find_basename_start(files, off, 524288, off - 1)
       val ne = e - 5
       val pa = path_at(files, off)
       val @(fz_p, bv_p) = $A.freeze<byte>(pa)

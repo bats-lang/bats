@@ -73,7 +73,7 @@ in
       val r1 = write_file_from_builder(sats_bv, 524288, sb)
       (* Write .dats - prepend self-staload *)
       var db : $B.builder_v = $B.create()
-      val bn_start = find_basename_start(sats_bv, 0, 524288, ~1, 4096)
+      val bn_start = find_basename_start(sats_bv, 0, 524288, ~1)
       val bn_end = find_null_bv_from(sats_bv, bn_start, 524288)
       val () = bput_v(db, "staload \"./")
       val () = copy_to_builder_v(sats_bv, bn_start, bn_end, 524288, db)
@@ -1032,9 +1032,9 @@ in
                                     val () = (if pr2 <> 0 then let
                                       val () = set_build_err()
                                       val () = print! ("warning: preprocess failed for dep ")
-                                      val () = print_borrow(ns_bv, 0, ns_len, 256, 256)
+                                      val () = print_borrow(ns_bv, 0, ns_len, 256)
                                       val () = print! ("/")
-                                      val () = print_borrow(bv_se, 0, sel, 256, 256)
+                                      val () = print_borrow(bv_se, 0, sel, 256)
                                     in print_newline() end
                                     else ())
                                     val () = $A.drop<byte>(fz_sp2, bv_sp2)
@@ -1184,7 +1184,7 @@ in
                     val () = (if pr <> 0 then let
                       val () = set_build_err()
                       val () = print! ("warning: preprocess failed for dep ")
-                      val () = print_borrow(bv_e, 0, elen, 256, 256)
+                      val () = print_borrow(bv_e, 0, elen, 256)
                     in print_newline() end
                     else ())
                     (* Scan additional .bats files in this dep *)
@@ -1251,7 +1251,7 @@ in
                                     val () = (if pr_ex <> 0 then let
                                       val () = set_build_err()
                                       val () = print! ("warning: preprocess failed for extra file in dep ")
-                                      val () = print_borrow(dep_bv, 0, dep_len, 256, 256)
+                                      val () = print_borrow(dep_bv, 0, dep_len, 256)
                                     in print_newline() end
                                     else ())
                                     val () = $A.drop<byte>(fz_spa, bv_spa)
@@ -1341,7 +1341,7 @@ in
                     val () = (if pr_sm <> 0 then let
                       val () = set_build_err()
                       val () = print! ("warning: preprocess failed for src/")
-                      val () = print_borrow(bv_esm, 0, elen_sm, 256, 256)
+                      val () = print_borrow(bv_esm, 0, elen_sm, 256)
                     in print_newline() end
                     else ())
                     val () = $A.drop<byte>(fz_spa_sm, bv_spa_sm)
@@ -1795,7 +1795,7 @@ in
                     val () = (if pr <> 0 then let
                       val () = set_build_err()
                       val () = print! ("error: preprocess failed for ")
-                      val () = print_borrow(bv_e, 0, elen, 256, 256)
+                      val () = print_borrow(bv_e, 0, elen, 256)
                     in print_newline() end
                     else ())
                     (* Step 5: Generate synthetic entry *)
@@ -2419,7 +2419,7 @@ in
                                   in (if rc <> 0 then let
                                     val () = set_build_err()
                                     val () = print! ("error: cc failed for dep ")
-                                    val () = print_borrow(bv_de, 0, dlen, 256, 256)
+                                    val () = print_borrow(bv_de, 0, dlen, 256)
                                   in print_newline() end else ()) end)
                                   (* compile extra _dats.c files for this dep *)
                                   var cc_src_b : $B.builder_v = $B.create()
@@ -2498,7 +2498,7 @@ in
                                                   in (if rc4 <> 0 then let
                                                     val () = set_build_err()
                                                     val () = print! ("error: cc failed for extra ")
-                                                    val () = print_borrow(bv_d4, 0, dl4, 256, 256)
+                                                    val () = print_borrow(bv_d4, 0, dl4, 256)
                                                   in print_newline() end else ()) end)
                                                   val () = $A.drop<byte>(fz_d4, bv_d4)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_d4))
@@ -2581,7 +2581,7 @@ in
                                   in (if rc_csm <> 0 then let
                                     val () = set_build_err()
                                     val () = print! ("error: cc failed for src module ")
-                                    val () = print_borrow(bv_dcsm, 0, dl_csm, 256, 256)
+                                    val () = print_borrow(bv_dcsm, 0, dl_csm, 256)
                                   in print_newline() end else ()) end)
                                   val () = $A.drop<byte>(fz_dcsm, bv_dcsm)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_dcsm))
@@ -3029,13 +3029,13 @@ in
                           (* Rust: "built <wasm> (wasm)" on stderr *)
                           val () = (if rel > 0 then prerr! ("built ./dist/release/")
                             else prerr! ("built ./dist/debug/"))
-                          val () = prerr_seg(bv_e, 0, stem_len, 256, 256)
+                          val () = prerr_seg(bv_e, 0, stem_len, 256)
                         in prerr! (".wasm (wasm)\n") end
                         else let
                           (* Rust: "built <exe> (<profile>)" on stderr *)
                           val () = (if rel > 0 then prerr! ("built ./dist/release/")
                             else prerr! ("built ./dist/debug/"))
-                          val () = prerr_seg(bv_e, 0, stem_len, 256, 256)
+                          val () = prerr_seg(bv_e, 0, stem_len, 256)
                         in
                           if rel > 0 then prerr! (" (release)\n") else prerr! (" (debug)\n")
                         end

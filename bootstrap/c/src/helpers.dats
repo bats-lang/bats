@@ -189,16 +189,22 @@ implement get_exit_code() = !g_exit_code
    String builder helpers
    ============================================================ *)
 
+(* buf[i, len) to stdout, stopping at the end of buf *)
 
 
-
-implement print_arr(buf, i, len, max, fuel) =
-  if fuel <= 0 then ()
-  else if i >= len then ()
-  else let
-    val b = peek_arr(buf, i, max)
-    val () = print_char(int2char0(b))
-  in print_arr(buf, i + 1, len, max, fuel - 1) end
+implement print_arr(buf, i, len, max) = let
+  fun loop {l:agz}{n:pos}{j:nat | j <= n} .<n - j>.
+    (buf: !$A.arr(byte, l, n), j: int j, len: int, max: int n): void =
+    if j >= max then ()
+    else if j >= len then ()
+    else let
+      val () = print_char(int2char0(byte2int0($A.get<byte>(buf, j))))
+    in loop(buf, j + 1, len, max) end
+in
+  if i < 0 then loop(buf, 0, len, max)
+  else if i > max then ()
+  else loop(buf, i, len, max)
+end
 
 
 
@@ -498,43 +504,56 @@ in lit_at(src, pos, max, c, 5) end
    ============================================================ *)
 
 
+(* b[i, len) to stdout (err = false) or stderr, stopping at the end of b *)
+fn put_seg {l:agz}{m:pos}
+  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m, err: bool): void = let
+  fun loop {j:nat | j <= m} .<m - j>.
+    (b: !$A.borrow(byte, l, m), j: int j, len: int, m: int m, err: bool): void =
+    if j >= m then ()
+    else if j >= len then ()
+    else let
+      val c = int2char0(byte2int0($A.read<byte>(b, j)))
+      val () = (if err then prerr_char(c) else print_char(c))
+    in loop(b, j + 1, len, m, err) end
+in
+  if i < 0 then loop(b, 0, len, m, err)
+  else if i > m then ()
+  else loop(b, i, len, m, err)
+end
+
 (* b[i, len) to stderr. *)
 
 
 
-implement prerr_seg(b, i, len, m, fuel) =
-  if fuel <= 0 then ()
-  else if i >= len then ()
-  else let
-    val () = prerr_char(int2char0(peek(b, i, m)))
-  in prerr_seg(b, i + 1, len, m, fuel - 1) end
+implement prerr_seg(b, i, len, m) = put_seg(b, i, len, m, true)
+
+(* buf[i, len) to stdout. *)
 
 
-
-
-implement print_borrow(buf, i, len, max, fuel) =
-  if fuel <= 0 then ()
-  else if i >= len then ()
-  else let
-    val b = peek(buf, i, max)
-    val () = print_char(int2char0(b))
-  in print_borrow(buf, i + 1, len, max, fuel - 1) end
+implement print_borrow(buf, i, len, max) = put_seg(buf, i, len, max, false)
 
 (* ============================================================
    Build pipeline helpers
    ============================================================ *)
 
-(* src[start, stop) appended to dst *)
+(* src[start, stop) appended to dst, stopping at the end of src *)
 
 
 
-implement copy_to_builder(src, start, stop, max, dst, fuel) =
-  if fuel <= 0 then ()
-  else if start >= stop then ()
-  else let
-    val b = peek(src, start, max)
-    val () = $B.put_char(dst, $AR.low_byte(b))
-  in copy_to_builder(src, start + 1, stop, max, dst, fuel - 1) end
+implement copy_to_builder(src, start, stop, max, dst) = let
+  fun loop {l:agz}{n:pos}{j:nat | j <= n}{bm:nat | bm + n - j <= $B.BUILDER_CAP} .<n - j>.
+    (src: !$A.borrow(byte, l, n), j: int j, stop: int, max: int n,
+     dst: !$B.builder(bm) >> [m:nat | bm <= m; m <= bm + n - j] $B.builder(m)): void =
+    if j >= max then ()
+    else if j >= stop then ()
+    else let
+      val () = $B.put_char(dst, $AR.low_byte(byte2int0($A.read<byte>(src, j))))
+    in loop(src, j + 1, stop, max, dst) end
+in
+  if start < 0 then loop(src, 0, stop, max, dst)
+  else if start > max then ()
+  else loop(src, start, stop, max, dst)
+end
 
 (* Builder_v wrappers: compute fuel from remaining capacity *)
 
@@ -595,39 +614,68 @@ implement put_int_v(out, v) = bput_int_v(out, v)
 
 implement put_newline_v(out) = put_char_v(out, 10)
 
-(* src[start, stop) appended to dst *)
+(* src[start, stop) appended to dst, stopping at the end of src or of
+   the builder's capacity *)
 
 
 
 
-implement copy_to_builder_v(src, start, stop, max, dst) =
-  copy_to_builder(src, start, stop, max, dst, 524288 - $B.length(dst))
+implement copy_to_builder_v(src, start, stop, max, dst) = let
+  fun loop {l:agz}{n:pos}{j:nat | j <= n}{bm:nat | bm <= $B.BUILDER_CAP} .<n - j>.
+    (src: !$A.borrow(byte, l, n), j: int j, stop: int, max: int n,
+     dst: !$B.builder(bm) >> $B.builder_v): void =
+    if j >= max then ()
+    else if j >= stop then ()
+    else if $B.length(dst) >= 524288 then ()
+    else let
+      val () = $B.put_char(dst, $AR.low_byte(byte2int0($A.read<byte>(src, j))))
+    in loop(src, j + 1, stop, max, dst) end
+in
+  if start < 0 then loop(src, 0, stop, max, dst)
+  else if start > max then ()
+  else loop(src, start, stop, max, dst)
+end
+
+(* One past the last '/' in bv before the NUL at or after pos (last + 1
+   when there is none) *)
 
 
 
+implement find_basename_start(bv, pos, max, last) = let
+  fun loop {l:agz}{n:pos}{j:nat | j <= n} .<n - j>.
+    (bv: !$A.borrow(byte, l, n), j: int j, max: int n, last: pos_t): pos_t =
+    if j >= max then last + 1
+    else let
+      val b = byte2int0($A.read<byte>(bv, j))
+    in
+      if $AR.eq_int_int(b, 0) then last + 1
+      else if $AR.eq_int_int(b, 47) then loop(bv, j + 1, max, j)
+      else loop(bv, j + 1, max, last)
+    end
+in
+  if pos < 0 then last + 1
+  else if pos > max then last + 1
+  else loop(bv, pos, max, last)
+end
 
-implement find_basename_start(bv, pos, max, last, fuel) =
-  if fuel <= 0 then last + 1
-  else let
-    val b = peek(bv, pos, max)
-  in
-    if $AR.eq_int_int(b, 0) then last + 1
-    else if $AR.eq_int_int(b, 47) then
-      find_basename_start(bv, pos + 1, max, pos, fuel - 1)
-    else find_basename_start(bv, pos + 1, max, last, fuel - 1)
-  end
+(* bv[i, lim) to bw *)
 
 
 
-
-implement wbw_loop(bw, bv, i, lim, fuel) =
-  if fuel <= 0 then ()
-  else if i >= lim then ()
-  else let
-    val b = peek(bv, i, 524288)
-    val wr = $F.buf_write_byte(bw, b)
-    val () = $R.discard<int><int>(wr)
-  in wbw_loop(bw, bv, i + 1, lim, fuel - 1) end
+implement wbw_loop(bw, bv, i, lim) = let
+  fun loop {l:agz}{j:nat | j <= 524288} .<524288 - j>.
+    (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288), j: int j, lim: int): void =
+    if j >= 524288 then ()
+    else if j >= lim then ()
+    else let
+      val wr = $F.buf_write_byte(bw, byte2int0($A.read<byte>(bv, j)))
+      val () = $R.discard<int><int>(wr)
+    in loop(bw, bv, j + 1, lim) end
+in
+  if i < 0 then loop(bw, bv, 0, lim)
+  else if i > 524288 then ()
+  else loop(bw, bv, i, lim)
+end
 
 
 
@@ -654,71 +702,43 @@ implement freshness_check_bv(out_b, in_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_i))
 in result end
 
+(* src[i, lim) appended to dst, stopping at the end of src or of the
+   builder's capacity *)
 
 
 
-implement token_eq_arr(buf, tstart, tend, sarr, si, fuel) =
-  if fuel <= 0 then tstart >= tend
-  else if tstart >= tend then
-    if si < 0 then true
-    else if si >= 4096 then true
-    else $AR.eq_int_int(peek_arr(sarr, si, 4096), 0)
-  else
-    if tstart < 0 then false
-    else if tstart >= 4096 then false
-    else if si < 0 then false
-    else if si >= 4096 then false
+
+implement arr_range_to_builder_v(src, i, lim, dst) = let
+  fun loop {l:agz}{j:nat | j <= 4096}{bm:nat | bm <= $B.BUILDER_CAP} .<4096 - j>.
+    (src: !$A.arr(byte, l, 4096), j: int j, lim: int,
+     dst: !$B.builder(bm) >> $B.builder_v): void =
+    if j >= 4096 then ()
+    else if j >= lim then ()
+    else if $B.length(dst) >= 524288 then ()
     else let
-      val tb = peek_arr(buf, tstart, 4096)
-      val sb = peek_arr(sarr, si, 4096)
-    in
-      if $AR.neq_int_int(tb, sb) then false
-      else if $AR.eq_int_int(sb, 0) then false
-      else token_eq_arr(buf, tstart + 1, tend, sarr, si + 1, fuel - 1)
-    end
+      val () = $B.put_char(dst, $AR.low_byte(byte2int0($A.get<byte>(src, j))))
+    in loop(src, j + 1, lim, dst) end
+in
+  if i < 0 then ()
+  else if i > 4096 then ()
+  else loop(src, i, lim, dst)
+end
 
-
-
-
-implement arr_range_to_builder(src, i, lim, dst, fuel) =
-  if fuel <= 0 then ()
-  else if i >= lim then ()
-  else if i < 0 then ()
-  else if i >= 4096 then ()
-  else let
-    val b = peek_arr(src, i, 4096)
-    val () = $B.put_char(dst, $AR.low_byte(b))
-  in arr_range_to_builder(src, i + 1, lim, dst, fuel - 1) end
-
-
-
-
-
-implement arr_range_to_builder_v(src, i, lim, dst) =
-  arr_range_to_builder(src, i, lim, dst, 524288 - $B.length(dst))
-
-
-
-implement str_fill_loop(b, s, slen, i, fuel) =
-  if fuel <= 0 then ()
-  else if i >= slen then ()
-  else if i >= 4096 then ()
-  else let
-    val c = char2int0(string_get_at(s, i))
-    val () = $A.set<byte>(b, i, int2byte0(c))
-  in str_fill_loop(b, s, slen, i + 1, fuel - 1) end
-
+(* s in a NUL-terminated 4096-byte array (cut at 4095 bytes) *)
 
 
 implement str_to_arr4096(s) = let
+  fun fill {lb:agz}{sn:nat}{i:nat | i <= sn} .<sn - i>.
+    (b: !$A.arr(byte, lb, 4096), s: string sn, slen: int sn, i: int i): void =
+    if i >= slen then ()
+    else if i >= 4095 then ()
+    else let
+      val () = $A.set<byte>(b, i, $A.int2byte($AR.low_byte(char2int0(string_get_at(s, i)))))
+    in fill(b, s, slen, i + 1) end
   val b = $A.alloc<byte>(4096)
-  val slen_sz = string1_length(s)
-  val slen = g1u2i(slen_sz)
-  val () = str_fill_loop(b, s, slen, 0, 4098)
-in
-  (if slen < 4096 then $A.set<byte>(b, slen, int2byte0(0))
-  else ()); b
-end
+  val slen = g1u2i(string1_length(s))
+  val () = fill(b, s, slen, 0)
+in b end
 
 (* ============================================================
    Process execution
@@ -905,7 +925,7 @@ in
     in
       if ec <> 0 then let
         val @(fz_eb2, bv_eb2) = $A.freeze<byte>(eb)
-        val () = print_borrow(bv_eb2, 0, elen, 65536, 65536)
+        val () = print_borrow(bv_eb2, 0, elen, 65536)
         val () = $A.drop<byte>(fz_eb2, bv_eb2)
         val () = $A.free<byte>($A.thaw<byte>(fz_eb2))
       in ec end
@@ -1188,7 +1208,7 @@ fn finish_patsopt {li:agz}
 implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
   var exec_b = $B.create()
-  val () = copy_to_builder(ph, 0, phlen, 512, exec_b, 512)
+  val () = copy_to_builder(ph, 0, phlen, 512, exec_b)
   val () = $B.bput(exec_b, "/bin/patsopt")
   val () = put_char_v(exec_b, 0)
   val @(exec_a, _) = $B.to_arr(exec_b)
@@ -1231,11 +1251,9 @@ implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) =
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
     val () = print! ("  + patsopt -o ")
-    val () = print_borrow(out_bv, 0, out_len, 524288,
-      4096)
+    val () = print_borrow(out_bv, 0, out_len, 524288)
     val () = print! (" -d ")
-    val () = print_borrow(in_bv, 0, in_len, 524288,
-      4096)
+    val () = print_borrow(in_bv, 0, in_len, 524288)
   in print_newline() end else ())
   val sr = $P.spawn_inherit_env_with(bv_exec, argv, envp,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
@@ -1315,11 +1333,9 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
     val () = print! ("  + cc -c -o ")
-    val () = print_borrow(out_bv, 0, out_len, 524288,
-      4096)
+    val () = print_borrow(out_bv, 0, out_len, 524288)
     val () = print! (" ")
-    val () = print_borrow(in_bv, 0, in_len, 524288,
-      4096)
+    val () = print_borrow(in_bv, 0, in_len, 524288)
   in print_newline() end else ())
   val sr = $P.spawn_inherit_env(bv_exec, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
@@ -1346,7 +1362,7 @@ in
     in
       if ec <> 0 then let
         val @(fz_eb2, bv_eb2) = $A.freeze<byte>(eb)
-        val () = print_borrow(bv_eb2, 0, elen, 65536, 65536)
+        val () = print_borrow(bv_eb2, 0, elen, 65536)
         val () = $A.drop<byte>(fz_eb2, bv_eb2)
         val () = $A.free<byte>($A.thaw<byte>(fz_eb2))
       in ec end
@@ -1372,7 +1388,7 @@ in case+ fd_r of
   | ~$R.ok(fd) => let
       val bw = $F.buf_writer_create(fd)
       val @(fz_c, bv_c) = $A.freeze<byte>(content_arr)
-      val () = wbw_loop(bw, bv_c, 0, content_len, 524289)
+      val () = wbw_loop(bw, bv_c, 0, content_len)
       val () = $A.drop<byte>(fz_c, bv_c)
       val () = $A.free<byte>($A.thaw<byte>(fz_c))
       val cr = $F.buf_writer_close(bw)
@@ -1464,27 +1480,18 @@ implement make_kind(buf) =
    Argparse helpers
    ============================================================ *)
 
+(* The number of NULs in buf[0, len) *)
 
 
 
-implement count_argc_loop(buf, pos, len, max, count, fuel) =
-  if fuel <= 0 then count
-  else if pos >= len then count
-  else if pos < 0 then count
-  else if pos >= max then count
-  else let
-    val b = peek_arr(buf, pos, max)
-  in
-    if $AR.eq_int_int(b, 0) then
-      count_argc_loop(buf, pos + 1, len, max, count + 1, fuel - 1)
-    else count_argc_loop(buf, pos + 1, len, max, count, fuel - 1)
-  end
-
-
-
-
-implement count_argc(buf, len) =
-  count_argc_loop(buf, 0, len, 4096, 0, 4097)
+implement count_argc(buf, len) = let
+  fun loop {l:agz}{j:nat | j <= 4096} .<4096 - j>.
+    (buf: !$A.arr(byte, l, 4096), j: int j, len: int, count: int): int =
+    if j >= 4096 then count
+    else if j >= len then count
+    else if $AR.eq_int_int(byte2int0($A.get<byte>(buf, j)), 0) then loop(buf, j + 1, len, count + 1)
+    else loop(buf, j + 1, len, count)
+in loop(buf, 0, len, 0) end
 
 
 

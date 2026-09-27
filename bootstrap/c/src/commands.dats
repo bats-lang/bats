@@ -70,7 +70,7 @@ in
               var spath = $B.create()
               val @(fz_e, bv_e) = $A.freeze<byte>(ent)
               val () = $B.bput(spath, "src/bin/")
-              val () = copy_to_builder(bv_e, 0, elen, 256, spath, 256)
+              val () = copy_to_builder(bv_e, 0, elen, 256, spath)
               val () = $B.put_char(spath, 0)
               val () = $A.drop<byte>(fz_e, bv_e)
               val () = $A.free<byte>($A.thaw<byte>(fz_e))
@@ -134,7 +134,7 @@ fn finish_sidecar {lz:agz}
   else let
     var line = sc
     val () = bput_v(line, "  ")
-    val base = find_basename_start(zp, 0, 524288, ~1, 524288)
+    val base = find_basename_start(zp, 0, 524288, ~1)
     val () = copy_to_builder_v(zp, base, zlen, 524288, line)
     val () = bput_v(line, "\n")
     var sp: $B.builder_v = $B.create()
@@ -509,9 +509,9 @@ in @(va, 524288, vl, false) end
 fn invalid_version_part {l:agz}{n:pos}
   (b: !$A.borrow(byte, l, n), ps: pos_t, pe: pos_t, t: int, n: int n): void = let
   val () = prerr! ("error: invalid version part '")
-  val () = prerr_seg(b, ps, pe, n, 8192)
+  val () = prerr_seg(b, ps, pe, n)
   val () = prerr! ("' in '")
-  val () = prerr_seg(b, 0, t, n, 8192)
+  val () = prerr_seg(b, 0, t, n)
 in prerr! ("'\n") end
 
 (* The upload version (Rust: resolve_version): [package] version when
@@ -563,7 +563,7 @@ fn git_not_found (e: int): void = let
   val k = $P.os_error_text(e, buf, 256)
   val @(fz_b, bv_b) = $A.freeze<byte>(buf)
   val () = prerr! ("error: git not found: ")
-  val () = prerr_seg(bv_b, 0, k, 256, 256)
+  val () = prerr_seg(bv_b, 0, k, 256)
   val () = $A.drop<byte>(fz_b, bv_b)
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
 in prerr! (" (os error ", e, ")\n") end
@@ -781,7 +781,7 @@ in
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
                   val () = (if is_quiet() then () else let
-                      val () = prerr_seg(bv_um, 0, umlen, 524288, 524288)
+                      val () = prerr_seg(bv_um, 0, umlen, 524288)
                     in prerr_newline() end)
                   val () = $A.drop<byte>(fz_um, bv_um)
                   val () = $A.free<byte>($A.thaw<byte>(fz_um))
@@ -930,7 +930,7 @@ fn add_project_name (b: !$B.builder_v >> $B.builder_v): void = let
   val cwd = $A.alloc<byte>(4096)
   val k = (case+ $E.cwd_read(cwd, 4096) of | ~$R.some(k) => k | ~$R.none() => 0): [k:nat | k <= 4096] int k
   val @(fz_c, bv_c) = $A.freeze<byte>(cwd)
-  val start = find_basename_start(bv_c, 0, 4096, ~1, 4096)
+  val start = find_basename_start(bv_c, 0, 4096, ~1)
   val () = (if start < k then copy_to_builder_v(bv_c, start, k, 4096, b)
     else bput_v(b, "myproject"))
   val () = $A.drop<byte>(fz_c, bv_c)
@@ -961,7 +961,7 @@ implement do_init {la} (arg, alen, claude) = let
 in
   if kind < 0 then let
     val () = prerr! ("error: unknown project kind '")
-    val () = prerr_seg(arg, 0, alen, 4096, 4096)
+    val () = prerr_seg(arg, 0, alen, 4096)
     val () = prerr! ("', use 'binary' or 'library'")
     val () = prerr_newline()
   in set_build_err() end
@@ -986,7 +986,7 @@ in
         val () = (if c_toml then let val () = prerr! ("  bats.toml") in prerr_newline() end else ())
         val () = (if c_src then let
             val () = prerr! ("  ")
-            val () = prerr_seg(bv_sp, 0, splen - 1, 524288, 524288)
+            val () = prerr_seg(bv_sp, 0, splen - 1, 524288)
           in prerr_newline() end else ())
         val () = (if c_gi then let val () = prerr! ("  .gitignore") in prerr_newline() end else ())
       in set_build_err() end
@@ -1017,7 +1017,7 @@ in
         in set_build_err() end
         else if r2 <> 0 then let
           val () = prerr! ("error: cannot write ")
-          val () = prerr_seg(bv_sp, 0, splen - 1, 524288, 524288)
+          val () = prerr_seg(bv_sp, 0, splen - 1, 524288)
           val () = prerr_newline()
         in set_build_err() end
         else if r3 <> 0 then let
@@ -1030,9 +1030,9 @@ in
           if is_quiet() then ()
           else let
             val () = prerr! ("created ")
-            val () = prerr_seg(arg, 0, alen, 4096, 4096)
+            val () = prerr_seg(arg, 0, alen, 4096)
             val () = prerr! (" project '")
-            val () = prerr_seg(bv_n, 0, nlen, 524288, 524288)
+            val () = prerr_seg(bv_n, 0, nlen, 524288)
             val () = prerr! ("'")
           in prerr_newline() end
         end
@@ -1071,7 +1071,7 @@ in
       if lock_len > 0 then let
         (* Use C helper to print Unicode tree *)
         val @(fz_lb, bv_lb) = $A.freeze<byte>(lock_buf)
-        val () = print_borrow(bv_lb, 0, lock_len, 524288, 524288)
+        val () = print_borrow(bv_lb, 0, lock_len, 524288)
         val () = $A.drop<byte>(fz_lb, bv_lb)
         val () = $A.free<byte>($A.thaw<byte>(fz_lb))
       in end
@@ -1121,7 +1121,7 @@ in
     in
       if rc = 0 then let
           val () = print! ("added '")
-          val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max, 524288)
+          val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
         in println! ("' to [dependencies]") end
       else println! ("error: cannot write bats.toml")
     end
@@ -1173,11 +1173,11 @@ in
     in
       if rc = 0 then let
           val () = print! ("removed '")
-          val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max, 524288)
+          val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
         in println! ("' from [dependencies]") end
       else let
         val () = print! ("error: package '")
-        val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max, 524288)
+        val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
       in println! ("' not found in [dependencies]") end
     end
   | ~$R.err(_) => println! ("error: cannot open bats.toml")
@@ -1221,7 +1221,7 @@ in
         | ~$R.ok(n) => n
         | ~$R.err(_) => ~1): int
       val () = print! ("  process: ")
-      val () = print_arr(out_buf, 0, out_len, 256, 256)
+      val () = print_arr(out_buf, 0, out_len, 256)
       val () = println! ("  exit code: ", exit_code)
       val () = $A.free<byte>(out_buf)
     in end
@@ -1341,7 +1341,7 @@ fun prerr_names {ln:agz}{fuel:nat} .<fuel>.
   else let
     val e = find_null_bv_from(n, s, 524288)
     val () = (if first then () else prerr! (", "))
-    val () = prerr_seg(n, s, e, 524288, 524288)
+    val () = prerr_seg(n, s, e, 524288)
   in prerr_names(n, nlen, e + 1, false, fuel - 1) end
 
 (* bin: the --bin name in bin[0, blen); blen is 0 when it was not
@@ -1364,7 +1364,7 @@ implement do_run {lb,le} (release, bin, blen, extra, elen) = let
       if list_has(bv_n, nlen, 0, bin, blen, 4096) then 0
       else let
         val () = prerr! ("error: binary '")
-        val () = prerr_seg(bin, 0, blen, 256, 256)
+        val () = prerr_seg(bin, 0, blen, 256)
         val () = prerr! ("' not found. Available: ")
         val () = prerr_names(bv_n, nlen, 0, true, 4096)
         val () = prerr_newline()
@@ -1398,7 +1398,7 @@ in
     val rc = run_program(bv_ea, run_argv)
     val () = (if rc < 0 then let
       val () = prerr! ("error: cannot run '")
-      val () = prerr_seg(bv_ea, 0, exec_len - 1, 524288, 524288)
+      val () = prerr_seg(bv_ea, 0, exec_len - 1, 524288)
       val () = prerr! ("'")
       val () = prerr_newline()
     in set_exit_code(1) end
