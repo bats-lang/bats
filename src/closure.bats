@@ -219,12 +219,66 @@ fn scan_path {u:nat} (b: $B.builder_v, unseen: deps(u)): scanned(u) = let
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
 
+(* The staloads of dependency x's modules other than its lib: each
+   .dats in build/bats_modules/<x>/src but lib.dats, entries i to n *)
+fun scan_extras {n,i:nat | i <= n}{u,m:nat} .<n - i>.
+  (es: !$F.entries(n), i: int i, n: int n, x: !dep, unseen: deps(u), found: deps(m), fm: int m)
+  : scanned(u + m) =
+  if i >= n then Scanned(unseen, found, fm)
+  else let
+    val e = $A.alloc<byte>(1024)
+    val el = $F.entries_name(es, i, e, 1024)
+    val dats = has_dats_ext(e, el, 1024)
+    val lib = is_lib_dats(e, el, 1024)
+    val extra = dats && ~lib
+    val @(fz, bv) = $A.freeze<byte>(e)
+    val+ ~Scanned(un3, f3, m3) = (if extra then let
+        var pb : $B.builder_v = $B.create()
+        val () = bput_v(pb, "build/bats_modules/")
+        val () = put_dep(pb, x)
+        val () = bput_v(pb, "/src/")
+        val () = copy_to_builder_v(bv, 0, el, 1024, pb)
+        val+ ~Scanned(un2, f2, m2) = scan_path(pb, unseen)
+      in Scanned(un2, deps_append(f2, found), m2 + fm) end
+      else Scanned(unseen, found, fm)): scanned(u + m)
+    val () = $A.drop<byte>(fz, bv)
+    val () = $A.free<byte>($A.thaw<byte>(fz))
+  in scan_extras(es, i + 1, n, x, un3, f3, m3) end
+
+(* The staloads of all of dependency x's modules: its lib.dats first,
+   then the others (a #use in any of them names a dependency the binary
+   links, as the others are linked and dynloaded too) *)
+fn scan_dep {u:nat} (x: !dep, unseen: deps(u)): scanned(u) = let
+  var pb : $B.builder_v = $B.create()
+  val () = bput_v(pb, "build/bats_modules/")
+  val () = put_dep(pb, x)
+  val () = bput_v(pb, "/src/lib.dats")
+  val+ ~Scanned(un1, f1, m1) = scan_path(pb, unseen)
+  var db : $B.builder_v = $B.create()
+  val () = bput_v(db, "build/bats_modules/")
+  val () = put_dep(db, x)
+  val () = bput_v(db, "/src")
+  val () = put_char_v(db, 0)
+  val @(da, _) = $B.to_arr(db)
+  val @(fz, bv) = $A.freeze<byte>(da)
+  val dr = $F.dir_read(bv, 524288)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in
+  case+ dr of
+  | ~$R.ok(es) => let
+      val r = scan_extras(es, 0, $F.entries_count(es), x, un1, f1, m1)
+      val () = $F.entries_free(es)
+    in r end
+  | ~$R.err(_) => Scanned(un1, f1, m1)
+end
+
 (* ============================================================
    The closure
    ============================================================ *)
 
 (* The packages the queue reaches: done (reversed) with the queue and
-   what its packages' lib.dats staload, in the order found *)
+   what its packages' modules staload, in the order found *)
 fun close {u,q:nat}{d:nat} .<u, q>.
   (unseen: deps(u), queue: deps(q), done: deps(d)): [r:nat] deps(r) =
   case+ queue of
@@ -232,11 +286,7 @@ fun close {u,q:nat}{d:nat} .<u, q>.
       val () = deps_free(unseen)
     in deps_rev(done, deps_nil()) end
   | ~deps_cons(x, rest) => let
-      var pb : $B.builder_v = $B.create()
-      val () = bput_v(pb, "build/bats_modules/")
-      val () = put_dep(pb, x)
-      val () = bput_v(pb, "/src/lib.dats")
-      val+ ~Scanned(un2, found, m) = scan_path(pb, unseen)
+      val+ ~Scanned(un2, found, m) = scan_dep(x, unseen)
       val q2 = deps_append(rest, deps_rev(found, deps_nil()))
     in
       if m > 0 then close(un2, q2, deps_cons(x, done))
