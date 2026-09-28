@@ -412,6 +412,14 @@ fn write_wasm_runtime_h(): int
 
 
 
+
+
+
+
+
+
+
+
 fn write_wasm_runtime_c(): int
 
 
