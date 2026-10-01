@@ -2427,6 +2427,7 @@ in
                       val () = bput_v(wl, "--export=bats_on_permission_result") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=bats_on_push_subscribe") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=bats_on_media_change") val () = put_char_v(wl, 0)
+                      val () = bput_v(wl, "--export=bats_on_audio_play") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "-o") val () = put_char_v(wl, 0)
                       (* Rust: out_dir/<name>.wasm, out_dir = dist/<profile> *)
                       val () = (if rel > 0 then bput_v(wl, "dist/release/") else bput_v(wl, "dist/debug/"))
