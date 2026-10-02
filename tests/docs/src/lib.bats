@@ -1,3 +1,4 @@
+#include "share/atspre_staload.hats"
 #pub fn first (): int
 
 implement first () = 0

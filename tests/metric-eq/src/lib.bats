@@ -1,3 +1,4 @@
+#include "share/atspre_staload.hats"
 (* Fixture for CI: a fun whose quantifier uses "==" before its
    termination metric. It is safe and must type-check. *)
 #pub fn count_down {n:nat} (n: int n): int

@@ -1189,6 +1189,130 @@ fn finish_patsopt {li:agz}
     val () = $B.builder_free(err)
   in 0 end
 
+(* ============================================================
+   Template instances patsopt left without an implementation
+   ============================================================ *)
+
+(* Whether "PMVtmpltcstmat" is at c[i]: patsopt's mark for a template
+   instance it found no implementation for, which only cc rejects *)
+fn is_unresolved_at {l:agz}{m:pos}
+  (c: !$A.borrow(byte, l, m), i: pos_t, max: int m): bool = let
+  var mark = @[char][14]('P', 'M', 'V', 't', 'm', 'p', 'l', 't', 'c', 's', 't', 'm', 'a', 't')
+in lit_at(c, i, max, mark, 14) end
+
+(* Whether "loc0 = " is at c[i]: an instruction's source location
+   follows it, in the comment patsopt writes before the instruction *)
+fn is_location_at {l:agz}{m:pos}
+  (c: !$A.borrow(byte, l, m), i: pos_t, max: int m): bool = let
+  var mark = @[char][7]('l', 'o', 'c', '0', ' ', '=', ' ')
+in lit_at(c, i, max, mark, 7) end
+
+(* The first unresolved instance in c[i, n), or n when there is none;
+   whether a source location comes before it, and where the last one
+   before it starts (seen and location say so for c[0, i)) *)
+fun find_unresolved {l:agz}{m:pos}{i,n:nat | i <= n; n < m}{k:nat | k <= n} .<n - i>.
+  (c: !$A.borrow(byte, l, m), i: int i, n: int n, max: int m, seen: bool, location: int k)
+  : [r,q:nat | r <= n; q <= n] @(int r, bool, int q) =
+  if i >= n then @(n, seen, location)
+  else let
+    val b = byte2int0($A.read<byte>(c, i))
+  in
+    if b = 80 && is_unresolved_at(c, i, max) then @(i, seen, location)
+    else if b = 108 && is_location_at(c, i, max) then
+      find_unresolved(c, i + 1, n, max, true, (if i + 7 <= n then i + 7 else n): [q:nat | q <= n] int q)
+    else find_unresolved(c, i + 1, n, max, seen, location)
+  end
+
+(* The first index in c[i, n) holding byte b, or n *)
+fun index_of_byte {l:agz}{m:pos}{i,n:nat | i <= n; n < m} .<n - i>.
+  (c: !$A.borrow(byte, l, m), i: int i, n: int n, b: int): [r:nat | i <= r; r <= n] int r =
+  if i >= n then n
+  else if byte2int0($A.read<byte>(c, i)) = b then i
+  else index_of_byte(c, i + 1, n, b)
+
+(* The end of the template name at c[i, n): its first '<', '(' or ')',
+   or n *)
+fun template_name_end {l:agz}{m:pos}{i,n:nat | i <= n; n < m} .<n - i>.
+  (c: !$A.borrow(byte, l, m), i: int i, n: int n): [r:nat | i <= r; r <= n] int r =
+  if i >= n then n
+  else let
+    val b = byte2int0($A.read<byte>(c, i))
+  in
+    if b = 60 || b = 40 || b = 41 then i
+    else template_name_end(c, i + 1, n)
+  end
+
+(* The end of the instance at c[i, n): the ')' that closes the "(" it
+   follows (depth counts the '(' opened since), or n *)
+fun instance_end {l:agz}{m:pos}{i,n:nat | i <= n; n < m} .<n - i>.
+  (c: !$A.borrow(byte, l, m), i: int i, n: int n, depth: int): [r:nat | i <= r; r <= n] int r =
+  if i >= n then n
+  else let
+    val b = byte2int0($A.read<byte>(c, i))
+  in
+    if b = 40 then instance_end(c, i + 1, n, depth + 1)
+    else if b = 41 then (if depth <= 0 then i else instance_end(c, i + 1, n, depth - 1))
+    else instance_end(c, i + 1, n, depth)
+  end
+
+(* " --> " and the location c[s, e) (patsopt's "<path>.dats: <offset>
+   (line=L, offs=O) -- ..."), as the .bats location: the path's .dats
+   as .bats and build/ dropped, each line=L past the prelude's off
+   lines (as patsopt's errors are reported) *)
+fn put_location {l:agz}{m:pos}{s:nat}
+  (c: !$A.borrow(byte, l, m), s: int s, e: int, max: int m, off: int,
+   out: !$B.builder_v >> $B.builder_v): void = let
+  var text : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(c, s, e, max, text)
+  val @(text_array, text_len) = $B.to_arr(text)
+  val @(fz_text, bv_text) = $A.freeze<byte>(text_array)
+  val () = bput_v(out, " --> ")
+  val () = remap_line(bv_text, 0, text_len, true, off, out)
+  val () = put_char_v(out, 10)
+  val () = $A.drop<byte>(fz_text, bv_text)
+in $A.free<byte>($A.thaw<byte>(fz_text)) end
+
+(* The error for the unresolved instance at c[at, n): the template's
+   name, the instance as patsopt wrote it (at most 400 bytes of it),
+   and, when seen, the .bats location of the instruction that uses it,
+   whose text starts at c[location] *)
+fn report_unresolved {l:agz}{m:pos}{at,n:nat | at <= n; n < m}{q:nat | q <= n}
+  (c: !$A.borrow(byte, l, m), at: int at, n: int n, max: int m,
+   seen: bool, location: int q, off: int): void = let
+  val open_paren = index_of_byte(c, at, n, 40)
+  val name_start = (if open_paren < n then open_paren + 1 else n): [s:nat | s <= n] int s
+  val name_end = template_name_end(c, name_start, n)
+  val whole_end = instance_end(c, name_start, n, 0)
+  val shown_end = (if whole_end - name_start > 400 then name_start + 400 else whole_end): int
+  var out : $B.builder_v = $B.create()
+  val () = bput_v(out, "error: template '")
+  val () = copy_to_builder_v(c, name_start, name_end, max, out)
+  val () = bput_v(out, "' has no implementation for the instance ")
+  val () = copy_to_builder_v(c, name_start, shown_end, max, out)
+  val () = bput_v(out, "; implement it for that type where the instance can see it\n")
+  val () = (if seen then put_location(c, location, index_of_byte(c, location, n, 10), max, off, out)
+            else ()): void
+in prerr_builder(out) end
+
+(* After patsopt made the C out[0, ol) of in[0, il) (paths), whether it
+   holds a template instance with no implementation: the first one is
+   reported, and the build fails, at check as at build (only cc would
+   reject it, and check runs no cc). 0 when there is none, else 1 *)
+fn check_template_instances {lo,li:agz}
+  (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int =
+  case+ read_whole(out_bv, 524288) of
+  | ~whole_err(_) => 0
+  | ~whole_ok(ar, piece, size, n) => let
+      val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+      val @(at, seen, location) = find_unresolved(bv_c, 0, n, size, false, 0)
+      val rc = (if at >= n then 0 else let
+          val () = report_unresolved(bv_c, at, n, size, seen, location, read_prelude(in_bv, il))
+          val () = set_build_err()
+        in 1 end): int
+      val () = $A.drop<byte>(fz_c, bv_c)
+      val () = whole_free(ar, $A.thaw<byte>(fz_c))
+    in rc end
+
 
 
 
@@ -1283,7 +1407,9 @@ in
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-      val rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
+      val patsopt_rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
+      val rc = (if patsopt_rc <> 0 then patsopt_rc
+                else check_template_instances(out_bv, in_bv, in_len - 1)): int
       val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
     in rc end
   | ~$R.err(_) => ~1

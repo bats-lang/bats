@@ -1,3 +1,4 @@
+#include "share/atspre_staload.hats"
 (* util -- helpers *)
 
 /// Doubles x.
