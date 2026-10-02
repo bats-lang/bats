@@ -284,6 +284,99 @@ in case+ dr of
 end
 
 (* ============================================================
+   The cache's orphans: a module's files in build/src (its .sats,
+   .dats, .dats.src, .dats.pre, _dats.c and objects) are kept between
+   builds, and the module list is read from there, so a module deleted
+   from src/ (or absent from the branch checked out) was still compiled
+   and linked (#219). Before anything is compiled, each cached file
+   whose src/<module>.bats is gone is removed.
+   ============================================================ *)
+
+(* Whether name[i, i + 6) is "_dats." or "_sats." *)
+fn is_c_mark {l:agz}{n:pos}{i:nat | i + 6 <= n}
+  (name: !$A.arr(byte, l, n), i: int i): bool = let
+  fn at {l:agz}{n:pos}{j:nat | j < n} (name: !$A.arr(byte, l, n), j: int j): int =
+    byte2int0($A.get<byte>(name, j))
+  val kind = at(name, i + 1)
+in
+  at(name, i) = 95 && (kind = 100 || kind = 115) && at(name, i + 2) = 97
+  && at(name, i + 3) = 116 && at(name, i + 4) = 115 && at(name, i + 5) = 46
+end
+
+(* Where the module's name ends in a cached file's name[0, k): before
+   "_dats." or "_sats." (its C and objects), else before the first '.';
+   k when there is neither (a directory, such as bin) *)
+fun module_name_end {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+  (name: !$A.arr(byte, l, n), k: int k, i: int i): [e:nat | e <= k] int e =
+  if i >= k then k
+  else if byte2int0($A.get<byte>(name, i)) = 46 then i
+  else if i + 6 <= k then (if is_c_mark(name, i) then i else module_name_end(name, k, i + 1))
+  else module_name_end(name, k, i + 1)
+
+(* Removes build/src/<name> when src/<module>.bats is gone; name's
+   buffer is freed *)
+fn prune_cached {l:agz}{n:pos}{k:nat | k <= n}
+  (name: $A.arr(byte, l, n), k: int k, max: int n): void = let
+  val stop = module_name_end(name, k, 0)
+in
+  if stop <= 0 then $A.free<byte>(name)
+  else if stop >= k then $A.free<byte>(name)
+  else let
+    val @(fz_name, bv_name) = $A.freeze<byte>(name)
+    var source : $B.builder_v = $B.create()
+    val () = bput_v(source, "src/")
+    val () = copy_to_builder_v(bv_name, 0, stop, max, source)
+    val () = bput_v(source, ".bats")
+    val () = put_char_v(source, 0)
+    val @(source_arr, _) = $B.to_arr(source)
+    val @(fz_source, bv_source) = $A.freeze<byte>(source_arr)
+    val present = $F.file_exists(bv_source, 524288)
+    val () = $A.drop<byte>(fz_source, bv_source)
+    val () = $A.free<byte>($A.thaw<byte>(fz_source))
+    val () = (if present then ()
+      else let
+        val exec = str_to_path_arr("rm")
+        val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+        var b1 = $B.create()
+        val () = bput_v(b1, "rm")
+        var b2 = $B.create()
+        val () = bput_v(b2, "-f")
+        var b3 = $B.create()
+        val () = bput_v(b3, "build/src/")
+        val () = copy_to_builder_v(bv_name, 0, k, max, b3)
+        val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+          $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))))
+        val () = $A.drop<byte>(fz_x, bv_x)
+      in $A.free<byte>($A.thaw<byte>(fz_x)) end)
+    val () = $A.drop<byte>(fz_name, bv_name)
+  in $A.free<byte>($A.thaw<byte>(fz_name)) end
+end
+
+(* Removes each file of build/src whose module is no longer in src/ *)
+fn prune_orphans (): void = let
+  fun prune_each {n,i:nat | i <= n} .<n - i>.
+    (es: !$F.entries(n), i: int i, n: int n): void =
+    if i >= n then ()
+    else let
+      val name = $A.alloc<byte>(1024)
+      val name_len = $F.entries_name(es, i, name, 1024)
+      val () = (if is_dot_or_dotdot(name, name_len, 1024) then $A.free<byte>(name)
+        else prune_cached(name, name_len, 1024))
+    in prune_each(es, i + 1, n) end
+  val dir = str_to_path_arr("build/src")
+  val @(fz_dir, bv_dir) = $A.freeze<byte>(dir)
+  val listed = $F.dir_read(bv_dir, 524288)
+  val () = $A.drop<byte>(fz_dir, bv_dir)
+  val () = $A.free<byte>($A.thaw<byte>(fz_dir))
+in
+  case+ listed of
+  | ~$R.ok(es) => let
+      val () = prune_each(es, 0, $F.entries_count(es))
+    in $F.entries_free(es) end
+  | ~$R.err(_) => ()
+end
+
+(* ============================================================
    clean: remove build/, dist/ and docs/, as the Rust bats does:
    "cleaned N artifacts", N being how many of them existed
    ============================================================ *)
@@ -1477,6 +1570,9 @@ in
           in end
         | ~$R.err(_) => ())
 
+      (* Step 3a': the cache's orphans go, before the module list is
+         read from build/src (#219) *)
+      val () = prune_orphans()
       (* Step 3b: Preprocess src/*.bats shared modules *)
       val sm_arr = str_to_path_arr("src")
       val @(fz_sm, bv_sm) = $A.freeze<byte>(sm_arr)
