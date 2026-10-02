@@ -41,7 +41,7 @@ accept 'fnx f {n:nat} .<n>. (x: int n): int = if x = 0 then 0 else f(x - 1)'
 accept 'fun f {n:nat} .<n, 0>. (x: int n): int = if x = 0 then 0 else g(x - 1)
 and g {n:nat} .<n, 1>. (x: int n): int = f(x)'
 accept 'val h = fix loop {n:nat} .<n>. (x: int n): int => if x = 0 then 0 else loop(x - 1)'
-accept 'datatype tree = Leaf of () | Node of (tree, forest)
+accept 'datavtype tree = Leaf of () | Node of (tree, forest)
 and forest = FNil of () | FCons of (tree, forest)'
 accept 'val a = 1
 and b = 2'

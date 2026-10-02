@@ -2463,8 +2463,7 @@ in
                       val wsm_dr = $F.dir_read(bv_wsma, 524288)
                       val () = $A.drop<byte>(fz_wsma, bv_wsma)
                       val () = $A.free<byte>($A.thaw<byte>(fz_wsma))
-                      val wl_sm_cnt = ref<int>(0)
-                      val () = (case+ wsm_dr of
+                      val wl_sm_cnt = (case+ wsm_dr of
                         | ~$R.ok(wsm_d) => let
                             fun wcc_sm {n,i:nat | i <= n} .<n - i>.
                               (d: !$F.entries(n), i: int i, n: int n, lb: !$B.builder_v >> $B.builder_v,
@@ -2499,11 +2498,10 @@ in
                               end
                               end
                             val sc = wcc_sm(wsm_d, 0, $F.entries_count(wsm_d), wl, 0)
-                            val () = !wl_sm_cnt := sc
                             val () = $F.entries_free(wsm_d)
-                          in end
-                        | ~$R.err(_) => ())
-                      val wl_argc2 = wl_argc1 + !wl_sm_cnt
+                          in sc end
+                        | ~$R.err(_) => 0): int
+                      val wl_argc2 = wl_argc1 + wl_sm_cnt
                       var mb_w1 : $B.builder_v = $B.create()
                       val () = bput_v(mb_w1, "dist")
                       val _ = run_mkdir(mb_w1)
