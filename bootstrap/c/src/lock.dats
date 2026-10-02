@@ -636,10 +636,9 @@ fn put_unknown_kind {lv:agz}
   in bput_v(err, "'") end
   else bput_v(err, "")
 
-(* [package] kind (Rust: config::load): 1 for lib, which is the
-   default, 2 for bin, or ~1 after Rust's "unknown package kind: '<k>'"
-   in err *)
-fn doc_kind (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): int = let
+(* [package] kind (Rust: config::load), or none after Rust's "unknown
+   package kind: '<k>'" in err *)
+fn doc_kind (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): $R.option(package_kind) = let
   var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
   val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
   var key_c = @[char][4]('k', 'i', 'n', 'd')
@@ -654,12 +653,12 @@ fn doc_kind (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): int = let
   val @(fz_v, bv_v) = $A.freeze<byte>(vb)
   var lib_c = @[char][3]('l', 'i', 'b')
   var bin_c = @[char][3]('b', 'i', 'n')
-  val kind = (if vl < 0 then 1
-              else if vl <> 3 then ~1
-              else if lit_at(bv_v, 0, 256, lib_c, 3) then 1
-              else if lit_at(bv_v, 0, 256, bin_c, 3) then 2
-              else ~1): int
-  val () = put_unknown_kind(kind < 0, bv_v, vl, err)
+  val kind = (if vl < 0 then $R.some(Library())
+              else if vl <> 3 then $R.none()
+              else if lit_at(bv_v, 0, 256, lib_c, 3) then $R.some(Library())
+              else if lit_at(bv_v, 0, 256, bin_c, 3) then $R.some(Binary())
+              else $R.none()): $R.option(package_kind)
+  val () = put_unknown_kind($R.is_none<package_kind>(kind), bv_v, vl, err)
   val () = $A.drop<byte>(fz_v, bv_v)
   val () = $A.free<byte>($A.thaw<byte>(fz_v))
 in kind end
@@ -972,20 +971,22 @@ fn config_cons {ls:agz}
   (doc: !$T.toml_doc, src: !$A.arr(byte, ls, 256), sk: nlen,
    err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) = let
   val ok = (if syntax_check(doc, err) then serde_check(doc, err) else false): bool
-  val kind = (if ok then doc_kind(doc, err) else ~1): int
+  val kind = (if ok then doc_kind(doc, err) else $R.none()): $R.option(package_kind)
 in
-  if kind < 0 then @(~1, cons_nil())
-  else let
+  case+ kind of
+  | ~$R.none() => @(~1, cons_nil())
+  | ~$R.some(known) => let
     val @(st, cs, paths) = doc_cons(doc, src, sk, err)
   in
     if st < 0 then @(~1, cs)
-    else if kind = 1 then
-      (if paths > 0 then let
-         val () = cons_free(cs)
-         val () = bput_v(err, "path dependencies are only supported in binary packages (kind = \"bin\")")
-       in @(~1, cons_nil()) end
-       else @(1, cs))
-    else @(1, cs)
+    else (case+ known of
+      | Library() =>
+        (if paths > 0 then let
+           val () = cons_free(cs)
+           val () = bput_v(err, "path dependencies are only supported in binary packages (kind = \"bin\")")
+         in @(~1, cons_nil()) end
+         else @(1, cs))
+      | Binary() => @(1, cs))
   end
 end
 
@@ -1995,22 +1996,19 @@ fn report_missing {nm:nat} (missing: names(nm)): void = let
   val () = names_free(missing)
 in prerr_builder(m) end
 
-(* kind, after printing err and failing when kind < 0; consumes err *)
-fn report_config (kind: int, err: $B.builder_v): int =
-  if kind < 0 then let
+(* Prints err and fails when the kind is not known; consumes err *)
+fn report_config (known: bool, err: $B.builder_v): void =
+  if ~known then let
     var e : $B.builder_v = err
     val () = put_char_v(e, 10)
     val () = prerr_builder(e)
-    val () = set_build_err()
-  in kind end
-  else let
-    val () = $B.builder_free(err)
-  in kind end
+  in set_build_err() end
+  else $B.builder_free(err)
 
-(* The project's kind as Rust's config::load reads bats.toml: 1 for lib,
-   2 for bin, or ~1 after printing its error (a bats.toml that cannot be
-   read, an unknown kind, a constraint that does not parse, a path
-   dependency in a lib package) *)
+(* The project's kind as Rust's config::load reads bats.toml, or none
+   after printing its error (a bats.toml that cannot be read, an unknown
+   kind, a constraint that does not parse, a path dependency in a lib
+   package) *)
 
 
 implement project_kind () = let
@@ -2019,20 +2017,19 @@ implement project_kind () = let
   val kind = (case+ read_toml(str_to_path_arr("bats.toml")) of
     | ~$R.err(e) => let
         val () = put_cannot_read(e, err)
-      in ~1 end
+      in $R.none() end
     | ~$R.ok(doc) => let
         val nb = $A.alloc<byte>(256)
         val @(st, cs) = config_cons(doc, nb, 0, err)
         val () = cons_free(cs)
         val () = $A.free<byte>(nb)
         var quiet_err : $B.builder_v = $B.create()
-        val k = (if st < 0 then ~1 else doc_kind(doc, quiet_err)): int
+        val k = (if st < 0 then $R.none() else doc_kind(doc, quiet_err)): $R.option(package_kind)
         val () = $B.builder_free(quiet_err)
         val () = $T.toml_free(doc)
-      in k end): int
-in
-  report_config(kind, err)
-end
+      in k end): $R.option(package_kind)
+  val () = report_config($R.is_some<package_kind>(kind), err)
+in kind end
 
 (* ============================================================
    Path dependencies at build time (Rust: build::copy_path_dep)
@@ -3048,4 +3045,4 @@ implement do_lock {lr} (dev, dry_run, repo, rplen) =
     var err : $B.builder_v = $B.create()
     val () = bput_v(err, "error: ")
     val @(cst, cs) = project_cons(err)
-  in lock_with(cst, cs, err, repo, rplen, dev <> 0, dry_run <> 0) end
+  in lock_with(cst, cs, err, repo, rplen, dev, dry_run) end

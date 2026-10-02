@@ -791,7 +791,14 @@ in prerr! ("'\n") end
 (* The upload version (Rust: resolve_version): [package] version when
    set; otherwise from git, which fails with 1 outside a git repository
    and 2 on a dirty working tree *)
-fn resolve_version (): $R.result(version_arr, int) = let
+(* Why there is no upload version (Rust: resolve_version) *)
+datavtype version_failure =
+  | GitNotFound of int   (* git could not be run: its errno *)
+  | NotARepository
+  | DirtyTree
+  | InvalidVersion       (* printed where it was found *)
+
+fn resolve_version (): $R.result(version_arr, version_failure) = let
   var key_c = @[char][7]('v', 'e', 'r', 's', 'i', 'o', 'n')
   val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 7))
   val v = package_value(bv_k, 7)
@@ -817,16 +824,16 @@ in
     in
       if bad_s >= 0 then let
         val () = $A.free<byte>(va)
-      in $R.err(3) end
+      in $R.err(InvalidVersion()) end
       else $R.ok(@(va, 524288, vl, true))
     end
   | ~$R.none() =>
     let
       val rc = git_dir_rc()
     in
-      if rc < 0 then $R.err(rc)
-      else if rc > 0 then $R.err(1)
-      else if git_tree_dirty() then $R.err(2)
+      if rc < 0 then $R.err(GitNotFound(0 - rc))
+      else if rc > 0 then $R.err(NotARepository())
+      else if git_tree_dirty() then $R.err(DirtyTree())
       else $R.ok(git_version())
     end
 end
@@ -842,14 +849,14 @@ fn git_not_found (e: int): void = let
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
 in prerr! (" (os error ", e, ")\n") end
 
-(* Prints resolve_version's error: -errno when git could not be run,
-   1 outside a git repository, 2 on a dirty tree; an invalid version (3)
-   was printed where it was found *)
-fn version_error (code: int): void =
-  if code < 0 then git_not_found(0 - code)
-  else if code = 1 then prerr! ("error: not a git repository (required for auto-versioning)\n")
-  else if code = 2 then prerr! ("error: working tree is dirty (commit or stash changes before upload)\n")
-  else ()
+(* Prints resolve_version's error; an invalid version was printed where
+   it was found *)
+fn version_error (failure: version_failure): void =
+  case+ failure of
+  | ~GitNotFound(e) => git_not_found(e)
+  | ~NotARepository() => prerr! ("error: not a git repository (required for auto-versioning)\n")
+  | ~DirtyTree() => prerr! ("error: working tree is dirty (commit or stash changes before upload)\n")
+  | ~InvalidVersion() => ()
 
 
 
@@ -929,10 +936,10 @@ in
                 val vr = resolve_version()
               in
                 case+ vr of
-                | ~$R.err(code) => let
+                | ~$R.err(failure) => let
                     val () = $A.free<byte>(nbuf)
                     val () = set_build_err()
-                  in version_error(code) end
+                  in version_error(failure) end
                 | ~$R.ok(ver) => let
                 val @(verbuf, vmax, verlen, explicit) = ver
                 val @(fz_vb, bv_vb) = $A.freeze<byte>(verbuf)
@@ -1089,16 +1096,19 @@ end
    completions: generate shell completion scripts
    ============================================================ *)
 
+(* The shells bats completions writes a script for *)
 
 
-implement do_completions(shell) =
-  if shell = 0 then
+
+
+implement do_completions(target) =
+  case+ target of
+  | Bash() =>
     print_string "# bash completions\ncomplete -W 'build check clean lock run test tree add remove upload init completions' bats\n"
-  else if shell = 1 then
+  | Zsh() =>
     print_string "#compdef bats\n_bats_cmds=(build check clean lock run test tree add remove upload init completions)\ncompadd $_bats_cmds\n"
-  else if shell = 2 then
+  | Fish() =>
     print_string "# fish completions\nfor c in build check clean lock run test tree add remove upload init completions; complete -c bats -n __fish_use_subcommand -a $c; end\n"
-  else println! ("error: specify a shell (bash, zsh, fish)")
 
 (* Check if a file exists by trying to open it *)
 
@@ -1178,18 +1188,18 @@ fun arg_is {l:agz}{n:pos}{i:nat | i <= n} .<n - i>.
   else arg_is(a, alen, w, n, i + 1)
 
 (* The project kind named by bats init's argument, as the Rust bats
-   accepted it: 0 for binary/bin, 1 for library/lib, ~1 otherwise. *)
-fn init_kind {l:agz} (a: !$A.borrow(byte, l, 4096), alen: int): int = let
+   accepted it: binary or bin, library or lib; none otherwise. *)
+fn init_kind {l:agz} (a: !$A.borrow(byte, l, 4096), alen: int): $R.option(package_kind) = let
   var w1 = @[char][6]('b', 'i', 'n', 'a', 'r', 'y')
   var w2 = @[char][3]('b', 'i', 'n')
   var w3 = @[char][7]('l', 'i', 'b', 'r', 'a', 'r', 'y')
   var w4 = @[char][3]('l', 'i', 'b')
 in
-  if arg_is(a, alen, w1, 6, 0) then 0
-  else if arg_is(a, alen, w2, 3, 0) then 0
-  else if arg_is(a, alen, w3, 7, 0) then 1
-  else if arg_is(a, alen, w4, 3, 0) then 1
-  else ~1
+  if arg_is(a, alen, w1, 6, 0) then $R.some(Binary())
+  else if arg_is(a, alen, w2, 3, 0) then $R.some(Binary())
+  else if arg_is(a, alen, w3, 7, 0) then $R.some(Library())
+  else if arg_is(a, alen, w4, 3, 0) then $R.some(Library())
+  else $R.none()
 end
 
 (* Whether the NUL-terminated path in p exists. *)
@@ -1212,13 +1222,14 @@ in $A.free<byte>($A.thaw<byte>(fz_c)) end
 
 (* The NUL-terminated path "src/bin/<name>.bats" or "src/lib.bats". *)
 fn init_source_path {ln:agz}
-  (kind: int, name: !$A.borrow(byte, ln, 524288), nlen: int): $B.builder_v = let
+  (kind: package_kind, name: !$A.borrow(byte, ln, 524288), nlen: int): $B.builder_v = let
   var p: $B.builder_v = $B.create()
-  val () = (if kind = 0 then let
-      val () = bput_v(p, "src/bin/")
-      val () = copy_to_builder_v(name, 0, nlen, 524288, p)
-    in bput_v(p, ".bats") end
-    else bput_v(p, "src/lib.bats"))
+  val () = (case+ kind of
+    | Binary() => let
+        val () = bput_v(p, "src/bin/")
+        val () = copy_to_builder_v(name, 0, nlen, 524288, p)
+      in bput_v(p, ".bats") end
+    | Library() => bput_v(p, "src/lib.bats")): void
   val () = put_char_v(p, 0)
 in p end
 
@@ -1230,16 +1241,15 @@ fn write_to {lp:agz} (p: !$A.borrow(byte, lp, 524288), b: $B.builder_v): int =
    in arg[0, alen). *)
 
 
-implement do_init {la} (arg, alen, claude) = let
-  val kind = init_kind(arg, alen)
-in
-  if kind < 0 then let
+implement do_init {la} (arg, alen, claude) =
+  case+ init_kind(arg, alen) of
+  | ~$R.none() => let
     val () = prerr! ("error: unknown project kind '")
     val () = prerr_seg(arg, 0, alen, 4096)
     val () = prerr! ("', use 'binary' or 'library'")
     val () = prerr_newline()
   in set_build_err() end
-  else let
+  | ~$R.some(kind) => let
     var nb: $B.builder_v = $B.create()
     val () = add_project_name(nb)
     val @(na, nlen) = $B.to_arr(nb)
@@ -1268,18 +1278,20 @@ in
         var toml: $B.builder_v = $B.create()
         val () = bput_v(toml, "[package]\nname = \"")
         val () = copy_to_builder_v(bv_n, 0, nlen, 524288, toml)
-        val () = (if kind = 0 then bput_v(toml, "\"\nkind = \"bin\"\n")
-          else bput_v(toml, "\"\nkind = \"lib\"\n"))
+        val () = (case+ kind of
+          | Binary() => bput_v(toml, "\"\nkind = \"bin\"\n")
+          | Library() => bput_v(toml, "\"\nkind = \"lib\"\n")): void
         val r1 = write_to(bv_tp, toml)
         var dir: $B.builder_v = $B.create()
-        val () = (if kind = 0 then bput_v(dir, "src/bin") else bput_v(dir, "src"))
+        val () = (case+ kind of Binary() => bput_v(dir, "src/bin") | Library() => bput_v(dir, "src")): void
         val _ = run_mkdir(dir)
         var src: $B.builder_v = $B.create()
         (* split so the emitter does not take the text for this file's main0 *)
-        val () = (if kind = 0 then let
-            val () = bput_v(src, "implement ")
-          in bput_v(src, "main0 () = println! (\"hello, world!\")\n") end
-          else bput_v(src, "#pub fun hello(): void\n\nimplement hello () = println! (\"hello from library\")\n"))
+        val () = (case+ kind of
+          | Binary() => let
+              val () = bput_v(src, "implement ")
+            in bput_v(src, "main0 () = println! (\"hello, world!\")\n") end
+          | Library() => bput_v(src, "#pub fun hello(): void\n\nimplement hello () = println! (\"hello from library\")\n")): void
         val r2 = write_to(bv_sp, src)
         var gi: $B.builder_v = $B.create()
         val () = bput_v(gi, "build/\ndist/\ndocs/\nbats_modules/\n")
@@ -1299,7 +1311,7 @@ in
           val () = prerr_newline()
         in set_build_err() end
         else let
-          val () = (if claude > 0 then write_claude_rules() else ())
+          val () = (if claude then write_claude_rules() else ())
         in
           if is_quiet() then ()
           else let
@@ -1319,7 +1331,6 @@ in
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
     val () = $A.drop<byte>(fz_n, bv_n)
   in $A.free<byte>($A.thaw<byte>(fz_n)) end
-end
 
 (* ============================================================
    tree: display dependency tree from bats.lock
@@ -1579,14 +1590,19 @@ fn collect_built (names: !$B.builder_v >> $B.builder_v, release: int): int = let
   val () = $A.free<byte>($A.thaw<byte>(fz_sb))
 in count end
 
-(* Appends the chosen binary's name: bin[0, blen) for 0, the first
-   entry of n for 1, nothing otherwise. *)
+(* Which binary bats run runs: the one --bin names, the only one built,
+   or none (an error was printed) *)
+datatype binary_choice = NamedBinary | OnlyBinary | NoBinary
+
+(* Appends the chosen binary's name: bin[0, blen) for the one --bin
+   names, the first entry of n for the only one, nothing for none. *)
 fn add_choice {lb,ln:agz}
-  (cmd: !$B.builder_v >> $B.builder_v, choice: int,
+  (cmd: !$B.builder_v >> $B.builder_v, choice: binary_choice,
    bin: !$A.borrow(byte, lb, 256), blen: int, n: !$A.borrow(byte, ln, 524288)): void =
-  if choice = 0 then copy_to_builder_v(bin, 0, blen, 256, cmd)
-  else if choice = 1 then copy_to_builder_v(n, 0, find_null_bv_from(n, 0, 524288), 524288, cmd)
-  else bput_v(cmd, "")
+  case+ choice of
+  | NamedBinary() => copy_to_builder_v(bin, 0, blen, 256, cmd)
+  | OnlyBinary() => copy_to_builder_v(n, 0, find_null_bv_from(n, 0, 524288), 524288, cmd)
+  | NoBinary() => ()
 
 (* Whether the entry at n[s, NUL) equals b[0, blen). *)
 fun entry_eq {ln,lb:agz}{s,i:nat | s + i <= 524288; i <= 256} .<256 - i>.
@@ -1634,27 +1650,27 @@ implement do_run {lb,le} (release, bin, blen, extra, elen) = let
   val @(na, nlen) = $B.to_arr(names)
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
   (* As the Rust bats: --bin names one of them; without it there must be
-     exactly one. 0: run --bin's; 1: run the only one; ~1: error. *)
+     exactly one. *)
   val choice = (if blen > 0 then
-      if list_has(bv_n, nlen, 0, bin, blen) then 0
+      if list_has(bv_n, nlen, 0, bin, blen) then NamedBinary()
       else let
         val () = prerr! ("error: binary '")
         val () = prerr_seg(bin, 0, blen, 256)
         val () = prerr! ("' not found. Available: ")
         val () = prerr_names(bv_n, nlen, 0, true)
         val () = prerr_newline()
-      in ~1 end
-    else if count = 1 then 1
+      in NoBinary() end
+    else if count = 1 then OnlyBinary()
     else let
       val () = prerr! ("error: multiple binaries available, specify one with --bin <name>: ")
       val () = prerr_names(bv_n, nlen, 0, true)
       val () = prerr_newline()
-    in ~1 end): int
+    in NoBinary() end): binary_choice
   var cmd: $B.builder_v = $B.create()
   val () = (if release > 0 then bput_v(cmd, "./dist/release/")
     else bput_v(cmd, "./dist/debug/"))
   val () = add_choice(cmd, choice, bin, blen, bv_n)
-  val chosen = choice >= 0
+  val chosen = (case+ choice of NoBinary() => false | _ => true): bool
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
   val () = put_char_v(cmd, 0)

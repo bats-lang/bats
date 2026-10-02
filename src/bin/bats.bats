@@ -17,36 +17,40 @@ staload "build.sats"
 staload "commands.sats"
 staload "lock.sats"
 
-(* Match command buffer to dispatch code *)
-(* 0=build 1=check 2=clean 3=lock 4=run 5=init 6=test 7=tree *)
-(* 8=upload 9=add 10=remove 11=completions 12=version -1=unknown *)
+(* The subcommands *)
+datatype command =
+  | Build | Check | Clean | Lock | Run | Init | Test | Tree
+  | Upload | Add | Remove | Completions | Version | UnknownCommand
+
+(* The command the command buffer names, told apart as the Rust bats did:
+   by its length and first bytes *)
 fn dispatch_cmd {l:agz}
-  (buf: !$A.arr(byte, l, 32), len: int): int = let
+  (buf: !$A.arr(byte, l, 32), len: int): command = let
   val b0 = byte2int0($A.get<byte>(buf, 0))
   val b1 = byte2int0($A.get<byte>(buf, 1))
 in
   if len = 5 then
-    (if $AR.eq_int_int(b0, 98) then 0
+    (if $AR.eq_int_int(b0, 98) then Build()
     else if $AR.eq_int_int(b0, 99) then
-      (if $AR.eq_int_int(b1, 104) then 1 else 2)
-    else ~1): int
+      (if $AR.eq_int_int(b1, 104) then Check() else Clean())
+    else UnknownCommand()): command
   else if len = 4 then
-    (if $AR.eq_int_int(b0, 108) then 3
-    else if $AR.eq_int_int(b0, 105) then 5
+    (if $AR.eq_int_int(b0, 108) then Lock()
+    else if $AR.eq_int_int(b0, 105) then Init()
     else if $AR.eq_int_int(b0, 116) then
-      (if $AR.eq_int_int(b1, 101) then 6 else 7)
-    else ~1): int
+      (if $AR.eq_int_int(b1, 101) then Test() else Tree())
+    else UnknownCommand()): command
   else if len = 3 then
-    (if $AR.eq_int_int(b0, 114) then 4
-    else if $AR.eq_int_int(b0, 97) then 9
-    else ~1): int
+    (if $AR.eq_int_int(b0, 114) then Run()
+    else if $AR.eq_int_int(b0, 97) then Add()
+    else UnknownCommand()): command
   else if len = 6 then
-    (if $AR.eq_int_int(b0, 117) then 8
-    else if $AR.eq_int_int(b0, 114) then 10
-    else ~1): int
-  else if len = 11 then 11
-  else if len = 7 then 12
-  else ~1
+    (if $AR.eq_int_int(b0, 117) then Upload()
+    else if $AR.eq_int_int(b0, 114) then Remove()
+    else UnknownCommand()): command
+  else if len = 11 then Completions()
+  else if len = 7 then Version()
+  else UnknownCommand()
 end
 
 (* Print usage matching Rust bats format *)
@@ -100,12 +104,44 @@ fun find_dashdash {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     else find_dashdash(buf, next + 1, len)
   end
 
-(* Scan --only values: read all repeated --only tokens from cmdline.
-   Returns bitmask: bit0=debug bit1=release bit2=native bit3=wasm *)
+(* The values the repeated --only options named *)
+typedef only_named = @{debug= bool, release= bool, native= bool, wasm= bool}
+
+(* The profiles a build makes: one when --only names it alone, both when
+   it names both or neither *)
+datatype profiles = DebugOnly | ReleaseOnly | BothProfiles
+
+(* The targets a build makes, likewise *)
+datatype targets = NativeOnly | WasmOnly | BothTargets
+
+fn profiles_of (named: only_named): profiles =
+  if named.debug && ~named.release then DebugOnly()
+  else if named.release && ~named.debug then ReleaseOnly()
+  else BothProfiles()
+
+fn targets_of (named: only_named): targets =
+  if named.native && ~named.wasm then NativeOnly()
+  else if named.wasm && ~named.native then WasmOnly()
+  else BothTargets()
+
+fn makes_debug (p: profiles): bool = case+ p of ReleaseOnly() => false | _ => true
+fn makes_release (p: profiles): bool = case+ p of DebugOnly() => false | _ => true
+fn makes_native (t: targets): bool = case+ t of WasmOnly() => false | _ => true
+fn makes_wasm (t: targets): bool = case+ t of NativeOnly() => false | _ => true
+
+(* The value of --only at v0 (its first byte) added to named *)
+fn only_add (named: only_named, v0: int): only_named =
+  if $AR.eq_int_int(v0, 100) then @{debug= true, release= named.release, native= named.native, wasm= named.wasm}
+  else if $AR.eq_int_int(v0, 114) then @{debug= named.debug, release= true, native= named.native, wasm= named.wasm}
+  else if $AR.eq_int_int(v0, 110) then @{debug= named.debug, release= named.release, native= true, wasm= named.wasm}
+  else if $AR.eq_int_int(v0, 119) then @{debug= named.debug, release= named.release, native= named.native, wasm= true}
+  else named
+
+(* Scan --only values: read all repeated --only tokens from cmdline. *)
 fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
-  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int, mask: int): int =
-  if pos >= len then mask
-  else if pos >= 4096 then mask
+  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int, named: only_named): only_named =
+  if pos >= len then named
+  else if pos >= 4096 then named
   (* "--only" : 45,45,111,110,108,121 *)
   else if peek_arr(buf, pos, 4096) = 45 && peek_arr(buf, pos + 1, 4096) = 45
           && peek_arr(buf, pos + 2, 4096) = 111 && peek_arr(buf, pos + 3, 4096) = 110
@@ -113,31 +149,22 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     val next = $S.find_null_at(buf, min(pos + 6, 4096), 4096)
     val val_start = next + 1
   in
-    if val_start >= len then mask
-    else if val_start >= 4096 then mask
+    if val_start >= len then named
+    else if val_start >= 4096 then named
     else let
       val v0 = peek_arr(buf, val_start, 4096)
       val vend = $S.find_null_at(buf, val_start, 4096)
-      val new_mask = (
-        if $AR.eq_int_int(v0, 100) then
-          (if (mask mod 2) = 0 then mask + 1 else mask)
-        else if $AR.eq_int_int(v0, 114) then
-          (if ((mask / 2) mod 2) = 0 then mask + 2 else mask)
-        else if $AR.eq_int_int(v0, 110) then
-          (if ((mask / 4) mod 2) = 0 then mask + 4 else mask)
-        else if $AR.eq_int_int(v0, 119) then
-          (if ((mask / 8) mod 2) = 0 then mask + 8 else mask)
-        else mask): int
+      val new_named = only_add(named, v0)
     in
-      if vend >= 4096 then new_mask
-      else scan_only(buf, vend + 1, len, new_mask)
+      if vend >= 4096 then new_named
+      else scan_only(buf, vend + 1, len, new_named)
     end
   end
   else let
     val next = $S.find_null_at(buf, pos, 4096)
   in
-    if next >= 4096 then mask
-    else scan_only(buf, next + 1, len, mask)
+    if next >= 4096 then named
+    else scan_only(buf, next + 1, len, named)
   end
 
 (* The value of a string option copied to buf, and its length; 0 when
@@ -153,16 +180,21 @@ fn opt_string_copy {l:agz}{n:pos}
 (* Whether the project is a binary package, which build and run need;
    false after printing the error (Rust: cmd_build's config::load, then
    build::build's kind check) *)
-fn bin_package (): bool = let
-  val k = project_kind()
-in
-  if k < 0 then false
-  else if k = 2 then true
-  else let
-    val () = prerr! ("error: 'bats build' is only for binary packages (kind = \"bin\")\n")
-    val () = set_build_err()
-  in false end
-end
+fn bin_package (): bool =
+  case+ project_kind() of
+  | ~$R.none() => false
+  | ~$R.some(Binary()) => true
+  | ~$R.some(Library()) => let
+      val () = prerr! ("error: 'bats build' is only for binary packages (kind = \"bin\")\n")
+      val () = set_build_err()
+    in false end
+
+(* Whether bats.toml reads as a package of a known kind; false after
+   printing the error *)
+fn project_known (): bool =
+  case+ project_kind() of
+  | ~$R.none() => false
+  | ~$R.some(_) => true
 
 fn bats_main (): void = let
   val cl_buf = $A.alloc<byte>(4096)
@@ -177,7 +209,8 @@ in
           val extra_len = copy_extra(cl_buf, extra_buf, dd_pos + 3, extra_end, 0)
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
           val argc = count_argc(cl_buf, effective_len)
-          val only_mask = scan_only(cl_buf, 0, effective_len, 0)
+          val named_only = scan_only(cl_buf, 0, effective_len,
+            @{debug= false, release= false, native= false, wasm= false})
           val @(fz_cb, bv_cb) = $A.freeze<byte>(cl_buf)
           var pna_c = @[char][4]('b', 'a', 't', 's')
           val pna = $S.from_char_array(pna_c, 4)
@@ -273,17 +306,17 @@ in
               (* Get command *)
               val cmd_buf = $A.alloc<byte>(32)
               val cmd_len = $AP.get_string_copy(r, h_cmd, cmd_buf, 32)
-              val cmd_code = dispatch_cmd(cmd_buf, cmd_len)
+              val chosen_command = dispatch_cmd(cmd_buf, cmd_len)
               val () = $A.free<byte>(cmd_buf)
               val arg_buf = $A.alloc<byte>(4096)
               val arg_len = $AP.get_string_copy(r, h_arg, arg_buf, 4096)
             in let val () = (
-              if cmd_code = 0 then let (* build *)
+              case+ chosen_command of
+              | Build() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-                val has_debug = (only_mask mod 2)
-                val has_release = ((only_mask / 2) mod 2)
-                val has_wasm = ((only_mask / 8) mod 2)
+                val profile_choice = profiles_of(named_only)
+                val target_choice = targets_of(named_only)
               in
                 (* Rust: cmd_build's config::load, then build's kind
                    check, then resolve_deps, once before the builds *)
@@ -293,39 +326,36 @@ in
                 else let
                   (* The matrix: an axis --only does not name keeps all
                      its values (debug and release; native and wasm) *)
-                  val has_native = ((only_mask / 4) mod 2)
-                  val any_prof = (has_debug + has_release = 0): bool
-                  val any_tgt = (has_native + has_wasm = 0): bool
-                  val dbg = (if any_prof then true else has_debug > 0): bool
-                  val rls = (if any_prof then true else has_release > 0): bool
-                  val nat = (if any_tgt then true else has_native > 0): bool
-                  val wsm = (if any_tgt then true else has_wasm > 0): bool
+                  val dbg = makes_debug(profile_choice)
+                  val rls = makes_release(profile_choice)
+                  val nat = makes_native(target_choice)
+                  val wsm = makes_wasm(target_choice)
                   val () = (if nat then (if dbg then do_build(0, 0, bv_tc, tc_len) else ()) else ())
                   val () = (if nat then (if rls then do_build(1, 0, bv_tc, tc_len) else ()) else ())
                   val () = (if wsm then (if dbg then do_build(0, 1, bv_tc, tc_len) else ()) else ())
-                  val () = (if has_wasm > 0 then
+                  val () = (if named_only.wasm then
                     if is_to_c() then
                       println! ("error: --to-c wasm is not yet implemented without shell")
                     else ()
                   else ())
                 in (if wsm then (if rls then do_build(1, 1, bv_tc, tc_len) else ()) else ()) end
               end
-              else if cmd_code = 1 then let (* check *)
+              | Check() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               (* Rust: cmd_check's config::load, then resolve_deps *)
-              in if project_kind() < 0 then () else if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_check() else () end
-              else if cmd_code = 2 then let (* clean *)
+              in if ~project_known() then () else if ~resolve_deps(bv_repo, repo_len) then () else if validate_project() then do_check() else () end
+              | Clean() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in do_clean() end
-              else if cmd_code = 3 then let (* lock *)
-                val lk_dev = (if $AP.is_present(r, h_dev) then 1 else 0): int
-                val lk_dry = (if $AP.is_present(r, h_dry_run) then 1 else 0): int
+              | Lock() => let
+                val lk_dev = $AP.is_present(r, h_dev)
+                val lk_dry = $AP.is_present(r, h_dry_run)
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in do_lock(lk_dev, lk_dry, bv_repo, repo_len) end
-              else if cmd_code = 4 then let (* run *)
+              | Run() => let
                 val bin_buf = $A.alloc<byte>(256)
                 val bin_len = opt_string_copy(r, h_bin, bin_buf, 256)
                 fn check_only_release {l2:agz}
@@ -349,8 +379,8 @@ in
                   do_run(run_release, bv_bin, bin_len, bv_extra, extra_len) else ())
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
-              else if cmd_code = 5 then let (* init *)
-                val init_claude = (if $AP.get_bool(r, h_claude) then 1 else 0): int
+              | Init() => let
+                val init_claude = $AP.get_bool(r, h_claude)
                 val () = $AP.parse_result_free(r)
               in
                 if arg_len > 0 then let
@@ -364,7 +394,7 @@ in
                   val () = prerr_newline()
                 in set_build_err() end
               end
-              else if cmd_code = 6 then let (* test *)
+              | Test() => let
                 (* --filter: a substring of the test names to run *)
                 val flt_buf = $A.alloc<byte>(4096)
                 val flt_len = opt_string_copy(r, h_filter, flt_buf, 4096)
@@ -372,25 +402,23 @@ in
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_flt, bv_flt) = $A.freeze<byte>(flt_buf)
                 (* --only native|wasm: one target's tests; both without it *)
-                val on = ((only_mask / 4) mod 2)
-                val ow = ((only_mask / 8) mod 2)
-                val any_tgt = (on + ow = 0): bool
-                val () = (if project_kind() < 0 then ()
+                val test_targets = targets_of(named_only)
+                val () = (if ~project_known() then ()
                   else if ~resolve_deps(bv_repo, repo_len) then ()
                   else if validate_project() then
-                    do_test(bv_flt, flt_len, (if any_tgt then true else on > 0), (if any_tgt then true else ow > 0))
+                    do_test(bv_flt, flt_len, makes_native(test_targets), makes_wasm(test_targets))
                   else ())
                 val () = $A.drop<byte>(fz_flt, bv_flt)
               in $A.free<byte>($A.thaw<byte>(fz_flt)) end
-              else if cmd_code = 7 then let (* tree *)
+              | Tree() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in do_tree() end
-              else if cmd_code = 8 then let (* upload *)
+              | Upload() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in do_upload(bv_repo, repo_len) end
-              else if cmd_code = 9 then let (* add *)
+              | Add() => let
                 val () = $AP.parse_result_free(r)
               in
                 if arg_len > 0 then let
@@ -403,7 +431,7 @@ in
                   val () = $A.free<byte>(arg_buf)
                 in println! ("error: specify a package name\nusage: bats add <package>") end
               end
-              else if cmd_code = 10 then let (* remove *)
+              | Remove() => let
                 val () = $AP.parse_result_free(r)
               in
                 if arg_len > 0 then let
@@ -416,28 +444,30 @@ in
                   val () = $A.free<byte>(arg_buf)
                 in println! ("error: specify a package name\nusage: bats remove <package>") end
               end
-              else if cmd_code = 11 then let (* completions *)
+              | Completions() => let
                 val () = $AP.parse_result_free(r)
+                (* The shell the argument names, by its first byte *)
                 fn check_shell_arg {l2:agz}
-                  (buf: !$A.arr(byte, l2, 4096), alen: int): int =
-                  if alen <= 0 then ~1
+                  (buf: !$A.arr(byte, l2, 4096), alen: int): $R.option(shell) =
+                  if alen <= 0 then $R.none()
                   else let val b0 = byte2int0($A.get<byte>(buf, 0)) in
-                    if $AR.eq_int_int(b0, 98) then 0
-                    else if $AR.eq_int_int(b0, 122) then 1
-                    else if $AR.eq_int_int(b0, 102) then 2
-                    else ~1
+                    if $AR.eq_int_int(b0, 98) then $R.some(Bash())
+                    else if $AR.eq_int_int(b0, 122) then $R.some(Zsh())
+                    else if $AR.eq_int_int(b0, 102) then $R.some(Fish())
+                    else $R.none()
                   end
-                val shell = check_shell_arg(arg_buf, arg_len)
+                val named_shell = check_shell_arg(arg_buf, arg_len)
                 val () = $A.free<byte>(arg_buf)
               in
-                if shell >= 0 then do_completions(shell)
-                else println! ("error: specify a shell (bash, zsh, fish)\nusage: bats completions bash|zsh|fish")
+                case+ named_shell of
+                | ~$R.some(target) => do_completions(target)
+                | ~$R.none() => println! ("error: specify a shell (bash, zsh, fish)\nusage: bats completions bash|zsh|fish")
               end
-              else if cmd_code = 12 then let (* version *)
+              | Version() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in println! ("bats 0.1.0") end
-              else let
+              | UnknownCommand() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|completions> [--only debug|release]") end)
