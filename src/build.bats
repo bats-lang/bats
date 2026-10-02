@@ -487,7 +487,7 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define ATS_MALLOC(sz) malloc(sz)\n#define ATS_MFREE(ptr) free(ptr)\n#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))\n#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)\n#define atspre_cloptr_free(p) ATS_MFREE(p)\n#define atspre_ptr_alloc_tsz(tsz) ATS_MALLOC(tsz)\n")
   val () = bput_v(b, "#define ATSclosurerize_beg(flab, tenvs, targs, tres)\n#define ATSclosurerize_end()\n#define ATSFCreturn(x) return(x)\n#define ATSFCreturn_void(x) (x); return\n")
   val () = bput_v(b, "#define ATSPMVcfunlab(knd, flab, env) (flab##__closurerize)env\nextern void mainats_0_void(void);\n#define ATSmainats_0_void(err) mainats_0_void()\n")
-  val () = bput_v(b, "void *malloc(int size);\nvoid free(void *ptr);\nvoid *memset(void *s, int c, unsigned int n);\nvoid *memcpy(void *dst, const void *src, unsigned int n);\nstatic inline unsigned int strlen(const char *s) { unsigned int n = 0; while (s[n]) n++; return n; }\n")
+  val () = bput_v(b, "void *malloc(int size);\nvoid free(void *ptr);\nvoid *memset(void *s, int c, unsigned int n);\nvoid *memcpy(void *dst, const void *src, unsigned int n);\nvoid *memmove(void *dst, const void *src, unsigned int n);\nint memcmp(const void *a, const void *b, unsigned int n);\nstatic inline unsigned int strlen(const char *s) { unsigned int n = 0; while (s[n]) n++; return n; }\n")
   val () = bput_v(b, "static inline void *calloc(int n, int sz) { return malloc(n * sz); }\n")
   (* print and exit_void, from the host: bats test's wasm runner prints
      its PASS and FAIL lines and exits with them *)
@@ -512,6 +512,13 @@ implement write_wasm_runtime_c() = let
   val () = bput_v(b, "static void *ward_fl[WARD_NBUCKET] = {0,0,0,0,0,0,0,0,0};\nstatic void *ward_fl_over = 0;\n")
   val () = bput_v(b, "void *memset(void *s,int c,unsigned int n){unsigned char *p=(unsigned char*)s;unsigned char byte=(unsigned char)c;while(n--)*p++=byte;return s;}\n")
   val () = bput_v(b, "void *memcpy(void *dst,const void *src,unsigned int n){unsigned char *d=(unsigned char*)dst;const unsigned char *s=(const unsigned char*)src;while(n--)*d++=*s++;return dst;}\n")
+  (* clang lowers some copies to memmove (an overlap it cannot rule out)
+     and some comparisons to memcmp, on its own: -nostdlib gives neither,
+     so without these a large record copy left env.memmove to import and
+     the module failed to load (#220). no_builtin keeps clang from
+     turning their own loops back into calls to themselves *)
+  val () = bput_v(b, "__attribute__((no_builtin)) void *memmove(void *dst,const void *src,unsigned int n){unsigned char *d=(unsigned char*)dst;const unsigned char *s=(const unsigned char*)src;if(d<=s){while(n--)*d++=*s++;}else{d+=n;s+=n;while(n--)*--d=*--s;}return dst;}\n")
+  val () = bput_v(b, "__attribute__((no_builtin)) int memcmp(const void *a,const void *b,unsigned int n){const unsigned char *p=(const unsigned char*)a;const unsigned char *q=(const unsigned char*)b;while(n--){if(*p!=*q)return (int)*p-(int)*q;p++;q++;}return 0;}\n")
   val () = bput_v(b, "static inline unsigned int ward_hdr_read(void *p){return *(unsigned int*)((char*)p-WARD_HEADER);}\n")
   val () = bput_v(b, "static inline int ward_bucket(unsigned int n){if(n<=32)return 0;if(n<=128)return 1;if(n<=512)return 2;if(n<=4096)return 3;\n")
   val () = bput_v(b, "if(n<=8192)return 4;if(n<=16384)return 5;if(n<=65536)return 6;if(n<=262144)return 7;if(n<=1048576)return 8;return -1;}\n")

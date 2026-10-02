@@ -541,6 +541,13 @@ fn write_wasm_runtime_c(): int
 
 
 
+
+
+
+
+
+
+
 fn write_wasm_stubs(): int
 
 
