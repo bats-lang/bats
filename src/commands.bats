@@ -549,7 +549,7 @@ fn write_with_version {lv:agz}{nv:pos}
   (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -558,7 +558,7 @@ in
       val tbuf = $A.alloc<byte>(8192)
       val trr = $F.file_read(tfd, tbuf, 8192)
       val tlen = (case+ trr of | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
-      val () = $R.discard<int><int>($F.file_close(tfd))
+      val () = $R.discard<int><$F.io_error>($F.file_close(tfd))
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
       val replace = any_version_line(bv_tb, 0, tlen, 8192)
       var out: $B.builder_v = $B.create()
@@ -641,7 +641,7 @@ fn package_value {lk:agz}{nk:pos}
   (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -650,7 +650,7 @@ in
       val tbuf = $A.alloc<byte>(8192)
       val trr = $F.file_read(tfd, tbuf, 8192)
       val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><int>(tcr)
+      val () = $R.discard<int><$F.io_error>(tcr)
       val tn = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
       val pr = $T.parse(bv_tb, tn)
@@ -855,7 +855,7 @@ implement do_upload {lr} (repo, rplen) = let
   (* Read bats.toml for package name and verify kind = "lib" *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -865,7 +865,7 @@ in
       val trr = $F.file_read(tfd, tbuf, 8192)
       val tlen = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
       val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><int>(tcr)
+      val () = $R.discard<int><$F.io_error>(tcr)
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
       val pr = $T.parse(bv_tb, tlen)
       val () = $A.drop<byte>(fz_tb, bv_tb)
@@ -1108,13 +1108,13 @@ implement do_completions(target) =
 implement file_exists(path) = let
   val pa = str_to_path_arr(path)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fex_or = $F.file_open(bv, 524288, 0, 0)
+  val fex_or = $F.file_open(bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in case+ fex_or of
   | ~$R.ok(fd) => let
       val cr = $F.file_close(fd)
-      val () = $R.discard<int><int>(cr)
+      val () = $R.discard<int><$F.io_error>(cr)
     in true end
   | ~$R.err(_) => false
 end
@@ -1195,8 +1195,8 @@ end
 
 (* Whether the NUL-terminated path in p exists. *)
 fn path_exists {l:agz} (p: !$A.borrow(byte, l, 524288)): bool =
-  case+ $F.file_open(p, 524288, 0, 0) of
-  | ~$R.ok(fd) => let val () = $R.discard<int><int>($F.file_close(fd)) in true end
+  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
   | ~$R.err(_) => false
 
 (* The project name, as the Rust bats chose it: the current directory's
@@ -1332,7 +1332,7 @@ implement do_init {la} (arg, alen, claude) =
 implement do_tree() = let
   val la = str_to_path_arr("bats.lock")
   val @(fz_la, bv_la) = $A.freeze<byte>(la)
-  val lock_or = $F.file_open(bv_la, 524288, 0, 0)
+  val lock_or = $F.file_open(bv_la, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_la, bv_la)
   val () = $A.free<byte>($A.thaw<byte>(fz_la))
 in
@@ -1342,7 +1342,7 @@ in
       val lr = $F.file_read(lfd, lock_buf, 524288)
       val lock_len = (case+ lr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
       val lcr = $F.file_close(lfd)
-      val () = $R.discard<int><int>(lcr)
+      val () = $R.discard<int><$F.io_error>(lcr)
     in
       if lock_len > 0 then let
         (* Use C helper to print Unicode tree *)
@@ -1370,7 +1370,7 @@ implement do_add(bv, pkg_start, pkg_len, max) = let
   (* Read bats.toml *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1380,7 +1380,7 @@ in
       val trr = $F.file_read(tfd, tbuf, 4096)
       val tlen = (case+ trr of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): int
       val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><int>(tcr)
+      val () = $R.discard<int><$F.io_error>(tcr)
       val @(fz_tb2, bv_tb2) = $A.freeze<byte>(tbuf)
       var out_b: $B.builder_v = $B.create()
       val () = copy_to_builder_v(bv_tb2, 0, tlen, 4096, out_b)
@@ -1415,7 +1415,7 @@ end
 implement do_remove(bv, pkg_start, pkg_len, max) = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1425,7 +1425,7 @@ in
       val trr = $F.file_read(tfd, tbuf, 4096)
       val tlen = (case+ trr of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): int
       val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><int>(tcr)
+      val () = $R.discard<int><$F.io_error>(tcr)
       val () = $A.free<byte>(tbuf)
       val sed_exec = str_to_path_arr("sed")
       val @(fz_se, bv_se) = $A.freeze<byte>(sed_exec)
@@ -1491,7 +1491,7 @@ in
         | ~$R.ok(n) => n
         | ~$R.err(_) => 0): int
       val fcr = $F.file_close(stdout_fd)
-      val () = $R.discard<int><int>(fcr)
+      val () = $R.discard<int><$F.io_error>(fcr)
       val wait_r = $P.child_wait(child)
       val exit_code = (case+ wait_r of
         | ~$R.ok(n) => n
@@ -1532,8 +1532,8 @@ fn is_built {le:agz} (ent: !$A.borrow(byte, le, 1024), len: int, release: profil
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val built = (case+ $F.file_open(bv_p, 524288, 0, 0) of
-    | ~$R.ok(fd) => let val () = $R.discard<int><int>($F.file_close(fd)) in true end
+  val built = (case+ $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+    | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
     | ~$R.err(_) => false): bool
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))

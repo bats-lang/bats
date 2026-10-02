@@ -91,9 +91,26 @@ stadef SPEC_STRIDE = 16
 
 
 
+
+
+
+
+
+
+
+
+(* The values an int argument may take: any, or those in [low, high].
+   Linear: IntBetween is a cell, freed when add_int stores it *)
+
+
+
+
 (* ============================================================
    API — Construction
    ============================================================ *)
+
+(* Each argument but a positional one or a subcommand may have a short
+   name, a character (-c): given as $R.some(c), or $R.none() *)
 
 
 
@@ -158,9 +175,9 @@ stadef SPEC_STRIDE = 16
 
 
 
-(* The index add_subcommand returned for the subcommand argv chose, or
-   ~1 when it chose none. The first positional token that names a
-   subcommand chooses it; later tokens are ordinary positionals. *)
+(* The index add_subcommand returned for the subcommand argv chose, if
+   it chose one. The first positional token that names a subcommand
+   chooses it; later tokens are ordinary positionals. *)
 
 
 (* ============================================================
@@ -217,6 +234,81 @@ fn _spec_get {ls:agz}{i:nat | i < 64}{f:nat | f < 16}
   (specs: !$A.arr(int, ls, 1024), i: int i, f: int f): int =
   $A.get<int>(specs, i * 16 + f)
 
+(* What a spec is. The table stores it as a number in field 0, written
+   by _kind_code and read by _spec_kind: the one place each way *)
+datatype spec_kind =
+  | PositionalString
+  | OptionString
+  | OptionInt
+  | Flag
+  | Count
+  | Subcommand
+
+fn _kind_code (kind: spec_kind): int =
+  case+ kind of
+  | PositionalString() => 0
+  | OptionString() => 1
+  | OptionInt() => 2
+  | Flag() => 3
+  | Count() => 4
+  | Subcommand() => 5
+
+fn _spec_kind {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i): spec_kind = let
+  val code = _spec_get(specs, i, 0)
+in
+  if code = 0 then PositionalString()
+  else if code = 1 then OptionString()
+  else if code = 2 then OptionInt()
+  else if code = 3 then Flag()
+  else if code = 4 then Count()
+  else Subcommand()
+end
+
+(* Whether a spec of this kind is an option (named --name or -c) *)
+fn _is_option (kind: spec_kind): bool =
+  case+ kind of
+  | PositionalString() => false
+  | OptionString() => true
+  | OptionInt() => true
+  | Flag() => true
+  | Count() => true
+  | Subcommand() => false
+
+(* A spec's short name: field 9 says whether it has one (1) or not
+   (0), field 6 which; written by _short_store, read by _spec_short *)
+fn _short_store {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i, short_name: $R.option(int)): void =
+  case+ short_name of
+  | ~$R.some(c) => let
+      val () = _spec_set(specs, i, 9, 1)
+    in _spec_set(specs, i, 6, c) end
+  | ~$R.none() => _spec_set(specs, i, 9, 0)
+
+fn _spec_short {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i): $R.option(int) =
+  if _spec_get(specs, i, 9) = 1 then $R.some(_spec_get(specs, i, 6)) else $R.none()
+
+(* An int spec's range: field 12 says whether it has one (1) or not
+   (0), fields 10 and 11 its ends *)
+fn _range_store {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i, range: int_range): void =
+  case+ range of
+  | ~AnyInt() => _spec_set(specs, i, 12, 0)
+  | ~IntBetween(low, high) => let
+      val () = _spec_set(specs, i, 12, 1)
+      val () = _spec_set(specs, i, 10, low)
+    in _spec_set(specs, i, 11, high) end
+
+fn _spec_range {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i): int_range =
+  if _spec_get(specs, i, 12) = 1 then IntBetween(_spec_get(specs, i, 10), _spec_get(specs, i, 11))
+  else AnyInt()
+
+(* A spec's exclusive group: field 13 says whether it is in one (1) or
+   not (0), field 15 which *)
+fn _group_store {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i, group: int): void = let
+  val () = _spec_set(specs, i, 13, 1)
+in _spec_set(specs, i, 15, group) end
+
+fn _in_group {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i, group: int): bool =
+  _spec_get(specs, i, 13) = 1 && _spec_get(specs, i, 15) = group
+
 (* Sets a[i] = v for every i in [i0, n). *)
 fun _fill_int {l:agz}{n:pos}{i:nat | i <= n} .<n - i>.
   (a: !$A.arr(int, l, n), n: int n, i: int i, v: int): void =
@@ -246,9 +338,9 @@ in $A.free<int>(specs); $A.free<byte>(tbuf) end
 
 fn _add_base
   {tp0:nat | tp0 <= 8192}{ac0:nat | ac0 < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp0 + nn + nh <= 8192}
-  (p: parser(tp0, ac0), kind: int, vtype: int,
+  (p: parser(tp0, ac0), kind: spec_kind,
    name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int,
+   short_name: $R.option(int),
    help: !$A.borrow(byte, lh, nh), hlen: int nh,
    def_int: int): @(parser(tp0 + nn + nh, ac0 + 1), int ac0) = let
   val+ ~parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl) = p
@@ -256,45 +348,47 @@ fn _add_base
   val tp2 = _text_write(tbuf, tp, name, nlen)
   val hoff = tp2
   val tp3 = _text_write(tbuf, tp2, help, hlen)
-  (* Every field is written, so nothing later reads uninitialized
-     memory; group -1 means "in no exclusive group". *)
+  (* Every field is written (0: no short name, no range, in no group),
+     so nothing later reads uninitialized memory. *)
   val () = _fill_int_range(specs, ac * 16, ac * 16 + 16, 0)
-  val () = _spec_set(specs, ac, 0, kind)
-  val () = _spec_set(specs, ac, 1, vtype)
+  val () = _spec_set(specs, ac, 0, _kind_code(kind))
   val () = _spec_set(specs, ac, 2, noff)
   val () = _spec_set(specs, ac, 3, nlen)
   val () = _spec_set(specs, ac, 4, hoff)
   val () = _spec_set(specs, ac, 5, hlen)
-  val () = _spec_set(specs, ac, 6, short_ch)
+  val () = _short_store(specs, ac, short_name)
   val () = _spec_set(specs, ac, 7, def_int)
-  val () = _spec_set(specs, ac, 15, ~1)
 in @(parser_mk(specs, tbuf, ac + 1, tp3, gc, sc, pno, pnl, pho, phl), ac) end
 
-implement add_string {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_ch, help, hlen, positional) = let
-  val kind = if positional then 0 else 1
-  val @(p2, idx) = _add_base(p, kind, 0, name, nlen, short_ch, help, hlen, 0)
-in @(p2, (kind_string() | idx)) end
+(* A positional argument has no short name: one given is dropped *)
+implement add_string {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_name, help, hlen, positional) =
+  if positional then let
+    val () = $R.option_discard<int>(short_name)
+    val @(p2, idx) = _add_base(p, PositionalString(), name, nlen, $R.none(), help, hlen, 0)
+  in @(p2, (kind_string() | idx)) end
+  else let
+    val @(p2, idx) = _add_base(p, OptionString(), name, nlen, short_name, help, hlen, 0)
+  in @(p2, (kind_string() | idx)) end
 
-implement add_int {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_ch, help, hlen, def, mn, mx) = let
-  val @(p2, idx) = _add_base(p, 1, 1, name, nlen, short_ch, help, hlen, def)
+implement add_int {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_name, help, hlen, def, range) = let
+  val @(p2, idx) = _add_base(p, OptionInt(), name, nlen, short_name, help, hlen, def)
   val+ ~parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl) = p2
-  val () = _spec_set(specs, idx, 10, mn)
-  val () = _spec_set(specs, idx, 11, mx)
+  val () = _range_store(specs, idx, range)
 in @(parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl), (kind_int() | idx)) end
 
-implement add_flag {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_ch, help, hlen) = let
-  val @(p2, idx) = _add_base(p, 2, 2, name, nlen, short_ch, help, hlen, 0)
+implement add_flag {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_name, help, hlen) = let
+  val @(p2, idx) = _add_base(p, Flag(), name, nlen, short_name, help, hlen, 0)
 in @(p2, (kind_bool() | idx)) end
 
-implement add_count {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_ch, help, hlen) = let
-  val @(p2, idx) = _add_base(p, 2, 3, name, nlen, short_ch, help, hlen, 0)
+implement add_count {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, short_name, help, hlen) = let
+  val @(p2, idx) = _add_base(p, Count(), name, nlen, short_name, help, hlen, 0)
 in @(p2, (kind_count() | idx)) end
 
-(* A subcommand is a spec of kind ~1 (neither positional nor option,
-   so no option or positional search finds it) whose field 8 holds its
-   subcommand index. *)
+(* A subcommand is a spec of its own kind (neither positional nor
+   option, so no option or positional search finds it) whose field 8
+   holds its subcommand index. *)
 implement add_subcommand {tp0}{ac0}{ln}{nn}{lh}{nh} (p, name, nlen, help, hlen) = let
-  val @(p2, idx) = _add_base(p, ~1, ~1, name, nlen, ~1, help, hlen, 0)
+  val @(p2, idx) = _add_base(p, Subcommand(), name, nlen, $R.none(), help, hlen, 0)
   val+ ~parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl) = p2
   val () = _spec_set(specs, idx, 8, sc)
 in @(parser_mk(specs, tbuf, ac, tp, gc, sc + 1, pno, pnl, pho, phl), sc) end
@@ -316,113 +410,142 @@ fn _bytes_eq
     else false
 in loop(argv, tbuf, 0) end
 
-(* Index of the option (kind > 0) named argv[off, off + len); ~1 if none. *)
+(* A spec index of a parser of ac specs *)
+typedef spec_index(ac:int) = [r:nat | r < ac] int r
+
+(* Index of the option named argv[off, off + len), if there is one *)
 fn _find_by_name
   {la:agz}{na:pos}{ls:agz}{lt:agz}{ac:nat | ac <= 64}{o:nat}{n:nat | o + n <= na}
   (argv: !$A.borrow(byte, la, na), off: int o, len: int n,
    specs: !$A.arr(int, ls, 1024), tbuf: !$A.arr(byte, lt, 8192), ac: int ac)
-  : [r:int | ~1 <= r; r < ac] int r = let
+  : $R.option(spec_index(ac)) = let
   fun loop {i:nat | i <= ac} .<ac - i>.
     (argv: !$A.borrow(byte, la, na), specs: !$A.arr(int, ls, 1024),
-     tbuf: !$A.arr(byte, lt, 8192), i: int i): [r:int | ~1 <= r; r < ac] int r =
-    if i >= ac then ~1
-    else if _spec_get(specs, i, 0) <= 0 then loop(argv, specs, tbuf, i + 1)
+     tbuf: !$A.arr(byte, lt, 8192), i: int i): $R.option(spec_index(ac)) =
+    if i >= ac then $R.none()
+    else if ~_is_option(_spec_kind(specs, i)) then loop(argv, specs, tbuf, i + 1)
     else let
       val snoff = _u16(_spec_get(specs, i, 2))
       val snlen = _u16(_spec_get(specs, i, 3))
     in
       if snlen != len then loop(argv, specs, tbuf, i + 1)
       else if snoff + snlen > 8192 then loop(argv, specs, tbuf, i + 1)
-      else if _bytes_eq(argv, off, tbuf, snoff, len) then i
+      else if _bytes_eq(argv, off, tbuf, snoff, len) then $R.some(i)
       else loop(argv, specs, tbuf, i + 1)
     end
 in loop(argv, specs, tbuf, 0) end
 
-(* Index of the option (kind > 0) with short flag ch; ~1 if none. *)
+(* Whether spec i's short name is ch *)
+fn _short_is {ls:agz}{i:nat | i < 64} (specs: !$A.arr(int, ls, 1024), i: int i, ch: int): bool =
+  case+ _spec_short(specs, i) of
+  | ~$R.some(c) => c = ch
+  | ~$R.none() => false
+
+(* Index of the option with short name ch, if there is one *)
 fn _find_by_short
   {ls:agz}{ac:nat | ac <= 64}
-  (specs: !$A.arr(int, ls, 1024), ch: int, ac: int ac): [r:int | ~1 <= r; r < ac] int r = let
+  (specs: !$A.arr(int, ls, 1024), ch: int, ac: int ac): $R.option(spec_index(ac)) = let
   fun loop {i:nat | i <= ac} .<ac - i>.
-    (specs: !$A.arr(int, ls, 1024), i: int i): [r:int | ~1 <= r; r < ac] int r =
-    if i >= ac then ~1
-    else if _spec_get(specs, i, 0) > 0 then
-      if _spec_get(specs, i, 6) = ch then i
-      else loop(specs, i + 1)
+    (specs: !$A.arr(int, ls, 1024), i: int i): $R.option(spec_index(ac)) =
+    if i >= ac then $R.none()
+    else if _is_option(_spec_kind(specs, i)) && _short_is(specs, i, ch) then $R.some(i)
     else loop(specs, i + 1)
 in loop(specs, 0) end
 
-(* Index of the pi-th positional spec (kind 0); ~1 if none. *)
+(* Whether a spec of this kind is a positional argument *)
+fn _is_positional (kind: spec_kind): bool =
+  case+ kind of
+  | PositionalString() => true
+  | OptionString() => false
+  | OptionInt() => false
+  | Flag() => false
+  | Count() => false
+  | Subcommand() => false
+
+(* Index of the pi-th positional spec, if there is one *)
 fn _find_pos_spec
   {ls:agz}{ac:nat | ac <= 64}
-  (specs: !$A.arr(int, ls, 1024), ac: int ac, pi: int): [r:int | ~1 <= r; r < ac] int r = let
+  (specs: !$A.arr(int, ls, 1024), ac: int ac, pi: int): $R.option(spec_index(ac)) = let
   fun loop {i:nat | i <= ac} .<ac - i>.
-    (specs: !$A.arr(int, ls, 1024), i: int i, pi: int): [r:int | ~1 <= r; r < ac] int r =
-    if i >= ac then ~1
-    else if _spec_get(specs, i, 0) = 0 then
-      if pi = 0 then i
+    (specs: !$A.arr(int, ls, 1024), i: int i, pi: int): $R.option(spec_index(ac)) =
+    if i >= ac then $R.none()
+    else if _is_positional(_spec_kind(specs, i)) then
+      if pi = 0 then $R.some(i)
       else loop(specs, i + 1, pi - 1)
     else loop(specs, i + 1, pi)
 in loop(specs, 0, pi) end
 
-(* Subcommand index of the subcommand (kind ~1) named
-   argv[off, off + len); ~1 if none. *)
+(* Whether a spec of this kind is a subcommand *)
+fn _is_subcommand (kind: spec_kind): bool =
+  case+ kind of
+  | PositionalString() => false
+  | OptionString() => false
+  | OptionInt() => false
+  | Flag() => false
+  | Count() => false
+  | Subcommand() => true
+
+(* Subcommand index of the subcommand named argv[off, off + len), if
+   there is one *)
 fn _find_subcmd
   {la:agz}{na:pos}{ls:agz}{lt:agz}{ac:nat | ac <= 64}{o:nat}{n:nat | o + n <= na}
   (argv: !$A.borrow(byte, la, na), off: int o, len: int n,
-   specs: !$A.arr(int, ls, 1024), tbuf: !$A.arr(byte, lt, 8192), ac: int ac): int = let
+   specs: !$A.arr(int, ls, 1024), tbuf: !$A.arr(byte, lt, 8192), ac: int ac): $R.option(int) = let
   fun loop {i:nat | i <= ac} .<ac - i>.
     (argv: !$A.borrow(byte, la, na), specs: !$A.arr(int, ls, 1024),
-     tbuf: !$A.arr(byte, lt, 8192), i: int i): int =
-    if i >= ac then ~1
-    else if _spec_get(specs, i, 0) != ~1 then loop(argv, specs, tbuf, i + 1)
+     tbuf: !$A.arr(byte, lt, 8192), i: int i): $R.option(int) =
+    if i >= ac then $R.none()
+    else if ~_is_subcommand(_spec_kind(specs, i)) then loop(argv, specs, tbuf, i + 1)
     else let
       val snoff = _u16(_spec_get(specs, i, 2))
       val snlen = _u16(_spec_get(specs, i, 3))
     in
       if snlen != len then loop(argv, specs, tbuf, i + 1)
       else if snoff + snlen > 8192 then loop(argv, specs, tbuf, i + 1)
-      else if _bytes_eq(argv, off, tbuf, snoff, len) then _spec_get(specs, i, 8)
+      else if _bytes_eq(argv, off, tbuf, snoff, len) then $R.some(_spec_get(specs, i, 8))
       else loop(argv, specs, tbuf, i + 1)
     end
 in loop(argv, specs, tbuf, 0) end
 
-(* Parses argv[off, off + len) as a decimal int with optional leading
-   '-'. Returns (value, success); (0, false) on a non-digit, an empty
-   string, or a value that does not fit in an int. *)
+(* argv[off, off + len) as a decimal int with an optional leading '-';
+   none for a non-digit, an empty string, or a value that does not fit
+   in an int. *)
 fn _parse_int
   {la:agz}{na:pos}{o:nat}{n:nat | o + n <= na}
-  (argv: !$A.borrow(byte, la, na), off: int o, len: int n): @(int, bool) = let
+  (argv: !$A.borrow(byte, la, na), off: int o, len: int n): $R.option(int) = let
   fun digits {i:nat | i <= n} .<n - i>.
-    (argv: !$A.borrow(byte, la, na), i: int i, acc: int): @(int, bool) =
-    if i >= len then @(acc, true)
+    (argv: !$A.borrow(byte, la, na), i: int i, acc: int): $R.option(int) =
+    if i >= len then $R.some(acc)
     else let
       val b = byte2int0($A.read<byte>(argv, off + i))
     in
-      if b < 48 then @(0, false)
-      else if b > 57 then @(0, false)
-      else if acc > 214748364 then @(0, false)
+      if b < 48 then $R.none()
+      else if b > 57 then $R.none()
+      else if acc > 214748364 then $R.none()
       else if acc = 214748364 then
-        if b > 55 then @(0, false)
+        if b > 55 then $R.none()
         else digits(argv, i + 1, acc * 10 + (b - 48))
       else digits(argv, i + 1, acc * 10 + (b - 48))
     end
 in
-  if len <= 0 then @(0, false)
-  else if byte2int0($A.read<byte>(argv, off)) = 45 then let
-    val @(v, ok) = digits(argv, 1, 0)
-  in @(0 - v, ok) end
+  if len <= 0 then $R.none()
+  else if byte2int0($A.read<byte>(argv, off)) = 45 then
+    (if len <= 1 then $R.none()
+     else case+ digits(argv, 1, 0) of
+       | ~$R.some(v) => $R.some(0 - v)
+       | ~$R.none() => $R.none())
   else digits(argv, 0, 0)
 end
 
 (* Copies argv[off, off + len) into the value buffer at sp and records
-   it for spec idx. Returns the next free position, or ~1 when the
+   it for spec idx. Returns the next free position, or none when the
    value does not fit. *)
 fn _store_str
   {la:agz}{na:pos}{ls:agz}{lm:agz}{o:nat}{n:nat | o + n <= na}{i:nat | i < 64}{sp:nat | sp <= 8192}
   (argv: !$A.borrow(byte, la, na), off: int o, len: int n,
    str_buf: !$A.arr(byte, ls, 8192), str_meta: !$A.arr(int, lm, 128),
-   idx: int i, sp: int sp): [r:int | ~1 <= r; r <= 8192] int r =
-  if sp + len > 8192 then ~1
+   idx: int i, sp: int sp): $R.option([r:nat | r <= 8192] int r) =
+  if sp + len > 8192 then $R.none()
   else let
     fun copy {k:nat | k <= n} .<n - k>.
       (argv: !$A.borrow(byte, la, na), dst: !$A.arr(byte, ls, 8192), k: int k): void =
@@ -433,7 +556,7 @@ fn _store_str
     val () = copy(argv, str_buf, 0)
     val () = $A.set<int>(str_meta, idx * 2, sp)
     val () = $A.set<int>(str_meta, idx * 2 + 1, len)
-  in sp + len end
+  in $R.some(sp + len) end
 
 (* End of the NUL-terminated token starting at p (the NUL, or na). *)
 fun _find_tok_end
@@ -486,17 +609,17 @@ fn _edit_dist
   val () = $A.free<int>(row)
 in d end
 
-(* Index of the option name closest to argv[off, off + len), or ~1 when
-   no option is within distance 999. *)
+(* Index of the option name closest to argv[off, off + len), if an
+   option is within distance 999 *)
 fn _find_closest
   {la:agz}{na:pos}{ls:agz}{lt:agz}{ac:nat | ac <= 64}{o:nat}{n:nat | o + n <= na}
   (argv: !$A.borrow(byte, la, na), off: int o, len: int n,
-   specs: !$A.arr(int, ls, 1024), tbuf: !$A.arr(byte, lt, 8192), ac: int ac): int = let
+   specs: !$A.arr(int, ls, 1024), tbuf: !$A.arr(byte, lt, 8192), ac: int ac): $R.option(int) = let
   fun loop {i:nat | i <= ac} .<ac - i>.
     (argv: !$A.borrow(byte, la, na), specs: !$A.arr(int, ls, 1024),
-     tbuf: !$A.arr(byte, lt, 8192), i: int i, best: int, best_d: int): int =
+     tbuf: !$A.arr(byte, lt, 8192), i: int i, best: $R.option(int), best_d: int): $R.option(int) =
     if i >= ac then best
-    else if _spec_get(specs, i, 0) <= 0 then loop(argv, specs, tbuf, i + 1, best, best_d)
+    else if ~_is_option(_spec_kind(specs, i)) then loop(argv, specs, tbuf, i + 1, best, best_d)
     else let
       val snoff = _u16(_spec_get(specs, i, 2))
       val snlen = _u16(_spec_get(specs, i, 3))
@@ -505,11 +628,13 @@ fn _find_closest
       else let
         val d = _edit_dist(argv, off, len, tbuf, snoff, snlen)
       in
-        if d < best_d then loop(argv, specs, tbuf, i + 1, i, d)
+        if d < best_d then let
+          val () = $R.option_discard<int>(best)
+        in loop(argv, specs, tbuf, i + 1, $R.some(i), d) end
         else loop(argv, specs, tbuf, i + 1, best, best_d)
       end
     end
-in loop(argv, specs, tbuf, 0, ~1, 999) end
+in loop(argv, specs, tbuf, 0, $R.none(), 999) end
 
 fn _free_parse_temps
   {ls:agz}{lm:agz}{li:agz}{lb:agz}{lp:agz}{lt:agz}{lsp:agz}
@@ -525,12 +650,6 @@ fn _free_parse_temps
   val () = $A.free<byte>(tbuf)
   val () = $A.free<int>(specs)
 in end
-
-(* Scan state after a token: (pos_idx, str_pos, next_av_pos, tok_num,
-   subcmd_idx, err). err is 0, 3000 + closest (unknown long option),
-   3000 (unknown, nothing close), 4000 + ch (unknown short option),
-   5000 + idx (value buffer full) or 6000 + tok_num (no such
-   subcommand). *)
 
 implement parse {tp0}{ac0}{la}{na} (p, argv, argv_len, argc) = let
   val+ ~parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl) = p
@@ -553,9 +672,20 @@ implement parse {tp0}{ac0}{la}{na} (p, argv, argv_len, argc) = let
     in init_defs(specs, ivals, i + 1) end
   val () = init_defs(specs, int_vals, 0)
 
+  (* An option's string value, argv[vs, ve), stored for spec idx *)
+  fn store_value
+    {lm:agz}{lsb:agz}{i:nat | i < ac0}{sp:nat | sp <= 8192}{vs,ve:nat | vs <= ve; ve <= na}
+    (argv: !$A.borrow(byte, la, na),
+     str_buf: !$A.arr(byte, lsb, 8192), str_meta: !$A.arr(int, lm, 128),
+     idx: int i, str_pos: int sp, vs: int vs, ve: int ve, tok_num: int)
+    : @([s:nat | s <= 8192] int s, [q:nat | q == ve + 1] int q, int, $R.option(parse_error)) =
+    case+ _store_str(argv, vs, ve - vs, str_buf, str_meta, idx, str_pos) of
+    | ~$R.some(sp2) => @(sp2, ve + 1, tok_num + 2, $R.none())
+    | ~$R.none() => @(str_pos, ve + 1, tok_num + 2, $R.some(err_too_long(idx + 1)))
+
   (* Handles the option with spec index idx whose token ended at
-     next_pos - 1: a flag/count takes no value, others take the next
-     token. Returns (str_pos, next_av_pos, tok_num, err). *)
+     next_pos - 1: a flag or count takes no value, others take the next
+     token. Returns (str_pos, next_av_pos, tok_num, the error if one) *)
   fn process_option
     {ls:agz}{lm:agz}{li:agz}{lb:agz}{lp:agz}{lsb:agz}
     {i:nat | i < ac0}{sp:nat | sp <= 8192}{np:nat | np <= na + 1}
@@ -565,30 +695,34 @@ implement parse {tp0}{ac0}{la}{na} (p, argv, argv_len, argc) = let
      int_vals: !$A.arr(int, li, 64), bool_vals: !$A.arr(int, lb, 64),
      present: !$A.arr(int, lp, 64),
      idx: int i, str_pos: int sp, next_pos: int np, tok_num: int)
-    : @([s:nat | s <= 8192] int s, [q:nat | np <= q; q <= na + 1] int q, int, int) = let
+    : @([s:nat | s <= 8192] int s, [q:nat | np <= q; q <= na + 1] int q, int, $R.option(parse_error)) = let
     val () = $A.set<int>(present, idx, 1)
+    val vs = min(next_pos, argv_len)
+    val ve = _find_tok_end(argv, vs, argv_len)
   in
-    if _spec_get(specs, idx, 0) = 2 then let
-      val () = $A.set<int>(bool_vals, idx, $A.get<int>(bool_vals, idx) + 1)
-    in @(str_pos, next_pos, tok_num + 1, 0) end
-    else let
-      val vs = min(next_pos, argv_len)
-      val ve = _find_tok_end(argv, vs, argv_len)
-    in
-      if _spec_get(specs, idx, 1) = 1 then let
-        val @(iv, _) = _parse_int(argv, vs, ve - vs)
-        val () = $A.set<int>(int_vals, idx, iv)
-      in @(str_pos, ve + 1, tok_num + 2, 0) end
-      else let
-        val sp2 = _store_str(argv, vs, ve - vs, str_buf, str_meta, idx, str_pos)
-      in
-        if sp2 < 0 then @(str_pos, ve + 1, tok_num + 2, 5000 + idx)
-        else @(sp2, ve + 1, tok_num + 2, 0)
-      end
-    end
+    case+ _spec_kind(specs, idx) of
+    | Flag() => let
+        val () = $A.set<int>(bool_vals, idx, $A.get<int>(bool_vals, idx) + 1)
+      in @(str_pos, next_pos, tok_num + 1, $R.none()) end
+    | Count() => let
+        val () = $A.set<int>(bool_vals, idx, $A.get<int>(bool_vals, idx) + 1)
+      in @(str_pos, next_pos, tok_num + 1, $R.none()) end
+    | OptionInt() =>
+      (case+ _parse_int(argv, vs, ve - vs) of
+       | ~$R.some(iv) => let
+           val () = $A.set<int>(int_vals, idx, iv)
+         in @(str_pos, ve + 1, tok_num + 2, $R.none()) end
+       | ~$R.none() => @(str_pos, ve + 1, tok_num + 2, $R.some(err_not_int(idx + 1))))
+    | OptionString() => store_value(argv, str_buf, str_meta, idx, str_pos, vs, ve, tok_num)
+    (* not options: the option lookups never give one, and a value is
+       taken as a string's would be *)
+    | PositionalString() => store_value(argv, str_buf, str_meta, idx, str_pos, vs, ve, tok_num)
+    | Subcommand() => @(str_pos, next_pos, tok_num + 1, $R.none())
   end
 
-  (* One token per step; av_pos moves forward every step. *)
+  (* One token per step; av_pos moves forward every step. Returns the
+     string buffer's end, the subcommand chosen if one was, and the
+     error if one stopped the scan *)
   fun scan_argv
     {ls:agz}{lt:agz}{li:agz}{lb:agz}{lp:agz}{lm:agz}{lsb:agz}
     {sp:nat | sp <= 8192}{ap:nat | ap <= na + 1} .<na + 1 - ap>.
@@ -598,9 +732,10 @@ implement parse {tp0}{ac0}{la}{na} (p, argv, argv_len, argc) = let
      int_vals: !$A.arr(int, li, 64), bool_vals: !$A.arr(int, lb, 64),
      present: !$A.arr(int, lp, 64),
      pos_idx: int, str_pos: int sp,
-     av_pos: int ap, tok_num: int, subcmd_idx: int): @(int, int, int) =
-    if tok_num >= argc then @(str_pos, subcmd_idx, 0)
-    else if av_pos >= argv_len then @(str_pos, subcmd_idx, 0)
+     av_pos: int ap, tok_num: int, chosen: $R.option(int))
+    : @(int, $R.option(int), $R.option(parse_error)) =
+    if tok_num >= argc then @(str_pos, chosen, $R.none())
+    else if av_pos >= argv_len then @(str_pos, chosen, $R.none())
     else let
       val tok_start = av_pos
       val tok_end = _find_tok_end(argv, tok_start, argv_len)
@@ -609,67 +744,68 @@ implement parse {tp0}{ac0}{la}{na} (p, argv, argv_len, argc) = let
     in
       if tok_len <= 0 then
         scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-          pos_idx, str_pos, next_pos, tok_num + 1, subcmd_idx)
+          pos_idx, str_pos, next_pos, tok_num + 1, chosen)
       else let
         val b0 = byte2int0($A.read<byte>(argv, tok_start))
         val b1 = (if tok_start + 1 < argv_len then byte2int0($A.read<byte>(argv, tok_start + 1)) else 0): int
       in
         if b0 = 45 then
           if b1 = 45 then
-            if tok_len < 2 then @(str_pos, subcmd_idx, 3000)
-            else let (* long option *)
-              val opt = _find_by_name(argv, tok_start + 2, tok_len - 2, specs, tbuf, ac)
-            in
-              if opt >= 0 then let
-                val @(sp2, np2, tn2, err) = process_option(argv, specs,
-                  str_buf, str_meta, int_vals, bool_vals, present,
-                  opt, str_pos, next_pos, tok_num)
-              in
-                if err > 0 then @(sp2, subcmd_idx, err)
-                else scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-                  pos_idx, sp2, np2, tn2, subcmd_idx)
-              end
-              else let
-                val closest = _find_closest(argv, tok_start + 2, tok_len - 2, specs, tbuf, ac)
-              in
-                if closest >= 0 then @(str_pos, subcmd_idx, 3000 + closest)
-                else @(str_pos, subcmd_idx, 3000)
-              end
-            end
-          else let (* short option *)
-            val opt = _find_by_short(specs, b1, ac)
-          in
-            if opt >= 0 then let
-              val @(sp2, np2, tn2, err) = process_option(argv, specs,
-                str_buf, str_meta, int_vals, bool_vals, present,
-                opt, str_pos, next_pos, tok_num)
-            in
-              if err > 0 then @(sp2, subcmd_idx, err)
-              else scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-                pos_idx, sp2, np2, tn2, subcmd_idx)
-            end
-            else @(str_pos, subcmd_idx, 4000 + b1)
-          end
+            if tok_len < 2 then @(str_pos, chosen, $R.some(err_unknown_long($R.none())))
+            else (* long option *)
+              (case+ _find_by_name(argv, tok_start + 2, tok_len - 2, specs, tbuf, ac) of
+               | ~$R.some(opt) => let
+                   val @(sp2, np2, tn2, failed) = process_option(argv, specs,
+                     str_buf, str_meta, int_vals, bool_vals, present,
+                     opt, str_pos, next_pos, tok_num)
+                 in
+                   case+ failed of
+                   | ~$R.some(e) => @(sp2, chosen, $R.some(e))
+                   | ~$R.none() => scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
+                       pos_idx, sp2, np2, tn2, chosen)
+                 end
+               | ~$R.none() =>
+                 @(str_pos, chosen, $R.some(err_unknown_long(_find_closest(argv, tok_start + 2, tok_len - 2, specs, tbuf, ac)))))
+          else (* short option *)
+            (case+ _find_by_short(specs, b1, ac) of
+             | ~$R.some(opt) => let
+                 val @(sp2, np2, tn2, failed) = process_option(argv, specs,
+                   str_buf, str_meta, int_vals, bool_vals, present,
+                   opt, str_pos, next_pos, tok_num)
+               in
+                 case+ failed of
+                 | ~$R.some(e) => @(sp2, chosen, $R.some(e))
+                 | ~$R.none() => scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
+                     pos_idx, sp2, np2, tn2, chosen)
+               end
+             | ~$R.none() => @(str_pos, chosen, $R.some(err_unknown_short(b1))))
         else let (* subcommand or positional *)
-          val sub = (if subcmd_idx < 0 then _find_subcmd(argv, tok_start, tok_len, specs, tbuf, ac)
-                     else ~1): int
-          val pidx = _find_pos_spec(specs, ac, pos_idx)
+          val choosing = $R.is_none<int>(chosen)
+          val sub = (if choosing then _find_subcmd(argv, tok_start, tok_len, specs, tbuf, ac)
+                     else $R.none()): $R.option(int)
         in
-          if sub >= 0 then
-            scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-              pos_idx, str_pos, next_pos, tok_num + 1, sub)
-          else if pidx >= 0 then let
-            val () = $A.set<int>(present, pidx, 1)
-            val sp2 = _store_str(argv, tok_start, tok_len, str_buf, str_meta, pidx, str_pos)
-          in
-            if sp2 < 0 then @(str_pos, subcmd_idx, 5000 + pidx)
-            else scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-              pos_idx + 1, sp2, next_pos, tok_num + 1, subcmd_idx)
-          end
-          else if sc > 0 && subcmd_idx < 0 then @(str_pos, subcmd_idx, 6000 + tok_num)
-          else (* a positional nothing takes is ignored *)
-            scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-              pos_idx, str_pos, next_pos, tok_num + 1, subcmd_idx)
+          case+ sub of
+          | ~$R.some(sub_index) => let
+              val () = $R.option_discard<int>(chosen)
+            in
+              scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
+                pos_idx, str_pos, next_pos, tok_num + 1, $R.some(sub_index))
+            end
+          | ~$R.none() =>
+            (case+ _find_pos_spec(specs, ac, pos_idx) of
+             | ~$R.some(pidx) => let
+                 val () = $A.set<int>(present, pidx, 1)
+               in
+                 case+ _store_str(argv, tok_start, tok_len, str_buf, str_meta, pidx, str_pos) of
+                 | ~$R.none() => @(str_pos, chosen, $R.some(err_too_long(pidx + 1)))
+                 | ~$R.some(sp2) => scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
+                     pos_idx + 1, sp2, next_pos, tok_num + 1, chosen)
+               end
+             | ~$R.none() =>
+               if sc > 0 && choosing then @(str_pos, chosen, $R.some(err_choice(tok_num)))
+               else (* a positional nothing takes is ignored *)
+                 scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
+                   pos_idx, str_pos, next_pos, tok_num + 1, chosen))
         end
       end
     end
@@ -677,70 +813,73 @@ implement parse {tp0}{ac0}{la}{na} (p, argv, argv_len, argc) = let
   (* Skip the first token (program name). *)
   val first_end = _find_tok_end(argv, 0, argv_len)
 
-  val @(final_sp, final_subcmd, scan_err) =
+  val @(final_sp, chosen, scan_failure) =
     scan_argv(argv, specs, tbuf, str_buf, str_meta, int_vals, bool_vals, present,
-      0, 0, first_end + 1, 1, ~1)
+      0, 0, first_end + 1, 1, $R.none())
 
-  (* Int range validation: a present int argument must lie in
-     [min, max] unless both are 0 (no range). *)
+  (* Int range validation: a present int argument with a range must lie
+     in it. The spec index + 1 of the first that does not, if one *)
   fun check_ranges {ls:agz}{li:agz}{lp:agz}{k:nat | k <= ac0} .<ac0 - k>.
     (specs: !$A.arr(int, ls, 1024), int_vals: !$A.arr(int, li, 64),
-     present: !$A.arr(int, lp, 64), i: int k): int =
-    if i >= ac then 0
-    else if _spec_get(specs, i, 1) != 1 then check_ranges(specs, int_vals, present, i + 1)
-    else let
-      val mn = _spec_get(specs, i, 10)
-      val mx = _spec_get(specs, i, 11)
-    in
-      if mn = 0 && mx = 0 then check_ranges(specs, int_vals, present, i + 1)
-      else if $A.get<int>(present, i) <= 0 then check_ranges(specs, int_vals, present, i + 1)
-      else let
-        val v = $A.get<int>(int_vals, i)
-      in
-        if v < mn then i + 1
-        else if v > mx then i + 1
-        else check_ranges(specs, int_vals, present, i + 1)
-      end
-    end
-
-  val range_err = check_ranges(specs, int_vals, present, 0)
+     present: !$A.arr(int, lp, 64), i: int k): $R.option(int) =
+    if i >= ac then $R.none()
+    else if $A.get<int>(present, i) <= 0 then check_ranges(specs, int_vals, present, i + 1)
+    else
+      case+ _spec_kind(specs, i) of
+      | OptionInt() => (case+ _spec_range(specs, i) of
+        | ~AnyInt() => check_ranges(specs, int_vals, present, i + 1)
+        | ~IntBetween(low, high) => let
+            val v = $A.get<int>(int_vals, i)
+          in
+            if v < low then $R.some(i + 1)
+            else if v > high then $R.some(i + 1)
+            else check_ranges(specs, int_vals, present, i + 1)
+          end)
+      | PositionalString() => check_ranges(specs, int_vals, present, i + 1)
+      | OptionString() => check_ranges(specs, int_vals, present, i + 1)
+      | Flag() => check_ranges(specs, int_vals, present, i + 1)
+      | Count() => check_ranges(specs, int_vals, present, i + 1)
+      | Subcommand() => check_ranges(specs, int_vals, present, i + 1)
 
   (* Exclusive group validation: at most one present argument per group. *)
   fun count_in_group {ls:agz}{lp:agz}{k:nat | k <= ac0} .<ac0 - k>.
     (specs: !$A.arr(int, ls, 1024), present: !$A.arr(int, lp, 64),
      i: int k, gid: int, count: int): int =
     if i >= ac then count
-    else if _spec_get(specs, i, 15) = gid then
+    else if _in_group(specs, i, gid) then
       if $A.get<int>(present, i) > 0 then count_in_group(specs, present, i + 1, gid, count + 1)
       else count_in_group(specs, present, i + 1, gid, count)
     else count_in_group(specs, present, i + 1, gid, count)
 
+  (* The index + 1 of the first group with more than one present, if
+     one *)
   fun check_groups {ls:agz}{lp:agz}{g:nat}{k:nat | k <= g} .<g - k>.
     (specs: !$A.arr(int, ls, 1024), present: !$A.arr(int, lp, 64),
-     k: int k, gc: int g): int =
-    if k >= gc then 0
-    else if count_in_group(specs, present, 0, k, 0) > 1 then k + 1
+     k: int k, gc: int g): $R.option(int) =
+    if k >= gc then $R.none()
+    else if count_in_group(specs, present, 0, k, 0) > 1 then $R.some(k + 1)
     else check_groups(specs, present, k + 1, gc)
-
-  val group_err = check_groups(specs, present, 0, gc)
 in
-  if scan_err > 0 then let
-    val () = _free_parse_temps(str_buf, str_meta, int_vals, bool_vals, present, tbuf, specs)
-  in
-    if scan_err >= 6000 then $R.err(err_choice(scan_err - 6000))
-    else if scan_err >= 5000 then $R.err(err_too_long(scan_err - 5000 + 1))
-    else if scan_err >= 4000 then $R.err(err_unknown_short(scan_err - 4000))
-    else $R.err(err_unknown_long(scan_err - 3000))
-  end
-  else if range_err > 0 then let
-    val () = _free_parse_temps(str_buf, str_meta, int_vals, bool_vals, present, tbuf, specs)
-  in $R.err(err_range(range_err)) end
-  else if group_err > 0 then let
-    val () = _free_parse_temps(str_buf, str_meta, int_vals, bool_vals, present, tbuf, specs)
-  in $R.err(err_exclusive(group_err)) end
-  else
-    $R.ok(parse_result_mk(str_buf, str_meta, int_vals, bool_vals, present,
-      ac, final_sp, final_subcmd, tbuf, specs))
+  case+ scan_failure of
+  | ~$R.some(e) => let
+      val () = $R.option_discard<int>(chosen)
+      val () = _free_parse_temps(str_buf, str_meta, int_vals, bool_vals, present, tbuf, specs)
+    in $R.err(e) end
+  | ~$R.none() =>
+    (case+ check_ranges(specs, int_vals, present, 0) of
+     | ~$R.some(out_of_range) => let
+         val () = $R.option_discard<int>(chosen)
+         val () = _free_parse_temps(str_buf, str_meta, int_vals, bool_vals, present, tbuf, specs)
+       in $R.err(err_range(out_of_range)) end
+     | ~$R.none() =>
+       (case+ check_groups(specs, present, 0, gc) of
+        | ~$R.some(group) => let
+            val () = $R.option_discard<int>(chosen)
+            val () = _free_parse_temps(str_buf, str_meta, int_vals, bool_vals, present, tbuf, specs)
+          in $R.err(err_exclusive(group)) end
+        | ~$R.none() =>
+          $R.ok(parse_result_mk(str_buf, str_meta, int_vals, bool_vals, present,
+            ac, final_sp, chosen, tbuf, specs))))
 end
 
 (* ============================================================
@@ -802,10 +941,12 @@ implement is_present {a} (r, h) = let
 in v > 0 end
 
 implement get_subcmd(r) = let
-  val+ @parse_result_mk(_, _, _, _, _, _, _, si, _, _) = r
-  val v = si
+  val+ @parse_result_mk(_, _, _, _, _, _, _, chosen, _, _) = r
+  val copy = (case+ chosen of
+    | $R.some(index) => $R.some(index)
+    | $R.none() => $R.none()): $R.option(int)
   prval () = fold@(r)
-in v end
+in copy end
 
 (* ============================================================
    Implementations — Exclusive groups
@@ -818,7 +959,7 @@ in @(parser_mk(specs, tbuf, ac, tp, gc + 1, sc, pno, pnl, pho, phl), gc) end
 implement add_to_group {tp0}{ac0}{a} (p, group_id, handle) = let
   val+ ~parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl) = p
   val (_ | idx) = handle
-  val () = _spec_set(specs, idx, 15, group_id)
+  val () = _group_store(specs, idx, group_id)
 in parser_mk(specs, tbuf, ac, tp, gc, sc, pno, pnl, pho, phl) end
 
 (* ============================================================
@@ -875,11 +1016,10 @@ implement format_help {l}{n} (r, buf, max_len) = let
       val nlen = _spec_get(specs, i, 3)
       val hoff = _spec_get(specs, i, 4)
       val hlen = _spec_get(specs, i, 5)
-      val sch = _spec_get(specs, i, 6)
       val pos = _help_put(buf, pos, 32, max_len)
       val pos = _help_put(buf, pos, 32, max_len)
     in
-      if _spec_get(specs, i, 0) <= 0 then let (* positional or subcommand *)
+      if ~_is_option(_spec_kind(specs, i)) then let (* positional or subcommand *)
         val pos = _help_copy(buf, pos, tbuf, noff, nlen, max_len)
         val pos = _help_put(buf, pos, 32, max_len)
         val pos = _help_put(buf, pos, 32, max_len)
@@ -888,12 +1028,13 @@ implement format_help {l}{n} (r, buf, max_len) = let
       in fmt_args(buf, tbuf, specs, pos, i + 1, ac) end
       else let
         val pos =
-          (if sch >= 0 then let
+          (case+ _spec_short(specs, i) of
+           | ~$R.some(short_char) => let
              val q = _help_put(buf, pos, 45, max_len)
-             val q = _help_put(buf, q, sch, max_len)
+             val q = _help_put(buf, q, short_char, max_len)
              val q = _help_put(buf, q, 44, max_len)
            in _help_put(buf, q, 32, max_len) end
-           else let
+           | ~$R.none() => let
              val q = _help_put(buf, pos, 32, max_len)
              val q = _help_put(buf, q, 32, max_len)
              val q = _help_put(buf, q, 32, max_len)
@@ -917,7 +1058,8 @@ in final_pos end
    ============================================================ *)
 
 implement parse_result_free(r) = let
-  val+ ~parse_result_mk(sb, sm, iv, bv, pr, _, _, _, tb, sp) = r
+  val+ ~parse_result_mk(sb, sm, iv, bv, pr, _, _, chosen, tb, sp) = r
+  val () = $R.option_discard<int>(chosen)
 in
   $A.free<byte>(sb); $A.free<int>(sm);
   $A.free<int>(iv); $A.free<int>(bv); $A.free<int>(pr);
@@ -926,9 +1068,10 @@ end
 
 implement parse_error_free(e) =
   case+ e of
-  | ~err_unknown_long(_) => ()
+  | ~err_unknown_long(closest) => $R.option_discard<int>(closest)
   | ~err_unknown_short(_) => ()
   | ~err_range(_) => ()
+  | ~err_not_int(_) => ()
   | ~err_exclusive(_) => ()
   | ~err_choice(_) => ()
   | ~err_too_long(_) => ()

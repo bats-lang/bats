@@ -723,7 +723,7 @@ implement wbw_loop(bw, bv, i, lim) = let
     else if j >= lim then ()
     else let
       val wr = $F.buf_write_byte(bw, byte2int0($A.read<byte>(bv, j)))
-      val () = $R.discard<int><int>(wr)
+      val () = $R.discard<int><$F.io_error>(wr)
     in loop(bw, bv, j + 1, lim) end
 in
   if i < 0 then loop(bw, bv, 0, lim)
@@ -801,13 +801,13 @@ in result end
 
 
 implement file_has_bytes {lp}{lb} (path_bv, bv, len) =
-  case+ $F.file_open(path_bv, 524288, 0, 0) of
+  case+ $F.file_open(path_bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(524288)
       val rr = $F.file_read(fd, buf, 524288)
       val k = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
       val cr = $F.file_close(fd)
-      val () = $R.discard<int><int>(cr)
+      val () = $R.discard<int><$F.io_error>(cr)
       fun same {la:agz}{m:nat | m <= 524288}{j:nat | j <= m} .<m - j>.
         (a: !$A.borrow(byte, la, 524288), bv: !$A.borrow(byte, lb, 524288), m: int m, j: int j): bool =
         if j >= m then true
@@ -997,7 +997,7 @@ in
       val elen = (case+ err_r of
         | ~$R.ok(n) => n | ~$R.err(_) => 0): int
       val ecr = $F.file_close(err_fd)
-      val () = $R.discard<int><int>(ecr)
+      val () = $R.discard<int><$F.io_error>(ecr)
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
@@ -1076,13 +1076,13 @@ in
       val olen = (case+ out_r of
         | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
       val ocr = $F.file_close(out_fd)
-      val () = $R.discard<int><int>(ocr)
+      val () = $R.discard<int><$F.io_error>(ocr)
       val+ ~$P.pipe_fd(err_fd) = serr_p
       val eb = $A.alloc<byte>(4096)
       val err_r = $F.file_read(err_fd, eb, 4096)
       val () = (case+ err_r of | ~$R.ok(_) => () | ~$R.err(_) => ())
       val ecr = $F.file_close(err_fd)
-      val () = $R.discard<int><int>(ecr)
+      val () = $R.discard<int><$F.io_error>(ecr)
       val () = $A.free<byte>(eb)
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
@@ -1122,13 +1122,13 @@ fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = l
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val n = (case+ $F.file_open(bv_p, 524288, 0, 0) of
+  val n = (case+ $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.err(_) => 0
     | ~$R.ok(fd) => let
         val buf = $A.alloc<byte>(16)
         val k = (case+ $F.file_read(fd, buf, 16) of
           | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 16] int k
-        val () = $R.discard<int><int>($F.file_close(fd))
+        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         val @(fz_b, bv_b) = $A.freeze<byte>(buf)
         val v = digits_val(bv_b, 0, k, 0)
         val () = $A.drop<byte>(fz_b, bv_b)
@@ -1516,7 +1516,7 @@ in
       var eb : $B.builder_v = $B.create()
       val () = drain_fd(err_fd, eb, 0)
       val ecr = $F.file_close(err_fd)
-      val () = $R.discard<int><int>(ecr)
+      val () = $R.discard<int><$F.io_error>(ecr)
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
@@ -1612,7 +1612,7 @@ in
       val elen = (case+ err_r of
         | ~$R.ok(n) => n | ~$R.err(_) => 0): int
       val ecr = $F.file_close(err_fd)
-      val () = $R.discard<int><int>(ecr)
+      val () = $R.discard<int><$F.io_error>(ecr)
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
@@ -1653,7 +1653,7 @@ in
     val () = set_build_err()
   in ~1 end
   else let
-  val fd_r = $F.file_open(path_bv, path_len, 577, 420)
+  val fd_r = $F.file_open(path_bv, path_len, $F.WriteOnly(), $F.CreateOrTruncate(), 420)
 in case+ fd_r of
   | ~$R.ok(fd) => let
       val bw = $F.buf_writer_create(fd)
@@ -1662,7 +1662,7 @@ in case+ fd_r of
       val () = $A.drop<byte>(fz_c, bv_c)
       val () = $A.free<byte>($A.thaw<byte>(fz_c))
       val cr = $F.buf_writer_close(bw)
-      val () = $R.discard<int><int>(cr)
+      val () = $R.discard<int><$F.io_error>(cr)
     in 0 end
   | ~$R.err(_) => let val () = $A.free<byte>(content_arr) in ~1 end
 end
@@ -1725,7 +1725,7 @@ fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
 
 
 implement file_has_rope (path_bv, cs) =
-  case+ $F.file_open(path_bv, 524288, 0, 0) of
+  case+ $F.file_open(path_bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val same = fd_has_chunks(fd, cs)
       (* and nothing after them *)
@@ -1733,7 +1733,7 @@ implement file_has_rope (path_bv, cs) =
       val more = (case+ $F.file_read(fd, one, 1) of
         | ~$R.ok(k) => k > 0 | ~$R.err(_) => true): bool
       val () = $A.free<byte>(one)
-      val () = $R.discard<int><int>($F.file_close(fd))
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
     in if same then ~more else false end
   | ~$R.err(_) => false
 
@@ -1760,7 +1760,7 @@ fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): int =
 
 
 implement write_file_from_rope (path_bv, cs) =
-  case+ $F.file_open(path_bv, 524288, 577, 420) of
+  case+ $F.file_open(path_bv, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
   | ~$R.ok(fd) => let
       val w = fd_write_chunks(fd, cs)
       val c = (case+ $F.file_close(fd) of | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
@@ -1771,8 +1771,25 @@ implement write_file_from_rope (path_bv, cs) =
    A file read whole (a module of any size)
    ============================================================ *)
 
+(* The errno a failure is reported with, as the Rust bats reported the
+   io::Error ("<text> (os error <errno>)"): file's io_error keeps the
+   kind, not the number, so each kind has its Linux errno; Unrecognized
+   is EIO's *)
+
+
+implement io_error_errno (e) =
+  case+ e of
+  | $F.NotFound() => 2 | $F.PermissionDenied() => 13 | $F.AlreadyExists() => 17
+  | $F.NotADirectory() => 20 | $F.IsADirectory() => 21 | $F.DirectoryNotEmpty() => 39
+  | $F.ReadOnlyFilesystem() => 30 | $F.FilesystemLoop() => 40 | $F.InvalidFilename() => 36
+  | $F.InvalidInput() => 22 | $F.FileTooLarge() => 27 | $F.StorageFull() => 28
+  | $F.TooManyOpenFiles() => 24 | $F.OutOfMemory() => 12 | $F.ResourceBusy() => 16
+  | $F.BrokenPipe() => 32 | $F.WouldBlock() => 11 | $F.BadDescriptor() => 9
+  | $F.DeviceError() => 5 | $F.Unsupported() => 95 | $F.CrossesDevices() => 18
+  | $F.Unrecognized() => 5
+
 (* The n bytes of a file, then a NUL (m = n + 1), in the one piece of an
-   arena of its own; or the errno of what failed *)
+   arena of its own; or what failed *)
 
 
 
@@ -1785,32 +1802,32 @@ implement write_file_from_rope (path_bv, cs) =
 
 
 implement read_whole (path, plen) =
-  case+ $F.file_open(path, plen, 0, 0) of
+  case+ $F.file_open(path, plen, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(e) => whole_err(e)
   | ~$R.ok(fd) =>
     (case+ $F.fd_size(fd) of
     | ~$R.err(e) => let
-        val () = $R.discard<int><int>($F.file_close(fd))
+        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
       in whole_err(e) end
     | ~$R.ok(z) =>
       if z >= 268435455 then let
-        val () = $R.discard<int><int>($F.file_close(fd))
-      in whole_err(27) end
+        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+      in whole_err($F.FileTooLarge()) end
       else (case+ $A.arena_create<byte>(z + 1) of
       | ~$A.arena_none() => let
-          val () = $R.discard<int><int>($F.file_close(fd))
-        in whole_err(12) end
+          val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+        in whole_err($F.OutOfMemory()) end
       | ~$A.arena_some(ar) => let
           val p = $A.arena_alloc<byte>(ar, z + 1)
           val k = (case+ $F.file_read(fd, p, z + 1) of
             | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
-          val () = $R.discard<int><int>($F.file_close(fd))
+          val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         in
           if k = z then whole_ok(ar, p, z + 1, z)
           else let
             val () = $A.arena_return<byte>(ar, p)
             val () = $A.arena_destroy<byte>(ar)
-          in whole_err(5) end
+          in whole_err($F.DeviceError()) end
         end))
 
 (* Frees what read_whole read *)
@@ -1953,7 +1970,7 @@ in @(p2, h) end
 implement ap_string_pos(p, name, nn, help, nh) = let
   val @(fzn, bvn) = $A.freeze<byte>($S.from_char_array(name, nn))
   val @(fzh, bvh) = $A.freeze<byte>($S.from_char_array(help, nh))
-  val @(p2, h) = $AP.add_string(p, bvn, nn, 0, bvh, nh, true)
+  val @(p2, h) = $AP.add_string(p, bvn, nn, $R.none(), bvh, nh, true)
   val () = $A.drop<byte>(fzn, bvn)
   val () = $A.free<byte>($A.thaw<byte>(fzn))
   val () = $A.drop<byte>(fzh, bvh)
@@ -1978,7 +1995,7 @@ fun _hash_chunks {lb:agz}{r:int} .<max(r, 0)>.
 
 
 implement put_file_sha256 {lp} (p, out) =
-  case+ $F.file_open(p, 524288, 0, 0) of
+  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(afd) => let
       val buf = $A.alloc<byte>(65536)
       val c = $SHA.init()
@@ -1986,7 +2003,7 @@ implement put_file_sha256 {lp} (p, out) =
         | ~$R.ok(s) => s | ~$R.err(_) => 0): [s:nat] int s
       val () = _hash_chunks(afd, buf, c, size)
       val () = $A.free<byte>(buf)
-      val () = $R.discard<int><int>($F.file_close(afd))
+      val () = $R.discard<int><$F.io_error>($F.file_close(afd))
       val hex = $A.alloc<byte>(64)
       val () = $SHA.finish(c, hex)
       val @(fh, bh) = $A.freeze<byte>(hex)

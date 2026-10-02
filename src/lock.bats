@@ -1009,11 +1009,11 @@ in
   end
 end
 
-(* The TOML file at the NUL-terminated path pa, parsed, or the errno
-   of why it could not be read *)
-fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.result($T.toml_doc, int) = let
+(* The TOML file at the NUL-terminated path pa, parsed, or why it could
+   not be read *)
+fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.result($T.toml_doc, $F.io_error) = let
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fr = $F.file_open(bv, 524288, 0, 0)
+  val fr = $F.file_open(bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
@@ -1022,26 +1022,31 @@ in
   | ~$R.ok(fd) => let
       val tb = $A.alloc<byte>(65536)
       val rr = $F.file_read(fd, tb, 65536)
-      val () = $R.discard<int><int>($F.file_close(fd))
-      val @(tn, e) = (case+ rr of | ~$R.ok(k) => @(k, 0) | ~$R.err(e) => @(0, e)): @([k:nat | k <= 65536] int k, int)
-      val @(fz_t, bv_t) = $A.freeze<byte>(tb)
-      val pr = $T.parse(bv_t, tn)
-      val () = $A.drop<byte>(fz_t, bv_t)
-      val () = $A.free<byte>($A.thaw<byte>(fz_t))
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
     in
-      case+ pr of
-      | ~$R.ok(doc) =>
-        if e = 0 then $R.ok(doc)
-        else let
-          val () = $T.toml_free(doc)
+      case+ rr of
+      | ~$R.err(e) => let
+          val () = $A.free<byte>(tb)
         in $R.err(e) end
-      | ~$R.err(_) => $R.err(e)
+      | ~$R.ok(tn) => let
+          val @(fz_t, bv_t) = $A.freeze<byte>(tb)
+          val pr = $T.parse(bv_t, tn)
+          val () = $A.drop<byte>(fz_t, bv_t)
+          val () = $A.free<byte>($A.thaw<byte>(fz_t))
+        in
+          case+ pr of
+          | ~$R.ok(doc) => $R.ok(doc)
+          (* a file that does not parse was read: the error, as
+             before, is the read's (none), an invalid input *)
+          | ~$R.err(_) => $R.err($F.InvalidInput())
+        end
     end
 end
 
 (* Rust's "cannot read './bats.toml': <text> (os error <e>)" appended
    to err (config::load, io::Error's Display) *)
-fn put_cannot_read (e: int, err: !$B.builder_v >> $B.builder_v): void = let
+fn put_cannot_read (failure: $F.io_error, err: !$B.builder_v >> $B.builder_v): void = let
+  val e = io_error_errno(failure)
   val buf = $A.alloc<byte>(256)
   val k = $P.os_error_text(e, buf, 256)
   val @(fz_b, bv_b) = $A.freeze<byte>(buf)
@@ -1765,7 +1770,7 @@ fun lock_notes {la,lb:agz}{al,i:int} .<max(al - i, 0)>.
 fn read_old_lock (): @([l:agz] $A.arr(byte, l, LOCK_MAX), pos_t) = let
   val lp = str_to_path_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val fr = $F.file_open(bv_lp, 524288, 0, 0)
+  val fr = $F.file_open(bv_lp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
   val buf = $A.alloc<byte>(LOCK_MAX)
@@ -1775,7 +1780,7 @@ in
   | ~$R.ok(fd) => let
       val n = (case+ $F.file_read(fd, buf, LOCK_MAX) of
         | ~$R.ok(k) => k | ~$R.err(_) => 0): pos_t
-      val () = $R.discard<int><int>($F.file_close(fd))
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
     in @(buf, n) end
 end
 
@@ -2190,17 +2195,17 @@ fn copy_mode {ls,ld:agz}
 
 fn copy_file {ls,ld:agz}
   (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
-  case+ $F.file_open(s, 524288, 0, 0) of
+  case+ $F.file_open(s, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(_) => false
   | ~$R.ok(sf) =>
-    (case+ $F.file_open(d, 524288, 1 + 64 + 512, 420) of
+    (case+ $F.file_open(d, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
      | ~$R.err(_) => let
-         val () = $R.discard<int><int>($F.file_close(sf))
+         val () = $R.discard<int><$F.io_error>($F.file_close(sf))
        in false end
      | ~$R.ok(df) => let
          val ok = (case+ $F.fd_copy(sf, df) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
-         val () = $R.discard<int><int>($F.file_close(sf))
-         val () = $R.discard<int><int>($F.file_close(df))
+         val () = $R.discard<int><$F.io_error>($F.file_close(sf))
+         val () = $R.discard<int><$F.io_error>($F.file_close(df))
        in if ok then copy_mode(s, d) else false end)
 
 (* Whether e[0, el) is ".", "..", or a directory Rust's copy skips:
@@ -2224,7 +2229,7 @@ end
 fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
   case+ $F.dir_open(p, 524288) of
   | ~$R.ok(d) => let
-      val () = $R.discard<int><int>($F.dir_close(d))
+      val () = $R.discard<int><$F.io_error>($F.dir_close(d))
     in true end
   | ~$R.err(_) => false
 

@@ -545,7 +545,7 @@ in $A.free<byte>(buf) end
 
 implement pipe_end_close {b} (p) =
   case+ p of
-  | ~pipe_fd(f) => $R.discard<int><int>($F.file_close(f))
+  | ~pipe_fd(f) => $R.discard<int><$F.io_error>($F.file_close(f))
   | ~pipe_none() => ()
 
 (* E2BIG for an argument or environment list that does not fit;
