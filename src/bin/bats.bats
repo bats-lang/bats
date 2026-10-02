@@ -331,15 +331,15 @@ in
                   val rls = makes_release(profile_choice)
                   val nat = makes_native(target_choice)
                   val wsm = makes_wasm(target_choice)
-                  val () = (if nat then (if dbg then do_build(0, Native(), bv_tc, tc_len) else ()) else ())
-                  val () = (if nat then (if rls then do_build(1, Native(), bv_tc, tc_len) else ()) else ())
-                  val () = (if wsm then (if dbg then do_build(0, Wasm(), bv_tc, tc_len) else ()) else ())
+                  val () = (if nat then (if dbg then do_build(Debug(), Native(), bv_tc, tc_len) else ()) else ())
+                  val () = (if nat then (if rls then do_build(Release(), Native(), bv_tc, tc_len) else ()) else ())
+                  val () = (if wsm then (if dbg then do_build(Debug(), Wasm(), bv_tc, tc_len) else ()) else ())
                   val () = (if named_only.wasm then
                     if is_to_c() then
                       println! ("error: --to-c wasm is not yet implemented without shell")
                     else ()
                   else ())
-                in (if wsm then (if rls then do_build(1, Wasm(), bv_tc, tc_len) else ()) else ()) end
+                in (if wsm then (if rls then do_build(Release(), Wasm(), bv_tc, tc_len) else ()) else ()) end
               end
               | Check() => let
                 val () = $AP.parse_result_free(r)
@@ -359,25 +359,27 @@ in
               | Run() => let
                 val bin_buf = $A.alloc<byte>(256)
                 val bin_len = opt_string_copy(r, h_bin, bin_buf, 256)
+                (* The profile --only names for bats run: release when it
+                   is "release", else debug *)
                 fn check_only_release {l2:agz}
-                  (buf: !$A.arr(byte, l2, 32), olen: int): int =
+                  (buf: !$A.arr(byte, l2, 32), olen: int): profile =
                   if olen = 7 then let
                     val b0 = byte2int0($A.get<byte>(buf, 0))
-                  in (if $AR.eq_int_int(b0, 114) then 1 else 0): int end
-                  else 0
-                val run_release = (let
+                  in (if $AR.eq_int_int(b0, 114) then Release() else Debug()): profile end
+                  else Debug()
+                val run_profile = (let
                   val ob2 = $A.alloc<byte>(32)
                   val ol2 = $AP.get_string_copy(r, h_only, ob2, 32)
-                  val is_rel = check_only_release(ob2, ol2)
+                  val chosen_profile = check_only_release(ob2, ol2)
                   val () = $A.free<byte>(ob2)
-                in is_rel end): int
+                in chosen_profile end): profile
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
                 val () = (if ~bin_package() then ()
                   else if ~resolve_deps(bv_repo, repo_len) then ()
                   else if validate_project() then
-                  do_run(run_release, bv_bin, bin_len, bv_extra, extra_len) else ())
+                  do_run(run_profile, bv_bin, bin_len, bv_extra, extra_len) else ())
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
               | Init() => let

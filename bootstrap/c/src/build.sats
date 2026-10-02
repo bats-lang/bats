@@ -35,7 +35,7 @@ fn preprocess_one
   (src_bv: !$A.borrow(byte, l1, 524288),
    sats_bv: !$A.borrow(byte, l2, 524288),
    dats_bv: !$A.borrow(byte, l3, 524288),
-   build_target: target, is_unsafe: int,
+   build_target: target, is_unsafe: bool,
    target_changed: bool): int
 
 
@@ -705,7 +705,8 @@ fn write_wasm_stubs(): int
 
 
 
-fn read_unsafe_flag(): int
+
+fn read_unsafe_flag(): bool
 
 
 
@@ -792,10 +793,10 @@ fn check_wasm_binary {l:agz}
 
 
 fn do_build {lt:agz}
-  (release: int, build_target: target, to_c: !$A.borrow(byte, lt, 4096), tclen: int): void
+  (release: profile, build_target: target, to_c: !$A.borrow(byte, lt, 4096), tclen: int): void
 
 
-fn do_build_plain(release: int, build_target: target): void
+fn do_build_plain(release: profile, build_target: target): void
 
 
 

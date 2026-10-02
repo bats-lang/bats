@@ -1640,7 +1640,7 @@ fn run_process_demo(): void
 
 
 fn do_run {lb,le:agz}
-  (release: int, bin: !$A.borrow(byte, lb, 256), blen: int,
+  (release: profile, bin: !$A.borrow(byte, lb, 256), blen: int,
    extra: !$A.borrow(byte, le, 4096), elen: int): void
 
 
