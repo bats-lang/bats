@@ -785,47 +785,60 @@ fun put_digits {i,e:int} .<max(e - i, 0)>.
   in put_digits(doc, i + 1, e, out) end
 
 
-(* What the bare value doc[s, e) is to serde: 1 true, 2 false, 3 a
-   sequence, 4 a map, 5 an integer, 6 a float, 0 none of them (the toml
+(* What a [package] value is to serde: a quoted string, or a bare true,
+   false, sequence, map, integer or float, or none of them (the toml
    crate rejects it as an invalid string) *)
-fn value_class (doc: !$T.toml_doc, s: pos_t, e: pos_t): int = let
+datatype value_class =
+  | QuotedString | TrueValue | FalseValue | SequenceValue | MapValue
+  | IntegerValue | FloatValue | NotAValue
+
+(* What the bare value doc[s, e) is to serde *)
+fn value_class (doc: !$T.toml_doc, s: pos_t, e: pos_t): value_class = let
   var t_c = @[char][4]('t', 'r', 'u', 'e')
   var f_c = @[char][5]('f', 'a', 'l', 's', 'e')
   val c = $T.byte_at(doc, s)
   val sgn = (if c = 43 then 1 else if c = 45 then 1 else 0): pos_t
   val d = $T.byte_at(doc, s + sgn)
 in
-  if doc_is(doc, s, e, t_c, 0, 4) then 1
-  else if doc_is(doc, s, e, f_c, 0, 5) then 2
-  else if c = 91 then 3
-  else if c = 123 then 4
-  else if doc_int(doc, s + sgn, e, false) then 5
-  else if d >= 48 then (if d <= 57 then 6 else 0)
-  else 0
+  if doc_is(doc, s, e, t_c, 0, 4) then TrueValue()
+  else if doc_is(doc, s, e, f_c, 0, 5) then FalseValue()
+  else if c = 91 then SequenceValue()
+  else if c = 123 then MapValue()
+  else if doc_int(doc, s + sgn, e, false) then IntegerValue()
+  else if d >= 48 then (if d <= 57 then FloatValue() else NotAValue())
+  else NotAValue()
 end
 
-(* serde's words for a value of class cls at doc[s, e) *)
-fn put_class (cls: int, doc: !$T.toml_doc, s: pos_t, e: pos_t, out: !$B.builder_v >> $B.builder_v): void =
-  if cls = 1 then bput_v(out, "boolean `true`")
-  else if cls = 2 then bput_v(out, "boolean `false`")
-  else if cls = 3 then bput_v(out, "sequence")
-  else if cls = 4 then bput_v(out, "map")
-  else if cls = 5 then let
-    val c = $T.byte_at(doc, s)
-    val () = bput_v(out, "integer `")
-    val () = put_digit((if c = 45 then 45 else 95): int, out)
-    val () = put_digits(doc, (if c = 43 then s + 1 else if c = 45 then s + 1 else s): pos_t, e, out)
-  in put_char_v(out, 96) end
-  else let
-    val () = bput_v(out, "floating point `")
-    val () = put_doc(doc, s, e, out)
-  in put_char_v(out, 96) end
+(* serde's words for a bare value of class cls at doc[s, e) (a float's
+   for one that is none of the others, as before) *)
+fn put_class (cls: value_class, doc: !$T.toml_doc, s: pos_t, e: pos_t, out: !$B.builder_v >> $B.builder_v): void =
+  case+ cls of
+  | TrueValue() => bput_v(out, "boolean `true`")
+  | FalseValue() => bput_v(out, "boolean `false`")
+  | SequenceValue() => bput_v(out, "sequence")
+  | MapValue() => bput_v(out, "map")
+  | IntegerValue() => let
+      val c = $T.byte_at(doc, s)
+      val () = bput_v(out, "integer `")
+      val () = put_digit((if c = 45 then 45 else 95): int, out)
+      val () = put_digits(doc, (if c = 43 then s + 1 else if c = 45 then s + 1 else s): pos_t, e, out)
+    in put_char_v(out, 96) end
+  | _ => let
+      val () = bput_v(out, "floating point `")
+      val () = put_doc(doc, s, e, out)
+    in put_char_v(out, 96) end
 
-(* The span of [package] key's value and what is wrong with it: 0
-   nothing (or no such key), 1 a value of the wrong type, 2 a bare value
-   that is no TOML value *)
+(* What is wrong with a [package] value: nothing (or there is no such
+   key), a value of the wrong type, or a bare value that is no TOML
+   value *)
+datatype field_problem = NoProblem | WrongType | NotTomlValue
+
+(* Whether there is a problem *)
+fn is_problem (bad: field_problem): bool = case+ bad of NoProblem() => false | _ => true
+
+(* The span of [package] key's value and what is wrong with it *)
 fn field_problem {kk:pos | kk <= 1048576}
-  (doc: !$T.toml_doc, kc: &(@[char][kk]), kk: int kk, want_bool: bool): @(pos_t, pos_t, int) = let
+  (doc: !$T.toml_doc, kc: &(@[char][kk]), kk: int kk, want_bool: bool): @(pos_t, pos_t, field_problem) = let
   var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
   val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
   val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(kc, kk))
@@ -836,11 +849,17 @@ fn field_problem {kk:pos | kk <= 1048576}
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
   val s1 = (if s < 0 then 0 else s): pos_t
   val e1 = (if e < 0 then 0 else e): pos_t
-  val cls = (if s < 0 then ~1 else if quoted then 7 else value_class(doc, s1, e1)): int
-  val bad = (if cls < 0 then 0
-             else if cls = 0 then 2
-             else if want_bool then (if cls = 1 then 0 else if cls = 2 then 0 else 1)
-             else (if cls = 7 then 0 else 1)): int
+  val bad = (if s < 0 then NoProblem()
+    else let
+      val cls = (if quoted then QuotedString() else value_class(doc, s1, e1)): value_class
+    in
+      case+ cls of
+      | NotAValue() => NotTomlValue()
+      | TrueValue() => (if want_bool then NoProblem() else WrongType())
+      | FalseValue() => (if want_bool then NoProblem() else WrongType())
+      | QuotedString() => (if want_bool then WrongType() else NoProblem())
+      | _ => WrongType()
+    end): field_problem
 in @(s1, e1, bad) end
 
 (* serde's words for the value at doc[s, e): a string's, quoted, or a
@@ -854,9 +873,9 @@ fn put_type (quoted: bool, doc: !$T.toml_doc, s: pos_t, e: pos_t, m: !$B.builder
 
 (* The message for problem bad of the value at doc[s, e), appended to m;
    want_bool says which type serde expected *)
-fn problem_msg (doc: !$T.toml_doc, s: pos_t, e: pos_t, bad: int, want_bool: bool,
+fn problem_msg (doc: !$T.toml_doc, s: pos_t, e: pos_t, bad: field_problem, want_bool: bool,
    m: !$B.builder_v >> $B.builder_v): void =
-  if bad = 2 then bput_v(m, "invalid string\nexpected `\"`, `'`")
+  if (case+ bad of NotTomlValue() => true | _ => false) then bput_v(m, "invalid string\nexpected `\"`, `'`")
   else let
     val q = $T.byte_at(doc, s)
     val quoted = (if q = 34 then true else q = 39): bool
@@ -879,27 +898,33 @@ fn has_field {kk:pos | kk <= 1048576} (doc: !$T.toml_doc, kc: &(@[char][kk]), kk
 in s >= 0 end
 
 (* The earlier of two problems @(start, end, bad, want_bool) *)
-fn first_problem (a: @(pos_t, pos_t, int, bool), b: @(pos_t, pos_t, int, bool)): @(pos_t, pos_t, int, bool) =
-  if a.2 <= 0 then b
-  else if b.2 <= 0 then a
+fn first_problem (a: @(pos_t, pos_t, field_problem, bool), b: @(pos_t, pos_t, field_problem, bool)): @(pos_t, pos_t, field_problem, bool) =
+  if ~is_problem(a.2) then b
+  else if ~is_problem(b.2) then a
   else if b.0 < a.0 then b
   else a
 
-(* The message for a check's outcome kind: 1 the problem p, 2 no
-   [package], 3 no name *)
-fn put_problem (kind: int, doc: !$T.toml_doc, p: @(pos_t, pos_t, int, bool),
+(* What a check of bats.toml found: nothing wrong, a problem (a value's,
+   or a syntax error), no [package], or no name *)
+datatype manifest_check = Fine | Problem | NoPackage | NoName
+
+(* The message for a check's outcome: the problem p, no [package], no
+   name *)
+fn put_problem (kind: manifest_check, doc: !$T.toml_doc, p: @(pos_t, pos_t, field_problem, bool),
    m: !$B.builder_v >> $B.builder_v): void =
-  if kind = 1 then problem_msg(doc, p.0, p.1, p.2, p.3, m)
-  else if kind = 2 then bput_v(m, "missing field `package`")
-  else if kind = 3 then bput_v(m, "missing field `name`")
-  else bput_v(m, "")
+  case+ kind of
+  | Problem() => problem_msg(doc, p.0, p.1, p.2, p.3, m)
+  | NoPackage() => bput_v(m, "missing field `package`")
+  | NoName() => bput_v(m, "missing field `name`")
+  | Fine() => ()
 
 (* Whether a check found nothing; else its error, the message m at
    doc[s, e), goes to err. Consumes m *)
-fn finish_check (kind: int, doc: !$T.toml_doc, s: pos_t, e: pos_t, m: $B.builder_v,
+fn finish_check (kind: manifest_check, doc: !$T.toml_doc, s: pos_t, e: pos_t, m: $B.builder_v,
    err: !$B.builder_v >> $B.builder_v): bool =
-  if kind = 0 then let val () = $B.builder_free(m) in true end
-  else let val () = put_toml_error(doc, s, e, m, err) in false end
+  case+ kind of
+  | Fine() => let val () = $B.builder_free(m) in true end
+  | _ => let val () = put_toml_error(doc, s, e, m, err) in false end
 
 (* Rust's config::load of doc as serde reads it into TomlConfig: the
    first [package] field of the wrong type, in the file's order, else a
@@ -917,7 +942,7 @@ fn syntax_check (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): bool = 
   val () = $A.drop<byte>(fz_m, bv_m)
   val () = $A.free<byte>($A.thaw<byte>(fz_m))
   val s = (if off < 0 then 0 else off): pos_t
-in finish_check((if off < 0 then 0 else 1): int, doc, s, s, m, err) end
+in finish_check((if off < 0 then Fine() else Problem()): manifest_check, doc, s, s, m, err) end
 
 fn serde_check (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): bool = let
   var n_c = @[char][4]('n', 'a', 'm', 'e')
@@ -944,12 +969,17 @@ fn serde_check (doc: !$T.toml_doc, err: !$B.builder_v >> $B.builder_v): bool = l
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
   val named = has_field(doc, n_c, 4)
   var m : $B.builder_v = $B.create()
-  val kind = (if p.2 > 0 then 1 else if hs < 0 then 2 else if ~named then 3 else 0): int
+  val kind = (if is_problem(p.2) then Problem() else if hs < 0 then NoPackage()
+              else if ~named then NoName() else Fine()): manifest_check
   val () = put_problem(kind, doc, p, m)
-  val sp = (if kind = 1 then p.0 else if kind = 3 then (if hs < 0 then 0 else hs) else 0): pos_t
-  val ep = (if kind = 1 then (if p.2 = 2 then p.0 else p.1)
-            else if kind = 3 then he
-            else if $T.has_root_keys(doc) then 65536 else 0): pos_t
+  val sp = (case+ kind of
+    | Problem() => p.0
+    | NoName() => (if hs < 0 then 0 else hs)
+    | _ => 0): pos_t
+  val ep = (case+ kind of
+    | Problem() => (case+ p.2 of NotTomlValue() => p.0 | _ => p.1)
+    | NoName() => he
+    | _ => (if $T.has_root_keys(doc) then 65536 else 0)): pos_t
 in finish_check(kind, doc, sp, ep, m, err) end
 
 (* The constraints of doc (Rust: config::load), from src[0, sk):
@@ -2782,11 +2812,15 @@ fn in_bin {lp:agz} (p: !$A.borrow(byte, lp, VMAX)): bool = let
   var b_c = @[char][10]('.', '/', 's', 'r', 'c', '/', 'b', 'i', 'n', '/')
 in lit_at(p, 0, VMAX, b_c, 10) end
 
-(* Checks each file of the NUL-separated list files[off, len): mode 0
-   the package's shared modules (not src/bin/, not named lib.bats), 1
-   the dependencies (each under its own unsafe flag), 2 every file *)
+(* Which files of a list are checked, and under which unsafe flag: the
+   package's shared modules (not src/bin/, not named lib.bats), the
+   dependencies (each under its own unsafe flag), or every file *)
+datatype checked = SharedModules | Dependencies | EveryFile
+
+(* Checks each file of the NUL-separated list files[off, len), as mode
+   says *)
 fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
-  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, mode: int, own_unsafe: bool,
+  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, mode: checked, own_unsafe: bool,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
   if off >= len then cnt
   else let
@@ -2797,8 +2831,10 @@ fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
     val @(pa, _) = $B.to_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
     val b0 = base_start(bv_p, pl)
-    val skip = (if mode = 0 then (if in_bin(bv_p) then true else is_lib_name(bv_p, b0, pl)) else false): bool
-    val uns = (if mode = 1 then dep_unsafe(bv_p, pl) else own_unsafe): bool
+    val skip = (case+ mode of
+      | SharedModules() => (if in_bin(bv_p) then true else is_lib_name(bv_p, b0, pl))
+      | _ => false): bool
+    val uns = (case+ mode of Dependencies() => dep_unsafe(bv_p, pl) | _ => own_unsafe): bool
     val cnt2 = check_file(bv_p, pl, ~skip, uns, cnt, errs)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
@@ -2806,7 +2842,7 @@ fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
 
 (* Checks the .bats files under dir (./src, ./bats_modules or
    ./src/bin) in mode, as check_list does *)
-fn check_dir {sn:nat} (dir: string sn, mode: int, own_unsafe: bool,
+fn check_dir {sn:nat} (dir: string sn, mode: checked, own_unsafe: bool,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
   var d : $B.builder_v = $B.create()
   val () = bput_v(d, dir)
@@ -2948,14 +2984,14 @@ fn report_errors (cnt: int, errs: $B.builder_v): bool =
 implement validate_project () = let
   val own_unsafe = toml_unsafe(str_to_path_arr("./bats.toml"))
   var errs : $B.builder_v = $B.create()
-  val c1 = check_dir("./src", 0, own_unsafe, 0, errs)
-  val c2 = check_dir("./bats_modules", 1, own_unsafe, c1, errs)
+  val c1 = check_dir("./src", SharedModules(), own_unsafe, 0, errs)
+  val c2 = check_dir("./bats_modules", Dependencies(), own_unsafe, c1, errs)
   val lp = str_to_path_arr("./src/lib.bats")
   val @(fz_l, bv_l) = $A.freeze<byte>(lp)
   val c3 = check_file(bv_l, 14, $F.file_exists(bv_l, VMAX), own_unsafe, c2, errs)
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
-  val c4 = check_dir("./src/bin", 2, own_unsafe, c3, errs)
+  val c4 = check_dir("./src/bin", EveryFile(), own_unsafe, c3, errs)
   val c5 = check_dir_cycles("./bats_modules", true, c4, errs)
   val c6 = check_dir_cycles("./src", false, c5, errs)
 in

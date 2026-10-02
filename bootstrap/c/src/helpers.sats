@@ -121,13 +121,13 @@ fn set_bin {sn:nat} (s: string sn): void
 
 fn get_bin(): string
 
-fn set_to_c(v: int): void
 
-fn get_to_c(): int
+fn set_to_c(v: bool): void
 
-fn set_to_c_done(v: int): void
 
-fn get_to_c_done(): int
+fn set_to_c_done(v: bool): void
+
+fn is_to_c_done(): bool
 
 fn set_self_path {sn:nat} (s: string sn): void
 
@@ -144,7 +144,6 @@ fn clear_build_err(): void
 fn set_exit_code(v: int): void
 
 fn get_exit_code(): int
-
 
 
 
@@ -959,10 +958,12 @@ fn run_mkdir
 
 
 
+datavtype program_run = Exited of int | NotStarted
+
 
 
 fn run_program {le:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): int
+  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): program_run
 
 
 

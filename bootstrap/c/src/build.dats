@@ -570,19 +570,29 @@ in rc end
    The dependency closure's dynloads, objects and wasm objects
    ============================================================ *)
 
-(* A dependency's source directory entry, i of n: kind 0 its lib, 1 an
-   extra file of the suffix sought, 2 anything else *)
-fn extra_kind {l:agz}{k:nat | k <= 1024} (e: !$A.arr(byte, l, 1024), el: int k, want: int): int =
-  if want = 0 then (if ~has_dats_ext(e, el, 1024) then 2 else if is_lib_dats(e, el, 1024) then 0 else 1)
-  else if want = 1 then (if ~has_dats_o_ext(e, el, 1024) then 2 else if has_lib_dats_o_sfx(e, el, 1024) then 0 else 1)
-  else (if ~has_dats_c_ext(e, el, 1024) then 2 else if has_lib_dats_c_sfx(e, el, 1024) then 0 else 1)
+(* What a dependency's extra files are wanted as: its .dats as dynloads,
+   its _dats.o as link objects, or its _dats.c compiled to wasm objects *)
+datatype wanted = Dynloads | LinkObjects | WasmObjects
 
-(* For each extra file of dependency d's build/bats_modules/<d>/src (want
-   0: .dats, as dynloads to eb; 1: _dats.o, as link objects to eb; 2:
-   _dats.c, compiled to wasm objects whose paths go to eb): the count of
-   wasm objects added to c *)
+(* What a dependency's source directory entry is: its lib, an extra file
+   of the suffix sought, or anything else *)
+datatype extra = LibFile | ExtraFile | Unrelated
+
+fn extra_kind {l:agz}{k:nat | k <= 1024} (e: !$A.arr(byte, l, 1024), el: int k, want: wanted): extra =
+  case+ want of
+  | Dynloads() =>
+    (if ~has_dats_ext(e, el, 1024) then Unrelated() else if is_lib_dats(e, el, 1024) then LibFile() else ExtraFile())
+  | LinkObjects() =>
+    (if ~has_dats_o_ext(e, el, 1024) then Unrelated() else if has_lib_dats_o_sfx(e, el, 1024) then LibFile() else ExtraFile())
+  | WasmObjects() =>
+    (if ~has_dats_c_ext(e, el, 1024) then Unrelated() else if has_lib_dats_c_sfx(e, el, 1024) then LibFile() else ExtraFile())
+
+(* For each extra file of dependency d's build/bats_modules/<d>/src, as
+   want says (the .dats as dynloads to eb, the _dats.o as link objects
+   to eb, the _dats.c compiled to wasm objects whose paths go to eb):
+   the count of wasm objects added to c *)
 fun dep_extras {n,i:nat | i <= n} .<n - i>.
-  (es: !$F.entries(n), i: int i, n: int n, d: !dep, want: int,
+  (es: !$F.entries(n), i: int i, n: int n, d: !dep, want: wanted,
    eb: !$B.builder_v >> $B.builder_v, c: int): int =
   if i >= n then c
   else let
@@ -590,21 +600,23 @@ fun dep_extras {n,i:nat | i <= n} .<n - i>.
     val el = $F.entries_name(es, i, e, 1024)
     val kind = extra_kind(e, el, want)
     val @(fz_e, bv_e) = $A.freeze<byte>(e)
-    val c2 = (if kind <> 1 then c
-      else if want = 0 then let
+    val is_extra = (case+ kind of ExtraFile() => true | _ => false): bool
+    val c2 = (if ~is_extra then c
+      else (case+ want of
+      | Dynloads() => let
         val () = bput_v(eb, "dynload \"./bats_modules/")
         val () = put_dep(eb, d)
         val () = bput_v(eb, "/src/")
         val () = copy_to_builder_v(bv_e, 0, el, 1024, eb)
         val () = bput_v(eb, "\"\n")
       in c end
-      else if want = 1 then let
+      | LinkObjects() => let
         val () = bput_v(eb, " build/bats_modules/")
         val () = put_dep(eb, d)
         val () = bput_v(eb, "/src/")
         val () = copy_to_builder_v(bv_e, 0, el, 1024, eb)
       in c end
-      else let
+      | WasmObjects() => let
         var wp : $B.builder_v = $B.create()
         val () = bput_v(wp, "build/bats_modules/")
         val () = put_dep(wp, d)
@@ -621,13 +633,13 @@ fun dep_extras {n,i:nat | i <= n} .<n - i>.
         in c + 1 end else c): int
         val () = $A.drop<byte>(fz_wp, bv_wp)
         val () = $A.free<byte>($A.thaw<byte>(fz_wp))
-      in c3 end): int
+      in c3 end)): int
     val () = $A.drop<byte>(fz_e, bv_e)
     val () = $A.free<byte>($A.thaw<byte>(fz_e))
   in dep_extras(es, i + 1, n, d, want, eb, c2) end
 
 (* The extra files of d (as dep_extras) *)
-fn dep_dir_extras (d: !dep, want: int, eb: !$B.builder_v >> $B.builder_v, c: int): int = let
+fn dep_dir_extras (d: !dep, want: wanted, eb: !$B.builder_v >> $B.builder_v, c: int): int = let
   var pb : $B.builder_v = $B.create()
   val () = bput_v(pb, "build/bats_modules/")
   val () = put_dep(pb, d)
@@ -655,7 +667,7 @@ fun put_dep_dynloads {k:nat} .<k>. (xs: !deps(k), eb: !$B.builder_v >> $B.builde
       val () = bput_v(eb, "dynload \"./bats_modules/")
       val () = put_dep(eb, d)
       val () = bput_v(eb, "/src/lib.dats\"\n")
-      val _ = dep_dir_extras(d, 0, eb, 0)
+      val _ = dep_dir_extras(d, Dynloads(), eb, 0)
     in put_dep_dynloads(tl, eb) end
 
 (* The link objects of the dependencies xs and of their extra modules *)
@@ -666,7 +678,7 @@ fun put_dep_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder
       val () = bput_v(lb, " build/bats_modules/")
       val () = put_dep(lb, d)
       val () = bput_v(lb, "/src/lib_dats.o")
-      val _ = dep_dir_extras(d, 1, lb, 0)
+      val _ = dep_dir_extras(d, LinkObjects(), lb, 0)
     in put_dep_objects(tl, lb) end
 
 (* The dependencies xs compiled to wasm objects, their NUL-terminated
@@ -691,7 +703,7 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
           val () = bput_v(lb, "/src/lib_dats.wasm.o")
           val () = put_char_v(lb, 0)
         in cnt + 1 end else cnt): int
-      val cnt3 = dep_dir_extras(d, 2, lb, cnt2)
+      val cnt3 = dep_dir_extras(d, WasmObjects(), lb, cnt2)
     in put_dep_wasm_objects(tl, lb, cnt3) end
 
 
@@ -2760,8 +2772,8 @@ in
         else ())
 
       (* --to-c: copy C files and generate Makefile *)
-      val () = (if is_to_c() then if get_to_c_done() = 0 then let
-        val () = set_to_c_done(1)
+      val () = (if is_to_c() then if ~is_to_c_done() then let
+        val () = set_to_c_done(true)
         val () = (
               if tclen > 0 then let
                 (* mkdir target *)

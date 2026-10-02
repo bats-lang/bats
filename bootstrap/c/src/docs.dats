@@ -516,9 +516,12 @@ fn is_lib_kind {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
   klen = 3 && peek_arr(kbuf, 0, 32) = 108 && peek_arr(kbuf, 1, 32) = 105
     && peek_arr(kbuf, 2, 32) = 98
 
+(* What check's docs step did: wrote a library's docs, found a package
+   that is not a library, or failed *)
+
+
 (* Writes docs/ when bats.toml has kind = "lib", as the Rust bats's check
-   does. Returns 1 for a library whose docs were written, 0 for any other
-   package, ~1 on an error. *)
+   does *)
 (* Whether the kind kbuf[0, klen) is lib; no kind is lib too, as in Rust's
    config::load *)
 fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
@@ -572,13 +575,13 @@ in
           val () = $A.free<byte>(kbuf)
           val nlen = (case+ nr of | ~$R.some(k) => k | ~$R.none() => 0): int
           val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
-          val rc = (if ~is_lib then 0
-                    else if generate_docs(bv_nb, nlen, 256) < 0 then ~1
-                    else 1): int
+          val rc = (if ~is_lib then NotLibrary()
+                    else if generate_docs(bv_nb, nlen, 256) < 0 then DocsFailed()
+                    else Written()): docs
           val () = $A.drop<byte>(fz_nb, bv_nb)
           val () = $A.free<byte>($A.thaw<byte>(fz_nb))
         in rc end
-      | ~$R.err(_) => 0
+      | ~$R.err(_) => NotLibrary()
     end
-  | ~$R.err(_) => 0
+  | ~$R.err(_) => NotLibrary()
 end
