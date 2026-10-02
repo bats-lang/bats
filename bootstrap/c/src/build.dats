@@ -757,23 +757,23 @@ in case+ r of
   | ~$R.err(_) => 0
 end
 
-(* Whether the binary entry at path is a wasm binary: a #target line
-   names wasm (Rust: lex_target) *)
+(* The target of the binary entry at path: wasm when a #target line
+   names wasm (Rust: lex_target), else native *)
 
 
 
-(* Whether xs hold a #target line naming wasm (1, or 2 for
-   "#target wasm binary"), as Rust's lex_target reads it *)
+(* Whether xs hold a #target line naming wasm (#target wasm, or #target
+   wasm binary), as Rust's lex_target reads it *)
 fun has_wasm_target {ns:int}{k:nat} .<k>. (xs: !spans(ns, k)): bool =
   case+ xs of
   | spans_nil() => false
   | spans_cons(sp, tl) => let
-      val w = (case+ sp of | STarget(_, _, t) => t > 0 | _ => false): bool
+      val w = (case+ sp of | STarget(_, _, NativeLine()) => false | STarget(_, _, _) => true | _ => false): bool
     in if w then true else has_wasm_target(tl) end
 
 implement check_wasm_binary(path) =
   case+ read_whole(path, 524288) of
-  | ~whole_err(_) => 0
+  | ~whole_err(_) => Native()
   | ~whole_ok(ar, piece, m, n) => let
       val @(fz_s, bv_s) = $A.freeze<byte>(piece)
       val xs = lex_spans(bv_s, n, m)
@@ -781,7 +781,14 @@ implement check_wasm_binary(path) =
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = whole_free(ar, $A.thaw<byte>(fz_s))
-    in (if w then 1 else 0) end
+    in (if w then Wasm() else Native()): target end
+
+(* The build's target and mode as the digit kept in build/.bats_target:
+   0 native, 1 wasm, plus 2 in check and test mode, whose output also
+   holds the $UNITTEST blocks *)
+fn target_mark (build_target: target, test_mode: bool): int = let
+  val base = (case+ build_target of Native() => 0 | Wasm() => 1): int
+in if test_mode then base + 2 else base end
 
 (* to_c: the --to-c directory in to_c[0, tclen); tclen is 0 when it was
    not given. *)
@@ -996,7 +1003,7 @@ in
       (* The marker is the target, plus 2 in check and test mode, whose
          output also holds the $UNITTEST blocks: a change of either
          makes preprocess_one reprocess every file *)
-      val mode_mark = (if is_test_mode() then build_target + 2 else build_target): int
+      val mode_mark = target_mark(build_target, is_test_mode())
       val target_changed_tgt = ~($AR.eq_int_int(old_target, mode_mark))
       (* Cache buster: when compiler semantics change, bump this ID.
          If the stored ID differs, force reprocessing of all cached files. *)
@@ -1578,11 +1585,9 @@ in
                     val () = put_char_v(sp, 0)
                     val @(sa, _) = $B.to_arr(sp)
                     val @(fz_sp, bv_sp) = $A.freeze<byte>(sa)
-                    val is_wasm_bin = check_wasm_binary(bv_sp)
+                    val binary_target = check_wasm_binary(bv_sp)
                     (* Skip: wasm binary during native pass, or native binary during wasm pass *)
-                    val skip_bin = (if is_wasm_bin > 0 then
-                      $AR.eq_int_int(build_target, 0)
-                    else $AR.eq_int_int(build_target, 1)): bool
+                    val skip_bin = ~same_target(binary_target, build_target)
                   in if skip_bin then let
                     val () = $A.drop<byte>(fz_sp, bv_sp)
                     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
@@ -1590,7 +1595,6 @@ in
                     val () = $A.free<byte>($A.thaw<byte>(fz_e))
                   in scan_bins(d, i + 1, n, ph, phlen, rel) end
                   else let
-                    val bin_bt = (if is_wasm_bin > 0 then 1 else 0): int
                     var ss : $B.builder_v = $B.create()
                     val () = bput_v(ss, "build/src/bin/")
                     val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ss)
@@ -1606,7 +1610,7 @@ in
                     val () = put_char_v(sd, 0)
                     val @(sda, _) = $B.to_arr(sd)
                     val @(fz_sd, bv_sd) = $A.freeze<byte>(sda)
-                    val pr = preprocess_one(bv_sp, bv_ss, bv_sd, bin_bt, is_unsafe, target_changed)
+                    val pr = preprocess_one(bv_sp, bv_ss, bv_sd, binary_target, is_unsafe, target_changed)
                     val () = (if pr <> 0 then let
                       val () = set_build_err()
                       val () = print! ("error: preprocess failed for ")
@@ -1619,7 +1623,7 @@ in
                        initialize every module's vals; patsopt names this
                        entry's dynload bats_dynload, which the host calls
                        before mainats_0_void *)
-                    val () = (if is_wasm_bin > 0 then
+                    val () = (if same_target(binary_target, Wasm()) then
                       bput_v(entry, "#define ATS_DYNLOADNAME \"bats_dynload\"\n")
                       else ())
                     val () = bput_v(entry, "staload \"./src/bin/")
@@ -2392,7 +2396,7 @@ in
                       | ~$R.err(_) => ())
 
                     (* WASM cc+link for wasm binaries, native cc+link otherwise *)
-                    val rl = (if bin_bt > 0 then let
+                    val rl = (if same_target(binary_target, Wasm()) then let
                       val _ = write_wasm_runtime_h()
                       val _ = write_wasm_runtime_c()
                       val _ = write_wasm_stubs()
@@ -2672,7 +2676,7 @@ in
                     (* Rename .new to final for native builds *)
                     val () = (if is_to_c() then ()
                     else if rl = 0 then
-                      if bin_bt <= 0 then let
+                      if same_target(binary_target, Native()) then let
                         var mv_src : $B.builder_v = $B.create()
                         val () = (if rel > 0 then bput_v(mv_src, "dist/release/")
                           else bput_v(mv_src, "dist/debug/"))
@@ -2701,7 +2705,7 @@ in
                     else if has_build_err() then ()
                     else if rl = 0 then
                       if ~is_quiet() then
-                        if bin_bt > 0 then let
+                        if same_target(binary_target, Wasm()) then let
                           (* Rust: "built <wasm> (wasm)" on stderr *)
                           val () = (if rel > 0 then prerr! ("built ./dist/release/")
                             else prerr! ("built ./dist/debug/"))

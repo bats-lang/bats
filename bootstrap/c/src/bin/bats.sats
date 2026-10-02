@@ -22,6 +22,7 @@ staload R = "result/src/lib.sats"
 
 
 staload "helpers.sats"
+staload "lexer.sats"
 staload "build.sats"
 staload "commands.sats"
 staload "lock.sats"

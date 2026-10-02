@@ -569,6 +569,12 @@ staload "lexer.sats"
 
 
 
+
+
+
+
+
+
 datavtype cycle_hits(int) =
   | cycle_hits_nil(0) of ()
   | {k:nat} cycle_hits_cons(k + 1) of (spos(524288), pos_t, pos_t, pos_t, cycle_hits(k))
