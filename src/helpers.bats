@@ -1177,8 +1177,14 @@ fn finish_patsopt {li:agz}
   in 0 end
 
 (* ============================================================
-   Template instances patsopt left without an implementation
+   What patsopt emits but only cc rejects: a template instance with no
+   implementation, a function that captures its environment
    ============================================================ *)
+
+(* What in patsopt's C only cc would reject *)
+datatype emitted_flaw =
+  | UnresolvedTemplate   (* PMVtmpltcstmat: an instance with no implementation *)
+  | CapturingFunction    (* ATSERRORnotenvless: a plain function that captures *)
 
 (* Whether "PMVtmpltcstmat" is at c[i]: patsopt's mark for a template
    instance it found no implementation for, which only cc rejects *)
@@ -1187,6 +1193,14 @@ fn is_unresolved_at {l:agz}{m:pos}
   var mark = @[char][14]('P', 'M', 'V', 't', 'm', 'p', 'l', 't', 'c', 's', 't', 'm', 'a', 't')
 in lit_at(c, i, max, mark, 14) end
 
+(* Whether "ATSERRORnotenvless" is at c[i]: patsopt's mark for a lambda
+   whose kind is a plain function (FUN) but which captures a variable, so
+   it has an environment a plain function cannot carry *)
+fn is_capturing_at {l:agz}{m:pos}
+  (c: !$A.borrow(byte, l, m), i: pos_t, max: int m): bool = let
+  var mark = @[char][18]('A', 'T', 'S', 'E', 'R', 'R', 'O', 'R', 'n', 'o', 't', 'e', 'n', 'v', 'l', 'e', 's', 's')
+in lit_at(c, i, max, mark, 18) end
+
 (* Whether "loc0 = " is at c[i]: an instruction's source location
    follows it, in the comment patsopt writes before the instruction *)
 fn is_location_at {l:agz}{m:pos}
@@ -1194,20 +1208,21 @@ fn is_location_at {l:agz}{m:pos}
   var mark = @[char][7]('l', 'o', 'c', '0', ' ', '=', ' ')
 in lit_at(c, i, max, mark, 7) end
 
-(* The first unresolved instance in c[i, n), or n when there is none;
+(* The first flaw in c[i, n), or n when there is none, and which it is;
    whether a source location comes before it, and where the last one
    before it starts (seen and location say so for c[0, i)) *)
-fun find_unresolved {l:agz}{m:pos}{i,n:nat | i <= n; n < m}{k:nat | k <= n} .<n - i>.
+fun find_flaw {l:agz}{m:pos}{i,n:nat | i <= n; n < m}{k:nat | k <= n} .<n - i>.
   (c: !$A.borrow(byte, l, m), i: int i, n: int n, max: int m, seen: bool, location: int k)
-  : [r,q:nat | r <= n; q <= n] @(int r, bool, int q) =
-  if i >= n then @(n, seen, location)
+  : [r,q:nat | r <= n; q <= n] @(int r, emitted_flaw, bool, int q) =
+  if i >= n then @(n, UnresolvedTemplate(), seen, location)
   else let
     val b = byte2int0($A.read<byte>(c, i))
   in
-    if b = 80 && is_unresolved_at(c, i, max) then @(i, seen, location)
+    if b = 80 && is_unresolved_at(c, i, max) then @(i, UnresolvedTemplate(), seen, location)
+    else if b = 65 && is_capturing_at(c, i, max) then @(i, CapturingFunction(), seen, location)
     else if b = 108 && is_location_at(c, i, max) then
-      find_unresolved(c, i + 1, n, max, true, (if i + 7 <= n then i + 7 else n): [q:nat | q <= n] int q)
-    else find_unresolved(c, i + 1, n, max, seen, location)
+      find_flaw(c, i + 1, n, max, true, (if i + 7 <= n then i + 7 else n): [q:nat | q <= n] int q)
+    else find_flaw(c, i + 1, n, max, seen, location)
   end
 
 (* The first index in c[i, n) holding byte b, or n *)
@@ -1281,19 +1296,34 @@ fn report_unresolved {l:agz}{m:pos}{at,n:nat | at <= n; n < m}{q:nat | q <= n}
             else ()): void
 in prerr_builder(out) end
 
+(* The error for a capturing function at c[at, n): what it is, and, when
+   seen, the .bats location of the lambda, whose text starts at
+   c[location] *)
+fn report_capturing {l:agz}{m:pos}{n:nat | n < m}{q:nat | q <= n}
+  (c: !$A.borrow(byte, l, m), n: int n, max: int m, seen: bool, location: int q, off: int): void = let
+  var out : $B.builder_v = $B.create()
+  val () = bput_v(out, "error: a lambda whose kind is a plain function (=<fun1>, or a context that makes it one) captures a variable, which a plain function cannot carry; pass what it captures as an argument, or make it a linear closure (llam)\n")
+  val () = (if seen then put_location(c, location, index_of_byte(c, location, n, 10), max, off, out)
+            else ()): void
+in prerr_builder(out) end
+
 (* After patsopt made the C out[0, ol) of in[0, il) (paths), whether it
-   holds a template instance with no implementation: the first one is
-   reported, and the build fails, at check as at build (only cc would
-   reject it, and check runs no cc). 0 when there is none, else 1 *)
-fn check_template_instances {lo,li:agz}
+   holds what only cc would reject (a template instance with no
+   implementation, a plain function that captures): the first one is
+   reported, and the build fails, at check as at build (check runs no
+   cc). 0 when there is none, else 1 *)
+fn check_emitted_flaws {lo,li:agz}
   (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int =
   case+ read_whole(out_bv, 524288) of
   | ~whole_err(_) => 0
   | ~whole_ok(ar, piece, size, n) => let
       val @(fz_c, bv_c) = $A.freeze<byte>(piece)
-      val @(at, seen, location) = find_unresolved(bv_c, 0, n, size, false, 0)
+      val @(at, flaw, seen, location) = find_flaw(bv_c, 0, n, size, false, 0)
       val rc = (if at >= n then 0 else let
-          val () = report_unresolved(bv_c, at, n, size, seen, location, read_prelude(in_bv, il))
+          val off = read_prelude(in_bv, il)
+          val () = (case+ flaw of
+            | UnresolvedTemplate() => report_unresolved(bv_c, at, n, size, seen, location, off)
+            | CapturingFunction() => report_capturing(bv_c, n, size, seen, location, off)): void
           val () = set_build_err()
         in 1 end): int
       val () = $A.drop<byte>(fz_c, bv_c)
@@ -1396,7 +1426,7 @@ in
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
       val patsopt_rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
       val rc = (if patsopt_rc <> 0 then patsopt_rc
-                else check_template_instances(out_bv, in_bv, in_len - 1)): int
+                else check_emitted_flaws(out_bv, in_bv, in_len - 1)): int
       val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
     in rc end
   | ~$R.err(_) => ~1
