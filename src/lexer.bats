@@ -267,11 +267,25 @@ fn looking_at_ext_hash {l:agz}{n:pos}
   lit_exthash(src, pos, max) &&
   is_kw_boundary_before(src, pos, max)
 
+(* Whether the last byte before pos that is not a blank is '<': the
+   "fun" at pos names a function kind in an arrow (=<fun>, -<fun>),
+   not a declaration *)
+fun _after_angle {l:agz}{n:pos}{i:int} .<max(i, 0)>.
+  (src: !$A.borrow(byte, l, n), pos: int i, max: int n): bool =
+  if pos <= 0 then false
+  else let
+    val b = peek(src, pos - 1, max)
+  in
+    if b = 32 || b = 9 then _after_angle(src, pos - 1, max)
+    else b = 60
+  end
+
 fn looking_at_fun {l:agz}{n:pos}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n): bool =
   lit_fun(src, pos, max) &&
   is_kw_boundary(src, pos + 3, max) &&
-  is_kw_boundary_before(src, pos, max)
+  is_kw_boundary_before(src, pos, max) &&
+  ~(_after_angle(src, pos, max))
 
 (* ============================================================
    Lexer: typed positions
@@ -598,10 +612,12 @@ fn boxed_dollar_end {l:agz}{n:pos}{p:nat | p <= n}
     var c_tup_t = @[char][5]('t', 'u', 'p', '_', 't')
     var c_rec_t = @[char][5]('r', 'e', 'c', '_', 't')
     var c_list_t = @[char][6]('l', 'i', 's', 't', '_', 't')
+    var c_delay = @[char][5]('d', 'e', 'l', 'a', 'y')
   in
     if word_is(src, ws, we, max, c_tup, 3) || word_is(src, ws, we, max, c_rec, 3) ||
        word_is(src, ws, we, max, c_list, 4) || word_is(src, ws, we, max, c_tup_t, 5) ||
-       word_is(src, ws, we, max, c_rec_t, 5) || word_is(src, ws, we, max, c_list_t, 6)
+       word_is(src, ws, we, max, c_rec_t, 5) || word_is(src, ws, we, max, c_list_t, 6) ||
+       word_is(src, ws, we, max, c_delay, 5)
     then we else pos
   end
   else pos
@@ -691,9 +707,86 @@ fn bare_lam_end {l:agz}{n:pos}{p:nat | p <= n}
   end
   else pos
 
+(* Whether src[i, e) holds "libats/ML" or "libats_ML" (a staload of
+   one of its SATS files, or an include of its staload .hats) *)
+fun names_libats_ml {l:agz}{n:pos}{i:nat}{e:int} .<max(e - i, 0)>.
+  (src: !$A.borrow(byte, l, n), i: int i, e: int e, max: int n): bool =
+  if i + 9 > e then false
+  else let
+    var slash_c = @[char][9]('l', 'i', 'b', 'a', 't', 's', '/', 'M', 'L')
+    var underscore_c = @[char][9]('l', 'i', 'b', 'a', 't', 's', '_', 'M', 'L')
+  in
+    if lit_at(src, i, max, slash_c, 9) || lit_at(src, i, max, underscore_c, 9) then true
+    else names_libats_ml(src, i + 1, e, max)
+  end
+
+(* #include at pos *)
+fn looking_at_include {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  if $AR.eq_int_int(at(src, pos, max), 35) then let
+    var c = @[char][8]('#', 'i', 'n', 'c', 'l', 'u', 'd', 'e')
+  in lit_at(src, pos, max, c, 8) && is_kw_boundary(src, pos + 8, max) end
+  else false
+
+(* Whether the source declares its own function or type named src[s, e):
+   a "fun", "fn", "datavtype", "vtypedef" or "typedef" keyword, then
+   blanks and {quantifier} groups, then the name. The list package's nil
+   and cons, which build a list_vt, and the compiler's cons, a linear
+   list of version constraints, are their own, not the prelude's macros *)
+fun _declares_own {l:agz}{n:pos}{p:nat | p <= n}{s,e:nat | s <= e; e <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n, s: int s, e: int e): bool =
+  if p >= max then false
+  else let
+    var fun_c = @[char][3]('f', 'u', 'n')
+    var fn_c = @[char][2]('f', 'n')
+    var datavtype_c = @[char][9]('d', 'a', 't', 'a', 'v', 't', 'y', 'p', 'e')
+    var vtypedef_c = @[char][8]('v', 't', 'y', 'p', 'e', 'd', 'e', 'f')
+    var typedef_c = @[char][7]('t', 'y', 'p', 'e', 'd', 'e', 'f')
+    val keyword_end = (if looking_at_kw(src, p, max, fun_c, 3) then adv(p, 3, max)
+                       else if looking_at_kw(src, p, max, fn_c, 2) then adv(p, 2, max)
+                       else if looking_at_kw(src, p, max, datavtype_c, 9) then adv(p, 9, max)
+                       else if looking_at_kw(src, p, max, vtypedef_c, 8) then adv(p, 8, max)
+                       else if looking_at_kw(src, p, max, typedef_c, 7) then adv(p, 7, max)
+                       else p): [q:int | p <= q; q <= n] int q
+  in
+    if keyword_end > p then let
+      val name_start = _skip_to_name(src, keyword_end, max)
+      val name_end = skip_ident(src, name_start, max)
+    in
+      if name_end - name_start = e - s && _names_match(src, name_start, s, e - s, max) then true
+      else _declares_own(src, p + 1, max, s, e)
+    end
+    else _declares_own(src, p + 1, max, s, e)
+  end
+
+(* A word of the prelude (or of libats/ML) that builds a non-linear
+   list, option or stream (helpers' prelude_build_of), not qualified
+   ($X.word names another package's): past it when it is one, else pos.
+   nil and cons are the prelude's macros for list_nil and list_cons
+   unless the source declares its own *)
+fn prelude_word_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q = let
+  val b0 = at(src, pos, max)
+  val qualified = (if pos > 0 then $AR.eq_int_int(at(src, pos - 1, max), 46) else false): bool
+in
+  if ~(is_ident_byte(b0)) || (b0 >= 48 && b0 <= 57) || qualified ||
+     ~(is_kw_boundary_before(src, pos, max)) then pos
+  else let
+    val we = skip_ident(src, pos, max)
+    var nil_c = @[char][3]('n', 'i', 'l')
+    var cons_c = @[char][4]('c', 'o', 'n', 's')
+    val is_macro = word_is(src, pos, we, max, nil_c, 3) || word_is(src, pos, we, max, cons_c, 4)
+  in
+    case+ prelude_build_of(src, pos, we, max) of
+    | NoPreludeBuild() => pos
+    | _ => if is_macro && _declares_own(src, 0, max, pos, we) then pos else we
+  end
+end
+
 (* Past the non-linear heap construct at pos when there is one (the
    datatype keyword, a '( '{ '[, a $tup $rec $list, a cloref or cloptr,
-   a bare lam, a ref made inside a function), else pos *)
+   a bare lam, a ref made inside a function, a word of the prelude that
+   builds a non-linear list, option or stream, a "::"), else pos *)
 fn nonlinear_end {l:agz}{n:pos}{p:nat | p <= n}
   (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q = let
   val b0 = at(src, pos, max)
@@ -701,10 +794,11 @@ in
   if $AR.eq_int_int(b0, 100) then (if datatype_carries(src, pos, max) then adv(pos, 8, max) else pos)
   else if $AR.eq_int_int(b0, 39) then (if boxed_quote(src, pos, max) then adv(pos, 2, max) else pos)
   else if $AR.eq_int_int(b0, 36) then boxed_dollar_end(src, pos, max)
-  else if $AR.eq_int_int(b0, 99) then nonlinear_clo_end(src, pos, max)
+  else if $AR.eq_int_int(b0, 99) && nonlinear_clo_end(src, pos, max) > pos then nonlinear_clo_end(src, pos, max)
   else if $AR.eq_int_int(b0, 114) then inner_ref_end(src, pos, max)
-  else if $AR.eq_int_int(b0, 108) then bare_lam_end(src, pos, max)
-  else pos
+  else if $AR.eq_int_int(b0, 108) && bare_lam_end(src, pos, max) > pos then bare_lam_end(src, pos, max)
+  else if $AR.eq_int_int(b0, 58) && $AR.eq_int_int(at(src, pos + 1, max), 58) then adv(pos, 2, max)
+  else prelude_word_end(src, pos, max)
 end
 
 (* The kind of declaration the word src[s, e) opens: 1 for fun or fnx,
@@ -1241,6 +1335,7 @@ fun lex_passthrough_scan {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>
     else if looking_at_and(src, pos, max) then pos
     else if val_rec_end(src, pos, max) > pos then pos
     else if looking_at_stld(src, pos, max) then pos
+    else if looking_at_include(src, pos, max) then pos
     else if nonlinear_end(src, pos, max) > pos then pos
     else lex_passthrough_scan(src, pos + 1, src_len, max)
   end
@@ -1495,7 +1590,15 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
     (* staload lines: kind=12, go to both .sats and .dats with .bats→.sats rename *)
     else if looking_at_stld(src, pos, max) then let
       val ep = skip_to_eol(src, adv(pos, 7, max), src_len, max)
-      val () = put_typed(spans, SStaload(pos, ep))
+      (* libats/ML is ATS's garbage-collected library: its lists, options,
+         arrays and maps are never freed *)
+      val () = (if names_libats_ml(src, pos, ep, max) then put_typed(spans, SConstruct(pos, ep))
+                else put_typed(spans, SStaload(pos, ep))): void
+    in lex_main(src, src_len, max, spans, ep, count + 1) end
+    else if looking_at_include(src, pos, max) &&
+            names_libats_ml(src, pos, skip_to_eol(src, pos, src_len, max), max) then let
+      val ep = skip_to_eol(src, pos, src_len, max)
+      val () = put_typed(spans, SConstruct(pos, ep))
     in lex_main(src, src_len, max, spans, ep, count + 1) end
     (* Default: passthrough *)
     else let

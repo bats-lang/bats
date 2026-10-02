@@ -226,6 +226,84 @@ implement is_ident_byte(b) =
   $AR.eq_int_int(b, 95)
 
 (* Whether src[pos, pos + m) spells the chars lit. *)
+(* ============================================================
+   The prelude's non-linear builders
+   ============================================================ *)
+
+(* What a word of the ATS prelude, or of libats/ML, builds that is boxed
+   and not linear: allocated, and never freed without a garbage
+   collector (bats-lang/bats#228) *)
+#pub datatype prelude_build = NoPreludeBuild | BuildsList | BuildsOption | BuildsStream
+
+(* The words, each followed by one space. Enumerated from the prelude's
+   SATS files (list.sats, option.sats, stream.sats, stream_vt.sats,
+   grandom.sats, basics_dyn.sats) and libats/ML's basis.sats: the
+   constructors of list, option and stream_con, the nil and cons macros,
+   and every function whose result is a non-linear list, option or
+   stream built from something that is not one (list_tail, which shares
+   a list it is given, is not) *)
+fn list_builders (): string = "list_cons list_nil nil cons list_append list_append1_vt list_reverse_append list_reverse_append1_vt list_insert_at list_remove_at list_takeout_at list_fset_at list_fexch_at list_split_at list_tuple_0 list_tuple_1 list_tuple_2 list_tuple_3 list_tuple_4 list_tuple_5 list_tuple_6 list_of_list_vt list_vt2t grandom_list list0 list0_cons list0_nil nil0 cons0 "
+fn option_builders (): string = "Some None option_some option_none option_of_option_vt option_vt2t Some0 None0 option0 "
+fn stream_builders (): string = "stream_cons stream_nil stream_append stream_concat stream_cross stream_differ stream_drop_exn stream_filter stream_filter_cloref stream_filter_fun stream_imap stream_imap_cloref stream_imap_fun stream_inter stream_labelize stream_make_cons stream_make_nil stream_make_sing stream_map stream_map2 stream_map2_cloref stream_map2_fun stream_map_cloref stream_map_fun stream_merge stream_merge_cloref stream_merge_fun stream_mergeq stream_mergeq_cloref stream_mergeq_fun stream_scan stream_scan_cloref stream_scan_fun stream_symdiff stream_tabulate stream_tabulate_cloref stream_tabulate_fun stream_tail_exn stream_union stream_vt2t stream_zip "
+
+(* The end of the table's word that starts at i: the next space, or the
+   table's end *)
+fun table_word_end {t:nat}{i:nat | i <= t} .<t - i>.
+  (table: string t, table_len: int t, i: int i): [j:nat | i <= j; j <= t] int j =
+  if i >= table_len then i
+  else if string_get_at(table, i) = ' ' then i
+  else table_word_end(table, table_len, i + 1)
+
+(* Whether src[s, s + k) holds table[i, i + k) *)
+fun table_bytes_match {l:agz}{n:pos}{p:int}{t:nat}{i,k:nat | i + k <= t} .<k>.
+  (src: !$A.borrow(byte, l, n), s: int p, max: int n, table: string t, i: int i, k: int k): bool =
+  if k <= 0 then true
+  else if peek(src, s, max) = char2int0(string_get_at(table, i)) then
+    table_bytes_match(src, s + 1, max, table, i + 1, k - 1)
+  else false
+
+(* Whether src[s, s + len) is one of the words of table[i, ...) *)
+fun in_table {l:agz}{n:pos}{p:int}{t:nat}{i:nat | i <= t} .<t - i>.
+  (src: !$A.borrow(byte, l, n), s: int p, len: int, max: int n,
+   table: string t, table_len: int t, i: int i): bool =
+  if i >= table_len then false
+  else let
+    val j = table_word_end(table, table_len, i)
+  in
+    if j - i = len && table_bytes_match(src, s, max, table, i, j - i) then true
+    else if j >= table_len then false
+    else in_table(src, s, len, max, table, table_len, j + 1)
+  end
+
+fn in_word_table {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), s: int p, len: int, max: int n, table: string): bool = let
+  val table1 = g1ofg0(table)
+in in_table(src, s, len, max, table1, g1u2i(string1_length(table1)), 0) end
+
+(* Whether build is the kind of build kind *)
+#pub fn prelude_build_is (build: prelude_build, kind: prelude_build): bool
+
+implement prelude_build_is (build, kind) =
+  case+ (build, kind) of
+  | (NoPreludeBuild(), NoPreludeBuild()) => true
+  | (BuildsList(), BuildsList()) => true
+  | (BuildsOption(), BuildsOption()) => true
+  | (BuildsStream(), BuildsStream()) => true
+  | (_, _) => false
+
+#pub fn prelude_build_of {l:agz}{n:pos}{p,q:int}
+  (src: !$A.borrow(byte, l, n), s: int p, e: int q, max: int n): prelude_build
+
+implement prelude_build_of (src, s, e, max) = let
+  val len = e - s
+in
+  if len <= 0 then NoPreludeBuild()
+  else if in_word_table(src, s, len, max, list_builders()) then BuildsList()
+  else if in_word_table(src, s, len, max, option_builders()) then BuildsOption()
+  else if in_word_table(src, s, len, max, stream_builders()) then BuildsStream()
+  else NoPreludeBuild()
+end
+
 #pub fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
 

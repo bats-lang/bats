@@ -2372,9 +2372,33 @@ fn construct_msg {ls:agz}{ns:pos}
   val is_ref = (if we - s >= 3 then lit_at(src, s, sm, ref_c, 3) else false): bool
   var lam_c = @[char][3]('l', 'a', 'm')
   val is_lam = (if w3 then lit_at(src, s, sm, lam_c, 3) else false): bool
+  var delay_c = @[char][5]('d', 'e', 'l', 'a', 'y')
+  val is_delay = (if b0 = 36 then lit_at(src, s + 1, sm, delay_c, 5) else false): bool
+  var staload_c = @[char][7]('s', 't', 'a', 'l', 'o', 'a', 'd')
+  var include_c = @[char][8]('#', 'i', 'n', 'c', 'l', 'u', 'd', 'e')
+  val is_libats_ml = lit_at(src, s, sm, staload_c, 7) || lit_at(src, s, sm, include_c, 8)
+  val built = prelude_build_of(src, s, we, sm)
 in
   if kind = 6 then bput_v(m, "extcode block outside of $UNSAFE begin...end block")
   else if at_unsafe_kw(src, sm, s) then bput_v(m, "$UNSAFE construct outside of $UNSAFE begin...end block")
+  else if is_libats_ml then
+    bput_v(m, "libats/ML is not allowed outside $UNSAFE; it is ATS's garbage-collected library, whose lists, options, arrays and maps are never freed: use the prelude's linear forms (list_vt, option_vt, arrayptr)")
+  else if b0 = 58 then
+    bput_v(m, "'::' is not allowed outside $UNSAFE; it is the prelude's list_cons, whose non-linear list is never freed: use list_vt_cons, whose match frees it")
+  else if is_delay then
+    bput_v(m, "'$delay' is not allowed outside $UNSAFE; a non-linear lazy value is never freed: use $ldelay (a stream_vt)")
+  else if prelude_build_is(built, BuildsList()) then let
+    val () = put_char_v(m, 39)
+    val () = copy_to_builder_v(src, s, we, sm, m)
+  in bput_v(m, "' is not allowed outside $UNSAFE; it builds the prelude's non-linear list, which is never freed: use list_vt (list_vt_cons, list_vt_nil and the list_vt functions, or the list package)") end
+  else if prelude_build_is(built, BuildsOption()) then let
+    val () = put_char_v(m, 39)
+    val () = copy_to_builder_v(src, s, we, sm, m)
+  in bput_v(m, "' is not allowed outside $UNSAFE; it builds the prelude's non-linear option, which is never freed: use option_vt (Some_vt, None_vt) or result's option ($R.some, $R.none)") end
+  else if prelude_build_is(built, BuildsStream()) then let
+    val () = put_char_v(m, 39)
+    val () = copy_to_builder_v(src, s, we, sm, m)
+  in bput_v(m, "' is not allowed outside $UNSAFE; it builds the prelude's non-linear lazy stream, which is never freed: use stream_vt ($ldelay and the stream_vt functions)") end
   else if is_datatype then
     bput_v(m, "'datatype' with a constructor that carries data is not allowed outside $UNSAFE; it allocates and is never freed: use 'datavtype', which its match frees")
   else if b0 = 39 then
