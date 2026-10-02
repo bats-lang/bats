@@ -317,6 +317,10 @@ in
   else NoPreludeBuild()
 end
 
+(* A package's kind: a library (kind = "lib", the default) or a binary
+   (kind = "bin") *)
+
+
 
 
 

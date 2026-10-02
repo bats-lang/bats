@@ -850,6 +850,13 @@ fn do_test {lf:agz} (f: !$A.borrow(byte, lf, 4096), fl: int, want_native: bool, 
 
 
 
+
+
+
+
+
+
+
 fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 
@@ -1088,7 +1095,10 @@ fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 
 
-fn do_completions(shell: int): void
+
+datatype shell = Bash | Zsh | Fish
+
+fn do_completions(target: shell): void
 
 
 
@@ -1227,7 +1237,8 @@ fn write_claude_rules(): void
 
 
 
-fn do_init {la:agz} (arg: !$A.borrow(byte, la, 4096), alen: int, claude: int): void
+
+fn do_init {la:agz} (arg: !$A.borrow(byte, la, 4096), alen: int, claude: bool): void
 
 
 
@@ -1461,6 +1472,11 @@ fn do_remove {l:agz}{n:pos}
 
 
 fn run_process_demo(): void
+
+
+
+
+
 
 
 

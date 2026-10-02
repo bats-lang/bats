@@ -2008,10 +2008,7 @@ staload "recursion.sats"
 
 
 
-
-
-fn project_kind (): int
-
+fn project_kind (): $R.option(package_kind)
 
 
 
@@ -3037,7 +3034,7 @@ fn resolve_deps {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): bool
 
 
 fn do_lock {lr:agz}
-  (dev: int, dry_run: int, repo: !$A.borrow(byte, lr, 4096), rplen: int): void
+  (dev: bool, dry_run: bool, repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 
 

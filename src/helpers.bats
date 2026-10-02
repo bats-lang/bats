@@ -304,6 +304,10 @@ in
   else NoPreludeBuild()
 end
 
+(* A package's kind: a library (kind = "lib", the default) or a binary
+   (kind = "bin") *)
+#pub datatype package_kind = Library | Binary
+
 #pub fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
 

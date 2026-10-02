@@ -316,6 +316,10 @@ fn prelude_build_of {l:agz}{n:pos}{p,q:int}
 
 
 
+
+
+datatype package_kind = Library | Binary
+
 fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
 
