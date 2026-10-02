@@ -122,3 +122,24 @@ Fix problems regardless of size. Never say "too large for this session" or defer
 ## Task Rules
 
 A task should never be more than one thing: if it requires the word "and", for example, it should be broken up. If it refers to plurals, it should be broken up. If it has a comma, it should be broken up.
+
+## CI is pinned
+
+Every input to CI is pinned in the source (bats-lang/repository-prototype#269),
+so a commit that passes keeps passing:
+
+* `bats.lock` is committed, and CI unpacks exactly the locked versions.
+* The seed compiler is `bootstrap/c`, in the tree.
+* The package repository is fetched at the commit in
+  `.github/repository-version`, so what the fixture tests under `tests/`
+  lock (`bats lock` against it, e.g. `lock-namespace`) is pinned too.
+* `relock-pins.yml` in bats-lang/repository-prototype is called by commit.
+
+Pins move only through a reviewed pull request that runs the same CI.
+The daily `relock.yml` (the shared `relock-pins.yml`) relocks against the
+newest repository, moves `.github/repository-version` to it, pushes
+`relock/<date>`, opens a pull request listing the old and new versions
+and dispatches `check.yml` on it, so a breaking publish shows as a red
+relock pull request and main stays green. GITHUB_TOKEN cannot change
+workflow files, so without a `RELOCK_TOKEN` secret that pull request lists
+a workflow pin that would move instead of moving it.

@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # The daily relock dispatches it on its relock/<date> branch: a pull
+  # request opened with GITHUB_TOKEN starts no workflow by itself
+  workflow_dispatch:
 
 jobs:
   check:
@@ -36,7 +39,12 @@ jobs:
 
       - name: Fetch deps from lock
         run: |
-          git clone https://github.com/bats-lang/repository-prototype.git ~/repository
+          # The package repository at the commit .github/repository-version
+          # pins (bats-lang/repository-prototype#269): the lock's packages,
+          # and what the fixture tests lock, never the newest
+          git init -q ~/repository
+          git -C ~/repository fetch -q --depth 1 https://github.com/bats-lang/repository-prototype.git "$(tr -d '[:space:]' < .github/repository-version)"
+          git -C ~/repository checkout -q FETCH_HEAD
           mkdir -p bats_modules
           awk '!seen[$1]++ { print $1, $2 }' bats.lock | while read name version; do
             dir="bats_modules/$name"
