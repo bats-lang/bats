@@ -507,6 +507,211 @@ fun line_start {l:agz}{n:pos}{p:nat | p <= n} .<p>.
   else if $AR.eq_int_int(at(src, p - 1, max), 10) then p
   else line_start(src, p - 1, max)
 
+(* ============================================================
+   Non-linear heap values: what allocates must be linear, so that its
+   consumer frees it (there is no garbage collector). Outside $UNSAFE
+   these are rejected: a datatype whose constructor carries data (a
+   datavtype is freed by its match), a boxed tuple, record or list
+   ('(, '{, '[ and $tup, $rec, $list; the flat @( ) and @{ } and the
+   linear $tup_vt, $rec_vt and $list_vt stay), a non-linear closure
+   (cloref, cloptr; lincloptr is freed with cloptr_free), a lam whose
+   arrow leaves its kind to the context (llam is linear) and a ref made
+   inside a function (one made once, at the top level, stays).
+   ============================================================ *)
+
+fn looking_at_datatype {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  if $AR.eq_int_int(at(src, pos, max), 100) then let
+    var c = @[char][8]('d', 'a', 't', 'a', 't', 'y', 'p', 'e')
+  in looking_at_kw(src, pos, max, c, 8) end
+  else false
+
+fn looking_at_of {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  if $AR.eq_int_int(at(src, pos, max), 111) then let
+    var c = @[char][2]('o', 'f')
+  in looking_at_kw(src, pos, max, c, 2) end
+  else false
+
+(* Whether what follows an "of" at pos is "()" (blanks allowed inside) *)
+fn of_unit {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool = let
+  val p1 = skip_ws(src, pos, max)
+in
+  if $AR.eq_int_int(at(src, p1, max), 40) then
+    $AR.eq_int_int(at(src, skip_ws(src, adv(p1, 1, max), max), max), 41)
+  else false
+end
+
+(* Whether the datatype declaration whose header starts at pos has a
+   constructor that carries data: an "of" at bracket depth 0 before the
+   declaration ends, at a line that starts with none of a blank, "|",
+   "of" and "and" (an "and" opens the next datatype of the group) *)
+fun _datatype_carries {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n, depth: int): bool =
+  if pos >= max then false
+  else let
+    val b = at(src, pos, max)
+  in
+    if $AR.eq_int_int(b, 40) || $AR.eq_int_int(b, 91) || $AR.eq_int_int(b, 123) then
+      _datatype_carries(src, pos + 1, max, depth + 1)
+    else if $AR.eq_int_int(b, 41) || $AR.eq_int_int(b, 93) || $AR.eq_int_int(b, 125) then
+      _datatype_carries(src, pos + 1, max, depth - 1)
+    else if depth > 0 then _datatype_carries(src, pos + 1, max, depth)
+    else if $AR.eq_int_int(b, 10) then let
+      val nb = at(src, pos + 1, max)
+    in
+      if $AR.eq_int_int(nb, 32) || $AR.eq_int_int(nb, 9) ||
+         $AR.eq_int_int(nb, 124) || $AR.eq_int_int(nb, 10) then
+        _datatype_carries(src, pos + 1, max, depth)
+      else if looking_at_of(src, pos + 1, max) || looking_at_and(src, pos + 1, max) then
+        _datatype_carries(src, pos + 1, max, depth)
+      else false
+    end
+    else if looking_at_of(src, pos, max) then
+      (* "of ()" carries nothing: it is a nullary constructor *)
+      ~(of_unit(src, adv(pos, 2, max), max))
+    else _datatype_carries(src, pos + 1, max, depth)
+  end
+
+(* A datatype keyword at pos whose declaration carries data *)
+fn datatype_carries {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool =
+  looking_at_datatype(src, pos, max) &&
+  _datatype_carries(src, adv(pos, 8, max), max, 0)
+
+(* '( '{ '[ : a boxed tuple, record or list (not a char literal) *)
+fn boxed_quote {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): bool = let
+  val b1 = at(src, pos + 1, max)
+in
+  $AR.eq_int_int(at(src, pos, max), 39) &&
+  ($AR.eq_int_int(b1, 40) || $AR.eq_int_int(b1, 123) || $AR.eq_int_int(b1, 91)) &&
+  ~($AR.eq_int_int(at(src, pos + 2, max), 39))
+end
+
+(* $tup $rec $list $tup_t $rec_t $list_t: a boxed tuple, record or
+   list; past it when it is one, else pos *)
+fn boxed_dollar_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q =
+  if $AR.eq_int_int(at(src, pos, max), 36) then let
+    val ws = adv(pos, 1, max)
+    val we = skip_ident(src, ws, max)
+    var c_tup = @[char][3]('t', 'u', 'p')
+    var c_rec = @[char][3]('r', 'e', 'c')
+    var c_list = @[char][4]('l', 'i', 's', 't')
+    var c_tup_t = @[char][5]('t', 'u', 'p', '_', 't')
+    var c_rec_t = @[char][5]('r', 'e', 'c', '_', 't')
+    var c_list_t = @[char][6]('l', 'i', 's', 't', '_', 't')
+  in
+    if word_is(src, ws, we, max, c_tup, 3) || word_is(src, ws, we, max, c_rec, 3) ||
+       word_is(src, ws, we, max, c_list, 4) || word_is(src, ws, we, max, c_tup_t, 5) ||
+       word_is(src, ws, we, max, c_rec_t, 5) || word_is(src, ws, we, max, c_list_t, 6)
+    then we else pos
+  end
+  else pos
+
+(* cloref cloref0 cloref1 cloptr cloptr0 cloptr1: a non-linear closure;
+   past it when it is one, else pos (lincloptr is not: the "n" before
+   "cloptr" is an identifier byte) *)
+fn nonlinear_clo_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q =
+  if $AR.eq_int_int(at(src, pos, max), 99) && is_kw_boundary_before(src, pos, max) then let
+    val we = skip_ident(src, pos, max)
+    var c_ref = @[char][6]('c', 'l', 'o', 'r', 'e', 'f')
+    var c_ref0 = @[char][7]('c', 'l', 'o', 'r', 'e', 'f', '0')
+    var c_ref1 = @[char][7]('c', 'l', 'o', 'r', 'e', 'f', '1')
+    var c_ptr = @[char][6]('c', 'l', 'o', 'p', 't', 'r')
+    var c_ptr0 = @[char][7]('c', 'l', 'o', 'p', 't', 'r', '0')
+    var c_ptr1 = @[char][7]('c', 'l', 'o', 'p', 't', 'r', '1')
+  in
+    if word_is(src, pos, we, max, c_ref, 6) || word_is(src, pos, we, max, c_ref0, 7) ||
+       word_is(src, pos, we, max, c_ref1, 7) || word_is(src, pos, we, max, c_ptr, 6) ||
+       word_is(src, pos, we, max, c_ptr0, 7) || word_is(src, pos, we, max, c_ptr1, 7)
+    then we else pos
+  end
+  else pos
+
+(* ref<...>( or ref_make_elt on an indented line: a cell made inside a
+   function, never freed; past the word when it is one, else pos *)
+fn inner_ref_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q =
+  if $AR.eq_int_int(at(src, pos, max), 114) && is_kw_boundary_before(src, pos, max) then let
+    val we = skip_ident(src, pos, max)
+    var c_ref = @[char][3]('r', 'e', 'f')
+    var c_make = @[char][12]('r', 'e', 'f', '_', 'm', 'a', 'k', 'e', '_', 'e', 'l', 't')
+    val is_make = (if word_is(src, pos, we, max, c_ref, 3)
+                   then $AR.eq_int_int(at(src, we, max), 60)
+                   else word_is(src, pos, we, max, c_make, 12)): bool
+    val ls = line_start(src, pos, max)
+    val lb = at(src, ls, max)
+  in
+    if is_make && ($AR.eq_int_int(lb, 32) || $AR.eq_int_int(lb, 9)) then we else pos
+  end
+  else pos
+
+(* Whether the arrow of the lambda whose parameters start at pos names
+   a plain function or a linear closure: the first "=>" or "=<" at
+   bracket depth 0 is "=<" followed by a word that starts with "fun"
+   or "lin" (fun, fun0, fun1, lincloptr1). A plain "=>" leaves the kind
+   to the context, which makes it a cloref1 closure when it is given to
+   a cloref parameter (one of the prelude's, say) *)
+fun _lam_arrow_plain {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n, depth: int): bool =
+  if pos >= max then false
+  else let
+    val b = at(src, pos, max)
+  in
+    if $AR.eq_int_int(b, 40) || $AR.eq_int_int(b, 91) || $AR.eq_int_int(b, 123) then
+      _lam_arrow_plain(src, pos + 1, max, depth + 1)
+    else if $AR.eq_int_int(b, 41) || $AR.eq_int_int(b, 93) || $AR.eq_int_int(b, 125) then
+      _lam_arrow_plain(src, pos + 1, max, depth - 1)
+    else if depth > 0 then _lam_arrow_plain(src, pos + 1, max, depth)
+    else if $AR.eq_int_int(b, 61) then let
+      val next = at(src, pos + 1, max)
+    in
+      if $AR.eq_int_int(next, 62) then false
+      else if $AR.eq_int_int(next, 60) then let
+        val word = skip_ws(src, adv(pos, 2, max), max)
+        var fun_c = @[char][3]('f', 'u', 'n')
+        var lin_c = @[char][3]('l', 'i', 'n')
+      in lit_at(src, word, max, fun_c, 3) || lit_at(src, word, max, lin_c, 3) end
+      else _lam_arrow_plain(src, pos + 1, max, depth)
+    end
+    else _lam_arrow_plain(src, pos + 1, max, depth)
+  end
+
+(* lam (not lam@, a flat closure on the stack, nor llam): past the word
+   when its arrow does not make it a plain function or a linear closure
+   (=<fun1>, =<lincloptr1>), else pos *)
+fn bare_lam_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q =
+  if $AR.eq_int_int(at(src, pos, max), 108) then let
+    var c = @[char][3]('l', 'a', 'm')
+    val after = adv(pos, 3, max)
+  in
+    if looking_at_kw(src, pos, max, c, 3) && ~($AR.eq_int_int(at(src, after, max), 64)) &&
+       ~(_lam_arrow_plain(src, after, max, 0))
+    then after else pos
+  end
+  else pos
+
+(* Past the non-linear heap construct at pos when there is one (the
+   datatype keyword, a '( '{ '[, a $tup $rec $list, a cloref or cloptr,
+   a bare lam, a ref made inside a function), else pos *)
+fn nonlinear_end {l:agz}{n:pos}{p:nat | p <= n}
+  (src: !$A.borrow(byte, l, n), pos: int p, max: int n): [q:int | p <= q; q <= n] int q = let
+  val b0 = at(src, pos, max)
+in
+  if $AR.eq_int_int(b0, 100) then (if datatype_carries(src, pos, max) then adv(pos, 8, max) else pos)
+  else if $AR.eq_int_int(b0, 39) then (if boxed_quote(src, pos, max) then adv(pos, 2, max) else pos)
+  else if $AR.eq_int_int(b0, 36) then boxed_dollar_end(src, pos, max)
+  else if $AR.eq_int_int(b0, 99) then nonlinear_clo_end(src, pos, max)
+  else if $AR.eq_int_int(b0, 114) then inner_ref_end(src, pos, max)
+  else if $AR.eq_int_int(b0, 108) then bare_lam_end(src, pos, max)
+  else pos
+end
+
 (* The kind of declaration the word src[s, e) opens: 1 for fun or fnx,
    2 for and, 3 for another declaration keyword, 0 for none *)
 fn decl_word {l:agz}{n:pos}{s,e:int}
@@ -1041,6 +1246,7 @@ fun lex_passthrough_scan {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>
     else if looking_at_and(src, pos, max) then pos
     else if val_rec_end(src, pos, max) > pos then pos
     else if looking_at_stld(src, pos, max) then pos
+    else if nonlinear_end(src, pos, max) > pos then pos
     else lex_passthrough_scan(src, pos + 1, src_len, max)
   end
 
@@ -1056,6 +1262,26 @@ fn unsafe_kw {n:nat}{p:nat | p < n}{k:pos}
   val () = put_typed(spans, SConstruct(pos, ep))
 in ep end
 
+(* The first non-linear heap construct in the #pub declaration src[p, e),
+   or e when there is none (its comments and strings are skipped) *)
+fun pub_nonlinear {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
+  (src: !$A.borrow(byte, l, n), p: int p, e: int m, max: int n)
+  : [q:int | p <= q; q <= n] int q =
+  if p >= e then p
+  else let
+    val b0 = at(src, p, max)
+    val b1 = at(src, p + 1, max)
+  in
+    if $AR.eq_int_int(b0, 40) && $AR.eq_int_int(b1, 42) then let
+      val @(q, _) = lex_ml_comment_inner(src, adv(p, 2, max), e, max, 1)
+    in pub_nonlinear(src, q, e, max) end
+    else if $AR.eq_int_int(b0, 34) then let
+      val @(q, _) = lex_string_inner(src, p + 1, e, max)
+    in pub_nonlinear(src, q, e, max) end
+    else if nonlinear_end(src, p, max) > p then p
+    else pub_nonlinear(src, p + 1, e, max)
+  end
+
 (* Whether the #pub declaration is rejected: restricted, or a proof
    function with no primplement in the source *)
 fn pub_rejected {l:agz}{n:pos}{m:nat | m <= n}{c:nat | c <= n}
@@ -1064,6 +1290,7 @@ fn pub_rejected {l:agz}{n:pos}{m:nat | m <= n}{c:nat | c <= n}
   val is_prfn = (if is_prfun then false else _content_starts_prfn(src, cs, max)): bool
 in
   if _content_starts_restricted(src, cs, max) then true
+  else if datatype_carries(src, cs, max) then true
   else if is_prfun || is_prfn then let
     val kw_len = (if is_prfun then 5 else 4): [k:int | 4 <= k; k <= 5] int k
     val name_pos = _skip_to_name(src, adv(cs, kw_len, max), max)
@@ -1087,6 +1314,7 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
     val b0 = at(src, pos, max)
     val b1 = at(src, pos + 1, max)
     val vr = val_rec_end(src, pos, max)
+    val nl = nonlinear_end(src, pos, max)
   in
     (* // line comment *)
     if $AR.eq_int_int(b0, 47) && $AR.eq_int_int(b1, 47) then let
@@ -1108,6 +1336,13 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
       val @(np, nc) = lex_string(src, src_len, max, spans, pos, count)
     in lex_main(src, src_len, max, spans, np, nc) end
 
+    (* A non-linear heap construct: a datatype whose constructor carries
+       data, a boxed tuple, record or list, a cloref or cloptr closure,
+       a bare lam, a ref made inside a function: allocated, never freed *)
+    else if nl > pos then let
+      val () = put_typed(spans, SConstruct(pos, nl))
+    in lex_main(src, src_len, max, spans, nl, count + 1) end
+
     (* ' char *)
     else if $AR.eq_int_int(b0, 39) then let
       val @(np, nc) = lex_char_lit(src, src_len, max, spans, pos, count)
@@ -1122,7 +1357,13 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
     else if looking_at_pub(src, pos, max) then let
       val contents_start = skip_ws(src, adv(pos, 4, max), max)
       val ep = lex_pub_lines(src, contents_start, src_len, max)
-      val () = put_typed(spans, SPub(pos, ep, pub_rejected(src, src_len, max, contents_start), contents_start))
+      val restricted = pub_rejected(src, src_len, max, contents_start)
+      (* A non-linear heap construct in the declaration rejects it, and
+         is where its error points (its contents start otherwise) *)
+      val nl = pub_nonlinear(src, contents_start, ep, max)
+      val () = (if restricted then put_typed(spans, SPub(pos, ep, true, contents_start))
+                else if nl < ep then put_typed(spans, SPub(pos, ep, true, nl))
+                else put_typed(spans, SPub(pos, ep, false, contents_start))): void
     in lex_main(src, src_len, max, spans, ep, count + 1) end
 
     (* #target *)
