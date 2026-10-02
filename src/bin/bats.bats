@@ -13,6 +13,7 @@
 #use result as R
 
 staload "helpers.sats"
+staload "lexer.sats"
 staload "build.sats"
 staload "commands.sats"
 staload "lock.sats"
@@ -330,15 +331,15 @@ in
                   val rls = makes_release(profile_choice)
                   val nat = makes_native(target_choice)
                   val wsm = makes_wasm(target_choice)
-                  val () = (if nat then (if dbg then do_build(0, 0, bv_tc, tc_len) else ()) else ())
-                  val () = (if nat then (if rls then do_build(1, 0, bv_tc, tc_len) else ()) else ())
-                  val () = (if wsm then (if dbg then do_build(0, 1, bv_tc, tc_len) else ()) else ())
+                  val () = (if nat then (if dbg then do_build(0, Native(), bv_tc, tc_len) else ()) else ())
+                  val () = (if nat then (if rls then do_build(1, Native(), bv_tc, tc_len) else ()) else ())
+                  val () = (if wsm then (if dbg then do_build(0, Wasm(), bv_tc, tc_len) else ()) else ())
                   val () = (if named_only.wasm then
                     if is_to_c() then
                       println! ("error: --to-c wasm is not yet implemented without shell")
                     else ()
                   else ())
-                in (if wsm then (if rls then do_build(1, 1, bv_tc, tc_len) else ()) else ()) end
+                in (if wsm then (if rls then do_build(1, Wasm(), bv_tc, tc_len) else ()) else ()) end
               end
               | Check() => let
                 val () = $AP.parse_result_free(r)

@@ -2340,10 +2340,15 @@ fn put_word_msg {ls:agz}{ns:pos}
   val () = copy_to_builder_v(src, s, we, sm, m)
 in bput_v(m, "' is not allowed outside of $UNSAFE begin...end block") end
 
+(* What outside $UNSAFE is rejected: an unsafe construct (or a restricted
+   keyword, or a construct that allocates without being linear), or an
+   extcode block *)
+datatype rejected_span = RejectedConstruct | RejectedExtcode
+
 (* Rust's message for the unsafe construct, restricted keyword or
    extcode block span at src[s, e) outside $UNSAFE (emit::validate) *)
 fn construct_msg {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), sm: int ns, kind: int, s: pos_t, e: pos_t, m: !$B.builder_v >> $B.builder_v): void = let
+  (src: !$A.borrow(byte, ls, ns), sm: int ns, rejected: rejected_span, s: pos_t, e: pos_t, m: !$B.builder_v >> $B.builder_v): void = let
   var fun_c = @[char][3]('f', 'u', 'n')
   var fnx_c = @[char][3]('f', 'n', 'x')
   var and_c = @[char][3]('a', 'n', 'd')
@@ -2376,7 +2381,8 @@ fn construct_msg {ls:agz}{ns:pos}
   val is_libats_ml = lit_at(src, s, sm, staload_c, 7) || lit_at(src, s, sm, include_c, 8)
   val built = prelude_build_of(src, s, we, sm)
 in
-  if kind = 6 then bput_v(m, "extcode block outside of $UNSAFE begin...end block")
+  if (case+ rejected of RejectedExtcode() => true | RejectedConstruct() => false) then
+    bput_v(m, "extcode block outside of $UNSAFE begin...end block")
   else if at_unsafe_kw(src, sm, s) then bput_v(m, "$UNSAFE construct outside of $UNSAFE begin...end block")
   else if is_libats_ml then
     bput_v(m, "libats/ML is not allowed outside $UNSAFE; it is ATS's garbage-collected library, whose lists, options, arrays and maps are never freed: use the prelude's linear forms (list_vt, option_vt, arrayptr)")
@@ -2516,13 +2522,13 @@ fun pass_unsafe_blocks {lp,ls:agz}{ns:pos}{k:nat} .<k>.
 
 (* cnt, with the unsafe construct's error added to errs when hit *)
 fn add_construct {lp,ls:agz}{ns:pos}
-  (hit: bool, want_pf: bool, kind: int, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
+  (hit: bool, want_pf: bool, rejected: rejected_span, p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t,
    src: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t, ss: pos_t, ws: pos_t, se: pos_t,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
   if ~hit then cnt
   else let
     var m : $B.builder_v = $B.create()
-    val () = (if want_pf then prfun_msg(src, sm, ws, se, m) else construct_msg(src, sm, kind, ws, se, m)): void
+    val () = (if want_pf then prfun_msg(src, sm, ws, se, m) else construct_msg(src, sm, rejected, ws, se, m)): void
     var fy : $B.builder_v = $B.create()
     val () = put_fancy(p, b0, pl, src, sm, n, ss, m, fy)
   in add_error(cnt, fy, errs) end
@@ -2536,13 +2542,13 @@ fn construct_error {lp,ls:agz}{ns:pos}
    sp: !span(ns), want_pf: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
   case+ sp of
   | SConstruct(ss, se) =>
-    add_construct(~want_pf, want_pf, 5, p, b0, pl, src, sm, n, ss, ss, se, cnt, errs)
+    add_construct(~want_pf, want_pf, RejectedConstruct(), p, b0, pl, src, sm, n, ss, ss, se, cnt, errs)
   | SExtcode(ss, se, _, _, _) =>
-    add_construct(~want_pf, want_pf, 6, p, b0, pl, src, sm, n, ss, ss, se, cnt, errs)
+    add_construct(~want_pf, want_pf, RejectedExtcode(), p, b0, pl, src, sm, n, ss, ss, se, cnt, errs)
   | SPub(ss, se, restricted, cs) => let
       val is_pf = (if restricted then at_prfun_kw(src, sm, cs, se) else false): bool
       val hit = (if ~restricted then false else if want_pf then is_pf else ~is_pf): bool
-    in add_construct(hit, want_pf, 5, p, b0, pl, src, sm, n, ss, cs, se, cnt, errs) end
+    in add_construct(hit, want_pf, RejectedConstruct(), p, b0, pl, src, sm, n, ss, cs, se, cnt, errs) end
   | _ => cnt
 
 fun pass_constructs {lp,ls:agz}{ns:pos}{k:nat} .<k>.
@@ -2663,21 +2669,23 @@ fn add_lex_error {lp,ls:agz}{ns:pos}
   (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t, src: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
    sp: !span(ns), cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
   case+ sp of
-  | SLexError(ss, code, e1, e2, run) => let
+  | SLexError(ss, what, e1, e2, run) => let
       var m : $B.builder_v = $B.create()
-      val off = (if code = 3 then ss else e1): pos_t
-      val () = (if code = 1 then bput_v(m, "empty target list in $UNITTEST.run()")
-        else if code = 2 then let
-          val () = bput_v(m, "unknown test target '")
-          val () = copy_to_builder_v(src, e1, e2, sm, m)
-        in bput_v(m, "'; expected 'native' or 'wasm'") end
-        else if code = 4 then bput_v(m, "unterminated C-style block comment")
-        else if code = 5 then bput_v(m, "unterminated ML-style block comment")
-        else if code = 6 then bput_v(m, "unterminated string literal")
-        else if code = 7 then bput_v(m, "unterminated extcode block")
-        else if code = 8 then bput_v(m, "unterminated $UNSAFE begin...end block")
-        else if run then bput_v(m, "unterminated $UNITTEST.run begin...end block")
-        else bput_v(m, "unterminated $UNITTEST begin...end block")): void
+      val off = (case+ what of UnterminatedUnittest() => ss | _ => e1): pos_t
+      val () = (case+ what of
+        | EmptyTargetList() => bput_v(m, "empty target list in $UNITTEST.run()")
+        | UnknownTarget() => let
+            val () = bput_v(m, "unknown test target '")
+            val () = copy_to_builder_v(src, e1, e2, sm, m)
+          in bput_v(m, "'; expected 'native' or 'wasm'") end
+        | UnterminatedCComment() => bput_v(m, "unterminated C-style block comment")
+        | UnterminatedMlComment() => bput_v(m, "unterminated ML-style block comment")
+        | UnterminatedString() => bput_v(m, "unterminated string literal")
+        | UnterminatedExtcode() => bput_v(m, "unterminated extcode block")
+        | UnterminatedUnsafe() => bput_v(m, "unterminated $UNSAFE begin...end block")
+        | UnterminatedUnittest() =>
+          if run then bput_v(m, "unterminated $UNITTEST.run begin...end block")
+          else bput_v(m, "unterminated $UNITTEST begin...end block")): void
       var fy : $B.builder_v = $B.create()
       val () = put_fancy(p, b0, pl, src, sm, n, off, m, fy)
     in add_error(cnt, fy, errs) end
