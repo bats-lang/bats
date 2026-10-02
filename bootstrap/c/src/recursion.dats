@@ -154,23 +154,25 @@ fn word_is {n:pos}{l:agz}{p,q:nat | p <= q; q <= n}{m:pos | m <= 16}
   (bv: !$A.borrow(byte, l, n), sn: int n, p: int p, q: int q, kw: &(@[char][m]), m: int m): bool =
   if q - p <> m then false else lit_at(bv, p, sn, kw, m)
 
-(* What the word src[p, q) at the start of a line begins: 1 an
-   implement, 2 a fn, 3 a fun or fnx (a new group), 4 an and (the
-   group goes on), 0 none *)
+(* What a word at the start of a line begins: an implement, a fn, a fun
+   or fnx (a new group), an and (the group goes on), or no definition *)
+datatype definition = ImplementDefinition | FnDefinition | FunGroup | AndMember | NoDefinition
+
+(* What the word src[p, q) at the start of a line begins *)
 fn def_kind {n:pos}{l:agz}{p,q:nat | p <= q; q <= n}
-  (bv: !$A.borrow(byte, l, n), sn: int n, p: int p, q: int q): int = let
+  (bv: !$A.borrow(byte, l, n), sn: int n, p: int p, q: int q): definition = let
   var impl_c = @[char][9]('i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't')
   var fn_c = @[char][2]('f', 'n')
   var fun_c = @[char][3]('f', 'u', 'n')
   var fnx_c = @[char][3]('f', 'n', 'x')
   var and_c = @[char][3]('a', 'n', 'd')
 in
-  if word_is(bv, sn, p, q, impl_c, 9) then 1
-  else if word_is(bv, sn, p, q, fn_c, 2) then 2
-  else if word_is(bv, sn, p, q, fun_c, 3) then 3
-  else if word_is(bv, sn, p, q, fnx_c, 3) then 3
-  else if word_is(bv, sn, p, q, and_c, 3) then 4
-  else 0
+  if word_is(bv, sn, p, q, impl_c, 9) then ImplementDefinition()
+  else if word_is(bv, sn, p, q, fn_c, 2) then FnDefinition()
+  else if word_is(bv, sn, p, q, fun_c, 3) then FunGroup()
+  else if word_is(bv, sn, p, q, fnx_c, 3) then FunGroup()
+  else if word_is(bv, sn, p, q, and_c, 3) then AndMember()
+  else NoDefinition()
 end
 
 (* src[s, e) (its first 256 bytes) into a name array *)
@@ -205,7 +207,7 @@ fn name_end {n:pos}{l:agz}{p,e:nat | p <= e; e <= n}
 (* A new definition of kind kd (def_kind) whose keyword is src[kw, q),
    its name after it within [q, e); the position after the name *)
 fn start_def {n:pos}{l:agz}{k,m:nat}{kw,q,e:nat | kw <= q; q <= e; e <= n}
-  (bv: !$A.borrow(byte, l, n), st: found(n, k, m), kind: int, kw: int kw, q: int q, e: int e, fi: spos(RMAX))
+  (bv: !$A.borrow(byte, l, n), st: found(n, k, m), kind: definition, kw: int kw, q: int q, e: int e, fi: spos(RMAX))
   : [k2,m2:nat | m2 - m == k2 - k] @(found(n, k2, m2), [r:nat | q <= r; r <= e] int r) = let
   val st1 = end_def(st, fi)
   val+ ~Found(ds, kd, nm, km, c, g) = st1
@@ -218,10 +220,14 @@ fn start_def {n:pos}{l:agz}{k,m:nat}{kw,q,e:nat | kw <= q; q <= e; e <= n}
   val ne = name_end(bv, ns, e)
   val a = $A.alloc<byte>(256)
   val nk = copy_name(bv, ns, ne, a, 0)
-  val g2 = (if kind = 4 then (if g > 0 then g else 1) else if kind = 1 then g else g + 1): int
-  val grp = (if kind = 1 then 0 else g2): int
+  val is_implement = (case+ kind of ImplementDefinition() => true | _ => false): bool
+  val g2 = (case+ kind of
+    | AndMember() => (if g > 0 then g else 1)
+    | ImplementDefinition() => g
+    | _ => g + 1): int
+  val grp = (if is_implement then 0 else g2): int
 in
-  @(Found(ds, kd, nm, km, cur_def(a, nk, kind = 1, grp, kw, ns, ne, occs_nil()), g2), ne)
+  @(Found(ds, kd, nm, km, cur_def(a, nk, is_implement, grp, kw, ns, ne, occs_nil()), g2), ne)
 end
 
 (* The identifier src[s, e) added to the body being read *)
@@ -255,9 +261,9 @@ fun scan_code {n:pos}{l:agz}{k,m:nat}{p,e:nat | p <= e; e <= n} .<e - p>.
   else if joined(bv, p) then scan_code(bv, sn, ident_end(bv, p + 1, e), e, st, fi)
   else let
     val q = ident_end(bv, p + 1, e)
-    val kind = (if line_start(bv, p) then def_kind(bv, sn, p, q) else 0): int
+    val kind = (if line_start(bv, p) then def_kind(bv, sn, p, q) else NoDefinition()): definition
   in
-    if kind > 0 then let
+    if (case+ kind of NoDefinition() => false | _ => true) then let
       val @(st2, r) = start_def(bv, st, kind, p, q, e, fi)
     in scan_code(bv, sn, r, e, st2, fi) end
     else scan_code(bv, sn, q, e, add_occ(st, p, q), fi)

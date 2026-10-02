@@ -21,6 +21,68 @@ fn is_ident_start(b: int): bool =
 (* A position in a source of n bytes *)
 #pub typedef spos(n:int) = [p:nat | p <= n] int p
 
+(* The targets a $UNITTEST.run block's tests run on (NoTestTargets
+   when its list named none, as a list that stops at a word that is not
+   an identifier can) *)
+#pub datatype test_targets = NoTestTargets | NativeTests | WasmTests | AllTargets
+
+(* Where the C of an extcode block goes, by the byte after its %{: %{
+   where it is, %{^ at the top of the C, %{$ at its end, %{# into the
+   static (.sats) code *)
+#pub datatype extcode_kind = CodeHere | CodeAtTop | CodeAtEnd | CodeInStatic
+
+(* What a build makes code for, and what a #target block is for *)
+#pub datatype target = Native | Wasm
+
+(* What a #target line names: #target native, #target wasm, or
+   #target wasm binary *)
+#pub datatype target_line = NativeLine | WasmLine | WasmBinaryLine
+
+(* Whether two targets are the same *)
+#pub fn same_target (a: target, b: target): bool
+
+implement same_target (a, b) =
+  case+ (a, b) of
+  | (Native(), Native()) => true
+  | (Wasm(), Wasm()) => true
+  | (_, _) => false
+
+(* A test's targets as the byte that leads its entry in a list of tests
+   (collect_tests): 1 native, 2 wasm, 3 both, 0 none *)
+#pub fn targets_byte (targets: test_targets): int
+
+implement targets_byte (targets) =
+  case+ targets of
+  | NoTestTargets() => 0 | NativeTests() => 1 | WasmTests() => 2 | AllTargets() => 3
+
+(* The targets a list entry's leading byte stands for (targets_byte) *)
+#pub fn targets_of_byte (b: int): test_targets
+
+implement targets_of_byte (b) =
+  if b = 1 then NativeTests() else if b = 2 then WasmTests()
+  else if b = 3 then AllTargets() else NoTestTargets()
+
+(* Whether a test of targets runs on wasm (when wasm) or native *)
+#pub fn runs_on (targets: test_targets, wasm: bool): bool
+
+implement runs_on (targets, wasm) =
+  case+ targets of
+  | NoTestTargets() => false
+  | NativeTests() => ~wasm
+  | WasmTests() => wasm
+  | AllTargets() => true
+
+(* What the lexer found wrong (Rust's lexer errors) *)
+#pub datatype lex_error =
+  | EmptyTargetList           (* $UNITTEST.run() *)
+  | UnknownTarget             (* a target other than native or wasm *)
+  | UnterminatedUnittest      (* a $UNITTEST block with no end *)
+  | UnterminatedCComment
+  | UnterminatedMlComment
+  | UnterminatedString
+  | UnterminatedExtcode
+  | UnterminatedUnsafe        (* a $UNSAFE block with no end *)
+
 (* A span of a source of n bytes: the construct and its positions (the
    span's own range first) *)
 #pub datavtype span(n:int) =
@@ -35,17 +97,17 @@ fn is_ident_start(b: int): bool =
   | SUnsafeBlock(n) of (spos(n), spos(n), spos(n), spos(n))
                                                       (* contents *)
   | SConstruct(n) of (spos(n), spos(n))              (* an unsafe construct *)
-  | SExtcode(n) of (spos(n), spos(n), spos(n), spos(n), int)
+  | SExtcode(n) of (spos(n), spos(n), spos(n), spos(n), extcode_kind)
                                                       (* contents; kind *)
-  | STarget(n) of (spos(n), spos(n), int)            (* #target line: 0 native, 1 wasm, 2 binary *)
+  | STarget(n) of (spos(n), spos(n), target_line)    (* #target line *)
   | SStaload(n) of (spos(n), spos(n))
-  | STargetBegin(n) of (spos(n), spos(n), int)       (* target *)
+  | STargetBegin(n) of (spos(n), spos(n), target)    (* target *)
   | STargetEnd(n) of (spos(n), spos(n))
-  | SUnittestBegin(n) of (spos(n), spos(n), bool, int)
+  | SUnittestBegin(n) of (spos(n), spos(n), bool, test_targets)
                                                       (* $UNITTEST.run; its targets *)
   | SUnittestEnd(n) of (spos(n), spos(n))
-  | SLexError(n) of (spos(n), int, spos(n), spos(n), bool)
-                                                      (* at; code; e1, e2; .run *)
+  | SLexError(n) of (spos(n), lex_error, spos(n), spos(n), bool)
+                                                      (* at; what; e1, e2; .run *)
 
 (* The spans of a source of n bytes, k of them *)
 #pub datavtype spans(n:int, int) =
@@ -801,10 +863,13 @@ in
   else prelude_word_end(src, pos, max)
 end
 
-(* The kind of declaration the word src[s, e) opens: 1 for fun or fnx,
-   2 for and, 3 for another declaration keyword, 0 for none *)
+(* What the word src[s, e) opens: a fun or fnx (a recursive group), an
+   and (a member of one), another declaration, or no declaration *)
+datatype declaration = RecursiveFun | AndClause | OtherDeclaration | NotDeclaration
+
+(* The declaration the word src[s, e) opens *)
 fn decl_word {l:agz}{n:pos}{s,e:int}
-  (src: !$A.borrow(byte, l, n), s: int s, e: int e, max: int n): int = let
+  (src: !$A.borrow(byte, l, n), s: int s, e: int e, max: int n): declaration = let
   var c_fun = @[char][3]('f', 'u', 'n')
   var c_fnx = @[char][3]('f', 'n', 'x')
   var c_and = @[char][3]('a', 'n', 'd')
@@ -828,29 +893,29 @@ fn decl_word {l:agz}{n:pos}{s,e:int}
   var c_vwtd = @[char][11]('v', 'i', 'e', 'w', 't', 'y', 'p', 'e', 'd', 'e', 'f')
   var c_sd = @[char][6]('s', 't', 'a', 'd', 'e', 'f')
 in
-  if word_is(src, s, e, max, c_fun, 3) then 1
-  else if word_is(src, s, e, max, c_fnx, 3) then 1
-  else if word_is(src, s, e, max, c_and, 3) then 2
-  else if word_is(src, s, e, max, c_fn, 2) then 3
-  else if word_is(src, s, e, max, c_val, 3) then 3
-  else if word_is(src, s, e, max, c_var, 3) then 3
-  else if word_is(src, s, e, max, c_prfun, 5) then 3
-  else if word_is(src, s, e, max, c_prfn, 4) then 3
-  else if word_is(src, s, e, max, c_impl, 9) then 3
-  else if word_is(src, s, e, max, c_primpl, 11) then 3
-  else if word_is(src, s, e, max, c_extern, 6) then 3
-  else if word_is(src, s, e, max, c_pub, 4) then 3
-  else if word_is(src, s, e, max, c_local, 5) then 3
-  else if word_is(src, s, e, max, c_dt, 8) then 3
-  else if word_is(src, s, e, max, c_dvt, 9) then 3
-  else if word_is(src, s, e, max, c_dvwt, 12) then 3
-  else if word_is(src, s, e, max, c_dp, 8) then 3
-  else if word_is(src, s, e, max, c_dv, 8) then 3
-  else if word_is(src, s, e, max, c_td, 7) then 3
-  else if word_is(src, s, e, max, c_vtd, 8) then 3
-  else if word_is(src, s, e, max, c_vwtd, 11) then 3
-  else if word_is(src, s, e, max, c_sd, 6) then 3
-  else 0
+  if word_is(src, s, e, max, c_fun, 3) then RecursiveFun()
+  else if word_is(src, s, e, max, c_fnx, 3) then RecursiveFun()
+  else if word_is(src, s, e, max, c_and, 3) then AndClause()
+  else if word_is(src, s, e, max, c_fn, 2) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_val, 3) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_var, 3) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_prfun, 5) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_prfn, 4) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_impl, 9) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_primpl, 11) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_extern, 6) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_pub, 4) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_local, 5) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_dt, 8) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_dvt, 9) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_dvwt, 12) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_dp, 8) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_dv, 8) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_td, 7) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_vtd, 8) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_vwtd, 11) then OtherDeclaration()
+  else if word_is(src, s, e, max, c_sd, 6) then OtherDeclaration()
+  else NotDeclaration()
 end
 
 (* The end of the word (ident bytes and #) at s *)
@@ -873,11 +938,12 @@ fun and_in_fun_group {l:agz}{n:pos}{ls:nat | ls <= n} .<ls>.
     val prev = line_start(src, ls - 1, max)
     val fs = skip_ws(src, prev, max)
     val we = word_end_at(src, fs, max)
-    val kind = (if fs - prev <= ind then decl_word(src, fs, we, max) else 0): int
+    val kind = (if fs - prev <= ind then decl_word(src, fs, we, max) else NotDeclaration()): declaration
   in
-    if kind = 1 then true
-    else if kind = 3 then false
-    else and_in_fun_group(src, prev, ind, max)
+    case+ kind of
+    | RecursiveFun() => true
+    | OtherDeclaration() => false
+    | _ => and_in_fun_group(src, prev, ind, max)
   end
 
 (* Whether the and at pos opens a member of a fun or fnx group *)
@@ -914,19 +980,18 @@ fun lex_c_comment_inner {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
           $AR.eq_int_int(at(src, pos + 1, max), 47) then @(pos + 2, true)
   else lex_c_comment_inner(src, pos + 1, src_len, max)
 
-(* An unterminated construct at start: Rust's lexer error (code 4 C
-   comment, 5 ML comment, 6 string, 7 extcode, 8 $UNSAFE block), at
-   start; the construct still runs to the end of the file *)
+(* An unterminated construct at start: Rust's lexer error, at start;
+   the construct still runs to the end of the file *)
 fn lex_unterminated {n:pos}{s:nat | s < n}
-  (spans: !lexout(n) >> lexout(n), start: int s, code: int): int = let
-  val () = put_typed(spans, SLexError(start, code, start, start, false))
+  (spans: !lexout(n) >> lexout(n), start: int s, what: lex_error): int = let
+  val () = put_typed(spans, SLexError(start, what, start, start, false))
 in 1 end
 
 fn lex_c_comment {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
   val @(ep, closed) = lex_c_comment_inner(src, adv(start, 2, max), src_len, max)
-  val ne = (if closed then 0 else lex_unterminated(spans, start, 4)): int
+  val ne = (if closed then 0 else lex_unterminated(spans, start, UnterminatedCComment())): int
   val () = put_typed(spans, SPass(start, ep, true))
 in @(ep, count + ne + 1) end
 
@@ -954,7 +1019,7 @@ fn lex_ml_comment {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
   val @(ep, closed) = lex_ml_comment_inner(src, adv(start, 2, max), src_len, max, 1)
-  val ne = (if closed then 0 else lex_unterminated(spans, start, 5)): int
+  val ne = (if closed then 0 else lex_unterminated(spans, start, UnterminatedMlComment())): int
   val () = put_typed(spans, SPass(start, ep, true))
 in @(ep, count + ne + 1) end
 
@@ -974,7 +1039,7 @@ fn lex_string {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n,
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
   val @(ep, closed) = lex_string_inner(src, start + 1, src_len, max)
-  val ne = (if closed then 0 else lex_unterminated(spans, start, 6)): int
+  val ne = (if closed then 0 else lex_unterminated(spans, start, UnterminatedString())): int
   val () = put_typed(spans, SPass(start, ep, true))
 in @(ep, count + ne + 1) end
 
@@ -1005,14 +1070,15 @@ fn lex_extcode {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
    spans: !lexout(n) >> lexout(n), start: int s, count: int): lexed(s, n) = let
   val after_open = adv(start, 2, max)
   val bk = at(src, after_open, max)
-  val kind = (if $AR.eq_int_int(bk, 94) then 1
-              else if $AR.eq_int_int(bk, 36) then 2
-              else if $AR.eq_int_int(bk, 35) then 3
-              else 0): int
-  val cstart = (if kind > 0 then adv(after_open, 1, max)
+  val kind = (if $AR.eq_int_int(bk, 94) then CodeAtTop()
+              else if $AR.eq_int_int(bk, 36) then CodeAtEnd()
+              else if $AR.eq_int_int(bk, 35) then CodeInStatic()
+              else CodeHere()): extcode_kind
+  val marked = (case+ kind of CodeHere() => false | _ => true): bool
+  val cstart = (if marked then adv(after_open, 1, max)
                 else after_open): [q:int | s < q; q <= n] int q
   val @(ep, closed) = lex_extcode_inner(src, cstart, src_len, max)
-  val ne = (if closed then 0 else lex_unterminated(spans, start, 7)): int
+  val ne = (if closed then 0 else lex_unterminated(spans, start, UnterminatedExtcode())): int
   val cend = (if closed then (if ep >= 2 then ep - 2 else ep) else ep): spos(n)
   val () = put_typed(spans, SExtcode(start, ep, cstart, cend, kind))
 in @(ep, count + ne + 1) end
@@ -1215,87 +1281,98 @@ in
       val contents_start = adv(p0, 5, max)
       val end_pos = find_end_kw(src, contents_start, src_len, max, 1)
       val ep = block_end(end_pos, src_len, max)
-      val ne = (if end_pos >= src_len then lex_unterminated(spans, start, 8) else 0): int
+      val ne = (if end_pos >= src_len then lex_unterminated(spans, start, UnterminatedUnsafe()) else 0): int
       val () = put_typed(spans, SUnsafeBlock(start, ep, contents_start, end_pos))
     in @(ep, count + ne + 1) end
     else @(start, count)
   end
 end
 
-(* bits (a set of targets: 1 native, 2 wasm) with bit added *)
-fn with_bit (bits: int, bit: int): int =
-  if bit = 1 then (if bits = 0 then 1 else if bits = 2 then 3 else bits)
-  else (if bits = 0 then 2 else if bits = 1 then 3 else bits)
+(* targets with the native or the wasm target added *)
+fn with_target (targets: test_targets, wasm: bool): test_targets =
+  case+ targets of
+  | NoTestTargets() => if wasm then WasmTests() else NativeTests()
+  | NativeTests() => if wasm then AllTargets() else NativeTests()
+  | WasmTests() => if wasm then WasmTests() else AllTargets()
+  | AllTargets() => AllTargets()
+
+(* How a $UNITTEST.run target list reads *)
+datatype target_list = TargetsRead | TargetListEmpty | TargetNotKnown
 
 (* The target list of $UNITTEST.run(...), from p inside the parens
-   (Rust: lex_unittest): @(status, bits, q, e) with status 0 and the
-   targets as bits (1 native, 2 wasm) and q past the list, or status 1
-   (an empty list) or 2 (an unknown target, src[q, e)). A list that
-   stops at a non-identifier (no ")") ends there, as in Rust. *)
+   (Rust: lex_unittest): @(how, targets, q, e) with the targets read
+   and q past the list, or an empty list, or an unknown target src[q,
+   e). A list that stops at a non-identifier (no ")") ends there, as in
+   Rust. *)
 fun ut_targets {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
-  (src: !$A.borrow(byte, l, n), p: int p, max: int n, bits: int, found: bool)
-  : @(int, int, [q:int | p <= q; q <= n] int q, spos(n)) = let
+  (src: !$A.borrow(byte, l, n), p: int p, max: int n, targets: test_targets, found: bool)
+  : @(target_list, test_targets, [q:int | p <= q; q <= n] int q, spos(n)) = let
   val p1 = skip_ws(src, p, max)
 in
   if $AR.eq_int_int(at(src, p1, max), 41) then
-    (if found then @(0, bits, adv(p1, 1, max), p1) else @(1, bits, p1, p1))
+    (if found then @(TargetsRead(), targets, adv(p1, 1, max), p1)
+     else @(TargetListEmpty(), targets, p1, p1))
   else let
     val ie = skip_ident(src, p1, max)
     var c_native = @[char][6]('n', 'a', 't', 'i', 'v', 'e')
     var c_wasm = @[char][4]('w', 'a', 's', 'm')
   in
-    if ie = p1 then @(0, bits, p1, p1)
+    if ie = p1 then @(TargetsRead(), targets, p1, p1)
     else let
-      val bit = (if word_is(src, p1, ie, max, c_native, 6) then 1
-                 else if word_is(src, p1, ie, max, c_wasm, 4) then 2
-                 else 0): int
+      val is_native = word_is(src, p1, ie, max, c_native, 6)
+      val is_wasm = word_is(src, p1, ie, max, c_wasm, 4)
     in
-      if bit = 0 then @(2, bits, p1, ie)
+      if ~is_native && ~is_wasm then @(TargetNotKnown(), targets, p1, ie)
       else let
         val p2 = skip_ws(src, ie, max)
         val c = at(src, p2, max)
+        val added = with_target(targets, is_wasm)
       in
-        if $AR.eq_int_int(c, 44) then ut_targets(src, adv(p2, 1, max), max, with_bit(bits, bit), true)
-        else if $AR.eq_int_int(c, 41) then @(0, with_bit(bits, bit), adv(p2, 1, max), p2)
-        else ut_targets(src, p2, max, with_bit(bits, bit), true)
+        if $AR.eq_int_int(c, 44) then ut_targets(src, adv(p2, 1, max), max, added, true)
+        else if $AR.eq_int_int(c, 41) then @(TargetsRead(), added, adv(p2, 1, max), p2)
+        else ut_targets(src, p2, max, added, true)
       end
     end
   end
 end
 
+(* What a $UNITTEST header is *)
+datatype unittest_header = NotUnittest | UnittestBlock | HeaderEmptyList | HeaderUnknownTarget
+
 (* The header of a $UNITTEST block at s (Rust: lex_unittest):
-   @(status, is_run, bits, cs, e1, e2). status 1: $UNITTEST[.run[(targets)]]
-   begin, whose contents start at cs; 0: not a unittest block; 2: an
-   empty target list, at e1; 3: an unknown target src[e1, e2). bits
-   are the targets (1 native, 2 wasm): native when there is no list. *)
+   @(header, is_run, targets, cs, e1, e2): a $UNITTEST[.run[(targets)]]
+   begin, whose contents start at cs; not a unittest block; an empty
+   target list, at e1; an unknown target src[e1, e2). The targets are
+   native when there is no list. *)
 fn ut_header {l:agz}{n:pos}{m:nat | m <= n}{s:nat | s < m}
   (src: !$A.borrow(byte, l, n), src_len: int m, max: int n, start: int s)
-  : @(int, int, int, [q:int | s < q; q <= n] int q, spos(n), spos(n)) = let
+  : @(unittest_header, bool, test_targets, [q:int | s < q; q <= n] int q, spos(n), spos(n)) = let
   val a = adv(start, 9, max)
   val is_run = $AR.eq_int_int(at(src, a, max), 46) &&
     $AR.eq_int_int(at(src, a + 1, max), 114) &&
     $AR.eq_int_int(at(src, a + 2, max), 117) &&
     $AR.eq_int_int(at(src, a + 3, max), 110)
   val p0 = (if is_run then adv(a, 4, max) else a): [q:int | s < q; q <= n] int q
-  val run = (if is_run then 1 else 0): int
+  val run = is_run
 in
   if (if is_run then $AR.eq_int_int(at(src, p0, max), 40) else false) then let
-    val @(st, bits, q, e) = ut_targets(src, adv(p0, 1, max), max, 0, false)
+    val @(how, targets, q, e) = ut_targets(src, adv(p0, 1, max), max, NoTestTargets(), false)
   in
-    if st = 1 then @(2, run, 0, p0, p0, p0)
-    else if st = 2 then @(3, run, 0, p0, q, e)
-    else let
-      val p1 = skip_ws(src, q, max)
-    in
-      if looking_at_begin(src, p1, max) then @(1, run, bits, adv(p1, 5, max), 0, 0)
-      else @(0, run, 0, p0, 0, 0)
-    end
+    case+ how of
+    | TargetListEmpty() => @(HeaderEmptyList(), run, NoTestTargets(), p0, p0, p0)
+    | TargetNotKnown() => @(HeaderUnknownTarget(), run, NoTestTargets(), p0, q, e)
+    | TargetsRead() => let
+        val p1 = skip_ws(src, q, max)
+      in
+        if looking_at_begin(src, p1, max) then @(UnittestBlock(), run, targets, adv(p1, 5, max), 0, 0)
+        else @(NotUnittest(), run, NoTestTargets(), p0, 0, 0)
+      end
   end
   else let
     val p1 = skip_ws(src, p0, max)
   in
-    if looking_at_begin(src, p1, max) then @(1, run, 1, adv(p1, 5, max), 0, 0)
-    else @(0, run, 0, p0, 0, 0)
+    if looking_at_begin(src, p1, max) then @(UnittestBlock(), run, NativeTests(), adv(p1, 5, max), 0, 0)
+    else @(NotUnittest(), run, NoTestTargets(), p0, 0, 0)
   end
 end
 
@@ -1460,7 +1537,7 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
     else if looking_at_target(src, pos, max) then let
       val p0 = skip_ws(src, adv(pos, 7, max), max)
       val ident_end = skip_ident(src, p0, max)
-      val target = (if $AR.eq_int_int(at(src, p0, max), 119) then 1 else 0): int
+      val is_wasm = $AR.eq_int_int(at(src, p0, max), 119)
       val p1 = skip_ws(src, ident_end, max)
     in
       if looking_at_begin(src, p1, max) then let
@@ -1469,19 +1546,19 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
         val ce = find_end_kw(src, cs, src_len, max, 1)
         val ep = block_end(ce, src_len, max)
         (* target_begin covers [pos, cs), target_end [ce, ep) *)
-        val () = put_typed(spans, STargetBegin(pos, cs, target))
+        val () = put_typed(spans, STargetBegin(pos, cs, (if is_wasm then Wasm() else Native()): target))
         val inner = lex_main(src, ce, max, spans, cs, 0)
         val () = put_typed(spans, STargetEnd(ce, ep))
       in lex_main(src, src_len, max, spans, ep, count + inner + 2) end
       else if looking_at_binary(src, p1, max) then let
-        (* Binary marker form: #target wasm binary; kind=7, aux1=2 *)
+        (* Binary marker form: #target wasm binary *)
         val ep = skip_to_eol(src, adv(p1, 6, max), src_len, max)
-        val () = put_typed(spans, STarget(pos, ep, 2))
+        val () = put_typed(spans, STarget(pos, ep, WasmBinaryLine()))
       in lex_main(src, src_len, max, spans, ep, count + 1) end
       else let
         (* Line form: just the directive *)
         val ep = skip_to_eol(src, ident_end, src_len, max)
-        val () = put_typed(spans, STarget(pos, ep, target))
+        val () = put_typed(spans, STarget(pos, ep, (if is_wasm then WasmLine() else NativeLine()): target_line))
       in lex_main(src, src_len, max, spans, ep, count + 1) end
     end
 
@@ -1508,28 +1585,34 @@ fun lex_main {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= n} .<n - p>.
 
     (* $UNITTEST *)
     else if looking_at_unittest(src, pos, max) then let
-      val @(st, run, bits, cs, e1, e2) = ut_header(src, src_len, max, pos)
+      val @(header, run, targets, cs, e1, e2) = ut_header(src, src_len, max, pos)
     in
-      if st = 1 then let
+      case+ header of
+      | UnittestBlock() => let
         val ce = find_end_kw(src, cs, src_len, max, 1)
         val ep = block_end(ce, src_len, max)
         (* No "end": Rust's "unterminated ... begin...end block", and the
            block runs to the end of the file *)
         val nerr = (if ce >= src_len then let
-            val () = put_typed(spans, SLexError(pos, 3, pos, pos, run = 1))
+            val () = put_typed(spans, SLexError(pos, UnterminatedUnittest(), pos, pos, run))
           in 1 end else 0): int
         (* unittest_begin covers [pos, cs), unittest_end [ce, ep) *)
-        val () = put_typed(spans, SUnittestBegin(pos, cs, run = 1, bits))
+        val () = put_typed(spans, SUnittestBegin(pos, cs, run, targets))
         val inner = lex_main(src, ce, max, spans, cs, 0)
         val () = put_typed(spans, SUnittestEnd(ce, ep))
       in lex_main(src, src_len, max, spans, ep, count + nerr + inner + 2) end
-      else let
+      | _ => let
         (* A bad target list is a lex error (Rust: "empty target list in
            $UNITTEST.run()", "unknown test target"); the text is then
            ordinary code, as when it is no unittest block at all *)
-        val nerr = (if st >= 2 then let
-            val () = put_typed(spans, SLexError(pos, st - 1, e1, e2, false))
-          in 1 end else 0): int
+        val nerr = (case+ header of
+          | HeaderEmptyList() => let
+              val () = put_typed(spans, SLexError(pos, EmptyTargetList(), e1, e2, false))
+            in 1 end
+          | HeaderUnknownTarget() => let
+              val () = put_typed(spans, SLexError(pos, UnknownTarget(), e1, e2, false))
+            in 1 end
+          | _ => 0): int
         val ep = lex_passthrough_scan(src, pos + 1, src_len, max)
         val () = put_typed(spans, SPass(pos, ep, false))
       in lex_main(src, src_len, max, spans, ep, count + nerr + 1) end

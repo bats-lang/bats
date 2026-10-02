@@ -24,7 +24,7 @@ staload "docs.sats"
    ============================================================ *)
 
 (* The tests of the .bats file at the NUL-terminated path p, as
-   <bits><name>NUL entries appended to out (collect_tests); the number
+   <targets><name>NUL entries appended to out (collect_tests); the number
    of them *)
 fn file_tests {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): int =
@@ -58,17 +58,17 @@ fun name_has {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
 
 (* The calls of the selected tests among the entries t[p, e) of module
    Tm, appended to out; the number selected. A test is selected when
-   its block targets the runner's target (bit 1 native, 2 wasm) and its
-   name contains the filter. *)
+   its block targets the runner's target (wasm when wasm, else native)
+   and its name contains the filter. *)
 fun put_calls {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int, m: int, k: int, bit: int,
+  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int, m: int, k: int, wasm: bool,
    f: !$A.borrow(byte, lf, 4096), fl: int, out: !$B.builder_v >> $B.builder_v, sel: int): int =
   if p >= e then sel
   else if p >= 524288 then sel
   else let
-    val bits = byte2int0($A.read<byte>(t, p))
+    val targets = targets_of_byte(byte2int0($A.read<byte>(t, p)))
     val ne = find_null_bv_from(t, p + 1, 524288)
-    val targeted = (if bit = 1 then (bits = 1 || bits = 3) else bits >= 2): bool
+    val targeted = runs_on(targets, wasm)
     val chosen = (if ~targeted then false else name_has(t, p + 1, ne, f, fl)): bool
     val () = (if chosen then let
         val () = bput_v(out, "  val f = f + __bats_run($T")
@@ -83,7 +83,7 @@ fun put_calls {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
   in
     if nx <= p then sel
     else if nx > 524288 then sel
-    else put_calls(t, nx, e, m, k + 1, bit, f, fl, out, (if chosen then sel + 1 else sel))
+    else put_calls(t, nx, e, m, k + 1, wasm, f, fl, out, (if chosen then sel + 1 else sel))
   end
 
 (* Whether files[p] starts src/bin/ *)
@@ -107,8 +107,8 @@ fn add_module {lf,lt,lg:agz}
   (* src/<stem>.bats: the module's .sats is <stem>.sats *)
   val () = copy_to_builder_v(files, p + 4, ne - 5, 524288, stl)
   val () = bput_v(stl, ".sats\"\n")
-  val sn = (if want_native then put_calls(t, 0, tlen, m, 0, 1, f, fl, calls, 0) else 0): int
-  val sw = (if want_wasm then put_calls(t, 0, tlen, m, 0, 2, f, fl, wcalls, 0) else 0): int
+  val sn = (if want_native then put_calls(t, 0, tlen, m, 0, false, f, fl, calls, 0) else 0): int
+  val sw = (if want_wasm then put_calls(t, 0, tlen, m, 0, true, f, fl, wcalls, 0) else 0): int
 in @(sn, sw) end
 
 (* The file files[p, ne) with k tests t[0, tlen) added to the scan:
@@ -319,7 +319,7 @@ in
     (* The runner is built as any binary, but not announced *)
     val q = is_quiet()
     val () = set_quiet(true)
-    val () = do_build_plain(0, (if wasm then 1 else 0))
+    val () = do_build_plain(0, (if wasm then Wasm() else Native()): target)
     val () = set_quiet(q)
     val back = chdir_to("../..")
   in
@@ -1632,7 +1632,7 @@ fun prerr_names {ln:agz}{s:nat | s <= 524288} .<524288 - s>.
    extra: !$A.borrow(byte, le, 4096), elen: int): void
 
 implement do_run {lb,le} (release, bin, blen, extra, elen) = let
-  val () = do_build_plain(release, 0)
+  val () = do_build_plain(release, Native())
   (* The binaries the build produced, NUL-terminated, in name order *)
   var names: $B.builder_v = $B.create()
   val count = collect_built(names, release)
@@ -1698,8 +1698,8 @@ implement do_check() = let
   (* Check mode: the $UNITTEST blocks are type-checked too (Rust:
      build::check preprocesses with check_mode) *)
   val () = set_test_mode(true)
-  val () = do_build_plain(0, 0)
-  val () = do_build_plain(0, 1)
+  val () = do_build_plain(0, Native())
+  val () = do_build_plain(0, Wasm())
   val () = set_test_mode(false)
 in
   (* The error is already reported, as Rust's check reports it *)

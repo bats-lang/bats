@@ -27,6 +27,68 @@ typedef spos(n:int) = [p:nat | p <= n] int p
 
 
 
+
+datatype test_targets = NoTestTargets | NativeTests | WasmTests | AllTargets
+
+
+
+
+datatype extcode_kind = CodeHere | CodeAtTop | CodeAtEnd | CodeInStatic
+
+
+datatype target = Native | Wasm
+
+
+
+datatype target_line = NativeLine | WasmLine | WasmBinaryLine
+
+
+fn same_target (a: target, b: target): bool
+
+
+
+
+
+
+
+
+
+fn targets_byte (targets: test_targets): int
+
+
+
+
+
+
+fn targets_of_byte (b: int): test_targets
+
+
+
+
+
+
+fn runs_on (targets: test_targets, wasm: bool): bool
+
+
+
+
+
+
+
+
+
+datatype lex_error =
+  | EmptyTargetList           (* $UNITTEST.run() *)
+  | UnknownTarget             (* a target other than native or wasm *)
+  | UnterminatedUnittest      (* a $UNITTEST block with no end *)
+  | UnterminatedCComment
+  | UnterminatedMlComment
+  | UnterminatedString
+  | UnterminatedExtcode
+  | UnterminatedUnsafe        (* a $UNSAFE block with no end *)
+
+
+
 datavtype span(n:int) =
   | {s,e:nat | s <= e; e <= n}
     SPass(n) of (int s, int e, bool)                 (* verbatim when true: comment, string, char *)
@@ -39,17 +101,17 @@ datavtype span(n:int) =
   | SUnsafeBlock(n) of (spos(n), spos(n), spos(n), spos(n))
                                                       (* contents *)
   | SConstruct(n) of (spos(n), spos(n))              (* an unsafe construct *)
-  | SExtcode(n) of (spos(n), spos(n), spos(n), spos(n), int)
+  | SExtcode(n) of (spos(n), spos(n), spos(n), spos(n), extcode_kind)
                                                       (* contents; kind *)
-  | STarget(n) of (spos(n), spos(n), int)            (* #target line: 0 native, 1 wasm, 2 binary *)
+  | STarget(n) of (spos(n), spos(n), target_line)    (* #target line *)
   | SStaload(n) of (spos(n), spos(n))
-  | STargetBegin(n) of (spos(n), spos(n), int)       (* target *)
+  | STargetBegin(n) of (spos(n), spos(n), target)    (* target *)
   | STargetEnd(n) of (spos(n), spos(n))
-  | SUnittestBegin(n) of (spos(n), spos(n), bool, int)
+  | SUnittestBegin(n) of (spos(n), spos(n), bool, test_targets)
                                                       (* $UNITTEST.run; its targets *)
   | SUnittestEnd(n) of (spos(n), spos(n))
-  | SLexError(n) of (spos(n), int, spos(n), spos(n), bool)
-                                                      (* at; code; e1, e2; .run *)
+  | SLexError(n) of (spos(n), lex_error, spos(n), spos(n), bool)
+                                                      (* at; what; e1, e2; .run *)
 
 
 datavtype spans(n:int, int) =
@@ -57,6 +119,27 @@ datavtype spans(n:int, int) =
   | {k:nat} spans_cons(n, k + 1) of (span(n), spans(n, k))
 
 fun spans_free {n:int}{k:nat} (xs: spans(n, k)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

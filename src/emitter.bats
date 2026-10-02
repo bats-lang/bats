@@ -318,10 +318,10 @@ fn emit_code_span {ls:agz}{ns:pos}
 (* The target state after sp: entering a #target block for another
    target, or a $UNITTEST block outside check and test mode, blanks
    what is in it *)
-fn next_state {n:int} (sp: !span(n), ts: int, build_target: int): int =
+fn next_state {n:int} (sp: !span(n), ts: int, build_target: target): int =
   case+ sp of
   | STargetBegin(_, _, t) =>
-    if ts > 0 then ts + 1 else if t = build_target then 0 else 1
+    if ts > 0 then ts + 1 else if same_target(t, build_target) then 0 else 1
   | SUnittestBegin(_, _, _, _) => unittest_enter(ts)
   | STargetEnd(_, _) => (if ts > 0 then ts - 1 else 0)
   | SUnittestEnd(_, _) => (if ts > 0 then ts - 1 else 0)
@@ -377,7 +377,7 @@ fn prelude_line {ls:agz}{ns:pos}
 fun emit_spans {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    sats: !$B.rope, dats: !$B.rope,
-   build_target: int, is_unsafe: int, errors: int, ts: int): int =
+   build_target: target, is_unsafe: int, errors: int, ts: int): int =
   case+ xs of
   | spans_nil() => errors
   | spans_cons(sp, tl) => let
@@ -389,7 +389,7 @@ fun emit_spans {ls:agz}{ns:pos}{k:nat} .<k>.
    blanked block; the number of them *)
 fun build_prelude {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   prelude: !$B.rope, build_target: int, ts: int): int =
+   prelude: !$B.rope, build_target: target, ts: int): int =
   case+ xs of
   | spans_nil() => 0
   | spans_cons(sp, tl) => let
@@ -400,7 +400,7 @@ fun build_prelude {ls:agz}{ns:pos}{k:nat} .<k>.
    not in a blanked block *)
 fun build_prelude_sats {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   prelude: !$B.rope, build_target: int, ts: int): void =
+   prelude: !$B.rope, build_target: target, ts: int): void =
   case+ xs of
   | spans_nil() => ()
   | spans_cons(sp, tl) => let
@@ -434,9 +434,9 @@ fn byte_before {l:agz}{n:pos}{p:nat}
   if p >= e then ~1 else if p >= max then ~1 else byte2int0($A.read<byte>(src, p))
 
 (* Each test in the code src[p, e): "fn", a name, "()", appended to out
-   as <bits><name>NUL; the number of them *)
+   as <targets><name>NUL (targets_byte); the number of them *)
 fun scan_tests {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
-  (src: !$A.borrow(byte, l, n), p: int p, e: int, max: int n, bits: int,
+  (src: !$A.borrow(byte, l, n), p: int p, e: int, max: int n, targets: test_targets,
    out: !$B.builder_v >> $B.builder_v, k: int): int =
   if p >= e then k
   else if p >= max then k
@@ -446,7 +446,7 @@ fun scan_tests {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
                  else if byte_before(src, p, e, max) <> 102 then false
                  else byte_before(src, p + 1, e, max) = 110): bool
   in
-    if ~at_fn then scan_tests(src, p + 1, e, max, bits, out, k)
+    if ~at_fn then scan_tests(src, p + 1, e, max, targets, out, k)
     else let
       val q0 = (if p + 2 <= max then p + 2 else max): [q:int | p < q; q <= n] int q
       val ns = skip_blank(src, q0, e, max)
@@ -461,46 +461,47 @@ fun scan_tests {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
                      else byte_before(src, q2, e, max) = 41): bool
     in
       if is_test then let
-        val () = put_char_v(out, bits)
+        val () = put_char_v(out, targets_byte(targets))
         val () = copy_to_builder_v(src, ns, ne, max, out)
         val () = put_char_v(out, 0)
-      in scan_tests(src, ne, e, max, bits, out, k + 1) end
-      else scan_tests(src, q0, e, max, bits, out, k)
+      in scan_tests(src, ne, e, max, targets, out, k + 1) end
+      else scan_tests(src, q0, e, max, targets, out, k)
     end
   end
 
 (* scan_tests over the code span src[ss, se) *)
 fn scan_span {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), ss: pos_t, se: int, max: int n, bits: int,
+  (src: !$A.borrow(byte, l, n), ss: pos_t, se: int, max: int n, targets: test_targets,
    out: !$B.builder_v >> $B.builder_v, k: int): int =
   if ss < 0 then k
   else if ss > max then k
-  else scan_tests(src, ss, se, max, bits, out, k)
+  else scan_tests(src, ss, se, max, targets, out, k)
 
 (* The run a span leaves: a $UNITTEST.run block's targets from its
-   begin to its end, else 0 *)
-fn next_run {ns:int} (sp: !span(ns), run: int): int =
+   begin to its end, else none *)
+fn next_run {ns:int} (sp: !span(ns), run: test_targets): test_targets =
   case+ sp of
-  | SUnittestBegin(_, _, r, bits) => (if r then bits else 0)
-  | SUnittestEnd(_, _) => 0
+  | SUnittestBegin(_, _, r, targets) => (if r then targets else NoTestTargets())
+  | SUnittestEnd(_, _) => NoTestTargets()
   | _ => run
 
 (* The tests sp holds when it is code in a $UNITTEST.run block of the
-   targets run (> 0), appended to out; k plus their number *)
+   targets run (some), appended to out; k plus their number *)
 fn span_tests {ls:agz}{ns:pos}
-  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns), run: int,
+  (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns), run: test_targets,
    out: !$B.builder_v >> $B.builder_v, k: int): int =
-  if run <= 0 then k
-  else case+ sp of
+  case+ run of
+  | NoTestTargets() => k
+  | _ => (case+ sp of
     | SPass(ss, se, v) => (if v then k else scan_tests(src, ss, se, src_max, run, out, k))
-    | _ => k
+    | _ => k)
 
 (* The tests of the $UNITTEST.run blocks among xs, in order, appended
-   to out as <bits><name>NUL, bits being the block's targets (1 native,
-   2 wasm); run: the targets of the block xs starts in, or 0 *)
+   to out as <targets><name>NUL (targets_byte); run: the targets of the
+   block xs starts in, or none *)
 fun collect_spans {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   run: int, out: !$B.builder_v >> $B.builder_v, n: int): int =
+   run: test_targets, out: !$B.builder_v >> $B.builder_v, n: int): int =
   case+ xs of
   | spans_nil() => n
   | spans_cons(sp, tl) => let
@@ -508,15 +509,15 @@ fun collect_spans {ls:agz}{ns:pos}{k:nat} .<k>.
     in collect_spans(src, src_max, tl, next_run(sp, run), out, n2) end
 
 (* The test functions of the $UNITTEST.run blocks of src, in order, as
-   <bits><name>NUL entries (bits: the block's targets, 1 native, 2
-   wasm); the number of them. A test is "fn <name> (): bool" in a
+   <targets><name>NUL entries (targets_byte: the block's targets); the
+   number of them. A test is "fn <name> (): bool" in a
    block's code. *)
 #pub fn collect_tests {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    out: !$B.builder_v >> $B.builder_v): int
 
 implement collect_tests (src, src_max, xs, out) =
-  collect_spans(src, src_max, xs, 0, out, 0)
+  collect_spans(src, src_max, xs, NoTestTargets(), out, 0)
 
 (* "  if i = <k> then <name> ()\n  else " for each entry of t[p, e) *)
 fun put_dispatch {l:agz}{p:nat | p <= 524288} .<524288 - p>.
@@ -568,7 +569,7 @@ in $A.free<byte>($A.thaw<byte>(fz_t)) end
    dats prelude, self-staload included, the number of errors) *)
 #pub fn do_emit {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   build_target: int, is_unsafe: int, sats: !$B.rope, dats: !$B.rope
+   build_target: target, is_unsafe: int, sats: !$B.rope, dats: !$B.rope
   ): @(int, int)
 
 implement do_emit (src, src_max, xs, build_target, is_unsafe, sats, dats) = let
