@@ -738,6 +738,130 @@ fun dep_extras {n,i:nat | i <= n} .<n - i>.
     val () = $A.free<byte>($A.thaw<byte>(fz_e))
   in dep_extras(es, i + 1, n, d, want, eb, c2) end
 
+(* ============================================================
+   The wasm exports: a callback JS calls on the instance is declared
+   #pub fun ... = "ext#<name>" in the package that holds it, and is
+   exported from the linked module by that name. The names are read
+   from the .sats of every module linked (each dependency's, the
+   project's src/ and its binary), not kept in a list here (#222)
+   ============================================================ *)
+
+(* Whether an entry's name ends in .sats *)
+fn has_sats_ext {l:agz}{n:pos}{k:nat | k <= n}
+  (ent: !$A.arr(byte, l, n), len: int k, max: int n): bool = let
+  var c = @[char][5]('.', 's', 'a', 't', 's')
+in ent_has_suffix(ent, len, max, c, 5) end
+
+(* Whether b[i, i + 5) is "ext# after a quote: the bytes 34 101 120 116
+   35 *)
+fn at_ext_mark {l:agz}{n:pos}{i:nat | i + 5 <= n} (b: !$A.borrow(byte, l, n), i: int i): bool = let
+  fn at {l:agz}{n:pos}{j:nat | j < n} (b: !$A.borrow(byte, l, n), j: int j): int =
+    byte2int0($A.read<byte>(b, j))
+in at(b, i) = 34 && at(b, i + 1) = 101 && at(b, i + 2) = 120 && at(b, i + 3) = 116 && at(b, i + 4) = 35 end
+
+(* Whether a byte may be in a C name: a letter, a digit or _ *)
+fn is_name_byte (c: int): bool =
+  (c >= 97 && c <= 122) || (c >= 65 && c <= 90) || (c >= 48 && c <= 57) || c = 95
+
+(* Where the name that starts at b[i] ends, before the first byte that
+   cannot be in one, at most k *)
+fun name_end {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+  (b: !$A.borrow(byte, l, n), k: int k, i: int i): [e:nat | i <= e; e <= k] int e =
+  if i >= k then k
+  else if is_name_byte(byte2int0($A.read<byte>(b, i))) then name_end(b, k, i + 1)
+  else i
+
+(* Each "ext#<name>" in b[i, k): --export=<name> and a NUL appended to
+   lb; c plus how many *)
+fun put_ext_names {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+  (b: !$A.borrow(byte, l, n), k: int k, i: int i, size: int n, lb: !$B.builder_v >> $B.builder_v, c: int): int =
+  if i + 5 > k then c
+  else if at_ext_mark(b, i) then let
+    val stop = name_end(b, k, i + 5)
+  in
+    if stop <= i + 5 then put_ext_names(b, k, i + 1, size, lb, c)
+    else if stop >= k then put_ext_names(b, k, i + 1, size, lb, c)
+    else if byte2int0($A.read<byte>(b, stop)) <> 34 then put_ext_names(b, k, i + 1, size, lb, c)
+    else let
+      val () = bput_v(lb, "--export=")
+      val () = copy_to_builder_v(b, i + 5, stop, size, lb)
+      val () = put_char_v(lb, 0)
+    in put_ext_names(b, k, stop, size, lb, c + 1) end
+  end
+  else put_ext_names(b, k, i + 1, size, lb, c)
+
+(* The ext# names of the .sats at the NUL-terminated path, as
+   put_ext_names *)
+fn put_file_exports {lp:agz} (path: !$A.borrow(byte, lp, 524288), lb: !$B.builder_v >> $B.builder_v, c: int): int =
+  case+ read_whole(path, 524288) of
+  | ~whole_err(_) => c
+  | ~whole_ok(ar, piece, m, nbytes) => let
+      val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+      val c2 = put_ext_names(bv_s, nbytes, 0, m, lb, c)
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = whole_free(ar, $A.thaw<byte>(fz_s))
+    in c2 end
+
+(* The ext# names of entry e[0, el) of dir, when it is a .sats; e's
+   buffer is freed *)
+fn entry_exports {le,ld:agz}{k:nat | k <= 1024}
+  (e: $A.arr(byte, le, 1024), el: int k, dir: !$A.borrow(byte, ld, 524288), dir_len: int,
+   lb: !$B.builder_v >> $B.builder_v, c: int): int =
+  if ~has_sats_ext(e, el, 1024) then let val () = $A.free<byte>(e) in c end
+  else let
+    val @(fz_e, bv_e) = $A.freeze<byte>(e)
+    var pb : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(dir, 0, dir_len, 524288, pb)
+    val () = bput_v(pb, "/")
+    val () = copy_to_builder_v(bv_e, 0, el, 1024, pb)
+    val () = $A.drop<byte>(fz_e, bv_e)
+    val () = $A.free<byte>($A.thaw<byte>(fz_e))
+    val () = put_char_v(pb, 0)
+    val @(pa, _) = $B.to_arr(pb)
+    val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+    val c2 = put_file_exports(bv_p, lb, c)
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in c2 end
+
+(* The ext# names of the .sats among es[i, n), each in dir *)
+fun dir_exports_each {ld:agz}{n,i:nat | i <= n} .<n - i>.
+  (es: !$F.entries(n), i: int i, n: int n, dir: !$A.borrow(byte, ld, 524288), dir_len: int,
+   lb: !$B.builder_v >> $B.builder_v, c: int): int =
+  if i >= n then c
+  else let
+    val e = $A.alloc<byte>(1024)
+    val el = $F.entries_name(es, i, e, 1024)
+    val c2 = entry_exports(e, el, dir, dir_len, lb, c)
+  in dir_exports_each(es, i + 1, n, dir, dir_len, lb, c2) end
+
+(* The ext# names of every .sats in the directory dir (NUL-terminated,
+   with no trailing slash, dir_len bytes), as put_ext_names *)
+fn put_dir_exports {ld:agz} (dir: !$A.borrow(byte, ld, 524288), dir_len: int, lb: !$B.builder_v >> $B.builder_v, c: int): int =
+  case+ $F.dir_read(dir, 524288) of
+  | ~$R.ok(es) => let
+      val c2 = dir_exports_each(es, 0, $F.entries_count(es), dir, dir_len, lb, c)
+      val () = $F.entries_free(es)
+    in c2 end
+  | ~$R.err(_) => c
+
+(* The ext# names of the dependencies xs, as put_ext_names *)
+fun put_dep_exports {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v, c: int): int =
+  case+ xs of
+  | deps_nil() => c
+  | deps_cons(d, tl) => let
+      var pb : $B.builder_v = $B.create()
+      val () = bput_v(pb, "build/bats_modules/")
+      val () = put_dep(pb, d)
+      val () = bput_v(pb, "/src")
+      val () = put_char_v(pb, 0)
+      val @(pa, plen) = $B.to_arr(pb)
+      val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+      val c2 = put_dir_exports(bv_p, plen - 1, lb, c)
+      val () = $A.drop<byte>(fz_p, bv_p)
+      val () = $A.free<byte>($A.thaw<byte>(fz_p))
+    in put_dep_exports(tl, lb, c2) end
+
 (* The extra files of d (as dep_extras) *)
 fn dep_dir_extras (d: !dep, want: wanted, eb: !$B.builder_v >> $B.builder_v, c: int): int = let
   var pb : $B.builder_v = $B.create()
@@ -2541,24 +2665,13 @@ in
                       val () = bput_v(wl, "--export=bats_dynload") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=mainats_0_void") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=malloc") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_event") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_timer_fire") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_idb_fire") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_idb_fire_get") val () = put_char_v(wl, 0)
+                      (* C functions bridge defines in its own C (not ext#)
+                         that JS reaches on the instance; each ext#
+                         callback is exported by name below *)
                       val () = bput_v(wl, "--export=bats_measure_set") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_fetch_complete") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_file_open") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_decompress_complete") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=bats_bridge_stash_set_int") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=bats_bridge_stash_get_int") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "--export=bats_listener_get") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_popstate") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_clipboard_complete") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_clipboard_read_complete") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_permission_result") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_push_subscribe") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_media_change") val () = put_char_v(wl, 0)
-                      val () = bput_v(wl, "--export=bats_on_audio_play") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "-o") val () = put_char_v(wl, 0)
                       (* Rust: out_dir/<name>.wasm, out_dir = dist/<profile> *)
                       val () = (if is_release(rel) then bput_v(wl, "dist/release/") else bput_v(wl, "dist/debug/"))
@@ -2622,6 +2735,20 @@ in
                           in sc end
                         | ~$R.err(_) => 0): int
                       val wl_argc2 = wl_argc1 + wl_sm_cnt
+                      (* The ext# callbacks of every module linked (#222) *)
+                      val x_cl = dep_closure(bv_sd)
+                      val x_dc = put_dep_exports(x_cl, wl, 0)
+                      val () = deps_free(x_cl)
+                      val x_src = str_to_path_arr("build/src")
+                      val @(fz_xs, bv_xs) = $A.freeze<byte>(x_src)
+                      val x_sc = put_dir_exports(bv_xs, 9, wl, x_dc)
+                      val () = $A.drop<byte>(fz_xs, bv_xs)
+                      val () = $A.free<byte>($A.thaw<byte>(fz_xs))
+                      val x_bin = str_to_path_arr("build/src/bin")
+                      val @(fz_xb, bv_xb) = $A.freeze<byte>(x_bin)
+                      val _ = put_dir_exports(bv_xb, 13, wl, x_sc)
+                      val () = $A.drop<byte>(fz_xb, bv_xb)
+                      val () = $A.free<byte>($A.thaw<byte>(fz_xb))
                       var mb_w1 : $B.builder_v = $B.create()
                       val () = bput_v(mb_w1, "dist")
                       val _ = run_mkdir(mb_w1)
