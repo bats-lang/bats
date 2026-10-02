@@ -1527,11 +1527,19 @@ fn run_patsopt {lph:agz}{lo:agz}{li:agz}
 
 
 
+
+
+datatype profile = Debug | Release
+
+fn is_release (p: profile): bool
+
+
+
 fn run_cc {lph:agz}{lo:agz}{li:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int,
-   rel: int): int
+   rel: profile): int
 
 
 

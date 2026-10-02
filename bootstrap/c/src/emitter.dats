@@ -261,7 +261,7 @@ in emit_blanks_v(src, ss, se, src_max, sats) end
 fn emit_code_span {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
    sats: !$B.rope, dats: !$B.rope,
-   is_unsafe: int): int =
+   is_unsafe: bool): int =
   case+ sp of
   | SPass(ss, se, verbatim) => let
       val () = (if verbatim then emit_range_v(src, ss, se, src_max, dats)
@@ -289,7 +289,7 @@ fn emit_code_span {ls:agz}{ns:pos}
   (* $UNSAFE begin...end: its contents in an unsafe package, an error in
      a safe one *)
   | SUnsafeBlock(ss, se, cs, ce) =>
-    if is_unsafe > 0 then let
+    if is_unsafe then let
       val () = emit_blanks_v(src, ss, cs, src_max, dats)
       val () = emit_blanks_v(src, ss, cs, src_max, sats)
       val () = emit_range_v(src, cs, ce, src_max, dats)
@@ -352,7 +352,7 @@ in emit_blanks_v(src, ss, se, src_max, dats) end
 fn emit_one {ls:agz}{ns:pos}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, sp: !span(ns),
    sats: !$B.rope, dats: !$B.rope,
-   is_unsafe: int, ts: int): int =
+   is_unsafe: bool, ts: int): int =
   if ts > 0 then let
     val () = emit_blank_span(src, src_max, sp, sats, dats)
   in 0 end
@@ -382,7 +382,7 @@ fn prelude_line {ls:agz}{ns:pos}
 fun emit_spans {ls:agz}{ns:pos}{k:nat} .<k>.
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    sats: !$B.rope, dats: !$B.rope,
-   build_target: target, is_unsafe: int, errors: int, ts: int): int =
+   build_target: target, is_unsafe: bool, errors: int, ts: int): int =
   case+ xs of
   | spans_nil() => errors
   | spans_cons(sp, tl) => let

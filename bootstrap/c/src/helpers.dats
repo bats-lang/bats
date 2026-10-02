@@ -1528,6 +1528,14 @@ in
   | ~$R.err(_) => ~1
 end
 
+(* The profile a build makes: debug (-g -O0, into dist/debug) or release
+   (-O2, into dist/release) *)
+
+
+
+
+implement is_release (p) = case+ p of Release() => true | Debug() => false
+
 
 
 
@@ -1549,7 +1557,7 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   var b5 = $B.create()
   val cc_in_clen = in_len - 1
   val () = copy_to_builder_v(in_bv, 0, cc_in_clen, 524288, b5)
-  val opt_args: $L.listv($P.arg_entry) = (if rel > 0 then let
+  val opt_args: $L.listv($P.arg_entry) = (if is_release(rel) then let
       var bo = $B.create()
       val () = bput_v(bo, "-O2")
     in $L.list_vt_cons(mk_arg(bo), $L.list_vt_nil()) end

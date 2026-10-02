@@ -573,7 +573,7 @@ fn collect_tests {ls:agz}{ns:pos}{k:nat}
 
 fn do_emit {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
-   build_target: target, is_unsafe: int, sats: !$B.rope, dats: !$B.rope
+   build_target: target, is_unsafe: bool, sats: !$B.rope, dats: !$B.rope
   ): @(int, int)
 
 

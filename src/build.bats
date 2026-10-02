@@ -25,7 +25,7 @@ staload "closure.sats"
   (src_bv: !$A.borrow(byte, l1, 524288),
    sats_bv: !$A.borrow(byte, l2, 524288),
    dats_bv: !$A.borrow(byte, l3, 524288),
-   build_target: target, is_unsafe: int,
+   build_target: target, is_unsafe: bool,
    target_changed: bool): int
 
 implement preprocess_one
@@ -215,7 +215,7 @@ fn cc_dir_extra
   {ld:agz}{lph:agz}
   (dir_bv: !$A.borrow(byte, ld, 524288), dir_len: int,
    ph: !$A.borrow(byte, lph, 512), phlen: int,
-   rel: int): void = let
+   rel: profile): void = let
   val dr = $F.dir_read(dir_bv, 524288)
 in case+ dr of
   | ~$R.ok(d) => let
@@ -223,7 +223,7 @@ in case+ dr of
         (d: !$F.entries(n), i: int i, n: int n,
          dir_bv: !$A.borrow(byte, ld, 524288), dir_len: int,
          ph: !$A.borrow(byte, lph, 512), phlen: int,
-         rel: int): void =
+         rel: profile): void =
         if i >= n then ()
         else let
           val e = $A.alloc<byte>(1024)
@@ -695,7 +695,8 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
       val cnt3 = dep_dir_extras(d, WasmObjects(), lb, cnt2)
     in put_dep_wasm_objects(tl, lb, cnt3) end
 
-#pub fn read_unsafe_flag(): int
+(* Whether bats.toml says unsafe = true *)
+#pub fn read_unsafe_flag(): bool
 
 implement read_unsafe_flag() = let
   val bt = str_to_path_arr("bats.toml")
@@ -735,15 +736,15 @@ in case+ r of
                 (* Check if value starts with 't' for "true" *)
                 val b0 = byte2int0($A.get<byte>(ubuf, 0))
                 val () = $A.free<byte>(ubuf)
-              in if $AR.eq_int_int(b0, 116) then 1 else 0 end
+              in $AR.eq_int_int(b0, 116) end
             | ~$R.none() => let
                 val () = $A.free<byte>(ubuf)
-              in 0 end): int
+              in false end): bool
           val () = $T.toml_free(doc)
         in result end
-      | ~$R.err(_) => 0
+      | ~$R.err(_) => false
     end
-  | ~$R.err(_) => 0
+  | ~$R.err(_) => false
 end
 
 (* The target of the binary entry at path: wasm when a #target line
@@ -782,10 +783,10 @@ in if test_mode then base + 2 else base end
 (* to_c: the --to-c directory in to_c[0, tclen); tclen is 0 when it was
    not given. *)
 #pub fn do_build {lt:agz}
-  (release: int, build_target: target, to_c: !$A.borrow(byte, lt, 4096), tclen: int): void
+  (release: profile, build_target: target, to_c: !$A.borrow(byte, lt, 4096), tclen: int): void
 
 (* do_build without --to-c *)
-#pub fn do_build_plain(release: int, build_target: target): void
+#pub fn do_build_plain(release: profile, build_target: target): void
 
 implement do_build_plain(release, build_target) = let
   val none = $A.alloc<byte>(4096)
@@ -1204,7 +1205,7 @@ in
                                     val () = put_char_v(sd2, 0)
                                     val @(sda2, _) = $B.to_arr(sd2)
                                     val @(fz_sd2, bv_sd2) = $A.freeze<byte>(sda2)
-                                    val pr2 = preprocess_one(bv_sp2, bv_ss2, bv_sd2, build_target, 1, target_changed)
+                                    val pr2 = preprocess_one(bv_sp2, bv_ss2, bv_sd2, build_target, true, target_changed)
                                     val () = (if pr2 <> 0 then let
                                       val () = set_build_err()
                                       val () = print! ("warning: preprocess failed for dep ")
@@ -1289,7 +1290,7 @@ in
                                                     val () = put_char_v(sd_ns, 0)
                                                     val @(sda_ns, _) = $B.to_arr(sd_ns)
                                                     val @(fz_sdn, bv_sdn) = $A.freeze<byte>(sda_ns)
-                                                    val pr_ns = preprocess_one(bv_spn, bv_ssn, bv_sdn, build_target, 1, target_changed)
+                                                    val pr_ns = preprocess_one(bv_spn, bv_ssn, bv_sdn, build_target, true, target_changed)
                                                     val () = (if pr_ns <> 0 then ()
                                                     else ())
                                                     val () = $A.drop<byte>(fz_spn, bv_spn)
@@ -1356,7 +1357,7 @@ in
                     val () = put_char_v(sd, 0)
                     val @(sda, _) = $B.to_arr(sd)
                     val @(fz_sd, bv_sd) = $A.freeze<byte>(sda)
-                    val pr = preprocess_one(bv_sp, bv_ss, bv_sd, build_target, 1, target_changed)
+                    val pr = preprocess_one(bv_sp, bv_ss, bv_sd, build_target, true, target_changed)
                     val () = (if pr <> 0 then let
                       val () = set_build_err()
                       val () = print! ("warning: preprocess failed for dep ")
@@ -1423,7 +1424,7 @@ in
                                     val () = put_char_v(sd_ex, 0)
                                     val @(sda_ex, _) = $B.to_arr(sd_ex)
                                     val @(fz_sda, bv_sda) = $A.freeze<byte>(sda_ex)
-                                    val pr_ex = preprocess_one(bv_spa, bv_ssa, bv_sda, build_target, 1, target_changed)
+                                    val pr_ex = preprocess_one(bv_spa, bv_ssa, bv_sda, build_target, true, target_changed)
                                     val () = (if pr_ex <> 0 then let
                                       val () = set_build_err()
                                       val () = print! ("warning: preprocess failed for extra file in dep ")
@@ -1549,7 +1550,7 @@ in
         | ~$R.ok(d2) => let
             fun scan_bins {n,i:nat | i <= n}{lph:agz} .<n - i>.
               (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512),
-               phlen: int, rel: int): void =
+               phlen: int, rel: profile): void =
               if i >= n then ()
               else let
                 val ent = $A.alloc<byte>(1024)
@@ -2070,7 +2071,7 @@ in
                           fun clang_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
                             (dd4: !$F.entries(n), i: int i, n: int n,
                              ph: !$A.borrow(byte, lph, 512), phlen: int,
-                             rr: int): void =
+                             rr: profile): void =
                             if i >= n then ()
                             else let
                               val de = $A.alloc<byte>(1024)
@@ -2112,7 +2113,7 @@ in
                                           fun clang_ns {n,i:nat | i <= n}{lph3:agz}{lns3:agz} .<n - i>.
                                             (nscd: !$F.entries(n), i: int i, n: int n, ph3: !$A.borrow(byte, lph3, 512), ph3len: int,
                                              ns3: !$A.borrow(byte, lns3, 1024), ns3len: int,
-                                             rr3: int): void =
+                                             rr3: profile): void =
                                             if i >= n then ()
                                             else let
                                               val sde = $A.alloc<byte>(1024)
@@ -2227,7 +2228,7 @@ in
                                           (d_cc: !$F.entries(n), i: int i, n: int n,
                                            ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
                                            dep4: !$A.borrow(byte, ld4, 1024), dep4_len: int,
-                                           rr2: int): void =
+                                           rr2: profile): void =
                                           if i >= n then ()
                                           else let
                                             val de4 = $A.alloc<byte>(1024)
@@ -2323,7 +2324,7 @@ in
                             {n,i:nat | i <= n}{lph_cm:agz} .<n - i>.
                             (d_csm: !$F.entries(n), i: int i, n: int n,
                              ph_cm: !$A.borrow(byte, lph_cm, 512), ph_cm_len: int,
-                             rr_cm: int): void =
+                             rr_cm: profile): void =
                             if i >= n then ()
                             else let
                               val de_csm = $A.alloc<byte>(1024)
@@ -2446,7 +2447,7 @@ in
                       val () = bput_v(wl, "--export=bats_on_audio_play") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "-o") val () = put_char_v(wl, 0)
                       (* Rust: out_dir/<name>.wasm, out_dir = dist/<profile> *)
-                      val () = (if rel > 0 then bput_v(wl, "dist/release/") else bput_v(wl, "dist/debug/"))
+                      val () = (if is_release(rel) then bput_v(wl, "dist/release/") else bput_v(wl, "dist/debug/"))
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, wl)
                       val () = bput_v(wl, ".wasm") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "build/_bats_wasm_runtime.wasm.o") val () = put_char_v(wl, 0)
@@ -2511,7 +2512,7 @@ in
                       val () = bput_v(mb_w1, "dist")
                       val _ = run_mkdir(mb_w1)
                       var mb_w2 : $B.builder_v = $B.create()
-                      val () = (if rel > 0 then bput_v(mb_w2, "dist/release") else bput_v(mb_w2, "dist/debug"))
+                      val () = (if is_release(rel) then bput_v(mb_w2, "dist/release") else bput_v(mb_w2, "dist/debug"))
                       val _ = run_mkdir(mb_w2)
                       val wld_exec = str_to_path_arr("wasm-ld")
                       val @(fz_wld, bv_wld) = $A.freeze<byte>(wld_exec)
@@ -2595,7 +2596,7 @@ in
 
                     (* Step 8: Link to .new then atomic rename *)
                     var link : $B.builder_v = $B.create()
-                    val () = (if rel > 0 then
+                    val () = (if is_release(rel) then
                       bput_v(link, "clang -o dist/release/")
                       else bput_v(link, "clang -o dist/debug/"))
                     val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, link)
@@ -2644,7 +2645,7 @@ in
                           val () = $F.entries_free(d_lsm)
                         in end
                       | ~$R.err(_) => ())
-                    val () = (if rel > 0 then bput_v(link, " -O2")
+                    val () = (if is_release(rel) then bput_v(link, " -O2")
                       else bput_v(link, " -g -O0"))
                     (* Convert space-separated link command to arg_entry list *)
                     val link_argv = split_spaces_to_list(link)
@@ -2667,13 +2668,13 @@ in
                     else if rl = 0 then
                       if same_target(binary_target, Native()) then let
                         var mv_src : $B.builder_v = $B.create()
-                        val () = (if rel > 0 then bput_v(mv_src, "dist/release/")
+                        val () = (if is_release(rel) then bput_v(mv_src, "dist/release/")
                           else bput_v(mv_src, "dist/debug/"))
                         val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, mv_src)
                         val () = bput_v(mv_src, ".new")
                         val a1 = mk_arg(mv_src)
                         var mv_dst : $B.builder_v = $B.create()
-                        val () = (if rel > 0 then bput_v(mv_dst, "dist/release/")
+                        val () = (if is_release(rel) then bput_v(mv_dst, "dist/release/")
                           else bput_v(mv_dst, "dist/debug/"))
                         val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, mv_dst)
                         val a2 = mk_arg(mv_dst)
@@ -2696,17 +2697,17 @@ in
                       if ~is_quiet() then
                         if same_target(binary_target, Wasm()) then let
                           (* Rust: "built <wasm> (wasm)" on stderr *)
-                          val () = (if rel > 0 then prerr! ("built ./dist/release/")
+                          val () = (if is_release(rel) then prerr! ("built ./dist/release/")
                             else prerr! ("built ./dist/debug/"))
                           val () = prerr_seg(bv_e, 0, stem_len, 1024)
                         in prerr! (".wasm (wasm)\n") end
                         else let
                           (* Rust: "built <exe> (<profile>)" on stderr *)
-                          val () = (if rel > 0 then prerr! ("built ./dist/release/")
+                          val () = (if is_release(rel) then prerr! ("built ./dist/release/")
                             else prerr! ("built ./dist/debug/"))
                           val () = prerr_seg(bv_e, 0, stem_len, 1024)
                         in
-                          if rel > 0 then prerr! (" (release)\n") else prerr! (" (debug)\n")
+                          if is_release(rel) then prerr! (" (release)\n") else prerr! (" (debug)\n")
                         end
                       else ()
                     else let val () = set_build_err() in println! ("error: link failed") end)

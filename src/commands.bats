@@ -282,7 +282,7 @@ fn run_runner {ls:agz}
             else run_sh("rm -rf build/_bats_test && mkdir -p build/_bats_test/src/bin && cp src/*.bats build/_bats_test/src/ && ln -s ../../bats_modules build/_bats_test/bats_modules")): int
   var toml : $B.builder_v = $B.create()
   val () = bput_v(toml, "[package]\nname = \"_bats_test\"\nkind = \"bin\"\n")
-  val () = (if read_unsafe_flag() > 0 then bput_v(toml, "unsafe = true\n") else ())
+  val () = (if read_unsafe_flag() then bput_v(toml, "unsafe = true\n") else ())
   val w1 = runner_write(wasm, "bats.toml", toml)
   var runner : $B.builder_v = $B.create()
   val () = (if wasm then bput_v(runner, "#target wasm binary\n\n") else ())
@@ -321,7 +321,7 @@ in
     (* The runner is built as any binary, but not announced *)
     val q = is_quiet()
     val () = set_quiet(true)
-    val () = do_build_plain(0, (if wasm then Wasm() else Native()): target)
+    val () = do_build_plain(Debug(), (if wasm then Wasm() else Native()): target)
     val () = set_quiet(q)
     val back = chdir_to("../..")
   in
@@ -1525,9 +1525,9 @@ fun extra_arg_list {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   in if np >= 4096 then acc2 else extra_arg_list(bv, np + 1, total, acc2) end
 
 (* Whether dist/<mode>/NAME exists, for NAME = ent[0, len). *)
-fn is_built {le:agz} (ent: !$A.borrow(byte, le, 1024), len: int, release: int): bool = let
+fn is_built {le:agz} (ent: !$A.borrow(byte, le, 1024), len: int, release: profile): bool = let
   var pb: $B.builder_v = $B.create()
-  val () = (if release > 0 then bput_v(pb, "dist/release/") else bput_v(pb, "dist/debug/"))
+  val () = (if is_release(release) then bput_v(pb, "dist/release/") else bput_v(pb, "dist/debug/"))
   val () = copy_to_builder_v(ent, 0, len, 1024, pb)
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
@@ -1549,7 +1549,7 @@ in put_char_v(names, 0) end
    dist/<mode>/NAME; returns count plus how many. *)
 fun collect_built_from {n,i:nat | i <= n} .<n - i>.
   (es: !$F.entries(n), i: int i, n: int n,
-   names: !$B.builder_v >> $B.builder_v, release: int, count: int): int =
+   names: !$B.builder_v >> $B.builder_v, release: profile, count: int): int =
   if i >= n then count
   else let
     val ent = $A.alloc<byte>(1024)
@@ -1568,7 +1568,7 @@ fun collect_built_from {n,i:nat | i <= n} .<n - i>.
     in collect_built_from(es, i + 1, n, names, release, count + inc) end
   end
 
-fn collect_built (names: !$B.builder_v >> $B.builder_v, release: int): int = let
+fn collect_built (names: !$B.builder_v >> $B.builder_v, release: profile): int = let
   val sb = str_to_path_arr("src/bin")
   val @(fz_sb, bv_sb) = $A.freeze<byte>(sb)
   val count = (case+ $F.dir_read(bv_sb, 524288) of
@@ -1630,7 +1630,7 @@ fun prerr_names {ln:agz}{s:nat | s <= 524288} .<524288 - s>.
    given. extra: the arguments
    after "--", NUL-terminated, in extra[0, elen). *)
 #pub fn do_run {lb,le:agz}
-  (release: int, bin: !$A.borrow(byte, lb, 256), blen: int,
+  (release: profile, bin: !$A.borrow(byte, lb, 256), blen: int,
    extra: !$A.borrow(byte, le, 4096), elen: int): void
 
 implement do_run {lb,le} (release, bin, blen, extra, elen) = let
@@ -1658,7 +1658,7 @@ implement do_run {lb,le} (release, bin, blen, extra, elen) = let
       val () = prerr_newline()
     in NoBinary() end): binary_choice
   var cmd: $B.builder_v = $B.create()
-  val () = (if release > 0 then bput_v(cmd, "./dist/release/")
+  val () = (if is_release(release) then bput_v(cmd, "./dist/release/")
     else bput_v(cmd, "./dist/debug/"))
   val () = add_choice(cmd, choice, bin, blen, bv_n)
   val chosen = (case+ choice of NoBinary() => false | _ => true): bool
@@ -1700,8 +1700,8 @@ implement do_check() = let
   (* Check mode: the $UNITTEST blocks are type-checked too (Rust:
      build::check preprocesses with check_mode) *)
   val () = set_test_mode(true)
-  val () = do_build_plain(0, Native())
-  val () = do_build_plain(0, Wasm())
+  val () = do_build_plain(Debug(), Native())
+  val () = do_build_plain(Debug(), Wasm())
   val () = set_test_mode(false)
 in
   (* The error is already reported, as Rust's check reports it *)
