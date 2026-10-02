@@ -238,6 +238,84 @@ fn is_ident_byte(b: int): bool
 
 
 
+
+
+
+
+
+
+
+datatype prelude_build = NoPreludeBuild | BuildsList | BuildsOption | BuildsStream
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn prelude_build_is (build: prelude_build, kind: prelude_build): bool
+
+
+
+
+
+
+
+
+
+fn prelude_build_of {l:agz}{n:pos}{p,q:int}
+  (src: !$A.borrow(byte, l, n), s: int p, e: int q, max: int n): prelude_build
+
+
+
+
+
+
+
+
+
+
+
 fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
 
