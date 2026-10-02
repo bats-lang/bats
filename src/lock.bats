@@ -1280,6 +1280,95 @@ fn is_fetched {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): bool = let
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
 
+(* rm -rf the path in b; consumes b (Rust: remove_dir_all) *)
+fn remove_tree (b: $B.builder_v): void = let
+  val exec = str_to_path_arr("rm")
+  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  var b1 = $B.create()
+  val () = bput_v(b1, "rm")
+  var b2 = $B.create()
+  val () = bput_v(b2, "-rf")
+  val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+    $L.list_vt_cons(mk_arg(b), $L.list_vt_nil()))))
+  val () = $A.drop<byte>(fz_x, bv_x)
+in $A.free<byte>($A.thaw<byte>(fz_x)) end
+
+(* bats_modules/<a[0, k)>/.bats-version, NUL-terminated, and its length
+   without the NUL: the version fetch unpacked there *)
+fn stamp_path {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): @([lo:agz] $A.arr(byte, lo, 524288), int) = let
+  var p : $B.builder_v = $B.create()
+  val () = bput_v(p, "bats_modules/")
+  val () = put_name(a, k, p)
+  val () = bput_v(p, "/.bats-version")
+  val plen = $B.length(p)
+  val () = put_char_v(p, 0)
+  val @(pa, _) = $B.to_arr(p)
+in @(pa, plen) end
+
+(* The version in the file of s[0, n) trimmed, when it parses *)
+fn text_cand {ls:agz}{m:pos}{n:nat} (s: !$A.borrow(byte, ls, m), m: int m, n: int n): $R.option(cand) = let
+  val e = trim_end(s, m, 0, n)
+  val @(c, _, _) = parse_cand(s, m, 0, e)
+in c end
+
+(* Whether c is v, when there is a c; frees c *)
+fn cand_is (c: $R.option(cand), v: !cand): bool =
+  case+ c of
+  | ~$R.some(cv) => let
+      val same = cand_same(cv, v)
+      val () = cand_free(cv)
+    in same end
+  | ~$R.none() => false
+
+(* Whether bats_modules/<a[0, k)>'s bats.toml's [package] version is v *)
+fn toml_version_is {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool = let
+  var p : $B.builder_v = $B.create()
+  val () = bput_v(p, "bats_modules/")
+  val () = put_name(a, k, p)
+  val () = bput_v(p, "/bats.toml")
+  val () = put_char_v(p, 0)
+  val @(pa, _) = $B.to_arr(p)
+in
+  case+ read_toml(pa) of
+  | ~$R.err(_) => false
+  | ~$R.ok(doc) => let
+      var section_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+      val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(section_c, 7))
+      var key_c = @[char][7]('v', 'e', 'r', 's', 'i', 'o', 'n')
+      val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 7))
+      val version = $A.alloc<byte>(256)
+      val version_len = (case+ $T.get(doc, bv_s, 7, bv_k, 7, version, 256) of
+        | ~$R.some(x) => x | ~$R.none() => 0): nlen
+      val () = $A.drop<byte>(fz_k, bv_k)
+      val () = $A.free<byte>($A.thaw<byte>(fz_k))
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = $T.toml_free(doc)
+      val @(fz_v, bv_v) = $A.freeze<byte>(version)
+      val @(c, _, _) = parse_cand(bv_v, 256, 0, version_len)
+      val () = $A.drop<byte>(fz_v, bv_v)
+      val () = $A.free<byte>($A.thaw<byte>(fz_v))
+    in cand_is(c, v) end
+end
+
+(* Whether bats_modules/<a[0, k)> holds the version v of the package:
+   fetch's stamp says so, or, without one (a package unpacked otherwise),
+   its bats.toml's version is v *)
+fn installed_at {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool = let
+  val @(pa, _) = stamp_path(a, k)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = (case+ read_whole(bv_p, 524288) of
+    | ~whole_ok(ar, piece, m, nbytes) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        val c = text_cand(bv_s, m, nbytes)
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+      in cand_is(c, v) end
+    | ~whole_err(_) => toml_version_is(a, k, v)): bool
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in r end
+
 (* m to stderr unless quiet; consumes m *)
 fn say (m: $B.builder_v): void =
   if is_quiet() then $B.builder_free(m) else prerr_builder(m)
@@ -1313,6 +1402,15 @@ fn fetch {lc,la:agz}
     $L.list_vt_cons(mk_arg(u6), $L.list_vt_nil())))))))
   val () = $A.drop<byte>(fz_uz, bv_uz)
   val () = $A.free<byte>($A.thaw<byte>(fz_uz))
+  (* The stamp installed_at reads *)
+  val @(sa, slen) = stamp_path(a, k)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  var stamp : $B.builder_v = $B.create()
+  val () = put_cand(v, stamp)
+  val () = put_char_v(stamp, 10)
+  val _ = write_file_from_builder(bv_s, 524288, stamp)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
   var msg : $B.builder_v = $B.create()
   val () = bput_v(msg, "fetched ")
   val () = put_name(a, k, msg)
@@ -1320,6 +1418,16 @@ fn fetch {lc,la:agz}
   val () = put_cand(v, msg)
   val () = put_char_v(msg, 10)
 in say(msg) end
+
+(* fetch, into an emptied bats_modules/<name> *)
+fn refetch {lc,la:agz}
+  (arc: !$A.borrow(byte, lc, 524288), alen: int,
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand): void = let
+  var dir : $B.builder_v = $B.create()
+  val () = bput_v(dir, "bats_modules/")
+  val () = put_name(a, k, dir)
+  val () = remove_tree(dir)
+in fetch(arc, alen, a, k, v) end
 
 (* The #use packages of bats_modules/<name>/src, newest first *)
 fn dep_uses {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): [m:nat] names(m) = let
@@ -1479,7 +1587,8 @@ fun resolve_all {s,m,nc,np,u:nat}{lr:agz} .<u, s>.
         | ~$R.some(v) => let
             val @(arc, alen) = archive_path(repo, rl, a, k, v)
             val @(fz_c, bv_c) = $A.freeze<byte>(arc)
-            val () = (if is_fetched(a, k) then () else fetch(bv_c, alen, a, k, v))
+            (* What bats_modules holds of another version is replaced *)
+            val () = (if installed_at(a, k, v) then () else refetch(bv_c, alen, a, k, v))
             val cs2 = cons_append(cs, dep_cons(a, k))
             val ts = dep_uses(a, k)
             val ok = put_lock_line(bv_c, a, k, v, lock)
@@ -2167,19 +2276,6 @@ in
       val () = $F.entries_free(dir)
     in ok end
 end
-
-(* rm -rf the path in b; consumes b (Rust: remove_dir_all) *)
-fn remove_tree (b: $B.builder_v): void = let
-  val exec = str_to_path_arr("rm")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
-  var b1 = $B.create()
-  val () = bput_v(b1, "rm")
-  var b2 = $B.create()
-  val () = bput_v(b2, "-rf")
-  val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
-    $L.list_vt_cons(mk_arg(b), $L.list_vt_nil()))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-in $A.free<byte>($A.thaw<byte>(fz_x)) end
 
 (* Rust's "path dependency '<n>': <what> '<p>'<after>" to stderr *)
 fn path_dep_error {la,lp:agz}
@@ -2998,42 +3094,319 @@ in
   report_errors(c6, errs)
 end
 
-(* Before build, check or test: every #use package of src/ that is not a
-   path dependency must be in bats_modules; the missing ones are fetched
-   from the repository repo[0, rplen), or reported when there is none
-   (Rust: build::resolve_deps). false after an error. *)
+(* ============================================================
+   Locked dependencies: with a bats.lock, check, build, run and test
+   use exactly the versions it locks
+   ============================================================ *)
+
+(* Whether ./bats.lock exists *)
+fn lock_exists (): bool = let
+  val lp = str_to_path_arr("bats.lock")
+  val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
+  val r = $F.file_exists(bv_lp, 524288)
+  val () = $A.drop<byte>(fz_lp, bv_lp)
+  val () = $A.free<byte>($A.thaw<byte>(fz_lp))
+in r end
+
+(* acc, with the package of each lock line of t[i, tl) added once *)
+fun lock_names {lt:agz}{tl,i:int}{m:nat} .<max(tl - i, 0)>.
+  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i, acc: names(m)): [m2:nat] names(m2) =
+  if i >= tl then acc
+  else let
+    val @(ts, te, le) = lock_line(t, tl, i)
+  in
+    if ts >= te then lock_names(t, tl, le + 1, acc)
+    else let
+      val @(pe, _) = lock_fields(t, ts, te)
+      val a = $A.alloc<byte>(256)
+      val k = copy_name(t, ts, pe, LOCK_MAX, a, 0)
+    in
+      if k <= 0 then let
+        val () = $A.free<byte>(a)
+      in lock_names(t, tl, le + 1, acc) end
+      else if names_has(acc, a, k) then let
+        val () = $A.free<byte>(a)
+      in lock_names(t, tl, le + 1, acc) end
+      else lock_names(t, tl, le + 1, names_cons(a, k, acc))
+    end
+  end
+
+(* The [start, end) of the version and of the sha256 on the first lock
+   line of t[0, tl) whose package is a[0, k), or ~1s when none is *)
+fn lock_entry {lt,la:agz}{tl:int}
+  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, a: !$A.arr(byte, la, 256), k: nlen)
+  : @(pos_t, pos_t, pos_t, pos_t) = let
+  var name : $B.builder_v = $B.create()
+  val () = put_name(a, k, name)
+  val @(name_arr, _) = $B.to_arr(name)
+  val @(fz_n, bv_n) = $A.freeze<byte>(name_arr)
+  val @(vs, ve) = lock_find(t, tl, 0, bv_n, 0, k)
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+in
+  if vs < 0 then @(~1, ~1, ~1, ~1)
+  else let
+    val line_end = find_byte(t, LOCK_MAX, ve, tl, 10)
+    val hash_end = trim_end(t, LOCK_MAX, ve, line_end)
+    val hash_start = (if ve < hash_end then ve + 1 else hash_end): pos_t
+  in @(vs, ve, hash_start, hash_end) end
+end
+
+(* "error: bats.lock locks <name> v<v>" *)
+fn put_locked {la:agz}
+  (a: !$A.arr(byte, la, 256), k: nlen, v: !cand, out: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(out, "error: bats.lock locks ")
+  val () = put_name(a, k, out)
+  val () = bput_v(out, " v")
+in put_cand(v, out) end
+
+(* What a stale bats.lock's error ends with *)
+fn put_relock (out: !$B.builder_v >> $B.builder_v): void =
+  bput_v(out, "; bats.lock is stale: run 'bats lock --repository <dir>' and commit it\n")
+
+(* Installs version v of the package a[0, k), whose archive's sha256
+   bats.lock gives as t[hash_start, hash_end), from the repository
+   repo[0, rl) into bats_modules; false after saying why it cannot: no
+   repository, no such archive in it, or an archive of another sha256 *)
+fn install_locked {lr,lt,la:agz}
+  (repo: !$A.borrow(byte, lr, 4096), rl: int,
+   t: !$A.borrow(byte, lt, LOCK_MAX), hash_start: pos_t, hash_end: pos_t,
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool =
+  if rl <= 0 then let
+    var m : $B.builder_v = $B.create()
+    val () = put_locked(a, k, v, m)
+    val () = bput_v(m, ", which is not in bats_modules. Use --repository <dir> to fetch it.\n")
+    val () = prerr_builder(m)
+  in false end
+  else let
+    val @(arc, alen) = archive_path(repo, rl, a, k, v)
+    val @(fz_c, bv_c) = $A.freeze<byte>(arc)
+    var hash : $B.builder_v = $B.create()
+    val found = put_file_sha256(bv_c, hash)
+    val @(hash_arr, _) = $B.to_arr(hash)
+    val @(fz_h, bv_h) = $A.freeze<byte>(hash_arr)
+    val same = (if found then lock_range_eq(bv_h, 0, 64, t, hash_start, hash_end) else false): bool
+    val () = $A.drop<byte>(fz_h, bv_h)
+    val () = $A.free<byte>($A.thaw<byte>(fz_h))
+    val () = (if same then refetch(bv_c, alen, a, k, v)
+      else let
+        var m : $B.builder_v = $B.create()
+        val () = put_locked(a, k, v, m)
+        val () = (if found then bput_v(m, ", but its archive '")
+                  else bput_v(m, ", which is not in repository '"))
+        val () = (if found then copy_to_builder_v(bv_c, 0, alen, 524288, m)
+                  else copy_to_builder_v(repo, 0, rl, 4096, m))
+        val () = (if found then bput_v(m, "' does not have the sha256 bats.lock gives\n")
+                  else bput_v(m, "'\n"))
+      in prerr_builder(m) end)
+    val () = $A.drop<byte>(fz_c, bv_c)
+    val () = $A.free<byte>($A.thaw<byte>(fz_c))
+  in same end
+
+(* "error: <name> is used but bats.lock does not lock it" and the hint *)
+fn not_locked {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "error: ")
+  val () = put_name(a, k, m)
+  val () = bput_v(m, " is used but bats.lock does not lock it")
+  val () = put_relock(m)
+in prerr_builder(m) end
+
+(* Says that bats.lock locks each package of xs, which nothing uses;
+   whether xs was empty *)
+fun report_unused {n:nat} .<n>. (xs: names(n), none: bool): bool =
+  case+ xs of
+  | ~names_nil() => none
+  | ~names_cons(a, k, rest) => let
+      var m : $B.builder_v = $B.create()
+      val () = bput_v(m, "error: bats.lock locks ")
+      val () = put_name(a, k, m)
+      val () = bput_v(m, ", which nothing uses")
+      val () = put_relock(m)
+      val () = prerr_builder(m)
+      val () = $A.free<byte>(a)
+    in report_unused(rest, false) end
+
+(* Walks the packages on stack as resolve_all does, but each one's
+   version is the one the lock t[0, tl) gives, not the repository's
+   newest: it must meet the constraints cs read so far, and is installed
+   unless bats_modules holds it. all holds every package queued so far,
+   pn the path dependencies, avail the lock's packages not yet reached,
+   which nothing uses when the walk ends. Whether every package was
+   locked, allowed and installed (ok so far), and nothing locked was
+   unused *)
+fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
+  (stack: names(s), all: names(m), cs: cons(nc), pn: !names(np), avail: names(u),
+   t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl,
+   repo: !$A.borrow(byte, lr, 4096), rl: int, ok: bool): bool =
+  case+ stack of
+  | ~names_nil() => let
+      val () = names_free(all)
+      val () = cons_free(cs)
+      val none_unused = report_unused(avail, true)
+    in if ok then none_unused else false end
+  | ~names_cons(a, k, rest) =>
+    (* A path dependency is not locked *)
+    if names_has(pn, a, k) then let
+      val () = $A.free<byte>(a)
+    in walk_locked(rest, all, cs, pn, avail, t, tl, repo, rl, ok) end
+    else (case+ names_take(avail, a, k) of
+      | ~NMissed(avail2) => let
+          val () = not_locked(a, k)
+          val () = $A.free<byte>(a)
+        in walk_locked(rest, all, cs, pn, avail2, t, tl, repo, rl, false) end
+      | ~NTaken(avail2) => let
+          val @(vs, ve, hash_start, hash_end) = lock_entry(t, tl, a, k)
+          val @(parsed, _, _) = parse_cand(t, LOCK_MAX, vs, ve)
+        in
+          case+ parsed of
+          | ~$R.none() => let
+              var m : $B.builder_v = $B.create()
+              val () = bput_v(m, "error: bats.lock's version of ")
+              val () = put_name(a, k, m)
+              val () = bput_v(m, " does not parse\n")
+              val () = prerr_builder(m)
+              val () = $A.free<byte>(a)
+              val () = names_free(rest)
+              val () = names_free(all)
+              val () = cons_free(cs)
+              val () = names_free(avail2)
+            in false end
+          | ~$R.some(v) =>
+            if ~cons_allow(cs, a, k, v) then let
+              var m : $B.builder_v = $B.create()
+              val () = put_locked(a, k, v, m)
+              val () = bput_v(m, ", which does not meet ")
+              val () = put_cons_of(cs, a, k, false, m)
+              val () = put_relock(m)
+              val () = prerr_builder(m)
+              val () = cand_free(v)
+              val () = $A.free<byte>(a)
+              val () = names_free(rest)
+              val () = names_free(all)
+              val () = cons_free(cs)
+              val () = names_free(avail2)
+            in false end
+            else let
+              val installed = (if installed_at(a, k, v) then true
+                               else install_locked(repo, rl, t, hash_start, hash_end, a, k, v)): bool
+              val () = cand_free(v)
+            in
+              if ~installed then let
+                val () = $A.free<byte>(a)
+                val () = names_free(rest)
+                val () = names_free(all)
+                val () = cons_free(cs)
+                val () = names_free(avail2)
+              in false end
+              else let
+                val cs2 = cons_append(cs, dep_cons(a, k))
+                val ts = dep_uses(a, k)
+                val @(stack2, all2) = push_new(ts, rest, all)
+                val () = $A.free<byte>(a)
+              in walk_locked(stack2, all2, cs2, pn, avail2, t, tl, repo, rl, ok) end
+            end
+        end)
+
+(* locked_deps under the project's constraints cs, when cst says they
+   were read; otherwise reports err, Rust's message about them; consumes
+   err *)
+fn locked_with {n,nc:nat}{lr:agz}
+  (cst: int, cs: cons(nc), err: $B.builder_v,
+   ds: !pdeps(n), repo: !$A.borrow(byte, lr, 4096), rl: int): bool =
+  if cst < 0 then let
+    val () = cons_free(cs)
+    var e : $B.builder_v = err
+    val () = put_char_v(e, 10)
+    val () = prerr_builder(e)
+  in false end
+  else let
+    val () = $B.builder_free(err)
+    val @(lock_arr, lock_len) = read_old_lock()
+    val @(fz_o, bv_o) = $A.freeze<byte>(lock_arr)
+    val @(ms, me) = lock_malformed(bv_o, lock_len, 0)
+    val ok = (if ms >= 0 then let
+        var m : $B.builder_v = $B.create()
+        val () = bput_v(m, "error: malformed lockfile line: ")
+        val () = copy_to_builder_v(bv_o, ms, me, LOCK_MAX, m)
+        val () = put_char_v(m, 10)
+        val () = prerr_builder(m)
+        val () = cons_free(cs)
+      in false end
+      else let
+        var src : $B.builder_v = $B.create()
+        val () = bput_v(src, "src")
+        val pkgs = collect_uses(src)
+        val all = names_copy(pkgs)
+        val @(stack, all2, cs2) = add_pdeps(ds, pkgs, all, cs)
+        val pn = pdeps_names(ds)
+        val avail = lock_names(bv_o, lock_len, 0, names_nil())
+        val r = walk_locked(stack, all2, cs2, pn, avail, bv_o, lock_len, repo, rl, true)
+        val () = names_free(pn)
+      in r end): bool
+    val () = $A.drop<byte>(fz_o, bv_o)
+    val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  in ok end
+
+(* With a bats.lock: installs into bats_modules exactly the versions it
+   locks, fetching from the repository repo[0, rl) those it does not
+   hold, and fails when the lock does not match the project: a package
+   used but not locked, one locked but not used, or a locked version
+   bats.toml's constraints rule out (what 'bats lock' would change other
+   than to newer versions). ds: the path dependencies, already copied *)
+fn locked_deps {n:nat}{lr:agz}
+  (ds: !pdeps(n), repo: !$A.borrow(byte, lr, 4096), rl: int): bool = let
+  var err : $B.builder_v = $B.create()
+  val () = bput_v(err, "error: ")
+  val @(cst, cs) = project_cons(err)
+in locked_with(cst, cs, err, ds, repo, rl) end
+
+(* Before build, check or test: with a bats.lock, bats_modules holds
+   exactly the versions it locks (locked_deps); without one, every #use
+   package of src/ that is not a path dependency must be in bats_modules,
+   and the missing ones are fetched from the repository repo[0, rplen),
+   or reported when there is none (Rust: build::resolve_deps). false
+   after an error. *)
 #pub fn resolve_deps {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): bool
 
 implement resolve_deps {lr} (repo, rplen) = let
-  var src : $B.builder_v = $B.create()
-  val () = bput_v(src, "src")
-  val pkgs = names_rev(collect_uses(src), names_nil())
   val ds = project_pdeps()
   (* Path dependencies are copied first, fresh each time *)
   val copied = copy_path_deps(ds)
-  val pn = pdeps_names(ds)
-  val () = pdeps_free(ds)
-  val missing = names_missing(pkgs, pn)
-  val () = names_free(pn)
 in
   if ~copied then let
-    val () = names_free(missing)
+    val () = pdeps_free(ds)
     val () = set_build_err()
   in false end
-  else if names_empty(missing) then let
-    val () = names_free(missing)
-  in true end
-  else if rplen <= 0 then let
-    val () = report_missing(missing)
-    val () = set_build_err()
-  in false end
-  else let
-    var err : $B.builder_v = $B.create()
-    val () = bput_v(err, "error: ")
-    val @(cst, cs) = project_cons(err)
-    val ok = fetch_with(cst, cs, err, missing, repo, rplen)
+  else if lock_exists() then let
+    val ok = locked_deps(ds, repo, rplen)
+    val () = pdeps_free(ds)
     val () = (if ok then () else set_build_err())
   in ok end
+  else let
+    var src : $B.builder_v = $B.create()
+    val () = bput_v(src, "src")
+    val pkgs = names_rev(collect_uses(src), names_nil())
+    val pn = pdeps_names(ds)
+    val () = pdeps_free(ds)
+    val missing = names_missing(pkgs, pn)
+    val () = names_free(pn)
+  in
+    if names_empty(missing) then let
+      val () = names_free(missing)
+    in true end
+    else if rplen <= 0 then let
+      val () = report_missing(missing)
+      val () = set_build_err()
+    in false end
+    else let
+      var err : $B.builder_v = $B.create()
+      val () = bput_v(err, "error: ")
+      val @(cst, cs) = project_cons(err)
+      val ok = fetch_with(cst, cs, err, missing, repo, rplen)
+      val () = (if ok then () else set_build_err())
+    in ok end
+  end
 end
 
 (* Resolves the #use packages of src/ under the project's constraints
