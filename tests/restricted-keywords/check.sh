@@ -15,7 +15,7 @@ lib() { # <unsafe> <body>: a scratch library in $TMP/p$n
   n=$((n + 1)); d=$TMP/p$n
   mkdir -p "$d/src"
   printf '[package]\nname = "rk%s"\nkind = "lib"\nunsafe = %s\n' "$n" "$1" > "$d/bats.toml"
-  printf '%s\n' "$2" > "$d/src/lib.bats"
+  printf '#include "share/atspre_staload.hats"\n%s\n' "$2" > "$d/src/lib.bats"
 }
 reject() { # <body>
   lib false "$1"
