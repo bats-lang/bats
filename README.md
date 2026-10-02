@@ -33,7 +33,7 @@ dist/debug/bats check --repository ../repository-prototype
 - `bats build [--only debug|release|wasm]` — compile the project
 - `bats check` — type-check without linking
 - `bats run [--bin name]` — build and run a binary
-- `bats lock --repository <dir>` — resolve dependencies
+- `bats lock --repository <dir>` — resolve dependencies to their newest versions and write `bats.lock`; with a `bats.lock`, the other commands use exactly the versions it locks
 - `bats init binary|library` — create a new project
 - `bats test` — build and run tests
 - `bats upload --repository <dir>` — package and publish a library
