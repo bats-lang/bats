@@ -2358,9 +2358,39 @@ fn construct_msg {ls:agz}{ns:pos}
   val is_rec = (if w3 then lit_at(src, s, sm, fnx_c, 3) || lit_at(src, s, sm, and_c, 3) ||
                            lit_at(src, s, sm, fix_c, 3) else false): bool
   val is_val_rec = (if w3 && e > we then lit_at(src, s, sm, val_c, 3) else false): bool
+  var dt_c = @[char][8]('d', 'a', 't', 'a', 't', 'y', 'p', 'e')
+  var clo_c = @[char][3]('c', 'l', 'o')
+  var ref_c = @[char][3]('r', 'e', 'f')
+  var tup_c = @[char][3]('t', 'u', 'p')
+  var rec_c = @[char][3]('r', 'e', 'c')
+  var list_c = @[char][4]('l', 'i', 's', 't')
+  val b0 = peek(src, s, sm)
+  val is_boxed_dollar = (if b0 = 36 then lit_at(src, s + 1, sm, tup_c, 3) ||
+    lit_at(src, s + 1, sm, rec_c, 3) || lit_at(src, s + 1, sm, list_c, 4) else false): bool
+  val is_datatype = (if we - s = 8 then lit_at(src, s, sm, dt_c, 8) else false): bool
+  val is_clo = (if we - s >= 6 then lit_at(src, s, sm, clo_c, 3) else false): bool
+  val is_ref = (if we - s >= 3 then lit_at(src, s, sm, ref_c, 3) else false): bool
+  var lam_c = @[char][3]('l', 'a', 'm')
+  val is_lam = (if w3 then lit_at(src, s, sm, lam_c, 3) else false): bool
 in
   if kind = 6 then bput_v(m, "extcode block outside of $UNSAFE begin...end block")
   else if at_unsafe_kw(src, sm, s) then bput_v(m, "$UNSAFE construct outside of $UNSAFE begin...end block")
+  else if is_datatype then
+    bput_v(m, "'datatype' with a constructor that carries data is not allowed outside $UNSAFE; it allocates and is never freed: use 'datavtype', which its match frees")
+  else if b0 = 39 then
+    bput_v(m, "a boxed tuple, record or list ('(, '{, '[) is not allowed outside $UNSAFE; it is never freed: use a flat @( ) or @{ }, or a linear $tup_vt, $rec_vt or $list_vt")
+  else if is_boxed_dollar then let
+    val () = put_char_v(m, 39)
+    val () = copy_to_builder_v(src, s, we, sm, m)
+  in bput_v(m, "' is not allowed outside $UNSAFE; a boxed tuple, record or list is never freed: use its linear form ($tup_vt, $rec_vt, $list_vt)") end
+  else if is_clo then let
+    val () = put_char_v(m, 39)
+    val () = copy_to_builder_v(src, s, we, sm, m)
+  in bput_v(m, "' is not allowed outside $UNSAFE; a non-linear closure is never freed: use lincloptr1 (made with llam, freed with cloptr_free)") end
+  else if is_lam then
+    bput_v(m, "'lam' is not allowed outside $UNSAFE; given to a cloref parameter it is a closure that is never freed: use 'llam' (a lincloptr1, freed with cloptr_free), or give it the arrow =<fun1> for a plain function")
+  else if is_ref then
+    bput_v(m, "'ref' inside a function is not allowed outside $UNSAFE; its cell is never freed: make it once, at the top level, or keep the value in a var")
   else if is_fun then
     bput_v(m, "'fun' without termination metric is not allowed outside $UNSAFE; use 'fn' or add '.< metric >.'")
   else if is_rec then let
