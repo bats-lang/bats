@@ -36,10 +36,10 @@ implement add (k) = let
 in f(1) end'
 reject 4 'fn apply (f: (int) -<fun1> int): int = f(1)
 #pub fn add (k: int): int
-implement add (k) = apply(lam (x) => x + k)'
+implement add (k) = apply(lam (x: int): int =<fun1> x + k)'
 accept 'fn apply (f: (int) -<fun1> int): int = f(1)
 #pub fn add_one (): int
-implement add_one () = apply(lam (x) => x + 1)'
+implement add_one () = apply(lam (x: int): int =<fun1> x + 1)'
 accept 'fn apply (f: (int) -<lincloptr1> int): int = let
   val r = f(1)
   val () = cloptr_free($UNSAFE begin $UNSAFE.castvwtp0{cloptr0}(f) end)
