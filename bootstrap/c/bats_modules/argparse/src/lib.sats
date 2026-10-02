@@ -67,7 +67,7 @@ datavtype parse_result =
       $A.arr(int, li, 64),        (* int values *)
       $A.arr(int, lb, 64),        (* bool/count values *)
       $A.arr(int, lp, 64),        (* present flags *)
-      int ac, int, int,           (* arg_count, text_pos, subcmd_idx *)
+      int ac, int, $R.option(int), (* arg_count, text_pos, the subcommand chosen *)
       $A.arr(byte, lt, 8192),     (* spec text for help *)
       $A.arr(int, lsp, 1024)      (* spec data for help *)
     )
@@ -77,9 +77,17 @@ datavtype parse_result =
 
 
 datavtype parse_error =
-  | err_unknown_long of (int)
+  (* A long option no spec names; carries the spec index of the option
+     whose name is closest, when there is an option *)
+  | err_unknown_long of ($R.option(int))
   | err_unknown_short of (int)
+  (* An int argument outside its range; carries its spec index + 1 *)
   | err_range of (int)
+  (* An int argument that is not a decimal int; carries its spec
+     index + 1 *)
+  | err_not_int of (int)
+  (* More than one argument of an exclusive group; carries the group's
+     index + 1 *)
   | err_exclusive of (int)
   (* A positional token named no subcommand, while subcommands are
      registered, none was given yet and no positional argument was left
@@ -89,6 +97,15 @@ datavtype parse_error =
   (* String values did not fit the 8192-byte value buffer; carries the
      spec index + 1 of the value that overflowed. *)
   | err_too_long of (int)
+
+
+
+datavtype int_range =
+  | AnyInt
+  | IntBetween of (int, int)
+
+
+
 
 
 
@@ -102,24 +119,24 @@ fn parser_new
 fn add_string
   {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
   (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh,
+   short_name: $R.option(int), help: !$A.borrow(byte, lh, nh), hlen: int nh,
    positional: bool): @(parser(tp + nn + nh, ac + 1), arg(string_val))
 
 fn add_int
   {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
   (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh,
-   default_val: int, min_val: int, max_val: int): @(parser(tp + nn + nh, ac + 1), arg(int_val))
+   short_name: $R.option(int), help: !$A.borrow(byte, lh, nh), hlen: int nh,
+   default_val: int, range: int_range): @(parser(tp + nn + nh, ac + 1), arg(int_val))
 
 fn add_flag
   {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
   (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(bool_val))
+   short_name: $R.option(int), help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(bool_val))
 
 fn add_count
   {tp:nat | tp <= 8192}{ac:nat | ac < 64}{ln:agz}{nn:pos}{lh:agz}{nh:pos | tp + nn + nh <= 8192}
   (p: parser(tp, ac), name: !$A.borrow(byte, ln, nn), nlen: int nn,
-   short_ch: int, help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(count_val))
+   short_name: $R.option(int), help: !$A.borrow(byte, lh, nh), hlen: int nh): @(parser(tp + nn + nh, ac + 1), arg(count_val))
 
 
 
@@ -160,7 +177,7 @@ fn is_present {a:t@ype} (r: !parse_result, h: arg(a)): bool
 
 
 
-fn get_subcmd(r: !parse_result): int
+fn get_subcmd(r: !parse_result): $R.option(int)
 
 
 
@@ -183,6 +200,132 @@ fn parse_result_free(r: parse_result): void
 fn parse_error_free(e: parse_error): void
 
 fn parser_free {tp:nat | tp <= 8192}{ac:nat | ac <= 64} (p: parser(tp, ac)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

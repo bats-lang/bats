@@ -1772,10 +1772,27 @@ fn write_file_from_rope {lp:agz}{k:nat}
 
 
 
+
+
+fn io_error_errno (e: $F.io_error): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 datavtype whole_file =
   | {la,l:agz}{m:pos}{n:nat | n < m}
     whole_ok of ($A.arena(byte, la, m, m, 1), $A.arrx(byte, l, m, la), int m, int n)
-  | whole_err of int
+  | whole_err of $F.io_error
 
 
 
@@ -1918,7 +1935,7 @@ fn count_argc {l:agz}
 
 
 fn ap_flag {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
-  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: int, help: &(@[char][nh]), nh: int nh
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: $R.option(int), help: &(@[char][nh]), nh: int nh
   ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.bool_val))
 
 
@@ -1932,7 +1949,7 @@ fn ap_flag {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 10
 
 
 fn ap_string_opt {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn <= 1048576; nh <= 1048576}
-  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: int, help: &(@[char][nh]), nh: int nh
+  (p: $AP.parser(tp, ac), name: &(@[char][nn]), nn: int nn, sc: $R.option(int), help: &(@[char][nh]), nh: int nh
   ): @($AP.parser(tp + nn + nh, ac + 1), $AP.arg($AP.string_val))
 
 

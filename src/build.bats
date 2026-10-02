@@ -925,7 +925,7 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
 implement read_unsafe_flag() = let
   val bt = str_to_path_arr("bats.toml")
   val @(fz_bt, bv_bt) = $A.freeze<byte>(bt)
-  val r = $F.file_open(bv_bt, 524288, 0, 0)
+  val r = $F.file_open(bv_bt, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_bt, bv_bt)
   val () = $A.free<byte>($A.thaw<byte>(fz_bt))
 in case+ r of
@@ -934,7 +934,7 @@ in case+ r of
       val rr = $F.file_read(fd, buf, 4096)
       val bl = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
       val cr = $F.file_close(fd)
-      val () = $R.discard<int><int>(cr)
+      val () = $R.discard<int><$F.io_error>(cr)
       val @(fz_b, bv_b) = $A.freeze<byte>(buf)
       val pr = $T.parse(bv_b, bl)
       val () = $A.drop<byte>(fz_b, bv_b)
@@ -1200,14 +1200,14 @@ in
          target_changed is passed to preprocess_one to force reprocessing. *)
       val tgt_path_r = str_to_path_arr("build/.bats_target")
       val @(fz_tgtr, bv_tgtr) = $A.freeze<byte>(tgt_path_r)
-      val old_tgt_or = $F.file_open(bv_tgtr, 524288, 0, 0)
+      val old_tgt_or = $F.file_open(bv_tgtr, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
       val old_target = (case+ old_tgt_or of
         | ~$R.ok(otfd) => let
             val otb = $A.alloc<byte>(16)
             val otr = $F.file_read(otfd, otb, 16)
             val otl = (case+ otr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
             val otc = $F.file_close(otfd)
-            val () = $R.discard<int><int>(otc)
+            val () = $R.discard<int><$F.io_error>(otc)
             val ob = byte2int0($A.get<byte>(otb, 0))
             val () = $A.free<byte>(otb)
           in (if otl > 0 then ob - 48 else ~1): int end
@@ -1224,14 +1224,14 @@ in
       val cache_buster_id = 50 (* ASCII '2' — bumped: auto-clean stale .o on target change *)
       val cid_path_r = str_to_path_arr("build/.bats_cache_id")
       val @(fz_cidr, bv_cidr) = $A.freeze<byte>(cid_path_r)
-      val old_cid_or = $F.file_open(bv_cidr, 524288, 0, 0)
+      val old_cid_or = $F.file_open(bv_cidr, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
       val old_cid = (case+ old_cid_or of
         | ~$R.ok(cfd) => let
             val cb = $A.alloc<byte>(16)
             val cr = $F.file_read(cfd, cb, 16)
             val cl = (case+ cr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
             val cc = $F.file_close(cfd)
-            val () = $R.discard<int><int>(cc)
+            val () = $R.discard<int><$F.io_error>(cc)
             val ov = byte2int0($A.get<byte>(cb, 0))
             val () = $A.free<byte>(cb)
           in (if cl > 0 then ov else ~1): int end
@@ -2955,13 +2955,13 @@ in
       (* Run patsopt on src/lib.bats if scan_src_modules preprocessed it *)
       val lib_d_path = str_to_path_arr("build/src/lib.dats")
       val @(fz_ldp, bv_ldp) = $A.freeze<byte>(lib_d_path)
-      val lib_or = $F.file_open(bv_ldp, 524288, 0, 0)
+      val lib_or = $F.file_open(bv_ldp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
       val () = $A.drop<byte>(fz_ldp, bv_ldp)
       val () = $A.free<byte>($A.thaw<byte>(fz_ldp))
       val lib_exists = (case+ lib_or of
         | ~$R.ok(fd) => let
             val cr = $F.file_close(fd)
-            val () = $R.discard<int><int>(cr)
+            val () = $R.discard<int><$F.io_error>(cr)
           in true end
         | ~$R.err(_) => false): bool
       val () = (if lib_exists then let

@@ -220,7 +220,7 @@ in case+ dr of
             val @(fz_c, bv_c) = $A.freeze<byte>(ca)
             val cr = $F.dir_open(bv_c, 524288)
             val is_dir = (case+ cr of
-              | ~$R.ok(cd) => let val () = $R.discard<int><int>($F.dir_close(cd)) in true end
+              | ~$R.ok(cd) => let val () = $R.discard<int><$F.io_error>($F.dir_close(cd)) in true end
               | ~$R.err(_) => false): bool
             val () = (if is_dir then copy_to_builder_v(bv_c, 0, clen + 1, 524288, dirs)
                       else if is_bats then copy_to_builder_v(bv_c, 0, clen + 1, 524288, files)
@@ -395,7 +395,7 @@ fn write_page {l:agz}{off,e:nat | off <= e; e <= 524288}
     val () = put_char_v(mp, 0)
     val @(ma, _) = $B.to_arr(mp)
     val @(fz_m, bv_m) = $A.freeze<byte>(ma)
-    val () = $R.discard<int><int>($F.file_mkdir(bv_m, 524288, 493))
+    val () = $R.discard<int><$F.io_error>($F.file_mkdir(bv_m, 524288, 493))
     val () = $A.drop<byte>(fz_m, bv_m)
     val () = $A.free<byte>($A.thaw<byte>(fz_m))
     var outp : $B.builder_v = $B.create()
@@ -525,7 +525,7 @@ fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 implement generate_lib_docs() = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, 0, 0)
+  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -534,7 +534,7 @@ in
       val tbuf = $A.alloc<byte>(8192)
       val trr = $F.file_read(tfd, tbuf, 8192)
       val tn = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
-      val () = $R.discard<int><int>($F.file_close(tfd))
+      val () = $R.discard<int><$F.io_error>($F.file_close(tfd))
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
       val pr = $T.parse(bv_tb, tn)
       val () = $A.drop<byte>(fz_tb, bv_tb)
