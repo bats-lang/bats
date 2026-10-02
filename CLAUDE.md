@@ -89,6 +89,8 @@ A build reuses what an earlier build produced when it is still fresh; the Rust b
 
 A string literal whose last byte is an escaping backslash is an unterminated string, reported as the Rust bats reports any other ("unterminated string literal"); the Rust bats's lexer stepped past the end of the file there and panicked (`tests/unterminated`).
 
+A template instance patsopt finds no implementation for (`PMVtmpltcstmat` in the C it emits) fails `bats check` and `bats build` right after patsopt, with an error that names the template, shows the instance, and points to the `.bats` line that uses it. The Rust bats's check passed it, since check runs no cc, and only cc rejected it at build, with an error in the generated C (`tests/template-instances`).
+
 These are the only allowed divergences. All other flags and behaviors must match the old Rust bats exactly.
 
 ## Safety Enforcement
