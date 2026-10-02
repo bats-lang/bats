@@ -693,6 +693,18 @@ fn write_wasm_stubs(): int
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 fn read_unsafe_flag(): int
 
 

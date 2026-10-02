@@ -90,8 +90,8 @@ val g_test_mode = ref<bool>(false)
 val g_lock_dev = ref<bool>(false)
 val g_repo: ref(string) = ref("")
 val g_bin: ref(string) = ref("")
-val g_to_c = ref<int>(0)
-val g_to_c_done = ref<int>(0)
+val g_to_c = ref<bool>(false)
+val g_to_c_done = ref<bool>(false)
 val g_self_path: ref(string) = ref("")
 val g_build_err = ref<bool>(false)
 val g_exit_code = ref<int>(0)
@@ -122,10 +122,10 @@ val g_exit_code = ref<int>(0)
 
 
 
+(* Whether --to-c was given: the build writes C to a directory *)
 
 
-
-
+(* Whether the --to-c output was written *)
 
 
 
@@ -149,7 +149,7 @@ val g_exit_code = ref<int>(0)
 implement is_verbose() = !g_verbose
 implement is_quiet() = !g_quiet
 implement is_test_mode() = !g_test_mode
-implement is_to_c() = !g_to_c > 0
+implement is_to_c() = !g_to_c
 implement set_verbose(v) = !g_verbose := v
 implement set_quiet(v) = !g_quiet := v
 implement set_test_mode(v) = !g_test_mode := v
@@ -160,9 +160,8 @@ implement get_repo() = !g_repo
 implement set_bin(s) = !g_bin := s
 implement get_bin() = !g_bin
 implement set_to_c(v) = !g_to_c := v
-implement get_to_c() = !g_to_c
 implement set_to_c_done(v) = !g_to_c_done := v
-implement get_to_c_done() = !g_to_c_done
+implement is_to_c_done() = !g_to_c_done
 implement set_self_path(s) = !g_self_path := s
 implement get_self_path() = !g_self_path
 implement set_build_err() = !g_build_err := true
@@ -958,10 +957,12 @@ implement run_mkdir(path_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
 in rc end
 
+(* How running a program went: it exited with a status (1 if it did not
+   exit normally), or it could not be started *)
+
+
 (* Runs exec with argv, sharing this process's stdin, stdout, stderr and
-   environment, as the Rust bats's Command::status did. The exit status
-   (1 if the program did not exit normally), or ~1 if it could not be
-   started. *)
+   environment, as the Rust bats's Command::status did *)
 
 
 
@@ -974,8 +975,8 @@ implement run_program (exec_bv, argv) =
       val () = $P.pipe_end_close(serr_p)
       val ec = (case+ $P.child_wait(child) of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-    in if ec >= 0 then ec else 1 end
-  | ~$R.err(_) => ~1
+    in Exited(if ec >= 0 then ec else 1) end
+  | ~$R.err(_) => NotStarted()
 
 
 

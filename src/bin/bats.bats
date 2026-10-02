@@ -301,7 +301,7 @@ in
               (* --to-c: passed to do_build; length 0 when absent *)
               val tc_buf = $A.alloc<byte>(4096)
               val tc_len = opt_string_copy(r, h_to_c, tc_buf, 4096)
-              val () = (if tc_len > 0 then set_to_c(1) else ())
+              val () = (if tc_len > 0 then set_to_c(true) else ())
               val @(fz_tc, bv_tc) = $A.freeze<byte>(tc_buf)
               (* Get command *)
               val cmd_buf = $A.alloc<byte>(32)

@@ -221,8 +221,9 @@ fn run_native_runner (n: int): bool = let
   val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
   val () = $A.drop<byte>(fz_x, bv_x)
   val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val passed = (case+ st of ~Exited(status) => status = 0 | ~NotStarted() => false): bool
 in
-  if st = 0 then true
+  if passed then true
   else let
     val () = prerr! ("error: native test failed\n")
   in false end
@@ -240,13 +241,14 @@ fn run_wasm_runner (n: int): bool = let
   val () = $A.drop<byte>(fz_x, bv_x)
   val () = $A.free<byte>($A.thaw<byte>(fz_x))
 in
-  if st = 0 then true
-  else if st < 0 then let
-    val () = prerr! ("error: cannot run node\n")
-  in false end
-  else let
-    val () = prerr! ("error: wasm test failed\n")
-  in false end
+  case+ st of
+  | ~Exited(0) => true
+  | ~Exited(_) => let
+      val () = prerr! ("error: wasm test failed\n")
+    in false end
+  | ~NotStarted() => let
+      val () = prerr! ("error: cannot run node\n")
+    in false end
 end
 
 (* Writes b to rel in the test runner's directory (build/_bats_test,
@@ -1686,14 +1688,14 @@ in
     val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
     val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil()), $L.list_vt_nil())
     val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
-    val rc = run_program(bv_ea, run_argv)
-    val () = (if rc < 0 then let
+    val () = (case+ run_program(bv_ea, run_argv) of
+    | ~NotStarted() => let
       val () = prerr! ("error: cannot run '")
       val () = prerr_seg(bv_ea, 0, exec_len - 1, 524288)
       val () = prerr! ("'")
       val () = prerr_newline()
     in set_exit_code(1) end
-    else set_exit_code(rc))
+    | ~Exited(status) => set_exit_code(status)): void
     val () = $A.drop<byte>(fz_ea, bv_ea)
   in $A.free<byte>($A.thaw<byte>(fz_ea)) end
 end
@@ -1716,14 +1718,14 @@ in
   (* The error is already reported, as Rust's check reports it *)
   if has_build_err() then ()
   else let
-    val kind = generate_lib_docs()
+    val written = generate_lib_docs()
   in
-    if kind < 0 then let
-      val () = set_build_err()
-    in println! ("check failed") end
+    case+ written of
+    | DocsFailed() => let
+        val () = set_build_err()
+      in println! ("check failed") end
     (* As the Rust bats's build::check *)
-    else if is_quiet() then ()
-    else if kind > 0 then prerr! ("check passed (library)\n")
-    else prerr! ("check passed (binary)\n")
+    | Written() => if is_quiet() then () else prerr! ("check passed (library)\n")
+    | NotLibrary() => if is_quiet() then () else prerr! ("check passed (binary)\n")
   end
 end

@@ -517,13 +517,16 @@ fn generate_docs {l:agz}{n:pos}
 
 
 
+datatype docs = Written | NotLibrary | DocsFailed
 
 
 
 
 
 
-fn generate_lib_docs(): int
+
+
+fn generate_lib_docs(): docs
 
 
 
