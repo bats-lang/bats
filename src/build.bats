@@ -17,6 +17,7 @@ staload "helpers.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
+staload "allocator.sats"
 
 (* Preprocess one .bats file: read -> lex -> emit -> write .sats + .dats
    All three path borrows must be null-terminated builder arrays (524288) *)
@@ -474,7 +475,7 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define atspre_lor_int_int(x, y) ((x) | (y))\n#define atspre_land_int_int(x, y) ((x) & (y))\n")
   val () = bput_v(b, "#define atspre_byte2int0(b) ((int)(b))\n#define atspre_int2byte0(i) ((atstype_byte)(i))\n#define atspre_char2int0(c) ((int)(c))\n#define atspre_int2char0(i) ((char)(i))\n")
   val () = bput_v(b, "#define atspre_ptr_null() ((void*)0)\n#define atspre_ptr_is_null(p) ((p) == 0)\n#define atspre_ptr0_is_null atspre_ptr_is_null\n#define atspre_ptr1_is_null atspre_ptr_is_null\n#define atspre_ptr_isnot_null(p) ((p) != 0)\n#define atspre_ptr0_isnot_null atspre_ptr_isnot_null\n#define atspre_ptr1_isnot_null atspre_ptr_isnot_null\n")
-  val () = bput_v(b, "#define atspre_add_ptr1_bsz(p, n) ((void*)((char*)(p) + (n)))\n#define atspre_g0int_neg_int(x) (-(x))\n#define atspre_g1int_neg_int(x) (-(x))\n")
+  val () = bput_v(b, "#define atspre_add_ptr1_bsz(p, n) ((void*)((char*)(p) + (n)))\n#define atspre_sub_ptr1_bsz(p, n) ((void*)((char*)(p) - (n)))\n#define atspre_g0int_neg_int(x) (-(x))\n#define atspre_g1int_neg_int(x) (-(x))\n")
   val () = bput_v(b, "#define atspre_g1int2uint_int_size(x) ((atstype_size)(x))\n#define atspre_strlen strlen\n")
   (* unsigned int and char operations, as ATS's integer.cats and char.cats
      define them (sha256 works on uint) *)
@@ -507,9 +508,8 @@ in rc end
 
 implement write_wasm_runtime_c() = let
   var b : $B.builder_v = $B.create()
-  val () = bput_v(b, "/* runtime.c -- Freestanding WASM: free-list allocator */\nextern unsigned char __heap_base;\nstatic unsigned char *heap_ptr = &__heap_base;\n")
-  val () = bput_v(b, "#define WARD_HEADER 8\n#define WARD_NBUCKET 9\nstatic const unsigned int ward_bsz[WARD_NBUCKET] = {32,128,512,4096,8192,16384,65536,262144,1048576};\n")
-  val () = bput_v(b, "static void *ward_fl[WARD_NBUCKET] = {0,0,0,0,0,0,0,0,0};\nstatic void *ward_fl_over = 0;\n")
+  (* malloc and free are the allocator's (src/allocator.bats), proven *)
+  val () = bput_v(b, "/* runtime.c -- Freestanding WASM: memset, memcpy, memmove, memcmp */\n")
   val () = bput_v(b, "void *memset(void *s,int c,unsigned int n){unsigned char *p=(unsigned char*)s;unsigned char byte=(unsigned char)c;while(n--)*p++=byte;return s;}\n")
   val () = bput_v(b, "void *memcpy(void *dst,const void *src,unsigned int n){unsigned char *d=(unsigned char*)dst;const unsigned char *s=(const unsigned char*)src;while(n--)*d++=*s++;return dst;}\n")
   (* clang lowers some copies to memmove (an overlap it cannot rule out)
@@ -519,18 +519,6 @@ implement write_wasm_runtime_c() = let
      turning their own loops back into calls to themselves *)
   val () = bput_v(b, "__attribute__((no_builtin)) void *memmove(void *dst,const void *src,unsigned int n){unsigned char *d=(unsigned char*)dst;const unsigned char *s=(const unsigned char*)src;if(d<=s){while(n--)*d++=*s++;}else{d+=n;s+=n;while(n--)*--d=*--s;}return dst;}\n")
   val () = bput_v(b, "__attribute__((no_builtin)) int memcmp(const void *a,const void *b,unsigned int n){const unsigned char *p=(const unsigned char*)a;const unsigned char *q=(const unsigned char*)b;while(n--){if(*p!=*q)return (int)*p-(int)*q;p++;q++;}return 0;}\n")
-  val () = bput_v(b, "static inline unsigned int ward_hdr_read(void *p){return *(unsigned int*)((char*)p-WARD_HEADER);}\n")
-  val () = bput_v(b, "static inline int ward_bucket(unsigned int n){if(n<=32)return 0;if(n<=128)return 1;if(n<=512)return 2;if(n<=4096)return 3;\n")
-  val () = bput_v(b, "if(n<=8192)return 4;if(n<=16384)return 5;if(n<=65536)return 6;if(n<=262144)return 7;if(n<=1048576)return 8;return -1;}\n")
-  val () = bput_v(b, "static void *ward_bump(unsigned int usable){unsigned long a=(unsigned long)heap_ptr;a=(a+7u)&~7u;unsigned long end=a+WARD_HEADER+usable;\n")
-  val () = bput_v(b, "unsigned long limit=(unsigned long)__builtin_wasm_memory_size(0)*65536UL;if(end>limit){unsigned long pages=(end-limit+65535UL)/65536UL;\n")
-  val () = bput_v(b, "if(__builtin_wasm_memory_grow(0,pages)==(unsigned long)(-1))return(void*)0;}*(unsigned int*)a=usable;void *p=(void*)(a+WARD_HEADER);heap_ptr=(unsigned char*)end;return p;}\n")
-  val () = bput_v(b, "void *malloc(int size){if(size<=0)size=1;unsigned int n=(unsigned int)size;int b=ward_bucket(n);if(b>=0){unsigned int bsz=ward_bsz[b];void *p;\n")
-  val () = bput_v(b, "if(ward_fl[b]){p=ward_fl[b];ward_fl[b]=*(void**)p;}else{p=ward_bump(bsz);}memset(p,0,bsz);return p;}\n")
-  val () = bput_v(b, "void **prev=&ward_fl_over;void *cur=ward_fl_over;while(cur){unsigned int bsz=ward_hdr_read(cur);if(bsz>=n&&bsz<=2*n){*prev=*(void**)cur;memset(cur,0,bsz);return cur;}\n")
-  val () = bput_v(b, "prev=(void**)cur;cur=*(void**)cur;}void *p=ward_bump(n);memset(p,0,n);return p;}\n")
-  val () = bput_v(b, "void free(void *ptr){if(!ptr)return;unsigned int sz=ward_hdr_read(ptr);int b=ward_bucket(sz);if(b>=0&&ward_bsz[b]==sz){*(void**)ptr=ward_fl[b];ward_fl[b]=ptr;}\n")
-  val () = bput_v(b, "else{*(void**)ptr=ward_fl_over;ward_fl_over=ptr;}}\n")
   val p = str_to_path_arr("build/_bats_wasm_runtime.c")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
   val rc = write_file_from_builder(bv_p, 524288, b)
@@ -653,6 +641,45 @@ fn wasm_cc_file {l:agz}
   val rc = run_wasm_cc(path, path_len, bv_o, ol)
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
+in rc end
+
+(* The allocator (src/allocator.bats): its source written to build/,
+   emitted as a module of an unsafe package is (its proven core, outside
+   $UNSAFE, under the same rules), proven by patsopt and compiled to
+   build/_bats_wasm_allocator_dats.wasm.o; 0 when it is *)
+fn build_wasm_allocator {lph:agz}
+  (ph: !$A.borrow(byte, lph, 512), phlen: int): int = let
+  val written = write_wasm_allocator()
+  val src = str_to_path_arr("build/_bats_wasm_allocator.bats")
+  val @(fz_src, bv_src) = $A.freeze<byte>(src)
+  val sats = str_to_path_arr("build/_bats_wasm_allocator.sats")
+  val @(fz_sats, bv_sats) = $A.freeze<byte>(sats)
+  val dats = str_to_path_arr("build/_bats_wasm_allocator.dats")
+  val @(fz_dats, bv_dats) = $A.freeze<byte>(dats)
+  val c = str_to_path_arr("build/_bats_wasm_allocator_dats.c")
+  val @(fz_c, bv_c) = $A.freeze<byte>(c)
+  val emitted = (if written <> 0 then ~1
+    else preprocess_one(bv_src, bv_sats, bv_dats, Wasm(), true, false)): int
+  val fresh = let
+    var fo : $B.builder_v = $B.create()
+    val () = bput_v(fo, "build/_bats_wasm_allocator_dats.c")
+    val () = put_char_v(fo, 0)
+    var fi : $B.builder_v = $B.create()
+    val () = bput_v(fi, "build/_bats_wasm_allocator.dats")
+    val () = put_char_v(fi, 0)
+  in c_fresh_bv(fo, fi) end
+  val proven = (if emitted <> 0 then 1
+    else if fresh then 0
+    else run_patsopt(ph, phlen, bv_c, 34, bv_dats, 32)): int
+  val rc = (if proven <> 0 then 1 else wasm_cc_file(bv_c, 34)): int
+  val () = $A.drop<byte>(fz_c, bv_c)
+  val () = $A.free<byte>($A.thaw<byte>(fz_c))
+  val () = $A.drop<byte>(fz_dats, bv_dats)
+  val () = $A.free<byte>($A.thaw<byte>(fz_dats))
+  val () = $A.drop<byte>(fz_sats, bv_sats)
+  val () = $A.free<byte>($A.thaw<byte>(fz_sats))
+  val () = $A.drop<byte>(fz_src, bv_src)
+  val () = $A.free<byte>($A.thaw<byte>(fz_src))
 in rc end
 
 (* ============================================================
@@ -2619,6 +2646,8 @@ in
                       val _ = write_wasm_stubs()
                       val wrt_rc = compile_wasm_runtime()
                       val () = (if wrt_rc <> 0 then let val () = set_build_err() in println! ("error: WASM runtime compile failed") end else ())
+                      val walloc_rc = build_wasm_allocator(ph, phlen)
+                      val () = (if walloc_rc <> 0 then let val () = set_build_err() in println! ("error: WASM allocator build failed") end else ())
                       (* Compile entry _dats.c *)
                       var we_b : $B.builder_v = $B.create()
                       val () = bput_v(we_b, "build/_bats_entry_")
@@ -2667,13 +2696,14 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, wl)
                       val () = bput_v(wl, ".wasm") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "build/_bats_wasm_runtime.wasm.o") val () = put_char_v(wl, 0)
+                      val () = bput_v(wl, "build/_bats_wasm_allocator_dats.wasm.o") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "build/_bats_entry_")
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, wl)
                       val () = bput_v(wl, "_dats.wasm.o") val () = put_char_v(wl, 0)
                       val () = bput_v(wl, "build/src/bin/")
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, wl)
                       val () = bput_v(wl, "_dats.wasm.o") val () = put_char_v(wl, 0)
-                      val wl_argc0 = 32
+                      val wl_argc0 = 33
                       (* Compile deps from staload chain and add .o to link *)
                       val w_cl = dep_closure(bv_sd)
                       val w_dc = put_dep_wasm_objects(w_cl, wl, 0)
