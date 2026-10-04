@@ -37,6 +37,12 @@ run() { # <bats command> <step>
   if [ "$1" = build ]; then set -- "$1" "$2" --only debug --only native; else set -- "$1" "$2"; fi
   command=$1; name=$2; shift 2
   (cd "$P" && "$BATS" "$command" "$@") > "$TMP/out" 2>&1 || { echo "FAIL: $name: bats $command"; cat "$TMP/out"; exit 1; }
+  # Freshness is by whole-second mtimes, and patsopt takes less than a
+  # second here: C made in the second its .dats was would be taken for
+  # stale. Every input of patsopt's (the .dats, the .sats, the stamp) is
+  # made older than the C made from it, as in a project whose modules
+  # take longer.
+  find "$P/build" -type f ! -name '*_dats.c' -exec touch -d "@$(( $(date +%s) - 10 ))" {} +
 }
 # Freshness is by whole-second mtimes: each change is a second later
 step() { # <bats command> <step>: m changed, then bats run
