@@ -96,12 +96,24 @@ in
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = whole_free(ar, $A.thaw<byte>(fz_src))
       (* Write .sats, unless it holds these bytes already: every module that
-         staloads it is rebuilt when it changes (touch_sats_stamp) *)
+         staloads it is rebuilt when it changes (touch_sats_stamp). In
+         check and test mode, whose C is never shipped, not when it has
+         only moved (sats_moved): a private declaration added or changed
+         before its #pub ones, as a static test's snippet is, changes no
+         module that staloads it, so only this module is checked again. *)
       val [ks:int] sc = $B.rope_chunks(sats)
       val r1 = (if file_has_rope(sats_bv, sc) then 0
         else let
+          val before = (if is_test_mode() then read_whole(sats_bv, 524288)
+                        else whole_err($F.NotFound())): whole_file
           val r = write_file_from_rope(sats_bv, sc)
-          val () = touch_sats_stamp()
+          val moved = (if r = 0 then sats_moved(before, sats_bv)
+            else let
+              val () = (case+ before of
+                | ~whole_ok(ar, p, _, _) => whole_free(ar, p)
+                | ~whole_err(_) => ())
+            in false end): bool
+          val () = (if moved then () else touch_sats_stamp())
         in r end): int
       val () = $B.rope_list_free(sc)
       val [kd:int] dc = $B.rope_chunks(dats)
@@ -1008,6 +1020,63 @@ implement check_wasm_binary(path) =
       val () = whole_free(ar, $A.thaw<byte>(fz_s))
     in (if w then Wasm() else Native()): target end
 
+(* The cache of the target and mode mark: build/ holds one target and
+   mode's (the digit in build/.bats_target), and each other one is kept
+   aside in build/.stash/<digit>, not wiped. When build/ holds another
+   mark's, it goes aside and this mark's comes back, if there is one; its
+   files keep their mtimes, so it is as fresh as when it was put aside.
+   check builds native and then wasm, so without this each pass found the
+   other's cache, made every .dats again and patsopt ran on every module
+   twice, every time. Each stash is a whole build/ that only ever saw its
+   own mark, which the freshness rules already handle. *)
+fn cache_swap (mark: int): void = let
+  val tgt_path = str_to_path_arr("build/.bats_target")
+  val @(fz_t, bv_t) = $A.freeze<byte>(tgt_path)
+  val held = (case+ $F.file_open(bv_t, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+    | ~$R.ok(fd) => let
+        val tb = $A.alloc<byte>(16)
+        val tr = $F.file_read(fd, tb, 16)
+        val tl = (case+ tr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
+        val tc = $F.file_close(fd)
+        val () = $R.discard<int><$F.io_error>(tc)
+        val b = byte2int0($A.get<byte>(tb, 0))
+        val () = $A.free<byte>(tb)
+      in (if tl > 0 then b - 48 else ~1): int end
+    | ~$R.err(_) => ~1): int
+  val () = $A.drop<byte>(fz_t, bv_t)
+  val () = $A.free<byte>($A.thaw<byte>(fz_t))
+in
+  if held < 0 then ()
+  else if held > 9 then ()
+  else if held = mark then ()
+  else let
+    val exec = str_to_path_arr("sh")
+    val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+    var b1 = $B.create()
+    val () = bput_v(b1, "sh")
+    var b2 = $B.create()
+    val () = bput_v(b2, "-c")
+    var b3 = $B.create()
+    val () = bput_v(b3, "cd build && rm -rf .stash/")
+    val () = put_int_v(b3, held)
+    val () = bput_v(b3, " && mkdir -p .stash/")
+    val () = put_int_v(b3, held)
+    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash -exec mv {} .stash/")
+    val () = put_int_v(b3, held)
+    val () = bput_v(b3, "/ \\; && if [ -d .stash/")
+    val () = put_int_v(b3, mark)
+    val () = bput_v(b3, " ]; then find .stash/")
+    val () = put_int_v(b3, mark)
+    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 -exec mv {} . \\; && rmdir .stash/")
+    val () = put_int_v(b3, mark)
+    val () = bput_v(b3, "; fi")
+    val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+      $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
+    val _ = run_cmd(bv_exec, argv)
+    val () = $A.drop<byte>(fz_exec, bv_exec)
+  in $A.free<byte>($A.thaw<byte>(fz_exec)) end
+end
+
 (* The build's target and mode as the digit kept in build/.bats_target:
    0 native, 1 wasm, plus 2 in check and test mode, whose output also
    holds the $UNITTEST blocks *)
@@ -1035,6 +1104,8 @@ in $A.free<byte>($A.thaw<byte>(fz_n)) end
 implement do_build {lt} (release, build_target, to_c, tclen) =
   if has_build_err() then () else let
   val is_unsafe = read_unsafe_flag()
+  (* This target and mode's cache in build/ (cache_swap) *)
+  val () = cache_swap(target_mark(build_target, is_test_mode()))
   (* Step 1: mkdir build directories *)
   var mb1 : $B.builder_v = $B.create()
   val () = bput_v(mb1, "build/src/bin")

@@ -1825,6 +1825,130 @@ implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
 
+(* ============================================================
+   A .sats that only moved: its declarations the same, at other lines
+   ============================================================ *)
+
+(* The byte of b at i, or ~1 outside b[0, n) *)
+fn byte_at {l:agz}{m:pos}{n:nat | n < m}{i:int}
+  (b: !$A.borrow(byte, l, m), n: int n, i: int i): int =
+  if i < 0 then ~1
+  else if i >= n then ~1
+  else byte2int0($A.read<byte>(b, i))
+
+(* i + k, at most n: k bytes on from i (k at least 1) *)
+fn ahead {n:nat}{i:nat | i < n}{k:int | k >= 1}
+  (n: int n, i: int i, k: int k): [j:int | i < j; j <= n] int j =
+  if i + k <= n then i + k else n
+
+(* Past the newlines of b from i *)
+fun past_newlines {l:agz}{m:pos}{n:nat | n < m}{i:nat | i <= n} .<n - i>.
+  (b: !$A.borrow(byte, l, m), n: int n, i: int i): [j:int | i <= j; j <= n] int j =
+  if i >= n then i
+  else if byte2int0($A.read<byte>(b, i)) = 10 then past_newlines(b, n, i + 1)
+  else i
+
+(* Whether a[i, an) and b[j, bn) are the same text once each run of
+   newlines, in either, is taken as one newline *)
+fun same_but_newline_runs
+  {la,lb:agz}{ma,mb:pos}{an:nat | an < ma}{bn:nat | bn < mb}
+  {i:nat | i <= an}{j:nat | j <= bn} .<an - i + bn - j>.
+  (a: !$A.borrow(byte, la, ma), an: int an, i: int i,
+   b: !$A.borrow(byte, lb, mb), bn: int bn, j: int j): bool =
+  if i >= an then j >= bn
+  else if j >= bn then false
+  else let
+    val x = byte2int0($A.read<byte>(a, i))
+    val y = byte2int0($A.read<byte>(b, j))
+  in
+    if x <> y then false
+    else if x = 10 then
+      same_but_newline_runs(a, an, past_newlines(a, an, i + 1),
+                            b, bn, past_newlines(b, bn, j + 1))
+    else same_but_newline_runs(a, an, i + 1, b, bn, j + 1)
+  end
+
+(* Whether no newline of b[i, n) is part of a literal: none in a string
+   literal (whose length it is part of) or a char literal, no C code
+   (%{, whose text is not read here), and no literal or block comment
+   left open at the end. A newline in a comment or between tokens is
+   only where the next line starts. state: 0 in code, 1 in a line
+   comment, 2 in ML comments depth deep, 3 in a string literal, 4 in a
+   C comment. Where it cannot tell, it says no. *)
+fun newlines_between_tokens {l:agz}{m:pos}{n:nat | n < m}{i:nat | i <= n} .<n - i>.
+  (b: !$A.borrow(byte, l, m), n: int n, i: int i, state: int, depth: int): bool =
+  if i >= n then (state = 0 || state = 1)
+  else let
+    val c = byte2int0($A.read<byte>(b, i))
+    val d = byte_at(b, n, i + 1)
+  in
+    if state = 1 then
+      newlines_between_tokens(b, n, i + 1, (if c = 10 then 0 else 1), 0)
+    else if state = 2 then
+      (if c = 40 && d = 42 then newlines_between_tokens(b, n, ahead(n, i, 2), 2, depth + 1)
+       else if c = 42 && d = 41 then
+         newlines_between_tokens(b, n, ahead(n, i, 2), (if depth <= 1 then 0 else 2), depth - 1)
+       else newlines_between_tokens(b, n, i + 1, 2, depth))
+    else if state = 3 then
+      (if c = 10 then false
+       else if c = 92 then (if d = 10 then false else if d < 0 then false
+         else newlines_between_tokens(b, n, ahead(n, i, 2), 3, 0))
+       else if c = 34 then newlines_between_tokens(b, n, i + 1, 0, 0)
+       else newlines_between_tokens(b, n, i + 1, 3, 0))
+    else if state = 4 then
+      (if c = 42 && d = 47 then newlines_between_tokens(b, n, ahead(n, i, 2), 0, 0)
+       else newlines_between_tokens(b, n, i + 1, 4, 0))
+    else if c = 34 then newlines_between_tokens(b, n, i + 1, 3, 0)
+    else if c = 47 && d = 47 then newlines_between_tokens(b, n, ahead(n, i, 2), 1, 0)
+    else if c = 47 && d = 42 then newlines_between_tokens(b, n, ahead(n, i, 2), 4, 0)
+    else if c = 40 && d = 42 then newlines_between_tokens(b, n, ahead(n, i, 2), 2, 1)
+    else if c = 37 && d = 123 then false
+    else if c = 39 then let
+      val e = byte_at(b, n, i + 2)
+      val f = byte_at(b, n, i + 3)
+    in
+      if d = 10 || e = 10 || f = 10 then false
+      (* '\x': an escape, closed at once, or not read here *)
+      else if d = 92 then (if f = 39 then newlines_between_tokens(b, n, ahead(n, i, 4), 0, 0)
+                           else false)
+      (* 'x' *)
+      else if e = 39 then newlines_between_tokens(b, n, ahead(n, i, 3), 0, 0)
+      (* a quote before a tuple, record or list: '( '{ '[ *)
+      else newlines_between_tokens(b, n, i + 1, 0, 0)
+    end
+    else newlines_between_tokens(b, n, i + 1, 0, 0)
+  end
+
+(* Whether a module's .sats, before (as it was read before it was
+   written again) and now at path, has only moved: the same text but
+   for how many newlines are in each run of them, none of them in a
+   literal. A private declaration added, removed or changed moves the
+   #pub ones after it to other lines (its lines are kept blank, so
+   patsopt's line numbers stay those of the .bats), and that changes
+   nothing a module that staloads the .sats is checked against. *)
+#pub fn sats_moved {lp:agz}
+  (before: whole_file, path: !$A.borrow(byte, lp, 524288)): bool
+
+implement sats_moved (before, path) =
+  case+ before of
+  | ~whole_err(_) => false
+  | ~whole_ok(ar0, p0, m0, n0) =>
+    (case+ read_whole(path, 524288) of
+    | ~whole_err(_) => let
+        val () = whole_free(ar0, p0)
+      in false end
+    | ~whole_ok(ar1, p1, m1, n1) => let
+        val @(fz0, bv0) = $A.freeze<byte>(p0)
+        val @(fz1, bv1) = $A.freeze<byte>(p1)
+        val moved = (if ~same_but_newline_runs(bv0, n0, 0, bv1, n1, 0) then false
+          else if ~newlines_between_tokens(bv0, n0, 0, 0, 0) then false
+          else newlines_between_tokens(bv1, n1, 0, 0, 0)): bool
+        val () = $A.drop<byte>(fz0, bv0)
+        val () = whole_free(ar0, $A.thaw<byte>(fz0))
+        val () = $A.drop<byte>(fz1, bv1)
+        val () = whole_free(ar1, $A.thaw<byte>(fz1))
+      in moved end)
+
 #pub fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 implement str_to_path_arr(s) = let
