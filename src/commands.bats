@@ -1631,10 +1631,14 @@ fun prerr_names {ln:agz}{s:nat | s <= 524288} .<524288 - s>.
    after "--", NUL-terminated, in extra[0, elen). *)
 #pub fn do_run {lb,le:agz}
   (release: profile, bin: !$A.borrow(byte, lb, 256), blen: int,
-   extra: !$A.borrow(byte, le, 4096), elen: int): void
+   extra: !$A.borrow(byte, le, 4096), elen: int, lk: project_lock): void
 
-implement do_run {lb,le} (release, bin, blen, extra, elen) = let
+(* The project's lock lk is released once the build is done, so the
+   program run holds nothing: a server run with bats run does not stop
+   the project from being built meanwhile *)
+implement do_run {lb,le} (release, bin, blen, extra, elen, lk) = let
   val () = do_build_plain(release, Native())
+  val () = project_lock_release(lk)
   (* The binaries the build produced, NUL-terminated, in name order *)
   var names: $B.builder_v = $B.create()
   val count = collect_built(names, release)

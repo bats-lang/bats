@@ -322,6 +322,118 @@ staload "./lib.sats"
 
 
 (* ============================================================
+   What an array holds
+   ============================================================ *)
+
+(* The cells of an array, first to last *)
+
+
+
+
+(* CLEN(cs, n): cs has n cells *)
+
+
+
+
+(* NTH(cs, i, v): cell i of cs is v *)
+
+
+
+
+(* SETC(cs, i, v, cs2): cs2 is cs with its cell i set to v *)
+
+
+
+
+(* ============================================================
+   What the cells of an array are, proved
+   ============================================================ *)
+
+(* Setting a cell leaves the number of cells *)
+
+
+prfun _setc_len {cs,cs2:cells}{i:nat}{v:int}{n:nat} .<n>. (s: SETC(cs, i, v, cs2), l: CLEN(cs, n)): CLEN(cs2, n) =
+  case+ s of
+  | SETC_here() => (case+ l of CLEN_cons(l1) => CLEN_cons(l1))
+  | SETC_there(s1) => (case+ l of CLEN_cons(l1) => CLEN_cons(_setc_len(s1, l1)))
+
+primplement setc_len {cs,cs2}{i}{v}{n} (s, l) = _setc_len(s, l)
+
+(* The cell that was set is the value *)
+
+
+prfun _setc_nth_same {cs,cs2:cells}{i:nat}{v:int} .<i>. (s: SETC(cs, i, v, cs2)): NTH(cs2, i, v) =
+  case+ s of
+  | SETC_here() => NTH_here()
+  | SETC_there(s1) => NTH_there(_setc_nth_same(s1))
+
+primplement setc_nth_same {cs,cs2}{i}{v} (s) = _setc_nth_same(s)
+
+(* The others are as they were *)
+
+
+prfun _setc_nth_other {cs,cs2:cells}{i,j:nat | i != j}{v,w:int} .<i>. (s: SETC(cs, i, v, cs2), p: NTH(cs, j, w)): NTH(cs2, j, w) =
+  case+ s of
+  | SETC_here() => (case+ p of NTH_there(p1) => NTH_there(p1))
+  | SETC_there(s1) =>
+    (case+ p of
+     | NTH_here() => NTH_here()
+     | NTH_there(p1) => NTH_there(_setc_nth_other(s1, p1)))
+
+primplement setc_nth_other {cs,cs2}{i,j}{v,w} (s, p) = _setc_nth_other(s, p)
+
+(* A cell is within the cells *)
+
+
+prfun _nth_in_len {cs:cells}{i:nat}{v:int}{n:nat} .<i>. (p: NTH(cs, i, v), l: CLEN(cs, n)): [i < n] void =
+  case+ p of
+  | NTH_here() => (case+ l of CLEN_cons(_) => ())
+  | NTH_there(p1) => (case+ l of CLEN_cons(l1) => _nth_in_len(p1, l1))
+
+primplement nth_in_len {cs}{i}{v}{n} (p, l) = _nth_in_len(p, l)
+
+(* A cell has one value *)
+
+
+prfun _nth_functional {cs:cells}{i:nat}{v,w:int} .<i>. (p: NTH(cs, i, v), q: NTH(cs, i, w)): [v == w] void =
+  case+ p of
+  | NTH_here() => (case+ q of NTH_here() => ())
+  | NTH_there(p1) => (case+ q of NTH_there(q1) => _nth_functional(p1, q1))
+
+primplement nth_functional {cs}{i}{v,w} (p, q) = _nth_functional(p, q)
+
+(* ============================================================
+   The array
+   ============================================================ *)
+
+(* n bytes at l holding the cells cs *)
+
+
+
+(* n bytes, all zero, which the types know nothing more of *)
+
+
+
+
+(* Cell i, with the proof that it is cell i of the cells *)
+
+
+
+(* Cell i set to v: the cells that are left, with the proof that they are *)
+
+
+
+(* The array that alloc gives, taken to hold cells nothing is known of; it
+   is not an array of alloc any more *)
+
+
+(* The array without its cells, to be written by what knows nothing of them *)
+
+
+(* Another array holding the same cells *)
+
+
+(* ============================================================
    C runtime helpers
    ============================================================ *)
 
@@ -390,6 +502,7 @@ local
 
 
   assume arrx(a, l, n, o) = ptr l
+  assume barr(l, n, cs) = ptr l
   assume frozenx(a, l, n, k, o) = ptr l
   assume arena(a, l, max, used, k) = ptr l
   assume borrow(a, l, n) = ptr l
@@ -423,6 +536,47 @@ implement alloc<Int>(n) = _alloc_zeroed<Int>(n)
 implement{a}
 free{l}{n}(arr) =
    $extfcall(void, "free", arr) 
+
+(* -- Byte arrays that know their contents -- *)
+
+implement barr_alloc {n} (n) =
+  
+    $UNSAFE.castvwtp0{[l:agz][cs:cells] (CLEN(cs, n) | barr(l, n, cs))}(_calloc(n, sizeof<byte>))
+  
+
+implement barr_free {l}{n}{cs} (a) =
+   $extfcall(void, "free", a) 
+
+implement barr_get {l}{n,i}{cs} (a, i) =
+  
+    $UNSAFE.cast{[v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)}(byte2int0($UNSAFE.ptr0_get<byte>(ptr_add<byte>(a, i))))
+  
+
+implement barr_set {l}{n,i}{cs}{v} (a, i, v) = let
+  val () =  $UNSAFE.ptr0_set<byte>(ptr_add<byte>(a, i), $UNSAFE.cast{byte}(v)) 
+in
+   $UNSAFE.castvwtp0{[cs2:cells] (SETC(cs, i, v, cs2) | barr(l, n, cs2))}(a) 
+end
+
+implement barr_of_arr {l}{n} (a) =
+   $UNSAFE.castvwtp0{[cs:cells] (CLEN(cs, n) | barr(l, n, cs))}(a) 
+
+implement barr_to_arr {l}{n}{cs} (a) =
+   $UNSAFE.castvwtp0{arr(byte, l, n)}(a) 
+
+implement barr_copy {l}{n}{cs} (a, n) = let
+  val copy =  _calloc(n, sizeof<byte>) 
+  fun go {i:nat | i <= n} .<n - i>. (i: int i): void =
+    if i >= n then ()
+    else let
+      val () = 
+        $UNSAFE.ptr0_set<byte>(ptr_add<byte>(copy, i), $UNSAFE.ptr0_get<byte>(ptr_add<byte>(a, i)))
+      
+    in go(i + 1) end
+  val () = go(0)
+in
+   $UNSAFE.castvwtp0{[m:agz] barr(m, n, cs)}(copy) 
+end
 
 (* -- Element access -- *)
 

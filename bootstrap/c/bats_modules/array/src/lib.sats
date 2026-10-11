@@ -325,6 +325,153 @@ arena_destroy
 
 
 
+datasort cells =
+  | cnil of ()
+  | ccons of (int, cells)
+
+
+dataprop CLEN(cells, int) =
+  | CLEN_nil(cnil(), 0)
+  | {c:int}{cs:cells}{n:nat} CLEN_cons(ccons(c, cs), n + 1) of CLEN(cs, n)
+
+
+dataprop NTH(cells, int, int) =
+  | {c:int}{cs:cells} NTH_here(ccons(c, cs), 0, c)
+  | {c,v:int}{cs:cells}{i:nat} NTH_there(ccons(c, cs), i + 1, v) of NTH(cs, i, v)
+
+
+dataprop SETC(cells, int, int, cells) =
+  | {c,v:int}{cs:cells} SETC_here(ccons(c, cs), 0, v, ccons(v, cs))
+  | {c,v:int}{cs,cs2:cells}{i:nat} SETC_there(ccons(c, cs), i + 1, v, ccons(c, cs2)) of SETC(cs, i, v, cs2)
+
+
+
+
+
+
+prfun setc_len {cs,cs2:cells}{i:nat}{v:int}{n:nat} (SETC(cs, i, v, cs2), CLEN(cs, n)): CLEN(cs2, n)
+
+
+
+
+
+
+
+
+
+prfun setc_nth_same {cs,cs2:cells}{i:nat}{v:int} (SETC(cs, i, v, cs2)): NTH(cs2, i, v)
+
+
+
+
+
+
+
+
+
+prfun setc_nth_other {cs,cs2:cells}{i,j:nat | i != j}{v,w:int} (SETC(cs, i, v, cs2), NTH(cs, j, w)): NTH(cs2, j, w)
+
+
+
+
+
+
+
+
+
+
+
+
+prfun nth_in_len {cs:cells}{i:nat}{v:int}{n:nat} (NTH(cs, i, v), CLEN(cs, n)): [i < n] void
+
+
+
+
+
+
+
+
+
+prfun nth_functional {cs:cells}{i:nat}{v,w:int} (NTH(cs, i, v), NTH(cs, i, w)): [v == w] void
+
+
+
+
+
+
+
+
+
+
+
+
+
+absvtype barr(l:addr, n:int, cs:cells) = ptr
+
+
+
+fun barr_alloc {n:pos | n <= 1048576} (n: int n): [l:agz][cs:cells] (CLEN(cs, n) | barr(l, n, cs))
+
+fun barr_free {l:agz}{n:nat}{cs:cells} (a: barr(l, n, cs)): void
+
+
+fun barr_get {l:agz}{n,i:nat | i < n}{cs:cells} (a: !barr(l, n, cs), i: int i)
+  : [v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)
+
+
+fun barr_set {l:agz}{n,i:nat | i < n}{cs:cells}{v:int | 0 <= v; v < 256} (a: barr(l, n, cs), i: int i, v: int v)
+  : [cs2:cells] (SETC(cs, i, v, cs2) | barr(l, n, cs2))
+
+
+
+fun barr_of_arr {l:agz}{n:nat} (a: arr(byte, l, n)): [cs:cells] (CLEN(cs, n) | barr(l, n, cs))
+
+
+fun barr_to_arr {l:agz}{n:nat}{cs:cells} (a: barr(l, n, cs)): arr(byte, l, n)
+
+
+fun barr_copy {l:agz}{n:pos}{cs:cells} (a: !barr(l, n, cs), n: int n): [m:agz] barr(m, n, cs)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

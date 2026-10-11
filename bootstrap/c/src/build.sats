@@ -24,6 +24,8 @@ staload T = "toml/src/lib.sats"
 
 
 staload "helpers.sats"
+staload "cache.sats"
+staload "facts.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
@@ -37,6 +39,12 @@ fn preprocess_one
    dats_bv: !$A.borrow(byte, l3, 524288),
    build_target: target, is_unsafe: bool,
    target_changed: bool): int
+
+
+
+
+
+
 
 
 
@@ -1090,6 +1098,13 @@ fn do_build {lt:agz}
 
 
 fn do_build_plain(release: profile, build_target: target): void
+
+
+
+
+
+
+
 
 
 

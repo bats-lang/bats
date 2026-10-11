@@ -1408,8 +1408,10 @@ in prerr_builder(out) end
    implementation, a plain function that captures): the first one is
    reported, and the build fails, at check as at build (check runs no
    cc). 0 when there is none, else 1 *)
-fn check_emitted_flaws {lo,li:agz}
-  (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int =
+
+
+
+implement check_emitted_flaws {lo,li} (out_bv, in_bv, il) =
   case+ read_whole(out_bv, 524288) of
   | ~whole_err(_) => 0
   | ~whole_ok(ar, piece, size, n) => let
@@ -1426,13 +1428,19 @@ fn check_emitted_flaws {lo,li:agz}
       val () = whole_free(ar, $A.thaw<byte>(fz_c))
     in rc end
 
+(* patsopt run on the .dats in[0, in_len) (a NUL-terminated path),
+   writing its C to out[0, out_len): 0, or patsopt's failure, reported,
+   its output removed. What only cc would reject in the C is not looked
+   for here (check_emitted_flaws): run_patsopt, in cache.bats, runs both. *)
 
 
 
 
 
 (* rm -f the NUL-terminated path out[0, len - 1) *)
-fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void = let
+
+
+implement remove_output {lo} (out_bv, out_len) = let
   val exec = str_to_path_arr("rm")
   val @(fz_x, bv_x) = $A.freeze<byte>(exec)
   var b1 = $B.create()
@@ -1450,7 +1458,7 @@ in $A.free<byte>($A.thaw<byte>(fz_x)) end
    more runs. A failed run's output (patsopt writes its #error line
    there) is removed, so it is not taken for fresh next time: the Rust
    bats records a module in its build cache only when patsopt succeeds *)
-implement run_patsopt(ph, phlen, out_bv, out_len, in_bv, in_len) =
+implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
   var exec_b = $B.create()
   val () = copy_to_builder(ph, 0, phlen, 512, exec_b)
@@ -1520,9 +1528,7 @@ in
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-      val patsopt_rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
-      val rc = (if patsopt_rc <> 0 then patsopt_rc
-                else check_emitted_flaws(out_bv, in_bv, in_len - 1)): int
+      val rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
       val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
     in rc end
   | ~$R.err(_) => ~1
@@ -1629,6 +1635,62 @@ in
     end
   | ~$R.err(_) => ~1
 end
+
+(* ============================================================
+   The project's lock (bats-lang/bats#250)
+   ============================================================ *)
+
+(* The lock a command that writes build/, dist/ or bats_modules/ holds,
+   so two bats never write one project's at once. It is flock(2) on
+   bats.toml opened read-only (file's fd_lock): bats.toml is always
+   there and bats clean leaves it, where a lock file in build/ would be
+   deleted while another bats waits on it, and the kernel releases the
+   lock when bats ends however it ends, so it is never left stale.
+   Where the file system has no locks (an error other than WouldBlock),
+   bats runs unlocked, as Cargo does. *)
+
+
+
+
+(* Takes the project's lock, saying on stderr when another bats holds it
+   and waiting until it is free *)
+
+
+
+
+implement project_lock_take () = let
+  val p = str_to_path_arr("bats.toml")
+  val @(fz_p, bv_p) = $A.freeze<byte>(p)
+  val opened = $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in
+  case+ opened of
+  | ~$R.err(_) => ProjectUnlocked()
+  | ~$R.ok(fd) =>
+    (case+ $F.fd_lock(fd, $F.LockExclusive(), $F.LockFailsAtOnce()) of
+    | ~$R.ok(_) => ProjectLocked(fd)
+    | ~$R.err(e) =>
+      (case+ e of
+      | $F.WouldBlock() => let
+          val () = (if is_quiet() then ()
+            else prerr! ("waiting for another bats running in this project (it holds the lock on bats.toml)\n"))
+        in
+          case+ $F.fd_lock(fd, $F.LockExclusive(), $F.LockWaits()) of
+          | ~$R.ok(_) => ProjectLocked(fd)
+          | ~$R.err(_) => let
+              val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+            in ProjectUnlocked() end
+        end
+      | _ => let
+          val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+        in ProjectUnlocked() end))
+end
+
+implement project_lock_release (lk) =
+  case+ lk of
+  | ~ProjectLocked(fd) => $R.discard<int><$F.io_error>($F.file_close(fd))
+  | ~ProjectUnlocked() => ()
 
 (* ============================================================
    File I/O
