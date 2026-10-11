@@ -64,6 +64,16 @@ in
   else UnknownCommand()
 end
 
+(* Whether the command writes build/, dist/ or bats_modules/, and so
+   holds the project's lock (run takes it itself) *)
+fn locks_project (c: command): bool =
+  case+ c of
+  | Build() => true | Check() => true | Clean() => true | Lock() => true
+  | Test() => true | Tree() => true | Upload() => true | Add() => true
+  | Remove() => true
+  | Run() => false | Init() => false | Completions() => false
+  | Version() => false | UnknownCommand() => false
+
 (* Print usage matching Rust bats format *)
 fn print_usage(): void = let
   val () = println! ("usage: bats [--run-in <dir>] [--quiet] <command>")
@@ -183,6 +193,22 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
 fn opt_string_copy {l:agz}{n:pos}
   (r: !$AP.parse_result, h: $AP.arg($AP.string_val), buf: !$A.arr(byte, l, n), n: int n): int =
   if $AP.is_present(r, h) then $AP.get_string_copy(r, h, buf, n) else 0
+
+(* BATS_REPOSITORY copied to buf, and its length: 0 when it is not set
+   (or is longer than buf holds) *)
+fn repository_from_env {l:agz} (buf: !$A.arr(byte, l, 4096)): int = let
+  var name_c = @[char][15]('B', 'A', 'T', 'S', '_', 'R', 'E', 'P', 'O', 'S', 'I', 'T', 'O', 'R', 'Y')
+  val name = $S.from_char_array(name_c, 15)
+  val @(fz_n, bv_n) = $A.freeze<byte>(name)
+  val got = $E.get(bv_n, 15, buf, 4096)
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+in case+ got of | ~$R.some(n) => (if n < 4096 then n else 0) | ~$R.none() => 0 end
+
+(* The repository's length in buf: --repository's (flag_len), else
+   BATS_REPOSITORY's *)
+fn repository_len {l:agz} (buf: !$A.arr(byte, l, 4096), flag_len: int): int =
+  if flag_len > 0 then flag_len else repository_from_env(buf)
 
 (* ============================================================
    Main: read argv (args_read: NUL-separated), dispatch
@@ -306,7 +332,9 @@ in
               (* --repository: passed to the commands that use it; length 0
                  when absent *)
               val repo_buf = $A.alloc<byte>(4096)
-              val repo_len = opt_string_copy(r, h_repository, repo_buf, 4096)
+              val repo_flag_len = opt_string_copy(r, h_repository, repo_buf, 4096)
+              (* without --repository, BATS_REPOSITORY names it (bats-lang/bats#250) *)
+              val repo_len = repository_len(repo_buf, repo_flag_len)
               val @(fz_repo, bv_repo) = $A.freeze<byte>(repo_buf)
               val @(fz_extra, bv_extra) = $A.freeze<byte>(extra_buf)
               (* --to-c: passed to do_build; length 0 when absent *)
@@ -321,6 +349,11 @@ in
               val () = $A.free<byte>(cmd_buf)
               val arg_buf = $A.alloc<byte>(4096)
               val arg_len = $AP.get_string_copy(r, h_arg, arg_buf, 4096)
+              (* The project's lock, for the commands that write
+                 build/, dist/ or bats_modules/ (run takes its own, and
+                 releases it before the program runs) *)
+              val lk = (if locks_project(chosen_command) then project_lock_take()
+                else ProjectUnlocked()): project_lock
             in let val () = (
               case+ chosen_command of
               | Build() => let
@@ -386,10 +419,12 @@ in
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
-                val () = (if ~bin_package() then ()
-                  else if ~resolve_deps(bv_repo, repo_len) then ()
+                val run_lock = project_lock_take()
+                val () = (if ~bin_package() then project_lock_release(run_lock)
+                  else if ~resolve_deps(bv_repo, repo_len) then project_lock_release(run_lock)
                   else if validate_project() then
-                  do_run(run_profile, bv_bin, bin_len, bv_extra, extra_len) else ())
+                  do_run(run_profile, bv_bin, bin_len, bv_extra, extra_len, run_lock)
+                  else project_lock_release(run_lock))
                 val () = $A.drop<byte>(fz_bin, bv_bin)
               in $A.free<byte>($A.thaw<byte>(fz_bin)) end
               | Init() => let
@@ -484,6 +519,7 @@ in
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
               in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|completions> [--only debug|release]") end)
+              val () = project_lock_release(lk)
               val () = $A.drop<byte>(fz_repo, bv_repo)
               val () = $A.free<byte>($A.thaw<byte>(fz_repo))
               val () = $A.drop<byte>(fz_extra, bv_extra)

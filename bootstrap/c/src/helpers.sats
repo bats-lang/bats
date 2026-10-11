@@ -1407,6 +1407,8 @@ fn prerr_builder (b: $B.builder_v): void
 
 
 
+fn check_emitted_flaws {lo,li:agz}
+  (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int
 
 
 
@@ -1425,13 +1427,17 @@ fn prerr_builder (b: $B.builder_v): void
 
 
 
-fn run_patsopt {lph:agz}{lo:agz}{li:agz}
+
+
+
+
+fn patsopt_only {lph:agz}{lo:agz}{li:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int): int
 
 
-
+fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void
 
 
 
@@ -1594,6 +1600,62 @@ fn run_cc {lph:agz}{lo:agz}{li:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datavtype project_lock =
+  | ProjectLocked of $F.fd
+  | ProjectUnlocked
+
+
+
+fn project_lock_take (): project_lock
+
+fn project_lock_release (lk: project_lock): void
 
 
 

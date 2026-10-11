@@ -1644,8 +1644,12 @@ fun prerr_names {ln:agz}{s:nat | s <= 524288} .<524288 - s>.
 
 
 
-implement do_run {lb,le} (release, bin, blen, extra, elen) = let
+(* The project's lock lk is released once the build is done, so the
+   program run holds nothing: a server run with bats run does not stop
+   the project from being built meanwhile *)
+implement do_run {lb,le} (release, bin, blen, extra, elen, lk) = let
   val () = do_build_plain(release, Native())
+  val () = project_lock_release(lk)
   (* The binaries the build produced, NUL-terminated, in name order *)
   var names: $B.builder_v = $B.create()
   val count = collect_built(names, release)

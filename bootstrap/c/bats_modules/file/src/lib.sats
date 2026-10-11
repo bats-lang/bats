@@ -131,6 +131,36 @@ fn fd_copy(src: !fd, dst: !fd): $R.result([c:nat] int c, io_error)
 
 
 
+
+datatype lock_kind =
+  | LockShared
+  | LockExclusive
+
+
+
+datatype lock_wait =
+  | LockWaits
+  | LockFailsAtOnce
+
+
+
+
+
+
+
+
+
+
+
+fn fd_lock(f: !fd, kind: lock_kind, wait: lock_wait): $R.result(int, io_error)
+
+
+fn fd_unlock(f: !fd): $R.result(int, io_error)
+
+
+
+
+
 fn dir_open
   {lb:agz}{n:pos | n < 1048576}
   (path: !$A.borrow(byte, lb, n), path_len: int n): $R.result(dir, io_error)
@@ -239,6 +269,26 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, io_error)
 fn buf_flush(w: !buf_writer): $R.result(int, io_error)
 
 fn buf_writer_close(w: buf_writer): $R.result(int, io_error)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

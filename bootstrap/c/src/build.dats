@@ -25,6 +25,8 @@ staload R = "result/src/lib.sats"
 staload T = "toml/src/lib.sats"
 
 staload "helpers.sats"
+staload "cache.sats"
+staload "facts.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
@@ -330,8 +332,14 @@ fun module_name_end {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
 fn prune_cached {l:agz}{n:pos}{k:nat | k <= n}
   (name: $A.arr(byte, l, n), k: int k, max: int n): void = let
   val stop = module_name_end(name, k, 0)
+  (* bats's own modules (_bats_facts) have no source in src/ *)
+  val own = (if k >= 6 then
+      peek_arr(name, 0, max) = 95 && peek_arr(name, 1, max) = 98 && peek_arr(name, 2, max) = 97
+      && peek_arr(name, 3, max) = 116 && peek_arr(name, 4, max) = 115 && peek_arr(name, 5, max) = 95
+    else false): bool
 in
-  if stop <= 0 then $A.free<byte>(name)
+  if own then $A.free<byte>(name)
+  else if stop <= 0 then $A.free<byte>(name)
   else if stop >= k then $A.free<byte>(name)
   else let
     val @(fz_name, bv_name) = $A.freeze<byte>(name)
@@ -1775,6 +1783,8 @@ in
       (* Step 3a': the cache's orphans go, before the module list is
          read from build/src (#219) *)
       val () = prune_orphans()
+      (* Step 3a'': the commit's facts, for a project that names them *)
+      val () = write_facts()
       (* Step 3b: Preprocess src/*.bats shared modules *)
       val sm_arr = str_to_path_arr("src")
       val @(fz_sm, bv_sm) = $A.freeze<byte>(sm_arr)
@@ -3123,6 +3133,11 @@ in
                 val () = bput_v(mf, "all: debug/bats release/bats\n\n")
                 val () = bput_v(mf, "debug/bats: $(DEBUG_OBJS)\n\tmkdir -p debug\n\t$(CC) -o $@ $^ -g -O0\n\n")
                 val () = bput_v(mf, "release/bats: $(RELEASE_OBJS)\n\tmkdir -p release\n\t$(CC) -o $@ $^ -O2\n\n")
+                (* make install: the compiler beside the ATS2 toolchain
+                   bats keeps in ~/.bats, so ~/.bats/bin on PATH, once, is
+                   all a machine needs (bats-lang/bats#250) *)
+                val () = bput_v(mf, "PREFIX ?= $(HOME)/.bats\n\n")
+                val () = bput_v(mf, "install: release/bats\n\tmkdir -p $(PREFIX)/bin\n\tcp release/bats $(PREFIX)/bin/bats.new\n\tmv -f $(PREFIX)/bin/bats.new $(PREFIX)/bin/bats\n\n")
                 val () = bput_v(mf, "clean:\n\trm -f *.o\n\trm -rf debug release\n")
                 var mfp : $B.builder_v = $B.create()
                 val () = copy_to_builder_v(to_c, 0, tclen, 4096, mfp)

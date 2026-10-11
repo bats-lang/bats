@@ -27,6 +27,8 @@ dist/debug/bats check --repository ../repository-prototype
 - `src/emitter.bats` — code generator (produces `.sats`/`.dats` from spans)
 - `src/build.bats` — build pipeline (preprocessing, patsopt, cc, link)
 - `src/commands.bats` — subcommands (init, test, upload, check, run, etc.)
+- `src/cache.bats` — patsopt's C made path-independent, and the shared cache (`BATS_CACHE_DIR`)
+- `src/facts.bats` — the commit a build is made from, for a project that staloads `_bats_facts.sats`
 
 ## Commands
 
@@ -40,6 +42,26 @@ dist/debug/bats check --repository ../repository-prototype
 - `bats clean` — remove build artifacts
 - `bats tree` — show dependency tree
 - `bats add <package>` / `bats remove <package>` — manage dependencies
+
+## Setting up a machine
+
+- `make install` in `bootstrap/c` (or in a `--to-c` directory) puts the compiler at `~/.bats/bin/bats` (`PREFIX=...` for elsewhere), beside the ATS2 toolchain bats keeps in `~/.bats/ats2`; put `~/.bats/bin` on `PATH` once.
+- `BATS_REPOSITORY=<dir>`: the package repository, when `--repository` is not given (the flag wins).
+- `BATS_CACHE_DIR=<dir>`: a cache of patsopt's output that every checkout of a project shares. An entry is keyed by the toolchain (patsopt and its prelude and libraries, by content) and by every file the module's staloads reach (by content), and only a run that passed is kept, so a hit never lets through what a cold build rejects. Entries unused for 7 days are removed; removing the directory is always safe.
+
+bats takes a lock on the project (flock on `bats.toml`) for every command that writes `build/`, `dist/` or `bats_modules/`, so two bats on one checkout take turns; the one that waits says so. `bats run` releases it before the program runs.
+
+## The commit a build is made from
+
+A module that staloads `"_bats_facts.sats"` gets the commit the build is made from: `BATS_COMMIT` (any revision git takes), else `HEAD`.
+
+```bats
+staload F = "_bats_facts.sats"
+
+implement main0 () = println! ($F.bats_commit_version (), " (", $F.bats_commit_short (), ")")
+```
+
+`bats_commit_time (): int` (committer time, seconds since 1970), `bats_commit_version ()` (that time in UTC as `YEAR.MONTH.DAY.SECONDS`, as bats versions packages), `bats_commit_short (): string 7` and `bats_commit_sha (): string 40`. They are the commit's, never the build's, and a new commit compiles one small module again and nothing else.
 
 ## Dependencies
 

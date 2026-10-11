@@ -21,6 +21,13 @@ release/bats: $(RELEASE_OBJS)
 	mkdir -p release
 	$(CC) -o $@ $^ -O2
 
+PREFIX ?= $(HOME)/.bats
+
+install: release/bats
+	mkdir -p $(PREFIX)/bin
+	cp release/bats $(PREFIX)/bin/bats.new
+	mv -f $(PREFIX)/bin/bats.new $(PREFIX)/bin/bats
+
 clean:
 	rm -f *.o
 	rm -rf debug release
