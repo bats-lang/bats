@@ -81,6 +81,9 @@ val g_to_c = ref<bool>(false)
 val g_to_c_done = ref<bool>(false)
 val g_self_path: ref(string) = ref("")
 val g_build_err = ref<bool>(false)
+(* The machine slot this bats holds (bats-lang/bats#252): its number
+   plus 1, 0 when it holds none *)
+val g_slot_held = ref<int>(0)
 val g_exit_code = ref<int>(0)
 
 #pub fn is_verbose(): bool
@@ -944,6 +947,94 @@ implement run_mkdir(path_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
 in rc end
 
+(* ============================================================
+   The machine's slots (bats-lang/bats#252): names and paths
+   ============================================================ *)
+
+(* The environment variable name appended to out; false when it is not
+   set or is empty *)
+#pub fn env_value {sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, out: !$B.builder_v >> $B.builder_v): bool
+
+implement env_value (name, out) = let
+  val na = str_to_path_arr(name)
+  val buf = $A.alloc<byte>(4096)
+  val got = $E.get_cstr(na, 524288, buf, 4096)
+  val () = $A.free<byte>(na)
+  val k = (case+ got of | ~$R.some(n) => n | ~$R.none() => 0): int
+  val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+  val () = (if k > 0 then copy_to_builder_v(bv_b, 0, k, 4096, out) else ())
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+in k > 0 end
+
+(* The slots' directory appended to out: BATS_LOCK_DIR, else
+   ~/.cache/bats (as gen-pwa test's PWA_TEST_LOCK_DIR, else
+   ~/.cache/pwa-test) *)
+#pub fn slot_dir (out: !$B.builder_v >> $B.builder_v): void
+
+implement slot_dir (out) =
+  if env_value("BATS_LOCK_DIR", out) then ()
+  else let
+    val _ = env_value("HOME", out)
+  in bput_v(out, "/.cache/bats") end
+
+(* The file of slot i appended to out: <dir>/slot-<i>.lock, the name
+   gen-pwa test gives its slots, so one directory is one pool *)
+#pub fn slot_path (i: int, out: !$B.builder_v >> $B.builder_v): void
+
+implement slot_path (i, out) = let
+  val () = slot_dir(out)
+  val () = bput_v(out, "/slot-")
+  val () = put_int_v(out, i)
+in bput_v(out, ".lock") end
+
+(* What bats starts (patsopt, cc, a test runner) gets this process's
+   environment, and, while this bats holds a machine slot
+   (bats-lang/bats#252), BATS_SLOT_HELD naming it: a bats started by it
+   runs in that slot instead of waiting for another, as a command make
+   starts runs in the job slot make reserved for it. Holding none, the
+   environment is this process's alone. extra's NAME=VALUE entries are
+   added too, each replacing that variable. *)
+#pub fn spawn_child_with
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}
+  (path: !$A.borrow(byte, lp, 524288),
+   argv: $L.listv($P.arg_entry),
+   extra: $L.listv($P.arg_entry),
+   stdin_cfg: $P.stream_config(sin),
+   stdout_cfg: $P.stream_config(sout),
+   stderr_cfg: $P.stream_config(serr))
+  : $R.result($P.spawn_pipes(sin, sout, serr), int)
+
+implement spawn_child_with (path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
+  val held = !g_slot_held
+  val extra = (if held > 0 then let
+      var e : $B.builder_v = $B.create()
+      val () = bput_v(e, "BATS_SLOT_HELD=")
+      val () = slot_path(held - 1, e)
+    in $L.list_vt_cons(mk_arg(e), extra) end
+    else extra): $L.listv($P.arg_entry)
+in
+  case+ extra of
+  | ~$L.list_vt_nil() => $P.spawn_inherit_env(path, argv, stdin_cfg, stdout_cfg, stderr_cfg)
+  | $L.list_vt_cons(_, _) => $P.spawn_inherit_env_with(path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg)
+end
+
+(* As spawn_child_with, with no extra entries *)
+#pub fn spawn_child
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}
+  (path: !$A.borrow(byte, lp, 524288),
+   argv: $L.listv($P.arg_entry),
+   stdin_cfg: $P.stream_config(sin),
+   stdout_cfg: $P.stream_config(sout),
+   stderr_cfg: $P.stream_config(serr))
+  : $R.result($P.spawn_pipes(sin, sout, serr), int)
+
+implement spawn_child (path, argv, stdin_cfg, stdout_cfg, stderr_cfg) =
+  spawn_child_with(path, argv, $L.list_vt_nil(), stdin_cfg, stdout_cfg, stderr_cfg)
+
 (* How running a program went: it exited with a status (1 if it did not
    exit normally), or it could not be started *)
 #pub datavtype program_run = Exited of int | NotStarted
@@ -953,8 +1044,10 @@ in rc end
 #pub fn run_program {le:agz}
   (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): program_run
 
-implement run_program (exec_bv, argv) =
-  case+ $P.spawn_inherit_env(exec_bv, argv, $P.inherit(), $P.inherit(), $P.inherit()) of
+implement run_program (exec_bv, argv) = let
+  val spawned = spawn_child(exec_bv, argv, $P.inherit(), $P.inherit(), $P.inherit())
+in
+  case+ spawned of
   | ~$R.ok(sp) => let
       val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
       val () = $P.pipe_end_close(sin_p)
@@ -964,13 +1057,14 @@ implement run_program (exec_bv, argv) =
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
     in Exited(if ec >= 0 then ec else 1) end
   | ~$R.err(_) => NotStarted()
+end
 
 #pub fn run_cmd {le:agz}
   (exec_bv: !$A.borrow(byte, le, 524288),
    argv: $L.listv($P.arg_entry)): int
 
 implement run_cmd (exec_bv, argv) = let
-  val sr = $P.spawn_inherit_env(exec_bv, argv,
+  val sr = spawn_child(exec_bv, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
 in
   case+ sr of
@@ -1051,7 +1145,7 @@ in @(y2, m, d, secs_of_day) end
    outbuf: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k)
 
 implement run_cmd_capture (exec_bv, argv, outbuf) = let
-  val sr = $P.spawn_inherit_env(exec_bv, argv,
+  val sr = spawn_child(exec_bv, argv,
     $P.dev_null(), $P.pipe_new(), $P.pipe_new())
 in
   case+ sr of
@@ -1495,7 +1589,7 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
     val () = print! (" -d ")
     val () = print_borrow(in_bv, 0, in_len, 524288)
   in print_newline() end else ())
-  val sr = $P.spawn_inherit_env_with(bv_exec, argv, envp,
+  val sr = spawn_child_with(bv_exec, argv, envp,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
@@ -1587,7 +1681,7 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
     val () = print! (" ")
     val () = print_borrow(in_bv, 0, in_len, 524288)
   in print_newline() end else ())
-  val sr = $P.spawn_inherit_env(bv_exec, argv,
+  val sr = spawn_child(bv_exec, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
@@ -1624,6 +1718,293 @@ in
 end
 
 (* ============================================================
+   The machine's slots (bats-lang/bats#252)
+   ============================================================ *)
+
+(* A limit on heavy bats work across the machine, for a machine shared
+   by several checkouts or agents (two worktrees are two projects, so
+   the project's lock does not keep their builds apart). Opt-in: with
+   BATS_SLOTS set to a number from 1 to 64, check, build, test and run's
+   build each hold one of that many slots, flock(2) on
+   <dir>/slot-<i>.lock in BATS_LOCK_DIR (else ~/.cache/bats), as gen-pwa
+   test holds PWA_TEST_SLOTS of PWA_TEST_LOCK_DIR: pointing both at one
+   directory makes one pool, so a build and an e2e run take turns too.
+   The kernel releases a slot when bats ends however it ends, so none is
+   left held by a bats that is gone. Unset or empty, nothing is read or
+   written and nothing is said. *)
+
+(* The commands that take a slot, and the word each is noted by *)
+#pub datatype heavy_command =
+  | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
+
+(* A machine slot: held (its file, open and locked, and its number), the
+   parent's (a bats that holds one started this one, BATS_SLOT_HELD), or
+   none (BATS_SLOTS unset, or the slot could not be taken, which is
+   said) *)
+#pub datavtype machine_slot =
+  | SlotHeld of ($F.fd, int)
+  | SlotOfParent
+  | SlotNone
+
+#pub fn machine_slot_take (heavy: heavy_command): machine_slot
+
+#pub fn machine_slot_release (slot: machine_slot): void
+
+(* BATS_SLOTS: 0 when it is not set or empty, -1 when it is not a number
+   from 1 up, else the number, at most 64 *)
+fn slots_wanted (): int = let
+  var b : $B.builder_v = $B.create()
+  val set = env_value("BATS_SLOTS", b)
+  val @(a, k) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  fun digits {l:agz}{i:nat | i <= 524288} .<524288 - i>.
+    (bv: !$A.borrow(byte, l, 524288), i: int i, k: int, acc: int): int =
+    if i >= 524288 then acc
+    else if i >= k then acc
+    else let
+      val c = byte2int0($A.read<byte>(bv, i))
+    in
+      if c < 48 then ~1
+      else if c > 57 then ~1
+      else digits(bv, i + 1, k, (if acc > 64 then 65 else acc * 10 + (c - 48)))
+    end
+  val n = (if set then digits(bv, 0, k, 0) else 0): int
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in
+  if ~set then 0
+  else if n < 1 then ~1
+  else if n > 64 then 64
+  else n
+end
+
+(* Opens the file at the path b holds (b is consumed) *)
+fn open_built (b: $B.builder_v, acc: $F.access, how: $F.opening): $R.result($F.fd, $F.io_error) = let
+  var p = b
+  val () = put_char_v(p, 0)
+  val @(pa, _) = $B.to_arr(p)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = $F.file_open(bv_p, 524288, acc, how, 420)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in r end
+
+(* What trying slot i found *)
+datavtype slot_found =
+  | SlotTaken of $F.fd
+  | SlotBusy
+  | SlotUnopenable   (* its file cannot be opened *)
+  | SlotUnlockable   (* it opens, but its file system has no locks *)
+
+fn slot_try (i: int, wait: $F.lock_wait): slot_found = let
+  var p : $B.builder_v = $B.create()
+  val () = slot_path(i, p)
+in
+  case+ open_built(p, $F.ReadWrite(), $F.CreateOrOpen()) of
+  | ~$R.err(_) => SlotUnopenable()
+  | ~$R.ok(fd) =>
+    (case+ $F.fd_lock(fd, $F.LockExclusive(), wait) of
+    | ~$R.ok(_) => SlotTaken(fd)
+    | ~$R.err(e) => let
+        val busy = (case+ e of $F.WouldBlock() => true | _ => false): bool
+        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+      in if busy then SlotBusy() else SlotUnlockable() end)
+end
+
+(* The first free slot of i to n - 1, without waiting, and its number *)
+fun slot_free {i,n:nat} .<max(n - i, 0)>. (i: int i, n: int n): @(slot_found, int) =
+  if i >= n then @(SlotBusy(), 0)
+  else (case+ slot_try(i, $F.LockFailsAtOnce()) of
+    | ~SlotBusy() => slot_free(i + 1, n)
+    | ~SlotTaken(fd) => @(SlotTaken(fd), i)
+    | ~SlotUnopenable() => @(SlotUnopenable(), i)
+    | ~SlotUnlockable() => @(SlotUnlockable(), i))
+
+(* Writes the bytes b holds (b is consumed) at the start of the file at
+   the path p holds (p is consumed), over what was there *)
+fn note_write (p: $B.builder_v, b: $B.builder_v): void =
+  case+ open_built(p, $F.WriteOnly(), $F.OpenExisting()) of
+  | ~$R.err(_) => $B.builder_free(b)
+  | ~$R.ok(fd) => let
+      val bw = $F.buf_writer_create(fd)
+      val @(ba, bl) = $B.to_arr(b)
+      val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+      val () = wbw_loop(bw, bv_b, 0, bl)
+      val () = $A.drop<byte>(fz_b, bv_b)
+      val () = $A.free<byte>($A.thaw<byte>(fz_b))
+    in $R.discard<int><$F.io_error>($F.buf_writer_close(bw)) end
+
+(* Notes in slot i's file who took it, "bats check in <directory>", its
+   first line, for a bats that waits for it to name. A slot's file is
+   never emptied (only a holder may write it, and an empty file could
+   not be told from one being written): its first line is the note,
+   what follows a shorter note's line is not read. *)
+fn note_holder (i: int, heavy: heavy_command): void = let
+  var p : $B.builder_v = $B.create()
+  val () = slot_path(i, p)
+  var b : $B.builder_v = $B.create()
+  val () = (case+ heavy of
+    | HeavyCheck() => bput_v(b, "bats check")
+    | HeavyBuild() => bput_v(b, "bats build")
+    | HeavyTest() => bput_v(b, "bats test")
+    | HeavyRun() => bput_v(b, "bats run")
+    | NotHeavy() => bput_v(b, "bats"))
+  val cwd = $A.alloc<byte>(4096)
+  val k = (case+ $E.cwd_read(cwd, 4096) of | ~$R.some(k) => k | ~$R.none() => 0): int
+  val @(fz_c, bv_c) = $A.freeze<byte>(cwd)
+  val () = (if k > 0 then bput_v(b, " in ") else ())
+  val () = copy_to_builder_v(bv_c, 0, k, 4096, b)
+  val () = $A.drop<byte>(fz_c, bv_c)
+  val () = $A.free<byte>($A.thaw<byte>(fz_c))
+  val () = put_char_v(b, 10)
+in note_write(p, b) end
+
+(* Slot i's note appended to out: the first line of its file; false
+   when it has none (a free slot's file, or one gen-pwa test holds) *)
+fn note_read (i: int, out: !$B.builder_v >> $B.builder_v): bool = let
+  var p : $B.builder_v = $B.create()
+  val () = slot_path(i, p)
+in
+  case+ open_built(p, $F.ReadOnly(), $F.OpenExisting()) of
+  | ~$R.err(_) => false
+  | ~$R.ok(fd) => let
+      val buf = $A.alloc<byte>(4096)
+      val k = (case+ $F.file_read(fd, buf, 4096) of | ~$R.ok(k) => k | ~$R.err(_) => 0): int
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+      val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+      fun line_end {l:agz}{i:nat | i <= 4096} .<4096 - i>.
+        (bv: !$A.borrow(byte, l, 4096), i: int i, k: int): int =
+        if i >= 4096 then i
+        else if i >= k then i
+        else if byte2int0($A.read<byte>(bv, i)) = 10 then i
+        else line_end(bv, i + 1, k)
+      val line = line_end(bv_b, 0, k)
+      val () = copy_to_builder_v(bv_b, 0, line, 4096, out)
+      val () = $A.drop<byte>(fz_b, bv_b)
+      val () = $A.free<byte>($A.thaw<byte>(fz_b))
+    in line > 0 end
+end
+
+(* A slot's note says who last took it; the holder clears it as it
+   releases the slot, so a note left is a bats that was killed, or one
+   that holds the slot now *)
+fn note_clear (i: int): void = let
+  var p : $B.builder_v = $B.create()
+  val () = slot_path(i, p)
+  var b : $B.builder_v = $B.create()
+  val () = put_char_v(b, 10)
+in note_write(p, b) end
+
+(* Whether the slot BATS_SLOT_HELD names is held by another open of its
+   file: this bats's parent's, which started it while holding it. A
+   variable left set with no holder (exported by hand, or by a bats
+   that is gone) is not trusted: its slot is free, and this bats takes
+   a slot as any other *)
+fn parent_holds (): bool = let
+  var p : $B.builder_v = $B.create()
+  val set = env_value("BATS_SLOT_HELD", p)
+  val path = p
+in
+  if ~set then let
+    val () = $B.builder_free(path)
+  in false end
+  else (case+ open_built(path, $F.ReadOnly(), $F.OpenExisting()) of
+    | ~$R.err(_) => false
+    | ~$R.ok(fd) => let
+        val held = (case+ $F.fd_lock(fd, $F.LockShared(), $F.LockFailsAtOnce()) of
+          | ~$R.ok(_) => false
+          | ~$R.err(e) => (case+ e of $F.WouldBlock() => true | _ => false)): bool
+        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+      in held end)
+end
+
+fn slot_warn {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "warning: ")
+  val () = bput_v(m, what)
+  val () = (if i >= 0 then slot_path(i, m) else slot_dir(m))
+  val () = bput_v(m, why)
+  val () = bput_v(m, ", so this bats runs without a machine slot (BATS_SLOTS)\n")
+in prerr_builder(m) end
+
+fn slot_held (fd: $F.fd, i: int, heavy: heavy_command): machine_slot = let
+  val () = note_holder(i, heavy)
+  val () = !g_slot_held := i + 1
+in SlotHeld(fd, i) end
+
+implement machine_slot_take (heavy) = let
+  val n0 = (case+ heavy of NotHeavy() => 0 | _ => slots_wanted()): int
+in
+  if n0 = 0 then SlotNone()
+  else if n0 < 0 then let
+    val () = prerr! ("warning: BATS_SLOTS is not a number from 1 to 64, so this bats runs without a machine slot\n")
+  in SlotNone() end
+  else if parent_holds() then SlotOfParent()
+  else let
+    var d : $B.builder_v = $B.create()
+    val () = slot_dir(d)
+    val made = run_mkdir(d)
+    val n = g1ofg0(n0)
+  in
+    if made <> 0 then let
+      val () = slot_warn("cannot make the slots' directory ", ~1, "")
+    in SlotNone() end
+    else if n < 1 then SlotNone()
+    else let
+      val @(found, i) = slot_free(0, n)
+    in
+      case+ found of
+      | ~SlotTaken(fd) => slot_held(fd, i, heavy)
+      | ~SlotUnopenable() => let
+          val () = slot_warn("cannot open ", i, "")
+        in SlotNone() end
+      | ~SlotUnlockable() => let
+          val () = slot_warn("cannot lock ", i, " (its file system has no locks)")
+        in SlotNone() end
+      | ~SlotBusy() => let
+          (* With more than one slot, a bats that waits waits for slot
+             0, though another may be freed first, as gen-pwa test does *)
+          val () = (if is_quiet() then () else let
+              var m : $B.builder_v = $B.create()
+              val () = bput_v(m, "waiting for another bats on this machine (")
+              val () = put_int_v(m, n)
+              val () = bput_v(m, " at once, BATS_SLOTS")
+              var note : $B.builder_v = $B.create()
+              val noted = note_read(0, note)
+              val holder = note
+              val () = (if noted then let
+                  val () = bput_v(m, "; ")
+                  val () = slot_path(0, m)
+                  val () = bput_v(m, " was last taken by ")
+                in append_builder(m, holder) end
+                else $B.builder_free(holder))
+              val () = bput_v(m, ")\n")
+            in prerr_builder(m) end)
+        in
+          case+ slot_try(0, $F.LockWaits()) of
+          | ~SlotTaken(fd) => slot_held(fd, 0, heavy)
+          | ~SlotBusy() => SlotNone()
+          | ~SlotUnopenable() => let
+              val () = slot_warn("cannot open ", 0, "")
+            in SlotNone() end
+          | ~SlotUnlockable() => let
+              val () = slot_warn("cannot lock ", 0, " (its file system has no locks)")
+            in SlotNone() end
+        end
+    end
+  end
+end
+
+implement machine_slot_release (slot) =
+  case+ slot of
+  | ~SlotHeld(fd, i) => let
+      val () = note_clear(i)
+      val () = !g_slot_held := 0
+    in $R.discard<int><$F.io_error>($F.file_close(fd)) end
+  | ~SlotOfParent() => ()
+  | ~SlotNone() => ()
+
+(* ============================================================
    The project's lock (bats-lang/bats#250)
    ============================================================ *)
 
@@ -1636,27 +2017,28 @@ end
    Where the file system has no locks (an error other than WouldBlock),
    bats runs unlocked, as Cargo does. *)
 #pub datavtype project_lock =
-  | ProjectLocked of $F.fd
-  | ProjectUnlocked
+  | ProjectLocked of ($F.fd, machine_slot)
+  | ProjectUnlocked of machine_slot
 
 (* Takes the project's lock, saying on stderr when another bats holds it
-   and waiting until it is free *)
-#pub fn project_lock_take (): project_lock
+   and waiting until it is free; then, for a heavy command, a slot of
+   the machine's (below) *)
+#pub fn project_lock_take (heavy: heavy_command): project_lock
 
+(* Releases the project's lock and the machine slot *)
 #pub fn project_lock_release (lk: project_lock): void
 
-implement project_lock_take () = let
+implement project_lock_take (heavy) = let
   val p = str_to_path_arr("bats.toml")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
   val opened = $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in
-  case+ opened of
-  | ~$R.err(_) => ProjectUnlocked()
+  val project = (case+ opened of
+  | ~$R.err(_) => $R.none()
   | ~$R.ok(fd) =>
     (case+ $F.fd_lock(fd, $F.LockExclusive(), $F.LockFailsAtOnce()) of
-    | ~$R.ok(_) => ProjectLocked(fd)
+    | ~$R.ok(_) => $R.some(fd)
     | ~$R.err(e) =>
       (case+ e of
       | $F.WouldBlock() => let
@@ -1664,20 +2046,30 @@ in
             else prerr! ("waiting for another bats running in this project (it holds the lock on bats.toml)\n"))
         in
           case+ $F.fd_lock(fd, $F.LockExclusive(), $F.LockWaits()) of
-          | ~$R.ok(_) => ProjectLocked(fd)
+          | ~$R.ok(_) => $R.some(fd)
           | ~$R.err(_) => let
               val () = $R.discard<int><$F.io_error>($F.file_close(fd))
-            in ProjectUnlocked() end
+            in $R.none() end
         end
       | _ => let
           val () = $R.discard<int><$F.io_error>($F.file_close(fd))
-        in ProjectUnlocked() end))
+        in $R.none() end))): $R.option($F.fd)
+  (* The slot after the project's lock, so a bats waiting for its project
+     holds no slot, and no two bats wait on each other: one that holds a
+     slot holds its project's lock already *)
+  val slot = machine_slot_take(heavy)
+in
+  case+ project of
+  | ~$R.some(fd) => ProjectLocked(fd, slot)
+  | ~$R.none() => ProjectUnlocked(slot)
 end
 
 implement project_lock_release (lk) =
   case+ lk of
-  | ~ProjectLocked(fd) => $R.discard<int><$F.io_error>($F.file_close(fd))
-  | ~ProjectUnlocked() => ()
+  | ~ProjectLocked(fd, slot) => let
+      val () = machine_slot_release(slot)
+    in $R.discard<int><$F.io_error>($F.file_close(fd)) end
+  | ~ProjectUnlocked(slot) => machine_slot_release(slot)
 
 (* ============================================================
    File I/O

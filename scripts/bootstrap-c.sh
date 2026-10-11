@@ -26,6 +26,9 @@ find "$TMP/c" -name '*.o' -exec rm -f {} +
 # The build's .sats change stamp is there only when this build wrote a
 # .sats, so it depends on the cache, not on the sources
 rm -f "$TMP/c/.sats_changed"
+# So are the shared cache's working files (BATS_CACHE_DIR's toolchain
+# listing and depgen output), there only when the build used it
+rm -f "$TMP/c/.bats_toolchain" "$TMP/c/.bats_depgen"
 
 esc() { printf '%s\n' "$1" | sed -e 's/[]\/$*.^[|]/\\&/g'; }
 root_re=$(esc "$ROOT/")

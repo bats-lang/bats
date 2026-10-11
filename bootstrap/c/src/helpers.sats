@@ -95,6 +95,9 @@ fn find_null_bv_from {l:agz}{n:pos}{p:int}
 
 
 
+
+
+
 fn is_verbose(): bool
 
 fn is_quiet(): bool
@@ -958,12 +961,103 @@ fn run_mkdir
 
 
 
+
+
+
+
+fn env_value {sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, out: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn slot_dir (out: !$B.builder_v >> $B.builder_v): void
+
+
+
+
+
+
+
+
+
+fn slot_path (i: int, out: !$B.builder_v >> $B.builder_v): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn spawn_child_with
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}
+  (path: !$A.borrow(byte, lp, 524288),
+   argv: $L.listv($P.arg_entry),
+   extra: $L.listv($P.arg_entry),
+   stdin_cfg: $P.stream_config(sin),
+   stdout_cfg: $P.stream_config(sout),
+   stderr_cfg: $P.stream_config(serr))
+  : $R.result($P.spawn_pipes(sin, sout, serr), int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn spawn_child
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}
+  (path: !$A.borrow(byte, lp, 524288),
+   argv: $L.listv($P.arg_entry),
+   stdin_cfg: $P.stream_config(sin),
+   stdout_cfg: $P.stream_config(sout),
+   stderr_cfg: $P.stream_config(serr))
+  : $R.result($P.spawn_pipes(sin, sout, serr), int)
+
+
+
+
+
+
 datavtype program_run = Exited of int | NotStarted
 
 
 
 fn run_program {le:agz}
   (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): program_run
+
+
+
 
 
 
@@ -1647,15 +1741,313 @@ fn run_cc {lph:agz}{lo:agz}{li:agz}
 
 
 
+
+
+
+
+
+datatype heavy_command =
+  | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
+
+
+
+
+
+datavtype machine_slot =
+  | SlotHeld of ($F.fd, int)
+  | SlotOfParent
+  | SlotNone
+
+fn machine_slot_take (heavy: heavy_command): machine_slot
+
+fn machine_slot_release (slot: machine_slot): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 datavtype project_lock =
-  | ProjectLocked of $F.fd
-  | ProjectUnlocked
+  | ProjectLocked of ($F.fd, machine_slot)
+  | ProjectUnlocked of machine_slot
 
 
 
-fn project_lock_take (): project_lock
+
+fn project_lock_take (heavy: heavy_command): project_lock
+
 
 fn project_lock_release (lk: project_lock): void
+
+
+
+
+
+
+
+
+
 
 
 

@@ -64,6 +64,17 @@ fn locks_project (c: command): bool =
   | Run() => false | Init() => false | Completions() => false
   | Version() => false | UnknownCommand() => false
 
+(* The commands that hold a machine slot while they work, with BATS_SLOTS
+   set (bats-lang/bats#252): those that run patsopt and cc (run takes its
+   own, for its build) *)
+fn heavy_of (c: command): heavy_command =
+  case+ c of
+  | Check() => HeavyCheck() | Build() => HeavyBuild() | Test() => HeavyTest()
+  | Run() => NotHeavy() | Clean() => NotHeavy() | Lock() => NotHeavy()
+  | Tree() => NotHeavy() | Upload() => NotHeavy() | Add() => NotHeavy()
+  | Remove() => NotHeavy() | Init() => NotHeavy() | Completions() => NotHeavy()
+  | Version() => NotHeavy() | UnknownCommand() => NotHeavy()
+
 (* Print usage matching Rust bats format *)
 fn print_usage(): void = let
   val () = println! ("usage: bats [--run-in <dir>] [--quiet] <command>")
@@ -342,8 +353,8 @@ in
               (* The project's lock, for the commands that write
                  build/, dist/ or bats_modules/ (run takes its own, and
                  releases it before the program runs) *)
-              val lk = (if locks_project(chosen_command) then project_lock_take()
-                else ProjectUnlocked()): project_lock
+              val lk = (if locks_project(chosen_command) then project_lock_take(heavy_of(chosen_command))
+                else ProjectUnlocked(SlotNone())): project_lock
             in let val () = (
               case+ chosen_command of
               | Build() => let
@@ -409,7 +420,7 @@ in
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
-                val run_lock = project_lock_take()
+                val run_lock = project_lock_take(HeavyRun())
                 val () = (if ~bin_package() then project_lock_release(run_lock)
                   else if ~resolve_deps(bv_repo, repo_len) then project_lock_release(run_lock)
                   else if validate_project() then
