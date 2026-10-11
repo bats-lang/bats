@@ -5,7 +5,8 @@
 # never the build's: the same under any TZ, BATS_COMMIT names another
 # commit, and a new commit compiles the facts module again and nothing
 # else (its .sats never changes). Outside a git repository it is an
-# error that says so.
+# error that says so. Only a staload of it counts: the name in a comment
+# or a string does not.
 # usage: tests/build-facts/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -67,9 +68,10 @@ if GIT_CEILING_DIRECTORIES="$TMP" "$BATS" build --only debug --only native > "$T
   echo "FAIL: a build outside git made facts"; exit 1
 fi
 grep -q "names no commit" "$TMP/5.log" || { echo "FAIL: outside git it did not say why"; cat "$TMP/5.log"; exit 1; }
-# a project that does not name them gets none
+# a project that does not staload them gets none, though it writes the
+# name in a comment and a string (as bats's own sources do)
 rm "$Q/src/bin/facts.bats"
-printf 'implement main0 () = ()\n' > "$Q/src/bin/facts.bats"
+printf '(* not a staload of "_bats_facts.sats" *)\nimplement main0 () = println! ("_bats_facts.sats")\n' > "$Q/src/bin/facts.bats"
 GIT_CEILING_DIRECTORIES="$TMP" "$BATS" build --only debug --only native > "$TMP/6.log" 2>&1 || { echo "FAIL: a build without facts outside git"; cat "$TMP/6.log"; exit 1; }
 [ ! -e "$Q/build/src/_bats_facts.dats" ] || { echo "FAIL: facts written for a project that does not name them"; exit 1; }
 echo "build-facts: ok"

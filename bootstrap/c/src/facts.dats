@@ -79,10 +79,14 @@ fn sh_capture {sn:nat}{lo:agz} (script: string sn, out: !$A.arr(byte, lo, 4096))
   val () = $A.free<byte>($A.thaw<byte>(fz_x))
 in r end
 
-(* Whether a module of src/ names "_bats_facts.sats" *)
+(* Whether a module of src/ staloads the facts: a staload, aliased or
+   not, of "_bats_facts.sats" (or "./_bats_facts.sats"). The name merely
+   written in a comment or a string is not a staload of it: bats's own
+   sources write it, and a build that made facts of them would differ
+   from commit to commit. *)
 fn facts_named (): bool = let
   val out = $A.alloc<byte>(4096)
-  val @(rc, _) = sh_capture("cat src/*.bats src/bin/*.bats 2>/dev/null | grep -q -F _bats_facts.sats", out)
+  val @(rc, _) = sh_capture("cat src/*.bats src/bin/*.bats 2>/dev/null | grep -q -E 'staload[[:space:]]+([A-Za-z_][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*)?\"(\\./)?_bats_facts\\.sats\"'", out)
   val () = $A.free<byte>(out)
 in rc = 0 end
 
