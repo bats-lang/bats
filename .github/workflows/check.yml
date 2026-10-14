@@ -15,17 +15,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The GMP build of ATS2: its constraint solver does infinite-precision
+      # arithmetic (the -int build computes in C int and accepts false
+      # statements, bats-lang/quire#594); bats installs the same build itself
       - name: Install ATS2
         run: |
-          curl -sL "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-int-0.4.2.tgz" -o /tmp/ats2.tgz
+          sudo apt-get install -y -q libgmp-dev
+          curl -sL "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-gmp-0.4.2.tgz" -o /tmp/ats2.tgz
           mkdir -p ~/.ats2
           tar -xzf /tmp/ats2.tgz -C ~/.ats2
-          cd ~/.ats2/ATS2-Postiats-int-0.4.2
+          cd ~/.ats2/ATS2-Postiats-gmp-0.4.2
           make -j$(nproc) -C src/CBOOT patsopt
           mkdir -p bin
           cp src/CBOOT/patsopt bin/patsopt
           mkdir -p ~/.bats
-          ln -sf ~/.ats2/ATS2-Postiats-int-0.4.2 ~/.bats/ats2
+          ln -sf ~/.ats2/ATS2-Postiats-gmp-0.4.2 ~/.bats/ats2
 
       - name: Install wasm-ld (wasm fixtures)
         run: sudo apt-get install -y -q lld
@@ -33,7 +37,7 @@ jobs:
       - name: Build seed compiler from bootstrap/c
         run: |
           cp -R bootstrap/c ~/seed
-          make -j$(nproc) -C ~/seed PATSHOME=$HOME/.ats2/ATS2-Postiats-int-0.4.2 debug/bats
+          make -j$(nproc) -C ~/seed PATSHOME=$HOME/.ats2/ATS2-Postiats-gmp-0.4.2 debug/bats
           mkdir -p ~/bats-bin
           cp ~/seed/debug/bats ~/bats-bin/bats
 
