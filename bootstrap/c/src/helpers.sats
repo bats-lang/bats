@@ -98,6 +98,14 @@ fn find_null_bv_from {l:agz}{n:pos}{p:int}
 
 
 
+
+
+
+
+
+
+
+
 fn is_verbose(): bool
 
 fn is_quiet(): bool
@@ -147,6 +155,12 @@ fn clear_build_err(): void
 fn set_exit_code(v: int): void
 
 fn get_exit_code(): int
+
+
+
+
+fn get_cap_exit(): int
+
 
 
 
@@ -1525,6 +1539,178 @@ fn check_emitted_flaws {lo,li:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn patsopt_only {lph:agz}{lo:agz}{li:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
@@ -1532,6 +1718,50 @@ fn patsopt_only {lph:agz}{lo:agz}{li:agz}
 
 
 fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

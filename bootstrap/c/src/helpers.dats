@@ -98,6 +98,14 @@ val g_build_err = ref<bool>(false)
    plus 1, 0 when it holds none *)
 val g_slot_held = ref<int>(0)
 val g_exit_code = ref<int>(0)
+(* The optional cap on every patsopt run (BATS_PATSOPT_TIMEOUT_S,
+   BATS_PATSOPT_MEM_MB): whether the environment was read, the seconds
+   and the megabytes (0: no cap), and the status bats exits with when
+   the cap ended a run (0 when none did) *)
+val g_cap_read = ref<bool>(false)
+val g_cap_secs = ref<int>(0)
+val g_cap_mb = ref<int>(0)
+val g_cap_exit = ref<int>(0)
 
 
 
@@ -149,6 +157,11 @@ val g_exit_code = ref<int>(0)
 
 
 
+(* The status bats exits with when a build error was recorded, as
+   patsopt_only sets it when a cap ended a patsopt run: 124 for the time
+   cap, 125 for the memory cap, 0 when no cap did (the status is 1) *)
+
+
 implement is_verbose() = !g_verbose
 implement is_quiet() = !g_quiet
 implement is_test_mode() = !g_test_mode
@@ -172,6 +185,7 @@ implement has_build_err() = !g_build_err
 implement clear_build_err() = !g_build_err := false
 implement set_exit_code(v) = !g_exit_code := v
 implement get_exit_code() = !g_exit_code
+implement get_cap_exit() = !g_cap_exit
 
 (* ============================================================
    String builder helpers
@@ -1522,6 +1536,178 @@ implement check_emitted_flaws {lo,li} (out_bv, in_bv, il) =
       val () = whole_free(ar, $A.thaw<byte>(fz_c))
     in rc end
 
+(* ============================================================
+   An optional cap on every patsopt run (BATS_PATSOPT_TIMEOUT_S,
+   BATS_PATSOPT_MEM_MB)
+   ============================================================ *)
+
+(* The GMP build of ATS2's constraint solver can run away in time and in
+   memory on a proof the machine-integer solver answers at once (one
+   function of quire's library.bats grew past 6.4 GB in 14 minutes, an
+   earlier run was killed by the system at 9.9 GB without a module being
+   named: bats-lang/quire#594). With BATS_PATSOPT_TIMEOUT_S set to a
+   number of seconds (wall clock) and/or BATS_PATSOPT_MEM_MB set to a
+   number of megabytes (the address space), every patsopt run
+   (patsopt_only, the one place patsopt is started) is held to it, and a
+   run the cap ends fails the build naming its module, the cap and how to
+   raise it, with its own exit status: 124 for the time, 125 for the
+   memory. Unset or empty, nothing is read, made or said, as for
+   BATS_SLOTS; anything else is said and ignored.
+
+   This is a resource cap on an external process, not a runtime check of
+   the program's safety (CLAUDE.md): the types prove nothing about how
+   long or how large patsopt's solver gets, so bats bounds the process.
+
+   How, with what is portable (sh and kill, which POSIX has; there is no
+   timeout(1) on macOS, and the process package has no setrlimit or kill):
+   a capped patsopt is started by sh -c, which lowers its own address
+   space limit (ulimit -v, in KiB) and runs patsopt under it, and, for the
+   time, keeps patsopt as its child and ends it with SIGALRM after the
+   seconds (a sleep, killed when patsopt ends first), which it tells from
+   any other death by the status 128 + 14 that wait gives (POSIX gives
+   SIGALRM the number 14). The memory cap has no such sign, since
+   RLIMIT_AS only makes allocations fail: a patsopt that fails with a
+   signal under it, or whose stderr says its allocator or GMP's failed
+   ("ats_malloc_gc", "Cannot allocate memory"), is the memory
+   cap's. Where sh cannot lower the limit (ulimit -v is refused, as on
+   systems that do not enforce RLIMIT_AS), that is said once and patsopt
+   runs without the memory cap. *)
+
+(* The count the environment variable name holds: 0 when it is not set
+   or empty, -1 when it is not a number from 1 up (or has over 9 digits),
+   else the number *)
+fn env_count {sn:nat | sn < $B.BUILDER_CAP} (name: string sn): int = let
+  var b : $B.builder_v = $B.create()
+  val set = env_value(name, b)
+  val @(a, k) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  fun digits {l:agz}{i:nat | i <= 524288} .<524288 - i>.
+    (bv: !$A.borrow(byte, l, 524288), i: int i, k: int, acc: int): int =
+    if i >= 524288 then acc
+    else if i >= k then acc
+    else let
+      val c = byte2int0($A.read<byte>(bv, i))
+    in
+      if c < 48 then ~1
+      else if c > 57 then ~1
+      else if acc > 99999999 then ~1
+      else digits(bv, i + 1, k, acc * 10 + (c - 48))
+    end
+  val n = (if set then digits(bv, 0, k, 0) else 0): int
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in
+  if ~set then 0
+  else if n < 1 then ~1
+  else n
+end
+
+(* Whether this system's sh can limit its address space to mb megabytes *)
+fn memory_limitable (mb: int): bool = let
+  val exec = str_to_path_arr("sh")
+  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  var b1 : $B.builder_v = $B.create()
+  val () = bput_v(b1, "sh")
+  var b2 : $B.builder_v = $B.create()
+  val () = bput_v(b2, "-c")
+  var b3 : $B.builder_v = $B.create()
+  val () = bput_v(b3, "ulimit -v $(($1 * 1024)) 2>/dev/null")
+  var b4 : $B.builder_v = $B.create()
+  val () = bput_v(b4, "sh")
+  var b5 : $B.builder_v = $B.create()
+  val () = put_int_v(b5, mb)
+  val rc = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+    $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
+    $L.list_vt_cons(mk_arg(b5), $L.list_vt_nil()))))))
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+in rc = 0 end
+
+(* Reads the two variables, once per process, into g_cap_secs and
+   g_cap_mb (0: no cap) *)
+fn caps_read (): void =
+  if !g_cap_read then () else let
+    val () = !g_cap_read := true
+    val t = env_count("BATS_PATSOPT_TIMEOUT_S")
+    val m = env_count("BATS_PATSOPT_MEM_MB")
+    val () = (if t < 0 then
+        prerr! ("warning: BATS_PATSOPT_TIMEOUT_S is not a number of seconds from 1 up, so patsopt runs without a time cap\n")
+      else !g_cap_secs := t): void
+    val () = (if m < 0 then
+        prerr! ("warning: BATS_PATSOPT_MEM_MB is not a number of megabytes from 1 up, so patsopt runs without a memory cap\n")
+      else if m = 0 then ()
+      else if memory_limitable(m) then !g_cap_mb := m
+      else
+        prerr! ("warning: BATS_PATSOPT_MEM_MB is set, but this system's sh cannot limit memory (ulimit -v), so patsopt runs without a memory cap\n")): void
+  in end
+
+(* Whether e[i] starts what ATS's allocator says when memory runs out *)
+fn is_ats_malloc_at {l:agz}{n:pos}
+  (e: !$A.borrow(byte, l, n), i: pos_t, max: int n): bool = let
+  var mark = @[char][13]('a', 't', 's', '_', 'm', 'a', 'l', 'l', 'o', 'c', '_', 'g', 'c')
+in lit_at(e, i, max, mark, 13) end
+
+(* Whether e[i] starts what GMP says when memory runs out *)
+fn is_gmp_alloc_at {l:agz}{n:pos}
+  (e: !$A.borrow(byte, l, n), i: pos_t, max: int n): bool = let
+  var mark = @[char][22]('C', 'a', 'n', 'n', 'o', 't', ' ', 'a', 'l', 'l', 'o', 'c', 'a', 't', 'e', ' ', 'm', 'e', 'm', 'o', 'r', 'y')
+in lit_at(e, i, max, mark, 22) end
+
+(* Whether patsopt's stderr err says its allocator or GMP's failed (only
+   looked for when wanted), and the same stderr again *)
+fn memory_said (wanted: bool, err: $B.builder_v): @(bool, $B.builder_v) =
+  if ~wanted then @(false, err) else let
+  val @(ea, en) = $B.to_arr(err)
+  val @(fz, bv) = $A.freeze<byte>(ea)
+  fun scan {l:agz}{i:nat | i <= 524288} .<524288 - i>.
+    (bv: !$A.borrow(byte, l, 524288), i: int i, n: int): bool =
+    if i >= 524288 then false
+    else if i >= n then false
+    else if is_ats_malloc_at(bv, i, 524288) then true
+    else if is_gmp_alloc_at(bv, i, 524288) then true
+    else scan(bv, i + 1, n)
+  val said = scan(bv, 0, en)
+  var again : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv, 0, en, 524288, again)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in @(said, again) end
+
+(* The module whose .dats is in[0, in_len - 1) (build/src/m.dats) as its
+   source is named, src/m.bats, appended to out *)
+fn module_put {li:agz}
+  (in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+   out: !$B.builder_v >> $B.builder_v): void = let
+  val stop = g1ofg0(in_len - 1)
+  val built = (peek(in_bv, 0, 524288) = 98 && peek(in_bv, 1, 524288) = 117
+    && peek(in_bv, 2, 524288) = 105 && peek(in_bv, 3, 524288) = 108
+    && peek(in_bv, 4, 524288) = 100 && peek(in_bv, 5, 524288) = 47): bool
+  val start = g1ofg0((if built then 6 else 0): int)
+  val dats = (stop >= start + 5 && peek(in_bv, stop - 5, 524288) = 46
+    && peek(in_bv, stop - 4, 524288) = 100 && peek(in_bv, stop - 3, 524288) = 97
+    && peek(in_bv, stop - 2, 524288) = 116 && peek(in_bv, stop - 1, 524288) = 115): bool
+  val () = copy_to_builder_v(in_bv, start, (if dats then stop - 5 else stop), 524288, out)
+in (if dats then bput_v(out, ".bats") else ()) end
+
+(* A run the cap ended, reported (the time cap's when time is true, else
+   the memory cap's), and the build failed with the cap's own status *)
+fn cap_report {li:agz}
+  (time: bool, in_bv: !$A.borrow(byte, li, 524288), in_len: int): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "error: patsopt on ")
+  val () = module_put(in_bv, in_len, m)
+  val () = (if time then let
+      val () = bput_v(m, " was stopped by the time cap: it did not finish within BATS_PATSOPT_TIMEOUT_S=")
+      val () = put_int_v(m, !g_cap_secs)
+    in bput_v(m, " seconds. Raise BATS_PATSOPT_TIMEOUT_S, or unset it for no time cap.\n") end
+    else let
+      val () = bput_v(m, " was stopped by the memory cap: it ran out of memory under BATS_PATSOPT_MEM_MB=")
+      val () = put_int_v(m, !g_cap_mb)
+    in bput_v(m, " megabytes of address space. Raise BATS_PATSOPT_MEM_MB, or unset it for no memory cap.\n") end)
+  val () = prerr_builder(m)
+  val () = !g_cap_exit := (if time then 124 else 125)
+in set_build_err() end
+
 (* patsopt run on the .dats in[0, in_len) (a NUL-terminated path),
    writing its C to out[0, out_len): 0, or patsopt's failure, reported,
    its output removed. What only cc would reject in the C is not looked
@@ -1554,14 +1740,19 @@ in $A.free<byte>($A.thaw<byte>(fz_x)) end
    bats records a module in its build cache only when patsopt succeeds *)
 implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
-  var exec_b = $B.create()
-  val () = copy_to_builder(ph, 0, phlen, 512, exec_b)
-  val () = $B.bput(exec_b, "/bin/patsopt")
+  val () = caps_read()
+  val secs = !g_cap_secs
+  val mb = !g_cap_mb
+  val capped = (secs > 0 || mb > 0): bool
+  (* uncapped, patsopt itself is started; capped, sh is, with patsopt as
+     its first argument (see the cap's comment above) *)
+  var exec_b : $B.builder_v = $B.create()
+  val () = (if capped then bput_v(exec_b, "sh") else let
+      val () = copy_to_builder_v(ph, 0, phlen, 512, exec_b)
+    in bput_v(exec_b, "/bin/patsopt") end)
   val () = put_char_v(exec_b, 0)
   val @(exec_a, _) = $B.to_arr(exec_b)
   val @(fz_exec, bv_exec) = $A.freeze<byte>(exec_a)
-  var b1 = $B.create()
-  val () = bput_v(b1, "patsopt")
   var b2 = $B.create()
   val () = bput_v(b2, "-IATS")
   var b3 = $B.create()
@@ -1584,13 +1775,37 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
   var b11 = $B.create()
   val in_clen = in_len - 1
   val () = copy_to_builder_v(in_bv, 0, in_clen, 524288, b11)
-  val argv = $L.list_vt_cons(mk_arg(b1),
-    $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3),
+  val rest = $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3),
     $L.list_vt_cons(mk_arg(b4), $L.list_vt_cons(mk_arg(b5),
     $L.list_vt_cons(mk_arg(b6), $L.list_vt_cons(mk_arg(b7),
     $L.list_vt_cons(mk_arg(b8), $L.list_vt_cons(mk_arg(b9),
     $L.list_vt_cons(mk_arg(b10), $L.list_vt_cons(mk_arg(b11),
-    $L.list_vt_nil())))))))))))
+    $L.list_vt_nil())))))))))): $L.listv($P.arg_entry)
+  val argv = (if capped then let
+      (* sh -c <script> sh <MB or 0> <seconds or 0> <patsopt> <its arguments> *)
+      var w1 : $B.builder_v = $B.create()
+      val () = bput_v(w1, "sh")
+      var w2 : $B.builder_v = $B.create()
+      val () = bput_v(w2, "-c")
+      var w3 : $B.builder_v = $B.create()
+      val () = bput_v(w3, "mb=$1; secs=$2; shift 2\n[ \"$mb\" = 0 ] || ulimit -v $((mb * 1024)) 2>/dev/null\n[ \"$secs\" = 0 ] && exec \"$@\"\n\"$@\" &\npid=$!\n( trap 'kill $sp 2>/dev/null; exit 0' TERM; sleep \"$secs\" & sp=$!; wait $sp; kill -s ALRM $pid 2>/dev/null ) >/dev/null 2>&1 &\nwd=$!\nwait $pid\nrc=$?\nkill $wd 2>/dev/null\nwait $wd 2>/dev/null\n[ $rc -eq 142 ] && exit 124\n[ $rc -eq 124 ] && exit 1\nexit $rc\n")
+      var w4 : $B.builder_v = $B.create()
+      val () = bput_v(w4, "sh")
+      var w5 : $B.builder_v = $B.create()
+      val () = put_int_v(w5, mb)
+      var w6 : $B.builder_v = $B.create()
+      val () = put_int_v(w6, secs)
+      var w7 : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(ph, 0, phlen, 512, w7)
+      val () = bput_v(w7, "/bin/patsopt")
+    in $L.list_vt_cons(mk_arg(w1), $L.list_vt_cons(mk_arg(w2),
+        $L.list_vt_cons(mk_arg(w3), $L.list_vt_cons(mk_arg(w4),
+        $L.list_vt_cons(mk_arg(w5), $L.list_vt_cons(mk_arg(w6),
+        $L.list_vt_cons(mk_arg(w7), rest))))))) end
+    else let
+      var b1 : $B.builder_v = $B.create()
+      val () = bput_v(b1, "patsopt")
+    in $L.list_vt_cons(mk_arg(b1), rest) end): $L.listv($P.arg_entry)
   var envp_b = $B.create()
   val () = bput_v(envp_b, "PATSHOME=")
   val () = copy_to_builder_v(ph, 0, phlen, 512, envp_b)
@@ -1622,7 +1837,22 @@ in
       val wr = $P.child_wait(child)
       val ec = (case+ wr of
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-      val rc = finish_patsopt(ec, in_bv, in_len - 1, eb)
+      (* the time cap ended it: sh's status 124 (a patsopt that exits 124
+         itself is made 1 there); the memory cap: it failed with a signal
+         (ec < 0 direct, over 128 through sh) or said its allocator failed *)
+      val time_hit = (secs > 0 && ec = 124): bool
+      val signalled = (ec < 0 || ec > 128): bool
+      val @(said, eb2) = memory_said(mb > 0 && ec <> 0 && ~time_hit && ~signalled, eb)
+      val mem_hit = (mb > 0 && ec <> 0 && ~time_hit && (signalled || said)): bool
+      val rc = (if time_hit then let
+          val () = $B.builder_free(eb2)
+          val () = cap_report(true, in_bv, in_len)
+        in 1 end
+        else if mem_hit then let
+          val () = $B.builder_free(eb2)
+          val () = cap_report(false, in_bv, in_len)
+        in 1 end
+        else finish_patsopt(ec, in_bv, in_len - 1, eb2)): int
       val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
     in rc end
   | ~$R.err(_) => ~1
