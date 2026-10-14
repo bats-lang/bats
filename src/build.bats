@@ -1183,7 +1183,7 @@ in
         val @(fz_ce, bv_ce) = $A.freeze<byte>(curl_exec)
         var ca1 = $B.create() val () = bput_v(ca1, "curl")
         var ca2 = $B.create() val () = bput_v(ca2, "-sL")
-        var ca3 = $B.create() val () = bput_v(ca3, "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-int-0.4.2.tgz")
+        var ca3 = $B.create() val () = bput_v(ca3, "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-gmp-0.4.2.tgz")
         var ca4 = $B.create() val () = bput_v(ca4, "-o")
         var ca5 = $B.create() val () = ats2_tarball(buf, plen, ca5)
         val curl_argv = $L.list_vt_cons(mk_arg(ca1), $L.list_vt_cons(mk_arg(ca2),
@@ -1263,7 +1263,10 @@ in
         val () = println! ("ATS2 installed successfully")
       in r1 + r2 + r3 + r4 end): int
     in
-      if rc <> 0 then let val () = set_build_err() in println! ("error: ATS2 installation failed") end else ()
+      if rc <> 0 then let
+        val () = set_build_err()
+        val () = println! ("error: ATS2 installation failed")
+      in println! ("note: the ATS2 build bats installs does its constraint solving in infinite precision (GMP), so it needs libgmp and its headers (libgmp-dev on Debian and Ubuntu, gmp on macOS with Homebrew)") end else ()
     end
     val @(fz_patshome, bv_patshome) = $A.freeze<byte>(phbuf)
     val () = ensure_ats2(bv_patshome, phlen)
