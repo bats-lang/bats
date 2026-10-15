@@ -16,6 +16,7 @@
 staload "helpers.sats"
 staload "cache.sats"
 staload "facts.sats"
+staload "inputs.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
@@ -321,7 +322,7 @@ fun module_name_end {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
 fn prune_cached {l:agz}{n:pos}{k:nat | k <= n}
   (name: $A.arr(byte, l, n), k: int k, max: int n): void = let
   val stop = module_name_end(name, k, 0)
-  (* bats's own modules (_bats_facts) have no source in src/ *)
+  (* bats's own modules (_bats_facts, _bats_inputs) have no source in src/ *)
   val own = (if k >= 6 then
       peek_arr(name, 0, max) = 95 && peek_arr(name, 1, max) = 98 && peek_arr(name, 2, max) = 97
       && peek_arr(name, 3, max) = 116 && peek_arr(name, 4, max) = 115 && peek_arr(name, 5, max) = 95
@@ -1777,6 +1778,8 @@ in
       val () = prune_orphans()
       (* Step 3a'': the commit's facts, for a project that names them *)
       val () = write_facts()
+      (* and the digest of its inputs *)
+      val () = write_inputs()
       (* Step 3b: Preprocess src/*.bats shared modules *)
       val sm_arr = str_to_path_arr("src")
       val @(fz_sm, bv_sm) = $A.freeze<byte>(sm_arr)
