@@ -1,0 +1,29 @@
+#!/bin/bash
+# with-env <env-file> <command> [args...]
+#
+# Sources <env-file> (a shell file of a machine's bats settings: BATS_SLOTS, BATS_LOCK_DIR,
+# BATS_CACHE_DIR, BATS_REPOSITORY, ...), then runs the
+# rest of the command line exactly as given, in this process's place (exec), so its exit status, its standard
+# streams and its signals are the command's own:
+#
+#   scripts/with-env ~/bats.env bats check
+#   scripts/with-env ~/bats.env bats build --repository /root/repository
+#
+# For a shell that does not read a profile (an agent's, a CI step's): the environment travels on the command line.
+set -e
+if [ $# -lt 2 ]; then
+  echo "usage: with-env <env-file> <command> [args...]" >&2
+  exit 2
+fi
+env_file=$1
+shift
+if [ ! -r "$env_file" ]; then
+  echo "with-env: cannot read $env_file" >&2
+  exit 2
+fi
+# every variable the file sets reaches the command, whether or not the file says `export`
+set -a
+. "$env_file"
+set +a
+set +e
+exec "$@"
