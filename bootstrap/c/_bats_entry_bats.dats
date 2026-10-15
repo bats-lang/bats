@@ -25,5 +25,6 @@ dynload "./src/inputs.dats"
 dynload "./src/lexer.dats"
 dynload "./src/lock.dats"
 dynload "./src/recursion.dats"
+dynload "./src/stamp.dats"
 dynload "./src/bin/bats.dats"
 implement main0 () = __BATS_main0 ()

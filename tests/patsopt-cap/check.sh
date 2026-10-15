@@ -113,7 +113,16 @@ is_sh "$(parent_of_last)" || fail "with caps, patsopt was not started by sh ($(p
 if grep -q "waiting" "$TMP/generous.log"; then fail "waited" generous; fi
 (cd "$TMP/generous" && HOME="$H" BATS_PATSOPT_TIMEOUT_S=600 BATS_PATSOPT_MEM_MB=8192 "$BATS" build --only debug --only native > "$TMP/generous-build.log" 2>&1) || fail "build with generous caps" generous-build
 cs_generous=$(cd "$TMP/generous/build" && find . -name '*.c' | sort | xargs cat | cksum)
-[ "$cs_plain" = "$cs_generous" ] || { echo "FAIL: the C differs under a cap"; echo "$cs_plain / $cs_generous"; exit 1; }
+[ "$cs_plain" = "$cs_generous" ] || {
+  echo "FAIL: the C differs under a cap"; echo "$cs_plain / $cs_generous"
+  (cd "$TMP/plain/build" && find . -name '*.c' | sort) > "$TMP/c-plain.list"
+  (cd "$TMP/generous/build" && find . -name '*.c' | sort) > "$TMP/c-generous.list"
+  diff "$TMP/c-plain.list" "$TMP/c-generous.list" || true
+  for f in $(cat "$TMP/c-plain.list"); do
+    cmp -s "$TMP/plain/build/$f" "$TMP/generous/build/$f" || { echo "--- $f differs:"; diff "$TMP/plain/build/$f" "$TMP/generous/build/$f" | head -20; }
+  done
+  exit 1
+}
 # the next bats in the project is not made to wait for a leftover timer
 start=$(date +%s)
 (cd "$TMP/generous" && HOME="$H" BATS_PATSOPT_TIMEOUT_S=600 "$BATS" clean > "$TMP/generous-clean.log" 2>&1) || fail "clean after a capped run" generous-clean

@@ -42,7 +42,9 @@ staload S = "str/src/lib.sats"
 
 
 
+
 staload "helpers.sats"
+staload "_bats_inputs.sats"
 
 
 
@@ -263,6 +265,21 @@ staload "helpers.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn toolchain_digest {lph:agz}
+  (ph: !$A.borrow(byte, lph, 512), phlen: int, out: !$B.builder_v >> $B.builder_v): bool
 
 
 
