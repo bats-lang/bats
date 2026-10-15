@@ -26,6 +26,7 @@ staload "lexer.sats"
 staload "build.sats"
 staload "commands.sats"
 staload "lock.sats"
+staload "_bats_inputs.sats"
 
 
 
