@@ -1,0 +1,3 @@
+[package]
+name = "setup-fixture"
+kind = "bin"

@@ -13,7 +13,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # Every uses: is a commit, never a name that moves
+      # (bats-lang/repository-prototype#269)
+      - name: Every uses is pinned
+        run: |
+          tests/setup-action/pins-check.sh
+          scripts/check-pins.sh
 
       # The GMP build of ATS2: its constraint solver does infinite-precision
       # arithmetic (the -int build computes in C int and accepts false
@@ -89,3 +96,69 @@ jobs:
           ~/stage2/bats build --repository ~/repository
           scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen2
           diff -r bootstrap/c /tmp/regen2
+
+  # The setup action other bats repositories call by commit
+  # (bats-lang/bats#274), run on a tiny project from the commit under test
+  setup-action:
+    runs-on: ubuntu-latest
+    steps:
+      # two commits deep: a pull request's head is the merge's second parent
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2
+
+      - name: Read the pins
+        id: pins
+        run: |
+          echo "repository=$(tr -d '[:space:]' < .github/repository-version)" >> "$GITHUB_OUTPUT"
+          echo "head=${{ github.event.pull_request.head.sha || github.sha }}" >> "$GITHUB_OUTPUT"
+
+      # a project with no bats.lock is refused before anything is installed
+      - name: A missing bats.lock is refused
+        id: no-lock
+        continue-on-error: true
+        uses: ./.github/actions/setup
+        with:
+          working-directory: tests/setup-action/project
+          bats-version: ${{ steps.pins.outputs.head }}
+          repository-version: ${{ steps.pins.outputs.repository }}
+
+      # so is a pin that is not a full commit
+      - name: A compiler pin that is a branch is refused
+        id: branch-pin
+        continue-on-error: true
+        uses: ./.github/actions/setup
+        with:
+          working-directory: tests/setup-action/project
+          require-lock: 'false'
+          bats-version: main
+          repository-version: ${{ steps.pins.outputs.repository }}
+
+      - name: A commit that is not in the checkout is refused
+        id: absent-commit
+        continue-on-error: true
+        uses: ./.github/actions/setup
+        with:
+          working-directory: tests/setup-action/project
+          require-lock: 'false'
+          bats-version: ${{ steps.pins.outputs.head }}
+          repository-version: ${{ steps.pins.outputs.repository }}
+          commit: 0000000000000000000000000000000000000001
+
+      - name: The refusals were refusals
+        run: |
+          test "${{ steps.no-lock.outcome }}" = failure
+          test "${{ steps.branch-pin.outcome }}" = failure
+          test "${{ steps.absent-commit.outcome }}" = failure
+
+      # the compiler built here is the commit under test: its bootstrap C
+      - name: Set up bats
+        uses: ./.github/actions/setup
+        with:
+          working-directory: tests/setup-action/project
+          require-lock: 'false'
+          bats-version: ${{ steps.pins.outputs.head }}
+          repository-version: ${{ steps.pins.outputs.repository }}
+
+      - name: What the action left behind
+        run: tests/setup-action/verify.sh "${{ steps.pins.outputs.head }}" "${{ steps.pins.outputs.repository }}" "${{ steps.pins.outputs.head }}" tests/setup-action/project
