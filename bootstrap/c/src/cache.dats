@@ -20,7 +20,8 @@ staload "str/src/lib.dats"
    any path.
 
    With BATS_CACHE_DIR set, that C is kept there under a key made of
-   what patsopt reads: the toolchain (patsopt and the files of its
+   what patsopt reads: the digest of the running bats's own inputs (the
+   stamp's `bats` line), the toolchain (patsopt and the files of its
    prelude and libraries, by content), patsopt's arguments, and the
    module's .dats with every file its staloads and includes reach
    (patsopt --depgen, followed to the end), each by path and sha256. A
@@ -44,14 +45,20 @@ staload SHA = "sha256/src/lib.sats"
 staload S = "str/src/lib.sats"
 
 staload "helpers.sats"
+staload "_bats_inputs.sats"
 
 (* Whether this process has written build/.bats_toolchain, the listing
    the toolchain's part of a key is the hash of: it is made once per
    process, since another run may have had another toolchain *)
 val g_toolchain_listed = ref<bool>(false)
 
-(* The cache format: entries of another format are in another directory *)
-#define CACHE_FORMAT "patsopt-1"
+(* The directory of the cache's entries under BATS_CACHE_DIR. It is only
+   a name: what an entry is valid for is in its key, which begins with the
+   digest of the running bats's own inputs (the stamp's `bats` line,
+   stamp.bats), so another bats never hits what this one made, with no
+   number to bump when the emitter changes. Entries of other bats
+   versions stay in this directory until they are not used for 7 days. *)
+#define CACHE_DIR_NAME "patsopt-1"
 
 (* ============================================================
    Running sh
@@ -265,13 +272,17 @@ fn put_path_sha256 (b: $B.builder_v, out: !$B.builder_v >> $B.builder_v): bool =
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in ok end
 
-(* The toolchain, appended to key: the sha256 of a cksum listing of
+(* The toolchain, appended to out as the sha256 of a cksum listing of
    patsopt and of every file of the prelude and libraries it reads
    (which --depgen does not name), made once per process into
    build/.bats_toolchain. By content, not by mtime: a patsopt rebuilt or
-   a prelude edited in place is another toolchain. *)
-fn put_toolchain {lph:agz}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int, key: !$B.builder_v >> $B.builder_v): bool = let
+   a prelude edited in place is another toolchain. This is the stamp's
+   `patsopt` line and the cache key's toolchain. false when the listing
+   cannot be made. *)
+
+
+
+implement toolchain_digest (ph, phlen, out) = let
   val listing = str_to_path_arr("build/.bats_toolchain")
   val @(fz_l, bv_l) = $A.freeze<byte>(listing)
   val have = (if !g_toolchain_listed then $F.file_exists(bv_l, 524288) else false): bool
@@ -285,11 +296,17 @@ fn put_toolchain {lph:agz}
         $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil())))
       val () = (if rc = 0 then !g_toolchain_listed := true else ())
     in rc = 0 end): bool
-  val () = bput_v(key, "toolchain ")
-  val ok = (if listed then put_file_sha256(bv_l, key) else false): bool
-  val () = put_char_v(key, 10)
+  val ok = (if listed then put_file_sha256(bv_l, out) else false): bool
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
+in ok end
+
+(* The toolchain, appended to key *)
+fn put_toolchain {lph:agz}
+  (ph: !$A.borrow(byte, lph, 512), phlen: int, key: !$B.builder_v >> $B.builder_v): bool = let
+  val () = bput_v(key, "toolchain ")
+  val ok = toolchain_digest(ph, phlen, key)
+  val () = put_char_v(key, 10)
 in ok end
 
 (* Each line of c[i, n), a path, appended to key with the sha256 of its
@@ -359,7 +376,7 @@ fn module_key {lph,lo,li:agz}
    hex: !$B.builder_v >> $B.builder_v): bool = let
   var key : $B.builder_v = $B.create()
   val () = bput_v(key, "bats ")
-  val () = bput_v(key, CACHE_FORMAT)
+  val () = bput_v(key, bats_inputs_sha256())
   val () = put_char_v(key, 10)
   val tool = put_toolchain(ph, phlen, key)
   val () = bput_v(key, "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o ")
@@ -418,7 +435,7 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   var store : $B.builder_v = $B.create()
   val () = copy_to_builder_v(bv_da, 0, dl, 524288, store)
   val () = put_char_v(store, 47)
-  val () = bput_v(store, CACHE_FORMAT)
+  val () = bput_v(store, CACHE_DIR_NAME)
   val () = $A.drop<byte>(fz_da, bv_da)
   val () = $A.free<byte>($A.thaw<byte>(fz_da))
   val @(ha, hl) = $B.to_arr(hex)

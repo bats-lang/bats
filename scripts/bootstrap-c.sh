@@ -29,6 +29,9 @@ rm -f "$TMP/c/.sats_changed"
 # So are the shared cache's working files (BATS_CACHE_DIR's toolchain
 # listing and depgen output), there only when the build used it
 rm -f "$TMP/c/.bats_toolchain" "$TMP/c/.bats_depgen"
+# The build's stamp and the listing of the C compiler it hashes name this
+# machine's toolchain (bats-lang/bats#267), not the sources
+rm -f "$TMP/c/.bats_stamp" "$TMP/c/.bats_stamp.new" "$TMP/c/.bats_cc"
 
 esc() { printf '%s\n' "$1" | sed -e 's/[]\/$*.^[|]/\\&/g'; }
 root_re=$(esc "$ROOT/")

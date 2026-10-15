@@ -17,6 +17,7 @@ staload "helpers.sats"
 staload "cache.sats"
 staload "facts.sats"
 staload "inputs.sats"
+staload "stamp.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
@@ -1279,8 +1280,23 @@ in
     in println! ("error: HOME not set, cannot find ATS2 toolchain") end
     else let
 
+      (* The stamp (stamp.bats): build/ is kept only when it was made by
+         this bats, this ATS2 and this C compiler, with these flags, for
+         this target and mode. It is judged here, after cache_swap has put
+         this mark's build/ in place and the ATS2 toolchain is known. *)
+      val mode_mark = target_mark(build_target, is_test_mode())
+      val () = stamp_check(bv_patshome, phlen, mode_mark)
+
       (* Read old target marker to detect target change, then write new one.
-         target_changed is passed to preprocess_one to force reprocessing. *)
+         target_changed is passed to preprocess_one to force reprocessing.
+         With the stamp it is true only for a build/ that holds no build
+         (nothing was there, or the stamp dropped it): the files it would
+         force are not there either, so it is a belt for a marker that
+         cannot be read. The hand-bumped build/.bats_cache_id and the
+         removal of every .o that it and a changed target caused are gone:
+         a build/ of another bats or toolchain no longer exists by now, and
+         one of another target or mode is in its stash (cache_swap), so
+         there is no stale object left to remove. *)
       val tgt_path_r = str_to_path_arr("build/.bats_target")
       val @(fz_tgtr, bv_tgtr) = $A.freeze<byte>(tgt_path_r)
       val old_tgt_or = $F.file_open(bv_tgtr, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
@@ -1297,40 +1313,7 @@ in
         | ~$R.err(_) => ~1): int
       val () = $A.drop<byte>(fz_tgtr, bv_tgtr)
       val () = $A.free<byte>($A.thaw<byte>(fz_tgtr))
-      (* The marker is the target, plus 2 in check and test mode, whose
-         output also holds the $UNITTEST blocks: a change of either
-         makes preprocess_one reprocess every file *)
-      val mode_mark = target_mark(build_target, is_test_mode())
-      val target_changed_tgt = ~($AR.eq_int_int(old_target, mode_mark))
-      (* Cache buster: when compiler semantics change, bump this ID.
-         If the stored ID differs, force reprocessing of all cached files. *)
-      val cache_buster_id = 50 (* ASCII '2' — bumped: auto-clean stale .o on target change *)
-      val cid_path_r = str_to_path_arr("build/.bats_cache_id")
-      val @(fz_cidr, bv_cidr) = $A.freeze<byte>(cid_path_r)
-      val old_cid_or = $F.file_open(bv_cidr, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
-      val old_cid = (case+ old_cid_or of
-        | ~$R.ok(cfd) => let
-            val cb = $A.alloc<byte>(16)
-            val cr = $F.file_read(cfd, cb, 16)
-            val cl = (case+ cr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-            val cc = $F.file_close(cfd)
-            val () = $R.discard<int><$F.io_error>(cc)
-            val ov = byte2int0($A.get<byte>(cb, 0))
-            val () = $A.free<byte>(cb)
-          in (if cl > 0 then ov else ~1): int end
-        | ~$R.err(_) => ~1): int
-      val () = $A.drop<byte>(fz_cidr, bv_cidr)
-      val () = $A.free<byte>($A.thaw<byte>(fz_cidr))
-      val cache_busted = ~($AR.eq_int_int(old_cid, cache_buster_id))
-      val target_changed = (target_changed_tgt || cache_busted)
-      (* Write cache buster ID *)
-      var cid_b : $B.builder_v = $B.create()
-      val () = put_char_v(cid_b, cache_buster_id)
-      val cid_path = str_to_path_arr("build/.bats_cache_id")
-      val @(fz_cidp, bv_cidp) = $A.freeze<byte>(cid_path)
-      val _ = write_file_from_builder(bv_cidp, 524288, cid_b)
-      val () = $A.drop<byte>(fz_cidp, bv_cidp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_cidp))
+      val target_changed = ~($AR.eq_int_int(old_target, mode_mark))
       (* Now write new target marker *)
       var tgt_b : $B.builder_v = $B.create()
       val () = put_char_v(tgt_b, 48 + mode_mark)
@@ -1339,23 +1322,6 @@ in
       val _ = write_file_from_builder(bv_tgtp, 524288, tgt_b)
       val () = $A.drop<byte>(fz_tgtp, bv_tgtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_tgtp))
-
-      (* When target changed or cache busted, remove stale .o files *)
-      val () = if target_changed then let
-        val exec = str_to_path_arr("sh")
-        val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
-        var b1 = $B.create()
-        val () = bput_v(b1, "sh")
-        var b2 = $B.create()
-        val () = bput_v(b2, "-c")
-        var b3 = $B.create()
-        val () = bput_v(b3, "rm -f build/*.o build/bats_modules/*/*/*.o build/bats_modules/*/*/*/*.o")
-        val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
-          $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
-        val _ = run_cmd(bv_exec, argv)
-        val () = $A.drop<byte>(fz_exec, bv_exec)
-        val () = $A.free<byte>($A.thaw<byte>(fz_exec))
-      in end else ()
 
       (* Step 2b: Write and compile native runtime (after stale .o removal) *)
       var nrt_b : $B.builder_v = $B.create()
