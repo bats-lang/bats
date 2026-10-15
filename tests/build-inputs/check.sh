@@ -44,7 +44,7 @@ want=$({ echo "bats-inputs 1"; { echo bats.toml; find src -type f -name '*.bats'
 [ "$d1" = "$want" ] || { echo "FAIL: digest $d1, listing says $want"; exit 1; }
 # the same under another commit
 sleep 1
-git commit -q --allow-empty -m second
+git -c user.name=t -c user.email=t@t commit -q --allow-empty -m second
 build "$P" "$TMP/2.log"
 [ "$(digest "$P")" = "$d1" ] || { echo "FAIL: a new commit changed the digest"; exit 1; }
 # the same from scratch, and from a copy at another path with other mtimes
