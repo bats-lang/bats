@@ -747,25 +747,8 @@ fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
 
 
 
-fn is_newer {l1:agz}{l2:agz}
-  (p1: !$A.borrow(byte, l1, 524288), p2: !$A.borrow(byte, l2, 524288)): bool
-
-
-
-
-
-
-
-
 fn freshness_check_bv
   (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
-
-
-
-
-
-
 
 
 
@@ -793,22 +776,11 @@ fn touch_sats_stamp (): void
 
 
 
+
+
+
 fn c_fresh_bv
   (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -829,6 +801,208 @@ fn file_has_bytes {lp:agz}{lb:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn input_digest_sizes {li:agz}
+  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+fn input_digest_hashes {li:agz}
+  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+fn input_digest {li:agz}
+  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+fn key_fresh (is_c: bool, out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn key_record {lo:agz}{li:agz}
+  (is_c: bool, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn key_drop {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288)): void
 
 
 
@@ -1976,6 +2150,8 @@ fn run_cc {lph:agz}{lo:agz}{li:agz}
 
 
 
+
+
 datatype heavy_command =
   | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
 
@@ -2516,6 +2692,47 @@ fn read_whole {lp:agz}{np:pos | np < 1048576}
 
 fn whole_free {la,l:agz}{m:pos}
   (ar: $A.arena(byte, la, m, m, 1), p: $A.arrx(byte, l, m, la)): void
+
+
+
+
+
+
+
+
+
+
+
+
+fn sats_stamp_save (): whole_file
+
+
+
+
+
+
+
+
+
+fn sats_stamp_end (saved: whole_file, back: bool): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

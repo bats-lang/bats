@@ -34,7 +34,7 @@ b=$!
 wait $a || { echo "FAIL: the first build"; cat "$TMP/a.log"; exit 1; }
 wait $b || { echo "FAIL: the second build"; cat "$TMP/b.log"; exit 1; }
 grep -q "waiting for another bats running in this project" "$TMP/b.log" || { echo "FAIL: the second bats did not say it waited"; cat "$TMP/b.log"; exit 1; }
-[ "$(grep -c '^start' "$LOG")" -ge 4 ] || { echo "FAIL: too few patsopt runs"; cat "$LOG"; exit 1; }
+[ "$(grep -c '^start' "$LOG")" -ge 3 ] || { echo "FAIL: too few patsopt runs"; cat "$LOG"; exit 1; }
 # no run starts while another bats's run is going
 awk '
   $1 == "start" { if (open != "" && open != $2) { print "overlap: " $2 " started inside " open; bad = 1 } open = $2; n[$2]++ }
