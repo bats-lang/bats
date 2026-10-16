@@ -27,13 +27,15 @@ staload "lexer.sats"
 staload "build.sats"
 staload "commands.sats"
 staload "lock.sats"
+staload "ats2.sats"
+staload "setup.sats"
 staload "with_env.sats"
 staload "_bats_inputs.sats"
 
 (* The subcommands *)
 datatype command =
   | Build | Check | Clean | Lock | Run | Init | Test | Tree
-  | Upload | Add | Remove | Completions | Version | UnknownCommand
+  | Upload | Add | Remove | Completions | Ats2 | CloneRepository | RecordCommit | Version | UnknownCommand
 
 (* The command the command buffer names, told apart as the Rust bats did:
    by its length and first bytes *)
@@ -50,6 +52,7 @@ in
   else if len = 4 then
     (if $AR.eq_int_int(b0, 108) then Lock()
     else if $AR.eq_int_int(b0, 105) then Init()
+    else if $AR.eq_int_int(b0, 97) then Ats2()
     else if $AR.eq_int_int(b0, 116) then
       (if $AR.eq_int_int(b1, 101) then Test() else Tree())
     else UnknownCommand()): command
@@ -62,6 +65,8 @@ in
     else if $AR.eq_int_int(b0, 114) then Remove()
     else UnknownCommand()): command
   else if len = 11 then Completions()
+  else if len = 16 then CloneRepository()
+  else if len = 13 then RecordCommit()
   else if len = 7 then Version()
   else UnknownCommand()
 end
@@ -73,7 +78,7 @@ fn locks_project (c: command): bool =
   | Build() => true | Check() => true | Clean() => true | Lock() => true
   | Test() => true | Tree() => true | Upload() => true | Add() => true
   | Remove() => true
-  | Run() => false | Init() => false | Completions() => false
+  | Run() => false | Init() => false | Completions() => false | Ats2() => false | CloneRepository() => false | RecordCommit() => false
   | Version() => false | UnknownCommand() => false
 
 (* The commands that hold a machine slot while they work, with BATS_SLOTS
@@ -85,6 +90,7 @@ fn heavy_of (c: command): heavy_command =
   | Run() => NotHeavy() | Clean() => NotHeavy() | Lock() => NotHeavy()
   | Tree() => NotHeavy() | Upload() => NotHeavy() | Add() => NotHeavy()
   | Remove() => NotHeavy() | Init() => NotHeavy() | Completions() => NotHeavy()
+  | Ats2() => NotHeavy() | CloneRepository() => NotHeavy() | RecordCommit() => NotHeavy()
   | Version() => NotHeavy() | UnknownCommand() => NotHeavy()
 
 (* Print usage matching Rust bats format *)
@@ -110,6 +116,10 @@ fn print_usage(): void = let
   val () = println! ("  tree [--repository <dir>]    Show dependency tree")
   val () = println! ("  upload --repository <dir>    Package and upload a library")
   val () = println! ("  clean                        Remove generated artifacts")
+  val () = println! ("  ats2 install                 Install the pinned ATS2 (patsopt) into ~/.bats/ats2")
+  val () = println! ("  clone-repository <commit> --repository <dir>")
+  val () = println! ("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>")
+  val () = println! ("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
   val () = println! ("  with-env <env-file> <command> [args...]")
   val () = println! ("                               Run a command with the variables of a dotenv file")
@@ -526,6 +536,34 @@ in
                 | ~$R.some(target) => do_completions(target)
                 | ~$R.none() => println! ("error: specify a shell (bash, zsh, fish)\nusage: bats completions bash|zsh|fish")
               end
+              | Ats2() => let
+                val () = $AP.parse_result_free(r)
+                (* the one subcommand: install *)
+                fn is_install_arg {l2:agz} (buf: !$A.arr(byte, l2, 4096), alen: int): bool =
+                  alen = 7 && peek_arr(buf, 0, 4096) = 105 && peek_arr(buf, 1, 4096) = 110
+                  && peek_arr(buf, 2, 4096) = 115 && peek_arr(buf, 3, 4096) = 116
+                  && peek_arr(buf, 4, 4096) = 97 && peek_arr(buf, 5, 4096) = 108
+                  && peek_arr(buf, 6, 4096) = 108
+                val install = is_install_arg(arg_buf, arg_len)
+                val () = $A.free<byte>(arg_buf)
+              in
+                if install then (if ats2_ensure(Say()) then () else set_build_err())
+                else let
+                  val () = prerr! ("error: specify 'install'\nusage: bats ats2 install\n")
+                in set_build_err() end
+              end
+              | CloneRepository() => let
+                val () = $AP.parse_result_free(r)
+                val @(fz_cm, bv_cm) = $A.freeze<byte>(arg_buf)
+                val () = (if clone_repository(bv_cm, arg_len, bv_repo, repo_len) then () else set_build_err())
+                val () = $A.drop<byte>(fz_cm, bv_cm)
+              in $A.free<byte>($A.thaw<byte>(fz_cm)) end
+              | RecordCommit() => let
+                val () = $AP.parse_result_free(r)
+                val @(fz_cm, bv_cm) = $A.freeze<byte>(arg_buf)
+                val () = (if record_commit(bv_cm, arg_len) then () else set_build_err())
+                val () = $A.drop<byte>(fz_cm, bv_cm)
+              in $A.free<byte>($A.thaw<byte>(fz_cm)) end
               | Version() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
@@ -533,7 +571,7 @@ in
               | UnknownCommand() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|completions> [--only debug|release]") end)
+              in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|ats2|clone-repository|record-commit|completions> [--only debug|release]") end)
               val () = project_lock_release(lk)
               val () = $A.drop<byte>(fz_repo, bv_repo)
               val () = $A.free<byte>($A.thaw<byte>(fz_repo))
