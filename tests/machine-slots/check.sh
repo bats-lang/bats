@@ -27,7 +27,11 @@ LOG=$TMP/runs
 NESTED=$TMP/nested
 cat > "$H/.bats/ats2/bin/patsopt" <<SH
 #!/bin/sh
-echo "start \$PPID" >> "$LOG"
+owner=\$PPID
+echo "start \$owner" >> "$LOG"
+# the kill case: a run waits here until the test has killed the bats that
+# started it, so that bats is killed while it still holds the slot
+if [ -f "$TMP/gate" ]; then while [ ! -f "$TMP/gate.open" ]; do sleep 0.1; done; fi
 # the nested case: once, a bats run by what holds the slot
 if [ -f "$NESTED/on" ] && [ -z "\${INNER:-}" ]; then
   rm -f "$NESTED/on"
@@ -37,7 +41,7 @@ fi
 sleep 1
 "$REAL/bin/patsopt" "\$@"
 rc=\$?
-echo "end \$PPID" >> "$LOG"
+echo "end \$owner" >> "$LOG"
 exit \$rc
 SH
 chmod +x "$H/.bats/ats2/bin/patsopt"
@@ -58,12 +62,31 @@ apart() {
     END { exit bad }' "$LOG"
 }
 build() { (cd "$TMP/$1" && HOME="$H" "$BATS" build --only debug --only native); }
+# Waits, bounded, until the stand-in has logged a start: a bats that has
+# started patsopt holds its slot, so what follows can wait for that
+await_started() {
+  i=0
+  until grep -q '^start ' "$LOG"; do
+    i=$((i + 1))
+    if [ $i -gt 600 ]; then echo "FAIL: nothing started in 120 s"; cat "$LOG"; ps -ef | grep "$TMP" | grep -v grep; exit 1; fi
+    sleep 0.2
+  done
+}
+# Waits, bounded, until every run the stand-in logged for bats $1 has ended
+await_ended() {
+  i=0
+  while [ "$(grep -c "^start $1\$" "$LOG")" != "$(grep -c "^end $1\$" "$LOG")" ]; do
+    i=$((i + 1))
+    if [ $i -gt 600 ]; then echo "FAIL: a patsopt of killed bats $1 has not ended in 120 s, so it still holds the slot"; cat "$LOG"; ps -ef | grep "$TMP" | grep -v grep; exit 1; fi
+    sleep 0.2
+  done
+}
 
 # one slot, two projects: they take turns
 fresh
 BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS build p1 > "$TMP/a.log" 2>&1 &
 a=$!
-sleep 1
+await_started
 BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS build p2 > "$TMP/b.log" 2>&1 &
 b=$!
 wait $a || { echo "FAIL: the first build"; cat "$TMP/a.log"; exit 1; }
@@ -80,7 +103,7 @@ apart || { echo "FAIL: one slot, but the two builds ran patsopt at once"; cat "$
 fresh
 BATS_SLOTS=2 BATS_LOCK_DIR=$SLOTS build p1 > "$TMP/a.log" 2>&1 &
 a=$!
-sleep 1
+await_started
 BATS_SLOTS=2 BATS_LOCK_DIR=$SLOTS build p2 > "$TMP/b.log" 2>&1 &
 b=$!
 wait $a || { echo "FAIL: the first build (2 slots)"; cat "$TMP/a.log"; exit 1; }
@@ -90,13 +113,18 @@ if apart > /dev/null; then echo "FAIL: 2 slots, but the builds took turns"; cat 
 
 # a bats killed holding the slot leaves it free
 fresh
-BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS build p1 > "$TMP/c.log" 2>&1 &
+rm -f "$TMP/gate.open"; : > "$TMP/gate"
+# exec: $c is the bats itself, so the kill reaches it (a subshell's pid
+# would leave bats running as an orphan that still holds the slot)
+( cd "$TMP/p1" && exec env HOME="$H" BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS "$BATS" build --only debug --only native ) > "$TMP/c.log" 2>&1 &
 c=$!
-sleep 1
+await_started
 kill -KILL $c
 wait $c 2>/dev/null || true
-# the patsopt it started inherited the slot: once it ends, nothing holds it
-sleep 4
+# what it started inherited the slot (its patsopt, held at the gate): let it
+# run on, and wait for that run to end, so nothing holds the slot
+rm -f "$TMP/gate"; : > "$TMP/gate.open"
+await_ended $c
 BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS build p2 > "$TMP/d.log" 2>&1 || { echo "FAIL: build after a killed one"; cat "$TMP/d.log"; exit 1; }
 if grep -q "waiting" "$TMP/d.log"; then echo "FAIL: a killed bats left the slot held"; cat "$TMP/d.log"; exit 1; fi
 [ "$("$TMP/p2/dist/debug/p2")" = 1 ] || { echo "FAIL: the binary"; cat "$TMP/d.log"; ls -R "$TMP/p2/dist" || true; exit 1; }
@@ -123,7 +151,7 @@ if grep -q "waiting" "$NESTED/log"; then echo "FAIL: the nested bats waited"; ca
 fresh
 BATS_SLOT_HELD=$SLOTS/slot-0.lock BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS build p1 > "$TMP/f.log" 2>&1 &
 f=$!
-sleep 1
+await_started
 BATS_SLOTS=1 BATS_LOCK_DIR=$SLOTS build p2 > "$TMP/g.log" 2>&1
 wait $f || { echo "FAIL: the build with a stale BATS_SLOT_HELD"; cat "$TMP/f.log"; exit 1; }
 grep -q "waiting for another bats on this machine" "$TMP/g.log" || { echo "FAIL: a stale BATS_SLOT_HELD let a bats run without its slot"; cat "$TMP/g.log"; exit 1; }
