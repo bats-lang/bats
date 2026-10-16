@@ -110,6 +110,11 @@ in
         else let
           val before = (if is_test_mode() then read_whole(sats_bv, 524288)
                         else whole_err($F.NotFound())): whole_file
+          (* the stamp first (see sats_stamp_save): a kill between the two
+             must not leave a C fresh that was built from the older .sats *)
+          val saved = (if is_test_mode() then sats_stamp_save()
+                       else whole_err($F.NotFound())): whole_file
+          val () = touch_sats_stamp()
           val r = write_file_from_rope(sats_bv, sc)
           val moved = (if r = 0 then sats_moved(before, sats_bv)
             else let
@@ -117,7 +122,7 @@ in
                 | ~whole_ok(ar, p, _, _) => whole_free(ar, p)
                 | ~whole_err(_) => ())
             in false end): bool
-          val () = (if moved then () else touch_sats_stamp())
+          val () = sats_stamp_end(saved, moved)
         in r end): int
       val () = $B.rope_list_free(sc)
       val [kd:int] dc = $B.rope_chunks(dats)

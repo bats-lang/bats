@@ -2698,6 +2698,47 @@ implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
 
+(* build/.sats_changed is touched BEFORE a .sats is written, so a bats
+   killed between the two leaves the stamp ahead (every C is made again),
+   never behind (a C built from the older .sats kept fresh). Where a .sats
+   turns out to have only moved (check and test mode), the stamp is put
+   back as it was: sats_stamp_save before the touch, and sats_stamp_end
+   after the write, with back = true to restore it, false to keep the
+   touched one. *)
+
+
+implement sats_stamp_save () = let
+  val @(pa, _) = $B.to_arr(sats_stamp_path())
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val w = read_whole(bv_p, 524288)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in w end
+
+
+
+implement sats_stamp_end (saved, back) =
+  case+ saved of
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+      val () = (if back then let
+          var cb : $B.builder_v = $B.create()
+          val () = copy_to_builder_v(bv_c, 0, n, m, cb)
+          val @(pa, _) = $B.to_arr(sats_stamp_path())
+          val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+          val _ = write_file_from_builder(bv_p, 524288, cb)
+          val () = $A.drop<byte>(fz_p, bv_p)
+        in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
+      val () = $A.drop<byte>(fz_c, bv_c)
+    in whole_free(ar, $A.thaw<byte>(fz_c)) end
+  | ~whole_err(_) => (if back then let
+        val @(pa, pl) = $B.to_arr(sats_stamp_path())
+        val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+        val () = remove_output(bv_p, pl)
+        val () = $A.drop<byte>(fz_p, bv_p)
+      in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
+
+
 (* ============================================================
    A .sats that only moved: its declarations the same, at other lines
    ============================================================ *)

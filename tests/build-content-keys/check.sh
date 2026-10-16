@@ -30,12 +30,22 @@ printf '#pub fun h (): int\n\nimplement h () = 9\n' > "$TMP/plain/src/lib.bats"
 printf '#pub fun k (): int\n\nimplement k () = 10\n' > "$TMP/plain/src/more.bats"
 printf '#target native\n#include "share/atspre_staload.hats"\n#use ns.example/mine as M\n#use plain as PL\n\nimplement main0 () = println! ("got ", $M.f () + $PL.h ())\n' > "$TMP/app/src/bin/tool.bats"
 printf '#target wasm binary\n#include "share/atspre_staload.hats"\n#use ns.example/mine as M\n#use plain as PL\n\nimplement main0 () = let val _ = $M.f () + $PL.h () in () end\n' > "$TMP/app/src/bin/web.bats"
+# A patsopt that kills the bats that started it, while a flag file is there
+# (an interrupted run); otherwise the real one. The same for every run, so
+# the toolchain's digest is the same.
+REAL=$HOME/.bats/ats2
+H=$TMP/home
+mkdir -p "$H/.bats/ats2/bin"
+for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
+KILL_FLAG=$TMP/kill-flag
+printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
+chmod +x "$H/.bats/ats2/bin/patsopt"
 cd "$TMP/app"
 N=0
 run() { # <log> <command...>: bats -v <command>
   l=$1; shift
   N=$((N + 1))
-  "$BATS" -v "$@" > "$l" 2>&1 || { echo "FAIL: $*"; cat "$l"; exit 1; }
+  HOME="$H" "$BATS" -v "$@" > "$l" 2>&1 || { echo "FAIL: $*"; cat "$l"; exit 1; }
 }
 # runs of a tool (the entry's generated module too: its C is the same
 # bytes, so it is not made again)
@@ -89,11 +99,37 @@ run c9.log check
 run c10.log check
 quiet c10.log "the check after a changed body"
 # A changed .sats: every module is made again
+# (as a dependency replaced by another version is: only its .sats differs,
+# and its files are older than everything)
 printf '#pub fun h (): int\n#pub fun h2 (): int\n\nimplement h () = 5\nimplement h2 () = 6\n' > "$TMP/plain/src/lib.bats"
+touch -d '2001-01-01 00:00:00' "$TMP/plain/src/lib.bats"
 run c11.log check
 cold c11.log "a changed .sats" 6
+grep -aq 'src/bin/tool_dats.c' c11.log || { echo "FAIL: the dependent bin's C was not made again"; cat c11.log; exit 1; }
+grep -aq 'ns.example/mine/src/lib_dats.c' c11.log || { echo "FAIL: another dependency's C was not made again"; cat c11.log; exit 1; }
 run c12.log check
 quiet c12.log "the check after a changed .sats"
+# An interrupted run: patsopt kills bats after the key was dropped. The
+# source then goes back to what the old C was made from, so a key left
+# behind would match it; the C is made again
+cp "$TMP/plain/src/lib.bats" "$TMP/lib.settled"
+printf '#pub fun h (): int\n#pub fun h2 (): int\n\nimplement h () = 4\nimplement h2 () = 6\n' > "$TMP/plain/src/lib.bats"
+: > "$KILL_FLAG"
+if HOME="$H" "$BATS" -v check > k1.log 2>&1; then echo "FAIL: the killed run ended well"; cat k1.log; exit 1; fi
+rm -f "$KILL_FLAG"
+cp "$TMP/lib.settled" "$TMP/plain/src/lib.bats"
+run k2.log check
+[ "$(count k2.log patsopt)" -ge 1 ] || { echo "FAIL: an interrupted run's C was kept"; cat k2.log; exit 1; }
+grep -aq 'plain/src/lib_dats.c' k2.log || { echo "FAIL: not plain's lib"; cat k2.log; exit 1; }
+run k3.log check
+quiet k3.log "the check after an interrupted run"
+# The stamp ahead of the .sats (bats killed after touching it, before it
+# wrote the .sats; it touches the stamp first): every module is made again
+printf 'x' >> build/.sats_changed
+run s1.log check
+cold s1.log "a stamp ahead of the .sats" 3
+run s2.log check
+quiet s2.log "the check after it"
 # The same for a build (another mark: a cold one first)
 run b0.log build --only debug --only native
 cold b0.log "a cold build" 5

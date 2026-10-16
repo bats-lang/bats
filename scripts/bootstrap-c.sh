@@ -33,6 +33,10 @@ rm -f "$TMP/c/.bats_toolchain" "$TMP/c/.bats_depgen"
 # machine's toolchain (bats-lang/bats#267), not the sources
 rm -f "$TMP/c/.bats_stamp" "$TMP/c/.bats_stamp.new" "$TMP/c/.bats_cc"
 
+# Each C and object has a key beside it (bats#254) that hashes patsopt's
+# raw C, which names this machine's paths; the seed's Makefile uses none
+find "$TMP/c" -name '*.key' -exec rm -f {} +
+
 esc() { printf '%s\n' "$1" | sed -e 's/[]\/$*.^[|]/\\&/g'; }
 root_re=$(esc "$ROOT/")
 # patsopt also mangles each file's absolute path into C symbol names

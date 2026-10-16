@@ -2704,6 +2704,47 @@ fn whole_free {la,l:agz}{m:pos}
 
 
 
+fn sats_stamp_save (): whole_file
+
+
+
+
+
+
+
+
+
+fn sats_stamp_end (saved: whole_file, back: bool): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
