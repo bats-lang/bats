@@ -185,33 +185,61 @@ cd "$TMP"
 ok "a directory whose name starts with a dash"
 
 # a real kill: the run is killed while it fetches, leaving its marked sibling;
-# the next run clears that sibling and clones
-mkdir -p "$TMP/killfake"
+# the next run clears that sibling and clones. The stand-in git logs the start
+# of its fetch and then becomes sleep (exec), so when the test kills the run the
+# clone's shell is parked in that one child, and its children are exactly the
+# ones the kill must reach: nothing starts between the snapshot and the kill.
+mkdir -p "$TMP/killfake" "$TMP/kill"
 REAL_GIT=$(command -v git)
 cat > "$TMP/killfake/git" <<SH
 #!/bin/sh
-case " \$* " in *" fetch "*) sleep 60 ;; esac
+case " \$* " in *" fetch "*) echo fetching >> "$TMP/kill.log"; exec sleep 60 ;; esac
 exec "$REAL_GIT" "\$@"
 SH
 chmod +x "$TMP/killfake/git"
 kd=$TMP/kill/clone
-mkdir -p "$TMP/kill"
 PATH="$TMP/killfake:$PATH" "$BATS" clone-repository "$first" --repository "$kd" > /dev/null 2>&1 &
 bpid=$!
 i=0
-until ls "$TMP"/kill/clone.new.*/.bats-clone-pending > /dev/null 2>&1; do
-  i=$((i + 1)); [ $i -lt 200 ] || fail "the killed run never made its sibling"; sleep 0.1
+until grep -q fetching "$TMP/kill.log" 2>/dev/null; do
+  i=$((i + 1)); [ $i -lt 600 ] || fail "the killed run never reached its fetch"; sleep 0.1
 done
-kids() { for k in $(pgrep -P "$1" 2>/dev/null); do kids "$k"; echo "$k"; done; }
-victims="$(kids "$bpid") $bpid"
+# the processes under $1 to two levels (bats, its shell, the shell's child), listed
+# children first. Not recursive: in sh a function's loop variable is global, so
+# a recursive call overwrites it (the test killed a grandchild, not the shell)
+tree() { for tc1 in $(pgrep -P "$1" 2>/dev/null); do for tc2 in $(pgrep -P "$tc1" 2>/dev/null); do echo "$tc2"; done; echo "$tc1"; done; }
+shpid=$(cat "$(ls -d "$TMP"/kill/clone.new.* | head -n 1)/.bats-clone-pending")
+victims="$(tree "$bpid") $bpid"
 kill -9 $victims 2>/dev/null || true
 wait "$bpid" 2>/dev/null || true
+i=0; until ! kill -0 "$shpid" 2>/dev/null; do i=$((i + 1)); [ $i -lt 100 ] || fail "the killed shell is still running"; sleep 0.1; done
 ls -d "$TMP"/kill/clone.new.* > /dev/null 2>&1 || fail "the kill left no sibling to clear"
 [ ! -e "$kd" ] || fail "the killed run made the target"
 "$BATS" clone-repository "$first" --repository "$kd" > /dev/null 2>&1 || fail "the run after a kill failed"
 [ "$(git -C "$kd" rev-parse HEAD)" = "$first" ] || fail "the run after a kill is not at the commit"
 [ -z "$(ls -A "$TMP/kill" | grep '^clone\.new\.')" ] || fail "the run after a kill left its sibling: $(ls -A "$TMP/kill")"
 ok "a run killed while it fetches leaves a marked sibling, which the next run clears"
+
+# only bats is killed: its shell lives on, parked in the fetch, and a run that
+# starts now must not clear the sibling of that live shell (the marker holds its
+# pid). The shell is ended here, once the run has been checked.
+rm -f "$TMP/kill.log"
+PATH="$TMP/killfake:$PATH" "$BATS" clone-repository "$first" --repository "$TMP/kill/alive" > /dev/null 2>&1 &
+bpid=$!
+i=0
+until grep -q fetching "$TMP/kill.log" 2>/dev/null; do
+  i=$((i + 1)); [ $i -lt 600 ] || fail "the run beside a live shell never reached its fetch"; sleep 0.1
+done
+live=$(ls -d "$TMP"/kill/alive.new.* | head -n 1)
+livepid=$(cat "$live/.bats-clone-pending")
+kill -9 "$bpid"; wait "$bpid" 2>/dev/null || true
+kill -0 "$livepid" 2>/dev/null || fail "the shell of a killed bats is not running"
+"$BATS" clone-repository "$first" --repository "$TMP/kill/alive" > /dev/null 2>&1 || fail "a run beside a live shell failed"
+[ -d "$live" ] && [ -f "$live/.bats-clone-pending" ] || fail "a run cleared the sibling of a live shell"
+[ "$(git -C "$TMP/kill/alive" rev-parse HEAD)" = "$first" ] || fail "a run beside a live shell is not at the commit"
+victims="$(tree "$livepid") $livepid"
+kill -9 $victims 2>/dev/null || true
+ok "a run does not clear the sibling of a shell that is still alive"
 
 "$BATS" clone-repository "$first" extra --repository "$TMP/x1" > /dev/null 2>&1 && fail "an extra argument was accepted"
 [ ! -e "$TMP/x1" ] || fail "an extra argument cloned"
