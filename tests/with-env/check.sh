@@ -182,6 +182,7 @@ got=$(with_env "$TMP/total-ok.env" sh -c 'echo ${#Ea} ${#F}')
 printf 'Ea=${A}${A}\nEb=${A}${A}\nEc=${A}${A}\nFF=${A}${A}\n' > "$TMP/total-over.env"
 with_env "$TMP/total-over.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "entries together 524288 bytes are not 2 (and not a late 126)"
 grep -q 'cannot be made' "$TMP/err" || fail "the error is not the 'cannot be made' one: $(cat "$TMP/err")"
+grep -q 'value of Ea ' "$TMP/err" || fail "the error does not name the entry that crossed the limit: $(cat "$TMP/err")"
 printf 'Ea=${A}${A}\nEb=${A}${A}\nEc=${A}${A}\nEd=${A}${A}\n' > "$TMP/four.env"
 with_env "$TMP/four.env" true 2>/dev/null; [ $? -eq 2 ] || fail "four entries of 131071 bytes are not 2 (a late 126)"
 unset A

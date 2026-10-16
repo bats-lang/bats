@@ -60,6 +60,16 @@
 
 staload "helpers.sats"
 
+(* The byte at p of bv[0, n), p being proved below n *)
+fn read_byte {l:agz}{n:pos}{p:nat | p < n}
+  (bv: !$A.borrow(byte, l, n), p: int p, n: int n): int =
+  byte2int0($A.read<byte>(bv, p))
+
+(* v's low byte written at p of name[0, n), p being proved below n *)
+fn write_byte {l:agz}{n:pos}{p:nat | p < n}
+  (name: !$A.arr(byte, l, n), p: int p, n: int n, v: int): void =
+  $A.set<byte>(name, p, $A.int2byte($AR.low_byte(v)))
+
 (* The first position at or after p of bv[0, n) that holds byte c, or the
    first one at or after lim, or n *)
 fun find_byte {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
@@ -67,7 +77,7 @@ fun find_byte {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
   : [r:nat | p <= r; r <= n] int r =
   if p >= n then p
   else if p >= lim then p
-  else if peek(bv, p, n) = c then p
+  else if read_byte(bv, p, n) = c then p
   else find_byte(bv, p + 1, n, lim, c)
 
 (* The first position at or after p, below lim, that holds no space or tab *)
@@ -77,7 +87,7 @@ fun skip_blank {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
   if p >= n then p
   else if p >= lim then p
   else let
-    val c = peek(bv, p, n)
+    val c = read_byte(bv, p, n)
   in
     if c = 32 then skip_blank(bv, p + 1, n, lim)
     else if c = 9 then skip_blank(bv, p + 1, n, lim)
@@ -91,7 +101,7 @@ fun trim_end {l:agz}{n:pos}{q:nat | q <= n} .<q>.
   if q <= 0 then q
   else if q <= lo then q
   else let
-    val c = peek(bv, q - 1, n)
+    val c = read_byte(bv, q - 1, n)
   in
     if c = 32 then trim_end(bv, lo, q - 1, n)
     else if c = 9 then trim_end(bv, lo, q - 1, n)
@@ -112,16 +122,15 @@ fun name_end {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
   : [r:nat | p <= r; r <= n] int r =
   if p >= n then p
   else if p >= lim then p
-  else if is_name_char(peek(bv, p, n)) then name_end(bv, p + 1, n, lim)
+  else if is_name_char(read_byte(bv, p, n)) then name_end(bv, p + 1, n, lim)
   else p
 
 (* Whether bv[a, ae) and bv[b, be) are the same bytes *)
-fun same_span {l:agz}{n:pos}{a,ae,b,be:int}{j:nat | j <= n} .<n - j>.
+fun same_span {l:agz}{n:pos}{a,ae,b,be:nat | a <= ae; ae <= n; b <= be; be <= n}{j:nat | j <= ae - a} .<ae - a - j>.
   (bv: !$A.borrow(byte, l, n), a: int a, ae: int ae, b: int b, be: int be, j: int j, n: int n): bool =
   if ae - a <> be - b then false
   else if a + j >= ae then true
-  else if j >= n then true
-  else if peek(bv, a + j, n) <> peek(bv, b + j, n) then false
+  else if read_byte(bv, a + j, n) <> read_byte(bv, b + j, n) then false
   else same_span(bv, a, ae, b, be, j + 1, n)
 
 (* bv[a, b) appended to out *)
@@ -131,7 +140,7 @@ fun put_span {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
   if p >= n then ()
   else if p >= b then ()
   else let
-    val () = put_char_v(out, peek(bv, p, n))
+    val () = put_char_v(out, read_byte(bv, p, n))
   in put_span(bv, p + 1, b, n, out) end
 
 (* bv[a, b) appended to out *)
@@ -141,13 +150,13 @@ fn put_range {l:agz}{n:pos}{a:nat | a <= n}
   put_span(bv, a, b, n, out)
 
 (* bv[a, b) copied into name[j, 255), at most *)
-fun copy_name {l:agz}{ln:agz}{n:pos}{a:int}{j:nat | j <= 255} .<255 - j>.
-  (bv: !$A.borrow(byte, l, n), a: int a, b: int, n: int n,
+fun copy_name {l:agz}{ln:agz}{n:pos}{a,b:nat | a <= b; b <= n}{j:nat | j <= 255} .<255 - j>.
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n,
    name: !$A.arr(byte, ln, 256), j: int j): [r:nat | r <= 255] int r =
   if j >= 255 then j
   else if a + j >= b then j
   else let
-    val () = poke_arr(name, j, 256, peek(bv, a + j, n))
+    val () = write_byte(name, j, 256, read_byte(bv, a + j, n))
   in copy_name(bv, a, b, n, name, j + 1) end
 
 (* The bytes out holds *)
@@ -173,14 +182,14 @@ in ok end
 (* The value of the variable named bv[a, b) in this process's environment
    appended to out; nothing when it is unset. False, and nothing appended,
    when the name is over 255 bytes or the value over 64 KiB *)
-fn put_variable {l:agz}{n:pos}{a:int}
-  (bv: !$A.borrow(byte, l, n), a: int a, b: int, n: int n,
+fn put_variable {l:agz}{n:pos}{a,b:nat | a <= b; b <= n}
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n,
    out: !$B.builder_v >> $B.builder_v): bool =
   if b - a > 255 then false
   else let
     val name = $A.alloc<byte>(256)
     val len = copy_name(bv, a, b, n, name, 0)
-    val () = poke_arr(name, len, 256, 0)
+    val () = write_byte(name, len, 256, 0)
     val ok = put_variable_named(name, out)
   in $A.free<byte>(name); ok end
 
@@ -192,13 +201,13 @@ fun put_expanded {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
   if p >= n then true
   else if p >= b then true
   else let
-    val c = peek(bv, p, n)
+    val c = read_byte(bv, p, n)
   in
     if c <> 36 then let
       val () = put_char_v(out, c)
     in put_expanded(bv, p + 1, b, n, out) end
     else let
-      val c1 = peek(bv, p + 1, n)
+      val c1 = (if p + 1 < n then read_byte(bv, p + 1, n) else 0): int
     in
       if c1 = 123 then (
         if p + 2 > n then let
@@ -233,17 +242,19 @@ fun put_expanded {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
 (* One line of the file that sets a variable: where its name is
    (bv[name_at, name_to)) and where its value starts *)
 typedef assignment (n:int) =
-  [a,b,v:nat | a <= n; b <= n; v <= n]
+  [a,b,v:nat | a <= b; b <= n; v <= n]
   @{found= bool, name_at= int a, name_to= int b, value_at= int v}
 
 fn no_assignment {n:pos} (): assignment(n) =
   @{found= false, name_at= 0, name_to= 0, value_at= 0}
 
 (* Whether bv[i, e) starts with export and a blank *)
-fn exported {l:agz}{n:pos}{i:int} (bv: !$A.borrow(byte, l, n), i: int i, e: int, n: int n): bool =
-  peek(bv, i, n) = 101 && peek(bv, i + 1, n) = 120 && peek(bv, i + 2, n) = 112
-  && peek(bv, i + 3, n) = 111 && peek(bv, i + 4, n) = 114 && peek(bv, i + 5, n) = 116
-  && (peek(bv, i + 6, n) = 32 || peek(bv, i + 6, n) = 9) && i + 6 < e
+fn exported {l:agz}{n:pos}{i:nat | i <= n}{e:nat | e <= n}
+  (bv: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n): bool =
+  if i + 6 >= e then false
+  else read_byte(bv, i, n) = 101 && read_byte(bv, i + 1, n) = 120 && read_byte(bv, i + 2, n) = 112
+    && read_byte(bv, i + 3, n) = 111 && read_byte(bv, i + 4, n) = 114 && read_byte(bv, i + 5, n) = 116
+    && (read_byte(bv, i + 6, n) = 32 || read_byte(bv, i + 6, n) = 9)
 
 (* Where the name of a line starts, past an export *)
 fn name_start_of {l:agz}{n:pos}{i:nat | i <= n}{e:nat | e <= n}
@@ -259,17 +270,17 @@ fn line_assignment {l:agz}{n:pos}{s:nat | s <= n}{e:nat | e <= n}
   val i0 = skip_blank(bv, s, n, e)
 in
   if i0 >= e then no_assignment{n}()
-  else if peek(bv, i0, n) = 35 then no_assignment{n}()
+  else if read_byte(bv, i0, n) = 35 then no_assignment{n}()
   else let
     val i1 = name_start_of(bv, i0, e, n)
   in
     if i1 >= e then no_assignment{n}()
-    else if ~is_name_start(peek(bv, i1, n)) then no_assignment{n}()
+    else if ~is_name_start(read_byte(bv, i1, n)) then no_assignment{n}()
     else let
       val ne = name_end(bv, i1, n, e)
     in
       if ne >= e then no_assignment{n}()
-      else if peek(bv, ne, n) <> 61 then no_assignment{n}()
+      else if read_byte(bv, ne, n) <> 61 then no_assignment{n}()
       else @{found= true, name_at= i1, name_to= ne, value_at= ne + 1}
     end
   end
@@ -286,10 +297,10 @@ fn put_value {l:agz}{n:pos}{v:nat | v <= n}{e:nat | e <= n}
     val t = trim_end(bv, a, e, n)
   in
     if t - a >= 2 then (
-      if peek(bv, a, n) = 39 && peek(bv, t - 1, n) = 39 then let
+      if read_byte(bv, a, n) = 39 && read_byte(bv, t - 1, n) = 39 then let
         val () = put_span(bv, a + 1, t - 1, n, out)
       in true end
-      else if peek(bv, a, n) = 34 && peek(bv, t - 1, n) = 34 then
+      else if read_byte(bv, a, n) = 34 && read_byte(bv, t - 1, n) = 34 then
         put_expanded(bv, a + 1, t - 1, n, out)
       else put_expanded(bv, a, t, n, out))
     else put_expanded(bv, a, t, n, out)
@@ -316,12 +327,12 @@ fn put_value {l:agz}{n:pos}{v:nat | v <= n}{e:nat | e <= n}
    in [0, m], which it always is, having been written from a position of
    the file or an entry's number. Every other use of a position, an
    entry's number or a table index is proved by its type. *)
-fn table_read {lt:agz}{p:nat | p < 6144}{m:nat}
-  (tab: !$A.arr(int, lt, 6144), p: int p, m: int m): [r:nat | r <= m] int r = let
+fn table_read {lt:agz}{p:nat | p < 6144}{lo,m:nat | lo <= m}
+  (tab: !$A.arr(int, lt, 6144), p: int p, lo: int lo, m: int m): [r:nat | lo <= r; r <= m] int r = let
   val v = g1ofg0($A.get<int>(tab, p))
 in
-  if v < 0 then 0
-  else if v > m then 0
+  if v < lo then lo
+  else if v > m then lo
   else v
 end
 
@@ -334,22 +345,22 @@ fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
   : [r:nat | r < 1024] int r =
   if p >= n then h
   else if p >= b then h
-  else hash_span(bv, p + 1, b, n, nmod(h * 31 + $AR.low_byte(peek(bv, p, n)), 1024))
+  else hash_span(bv, p + 1, b, n, nmod(h * 31 + $AR.low_byte(read_byte(bv, p, n)), 1024))
 
 (* The entry (counted from 1) from entry k on along its chain whose name is
    bv[a, b), or 0; at most fuel entries are looked at *)
-fun chain_find {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024}{a,b:nat | a <= n; b <= n}{f:nat} .<f>.
+fun chain_find {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024}{a,b:nat | a <= b; b <= n}{f:nat} .<f>.
   (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
    a: int a, b: int b, fuel: int f): [r:nat | r <= 1024] int r =
   if k <= 0 then 0
   else if fuel <= 0 then 0
   else let
     val base = 5 * (k - 1)
-    val entry_at = table_read(tab, base, n)
-    val entry_to = table_read(tab, base + 1, n)
+    val entry_at = table_read(tab, base, 0, n)
+    val entry_to = table_read(tab, base + 1, entry_at, n)
   in
     if same_span(bv, entry_at, entry_to, a, b, 0, n) then k
-    else chain_find(bv, n, tab, table_read(tab, base + 4, 1024), a, b, fuel - 1)
+    else chain_find(bv, n, tab, table_read(tab, base + 4, 0, 1024), a, b, fuel - 1)
   end
 
 (* The assignment x, on a line ending at e, put in the table that holds
@@ -360,7 +371,7 @@ fn table_put {l:agz}{n:pos}{lt:agz}{e:nat | e <= n}{c:nat | c <= 1024}
    x: assignment(n), e: int e, count: int c): [r:nat | r <= 1025] int r = let
   val bucket = hash_span(bv, x.name_at, x.name_to, n, 0)
   val slot = 5120 + bucket
-  val head = table_read(tab, slot, 1024)
+  val head = table_read(tab, slot, 0, 1024)
   val found = chain_find(bv, n, tab, head, x.name_at, x.name_to, 1100)
 in
   if found > 0 then let
@@ -397,9 +408,10 @@ fun table_fill {l:agz}{n:pos}{lt:agz}{s:nat | s <= n}{c:nat | c <= 1024} .<n - s
   end
 
 (* Whether bv[a, b) is PATH *)
-fn is_path_name {l:agz}{n:pos}{a,b:int} (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n): bool =
-  b - a = 4 && peek(bv, a, n) = 80 && peek(bv, a + 1, n) = 65
-  && peek(bv, a + 2, n) = 84 && peek(bv, a + 3, n) = 72
+fn is_path_name {l:agz}{n:pos}{a,b:nat | a <= b; b <= n} (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n): bool =
+  if b - a <> 4 then false
+  else read_byte(bv, a, n) = 80 && read_byte(bv, a + 1, n) = 65
+    && read_byte(bv, a + 2, n) = 84 && read_byte(bv, a + 3, n) = 72
 
 (* Frees the entries *)
 fun arguments_free {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
@@ -424,10 +436,10 @@ fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024} .<k>.
   if k <= 0 then @(~1, has_path, acc)
   else let
     val base = 5 * (k - 1)
-    val name_at = table_read(tab, base, n)
-    val name_to = table_read(tab, base + 1, n)
-    val value_at = table_read(tab, base + 2, n)
-    val line_end = table_read(tab, base + 3, n)
+    val name_at = table_read(tab, base, 0, n)
+    val name_to = table_read(tab, base + 1, name_at, n)
+    val value_at = table_read(tab, base + 2, 0, n)
+    val line_end = table_read(tab, base + 3, 0, n)
     var entry : $B.builder_v = $B.create()
     val () = put_range(bv, name_at, name_to, n, entry)
     val () = put_char_v(entry, 61)
@@ -562,10 +574,10 @@ fun search_path {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096} .<524
 (* The PATH of the environment appended to out; false when it is over 64 KiB *)
 fn put_environment_path (out: !$B.builder_v >> $B.builder_v): bool = let
   val name = $A.alloc<byte>(256)
-  val () = poke_arr(name, 0, 256, 80)
-  val () = poke_arr(name, 1, 256, 65)
-  val () = poke_arr(name, 2, 256, 84)
-  val () = poke_arr(name, 3, 256, 72)
+  val () = write_byte(name, 0, 256, 80)
+  val () = write_byte(name, 1, 256, 65)
+  val () = write_byte(name, 2, 256, 84)
+  val () = write_byte(name, 3, 256, 72)
   val ok = put_variable_named(name, out)
 in $A.free<byte>(name); ok end
 
@@ -687,7 +699,7 @@ fn nul_line {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), size: int, n: int n): in
     (bv: !$A.borrow(byte, l, n), p: int p, upto: int, n: int n, seen: int): int =
     if p >= n then seen
     else if p >= upto then seen
-    else count(bv, p + 1, upto, n, (if peek(bv, p, n) = 10 then seen + 1 else seen))
+    else count(bv, p + 1, upto, n, (if read_byte(bv, p, n) = 10 then seen + 1 else seen))
   val z = find_byte(bv, 0, n, size, 0)
 in
   if z >= size then 0 else 1 + count(bv, 0, z, n, 0)
@@ -698,7 +710,9 @@ fn bad_name_put {l:agz}{lt:agz}{bad:int | bad < 1024}
   (bv: !$A.borrow(byte, l, 65537), tab: !$A.arr(int, lt, 6144), bad: int bad,
    out: !$B.builder_v >> $B.builder_v): void =
   if bad < 0 then ()
-  else put_range(bv, table_read(tab, 5 * bad, 65537), table_read(tab, 5 * bad + 1, 65537), 65537, out)
+  else let
+    val name_at = table_read(tab, 5 * bad, 0, 65537)
+  in put_range(bv, name_at, table_read(tab, 5 * bad + 1, name_at, 65537), 65537, out) end
 
 (* Says that the value of the variable name, set in the file at
    bv[file_at, file_to), cannot be made *)
@@ -710,7 +724,7 @@ fn expansion_failed {l:agz}{ln:agz}{file_at:nat | file_at <= 4096}
   val () = prerr_seg(bv_n, 0, name_len, 524288)
   val () = prerr! (" in ")
   val () = prerr_seg(bv, file_at, file_to, 4096)
-  val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 131071 bytes itself, or the variables of the file together are over 524287 bytes (a NUL counted after each)")
+  val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 131071 bytes itself, or the variables of the file together are over 524287 bytes (a NUL counted after each; they are counted from the last variable of the file, and this is the one that crossed)")
   val () = prerr_newline()
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
@@ -787,15 +801,15 @@ in
 end
 
 (* Whether argv[1] is with-env *)
-fn names_with_env {l:agz} (bv: !$A.borrow(byte, l, 4096), total: int): bool = let
+fn names_with_env {l:agz}{t:nat | t <= 4096} (bv: !$A.borrow(byte, l, 4096), total: int t): bool = let
   val a = find_byte(bv, 0, 4096, 4096, 0) + 1
 in
-  a + 8 < total
-  && peek(bv, a, 4096) = 119 && peek(bv, a + 1, 4096) = 105
-  && peek(bv, a + 2, 4096) = 116 && peek(bv, a + 3, 4096) = 104
-  && peek(bv, a + 4, 4096) = 45 && peek(bv, a + 5, 4096) = 101
-  && peek(bv, a + 6, 4096) = 110 && peek(bv, a + 7, 4096) = 118
-  && peek(bv, a + 8, 4096) = 0
+  if a + 8 >= total then false
+  else read_byte(bv, a, 4096) = 119 && read_byte(bv, a + 1, 4096) = 105
+    && read_byte(bv, a + 2, 4096) = 116 && read_byte(bv, a + 3, 4096) = 104
+    && read_byte(bv, a + 4, 4096) = 45 && read_byte(bv, a + 5, 4096) = 101
+    && read_byte(bv, a + 6, 4096) = 110 && read_byte(bv, a + 7, 4096) = 118
+    && read_byte(bv, a + 8, 4096) = 0
 end
 
 (* Runs bats with-env when that is the command given and answers true;
