@@ -9,7 +9,11 @@
 #  * another commit moves the clone to it
 #  * a branch, a tag, a short or upper case sha, and no commit are refused
 #  * a commit the remote lacks fails and leaves nothing
-#  * a directory that is not empty and not a clone is not replaced
+#  * nothing is deleted that the run did not make: a directory with files, a
+#    git project of the user's and a file are refused and unchanged (the
+#    directory is compared, not only the messages); a good clone survives a
+#    fetch that fails; a failed clone leaves nothing; a control character in
+#    the name, and an extra argument, are refused
 #  * no directory is an error; BATS_REPOSITORY names it as --repository does
 # usage: tests/clone-repository/check.sh <bats-binary> <repository-dir>
 set -eu
@@ -61,15 +65,63 @@ rm -rf "$TMP/absent"
 [ -s "$TMP/err" ] || fail "a failed clone says nothing"
 ok "a commit the remote lacks fails"
 
+# nothing that this run did not make is deleted or changed
+# (.git/FETCH_HEAD is git's note of the last fetch, rewritten even by a failed one)
+snapshot() { (cd "$1" && find . -path ./.git/objects -prune -o ! -name FETCH_HEAD -print | LC_ALL=C sort; find . -path ./.git/objects -prune -o -type f ! -name FETCH_HEAD -exec cksum {} + | LC_ALL=C sort); }
 mkdir -p "$TMP/mine"; echo precious > "$TMP/mine/keep"
+snapshot "$TMP/mine" > "$TMP/before"
 "$BATS" clone-repository "$first" --repository "$TMP/mine" > "$TMP/out" 2> "$TMP/err" && fail "a directory with files was replaced"
-[ "$(cat "$TMP/mine/keep")" = precious ] || fail "the directory was touched"
+snapshot "$TMP/mine" > "$TMP/after"; cmp -s "$TMP/before" "$TMP/after" || fail "the directory was touched"
 grep -q "not replaced" "$TMP/err" || fail "not said"
 ok "a directory that is not a clone is not replaced"
 
+git init -q "$TMP/users"; echo mine > "$TMP/users/work"; git -C "$TMP/users" add work; git -C "$TMP/users" commit -q -m work
+users_head=$(git -C "$TMP/users" rev-parse HEAD); snapshot "$TMP/users" > "$TMP/before"
+"$BATS" clone-repository "$first" --repository "$TMP/users" > "$TMP/out" 2> "$TMP/err" && fail "the user's own git project was replaced"
+[ ! -s "$TMP/out" ] || fail "stdout on a refusal"
+grep -q "not a clone of the package repository" "$TMP/err" || fail "the refusal does not say why"
+[ "$(git -C "$TMP/users" rev-parse HEAD)" = "$users_head" ] && [ "$(cat "$TMP/users/work")" = mine ] || fail "the user's project changed"
+snapshot "$TMP/users" > "$TMP/after"; cmp -s "$TMP/before" "$TMP/after" || fail "the user's project was touched"
+ok "a git project of the user's survives"
+
+# a good clone survives a fetch that fails (the remote is gone)
+snapshot "$D" > "$TMP/before"; head_before=$(git -C "$D" rev-parse HEAD)
+GIT_CONFIG_VALUE_0="file://$TMP/no-such-remote" \
+  "$BATS" clone-repository "$first" --repository "$D" > "$TMP/out" 2> "$TMP/err" && fail "an offline fetch succeeded"
+[ ! -s "$TMP/out" ] || fail "stdout on a failed fetch"
+[ "$(git -C "$D" rev-parse HEAD)" = "$head_before" ] || fail "the good clone moved"
+[ -z "$(git -C "$D" status --porcelain)" ] || fail "the good clone is not clean"
+snapshot "$D" > "$TMP/after"; cmp -s "$TMP/before" "$TMP/after" || { diff "$TMP/before" "$TMP/after"; fail "the good clone changed"; }
+ok "a good clone survives a failed fetch"
+
+# a failed clone leaves nothing: no directory, no temporary sibling; an empty
+# directory stays as it was
+mkdir -p "$TMP/par"; rm -rf "$TMP/par/fresh"
+"$BATS" clone-repository 0000000000000000000000000000000000000001 --repository "$TMP/par/fresh" > /dev/null 2>&1 && fail "accepted"
+[ -z "$(ls -A "$TMP/par")" ] || fail "a failed clone left $(ls -A "$TMP/par")"
+mkdir -p "$TMP/par/emptied"
+"$BATS" clone-repository 0000000000000000000000000000000000000001 --repository "$TMP/par/emptied" > /dev/null 2>&1 && fail "accepted"
+[ -d "$TMP/par/emptied" ] && [ -z "$(ls -A "$TMP/par/emptied")" ] && [ "$(ls -A "$TMP/par")" = emptied ] || fail "a failed clone changed the empty directory or left files"
+ok "a failed clone leaves nothing"
+
+: > "$TMP/afile"
+"$BATS" clone-repository "$first" --repository "$TMP/afile" > /dev/null 2>&1 && fail "a file was replaced"
+[ -f "$TMP/afile" ] || fail "the file went"
+nl=$(printf 'a\nb')
+"$BATS" clone-repository "$first" --repository "$TMP/$nl" > "$TMP/out" 2> "$TMP/err" && fail "a name with a newline was accepted"
+[ ! -s "$TMP/out" ] && grep -q "control character" "$TMP/err" || fail "a newline in the name is not refused"
+ok "a file and a name with a control character are refused"
+
+"$BATS" clone-repository "$first" --repository "$TMP/with space/clone/" > "$TMP/out" 2> "$TMP/err" || { cat "$TMP/err"; fail "a path with a space and a trailing slash failed"; }
+[ "$(git -C "$TMP/with space/clone" rev-parse HEAD)" = "$first" ] || fail "not at the commit"
 mkdir -p "$TMP/empty"
 "$BATS" clone-repository "$first" --repository "$TMP/empty" > /dev/null 2>&1 || fail "an empty directory was refused"
-ok "an empty directory is cloned into"
+[ "$(git -C "$TMP/empty" rev-parse HEAD)" = "$first" ] && [ "$(stat -c %a "$TMP/empty")" = 755 ] || fail "the empty directory did not become the clone"
+ok "a path with a space, a trailing slash, and an empty directory"
+
+"$BATS" clone-repository "$first" extra --repository "$TMP/x1" > /dev/null 2>&1 && fail "an extra argument was accepted"
+[ ! -e "$TMP/x1" ] || fail "an extra argument cloned"
+ok "an extra argument is refused"
 
 "$BATS" clone-repository "$first" > "$TMP/out" 2> "$TMP/err" && fail "no directory was accepted"
 grep -q "BATS_REPOSITORY" "$TMP/err" || fail "no directory is not said"

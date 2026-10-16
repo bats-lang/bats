@@ -1,8 +1,10 @@
 staload A = "array/src/lib.sats"
 staload B = "builder/src/lib.sats"
+staload F = "file/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
+
 
 
 
@@ -131,27 +133,127 @@ datatype ats2_talk = Say | Quiet
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn ats2_ensure (talk: ats2_talk): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -52,7 +52,7 @@ in
   else if len = 4 then
     (if $AR.eq_int_int(b0, 108) then Lock()
     else if $AR.eq_int_int(b0, 105) then Init()
-    else if $AR.eq_int_int(b0, 97) then Ats2()
+    else if peek_arr(buf, 0, 32) = 97 && peek_arr(buf, 1, 32) = 116 && peek_arr(buf, 2, 32) = 115 && peek_arr(buf, 3, 32) = 50 && peek_arr(buf, 4, 32) = 0 then Ats2()
     else if $AR.eq_int_int(b0, 116) then
       (if $AR.eq_int_int(b1, 101) then Test() else Tree())
     else UnknownCommand()): command
@@ -65,8 +65,8 @@ in
     else if $AR.eq_int_int(b0, 114) then Remove()
     else UnknownCommand()): command
   else if len = 11 then Completions()
-  else if len = 16 then CloneRepository()
-  else if len = 13 then RecordCommit()
+  else if len = 16 then (if peek_arr(buf, 0, 32) = 99 && peek_arr(buf, 1, 32) = 108 && peek_arr(buf, 2, 32) = 111 && peek_arr(buf, 3, 32) = 110 && peek_arr(buf, 4, 32) = 101 && peek_arr(buf, 5, 32) = 45 && peek_arr(buf, 6, 32) = 114 && peek_arr(buf, 7, 32) = 101 && peek_arr(buf, 8, 32) = 112 && peek_arr(buf, 9, 32) = 111 && peek_arr(buf, 10, 32) = 115 && peek_arr(buf, 11, 32) = 105 && peek_arr(buf, 12, 32) = 116 && peek_arr(buf, 13, 32) = 111 && peek_arr(buf, 14, 32) = 114 && peek_arr(buf, 15, 32) = 121 && peek_arr(buf, 16, 32) = 0 then CloneRepository() else UnknownCommand())
+  else if len = 13 then (if peek_arr(buf, 0, 32) = 114 && peek_arr(buf, 1, 32) = 101 && peek_arr(buf, 2, 32) = 99 && peek_arr(buf, 3, 32) = 111 && peek_arr(buf, 4, 32) = 114 && peek_arr(buf, 5, 32) = 100 && peek_arr(buf, 6, 32) = 45 && peek_arr(buf, 7, 32) = 99 && peek_arr(buf, 8, 32) = 111 && peek_arr(buf, 9, 32) = 109 && peek_arr(buf, 10, 32) = 109 && peek_arr(buf, 11, 32) = 105 && peek_arr(buf, 12, 32) = 116 && peek_arr(buf, 13, 32) = 0 then RecordCommit() else UnknownCommand())
   else if len = 7 then Version()
   else UnknownCommand()
 end
@@ -213,6 +213,38 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     else scan_only(buf, next + 1, len, named)
   end
 
+(* The words of the command line that are neither options nor an option's
+   value: the command and its arguments. An option that takes a value is one
+   of --repository, --run-in, --only, --bin, --to-c and --filter. *)
+fun count_positionals {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int, count: int): int =
+  if pos >= len then count
+  else if pos >= 4096 then count
+  else let
+    val next = $S.find_null_at(buf, pos, 4096)
+    val dash = peek_arr(buf, pos, 4096) = 45
+    val c1 = peek_arr(buf, min(pos + 1, 4095), 4096)
+    val c2 = peek_arr(buf, min(pos + 2, 4095), 4096)
+    val c3 = peek_arr(buf, min(pos + 3, 4095), 4096)
+    val valued = dash && c1 = 45
+      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || c2 = 102)
+  in
+    if next >= 4096 then (if dash then count else count + 1)
+    else if valued then let
+      val vstart = next + 1
+    in
+      if vstart >= len then count
+      else if vstart >= 4096 then count
+      else let
+        val vend = $S.find_null_at(buf, vstart, 4096)
+      in
+        if vend >= 4096 then count
+        else count_positionals(buf, vend + 1, len, count)
+      end
+    end
+    else count_positionals(buf, next + 1, len, (if dash then count else count + 1))
+  end
+
 (* The value of a string option copied to buf, and its length; 0 when
    the option was not given. *)
 fn opt_string_copy {l:agz}{n:pos}
@@ -271,6 +303,7 @@ in
           val extra_len = copy_extra(cl_buf, extra_buf, dd_pos + 3, extra_end, 0)
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
           val argc = count_argc(cl_buf, effective_len)
+          val positionals = count_positionals(cl_buf, 0, effective_len, 0)
           val named_only = scan_only(cl_buf, 0, effective_len,
             @{debug= false, release= false, native= false, wasm= false})
           val @(fz_cb, bv_cb) = $A.freeze<byte>(cl_buf)
@@ -547,7 +580,10 @@ in
                 val install = is_install_arg(arg_buf, arg_len)
                 val () = $A.free<byte>(arg_buf)
               in
-                if install then (if ats2_ensure(Say()) then () else set_build_err())
+                if positionals > 3 then let
+                  val () = prerr! ("error: unexpected extra argument\nusage: bats ats2 install\n")
+                in set_build_err() end
+                else if install then (if ats2_ensure(Say()) then () else set_build_err())
                 else let
                   val () = prerr! ("error: specify 'install'\nusage: bats ats2 install\n")
                 in set_build_err() end
@@ -555,13 +591,15 @@ in
               | CloneRepository() => let
                 val () = $AP.parse_result_free(r)
                 val @(fz_cm, bv_cm) = $A.freeze<byte>(arg_buf)
-                val () = (if clone_repository(bv_cm, arg_len, bv_repo, repo_len) then () else set_build_err())
+                val () = (if positionals > 3 then let val () = prerr! ("error: unexpected extra argument\nusage: bats clone-repository <commit> --repository <dir>\n") in set_build_err() end
+                  else if clone_repository(bv_cm, arg_len, bv_repo, repo_len) then () else set_build_err())
                 val () = $A.drop<byte>(fz_cm, bv_cm)
               in $A.free<byte>($A.thaw<byte>(fz_cm)) end
               | RecordCommit() => let
                 val () = $AP.parse_result_free(r)
                 val @(fz_cm, bv_cm) = $A.freeze<byte>(arg_buf)
-                val () = (if record_commit(bv_cm, arg_len) then () else set_build_err())
+                val () = (if positionals > 3 then let val () = prerr! ("error: unexpected extra argument\nusage: bats record-commit <commit>\n") in set_build_err() end
+                  else if record_commit(bv_cm, arg_len) then () else set_build_err())
                 val () = $A.drop<byte>(fz_cm, bv_cm)
               in $A.free<byte>($A.thaw<byte>(fz_cm)) end
               | Version() => let

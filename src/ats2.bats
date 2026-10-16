@@ -4,7 +4,7 @@
    at $HOME/.bats/ats2/bin/patsopt, and `bats ats2 install` (and, when it
    is missing, bats build, check, test and run) puts it there. Building
    bats itself from bootstrap/c needs none of this: the C and its Makefile
-   carry the ATS2 headers they compile against (bootstrap/c/ats2).
+   carry the ATS2 headers they compile against (bootstrap/c/_bats_native_stubs).
 
    The pin is here and nowhere else: the tarball's name, its URL and its
    SHA-256. It is the GMP build of ATS2 (the -int build's constraint
@@ -33,6 +33,7 @@
 
 #use array as A
 #use builder as B
+#use file as F
 #use list as L
 #use process as P
 #use result as R
@@ -100,31 +101,151 @@ in has end
    is there; 2: nothing usable (nothing, or an older pin's) *)
 #define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then exit 2; fi\n  exit 3\nfi\nexit 2\n"
 
-(* what an earlier run left, and the download *)
-#define FETCH "set -e\nmkdir -p \"$1\"\nrm -rf \"$1/ats2.new\" \"$1/ats2.tgz.part\"\ncurl -fsSL \"$2\" -o \"$1/ats2.tgz.part\"\n"
+(* $1 the base. A private directory of this run's own, the download in it
+   (fixed timeouts, a few retries); its path on stdout, or on failure what
+   curl said *)
+#define FETCH "d=$(mktemp -d \"$1/ats2-download.XXXXXX\") || { echo \"error: cannot make a temporary directory in $1\"; exit 1; }\nif out=$(curl -fsSL --connect-timeout 20 --max-time 900 --retry 3 --retry-delay 2 \"$2\" -o \"$d/ats2.tgz\" 2>&1); then printf '%s' \"$d\"; else rm -rf \"$d\"; printf '%s\\n' \"$out\"; exit 1; fi\n"
 
-(* $1 the digest of the download, $2 the pin's, $3 the base *)
-#define VERIFY "if [ \"$1\" = \"$2\" ]; then exit 0; fi\nrm -f \"$3/ats2.tgz.part\"\necho \"error: the ATS2 download has sha256 '$1', not the pinned '$2': nothing was installed\" >&2\nexit 1\n"
+(* $1 the digest of the download, $2 the pin's, $3 the download's directory,
+   which is this run's own and goes when the digest is not the pin's *)
+#define VERIFY "if [ \"$1\" = \"$2\" ]; then exit 0; fi\nrm -rf \"$3\"\necho \"error: the ATS2 download has sha256 '$1', not the pinned '$2': nothing was installed\" >&2\nexit 1\n"
 
-(* unpack, build patsopt, mark, and move into place *)
-#define BUILD "set -e\nn=\"$1/ats2.new\"\nmkdir \"$n\"\ntar -xzf \"$1/ats2.tgz.part\" --strip-components=1 -C \"$n\"\nrm -f \"$1/ats2.tgz.part\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\nprintf '%s\\n' \"$2\" > \"$n/.bats-ats2\"\nrm -rf \"$1/ats2\"\nmv \"$n\" \"$1/ats2\"\n"
+(* $1 the base, $2 the marker, $3 the download's directory: unpack, build
+   patsopt, mark, and move into place *)
+#define BUILD "set -e\nn=\"$1/ats2.new\"\nmkdir \"$n\"\ntar -xzf \"$3/ats2.tgz\" --no-same-owner --strip-components=1 -C \"$n\"\nrm -rf \"$3\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\nprintf '%s\\n' \"$2\" > \"$n/.bats-ats2\"\nrm -rf \"$1/ats2\"\nmv \"$n\" \"$1/ats2\"\n"
 
-#define CLEAR "rm -rf \"$1/ats2.new\" \"$1/ats2.tgz.part\"\n"
+(* $1 the base, $2 a download's directory (or the base's own, to clear
+   only what a run killed before this one left): this module's own files,
+   ats2.new and ats2-download.* *)
+#define CLEAR "rm -rf \"$1/ats2.new\" \"$1\"/ats2-download.*\n"
+#define CLEAR_ONE "rm -rf \"$1/ats2.new\" \"$2\"\n"
 
-(* The SHA-256 of the download, as bats computes it *)
-fn download_digest (): $B.builder_v = let
+(* The lock that makes two installs one: $HOME/.bats/ats2.lock, held with
+   the file package's flock while ats2 is installed (what is installed is
+   judged again under it) *)
+fn lock_take (): $R.option($F.fd) = let
+  val _ = sh_exec("mkdir -p \"$1\"", base_arg(), empty_arg(), empty_arg())
+  var p : $B.builder_v = $B.create()
+  val _ = env_value("HOME", p)
+  val () = bput_v(p, "/.bats/ats2.lock")
+  val () = put_char_v(p, 0)
+  val @(pa, _) = $B.to_arr(p)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val opened = $F.file_open(bv_p, 524288, $F.ReadWrite(), $F.CreateOrOpen(), 420)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in
+  case+ opened of
+  | ~$R.err(_) => $R.none()
+  | ~$R.ok(fd) =>
+    (case+ $F.fd_lock(fd, $F.LockExclusive(), $F.LockFailsAtOnce()) of
+    | ~$R.ok(_) => $R.some(fd)
+    | ~$R.err(e) =>
+      (case+ e of
+      | $F.WouldBlock() => let
+          val () = prerr! ("waiting for another bats installing ATS2 (it holds ~/.bats/ats2.lock)\n")
+        in
+          case+ $F.fd_lock(fd, $F.LockExclusive(), $F.LockWaits()) of
+          | ~$R.ok(_) => $R.some(fd)
+          | ~$R.err(_) => let
+              val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+            in $R.none() end
+        end
+      | _ => let
+          val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+        in $R.none() end))
+end
+
+fn lock_release (lk: $R.option($F.fd)): void =
+  case+ lk of
+  | ~$R.some(fd) => $R.discard<int><$F.io_error>($F.file_close(fd))
+  | ~$R.none() => ()
+
+(* The SHA-256 of ats2.tgz in the directory the n bytes of out name, as
+   bats computes it; a file that cannot be read gives no digest, which is
+   no match *)
+fn download_digest {l:agz} (out: !$A.borrow(byte, l, 4096), n: int): $B.builder_v = let
   var path : $B.builder_v = $B.create()
-  val _ = env_value("HOME", path)
-  val () = bput_v(path, "/.bats/ats2.tgz.part")
+  val () = copy_to_builder_v(out, 0, n, 4096, path)
+  val () = bput_v(path, "/ats2.tgz")
   val () = put_char_v(path, 0)
   val @(pa, _) = $B.to_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   var got : $B.builder_v = $B.create()
-  (* a download that cannot be read gives no digest, which is no match *)
   val _ = put_file_sha256(bv_p, got)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in got end
+
+fn dir_arg {l:agz} (out: !$A.borrow(byte, l, 4096), n: int): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(out, 0, n, 4096, b)
+in b end
+
+(* The install itself, under the lock: false (said) when it fails *)
+fn install_now (): bool = let
+  val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
+  val () = println! ("ATS2 not found, installing ", ATS2_NAME, " into ~/.bats/ats2 ...")
+  val out = $A.alloc<byte>(4096)
+  val @(fexec, fbv) = let
+    val e = str_to_path_arr("sh")
+  in $A.freeze<byte>(e) end
+  var s1 = $B.create()
+  val () = bput_v(s1, "sh")
+  var s2 = $B.create()
+  val () = bput_v(s2, "-c")
+  var s3 = $B.create()
+  val () = bput_v(s3, FETCH)
+  var s4 = $B.create()
+  val () = bput_v(s4, "sh")
+  val @(rc, k) = run_cmd_capture(fbv, $L.list_vt_cons(mk_arg(s1), $L.list_vt_cons(mk_arg(s2),
+    $L.list_vt_cons(mk_arg(s3), $L.list_vt_cons(mk_arg(s4),
+    $L.list_vt_cons(mk_arg(base_arg()), $L.list_vt_cons(mk_arg(text_arg(ATS2_URL)), $L.list_vt_nil())))))), out)
+  val () = $A.drop<byte>(fexec, fbv)
+  val () = $A.free<byte>($A.thaw<byte>(fexec))
+  val @(fz_o, bv_o) = $A.freeze<byte>(out)
+in
+  if rc <> 0 then let
+    val () = (if k > 0 then prerr_seg(bv_o, 0, k, 4096) else ())
+    val () = $A.drop<byte>(fz_o, bv_o)
+    val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  in false end
+  else let
+    val checked = sh_exec(VERIFY, download_digest(bv_o, k), text_arg(ATS2_SHA256), dir_arg(bv_o, k))
+  in
+    if checked <> 0 then let
+      val () = $A.drop<byte>(fz_o, bv_o)
+      val () = $A.free<byte>($A.thaw<byte>(fz_o))
+    in false end
+    else let
+      val () = println! ("building patsopt ...")
+      val built = sh_exec(BUILD, base_arg(), marker_arg(), dir_arg(bv_o, k))
+    in
+      if built <> 0 then let
+        val _ = sh_exec(CLEAR_ONE, base_arg(), dir_arg(bv_o, k), empty_arg())
+        val () = $A.drop<byte>(fz_o, bv_o)
+        val () = $A.free<byte>($A.thaw<byte>(fz_o))
+        val () = println! ("note: the ATS2 build bats installs does its constraint solving in infinite precision (GMP), so it needs libgmp and its headers (libgmp-dev on Debian and Ubuntu, gmp on macOS with Homebrew), and make and a C compiler")
+      in false end
+      else let
+        val () = $A.drop<byte>(fz_o, bv_o)
+        val () = $A.free<byte>($A.thaw<byte>(fz_o))
+        val () = println! ("ATS2 installed successfully")
+      in true end
+    end
+  end
+end
+
+(* A toolchain bats did not make: used as it is, and said on every run, on
+   stderr, because an -int build computes in C int and accepts false
+   statements (bats#264) *)
+fn warn_foreign (): void = let
+  var b : $B.builder_v = $B.create()
+  val _ = env_value("HOME", b)
+  val () = bput_v(b, "/.bats/ats2")
+  val () = prerr! ("warning: the ATS2 in ")
+  val () = prerr_builder(b)
+in prerr! (" was not installed by bats and is not checked against the pinned ", ATS2_NAME, " (an -int build accepts false statements, bats#264)\n") end
 
 #pub fn ats2_ensure (talk: ats2_talk): bool
 
@@ -141,34 +262,14 @@ implement ats2_ensure (talk) =
         | Quiet() => ())
     in true end
     else if state = 3 then let
-      val () = (case+ talk of
-        | Say() => println! ("ATS2 in ~/.bats/ats2 was not installed by bats, so it is used as it is: it is not checked against the pinned ", ATS2_NAME)
-        | Quiet() => ())
+      val () = warn_foreign()
     in true end
     else if state <> 2 then false
     else let
-      val () = println! ("ATS2 not found, installing ", ATS2_NAME, " into ~/.bats/ats2 ...")
-      val fetched = sh_exec(FETCH, base_arg(), text_arg(ATS2_URL), empty_arg())
-    in
-      if fetched <> 0 then let
-        val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
-      in false end
-      else let
-        val checked = sh_exec(VERIFY, download_digest(), text_arg(ATS2_SHA256), base_arg())
-      in
-        if checked <> 0 then false
-        else let
-          val () = println! ("building patsopt ...")
-          val built = sh_exec(BUILD, base_arg(), marker_arg(), empty_arg())
-        in
-          if built <> 0 then let
-            val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
-            val () = println! ("note: the ATS2 build bats installs does its constraint solving in infinite precision (GMP), so it needs libgmp and its headers (libgmp-dev on Debian and Ubuntu, gmp on macOS with Homebrew), and make and a C compiler")
-          in false end
-          else let
-            val () = println! ("ATS2 installed successfully")
-          in true end
-        end
-      end
-    end
+      val lk = lock_take()
+      (* judged again under the lock: another bats may have installed it *)
+      val again = sh_exec(STATE, base_arg(), marker_arg(), empty_arg())
+      val ok = (if again = 2 then install_now() else (again = 0 || again = 3)): bool
+      val () = lock_release(lk)
+    in ok end
   end

@@ -493,50 +493,8 @@ fn do_clean(): void
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn write_native_runtime_h {l:agz}
   (dir: !$A.borrow(byte, l, 4096), dlen: int): int
-
-
 
 
 

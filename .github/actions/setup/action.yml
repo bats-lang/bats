@@ -161,6 +161,8 @@ runs:
         git init -q "$src"
         git -C "$src" fetch -q --depth 1 https://github.com/bats-lang/bats.git "$BATS_COMMIT_BUILT"
         git -C "$src" checkout -q FETCH_HEAD
+        [ -f "$src/bootstrap/c/_bats_native_runtime.h" ] \
+          || { echo "::error::setup-bats: bats-version $BATS_COMMIT_BUILT predates bats#283: its bootstrap/c has no _bats_native_runtime.h and needs an ATS2 to build. Pin a newer commit of bats-lang/bats"; exit 1; }
         rm -rf ~/bats-c
         cp -R "$src/bootstrap/c" ~/bats-c
         make -j"$(nproc)" -C ~/bats-c "$PROFILE/bats"
@@ -186,7 +188,14 @@ runs:
       env:
         REPOSITORY_COMMIT: ${{ steps.pins.outputs.repository }}
         REPOSITORY_DIR: ${{ steps.pins.outputs.repository_dir }}
-      run: bats clone-repository "$REPOSITORY_COMMIT" --repository "$REPOSITORY_DIR" >> "$GITHUB_ENV"
+      run: |
+        set -eu
+        # a bats that does not know the command prints its usage and exits 0:
+        # only a single NAME=VALUE line reaches the environment
+        bats clone-repository "$REPOSITORY_COMMIT" --repository "$REPOSITORY_DIR" > "$RUNNER_TEMP/clone.env"
+        [ "$(grep -Ec '^BATS_REPOSITORY=[^=]+$' "$RUNNER_TEMP/clone.env")" = 1 ] && [ "$(wc -l < "$RUNNER_TEMP/clone.env")" -eq 1 ] \
+          || { echo "::error::setup-bats: bats clone-repository did not print BATS_REPOSITORY=<dir>: is the bats built from a commit that has it (bats#283)?"; exit 1; }
+        cat "$RUNNER_TEMP/clone.env" >> "$GITHUB_ENV"
 
     # The commit the version names (quire#219): bats writes the facts (the
     # commit's date and short SHA, bats#250) from BATS_COMMIT, for every
@@ -197,4 +206,9 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       env:
         COMMIT: ${{ steps.pins.outputs.commit }}
-      run: bats record-commit "$COMMIT" >> "$GITHUB_ENV"
+      run: |
+        set -eu
+        bats record-commit "$COMMIT" > "$RUNNER_TEMP/commit.env"
+        [ "$(grep -Ec '^BATS_COMMIT=[0-9a-f]{40}$' "$RUNNER_TEMP/commit.env")" = 1 ] && [ "$(wc -l < "$RUNNER_TEMP/commit.env")" -eq 1 ] \
+          || { echo "::error::setup-bats: bats record-commit did not print BATS_COMMIT=<commit>: is the bats built from a commit that has it (bats#283)?"; exit 1; }
+        cat "$RUNNER_TEMP/commit.env" >> "$GITHUB_ENV"

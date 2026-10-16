@@ -1,21 +1,22 @@
-/* _bats_native_runtime.h -- the ATS2 C runtime's macros over libc */
+/* _bats_native_runtime.h -- the C runtime the emitted C is compiled against, over libc */
 #ifndef BATS_NATIVE_RUNTIME_H
 #define BATS_NATIVE_RUNTIME_H
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+/* Scalar and pointer types the emitted C names. */
 typedef void atstype_void;
 typedef void atsvoid_t0ype;
 typedef int atstype_int;
 typedef unsigned int atstype_uint;
-typedef long int atstype_lint;
-typedef unsigned long int atstype_ulint;
-typedef long long int atstype_llint;
-typedef unsigned long long int atstype_ullint;
-typedef short int atstype_sint;
-typedef unsigned short int atstype_usint;
-typedef atstype_lint atstype_ssize;
-typedef atstype_ulint atstype_size;
+typedef long atstype_lint;
+typedef unsigned long atstype_ulint;
+typedef long long atstype_llint;
+typedef unsigned long long atstype_ullint;
+typedef short atstype_sint;
+typedef unsigned short atstype_usint;
+typedef __PTRDIFF_TYPE__ atstype_ssize;
+typedef __SIZE_TYPE__ atstype_size;
 typedef int atstype_bool;
 typedef unsigned char atstype_byte;
 typedef char atstype_char;
@@ -33,242 +34,284 @@ typedef void *atstype_datcontyp;
 typedef void *atstype_arrptr;
 typedef void *atstype_funptr;
 typedef void *atstype_cloptr;
-#define atstkind_type(tk) tk
-#define atstkind_t0ype(tk) tk
+/* The emitted C wraps each type in a kind and a role; both are transparent
+   except where a reference argument or a boxed value is a pointer. */
+#define atstkind_type(kind) kind
+#define atstkind_t0ype(kind) kind
+#define atstyvar_type(name) atstype_var
+#define atstybox_type(ty) atstype_boxed
+#define atsrefarg0_type(ty) ty
+#define atsrefarg1_type(ty) atstype_ref
+#define atstyarr_type(ty) ty
+/* A type variable stands for a value of unknown size; no value of it is
+   ever made, only pointed to, so a zero-length array of a large record. */
 #ifndef _ATSTYPE_VAR_SIZE_
-#define _ATSTYPE_VAR_SIZE_ 0X10000
+#define _ATSTYPE_VAR_SIZE_ 65536
 #endif
-typedef struct { char _[_ATSTYPE_VAR_SIZE_]; } atstype_var[0];
-#define atstyvar_type(a) atstype_var
-#define atstybox_type(hit) atstype_boxed
-#define atsrefarg0_type(hit) hit
-#define atsrefarg1_type(hit) atstype_ref
-#define atstyarr_type(hit) hit
+typedef struct { char pad[_ATSTYPE_VAR_SIZE_]; } atstype_var[0];
 #define atsbool_true 1
 #define atsbool_false 0
-#define atsptr_null ((void*)0)
-#define the_atsptr_null ((void*)0)
+#define atsptr_null ((void *)0)
+#define the_atsptr_null atsptr_null
+/* Storage classes and linkage of what is declared. */
 #define ATSstruct struct
 #define ATSextern() extern
 #define ATSstatic() static
 #define ATSinline() static inline
+/* Loading a module's dynamic part once: a flag per module, set when its
+   initialiser has run. */
 #define ATSdynload()
-#define ATSdynloadflag_sta(flag)
-#define ATSdynloadflag_ext(flag) extern int flag
-#define ATSdynloadflag_init(flag) int flag = 0
-#define ATSdynloadflag_minit(flag) int flag = 0
-#define ATSdynloadset(flag) flag = 1
-#define ATSdynloadfcall(dynloadfun) dynloadfun()
-#define ATSassume(flag) void *flag = (void*)0
-#define ATSdyncst_mac(d2c)
-#define ATSdyncst_castfn(d2c)
-#define ATSdyncst_extfun(d2c, targs, tres) extern tres d2c targs
-#define ATSdyncst_stafun(d2c, targs, tres) static tres d2c targs
-#define ATSdyncst_valimp(d2c, type) type d2c
-#define ATSdyncst_valdec(d2c, type) extern type d2c
-#define ATSif(x) if(x)
+#define ATSdynloadflag_sta(flagvar)
+#define ATSdynloadflag_ext(flagvar) extern int flagvar
+#define ATSdynloadflag_init(flagvar) int flagvar = 0
+#define ATSdynloadflag_minit(flagvar) int flagvar = 0
+#define ATSdynloadset(flagvar) (flagvar = 1)
+#define ATSdynloadfcall(initfn) initfn()
+#define ATSassume(sym) void *sym = atsptr_null
+/* Declarations of constants the module uses but does not define. */
+#define ATSdyncst_mac(name)
+#define ATSdyncst_castfn(name)
+#define ATSdyncst_extfun(name, params, result) extern result name params
+#define ATSdyncst_stafun(name, params, result) static result name params
+#define ATSdyncst_valimp(name, ty) ty name
+#define ATSdyncst_valdec(name, ty) extern ty name
+/* Control flow. */
+#define ATSif(test) if (test)
 #define ATSthen()
 #define ATSelse() else
-#define ATSifthen(x) if(x)
-#define ATSifnthen(x) if(!(x))
-#define ATSreturn(x) return(x)
-#define ATSreturn_void(x) return
+#define ATSifthen(test) if (test)
+#define ATSifnthen(test) if (!(test))
+#define ATSreturn(result) return (result)
+#define ATSreturn_void(ignored) return
 #define ATSfunbody_beg()
 #define ATSfunbody_end()
-#define ATSPMVint(i) i
-#define ATSPMVintrep(rep) (rep)
-#define ATSPMVbool_true() atsbool_true
-#define ATSPMVbool_false() atsbool_false
-#define ATSPMVchar(c) (c)
-#define ATSPMVstring(str) (str)
-#define ATSPMVi0nt(tok) (tok)
-#define ATSPMVempty()
-#define ATSPMVextval(name) (name)
-#define ATSPMVptrof(lval) (&(lval))
-#define ATSPMVptrof_void(lval) ((void*)0)
-#define ATSPMVrefarg0(val) (val)
-#define ATSPMVrefarg1(ref) (ref)
-#define ATSPMVsizeof(hit) (sizeof(hit))
-#define ATSPMVfunlab(flab) (flab)
-#define ATSPMVcastfn(d2c, hit, arg) ((hit)arg)
-#define ATSPMVtyrep(rep) (rep)
-#define ATStyclo() struct{ void *cfun; }
-#define ATSfunclo_fun(pmv, targs, tres) ((tres(*)targs)(pmv))
-#define ATSfunclo_clo(pmv, targs, tres) ((tres(*)targs)(((ATStyclo()*)pmv)->cfun))
-#define ATSfuncall(fun, funarg) (fun)funarg
-#define ATSextfcall(fun, funarg) (fun)funarg
-#define ATSextmcall(obj, mtd, funarg) (obj->mtd)funarg
-#define ATStmpdec(tmp, hit) hit tmp
-#define ATStmpdec_void(tmp)
-#define ATSstatmpdec(tmp, hit) static hit tmp
-#define ATSstatmpdec_void(tmp)
-#define ATSderef(pmv, hit) (*(hit*)pmv)
-#define ATSCKnot(x) ((x)==0)
-#define ATSCKiseqz(x) ((x)==0)
-#define ATSCKisneqz(x) ((x)!=0)
-#define ATSCKptriscons(x) (0 != (void*)(x))
-#define ATSCKptrisnull(x) (0 == (void*)(x))
-#define ATSINSlab(lab) lab
-#define ATSINSgoto(lab) goto lab
-#define ATSINSflab(flab) flab
-#define ATSINSfgoto(flab) goto flab
-#define ATSINSmove(tmp, val) (tmp = val)
-#define ATSINSpmove(tmp, hit, val) (*(hit*)tmp = val)
-#define ATSINSmove_void(tmp, command) command
-#define ATSINSpmove_void(tmp, hit, command) command
-#define ATSINSmove_nil(tmp) (tmp = ((void*)0))
-#define ATSINSupdate_ptrinc(tmp, tyelt) (tmp = (tyelt*)(tmp) + 1)
-#define ATSINSupdate_ptrdec(tmp, tyelt) (tmp = (tyelt*)(tmp) - 1)
-#define ATSINSdeadcode_fail() /*deadcode*/
-#define ATSSELfltrec(pmv, tyrec, lab) ((pmv).lab)
-#define ATSSELcon(pmv, tycon, lab) (((tycon*)(pmv))->lab)
-#define ATSSELarrptrind(pmv, tyelt, lab) (((tyelt*)pmv)lab)
-#define ATSINSmove_con1_beg()
-#define ATSINSmove_con1_new(tmp, tycon) (tmp = ATS_MALLOC(sizeof(tycon)))
-#define ATSINSstore_con1_ofs(tmp, tycon, lab, val) (((tycon*)(tmp))->lab = val)
-#define ATSINSmove_con1_end()
-#define ATSINSfreecon(ptr) ATS_MFREE(ptr)
-#define ATSSELrecsin(pmv, tyrec, lab) (pmv)
-#define ATSINSstore_con1_tag(dst, tag) (((int*)(dst))[0] = (tag))
-#define ATSINSmove_con0(dst, tag) ((dst) = (void*)(tag))
-#define ATSCKpat_con0(p, tag) ((p) == (void*)(tag))
-#define ATSCKpat_con1(p, tag) ((p) >= (void*)1024 && ((int*)(p))[0] == (tag))
-#define ATSCKpat_int(pmv, pat) ((pmv) == pat)
-#define ATSCKpat_bool(pmv, pat) ((pmv) == pat)
-#define ATSCKpat_char(pmv, pat) ((pmv) == pat)
-#define ATSCKpat_float(pmv, pat) ((pmv) == pat)
-#define ATSINSmove_fltrec_beg()
-#define ATSINSmove_fltrec_end()
-#define ATSINSstore_fltrec_ofs(tmp, tyrec, lab, val) ((tmp).lab = val)
-#define ATSINSload(tmp, pmv) (tmp = pmv)
-#define ATSINSstore(pmv1, pmv2) (pmv1 = pmv2)
-#define ATSINSxstore(tmp, pmv1, pmv2) (tmp = pmv1, pmv1 = pmv2, pmv2 = tmp)
-#define ATStailcal_beg() do {
-#define ATStailcal_end() } while(0) ;
-#define ATSINSmove_tlcal(apy, tmp) (apy = tmp)
-#define ATSINSargmove_tlcal(arg, apy) (arg = apy)
 #define ATSbranch_beg()
-#define ATSbranch_end() break ;
+#define ATSbranch_end() break;
 #define ATScaseof_beg() do {
-#define ATScaseof_end() } while(0) ;
+#define ATScaseof_end() } while (0);
+#define ATStailcal_beg() do {
+#define ATStailcal_end() } while (0);
 #define ATSextcode_beg()
 #define ATSextcode_end()
-#define atspre_g1uint2int_size_int(x) ((int)(x))
-#define atspre_g0int_add_int(x, y) ((x) + (y))
-#define atspre_g1int_mul_int(x, y) ((x) * (y))
-#define atspre_g0int2uint_int_size(x) ((atstype_size)(x))
-#define atspre_g0uint_mul_size(x, y) ((x) * (y))
-#define atspre_add_ptr0_bsz(p, n) ((void*)((char*)(p) + (n)))
-#define atspre_g1int2int_int_int(x) (x)
-#define atspre_g1int_lt_int(x, y) ((x) < (y))
-#define atspre_g1int_add_int(x, y) ((x) + (y))
-#define atspre_char2int1(c) ((int)(c))
-#define atspre_g0int2int_int_int(x) (x)
-#define atspre_g0int_gt_int(x, y) ((x) > (y))
-#define atspre_g1ofg0_int(x) (x)
-#define atspre_g0ofg1_int(x) (x)
-#define atspre_g1int_gt_int(x, y) ((x) > (y))
-#define atspre_g1int_gte_int(x, y) ((x) >= (y))
-#define atspre_g1int_lte_int(x, y) ((x) <= (y))
-#define atspre_g1int_sub_int(x, y) ((x) - (y))
-#define atspre_g1int_neg_int(x) (-(x))
-#define atspre_g0int_gte_int(x, y) ((x) >= (y))
-#define atspre_g0int_lte_int(x, y) ((x) <= (y))
-#define atspre_g0int_eq_int(x, y) ((x) == (y))
-#define atspre_g0int_mul_int(x, y) ((x) * (y))
-#define atspre_g0int_sub_int(x, y) ((x) - (y))
-#define atspre_g0int_neq_int(x, y) ((x) != (y))
-#define atspre_g0int_lt_int(x, y) ((x) < (y))
-#define atspre_g0int_div_int(x, y) ((x) / (y))
-#define atspre_g0int_mod_int(x, y) ((x) % (y))
-#define atspre_g1int_div_int(x, y) ((x) / (y))
-#define atspre_g1int_eq_int(x, y) ((x) == (y))
-#define atspre_g1int_neq_int(x, y) ((x) != (y))
-#define atspre_g0int_nmod_int(x, y) ((x) % (y))
-#define atspre_g1int_nmod_int(x, y) ((x) % (y))
-#define atspre_g1int_mod_int(x, y) ((x) % (y))
-#define atspre_neg_bool(b) ((b) ? 0 : 1)
-#define atspre_neg_bool0 atspre_neg_bool
-#define atspre_neg_bool1 atspre_neg_bool
-#define atspre_g0int_asl_int(x, n) ((x) << (n))
-#define atspre_g0int_asr_int(x, n) ((x) >> (n))
-#define atspre_lor_int_int(x, y) ((x) | (y))
-#define atspre_land_int_int(x, y) ((x) & (y))
-#define atspre_byte2int0(b) ((int)(b))
-#define atspre_int2byte0(i) ((atstype_byte)(i))
-#define atspre_char2int0(c) ((int)(c))
-#define atspre_int2char0(i) ((char)(i))
-#define atspre_ptr_null() ((void*)0)
-#define atspre_ptr_is_null(p) ((p) == 0)
-#define atspre_ptr0_is_null atspre_ptr_is_null
-#define atspre_ptr1_is_null atspre_ptr_is_null
-#define atspre_ptr_isnot_null(p) ((p) != 0)
-#define atspre_ptr0_isnot_null atspre_ptr_isnot_null
-#define atspre_ptr1_isnot_null atspre_ptr_isnot_null
-#define atspre_add_ptr1_bsz(p, n) ((void*)((char*)(p) + (n)))
-#define atspre_g0int_neg_int(x) (-(x))
-#define atspre_g1int_neg_int(x) (-(x))
-#define atspre_g1int2uint_int_size(x) ((atstype_size)(x))
-#define atspre_strlen strlen
-#define atspre_g0int2uint_int_uint(x) ((unsigned int)(x))
-#define atspre_g1int2uint_int_uint(x) ((unsigned int)(x))
-#define atspre_g0uint2int_uint_int(x) ((int)(x))
-#define atspre_g1uint2int_uint_int(x) ((int)(x))
-#define atspre_g0uint_add_uint(x, y) ((x) + (y))
-#define atspre_g0uint_sub_uint(x, y) ((x) - (y))
-#define atspre_g0uint_mul_uint(x, y) ((x) * (y))
-#define atspre_g0uint_div_uint(x, y) ((x) / (y))
-#define atspre_g0uint_mod_uint(x, y) ((x) % (y))
-#define atspre_g0uint_lt_uint(x, y) ((x) < (y))
-#define atspre_g0uint_lte_uint(x, y) ((x) <= (y))
-#define atspre_g0uint_gt_uint(x, y) ((x) > (y))
-#define atspre_g0uint_gte_uint(x, y) ((x) >= (y))
-#define atspre_g0uint_eq_uint(x, y) ((x) == (y))
-#define atspre_g0uint_neq_uint(x, y) ((x) != (y))
-#define atspre_g0uint_lsl_uint(x, n) ((x) << (n))
-#define atspre_g0uint_lsr_uint(x, n) ((x) >> (n))
-#define atspre_g0uint_lor_uint(x, y) ((x) | (y))
-#define atspre_g0uint_land_uint(x, y) ((x) & (y))
-#define atspre_g0uint_lxor_uint(x, y) ((x) ^ (y))
-#define atspre_g0uint_lnot_uint(x) (~(x))
-#define atspre_g1uint_add_uint(x, y) ((x) + (y))
-#define atspre_g1uint_sub_uint(x, y) ((x) - (y))
-#define atspre_g1uint_lt_uint(x, y) ((x) < (y))
-#define atspre_g1uint_lte_uint(x, y) ((x) <= (y))
-#define atspre_g1uint_gt_uint(x, y) ((x) > (y))
-#define atspre_g1uint_gte_uint(x, y) ((x) >= (y))
-#define atspre_g1uint_eq_uint(x, y) ((x) == (y))
-#define atspre_g1uint_neq_uint(x, y) ((x) != (y))
-#define atspre_eq_char0_char0(x, y) ((x) == (y))
-#define atspre_neq_char0_char0(x, y) ((x) != (y))
-#define atspre_eq_char1_char1(x, y) ((x) == (y))
-#define atspre_neq_char1_char1(x, y) ((x) != (y))
-#define atspre_lt_char0_char0(x, y) ((x) < (y))
-#define atspre_gt_char0_char0(x, y) ((x) > (y))
-#define ATS_MALLOC(sz) malloc(sz)
-#define ATS_MFREE(ptr) free(ptr)
-#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))
-#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)
-#define atspre_cloptr_free(p) ATS_MFREE(p)
-#define atspre_ptr_alloc_tsz(tsz) ATS_MALLOC(tsz)
-#define ATSclosurerize_beg(flab, tenvs, targs, tres)
+#define ATSINSlab(target) target
+#define ATSINSgoto(target) goto target
+#define ATSINSflab(target) target
+#define ATSINSfgoto(target) goto target
+#define ATSINSdeadcode_fail() /* unreachable by the types */
+/* Values: literals and conversions. */
+#define ATSPMVint(literal) literal
+#define ATSPMVintrep(literal) (literal)
+#define ATSPMVi0nt(literal) (literal)
+#define ATSPMVbool_true() atsbool_true
+#define ATSPMVbool_false() atsbool_false
+#define ATSPMVchar(literal) (literal)
+#define ATSPMVstring(literal) (literal)
+#define ATSPMVempty()
+#define ATSPMVextval(sym) (sym)
+#define ATSPMVptrof(place) (&(place))
+#define ATSPMVptrof_void(place) atsptr_null
+#define ATSPMVrefarg0(value) (value)
+#define ATSPMVrefarg1(pointer) (pointer)
+#define ATSPMVsizeof(ty) (sizeof(ty))
+#define ATSPMVfunlab(label) (label)
+#define ATSPMVcastfn(name, ty, operand) ((ty)(operand))
+#define ATSPMVtyrep(repr) (repr)
+/* A closure begins with the address of its code. */
+#define ATStyclo() struct { void *cfun; }
+#define ATSfunclo_fun(callee, params, result) ((result (*) params)(callee))
+#define ATSfunclo_clo(callee, params, result) \
+  ((result (*) params)(((ATStyclo() *)(callee))->cfun))
+#define ATSfuncall(callee, args) (callee) args
+#define ATSextfcall(callee, args) (callee) args
+#define ATSextmcall(receiver, method, args) ((receiver)->method) args
+/* Temporaries and what they hold. */
+#define ATStmpdec(name, ty) ty name
+#define ATStmpdec_void(name)
+#define ATSstatmpdec(name, ty) static ty name
+#define ATSstatmpdec_void(name)
+#define ATSderef(place, ty) (*(ty *)place)
+/* Tests on values and on patterns. */
+#define ATSCKnot(test) (0 == (test))
+#define ATSCKiseqz(operand) (0 == (operand))
+#define ATSCKisneqz(operand) (0 != (operand))
+#define ATSCKptrisnull(operand) (atsptr_null == (void *)(operand))
+#define ATSCKptriscons(operand) (atsptr_null != (void *)(operand))
+#define ATSCKpat_int(subject, literal) (literal == (subject))
+#define ATSCKpat_bool(subject, literal) (literal == (subject))
+#define ATSCKpat_char(subject, literal) (literal == (subject))
+#define ATSCKpat_float(subject, literal) (literal == (subject))
+/* Constructors without fields are small integers, those with fields point
+   to a block whose first word is the tag; real blocks live above the
+   small integers, at 1024 and up. */
+#define ATSCKpat_con0(subject, tag) ((void *)(tag) == (void *)(subject))
+#define ATSCKpat_con1(subject, tag) \
+  ((void *)1024 <= (void *)(subject) && (tag) == *(int *)(subject))
+/* Instructions. */
+#define ATSINSmove(dest, value) (dest = (value))
+#define ATSINSpmove(dest, ty, value) (*(ty *)(dest) = (value))
+#define ATSINSmove_void(dest, call) call
+#define ATSINSpmove_void(dest, ty, call) call
+#define ATSINSmove_nil(dest) (dest = atsptr_null)
+#define ATSINSload(dest, place) (dest = (place))
+#define ATSINSstore(place, value) (place = (value))
+#define ATSINSxstore(scratch, left, right) \
+  (scratch = (left), left = (right), right = scratch)
+#define ATSINSupdate_ptrinc(ptrvar, elty) (ptrvar = 1 + (elty *)(ptrvar))
+#define ATSINSupdate_ptrdec(ptrvar, elty) (ptrvar = (elty *)(ptrvar) - 1)
+#define ATSINSmove_tlcal(applied, source) (applied = (source))
+#define ATSINSargmove_tlcal(param, applied) (param = (applied))
+/* Fields of flat records and of constructor blocks. */
+#define ATSSELfltrec(rec, recty, field) ((rec).field)
+#define ATSSELrecsin(rec, recty, field) (rec)
+#define ATSSELcon(block, conty, field) (((conty *)(block))->field)
+#define ATSSELarrptrind(base, elty, index) (((elty *)base) index)
+#define ATSINSmove_fltrec_beg()
+#define ATSINSmove_fltrec_end()
+#define ATSINSstore_fltrec_ofs(rec, recty, field, value) ((rec).field = (value))
+#define ATSINSmove_con0(dest, tag) (dest = (void *)(tag))
+#define ATSINSmove_con1_beg()
+#define ATSINSmove_con1_new(dest, conty) (dest = (void *)ATS_MALLOC(sizeof(conty)))
+#define ATSINSstore_con1_tag(block, tag) (*(int *)(block) = (tag))
+#define ATSINSstore_con1_ofs(block, conty, field, value) \
+  (((conty *)(block))->field = (value))
+#define ATSINSmove_con1_end()
+#define ATSINSfreecon(block) ATS_MFREE(block)
+/* Closures are made and freed whole. */
+#define ATSINScloptr_make(dest, nbytes) (dest = ATS_MALLOC(nbytes))
+#define ATSINScloptr_free(clo) ATS_MFREE(clo)
+#define ATSclosurerize_beg(label, envs, params, result)
 #define ATSclosurerize_end()
-#define ATSFCreturn(x) return(x)
-#define ATSFCreturn_void(x) (x); return
-#define ATSPMVcfunlab(knd, flab, env) (flab##__closurerize)env
+#define ATSPMVcfunlab(kind, label, envargs) (label##__closurerize) envargs
+#define ATSFCreturn(result) return (result)
+#define ATSFCreturn_void(call) (call); return
 extern void mainats_0_void(void);
-#define ATSmainats_0_void(err) mainats_0_void()
-#define atspre_g1int_min_int(x, y) ((x) < (y) ? (x) : (y))
-#define atspre_g1uint_gte_size(x, y) ((x) >= (y))
-#define atspre_g0uint_add_size(x, y) ((x) + (y))
-#define atspre_eq_bool0_bool0(x, y) ((x) == (y))
-#define atspre_print_string(s) fputs((s), stdout)
-#define atspre_print_newline() (fputc('\n', stdout), fflush(stdout))
-#define atspre_print_int(x) fprintf(stdout, "%d", (int)(x))
-#define atspre_print_char(c) fputc((int)(c), stdout)
-#define atspre_prerr_string(s) fputs((s), stderr)
-#define atspre_prerr_newline() (fputc('\n', stderr), fflush(stderr))
-#define atspre_prerr_int(x) fprintf(stderr, "%d", (int)(x))
-#define atspre_prerr_char(c) fputc((int)(c), stderr)
-#define atspre_exit_void(c) exit(c)
+#define ATSmainats_0_void(errcode) mainats_0_void()
+/* The prelude's arithmetic, comparison and conversion functions the emitted
+   C calls by name. Each is a typed inline function whose name says its
+   signature (g0 and g1 are the unchecked and the checked flavour of the
+   same operation; the C does not tell them apart). */
+#define BATS_FN2(fname, result, operand, expr) \
+  static inline result fname(operand lhs, operand rhs) { return expr; }
+#define BATS_FN1(fname, result, operand, expr) \
+  static inline result fname(operand val) { return expr; }
+
+BATS_FN2(atspre_g0int_add_int, atstype_int, atstype_int, lhs + rhs)
+BATS_FN2(atspre_g1int_add_int, atstype_int, atstype_int, lhs + rhs)
+BATS_FN2(atspre_g0int_sub_int, atstype_int, atstype_int, lhs - rhs)
+BATS_FN2(atspre_g1int_sub_int, atstype_int, atstype_int, lhs - rhs)
+BATS_FN2(atspre_g0int_mul_int, atstype_int, atstype_int, lhs * rhs)
+BATS_FN2(atspre_g1int_mul_int, atstype_int, atstype_int, lhs * rhs)
+BATS_FN2(atspre_g0int_div_int, atstype_int, atstype_int, lhs / rhs)
+BATS_FN2(atspre_g1int_div_int, atstype_int, atstype_int, lhs / rhs)
+BATS_FN2(atspre_g0int_mod_int, atstype_int, atstype_int, lhs % rhs)
+BATS_FN2(atspre_g1int_mod_int, atstype_int, atstype_int, lhs % rhs)
+BATS_FN2(atspre_g0int_nmod_int, atstype_int, atstype_int, lhs % rhs)
+BATS_FN2(atspre_g1int_nmod_int, atstype_int, atstype_int, lhs % rhs)
+BATS_FN2(atspre_g1int_min_int, atstype_int, atstype_int, lhs < rhs ? lhs : rhs)
+BATS_FN1(atspre_g0int_neg_int, atstype_int, atstype_int, 0 - val)
+BATS_FN1(atspre_g1int_neg_int, atstype_int, atstype_int, 0 - val)
+BATS_FN2(atspre_g0int_lt_int, atstype_bool, atstype_int, lhs < rhs)
+BATS_FN2(atspre_g1int_lt_int, atstype_bool, atstype_int, lhs < rhs)
+BATS_FN2(atspre_g0int_lte_int, atstype_bool, atstype_int, lhs <= rhs)
+BATS_FN2(atspre_g1int_lte_int, atstype_bool, atstype_int, lhs <= rhs)
+BATS_FN2(atspre_g0int_gt_int, atstype_bool, atstype_int, lhs > rhs)
+BATS_FN2(atspre_g1int_gt_int, atstype_bool, atstype_int, lhs > rhs)
+BATS_FN2(atspre_g0int_gte_int, atstype_bool, atstype_int, lhs >= rhs)
+BATS_FN2(atspre_g1int_gte_int, atstype_bool, atstype_int, lhs >= rhs)
+BATS_FN2(atspre_g0int_eq_int, atstype_bool, atstype_int, lhs == rhs)
+BATS_FN2(atspre_g1int_eq_int, atstype_bool, atstype_int, lhs == rhs)
+BATS_FN2(atspre_g0int_neq_int, atstype_bool, atstype_int, lhs != rhs)
+BATS_FN2(atspre_g1int_neq_int, atstype_bool, atstype_int, lhs != rhs)
+BATS_FN2(atspre_g0int_asl_int, atstype_int, atstype_int, lhs << rhs)
+BATS_FN2(atspre_g0int_asr_int, atstype_int, atstype_int, lhs >> rhs)
+BATS_FN2(atspre_lor_int_int, atstype_int, atstype_int, lhs | rhs)
+BATS_FN2(atspre_land_int_int, atstype_int, atstype_int, lhs & rhs)
+BATS_FN1(atspre_g0int2int_int_int, atstype_int, atstype_int, val)
+BATS_FN1(atspre_g1int2int_int_int, atstype_int, atstype_int, val)
+BATS_FN1(atspre_g1ofg0_int, atstype_int, atstype_int, val)
+BATS_FN1(atspre_g0ofg1_int, atstype_int, atstype_int, val)
+
+BATS_FN2(atspre_g0uint_add_uint, atstype_uint, atstype_uint, lhs + rhs)
+BATS_FN2(atspre_g1uint_add_uint, atstype_uint, atstype_uint, lhs + rhs)
+BATS_FN2(atspre_g0uint_sub_uint, atstype_uint, atstype_uint, lhs - rhs)
+BATS_FN2(atspre_g1uint_sub_uint, atstype_uint, atstype_uint, lhs - rhs)
+BATS_FN2(atspre_g0uint_mul_uint, atstype_uint, atstype_uint, lhs * rhs)
+BATS_FN2(atspre_g0uint_div_uint, atstype_uint, atstype_uint, lhs / rhs)
+BATS_FN2(atspre_g0uint_mod_uint, atstype_uint, atstype_uint, lhs % rhs)
+BATS_FN2(atspre_g0uint_lt_uint, atstype_bool, atstype_uint, lhs < rhs)
+BATS_FN2(atspre_g1uint_lt_uint, atstype_bool, atstype_uint, lhs < rhs)
+BATS_FN2(atspre_g0uint_lte_uint, atstype_bool, atstype_uint, lhs <= rhs)
+BATS_FN2(atspre_g1uint_lte_uint, atstype_bool, atstype_uint, lhs <= rhs)
+BATS_FN2(atspre_g0uint_gt_uint, atstype_bool, atstype_uint, lhs > rhs)
+BATS_FN2(atspre_g1uint_gt_uint, atstype_bool, atstype_uint, lhs > rhs)
+BATS_FN2(atspre_g0uint_gte_uint, atstype_bool, atstype_uint, lhs >= rhs)
+BATS_FN2(atspre_g1uint_gte_uint, atstype_bool, atstype_uint, lhs >= rhs)
+BATS_FN2(atspre_g0uint_eq_uint, atstype_bool, atstype_uint, lhs == rhs)
+BATS_FN2(atspre_g1uint_eq_uint, atstype_bool, atstype_uint, lhs == rhs)
+BATS_FN2(atspre_g0uint_neq_uint, atstype_bool, atstype_uint, lhs != rhs)
+BATS_FN2(atspre_g1uint_neq_uint, atstype_bool, atstype_uint, lhs != rhs)
+BATS_FN2(atspre_g0uint_lsl_uint, atstype_uint, atstype_uint, lhs << rhs)
+BATS_FN2(atspre_g0uint_lsr_uint, atstype_uint, atstype_uint, lhs >> rhs)
+BATS_FN2(atspre_g0uint_lor_uint, atstype_uint, atstype_uint, lhs | rhs)
+BATS_FN2(atspre_g0uint_land_uint, atstype_uint, atstype_uint, lhs & rhs)
+BATS_FN2(atspre_g0uint_lxor_uint, atstype_uint, atstype_uint, lhs ^ rhs)
+BATS_FN1(atspre_g0uint_lnot_uint, atstype_uint, atstype_uint, ~val)
+BATS_FN1(atspre_g0int2uint_int_uint, atstype_uint, atstype_int, (atstype_uint)val)
+BATS_FN1(atspre_g1int2uint_int_uint, atstype_uint, atstype_int, (atstype_uint)val)
+BATS_FN1(atspre_g0uint2int_uint_int, atstype_int, atstype_uint, (atstype_int)val)
+BATS_FN1(atspre_g1uint2int_uint_int, atstype_int, atstype_uint, (atstype_int)val)
+
+BATS_FN2(atspre_g0uint_add_size, atstype_size, atstype_size, lhs + rhs)
+BATS_FN2(atspre_g0uint_mul_size, atstype_size, atstype_size, lhs * rhs)
+BATS_FN2(atspre_g1uint_gte_size, atstype_bool, atstype_size, lhs >= rhs)
+BATS_FN1(atspre_g0int2uint_int_size, atstype_size, atstype_int, (atstype_size)val)
+BATS_FN1(atspre_g1int2uint_int_size, atstype_size, atstype_int, (atstype_size)val)
+BATS_FN1(atspre_g1uint2int_size_int, atstype_int, atstype_size, (atstype_int)val)
+
+BATS_FN2(atspre_eq_char0_char0, atstype_bool, atstype_char, lhs == rhs)
+BATS_FN2(atspre_eq_char1_char1, atstype_bool, atstype_char, lhs == rhs)
+BATS_FN2(atspre_neq_char0_char0, atstype_bool, atstype_char, lhs != rhs)
+BATS_FN2(atspre_neq_char1_char1, atstype_bool, atstype_char, lhs != rhs)
+BATS_FN2(atspre_lt_char0_char0, atstype_bool, atstype_char, lhs < rhs)
+BATS_FN2(atspre_gt_char0_char0, atstype_bool, atstype_char, lhs > rhs)
+BATS_FN1(atspre_char2int0, atstype_int, atstype_char, (atstype_int)val)
+BATS_FN1(atspre_char2int1, atstype_int, atstype_char, (atstype_int)val)
+BATS_FN1(atspre_int2char0, atstype_char, atstype_int, (atstype_char)val)
+BATS_FN1(atspre_byte2int0, atstype_int, atstype_byte, (atstype_int)val)
+BATS_FN1(atspre_int2byte0, atstype_byte, atstype_int, (atstype_byte)val)
+BATS_FN2(atspre_eq_bool0_bool0, atstype_bool, atstype_bool, lhs == rhs)
+BATS_FN1(atspre_neg_bool, atstype_bool, atstype_bool, !val)
+BATS_FN1(atspre_neg_bool0, atstype_bool, atstype_bool, !val)
+BATS_FN1(atspre_neg_bool1, atstype_bool, atstype_bool, !val)
+
+/* Pointers. */
+static inline atstype_ptr atspre_ptr_null(void) { return atsptr_null; }
+BATS_FN1(atspre_ptr_is_null, atstype_bool, atstype_ptr, atsptr_null == val)
+BATS_FN1(atspre_ptr0_is_null, atstype_bool, atstype_ptr, atsptr_null == val)
+BATS_FN1(atspre_ptr1_is_null, atstype_bool, atstype_ptr, atsptr_null == val)
+BATS_FN1(atspre_ptr_isnot_null, atstype_bool, atstype_ptr, atsptr_null != val)
+BATS_FN1(atspre_ptr0_isnot_null, atstype_bool, atstype_ptr, atsptr_null != val)
+BATS_FN1(atspre_ptr1_isnot_null, atstype_bool, atstype_ptr, atsptr_null != val)
+static inline atstype_ptr atspre_add_ptr0_bsz(atstype_ptr base, atstype_size nbytes)
+{ return (char *)base + nbytes; }
+static inline atstype_ptr atspre_add_ptr1_bsz(atstype_ptr base, atstype_size nbytes)
+{ return (char *)base + nbytes; }
+#undef BATS_FN1
+#undef BATS_FN2
+
+/* Memory: blocks are the C library's (wasm: the runtime's own). */
+#define ATS_MALLOC(nbytes) malloc(nbytes)
+#define ATS_MFREE(block) free(block)
+#define atspre_cloptr_free(clo) ATS_MFREE(clo)
+#define atspre_ptr_alloc_tsz(nbytes) ATS_MALLOC(nbytes)
+#define atspre_strlen strlen
+static inline void atspre_print_string(const char *text) { fputs(text, stdout); }
+static inline void atspre_print_newline(void) { fputc(10, stdout); fflush(stdout); }
+static inline void atspre_print_int(int number) { fprintf(stdout, "%d", number); }
+static inline void atspre_print_char(int code) { fputc(code, stdout); }
+static inline void atspre_prerr_string(const char *text) { fputs(text, stderr); }
+static inline void atspre_prerr_newline(void) { fputc(10, stderr); fflush(stderr); }
+static inline void atspre_prerr_int(int number) { fprintf(stderr, "%d", number); }
+static inline void atspre_prerr_char(int code) { fputc(code, stderr); }
+static inline void atspre_exit_void(int status) { exit(status); }
 #endif

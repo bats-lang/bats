@@ -31,4 +31,8 @@ for bad in 0000000000000000000000000000000000000001 main "$(echo "$head" | cut -
 done
 "$BATS" record-commit 0000000000000000000000000000000000000001 2>&1 >/dev/null | grep -q "fetch-depth: 2" || fail "the missing commit does not say what to do"
 ok "a commit that is not there, a branch, a short sha and none are refused"
+"$BATS" record-commit "$merge" extra > "$TMP/out" 2> "$TMP/err" && fail "an extra argument was accepted"
+[ ! -s "$TMP/out" ] || fail "an extra argument printed"
+"$BATS" abcdefghijklm "$merge" 2>&1 | grep -q "BATS_COMMIT" && fail "a command of the same length ran record-commit"
+ok "an extra argument is refused, and the command word must match"
 echo "all passed"

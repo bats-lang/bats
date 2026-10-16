@@ -1,5 +1,5 @@
 CC ?= cc
-ATSFLAGS := -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include _bats_native_runtime.h -I_bats_native_stubs -Wno-implicit-function-declaration -Wno-int-conversion
+ATSFLAGS := -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include _bats_native_runtime.h -I_bats_native_stubs
 
 %_debug.o: %.c
 	$(CC) -c -o $@ $< -g -O0 $(ATSFLAGS)
