@@ -92,6 +92,13 @@ slow 5 "$BATS" with-env "$TMP/repeated.env" true || fail "one variable on 16384 
 python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(1024)))" > "$TMP/thousand.env"
 got=$(with_env "$TMP/thousand.env" sh -c 'echo $V0 $V1023')
 [ "$got" = 'x x' ] || fail "1024 variables: $got"
+# the same 1024 names set again: the table keeps 1024 entries and each one
+# holds its last value (a chain that is searched too little adds copies)
+python3 -c "import sys; sys.stdout.write(''.join('V%d=a\n' % i for i in range(1024)) + ''.join('V%d=b\n' % i for i in range(1024)))" > "$TMP/reset.env"
+got=$(with_env "$TMP/reset.env" sh -c 'env | grep -c "^V[0-9]*=b$"')
+[ "$got" = '1024' ] || fail "1024 variables set again do not all hold their last value: $got"
+got=$(with_env "$TMP/reset.env" sh -c 'env | grep -c "^V[0-9]*=a$"')
+[ "$got" = '0' ] || fail "a variable holds its first value after being set again: $got"
 python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(1025)))" > "$TMP/over-thousand.env"
 slow 5 "$BATS" with-env "$TMP/over-thousand.env" true; [ $? -eq 2 ] || fail "1025 variables are not refused"
 python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(9000)))" > "$TMP/many.env"
@@ -185,6 +192,11 @@ grep -q 'cannot be made' "$TMP/err" || fail "the error is not the 'cannot be mad
 grep -q 'value of Ea ' "$TMP/err" || fail "the error does not name the entry that crossed the limit: $(cat "$TMP/err")"
 printf 'Ea=${A}${A}\nEb=${A}${A}\nEc=${A}${A}\nEd=${A}${A}\n' > "$TMP/four.env"
 with_env "$TMP/four.env" true 2>/dev/null; [ $? -eq 2 ] || fail "four entries of 131071 bytes are not 2 (a late 126)"
+# a literal tail after expansions counts too: 2 + 1 + 65534 + 65534 + 1 is
+# 131072, one over the limit (with the fits check removed, exec refuses 126)
+printf 'EX=${A}${A}x\n' > "$TMP/tail-over.env"
+with_env "$TMP/tail-over.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "an entry of 131072 bytes with a literal tail is not 2"
+grep -q 'EX' "$TMP/err" || fail "the error does not name the variable: $(cat "$TMP/err")"
 unset A
 
 # a NUL byte in the file is a usage error that names its line

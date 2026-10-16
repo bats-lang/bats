@@ -15,6 +15,10 @@
 #    fetch that fails; a failed clone leaves nothing; a control character in
 #    the name, and an extra argument, are refused
 #  * no directory is an error; BATS_REPOSITORY names it as --repository does
+#  * a dangling link, a failed clone under new parents (which it removes, and
+#    only those), the mode of an empty directory (setgid and sticky), a git
+#    repository with no origin (refused, said), a directory named -foo, and a
+#    run killed while it fetches (the next run clears its marked sibling)
 # usage: tests/clone-repository/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -136,9 +140,112 @@ PATH="$TMP/failbin:$PATH" "$BATS" clone-repository "$first" --repository "$TMP/p
 [ "$(stat -c %a "$TMP/par4/dir")" = 700 ] && [ "$(git -C "$TMP/par4/dir" rev-parse HEAD)" = "$first" ] || fail "the mode of the empty directory was not kept"
 ok "a link, a killed run's sibling, a failing rename, and the mode of an empty directory"
 
+# a dangling link is refused and neither followed nor replaced
+mkdir -p "$TMP/dangle"; ln -s "$TMP/nowhere" "$TMP/dangle/lnk"
+"$BATS" clone-repository "$first" --repository "$TMP/dangle/lnk" > "$TMP/out" 2> "$TMP/err" && fail "a dangling link was accepted"
+[ -L "$TMP/dangle/lnk" ] && [ "$(readlink "$TMP/dangle/lnk")" = "$TMP/nowhere" ] && [ ! -e "$TMP/nowhere" ] && [ ! -s "$TMP/out" ] || fail "a dangling link was replaced or followed"
+ok "a dangling link is refused and left as it was"
+
+# a link to a clone is refused, not followed: without the check the script
+# would fetch and check out into the clone the link names
+ln -s "$D" "$TMP/dangle/toclone"; snapshot "$D" > "$TMP/before"; head_before=$(git -C "$D" rev-parse HEAD)
+"$BATS" clone-repository "$first" --repository "$TMP/dangle/toclone" > "$TMP/out" 2> "$TMP/err" && fail "a link to a clone was followed"
+[ ! -s "$TMP/out" ] && grep -q "symbolic link" "$TMP/err" || { cat "$TMP/err"; fail "a link to a clone is not refused as a link"; }
+[ -L "$TMP/dangle/toclone" ] && [ "$(git -C "$D" rev-parse HEAD)" = "$head_before" ] || fail "the clone behind a link moved"
+snapshot "$D" > "$TMP/after"; cmp -s "$TMP/before" "$TMP/after" || fail "the clone behind a link was touched"
+ok "a link to a clone is refused and the clone is untouched"
+
+# a failed clone removes the parents it made (and only those): a/b/c under an
+# existing empty a leaves a, and nothing of a/b
+mkdir -p "$TMP/deep/a"
+"$BATS" clone-repository 0000000000000000000000000000000000000001 --repository "$TMP/deep/a/b/c" > /dev/null 2>&1 && fail "a commit the remote lacks was accepted under new parents"
+[ -d "$TMP/deep/a" ] && [ -z "$(ls -A "$TMP/deep/a")" ] && [ "$(ls -A "$TMP/deep")" = a ] || fail "a failed clone left parents it made: $(find "$TMP/deep" | tr '\n' ' ')"
+ok "a failed clone removes the parent directories it made"
+
+# a directory's mode is kept, setgid and sticky too
+for m in 2755 1777; do
+  rm -rf "$TMP/mode-$m"; mkdir "$TMP/mode-$m"; chmod "$m" "$TMP/mode-$m"
+  "$BATS" clone-repository "$first" --repository "$TMP/mode-$m" > /dev/null 2>&1 || fail "the clone into a $m directory failed"
+  [ "$(stat -c %a "$TMP/mode-$m")" = "$m" ] || fail "the mode $m of an empty directory became $(stat -c %a "$TMP/mode-$m")"
+done
+ok "the mode of an empty directory is kept, setgid and sticky included"
+
+# a git repository with no origin (what the old setup action's git init made) is refused, said, untouched
+git init -q "$TMP/noorigin"; echo keep > "$TMP/noorigin/k"
+snapshot "$TMP/noorigin" > "$TMP/before"
+"$BATS" clone-repository "$first" --repository "$TMP/noorigin" > "$TMP/out" 2> "$TMP/err" && fail "a repository with no origin was replaced"
+grep -q "no origin" "$TMP/err" || { cat "$TMP/err"; fail "the refusal does not say there is no origin"; }
+snapshot "$TMP/noorigin" > "$TMP/after"; cmp -s "$TMP/before" "$TMP/after" || fail "the repository with no origin was touched"
+ok "a git repository with no origin is refused, and the message says so"
+
+# an option-like directory name is a directory, not an option of dirname
+mkdir -p "$TMP/dashrun" && cd "$TMP/dashrun" && "$BATS" clone-repository "$first" --repository -foo > "$TMP/out" 2> "$TMP/err" || { cat "$TMP/err"; fail "a directory named -foo was refused"; }
+[ "$(git -C "$TMP/dashrun/-foo" rev-parse HEAD)" = "$first" ] || fail "-foo is not the clone"
+cd "$TMP"
+ok "a directory whose name starts with a dash"
+
+# a real kill: the run is killed while it fetches, leaving its marked sibling;
+# the next run clears that sibling and clones. The stand-in git logs the start
+# of its fetch and then becomes sleep (exec), so when the test kills the run the
+# clone's shell is parked in that one child, and its children are exactly the
+# ones the kill must reach: nothing starts between the snapshot and the kill.
+mkdir -p "$TMP/killfake" "$TMP/kill"
+REAL_GIT=$(command -v git)
+cat > "$TMP/killfake/git" <<SH
+#!/bin/sh
+case " \$* " in *" fetch "*) echo fetching >> "$TMP/kill.log"; exec sleep 60 ;; esac
+exec "$REAL_GIT" "\$@"
+SH
+chmod +x "$TMP/killfake/git"
+kd=$TMP/kill/clone
+PATH="$TMP/killfake:$PATH" "$BATS" clone-repository "$first" --repository "$kd" > /dev/null 2>&1 &
+bpid=$!
+i=0
+until grep -q fetching "$TMP/kill.log" 2>/dev/null; do
+  i=$((i + 1)); [ $i -lt 600 ] || fail "the killed run never reached its fetch"; sleep 0.1
+done
+# the processes under $1 to two levels (bats, its shell, the shell's child), listed
+# children first. Not recursive: in sh a function's loop variable is global, so
+# a recursive call overwrites it (the test killed a grandchild, not the shell)
+tree() { for tc1 in $(pgrep -P "$1" 2>/dev/null); do for tc2 in $(pgrep -P "$tc1" 2>/dev/null); do echo "$tc2"; done; echo "$tc1"; done; }
+shpid=$(cat "$(ls -d "$TMP"/kill/clone.new.* | head -n 1)/.bats-clone-pending")
+victims="$(tree "$bpid") $bpid"
+kill -9 $victims 2>/dev/null || true
+wait "$bpid" 2>/dev/null || true
+i=0; until ! kill -0 "$shpid" 2>/dev/null; do i=$((i + 1)); [ $i -lt 100 ] || fail "the killed shell is still running"; sleep 0.1; done
+ls -d "$TMP"/kill/clone.new.* > /dev/null 2>&1 || fail "the kill left no sibling to clear"
+[ ! -e "$kd" ] || fail "the killed run made the target"
+"$BATS" clone-repository "$first" --repository "$kd" > /dev/null 2>&1 || fail "the run after a kill failed"
+[ "$(git -C "$kd" rev-parse HEAD)" = "$first" ] || fail "the run after a kill is not at the commit"
+[ -z "$(ls -A "$TMP/kill" | grep '^clone\.new\.')" ] || fail "the run after a kill left its sibling: $(ls -A "$TMP/kill")"
+ok "a run killed while it fetches leaves a marked sibling, which the next run clears"
+
+# only bats is killed: its shell lives on, parked in the fetch, and a run that
+# starts now must not clear the sibling of that live shell (the marker holds its
+# pid). The shell is ended here, once the run has been checked.
+rm -f "$TMP/kill.log"
+PATH="$TMP/killfake:$PATH" "$BATS" clone-repository "$first" --repository "$TMP/kill/alive" > /dev/null 2>&1 &
+bpid=$!
+i=0
+until grep -q fetching "$TMP/kill.log" 2>/dev/null; do
+  i=$((i + 1)); [ $i -lt 600 ] || fail "the run beside a live shell never reached its fetch"; sleep 0.1
+done
+live=$(ls -d "$TMP"/kill/alive.new.* | head -n 1)
+livepid=$(cat "$live/.bats-clone-pending")
+kill -9 "$bpid"; wait "$bpid" 2>/dev/null || true
+kill -0 "$livepid" 2>/dev/null || fail "the shell of a killed bats is not running"
+"$BATS" clone-repository "$first" --repository "$TMP/kill/alive" > /dev/null 2>&1 || fail "a run beside a live shell failed"
+[ -d "$live" ] && [ -f "$live/.bats-clone-pending" ] || fail "a run cleared the sibling of a live shell"
+[ "$(git -C "$TMP/kill/alive" rev-parse HEAD)" = "$first" ] || fail "a run beside a live shell is not at the commit"
+victims="$(tree "$livepid") $livepid"
+kill -9 $victims 2>/dev/null || true
+ok "a run does not clear the sibling of a shell that is still alive"
+
 "$BATS" clone-repository "$first" extra --repository "$TMP/x1" > /dev/null 2>&1 && fail "an extra argument was accepted"
 [ ! -e "$TMP/x1" ] || fail "an extra argument cloned"
 "$BATS" clone-repository "$first" --repository "$TMP/x2" -- extra > /dev/null 2>&1 && fail "words after -- were accepted"
+"$BATS" clone-repository "$first" --repository "$TMP/x4" --release > /dev/null 2>&1 && fail "an unknown option was accepted"
+[ ! -e "$TMP/x4" ] || fail "an unknown option cloned"
 "$BATS" cXone-repository "$first" --repository "$TMP/x3" > /dev/null 2>&1; [ ! -e "$TMP/x3" ] || fail "a near miss of the command word cloned"
 ok "an extra argument, words after --, and a near miss of the command word are refused"
 
