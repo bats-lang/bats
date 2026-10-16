@@ -18,6 +18,7 @@ staload "cache.sats"
 staload "facts.sats"
 staload "inputs.sats"
 staload "stamp.sats"
+staload "ats2.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
@@ -428,12 +429,13 @@ in
 end
 
 
-(* Write WASM freestanding runtime header *)
-#pub fn write_wasm_runtime_h(): int
-
-implement write_wasm_runtime_h() = let
-  var b : $B.builder_v = $B.create()
-  val () = bput_v(b, "/* runtime.h -- Freestanding WASM runtime for ATS2 */\n#ifndef BATS_WASM_RUNTIME_H\n#define BATS_WASM_RUNTIME_H\n")
+(* The macros and functions of ATS2's C runtime that generated C uses,
+   bats's own, freestanding, checked by the C compiler against the
+   generated C (not copied from ATS2), so that
+   neither the wasm build nor the native bootstrap needs ATS2's GPL-3
+   headers (bats#283). The wasm runtime adds a heap and the host's
+   print; the native bootstrap adds libc (write_native_runtime_h). *)
+fn put_runtime_macros (b: !$B.builder_v >> $B.builder_v): void = let
   val () = bput_v(b, "typedef void atstype_void;\ntypedef void atsvoid_t0ype;\ntypedef int atstype_int;\ntypedef unsigned int atstype_uint;\n")
   val () = bput_v(b, "typedef long int atstype_lint;\ntypedef unsigned long int atstype_ulint;\ntypedef long long int atstype_llint;\n")
   val () = bput_v(b, "typedef unsigned long long int atstype_ullint;\ntypedef short int atstype_sint;\ntypedef unsigned short int atstype_usint;\n")
@@ -509,6 +511,68 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define ATS_MALLOC(sz) malloc(sz)\n#define ATS_MFREE(ptr) free(ptr)\n#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))\n#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)\n#define atspre_cloptr_free(p) ATS_MFREE(p)\n#define atspre_ptr_alloc_tsz(tsz) ATS_MALLOC(tsz)\n")
   val () = bput_v(b, "#define ATSclosurerize_beg(flab, tenvs, targs, tres)\n#define ATSclosurerize_end()\n#define ATSFCreturn(x) return(x)\n#define ATSFCreturn_void(x) (x); return\n")
   val () = bput_v(b, "#define ATSPMVcfunlab(knd, flab, env) (flab##__closurerize)env\nextern void mainats_0_void(void);\n#define ATSmainats_0_void(err) mainats_0_void()\n")
+  val () = bput_v(b, "#define atspre_g1int_min_int(x, y) ((x) < (y) ? (x) : (y))\n#define atspre_g1uint_gte_size(x, y) ((x) >= (y))\n#define atspre_g0uint_add_size(x, y) ((x) + (y))\n#define atspre_eq_bool0_bool0(x, y) ((x) == (y))\n")
+in end
+
+
+(* The native bootstrap's runtime header: the same macros, over libc
+   (bootstrap/c, bats#283). The generated C is compiled with
+   -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_
+   -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include
+   _bats_native_runtime.h, as the wasm build is, and the three empty
+   files of libats/libc/CATS (the C names them) are in
+   _bats_native_stubs. Written into dir (a path NUL-terminated at
+   dlen) *)
+#pub fn write_native_runtime_h {l:agz}
+  (dir: !$A.borrow(byte, l, 4096), dlen: int): int
+
+implement write_native_runtime_h (dir, dlen) = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "/* _bats_native_runtime.h -- the ATS2 C runtime's macros over libc */\n#ifndef BATS_NATIVE_RUNTIME_H\n#define BATS_NATIVE_RUNTIME_H\n#include <stdlib.h>\n#include <string.h>\n#include <stdio.h>\n")
+  val () = put_runtime_macros(b)
+  val () = bput_v(b, "#define atspre_print_string(s) fputs((s), stdout)\n#define atspre_print_newline() (fputc('\\n', stdout), fflush(stdout))\n#define atspre_print_int(x) fprintf(stdout, \"%d\", (int)(x))\n#define atspre_print_char(c) fputc((int)(c), stdout)\n")
+  val () = bput_v(b, "#define atspre_prerr_string(s) fputs((s), stderr)\n#define atspre_prerr_newline() (fputc('\\n', stderr), fflush(stderr))\n#define atspre_prerr_int(x) fprintf(stderr, \"%d\", (int)(x))\n#define atspre_prerr_char(c) fputc((int)(c), stderr)\n")
+  val () = bput_v(b, "#define atspre_exit_void(c) exit(c)\n#endif\n")
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(dir, 0, dlen, 4096, pb)
+  val () = bput_v(pb, "/_bats_native_runtime.h")
+  val () = put_char_v(pb, 0)
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val rc = write_file_from_builder(bv_p, 524288, b)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  (* the stubs *)
+  var mb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(dir, 0, dlen, 4096, mb)
+  val () = bput_v(mb, "/_bats_native_stubs/libats/libc/CATS/sys")
+  val r0 = run_mkdir(mb)
+  fn stub {l2:agz}{sn:nat} (dir: !$A.borrow(byte, l2, 4096), dlen: int, name: string sn): int = let
+    var sb : $B.builder_v = $B.create()
+    val () = bput_v(sb, "/* stub */\n")
+    var sp : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(dir, 0, dlen, 4096, sp)
+    val () = bput_v(sp, "/_bats_native_stubs/libats/libc/CATS/")
+    val () = bput_v(sp, name)
+    val () = put_char_v(sp, 0)
+    val @(spa, _) = $B.to_arr(sp)
+    val @(fz_s, bv_s) = $A.freeze<byte>(spa)
+    val rc = write_file_from_builder(bv_s, 524288, sb)
+    val () = $A.drop<byte>(fz_s, bv_s)
+    val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  in rc end
+  val r1 = stub(dir, dlen, "stdio.cats")
+  val r2 = stub(dir, dlen, "sys/stat.cats")
+  val r3 = stub(dir, dlen, "sys/types.cats")
+in rc + r0 + r1 + r2 + r3 end
+
+(* Write WASM freestanding runtime header *)
+#pub fn write_wasm_runtime_h(): int
+
+implement write_wasm_runtime_h() = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "/* runtime.h -- Freestanding WASM runtime for ATS2 */\n#ifndef BATS_WASM_RUNTIME_H\n#define BATS_WASM_RUNTIME_H\n")
+  val () = put_runtime_macros(b)
   val () = bput_v(b, "void *malloc(int size);\nvoid free(void *ptr);\nvoid *memset(void *s, int c, unsigned int n);\nvoid *memcpy(void *dst, const void *src, unsigned int n);\nvoid *memmove(void *dst, const void *src, unsigned int n);\nint memcmp(const void *a, const void *b, unsigned int n);\nstatic inline unsigned int strlen(const char *s) { unsigned int n = 0; while (s[n]) n++; return n; }\n")
   val () = bput_v(b, "static inline void *calloc(int n, int sz) { return malloc(n * sz); }\n")
   (* print and exit_void, from the host: bats test's wasm runner prints
@@ -1153,123 +1217,15 @@ in
         val () = poke_arr(buf, pos+10, 512, 50)
       in pos + 11 end
     val phlen = append_bats_path(phbuf, hlen)
-    (* Check if patsopt exists, install if not — single freeze *)
-    (* The download next to the toolchain, as the Rust bats did:
-       <patshome>-postiats-0.4.2.tgz, i.e. ~/.bats/ats2-postiats-0.4.2.tgz *)
-    fn ats2_tarball {l:agz}
-      (buf: !$A.borrow(byte, l, 512), plen: int, dst: !$B.builder_v >> $B.builder_v): void = let
-      val () = copy_to_builder_v(buf, 0, plen, 512, dst)
-    in bput_v(dst, "-postiats-0.4.2.tgz") end
+    (* patsopt: bats keeps it in ~/.bats/ats2 and installs it, checked
+       against the pin in ats2.bats, when it is not there (bats ats2 install) *)
     fn ensure_ats2 {l:agz}
-      (buf: !$A.borrow(byte, l, 512), plen: int): void = let
-      (* Check if patsopt exists by trying to stat it *)
-      var test_path : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(buf, 0, plen, 512, test_path)
-      val () = bput_v(test_path, "/bin/patsopt")
-      val () = put_char_v(test_path, 0)
-      val @(tp_arr, _) = $B.to_arr(test_path)
-      val @(fz_tp, bv_tp) = $A.freeze<byte>(tp_arr)
-      val exists = (case+ $F.file_mtime(bv_tp, 524288) of
-        | ~$R.ok(_) => true | ~$R.err(_) => false): bool
-      val () = $A.drop<byte>(fz_tp, bv_tp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tp))
-      val rc = (if exists then 0
+      (buf: !$A.borrow(byte, l, 512), plen: int): void =
+      if plen <= 0 then ()
+      else if ats2_ensure(Quiet()) then ()
       else let
-        val () = println! ("ATS2 not found, installing...")
-        (* mkdir -p <patshome> *)
-        var mkb : $B.builder_v = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, mkb)
-        val _ = run_mkdir(mkb)
-        (* curl -sL <url> -o <tarball> *)
-        val curl_exec = str_to_path_arr("curl")
-        val @(fz_ce, bv_ce) = $A.freeze<byte>(curl_exec)
-        var ca1 = $B.create() val () = bput_v(ca1, "curl")
-        var ca2 = $B.create() val () = bput_v(ca2, "-sL")
-        var ca3 = $B.create() val () = bput_v(ca3, "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-gmp-0.4.2.tgz")
-        var ca4 = $B.create() val () = bput_v(ca4, "-o")
-        var ca5 = $B.create() val () = ats2_tarball(buf, plen, ca5)
-        val curl_argv = $L.list_vt_cons(mk_arg(ca1), $L.list_vt_cons(mk_arg(ca2),
-          $L.list_vt_cons(mk_arg(ca3), $L.list_vt_cons(mk_arg(ca4),
-          $L.list_vt_cons(mk_arg(ca5), $L.list_vt_nil())))))
-        val r1 = run_cmd(bv_ce, curl_argv)
-        val () = $A.drop<byte>(fz_ce, bv_ce)
-        val () = $A.free<byte>($A.thaw<byte>(fz_ce))
-        (* tar -xzf <tarball> --strip-components=1 -C <patshome> *)
-        val tar_exec = str_to_path_arr("tar")
-        val @(fz_te, bv_te) = $A.freeze<byte>(tar_exec)
-        var ta1 = $B.create() val () = bput_v(ta1, "tar")
-        var ta2 = $B.create() val () = bput_v(ta2, "-xzf")
-        var ta3 = $B.create() val () = ats2_tarball(buf, plen, ta3)
-        var ta4 = $B.create() val () = bput_v(ta4, "--strip-components=1")
-        var ta5 = $B.create() val () = bput_v(ta5, "-C")
-        var ta6 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, ta6)
-        val tar_argv = $L.list_vt_cons(mk_arg(ta1), $L.list_vt_cons(mk_arg(ta2),
-          $L.list_vt_cons(mk_arg(ta3), $L.list_vt_cons(mk_arg(ta4),
-          $L.list_vt_cons(mk_arg(ta5), $L.list_vt_cons(mk_arg(ta6),
-          $L.list_vt_nil()))))))
-        val r2 = run_cmd(bv_te, tar_argv)
-        val () = $A.drop<byte>(fz_te, bv_te)
-        val () = $A.free<byte>($A.thaw<byte>(fz_te))
-        (* rm <tarball> *)
-        val rm_exec = str_to_path_arr("rm")
-        val @(fz_re, bv_re) = $A.freeze<byte>(rm_exec)
-        var ra1 = $B.create() val () = bput_v(ra1, "rm")
-        var ra2 = $B.create() val () = ats2_tarball(buf, plen, ra2)
-        val rm_argv = $L.list_vt_cons(mk_arg(ra1),
-          $L.list_vt_cons(mk_arg(ra2), $L.list_vt_nil()))
-        val _ = run_cmd(bv_re, rm_argv)
-        val () = $A.drop<byte>(fz_re, bv_re)
-        val () = $A.free<byte>($A.thaw<byte>(fz_re))
-        (* make -j4 -C <patshome>/src/CBOOT patsopt PATSHOME=<patshome> *)
-        val () = println! ("building ATS2...")
-        val make_exec = str_to_path_arr("make")
-        val @(fz_me, bv_me) = $A.freeze<byte>(make_exec)
-        var mk1 = $B.create() val () = bput_v(mk1, "make")
-        var mk2 = $B.create() val () = bput_v(mk2, "-j4")
-        var mk3 = $B.create() val () = bput_v(mk3, "-C")
-        var mk4 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, mk4)
-        val () = bput_v(mk4, "/src/CBOOT")
-        var mk5 = $B.create() val () = bput_v(mk5, "patsopt")
-        var mk6 = $B.create()
-        val () = bput_v(mk6, "PATSHOME=")
-        val () = copy_to_builder_v(buf, 0, plen, 512, mk6)
-        val make_argv = $L.list_vt_cons(mk_arg(mk1), $L.list_vt_cons(mk_arg(mk2),
-          $L.list_vt_cons(mk_arg(mk3), $L.list_vt_cons(mk_arg(mk4),
-          $L.list_vt_cons(mk_arg(mk5), $L.list_vt_cons(mk_arg(mk6),
-          $L.list_vt_nil()))))))
-        val r3 = run_cmd(bv_me, make_argv)
-        val () = $A.drop<byte>(fz_me, bv_me)
-        val () = $A.free<byte>($A.thaw<byte>(fz_me))
-        (* mkdir -p <patshome>/bin *)
-        var mkb2 : $B.builder_v = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, mkb2)
-        val () = bput_v(mkb2, "/bin")
-        val _ = run_mkdir(mkb2)
-        (* cp <patshome>/src/CBOOT/patsopt <patshome>/bin/patsopt *)
-        val cp_exec = str_to_path_arr("cp")
-        val @(fz_cpe, bv_cpe) = $A.freeze<byte>(cp_exec)
-        var cp1 = $B.create() val () = bput_v(cp1, "cp")
-        var cp2 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, cp2)
-        val () = bput_v(cp2, "/src/CBOOT/patsopt")
-        var cp3 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, cp3)
-        val () = bput_v(cp3, "/bin/patsopt")
-        val cp_argv = $L.list_vt_cons(mk_arg(cp1), $L.list_vt_cons(mk_arg(cp2),
-          $L.list_vt_cons(mk_arg(cp3), $L.list_vt_nil())))
-        val r4 = run_cmd(bv_cpe, cp_argv)
-        val () = $A.drop<byte>(fz_cpe, bv_cpe)
-        val () = $A.free<byte>($A.thaw<byte>(fz_cpe))
-        val () = println! ("ATS2 installed successfully")
-      in r1 + r2 + r3 + r4 end): int
-    in
-      if rc <> 0 then let
         val () = set_build_err()
-        val () = println! ("error: ATS2 installation failed")
-      in println! ("note: the ATS2 build bats installs does its constraint solving in infinite precision (GMP), so it needs libgmp and its headers (libgmp-dev on Debian and Ubuntu, gmp on macOS with Homebrew)") end else ()
-    end
+      in println! ("error: ATS2 installation failed") end
     val @(fz_patshome, bv_patshome) = $A.freeze<byte>(phbuf)
     val () = ensure_ats2(bv_patshome, phlen)
   in
@@ -3084,10 +3040,15 @@ in
                 val () = $A.free<byte>($A.thaw<byte>(fz_rme))
                 (* Generate Makefile *)
                 var mf : $B.builder_v = $B.create()
-                val () = bput_v(mf, "PATSHOME ?= $(HOME)/.bats/ats2\n")
-                val () = bput_v(mf, "CC ?= cc\n\n")
-                val () = bput_v(mf, "%_debug.o: %.c\n\t$(CC) -c -o $@ $< -g -O0 -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime\n\n")
-                val () = bput_v(mf, "%_release.o: %.c\n\t$(CC) -c -o $@ $< -O2 -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime\n\n")
+                (* The C is compiled with bats's own runtime header and not ATS2's
+                   (write_native_runtime_h), so the compiler is built from this
+                   directory with no ATS2 on the machine; PATSHOME is for running
+                   patsopt only (bats#283) *)
+                val _ = write_native_runtime_h(to_c, tclen)
+                val () = bput_v(mf, "CC ?= cc\n")
+                val () = bput_v(mf, "ATSFLAGS := -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include _bats_native_runtime.h -I_bats_native_stubs -Wno-implicit-function-declaration -Wno-int-conversion\n\n")
+                val () = bput_v(mf, "%_debug.o: %.c\n\t$(CC) -c -o $@ $< -g -O0 $(ATSFLAGS)\n\n")
+                val () = bput_v(mf, "%_release.o: %.c\n\t$(CC) -c -o $@ $< -O2 $(ATSFLAGS)\n\n")
                 val () = bput_v(mf, "SRCS := $(shell find . -name '*_dats.c') _bats_native_runtime.c\n")
                 val () = bput_v(mf, "DEBUG_OBJS := $(SRCS:.c=_debug.o)\n")
                 val () = bput_v(mf, "RELEASE_OBJS := $(SRCS:.c=_release.o)\n\n")

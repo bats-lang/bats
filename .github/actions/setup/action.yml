@@ -1,10 +1,11 @@
 name: Set up bats
 description: >-
-  What every job of a bats repository needs first: the GMP build of ATS2,
-  libgmp-dev and lld, the compiler built from the checked-in bootstrap C of
-  one pinned commit, the package repository at its pinned commit, the
-  patsopt caps, and BATS_COMMIT, so the version a build is stamped with is
-  the commit's. Linux runners with apt (ubuntu-latest). Called by commit:
+  What every job of a bats repository needs first: libgmp-dev and lld, the
+  compiler built from the checked-in bootstrap C of one pinned commit (which
+  needs no ATS2), then, by bats itself, the GMP build of ATS2 (bats ats2
+  install), the package repository at its pinned commit (bats
+  clone-repository), the patsopt caps, and BATS_COMMIT (bats record-commit),
+  so the version a build is stamped with is the commit's. Linux runners with apt (ubuntu-latest). Called by commit:
   bats-lang/bats/.github/actions/setup@<40 hex digits>. The step installs;
   it keys no cache (a build/ is kept or dropped by bats itself, bats#267).
 
@@ -119,10 +120,6 @@ runs:
           false) ;;
           *) fail "require-lock is '$REQUIRE_LOCK': true or false" ;;
         esac
-        # The version names this commit: it has to be in the checkout, and
-        # a pull request's head is there only two commits deep
-        git cat-file -e "$COMMIT^{commit}" 2>/dev/null \
-          || fail "commit $COMMIT is not in the checkout: a pull request's head is the merge's second parent, so check out with fetch-depth: 2"
         {
           echo "bats=$bats_commit"
           echo "repository=$repository_commit"
@@ -130,37 +127,28 @@ runs:
           echo "commit=$COMMIT"
         } >> "$GITHUB_OUTPUT"
 
-    # The GMP build of ATS2: its constraint solver does infinite-precision
-    # arithmetic. The -int build computes in C int and accepts false
-    # statements (bats-lang/quire#594, bats#261), so a proof that passed
-    # there proved nothing. The tarball is pinned by its SHA-256 (the URL
-    # is a frozen path of ATS's repository, but a download is checked, not
-    # trusted). A run that runs away is ended by the caps, naming its
+    # libgmp and lld are the system's (bats does not install packages).
+    # libgmp is what the GMP build of ATS2 is built and run with: its
+    # constraint solver does infinite-precision arithmetic, where the -int
+    # build computes in C int and accepts false statements (bats-lang/quire#594,
+    # bats#261). A run that runs away is ended by the caps, naming its
     # module (bats#263)
-    - name: Install ATS2, libgmp-dev and lld
+    - name: Install libgmp-dev and lld, and set the patsopt caps
       shell: bash
       env:
         TIMEOUT_S: ${{ inputs.patsopt-timeout-s }}
         MEM_MB: ${{ inputs.patsopt-mem-mb }}
       run: |
         set -eu
-        ats2=ATS2-Postiats-gmp-0.4.2
-        sha256=73c64f1480df170d65aef5c7e5648677898855a2fa9ea2f3c0502f1b6d7e1b80
         sudo apt-get install -y -q libgmp-dev lld
         echo "BATS_PATSOPT_TIMEOUT_S=$TIMEOUT_S" >> "$GITHUB_ENV"
         echo "BATS_PATSOPT_MEM_MB=$MEM_MB" >> "$GITHUB_ENV"
-        curl -fsSL "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/$ats2.tgz" -o "$RUNNER_TEMP/ats2.tgz"
-        echo "$sha256  $RUNNER_TEMP/ats2.tgz" | sha256sum -c -
-        mkdir -p ~/.ats2
-        tar -xzf "$RUNNER_TEMP/ats2.tgz" -C ~/.ats2
-        make -j"$(nproc)" -C ~/.ats2/$ats2/src/CBOOT patsopt
-        mkdir -p ~/.ats2/$ats2/bin
-        cp ~/.ats2/$ats2/src/CBOOT/patsopt ~/.ats2/$ats2/bin/patsopt
-        mkdir -p ~/.bats
-        ln -sfn ~/.ats2/$ats2 ~/.bats/ats2
 
-    # The compiler is built from the checked-in C of the pinned commit
-    # (bootstrap/c), fetched by that commit, not by a name that can move
+    # The compiler is built first, from the checked-in C of the pinned
+    # commit (bootstrap/c), fetched by that commit, not by a name that can
+    # move. The C carries the runtime header it is compiled with, so no
+    # ATS2 is needed yet (bats#283); the commit must be one with that
+    # change.
     - name: Build bats from the bootstrap C of the pinned commit
       shell: bash
       env:
@@ -175,35 +163,38 @@ runs:
         git -C "$src" checkout -q FETCH_HEAD
         rm -rf ~/bats-c
         cp -R "$src/bootstrap/c" ~/bats-c
-        make -j"$(nproc)" -C ~/bats-c PATSHOME="$HOME/.ats2/ATS2-Postiats-gmp-0.4.2" "$PROFILE/bats"
+        make -j"$(nproc)" -C ~/bats-c "$PROFILE/bats"
         mkdir -p ~/bats-bin
         cp ~/bats-c/"$PROFILE"/bats ~/bats-bin/bats
         rm -rf "$src"
         sudo cp ~/bats-bin/bats /bin/bats
         echo "$HOME/bats-bin" >> "$GITHUB_PATH"
 
-    # The packages are the versions the committed bats.lock locks
-    # (CI is pinned): bats check and build fetch exactly those and
-    # fail on a lock that does not match the project. Only a relock moves
-    # them, never this step. The repository is read at its pinned commit.
+    # Then bats does the rest: it installs the ATS2 it pins (checked against
+    # its SHA-256, in ~/.bats/ats2), clones the package repository at the
+    # project's pinned commit, and names the commit the version is the date
+    # of. The packages are the versions the committed bats.lock locks (CI is
+    # pinned): bats check and build fetch exactly those and fail on a lock
+    # that does not match the project; only a relock moves them. What bats
+    # prints as NAME=VALUE is the environment of the later steps.
+    - name: Install ATS2 (patsopt)
+      shell: bash
+      run: bats ats2 install
+
     - name: Clone the package repository at its pinned commit
       shell: bash
       env:
         REPOSITORY_COMMIT: ${{ steps.pins.outputs.repository }}
         REPOSITORY_DIR: ${{ steps.pins.outputs.repository_dir }}
-      run: |
-        set -eu
-        rm -rf "$REPOSITORY_DIR"
-        git init -q "$REPOSITORY_DIR"
-        git -C "$REPOSITORY_DIR" fetch -q --depth 1 https://github.com/bats-lang/repository-prototype.git "$REPOSITORY_COMMIT"
-        git -C "$REPOSITORY_DIR" checkout -q FETCH_HEAD
-        echo "BATS_REPOSITORY=$REPOSITORY_DIR" >> "$GITHUB_ENV"
+      run: bats clone-repository "$REPOSITORY_COMMIT" --repository "$REPOSITORY_DIR" >> "$GITHUB_ENV"
 
-    # The commit the version names (quire#219): bats writes the facts
-    # (the commit's date and short SHA, bats#250) from BATS_COMMIT, for
-    # every later step
+    # The commit the version names (quire#219): bats writes the facts (the
+    # commit's date and short SHA, bats#250) from BATS_COMMIT, for every
+    # later step. A pull request's head is the merge's second parent, so the
+    # commit is in the checkout only two commits deep (fetch-depth: 2)
     - name: Name the commit built from
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       env:
         COMMIT: ${{ steps.pins.outputs.commit }}
-      run: echo "BATS_COMMIT=$COMMIT" >> "$GITHUB_ENV"
+      run: bats record-commit "$COMMIT" >> "$GITHUB_ENV"

@@ -1,11 +1,11 @@
-PATSHOME ?= $(HOME)/.bats/ats2
 CC ?= cc
+ATSFLAGS := -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include _bats_native_runtime.h -I_bats_native_stubs -Wno-implicit-function-declaration -Wno-int-conversion
 
 %_debug.o: %.c
-	$(CC) -c -o $@ $< -g -O0 -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime
+	$(CC) -c -o $@ $< -g -O0 $(ATSFLAGS)
 
 %_release.o: %.c
-	$(CC) -c -o $@ $< -O2 -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime
+	$(CC) -c -o $@ $< -O2 $(ATSFLAGS)
 
 SRCS := $(shell find . -name '*_dats.c') _bats_native_runtime.c
 DEBUG_OBJS := $(SRCS:.c=_debug.o)

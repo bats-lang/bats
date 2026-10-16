@@ -1,6 +1,6 @@
 #!/bin/sh
 # What the setup action (.github/actions/setup) leaves behind, checked on a
-# runner after it ran (bats-lang/bats#274): the GMP build of ATS2, lld, the
+# runner after it ran (bats-lang/bats#274, #283): the GMP build of ATS2, lld, the
 # caps, the package repository at its pinned commit, the compiler built
 # from the commit it was given, and BATS_COMMIT naming the commit the
 # version is the date of (a pull request's head, never the merge).
@@ -11,10 +11,12 @@ set -eu
 expected=$1 repository_version=$2 bats_version=$3 project=$4
 fail() { echo "FAIL: $1"; exit 1; }
 
-# The GMP build: the symlink names it, and patsopt is linked to libgmp
-# (the -int build computes in C int and accepts false statements, quire#594)
-target=$(readlink ~/.bats/ats2) || fail "~/.bats/ats2 is not a link"
-case $target in *ATS2-Postiats-gmp-*) ;; *) fail "~/.bats/ats2 is $target, not the GMP build" ;; esac
+# The GMP build, installed by bats itself (bats ats2 install): a directory
+# of its own whose marker names the GMP build, and patsopt is linked to
+# libgmp (the -int build computes in C int and accepts false statements,
+# quire#594)
+[ -d ~/.bats/ats2 ] && [ ! -L ~/.bats/ats2 ] || fail "~/.bats/ats2 is not a directory bats made"
+grep -q '^ATS2-Postiats-gmp-' ~/.bats/ats2/.bats-ats2 || fail "~/.bats/ats2 is not marked as the GMP build"
 ldd ~/.bats/ats2/bin/patsopt | grep -q 'libgmp' || fail "patsopt is not linked to libgmp"
 dpkg -s libgmp-dev > /dev/null 2>&1 || fail "libgmp-dev is not installed"
 command -v wasm-ld > /dev/null || fail "lld (wasm-ld) is not installed"
