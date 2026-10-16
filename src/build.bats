@@ -50,8 +50,7 @@ implement preprocess_one
   val () = put_char_v(sb, 0)
   val @(sa, _) = $B.to_arr(sb)
   val @(fz_sa, bv_sa) = $A.freeze<byte>(sa)
-  val dats_there = (case+ $F.file_mtime(dats_bv, 524288) of
-    | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+  val dats_there = $F.file_exists(dats_bv, 524288)
   val @(ha, hlen) = $B.to_arr(hb)
   val @(fz_ha, bv_ha) = $A.freeze<byte>(ha)
   val fresh = (if target_changed then false
@@ -707,9 +706,20 @@ fn wasm_cc_file {l:agz}
   val () = copy_to_builder_v(path, 0, pl - 1, 524288, ob)
   val () = bput_v(ob, "wasm.o")
   val () = put_char_v(ob, 0)
+  (* fresh by content like every object (bats#254): the key of its C *)
+  var wfo : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(path, 0, pl - 1, 524288, wfo)
+  val () = bput_v(wfo, "wasm.o")
+  val () = put_char_v(wfo, 0)
+  var wfi : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(path, 0, pl, 524288, wfi)
+  val () = put_char_v(wfi, 0)
+  val wasm_fresh = freshness_check_bv(wfo, wfi)
   val @(oa, ol) = $B.to_arr(ob)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
-  val rc = run_wasm_cc(path, path_len, bv_o, ol)
+  val () = (if wasm_fresh then () else key_drop(bv_o))
+  val rc = (if wasm_fresh then 0 else run_wasm_cc(path, path_len, bv_o, ol)): int
+  val () = (if rc = 0 && ~wasm_fresh then key_record(false, bv_o, path) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in rc end
@@ -1311,9 +1321,7 @@ in
                     val () = put_char_v(chk_b, 0)
                     val @(chk_a, _) = $B.to_arr(chk_b)
                     val @(fz_chk, bv_chk) = $A.freeze<byte>(chk_a)
-                    val chk_or = $F.file_mtime(bv_chk, 524288)
-                    val is_pkg = (case+ chk_or of
-                      | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                    val is_pkg = $F.file_exists(bv_chk, 524288)
                     val () = $A.drop<byte>(fz_chk, bv_chk)
                     val () = $A.free<byte>($A.thaw<byte>(fz_chk))
                   in
@@ -1357,9 +1365,7 @@ in
                                     val () = put_char_v(ns_chk, 0)
                                     val @(ns_chk_a, _) = $B.to_arr(ns_chk)
                                     val @(fz_nsc, bv_nsc) = $A.freeze<byte>(ns_chk_a)
-                                    val ns_chk_or = $F.file_mtime(bv_nsc, 524288)
-                                    val ns_is_pkg = (case+ ns_chk_or of
-                                      | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                                    val ns_is_pkg = $F.file_exists(bv_nsc, 524288)
                                     val () = $A.drop<byte>(fz_nsc, bv_nsc)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_nsc))
                                   in
@@ -1914,8 +1920,7 @@ in
                                   val () = put_char_v(pk_b, 0)
                                   val @(pka, _) = $B.to_arr(pk_b)
                                   val @(fz_pk, bv_pk) = $A.freeze<byte>(pka)
-                                  val pk_r = $F.file_mtime(bv_pk, 524288)
-                                  val is_p = (case+ pk_r of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                                  val is_p = $F.file_exists(bv_pk, 524288)
                                   val () = $A.drop<byte>(fz_pk, bv_pk)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pk))
                                 in
@@ -2321,8 +2326,7 @@ in
                                   val () = put_char_v(pk_b3, 0)
                                   val @(pka3, _) = $B.to_arr(pk_b3)
                                   val @(fz_pk3, bv_pk3) = $A.freeze<byte>(pka3)
-                                  val pk_r3 = $F.file_mtime(bv_pk3, 524288)
-                                  val is_p3 = (case+ pk_r3 of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                                  val is_p3 = $F.file_exists(bv_pk3, 524288)
                                   val () = $A.drop<byte>(fz_pk3, bv_pk3)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pk3))
                                 in
