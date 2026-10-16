@@ -29,7 +29,10 @@ staload "lock.sats"
 staload "ats2.sats"
 staload "setup.sats"
 staload "with_env.sats"
+staload "fixtures.sats"
 staload "_bats_inputs.sats"
+
+
 
 
 
