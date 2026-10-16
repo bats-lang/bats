@@ -29,6 +29,7 @@ staload "cache.sats"
 staload "facts.sats"
 staload "inputs.sats"
 staload "stamp.sats"
+staload "ats2.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
@@ -439,88 +440,110 @@ in
 end
 
 
+(* The macros and functions of the ATS2 C runtime that the C patsopt emits
+   uses, for the native bootstrap and for the wasm build. The text is
+   written from the use sites in the emitted C and from what each name is
+   documented to do, with its own parameter names, bodies and order
+   (CLAUDE.md, "The runtime header": the method, and the residue of
+   one-line macros whose expansion the interface forces, which agree with
+   ATS2's headers, GPL-3.0-or-later, bats#283). *)
+fn put_runtime_macros (b: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(b, "/* Types the emitted C names, alphabetically. */\ntypedef void atsvoid_t0ype;\ntypedef void atstype_void;\ntypedef void *atstype_arrptr;\ntypedef int atstype_bool;\ntypedef void *atstype_boxed;\ntypedef unsigned char atstype_byte;\ntypedef char atstype_char;\n")
+  val () = bput_v(b, "typedef void *atstype_cloptr;\ntypedef void *atstype_datconptr;\ntypedef void *atstype_datcontyp;\ntypedef void *atstype_funptr;\ntypedef int atstype_int;\ntypedef long atstype_lint;\ntypedef long long atstype_llint;\ntypedef void *atstype_ptr;\n")
+  val () = bput_v(b, "typedef void *atstype_ptrk;\ntypedef void *atstype_ref;\ntypedef signed char atstype_schar;\ntypedef short atstype_sint;\ntypedef __SIZE_TYPE__ atstype_size;\ntypedef __PTRDIFF_TYPE__ atstype_ssize;\ntypedef char *atstype_string;\ntypedef char *atstype_stropt;\n")
+  val () = bput_v(b, "typedef char *atstype_strptr;\ntypedef unsigned char atstype_uchar;\ntypedef unsigned int atstype_uint;\ntypedef unsigned long atstype_ulint;\ntypedef unsigned long long atstype_ullint;\ntypedef unsigned short atstype_usint;\n/* A type variable stands for a value of unknown size, which is only ever\n   pointed to: a zero-length array of an opaque block. */\n")
+  val () = bput_v(b, "typedef struct { char opaque[1 << 16]; } atstype_var[0];\n/* A cast spelt once, for the macros that cast an operand. */\n#define BATS_CAST(ty, operand) ((ty)(operand))\n/* Kinds and roles wrap a type; all are transparent but a reference argument and a boxed value, which are pointers. */\n#define atsrefarg0_type(ty) ty\n#define atsrefarg1_type(ty) atstype_ref\n#define atstkind_t0ype(kind) kind\n#define atstkind_type(kind) kind\n")
+  val () = bput_v(b, "#define atstyarr_type(ty) ty\n#define atstybox_type(ty) atstype_boxed\n#define atstyvar_type(name) atstype_var\n/* Constants. */\n#define atsbool_false 0\n#define atsbool_true 1\n#define atsptr_null ((atstype_ptr)0)\n#define the_atsptr_null atsptr_null\n")
+  val () = bput_v(b, "/* Storage class and linkage of what is declared. */\n#define ATSextern() extern\n#define ATSinline() static __inline__\n#define ATSstatic() static\n#define ATSstruct struct\n/* A module is loaded once: a flag per module, set when its initialiser has run. */\n#define ATSassume(sym) void *sym = atsptr_null\n#define ATSdynload()\n")
+  val () = bput_v(b, "#define ATSdynloadfcall(initfn) (initfn)()\n#define ATSdynloadflag_ext(flagvar) extern int flagvar\n#define ATSdynloadflag_init(flagvar) int flagvar\n#define ATSdynloadflag_minit(flagvar) int flagvar\n#define ATSdynloadflag_sta(flagvar)\n#define ATSdynloadset(flagvar) (flagvar = 1)\n/* Constants the module uses but does not define. */\n#define ATSdyncst_castfn(name)\n")
+  val () = bput_v(b, "#define ATSdyncst_extfun(name, params, result) extern result name params\n#define ATSdyncst_mac(name)\n#define ATSdyncst_stafun(name, params, result) static result name params\n#define ATSdyncst_valdec(name, ty) extern ty name\n#define ATSdyncst_valimp(name, ty) ty name\n/* Control flow. */\n#define ATSINSdeadcode_fail() /* unreachable by the types */\n#define ATSINSfgoto(target) goto target\n")
+  val () = bput_v(b, "#define ATSINSflab(target) target\n#define ATSINSgoto(target) goto target\n#define ATSINSlab(target) target\n#define ATSbranch_beg()\n#define ATSbranch_end() break;\n#define ATScaseof_beg() for (;;) {\n#define ATScaseof_end() break; }\n#define ATSelse() else\n")
+  val () = bput_v(b, "#define ATSextcode_beg()\n#define ATSextcode_end()\n#define ATSfunbody_beg()\n#define ATSfunbody_end()\n#define ATSif(test) if (test)\n#define ATSifnthen(test) if ((test) == 0)\n#define ATSifthen(test) if (test)\n#define ATSreturn(result) return (result)\n")
+  val () = bput_v(b, "#define ATSreturn_void(ignored) return\n#define ATStailcal_beg() for (;;) {\n#define ATStailcal_end() break; }\n#define ATSthen()\n/* Values: literals, conversions and the address of a place. */\n#define ATSPMVbool_false() atsbool_false\n#define ATSPMVbool_true() atsbool_true\n#define ATSPMVcastfn(name, ty, operand) BATS_CAST(ty, operand)\n")
+  val () = bput_v(b, "#define ATSPMVchar(literal) (literal)\n#define ATSPMVempty()\n#define ATSPMVextval(sym) (sym)\n#define ATSPMVfunlab(label) (label)\n#define ATSPMVi0nt(literal) (literal)\n#define ATSPMVint(literal) literal\n#define ATSPMVintrep(literal) (literal)\n#define ATSPMVptrof(place) (&(place))\n")
+  val () = bput_v(b, "#define ATSPMVptrof_void(place) atsptr_null\n#define ATSPMVrefarg0(value) (value)\n#define ATSPMVrefarg1(pointer) (pointer)\n#define ATSPMVsizeof(ty) ((atstype_size)sizeof(ty))\n#define ATSPMVstring(literal) (literal)\n#define ATSPMVtyrep(repr) (repr)\n/* Calls. A closure begins with the address of its code. */\n#define ATSextfcall(callee, args) ((callee) args)\n")
+  val () = bput_v(b, "#define ATSextmcall(receiver, method, args) ((receiver)->method) args\n#define ATSfuncall(callee, args) ((callee) args)\n#define ATSfunclo_clo(callee, params, result) BATS_CAST(result (*) params, ((ATStyclo() *)(callee))->cfun)\n#define ATSfunclo_fun(callee, params, result) BATS_CAST(result (*) params, callee)\n#define ATStyclo() struct { void *cfun; }\n/* Temporaries and dereferencing. */\n#define ATSderef(place, ty) (((ty *)(place))[0])\n#define ATSstatmpdec(name, ty) static ty name\n")
+  val () = bput_v(b, "#define ATSstatmpdec_void(name)\n#define ATStmpdec(name, ty) ty name\n#define ATStmpdec_void(name)\n/* Tests on values and on patterns. A constructor without fields is a small integer; one with fields is a pointer to a block whose first word is the tag, and blocks lie at 1024 and above. */\n#define ATSCKiseqz(operand) (0 == (operand))\n#define ATSCKisneqz(operand) (0 != (operand))\n#define ATSCKnot(test) (0 == (test))\n#define ATSCKpat_bool(subject, literal) (literal == (subject))\n")
+  val () = bput_v(b, "#define ATSCKpat_char(subject, literal) (literal == (subject))\n#define ATSCKpat_con0(subject, tag) ((void *)(tag) == (void *)(subject))\n#define ATSCKpat_con1(subject, tag) ((void *)1024 <= (void *)(subject) && (tag) == *(int *)(subject))\n#define ATSCKpat_float(subject, literal) (literal == (subject))\n#define ATSCKpat_int(subject, literal) (literal == (subject))\n#define ATSCKptriscons(operand) (atsptr_null != (void *)(operand))\n#define ATSCKptrisnull(operand) (atsptr_null == (void *)(operand))\n/* Instructions: moves, loads and stores. */\n")
+  val () = bput_v(b, "#define ATSINSargmove_tlcal(param, applied) (param = (applied))\n#define ATSINSload(dest, place) (dest = (place))\n#define ATSINSmove(dest, value) (dest = (value))\n#define ATSINSmove_nil(dest) (dest = atsptr_null)\n#define ATSINSmove_tlcal(applied, source) (applied = (source))\n#define ATSINSmove_void(dest, call) call\n#define ATSINSpmove(dest, ty, value) (*(ty *)(dest) = (value))\n#define ATSINSpmove_void(dest, ty, call) call\n")
+  val () = bput_v(b, "#define ATSINSstore(place, value) (place = (value))\n#define ATSINSupdate_ptrdec(ptrvar, elty) (ptrvar = (elty *)(ptrvar) + (-1))\n#define ATSINSupdate_ptrinc(ptrvar, elty) (ptrvar = 1 + (elty *)(ptrvar))\n#define ATSINSxstore(scratch, left, right) (scratch = (left), left = (right), right = scratch)\n/* Fields of flat records, and of constructor blocks. */\n#define ATSINSfreecon(block) ((void)ATS_MFREE(block))\n#define ATSINSmove_con0(dest, tag) (dest = (void *)(tag))\n#define ATSINSmove_con1_beg()\n")
+  val () = bput_v(b, "#define ATSINSmove_con1_end()\n#define ATSINSmove_con1_new(dest, conty) (dest = (void *)ATS_MALLOC(sizeof(conty)))\n#define ATSINSmove_fltrec_beg()\n#define ATSINSmove_fltrec_end()\n#define ATSINSstore_con1_ofs(block, conty, field, value) ((*(conty *)(block)).field = (value))\n#define ATSINSstore_con1_tag(block, tag) (*(int *)(block) = (tag))\n#define ATSINSstore_fltrec_ofs(rec, recty, field, value) ((rec).field = (value))\n#define ATSSELarrptrind(base, elty, index) (BATS_CAST(elty *, base) index)\n")
+  val () = bput_v(b, "#define ATSSELcon(block, conty, field) ((*(conty *)(block)).field)\n#define ATSSELfltrec(rec, recty, field) ((rec).field)\n#define ATSSELrecsin(rec, recty, field) (rec)\n/* Closures are made and freed whole; the program ends in its entry. */\n#define ATSFCreturn(result) return (result)\n#define ATSFCreturn_void(call) ((void)(call)); return\n#define ATSINScloptr_free(clo) ATS_MFREE(clo)\n#define ATSINScloptr_make(dest, nbytes) (dest = ATS_MALLOC(nbytes))\n")
+  val () = bput_v(b, "#define ATSPMVcfunlab(kind, label, envargs) ((label##__closurerize) envargs)\n#define ATSclosurerize_beg(label, envs, params, result)\n#define ATSclosurerize_end()\n#define ATSmainats_0_void(errcode) mainats_0_void()\nextern void mainats_0_void(void);\n/* The prelude's arithmetic, comparison and conversion functions the emitted\n   C calls by name. Each is a typed inline function whose name says its\n   signature (g0 and g1 are the unchecked and the checked flavour of the\n")
+  val () = bput_v(b, "   same operation; the C does not tell them apart). */\n#define BATS_FN2(fname, result, operand, expr) \\\n  static inline result fname(operand lhs, operand rhs) { return expr; }\n#define BATS_FN1(fname, result, operand, expr) \\\n  static inline result fname(operand val) { return expr; }\n\nBATS_FN2(atspre_g0int_add_int, atstype_int, atstype_int, lhs + rhs)\nBATS_FN2(atspre_g1int_add_int, atstype_int, atstype_int, lhs + rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g0int_sub_int, atstype_int, atstype_int, lhs - rhs)\nBATS_FN2(atspre_g1int_sub_int, atstype_int, atstype_int, lhs - rhs)\nBATS_FN2(atspre_g0int_mul_int, atstype_int, atstype_int, lhs * rhs)\nBATS_FN2(atspre_g1int_mul_int, atstype_int, atstype_int, lhs * rhs)\nBATS_FN2(atspre_g0int_div_int, atstype_int, atstype_int, lhs / rhs)\nBATS_FN2(atspre_g1int_div_int, atstype_int, atstype_int, lhs / rhs)\nBATS_FN2(atspre_g0int_mod_int, atstype_int, atstype_int, lhs % rhs)\nBATS_FN2(atspre_g1int_mod_int, atstype_int, atstype_int, lhs % rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g0int_nmod_int, atstype_int, atstype_int, lhs % rhs)\nBATS_FN2(atspre_g1int_nmod_int, atstype_int, atstype_int, lhs % rhs)\nBATS_FN2(atspre_g1int_min_int, atstype_int, atstype_int, lhs < rhs ? lhs : rhs)\nBATS_FN1(atspre_g0int_neg_int, atstype_int, atstype_int, 0 - val)\nBATS_FN1(atspre_g1int_neg_int, atstype_int, atstype_int, 0 - val)\nBATS_FN2(atspre_g0int_lt_int, atstype_bool, atstype_int, lhs < rhs)\nBATS_FN2(atspre_g1int_lt_int, atstype_bool, atstype_int, lhs < rhs)\nBATS_FN2(atspre_g0int_lte_int, atstype_bool, atstype_int, lhs <= rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g1int_lte_int, atstype_bool, atstype_int, lhs <= rhs)\nBATS_FN2(atspre_g0int_gt_int, atstype_bool, atstype_int, lhs > rhs)\nBATS_FN2(atspre_g1int_gt_int, atstype_bool, atstype_int, lhs > rhs)\nBATS_FN2(atspre_g0int_gte_int, atstype_bool, atstype_int, lhs >= rhs)\nBATS_FN2(atspre_g1int_gte_int, atstype_bool, atstype_int, lhs >= rhs)\nBATS_FN2(atspre_g0int_eq_int, atstype_bool, atstype_int, lhs == rhs)\nBATS_FN2(atspre_g1int_eq_int, atstype_bool, atstype_int, lhs == rhs)\nBATS_FN2(atspre_g0int_neq_int, atstype_bool, atstype_int, lhs != rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g1int_neq_int, atstype_bool, atstype_int, lhs != rhs)\nBATS_FN2(atspre_g0int_asl_int, atstype_int, atstype_int, lhs << rhs)\nBATS_FN2(atspre_g0int_asr_int, atstype_int, atstype_int, lhs >> rhs)\nBATS_FN2(atspre_lor_int_int, atstype_int, atstype_int, lhs | rhs)\nBATS_FN2(atspre_land_int_int, atstype_int, atstype_int, lhs & rhs)\nBATS_FN1(atspre_g0int2int_int_int, atstype_int, atstype_int, val)\nBATS_FN1(atspre_g1int2int_int_int, atstype_int, atstype_int, val)\nBATS_FN1(atspre_g1ofg0_int, atstype_int, atstype_int, val)\n")
+  val () = bput_v(b, "BATS_FN1(atspre_g0ofg1_int, atstype_int, atstype_int, val)\n\nBATS_FN2(atspre_g0uint_add_uint, atstype_uint, atstype_uint, lhs + rhs)\nBATS_FN2(atspre_g1uint_add_uint, atstype_uint, atstype_uint, lhs + rhs)\nBATS_FN2(atspre_g0uint_sub_uint, atstype_uint, atstype_uint, lhs - rhs)\nBATS_FN2(atspre_g1uint_sub_uint, atstype_uint, atstype_uint, lhs - rhs)\nBATS_FN2(atspre_g0uint_mul_uint, atstype_uint, atstype_uint, lhs * rhs)\nBATS_FN2(atspre_g0uint_div_uint, atstype_uint, atstype_uint, lhs / rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g0uint_mod_uint, atstype_uint, atstype_uint, lhs % rhs)\nBATS_FN2(atspre_g0uint_lt_uint, atstype_bool, atstype_uint, lhs < rhs)\nBATS_FN2(atspre_g1uint_lt_uint, atstype_bool, atstype_uint, lhs < rhs)\nBATS_FN2(atspre_g0uint_lte_uint, atstype_bool, atstype_uint, lhs <= rhs)\nBATS_FN2(atspre_g1uint_lte_uint, atstype_bool, atstype_uint, lhs <= rhs)\nBATS_FN2(atspre_g0uint_gt_uint, atstype_bool, atstype_uint, lhs > rhs)\nBATS_FN2(atspre_g1uint_gt_uint, atstype_bool, atstype_uint, lhs > rhs)\nBATS_FN2(atspre_g0uint_gte_uint, atstype_bool, atstype_uint, lhs >= rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g1uint_gte_uint, atstype_bool, atstype_uint, lhs >= rhs)\nBATS_FN2(atspre_g0uint_eq_uint, atstype_bool, atstype_uint, lhs == rhs)\nBATS_FN2(atspre_g1uint_eq_uint, atstype_bool, atstype_uint, lhs == rhs)\nBATS_FN2(atspre_g0uint_neq_uint, atstype_bool, atstype_uint, lhs != rhs)\nBATS_FN2(atspre_g1uint_neq_uint, atstype_bool, atstype_uint, lhs != rhs)\nBATS_FN2(atspre_g0uint_lsl_uint, atstype_uint, atstype_uint, lhs << rhs)\nBATS_FN2(atspre_g0uint_lsr_uint, atstype_uint, atstype_uint, lhs >> rhs)\nBATS_FN2(atspre_g0uint_lor_uint, atstype_uint, atstype_uint, lhs | rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g0uint_land_uint, atstype_uint, atstype_uint, lhs & rhs)\nBATS_FN2(atspre_g0uint_lxor_uint, atstype_uint, atstype_uint, lhs ^ rhs)\nBATS_FN1(atspre_g0uint_lnot_uint, atstype_uint, atstype_uint, ~val)\nBATS_FN1(atspre_g0int2uint_int_uint, atstype_uint, atstype_int, (atstype_uint)val)\nBATS_FN1(atspre_g1int2uint_int_uint, atstype_uint, atstype_int, (atstype_uint)val)\nBATS_FN1(atspre_g0uint2int_uint_int, atstype_int, atstype_uint, (atstype_int)val)\nBATS_FN1(atspre_g1uint2int_uint_int, atstype_int, atstype_uint, (atstype_int)val)\n\n")
+  val () = bput_v(b, "BATS_FN2(atspre_g0uint_add_size, atstype_size, atstype_size, lhs + rhs)\nBATS_FN2(atspre_g0uint_mul_size, atstype_size, atstype_size, lhs * rhs)\nBATS_FN2(atspre_g1uint_gte_size, atstype_bool, atstype_size, lhs >= rhs)\nBATS_FN1(atspre_g0int2uint_int_size, atstype_size, atstype_int, (atstype_size)val)\nBATS_FN1(atspre_g1int2uint_int_size, atstype_size, atstype_int, (atstype_size)val)\nBATS_FN1(atspre_g1uint2int_size_int, atstype_int, atstype_size, (atstype_int)val)\n\nBATS_FN2(atspre_eq_char0_char0, atstype_bool, atstype_char, lhs == rhs)\n")
+  val () = bput_v(b, "BATS_FN2(atspre_eq_char1_char1, atstype_bool, atstype_char, lhs == rhs)\nBATS_FN2(atspre_neq_char0_char0, atstype_bool, atstype_char, lhs != rhs)\nBATS_FN2(atspre_neq_char1_char1, atstype_bool, atstype_char, lhs != rhs)\nBATS_FN2(atspre_lt_char0_char0, atstype_bool, atstype_char, lhs < rhs)\nBATS_FN2(atspre_gt_char0_char0, atstype_bool, atstype_char, lhs > rhs)\nBATS_FN1(atspre_char2int0, atstype_int, atstype_char, (atstype_int)val)\nBATS_FN1(atspre_char2int1, atstype_int, atstype_char, (atstype_int)val)\nBATS_FN1(atspre_int2char0, atstype_char, atstype_int, (atstype_char)val)\n")
+  val () = bput_v(b, "BATS_FN1(atspre_byte2int0, atstype_int, atstype_byte, (atstype_int)val)\nBATS_FN1(atspre_int2byte0, atstype_byte, atstype_int, (atstype_byte)val)\nBATS_FN2(atspre_eq_bool0_bool0, atstype_bool, atstype_bool, lhs == rhs)\nBATS_FN1(atspre_neg_bool, atstype_bool, atstype_bool, !val)\nBATS_FN1(atspre_neg_bool0, atstype_bool, atstype_bool, !val)\nBATS_FN1(atspre_neg_bool1, atstype_bool, atstype_bool, !val)\n\n/* Pointers. */\n")
+  val () = bput_v(b, "static inline atstype_ptr atspre_ptr_null(void) { return atsptr_null; }\nBATS_FN1(atspre_ptr_is_null, atstype_bool, atstype_ptr, atsptr_null == val)\nBATS_FN1(atspre_ptr0_is_null, atstype_bool, atstype_ptr, atsptr_null == val)\nBATS_FN1(atspre_ptr1_is_null, atstype_bool, atstype_ptr, atsptr_null == val)\nBATS_FN1(atspre_ptr_isnot_null, atstype_bool, atstype_ptr, atsptr_null != val)\nBATS_FN1(atspre_ptr0_isnot_null, atstype_bool, atstype_ptr, atsptr_null != val)\nBATS_FN1(atspre_ptr1_isnot_null, atstype_bool, atstype_ptr, atsptr_null != val)\nstatic inline atstype_ptr atspre_add_ptr0_bsz(atstype_ptr base, atstype_size nbytes)\n")
+  val () = bput_v(b, "{ return (char *)base + nbytes; }\nstatic inline atstype_ptr atspre_add_ptr1_bsz(atstype_ptr base, atstype_size nbytes)\n{ return (char *)base + nbytes; }\n#undef BATS_FN1\n#undef BATS_FN2\n\n/* Memory: blocks are the C library's (wasm: the runtime's own). */\n#define ATS_MALLOC(nbytes) bats_alloc(nbytes)\n")
+  val () = bput_v(b, "#define ATS_MFREE(block) free(block)\n#define atspre_cloptr_free(clo) ATS_MFREE(clo)\n#define atspre_ptr_alloc_tsz(nbytes) ATS_MALLOC(nbytes)\n#define atspre_strlen strlen\n")
+in end
+
+(* The native bootstrap's runtime header: the same macros, over libc
+   (bootstrap/c, bats#283). The generated C is compiled with
+   -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_
+   -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include
+   _bats_native_runtime.h, as the wasm build is, and the three empty
+   files of libats/libc/CATS (the C names them) are in
+   _bats_native_stubs. Written into dir (a path NUL-terminated at
+   dlen) *)
+
+
+
+implement write_native_runtime_h (dir, dlen) = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "/* _bats_native_runtime.h -- the C runtime the emitted C is compiled against, over libc */\n#ifndef BATS_NATIVE_RUNTIME_H\n#define BATS_NATIVE_RUNTIME_H\n#include <stdlib.h>\n#include <string.h>\n#include <stdio.h>\n")
+  val () = put_runtime_macros(b)
+  val () = bput_v(b, "static inline void *bats_alloc(size_t nbytes) { void *block = malloc(nbytes); if (block == NULL) { fputs(\"bats: out of memory\\n\", stderr); exit(1); } return block; }\nstatic inline void atspre_print_string(const char *text) { fputs(text, stdout); }\nstatic inline void atspre_print_newline(void) { fputc(10, stdout); fflush(stdout); }\nstatic inline void atspre_print_int(int number) { fprintf(stdout, \"%d\", number); }\nstatic inline void atspre_print_char(int code) { fputc(code, stdout); }\nstatic inline void atspre_prerr_string(const char *text) { fputs(text, stderr); }\nstatic inline void atspre_prerr_newline(void) { fputc(10, stderr); fflush(stderr); }\nstatic inline void atspre_prerr_int(int number) { fprintf(stderr, \"%d\", number); }\nstatic inline void atspre_prerr_char(int code) { fputc(code, stderr); }\nstatic inline void atspre_exit_void(int status) { exit(status); }\n#endif\n")
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(dir, 0, dlen, 4096, pb)
+  val () = bput_v(pb, "/_bats_native_runtime.h")
+  val () = put_char_v(pb, 0)
+  val @(pa, _) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val rc = write_file_from_builder(bv_p, 524288, b)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  (* the stubs *)
+  var mb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(dir, 0, dlen, 4096, mb)
+  val () = bput_v(mb, "/_bats_native_stubs/libats/libc/CATS/sys")
+  val r0 = run_mkdir(mb)
+  fn stub {l2:agz}{sn:nat} (dir: !$A.borrow(byte, l2, 4096), dlen: int, name: string sn): int = let
+    var sb : $B.builder_v = $B.create()
+    val () = bput_v(sb, "/* stub */\n")
+    var sp : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(dir, 0, dlen, 4096, sp)
+    val () = bput_v(sp, "/_bats_native_stubs/libats/libc/CATS/")
+    val () = bput_v(sp, name)
+    val () = put_char_v(sp, 0)
+    val @(spa, _) = $B.to_arr(sp)
+    val @(fz_s, bv_s) = $A.freeze<byte>(spa)
+    val rc = write_file_from_builder(bv_s, 524288, sb)
+    val () = $A.drop<byte>(fz_s, bv_s)
+    val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  in rc end
+  val r1 = stub(dir, dlen, "stdio.cats")
+  val r2 = stub(dir, dlen, "sys/stat.cats")
+  val r3 = stub(dir, dlen, "sys/types.cats")
+in rc + r0 + r1 + r2 + r3 end
+
 (* Write WASM freestanding runtime header *)
 
 
 implement write_wasm_runtime_h() = let
   var b : $B.builder_v = $B.create()
   val () = bput_v(b, "/* runtime.h -- Freestanding WASM runtime for ATS2 */\n#ifndef BATS_WASM_RUNTIME_H\n#define BATS_WASM_RUNTIME_H\n")
-  val () = bput_v(b, "typedef void atstype_void;\ntypedef void atsvoid_t0ype;\ntypedef int atstype_int;\ntypedef unsigned int atstype_uint;\n")
-  val () = bput_v(b, "typedef long int atstype_lint;\ntypedef unsigned long int atstype_ulint;\ntypedef long long int atstype_llint;\n")
-  val () = bput_v(b, "typedef unsigned long long int atstype_ullint;\ntypedef short int atstype_sint;\ntypedef unsigned short int atstype_usint;\n")
-  val () = bput_v(b, "typedef atstype_lint atstype_ssize;\ntypedef atstype_ulint atstype_size;\ntypedef int atstype_bool;\n")
-  val () = bput_v(b, "typedef unsigned char atstype_byte;\ntypedef char atstype_char;\ntypedef signed char atstype_schar;\ntypedef unsigned char atstype_uchar;\n")
-  val () = bput_v(b, "typedef char *atstype_string;\ntypedef char *atstype_stropt;\ntypedef char *atstype_strptr;\n")
-  val () = bput_v(b, "typedef void *atstype_ptr;\ntypedef void *atstype_ptrk;\ntypedef void *atstype_ref;\ntypedef void *atstype_boxed;\n")
-  val () = bput_v(b, "typedef void *atstype_datconptr;\ntypedef void *atstype_datcontyp;\ntypedef void *atstype_arrptr;\ntypedef void *atstype_funptr;\ntypedef void *atstype_cloptr;\n")
-  val () = bput_v(b, "#define atstkind_type(tk) tk\n#define atstkind_t0ype(tk) tk\n#ifndef _ATSTYPE_VAR_SIZE_\n#define _ATSTYPE_VAR_SIZE_ 0X10000\n#endif\n")
-  val () = bput_v(b, "typedef struct { char _[_ATSTYPE_VAR_SIZE_]; } atstype_var[0];\n#define atstyvar_type(a) atstype_var\n#define atstybox_type(hit) atstype_boxed\n")
-  val () = bput_v(b, "#define atsrefarg0_type(hit) hit\n#define atsrefarg1_type(hit) atstype_ref\n#define atstyarr_type(hit) hit\n")
-  val () = bput_v(b, "#define atsbool_true 1\n#define atsbool_false 0\n#define atsptr_null ((void*)0)\n#define the_atsptr_null ((void*)0)\n")
-  val () = bput_v(b, "#define ATSstruct struct\n#define ATSextern() extern\n#define ATSstatic() static\n#define ATSinline() static inline\n")
-  val () = bput_v(b, "#define ATSdynload()\n#define ATSdynloadflag_sta(flag)\n#define ATSdynloadflag_ext(flag) extern int flag\n")
-  val () = bput_v(b, "#define ATSdynloadflag_init(flag) int flag = 0\n#define ATSdynloadflag_minit(flag) int flag = 0\n#define ATSdynloadset(flag) flag = 1\n")
-  val () = bput_v(b, "#define ATSdynloadfcall(dynloadfun) dynloadfun()\n#define ATSassume(flag) void *flag = (void*)0\n")
-  val () = bput_v(b, "#define ATSdyncst_mac(d2c)\n#define ATSdyncst_castfn(d2c)\n#define ATSdyncst_extfun(d2c, targs, tres) extern tres d2c targs\n")
-  val () = bput_v(b, "#define ATSdyncst_stafun(d2c, targs, tres) static tres d2c targs\n#define ATSdyncst_valimp(d2c, type) type d2c\n#define ATSdyncst_valdec(d2c, type) extern type d2c\n")
-  val () = bput_v(b, "#define ATSif(x) if(x)\n#define ATSthen()\n#define ATSelse() else\n#define ATSifthen(x) if(x)\n#define ATSifnthen(x) if(!(x))\n")
-  val () = bput_v(b, "#define ATSreturn(x) return(x)\n#define ATSreturn_void(x) return\n#define ATSfunbody_beg()\n#define ATSfunbody_end()\n")
-  val () = bput_v(b, "#define ATSPMVint(i) i\n#define ATSPMVintrep(rep) (rep)\n#define ATSPMVbool_true() atsbool_true\n#define ATSPMVbool_false() atsbool_false\n")
-  val () = bput_v(b, "#define ATSPMVchar(c) (c)\n#define ATSPMVstring(str) (str)\n#define ATSPMVi0nt(tok) (tok)\n#define ATSPMVempty()\n")
-  val () = bput_v(b, "#define ATSPMVextval(name) (name)\n#define ATSPMVptrof(lval) (&(lval))\n#define ATSPMVptrof_void(lval) ((void*)0)\n")
-  val () = bput_v(b, "#define ATSPMVrefarg0(val) (val)\n#define ATSPMVrefarg1(ref) (ref)\n#define ATSPMVsizeof(hit) (sizeof(hit))\n")
-  val () = bput_v(b, "#define ATSPMVfunlab(flab) (flab)\n#define ATSPMVcastfn(d2c, hit, arg) ((hit)arg)\n#define ATSPMVtyrep(rep) (rep)\n")
-  val () = bput_v(b, "#define ATStyclo() struct{ void *cfun; }\n#define ATSfunclo_fun(pmv, targs, tres) ((tres(*)targs)(pmv))\n")
-  val () = bput_v(b, "#define ATSfunclo_clo(pmv, targs, tres) ((tres(*)targs)(((ATStyclo()*)pmv)->cfun))\n")
-  val () = bput_v(b, "#define ATSfuncall(fun, funarg) (fun)funarg\n#define ATSextfcall(fun, funarg) (fun)funarg\n#define ATSextmcall(obj, mtd, funarg) (obj->mtd)funarg\n")
-  val () = bput_v(b, "#define ATStmpdec(tmp, hit) hit tmp\n#define ATStmpdec_void(tmp)\n#define ATSstatmpdec(tmp, hit) static hit tmp\n#define ATSstatmpdec_void(tmp)\n")
-  val () = bput_v(b, "#define ATSderef(pmv, hit) (*(hit*)pmv)\n#define ATSCKnot(x) ((x)==0)\n#define ATSCKiseqz(x) ((x)==0)\n#define ATSCKisneqz(x) ((x)!=0)\n")
-  val () = bput_v(b, "#define ATSCKptriscons(x) (0 != (void*)(x))\n#define ATSCKptrisnull(x) (0 == (void*)(x))\n")
-  val () = bput_v(b, "#define ATSINSlab(lab) lab\n#define ATSINSgoto(lab) goto lab\n#define ATSINSflab(flab) flab\n#define ATSINSfgoto(flab) goto flab\n")
-  val () = bput_v(b, "#define ATSINSmove(tmp, val) (tmp = val)\n#define ATSINSpmove(tmp, hit, val) (*(hit*)tmp = val)\n")
-  val () = bput_v(b, "#define ATSINSmove_void(tmp, command) command\n#define ATSINSpmove_void(tmp, hit, command) command\n#define ATSINSmove_nil(tmp) (tmp = ((void*)0))\n")
-  val () = bput_v(b, "#define ATSINSupdate_ptrinc(tmp, tyelt) (tmp = (tyelt*)(tmp) + 1)\n#define ATSINSupdate_ptrdec(tmp, tyelt) (tmp = (tyelt*)(tmp) - 1)\n")
-  val () = bput_v(b, "#define ATSINSdeadcode_fail() /*deadcode*/\n")
-  val () = bput_v(b, "#define ATSSELfltrec(pmv, tyrec, lab) ((pmv).lab)\n#define ATSSELcon(pmv, tycon, lab) (((tycon*)(pmv))->lab)\n#define ATSSELarrptrind(pmv, tyelt, lab) (((tyelt*)pmv)lab)\n")
-  val () = bput_v(b, "#define ATSINSmove_con1_beg()\n#define ATSINSmove_con1_new(tmp, tycon) (tmp = ATS_MALLOC(sizeof(tycon)))\n")
-  val () = bput_v(b, "#define ATSINSstore_con1_ofs(tmp, tycon, lab, val) (((tycon*)(tmp))->lab = val)\n#define ATSINSmove_con1_end()\n#define ATSINSfreecon(ptr) ATS_MFREE(ptr)\n")
-  val () = bput_v(b, "#define ATSSELrecsin(pmv, tyrec, lab) (pmv)\n#define ATSINSstore_con1_tag(dst, tag) (((int*)(dst))[0] = (tag))\n")
-  val () = bput_v(b, "#define ATSINSmove_con0(dst, tag) ((dst) = (void*)(tag))\n#define ATSCKpat_con0(p, tag) ((p) == (void*)(tag))\n#define ATSCKpat_con1(p, tag) ((p) >= (void*)1024 && ((int*)(p))[0] == (tag))\n")
-  val () = bput_v(b, "#define ATSCKpat_int(pmv, pat) ((pmv) == pat)\n#define ATSCKpat_bool(pmv, pat) ((pmv) == pat)\n#define ATSCKpat_char(pmv, pat) ((pmv) == pat)\n#define ATSCKpat_float(pmv, pat) ((pmv) == pat)\n")
-  val () = bput_v(b, "#define ATSINSmove_fltrec_beg()\n#define ATSINSmove_fltrec_end()\n#define ATSINSstore_fltrec_ofs(tmp, tyrec, lab, val) ((tmp).lab = val)\n")
-  val () = bput_v(b, "#define ATSINSload(tmp, pmv) (tmp = pmv)\n#define ATSINSstore(pmv1, pmv2) (pmv1 = pmv2)\n#define ATSINSxstore(tmp, pmv1, pmv2) (tmp = pmv1, pmv1 = pmv2, pmv2 = tmp)\n")
-  val () = bput_v(b, "#define ATStailcal_beg() do {\n#define ATStailcal_end() } while(0) ;\n#define ATSINSmove_tlcal(apy, tmp) (apy = tmp)\n#define ATSINSargmove_tlcal(arg, apy) (arg = apy)\n")
-  val () = bput_v(b, "#define ATSbranch_beg()\n#define ATSbranch_end() break ;\n#define ATScaseof_beg() do {\n#define ATScaseof_end() } while(0) ;\n#define ATSextcode_beg()\n#define ATSextcode_end()\n")
-  val () = bput_v(b, "#define atspre_g1uint2int_size_int(x) ((int)(x))\n#define atspre_g0int_add_int(x, y) ((x) + (y))\n#define atspre_g1int_mul_int(x, y) ((x) * (y))\n")
-  val () = bput_v(b, "#define atspre_g0int2uint_int_size(x) ((atstype_size)(x))\n#define atspre_g0uint_mul_size(x, y) ((x) * (y))\n#define atspre_add_ptr0_bsz(p, n) ((void*)((char*)(p) + (n)))\n")
-  val () = bput_v(b, "#define atspre_g1int2int_int_int(x) (x)\n#define atspre_g1int_lt_int(x, y) ((x) < (y))\n#define atspre_g1int_add_int(x, y) ((x) + (y))\n")
-  val () = bput_v(b, "#define atspre_char2int1(c) ((int)(c))\n#define atspre_g0int2int_int_int(x) (x)\n#define atspre_g0int_gt_int(x, y) ((x) > (y))\n")
-  val () = bput_v(b, "#define atspre_g1ofg0_int(x) (x)\n#define atspre_g0ofg1_int(x) (x)\n#define atspre_g1int_gt_int(x, y) ((x) > (y))\n#define atspre_g1int_gte_int(x, y) ((x) >= (y))\n")
-  val () = bput_v(b, "#define atspre_g1int_lte_int(x, y) ((x) <= (y))\n#define atspre_g1int_sub_int(x, y) ((x) - (y))\n#define atspre_g1int_neg_int(x) (-(x))\n")
-  val () = bput_v(b, "#define atspre_g0int_gte_int(x, y) ((x) >= (y))\n#define atspre_g0int_lte_int(x, y) ((x) <= (y))\n#define atspre_g0int_eq_int(x, y) ((x) == (y))\n")
-  val () = bput_v(b, "#define atspre_g0int_mul_int(x, y) ((x) * (y))\n#define atspre_g0int_sub_int(x, y) ((x) - (y))\n#define atspre_g0int_neq_int(x, y) ((x) != (y))\n")
-  val () = bput_v(b, "#define atspre_g0int_lt_int(x, y) ((x) < (y))\n#define atspre_g0int_div_int(x, y) ((x) / (y))\n#define atspre_g0int_mod_int(x, y) ((x) % (y))\n")
-  val () = bput_v(b, "#define atspre_g1int_div_int(x, y) ((x) / (y))\n#define atspre_g1int_eq_int(x, y) ((x) == (y))\n#define atspre_g1int_neq_int(x, y) ((x) != (y))\n")
-  val () = bput_v(b, "#define atspre_g0int_nmod_int(x, y) ((x) % (y))\n#define atspre_g1int_nmod_int(x, y) ((x) % (y))\n#define atspre_g1int_mod_int(x, y) ((x) % (y))\n")
-  val () = bput_v(b, "#define atspre_neg_bool(b) ((b) ? 0 : 1)\n#define atspre_neg_bool0 atspre_neg_bool\n#define atspre_neg_bool1 atspre_neg_bool\n")
-  val () = bput_v(b, "#define atspre_g0int_asl_int(x, n) ((x) << (n))\n#define atspre_g0int_asr_int(x, n) ((x) >> (n))\n")
-  val () = bput_v(b, "#define atspre_lor_int_int(x, y) ((x) | (y))\n#define atspre_land_int_int(x, y) ((x) & (y))\n")
-  val () = bput_v(b, "#define atspre_byte2int0(b) ((int)(b))\n#define atspre_int2byte0(i) ((atstype_byte)(i))\n#define atspre_char2int0(c) ((int)(c))\n#define atspre_int2char0(i) ((char)(i))\n")
-  val () = bput_v(b, "#define atspre_ptr_null() ((void*)0)\n#define atspre_ptr_is_null(p) ((p) == 0)\n#define atspre_ptr0_is_null atspre_ptr_is_null\n#define atspre_ptr1_is_null atspre_ptr_is_null\n#define atspre_ptr_isnot_null(p) ((p) != 0)\n#define atspre_ptr0_isnot_null atspre_ptr_isnot_null\n#define atspre_ptr1_isnot_null atspre_ptr_isnot_null\n")
-  val () = bput_v(b, "#define atspre_add_ptr1_bsz(p, n) ((void*)((char*)(p) + (n)))\n#define atspre_g0int_neg_int(x) (-(x))\n#define atspre_g1int_neg_int(x) (-(x))\n")
-  val () = bput_v(b, "#define atspre_g1int2uint_int_size(x) ((atstype_size)(x))\n#define atspre_strlen strlen\n")
-  (* unsigned int and char operations, as ATS's integer.cats and char.cats
-     define them (sha256 works on uint) *)
-  val () = bput_v(b, "#define atspre_g0int2uint_int_uint(x) ((unsigned int)(x))\n#define atspre_g1int2uint_int_uint(x) ((unsigned int)(x))\n#define atspre_g0uint2int_uint_int(x) ((int)(x))\n#define atspre_g1uint2int_uint_int(x) ((int)(x))\n")
-  val () = bput_v(b, "#define atspre_g0uint_add_uint(x, y) ((x) + (y))\n#define atspre_g0uint_sub_uint(x, y) ((x) - (y))\n#define atspre_g0uint_mul_uint(x, y) ((x) * (y))\n#define atspre_g0uint_div_uint(x, y) ((x) / (y))\n#define atspre_g0uint_mod_uint(x, y) ((x) % (y))\n")
-  val () = bput_v(b, "#define atspre_g0uint_lt_uint(x, y) ((x) < (y))\n#define atspre_g0uint_lte_uint(x, y) ((x) <= (y))\n#define atspre_g0uint_gt_uint(x, y) ((x) > (y))\n#define atspre_g0uint_gte_uint(x, y) ((x) >= (y))\n#define atspre_g0uint_eq_uint(x, y) ((x) == (y))\n#define atspre_g0uint_neq_uint(x, y) ((x) != (y))\n")
-  val () = bput_v(b, "#define atspre_g0uint_lsl_uint(x, n) ((x) << (n))\n#define atspre_g0uint_lsr_uint(x, n) ((x) >> (n))\n#define atspre_g0uint_lor_uint(x, y) ((x) | (y))\n#define atspre_g0uint_land_uint(x, y) ((x) & (y))\n#define atspre_g0uint_lxor_uint(x, y) ((x) ^ (y))\n#define atspre_g0uint_lnot_uint(x) (~(x))\n")
-  val () = bput_v(b, "#define atspre_g1uint_add_uint(x, y) ((x) + (y))\n#define atspre_g1uint_sub_uint(x, y) ((x) - (y))\n#define atspre_g1uint_lt_uint(x, y) ((x) < (y))\n#define atspre_g1uint_lte_uint(x, y) ((x) <= (y))\n#define atspre_g1uint_gt_uint(x, y) ((x) > (y))\n#define atspre_g1uint_gte_uint(x, y) ((x) >= (y))\n#define atspre_g1uint_eq_uint(x, y) ((x) == (y))\n#define atspre_g1uint_neq_uint(x, y) ((x) != (y))\n")
-  val () = bput_v(b, "#define atspre_eq_char0_char0(x, y) ((x) == (y))\n#define atspre_neq_char0_char0(x, y) ((x) != (y))\n#define atspre_eq_char1_char1(x, y) ((x) == (y))\n#define atspre_neq_char1_char1(x, y) ((x) != (y))\n#define atspre_lt_char0_char0(x, y) ((x) < (y))\n#define atspre_gt_char0_char0(x, y) ((x) > (y))\n")
-  val () = bput_v(b, "#define ATS_MALLOC(sz) malloc(sz)\n#define ATS_MFREE(ptr) free(ptr)\n#define ATSINScloptr_make(tmp, sz) (tmp = ATS_MALLOC(sz))\n#define ATSINScloptr_free(tmp) ATS_MFREE(tmp)\n#define atspre_cloptr_free(p) ATS_MFREE(p)\n#define atspre_ptr_alloc_tsz(tsz) ATS_MALLOC(tsz)\n")
-  val () = bput_v(b, "#define ATSclosurerize_beg(flab, tenvs, targs, tres)\n#define ATSclosurerize_end()\n#define ATSFCreturn(x) return(x)\n#define ATSFCreturn_void(x) (x); return\n")
-  val () = bput_v(b, "#define ATSPMVcfunlab(knd, flab, env) (flab##__closurerize)env\nextern void mainats_0_void(void);\n#define ATSmainats_0_void(err) mainats_0_void()\n")
-  val () = bput_v(b, "void *malloc(int size);\nvoid free(void *ptr);\nvoid *memset(void *s, int c, unsigned int n);\nvoid *memcpy(void *dst, const void *src, unsigned int n);\nvoid *memmove(void *dst, const void *src, unsigned int n);\nint memcmp(const void *a, const void *b, unsigned int n);\nstatic inline unsigned int strlen(const char *s) { unsigned int n = 0; while (s[n]) n++; return n; }\n")
+  val () = put_runtime_macros(b)
+  val () = bput_v(b, "void *malloc(int size);\n#define bats_alloc(nbytes) malloc(nbytes)\nvoid free(void *ptr);\nvoid *memset(void *s, int c, unsigned int n);\nvoid *memcpy(void *dst, const void *src, unsigned int n);\nvoid *memmove(void *dst, const void *src, unsigned int n);\nint memcmp(const void *a, const void *b, unsigned int n);\nstatic inline unsigned int strlen(const char *s) { unsigned int n = 0; while (s[n]) n++; return n; }\n")
   val () = bput_v(b, "static inline void *calloc(int n, int sz) { return malloc(n * sz); }\n")
   (* print and exit_void, from the host: bats test's wasm runner prints
      its PASS and FAIL lines and exits with them *)
@@ -1164,123 +1187,15 @@ in
         val () = poke_arr(buf, pos+10, 512, 50)
       in pos + 11 end
     val phlen = append_bats_path(phbuf, hlen)
-    (* Check if patsopt exists, install if not — single freeze *)
-    (* The download next to the toolchain, as the Rust bats did:
-       <patshome>-postiats-0.4.2.tgz, i.e. ~/.bats/ats2-postiats-0.4.2.tgz *)
-    fn ats2_tarball {l:agz}
-      (buf: !$A.borrow(byte, l, 512), plen: int, dst: !$B.builder_v >> $B.builder_v): void = let
-      val () = copy_to_builder_v(buf, 0, plen, 512, dst)
-    in bput_v(dst, "-postiats-0.4.2.tgz") end
+    (* patsopt: bats keeps it in ~/.bats/ats2 and installs it, checked
+       against the pin in ats2.bats, when it is not there (bats ats2 install) *)
     fn ensure_ats2 {l:agz}
-      (buf: !$A.borrow(byte, l, 512), plen: int): void = let
-      (* Check if patsopt exists by trying to stat it *)
-      var test_path : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(buf, 0, plen, 512, test_path)
-      val () = bput_v(test_path, "/bin/patsopt")
-      val () = put_char_v(test_path, 0)
-      val @(tp_arr, _) = $B.to_arr(test_path)
-      val @(fz_tp, bv_tp) = $A.freeze<byte>(tp_arr)
-      val exists = (case+ $F.file_mtime(bv_tp, 524288) of
-        | ~$R.ok(_) => true | ~$R.err(_) => false): bool
-      val () = $A.drop<byte>(fz_tp, bv_tp)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tp))
-      val rc = (if exists then 0
+      (buf: !$A.borrow(byte, l, 512), plen: int): void =
+      if plen <= 0 then ()
+      else if ats2_ensure(Quiet()) then ()
       else let
-        val () = println! ("ATS2 not found, installing...")
-        (* mkdir -p <patshome> *)
-        var mkb : $B.builder_v = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, mkb)
-        val _ = run_mkdir(mkb)
-        (* curl -sL <url> -o <tarball> *)
-        val curl_exec = str_to_path_arr("curl")
-        val @(fz_ce, bv_ce) = $A.freeze<byte>(curl_exec)
-        var ca1 = $B.create() val () = bput_v(ca1, "curl")
-        var ca2 = $B.create() val () = bput_v(ca2, "-sL")
-        var ca3 = $B.create() val () = bput_v(ca3, "https://raw.githubusercontent.com/ats-lang/ats-lang.github.io/master/FROZEN000/ATS-Postiats/ATS2-Postiats-gmp-0.4.2.tgz")
-        var ca4 = $B.create() val () = bput_v(ca4, "-o")
-        var ca5 = $B.create() val () = ats2_tarball(buf, plen, ca5)
-        val curl_argv = $L.list_vt_cons(mk_arg(ca1), $L.list_vt_cons(mk_arg(ca2),
-          $L.list_vt_cons(mk_arg(ca3), $L.list_vt_cons(mk_arg(ca4),
-          $L.list_vt_cons(mk_arg(ca5), $L.list_vt_nil())))))
-        val r1 = run_cmd(bv_ce, curl_argv)
-        val () = $A.drop<byte>(fz_ce, bv_ce)
-        val () = $A.free<byte>($A.thaw<byte>(fz_ce))
-        (* tar -xzf <tarball> --strip-components=1 -C <patshome> *)
-        val tar_exec = str_to_path_arr("tar")
-        val @(fz_te, bv_te) = $A.freeze<byte>(tar_exec)
-        var ta1 = $B.create() val () = bput_v(ta1, "tar")
-        var ta2 = $B.create() val () = bput_v(ta2, "-xzf")
-        var ta3 = $B.create() val () = ats2_tarball(buf, plen, ta3)
-        var ta4 = $B.create() val () = bput_v(ta4, "--strip-components=1")
-        var ta5 = $B.create() val () = bput_v(ta5, "-C")
-        var ta6 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, ta6)
-        val tar_argv = $L.list_vt_cons(mk_arg(ta1), $L.list_vt_cons(mk_arg(ta2),
-          $L.list_vt_cons(mk_arg(ta3), $L.list_vt_cons(mk_arg(ta4),
-          $L.list_vt_cons(mk_arg(ta5), $L.list_vt_cons(mk_arg(ta6),
-          $L.list_vt_nil()))))))
-        val r2 = run_cmd(bv_te, tar_argv)
-        val () = $A.drop<byte>(fz_te, bv_te)
-        val () = $A.free<byte>($A.thaw<byte>(fz_te))
-        (* rm <tarball> *)
-        val rm_exec = str_to_path_arr("rm")
-        val @(fz_re, bv_re) = $A.freeze<byte>(rm_exec)
-        var ra1 = $B.create() val () = bput_v(ra1, "rm")
-        var ra2 = $B.create() val () = ats2_tarball(buf, plen, ra2)
-        val rm_argv = $L.list_vt_cons(mk_arg(ra1),
-          $L.list_vt_cons(mk_arg(ra2), $L.list_vt_nil()))
-        val _ = run_cmd(bv_re, rm_argv)
-        val () = $A.drop<byte>(fz_re, bv_re)
-        val () = $A.free<byte>($A.thaw<byte>(fz_re))
-        (* make -j4 -C <patshome>/src/CBOOT patsopt PATSHOME=<patshome> *)
-        val () = println! ("building ATS2...")
-        val make_exec = str_to_path_arr("make")
-        val @(fz_me, bv_me) = $A.freeze<byte>(make_exec)
-        var mk1 = $B.create() val () = bput_v(mk1, "make")
-        var mk2 = $B.create() val () = bput_v(mk2, "-j4")
-        var mk3 = $B.create() val () = bput_v(mk3, "-C")
-        var mk4 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, mk4)
-        val () = bput_v(mk4, "/src/CBOOT")
-        var mk5 = $B.create() val () = bput_v(mk5, "patsopt")
-        var mk6 = $B.create()
-        val () = bput_v(mk6, "PATSHOME=")
-        val () = copy_to_builder_v(buf, 0, plen, 512, mk6)
-        val make_argv = $L.list_vt_cons(mk_arg(mk1), $L.list_vt_cons(mk_arg(mk2),
-          $L.list_vt_cons(mk_arg(mk3), $L.list_vt_cons(mk_arg(mk4),
-          $L.list_vt_cons(mk_arg(mk5), $L.list_vt_cons(mk_arg(mk6),
-          $L.list_vt_nil()))))))
-        val r3 = run_cmd(bv_me, make_argv)
-        val () = $A.drop<byte>(fz_me, bv_me)
-        val () = $A.free<byte>($A.thaw<byte>(fz_me))
-        (* mkdir -p <patshome>/bin *)
-        var mkb2 : $B.builder_v = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, mkb2)
-        val () = bput_v(mkb2, "/bin")
-        val _ = run_mkdir(mkb2)
-        (* cp <patshome>/src/CBOOT/patsopt <patshome>/bin/patsopt *)
-        val cp_exec = str_to_path_arr("cp")
-        val @(fz_cpe, bv_cpe) = $A.freeze<byte>(cp_exec)
-        var cp1 = $B.create() val () = bput_v(cp1, "cp")
-        var cp2 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, cp2)
-        val () = bput_v(cp2, "/src/CBOOT/patsopt")
-        var cp3 = $B.create()
-        val () = copy_to_builder_v(buf, 0, plen, 512, cp3)
-        val () = bput_v(cp3, "/bin/patsopt")
-        val cp_argv = $L.list_vt_cons(mk_arg(cp1), $L.list_vt_cons(mk_arg(cp2),
-          $L.list_vt_cons(mk_arg(cp3), $L.list_vt_nil())))
-        val r4 = run_cmd(bv_cpe, cp_argv)
-        val () = $A.drop<byte>(fz_cpe, bv_cpe)
-        val () = $A.free<byte>($A.thaw<byte>(fz_cpe))
-        val () = println! ("ATS2 installed successfully")
-      in r1 + r2 + r3 + r4 end): int
-    in
-      if rc <> 0 then let
         val () = set_build_err()
-        val () = println! ("error: ATS2 installation failed")
-      in println! ("note: the ATS2 build bats installs does its constraint solving in infinite precision (GMP), so it needs libgmp and its headers (libgmp-dev on Debian and Ubuntu, gmp on macOS with Homebrew)") end else ()
-    end
+      in println! ("error: ATS2 installation failed") end
     val @(fz_patshome, bv_patshome) = $A.freeze<byte>(phbuf)
     val () = ensure_ats2(bv_patshome, phlen)
   in
@@ -3095,10 +3010,15 @@ in
                 val () = $A.free<byte>($A.thaw<byte>(fz_rme))
                 (* Generate Makefile *)
                 var mf : $B.builder_v = $B.create()
-                val () = bput_v(mf, "PATSHOME ?= $(HOME)/.bats/ats2\n")
-                val () = bput_v(mf, "CC ?= cc\n\n")
-                val () = bput_v(mf, "%_debug.o: %.c\n\t$(CC) -c -o $@ $< -g -O0 -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime\n\n")
-                val () = bput_v(mf, "%_release.o: %.c\n\t$(CC) -c -o $@ $< -O2 -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime\n\n")
+                (* The C is compiled with bats's own runtime header and not ATS2's
+                   (write_native_runtime_h), so the compiler is built from this
+                   directory with no ATS2 on the machine; PATSHOME is for running
+                   patsopt only (bats#283) *)
+                val _ = write_native_runtime_h(to_c, tclen)
+                val () = bput_v(mf, "CC ?= cc\n")
+                val () = bput_v(mf, "ATSFLAGS := -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include _bats_native_runtime.h -I_bats_native_stubs\n\n")
+                val () = bput_v(mf, "%_debug.o: %.c\n\t$(CC) -c -o $@ $< -g -O0 $(ATSFLAGS)\n\n")
+                val () = bput_v(mf, "%_release.o: %.c\n\t$(CC) -c -o $@ $< -O2 $(ATSFLAGS)\n\n")
                 val () = bput_v(mf, "SRCS := $(shell find . -name '*_dats.c') _bats_native_runtime.c\n")
                 val () = bput_v(mf, "DEBUG_OBJS := $(SRCS:.c=_debug.o)\n")
                 val () = bput_v(mf, "RELEASE_OBJS := $(SRCS:.c=_release.o)\n\n")

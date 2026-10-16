@@ -7,7 +7,9 @@
 # usage: scripts/check-pins.sh [file...]   (default: .github/workflows/*.yml
 #        and .github/actions/*/action.yml)
 set -eu
+defaults=no
 if [ $# -eq 0 ]; then
+  defaults=yes
   set -- .github/workflows/*.yml .github/actions/*/action.yml
 fi
 status=0
@@ -33,4 +35,16 @@ for file in "$@"; do
     fi
   done || status=1
 done
+# The ATS2 bats installs is pinned in src/ats2.bats alone (bats-lang/bats#283):
+# a tarball of an https URL, checked by a SHA-256, and no workflow or action
+# names a tarball or a digest of its own
+if [ $defaults = yes ] && [ -f src/ats2.bats ]; then
+  grep -qE '^#define ATS2_SHA256 "[0-9a-f]{64}"$' src/ats2.bats \
+    || { echo "src/ats2.bats: ATS2_SHA256 is not a SHA-256 (64 lowercase hex digits)"; status=1; }
+  grep -qE '^#define ATS2_URL "https://[^"]+\.tgz"$' src/ats2.bats \
+    || { echo "src/ats2.bats: ATS2_URL is not an https tarball"; status=1; }
+  if grep -nE 'ATS2-Postiats|[0-9a-f]{64}' "$@" /dev/null | grep -v 'uses:'; then
+    echo "the ATS2 pin is in src/ats2.bats alone: a workflow or action names a tarball or a digest"; status=1
+  fi
+fi
 exit $status
