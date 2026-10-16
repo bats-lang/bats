@@ -222,7 +222,7 @@ in case+ dr of
                 val () = bput_v(fi, "/")
                 val () = copy_to_builder_v(bv_e, 0, el, 1024, fi)
                 val () = put_char_v(fi, 0)
-              in c_fresh_bv(fo, fi) end
+              in module_fresh(fo, fi) end
               val rc = (if fresh then 0 else run_patsopt(ph, phlen, bv_o, ol, bv_i, il)): int
               val () = ()
               val () = $A.drop<byte>(fz_o, bv_o)
@@ -2003,7 +2003,7 @@ in
                        val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nfi)
                        val () = bput_v(nfi, "/src/lib.dats")
                        val () = put_char_v(nfi, 0)
-                     in c_fresh_bv(nfo, nfi) end
+                     in module_fresh(nfo, nfi) end
                      val rc_ns = (if ns_fresh then 0 else run_patsopt(ph2, ph2len, bv_po, po_len, bv_pi, pi_len)): int
                                                   val () = $A.drop<byte>(fz_po, bv_po)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_po))
@@ -2047,7 +2047,7 @@ in
                                     val () = copy_to_builder_v(bv_de, 0, dlen, 1024, ib)
                                     val () = bput_v(ib, "/src/lib.dats")
                                     val () = put_char_v(ib, 0)
-                                  in (if c_fresh_bv(ob, ib) then 1 else 0): int end
+                                  in (if module_fresh(ob, ib) then 1 else 0): int end
                                   val () = (if pats_fresh > 0 then ()
                                   else let
                                   var po_b : $B.builder_v = $B.create()
@@ -2119,7 +2119,7 @@ in
                                                     val () = bput_v(fi, "/src/")
                                                     val () = copy_to_builder_v(bv_d3, 0, dl3, 1024, fi)
                                                     val () = put_char_v(fi, 0)
-                                                  in (if c_fresh_bv(fo, fi) then 1 else 0): int end
+                                                  in (if module_fresh(fo, fi) then 1 else 0): int end
                                                   val () = (if pf > 0 then ()
                                                   else let
                                                     var eo : $B.builder_v = $B.create()
@@ -2201,7 +2201,7 @@ in
                                     val () = bput_v(fi, "build/src/")
                                     val () = copy_to_builder_v(bv_dpsm, 0, dl_psm, 1024, fi)
                                     val () = put_char_v(fi, 0)
-                                  in (if c_fresh_bv(fo, fi) then 1 else 0): int end
+                                  in (if module_fresh(fo, fi) then 1 else 0): int end
                                   val () = (if pf_sm > 0 then ()
                                   else let
                                     var eo_sm : $B.builder_v = $B.create()
@@ -2248,7 +2248,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ib)
                       val () = bput_v(ib, ".dats")
                       val () = put_char_v(ib, 0)
-                    in (if c_fresh_bv(ob, ib) then 1 else 0): int end
+                    in (if module_fresh(ob, ib) then 1 else 0): int end
                     val () = (if bin_pats_fresh > 0 then ()
                     else let
                     var po_b : $B.builder_v = $B.create()
@@ -2284,7 +2284,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ib)
                       val () = bput_v(ib, ".dats")
                       val () = put_char_v(ib, 0)
-                    in (if c_fresh_bv(ob, ib) then 1 else 0): int end
+                    in (if module_fresh(ob, ib) then 1 else 0): int end
                     val () = (if ent_pats_fresh > 0 then ()
                     else let
                     var eo_b : $B.builder_v = $B.create()
@@ -3014,7 +3014,19 @@ in
           val () = put_char_v(ld_b, 0)
           val @(lib_d_in, ld_len) = $B.to_arr(ld_b)
           val @(fz_ld, bv_ld) = $A.freeze<byte>(lib_d_in)
-          val lrc = run_patsopt(bv_patshome, phlen, bv_lc, lc_len, bv_ld, ld_len)
+          (* fresh like the dependencies' lib_dats.c: a library's own is
+             checked again only when its closure changed, in check and
+             test mode (bats#267) *)
+          val lib_fresh = let
+            var fo : $B.builder_v = $B.create()
+            val () = bput_v(fo, "build/src/lib_dats.c")
+            val () = put_char_v(fo, 0)
+            var fi : $B.builder_v = $B.create()
+            val () = bput_v(fi, "build/src/lib.dats")
+            val () = put_char_v(fi, 0)
+          in memo_fresh_in_check(fo, fi) end
+          val lrc = (if lib_fresh then 0
+            else run_patsopt(bv_patshome, phlen, bv_lc, lc_len, bv_ld, ld_len)): int
           val () = $A.drop<byte>(fz_lc, bv_lc)
           val () = $A.free<byte>($A.thaw<byte>(fz_lc))
           val () = $A.drop<byte>(fz_ld, bv_ld)

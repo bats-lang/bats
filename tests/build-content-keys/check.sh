@@ -54,6 +54,7 @@ quiet() { # <log> <what>: no patsopt and no cc
   [ "$(count "$1" patsopt)" = 0 ] || { echo "FAIL: $2 ran patsopt"; cat "$1"; exit 1; }
   [ "$(count "$1" cc)" = 0 ] || { echo "FAIL: $2 ran cc"; cat "$1"; exit 1; }
 }
+ran_on() { grep -a -- '+ patsopt' "$1" | grep -ac "$2" || true; }
 cold() { # <log> <what> <patsopt at least>
   [ "$(count "$1" patsopt)" -ge "$3" ] || { echo "FAIL: $2 ran patsopt $(count "$1" patsopt) times, expected $3 at least"; cat "$1"; exit 1; }
 }
@@ -93,20 +94,22 @@ cp "$TMP/plain/src/lib.bats" "$TMP/lib.keep"
 printf '#pub fun h (): int\n\nimplement h () = 5\n' > "$TMP/plain/src/lib.bats"
 touch -d '2001-01-01 00:00:00' "$TMP/plain/src/lib.bats"
 run c9.log check
-# (check makes two passes, the native one and the wasm one: once in each)
-[ "$(count c9.log patsopt)" = 2 ] || { echo "FAIL: a changed body ran patsopt $(count c9.log patsopt) times, not once in each pass"; cat c9.log; exit 1; }
-[ "$(grep -a -- '+ patsopt' c9.log | grep -avc 'plain/src/lib_dats.c')" = 0 ] || { echo "FAIL: patsopt ran on another module than plain's lib"; cat c9.log; exit 1; }
+# (check makes two passes, the native one and the wasm one: the library's
+# module once in each, and each bin once, whose closure holds the
+# dependency's .dats it staloads; the others are not checked again)
+[ "$(count c9.log patsopt)" = 4 ] || { echo "FAIL: a changed body ran patsopt $(count c9.log patsopt) times, not on the module and the two bins that staload it"; cat c9.log; exit 1; }
+[ "$(grep -a -- '+ patsopt' c9.log | grep -avc 'plain/src/lib_dats.c\|src/bin/tool_dats.c\|src/bin/web_dats.c')" = 0 ] || { echo "FAIL: patsopt ran on another module than plain's lib and the bins"; cat c9.log; exit 1; }
 run c10.log check
 quiet c10.log "the check after a changed body"
-# A changed .sats: every module is made again
-# (as a dependency replaced by another version is: only its .sats differs,
-# and its files are older than everything)
+# A changed .sats: the modules whose closure holds it are checked again
+# (a dependency replaced by another version: only its .sats differs, and
+# its files are older than everything), not the others (bats#267)
 printf '#pub fun h (): int\n#pub fun h2 (): int\n\nimplement h () = 5\nimplement h2 () = 6\n' > "$TMP/plain/src/lib.bats"
 touch -d '2001-01-01 00:00:00' "$TMP/plain/src/lib.bats"
 run c11.log check
-cold c11.log "a changed .sats" 6
+cold c11.log "a changed .sats" 4
 grep -aq 'src/bin/tool_dats.c' c11.log || { echo "FAIL: the dependent bin's C was not made again"; cat c11.log; exit 1; }
-grep -aq 'ns.example/mine/src/lib_dats.c' c11.log || { echo "FAIL: another dependency's C was not made again"; cat c11.log; exit 1; }
+[ "$(ran_on c11.log 'ns.example/mine')" = 0 ] || { echo "FAIL: a dependency that does not staload it was made again"; cat c11.log; exit 1; }
 run c12.log check
 quiet c12.log "the check after a changed .sats"
 # An interrupted run: patsopt kills bats after the key was dropped. The
@@ -124,12 +127,12 @@ grep -aq 'plain/src/lib_dats.c' k2.log || { echo "FAIL: not plain's lib"; cat k2
 run k3.log check
 quiet k3.log "the check after an interrupted run"
 # The stamp ahead of the .sats (bats killed after touching it, before it
-# wrote the .sats; it touches the stamp first): every module is made again
+# wrote the .sats; it touches the stamp first): a check does not read it
+# any more, its modules' keys name the files they were checked from
+# (bats#267); a build does, and makes every module again (below)
 printf 'x' >> build/.sats_changed
 run s1.log check
-cold s1.log "a stamp ahead of the .sats" 3
-run s2.log check
-quiet s2.log "the check after it"
+quiet s1.log "a check with the .sats stamp ahead"
 # The same for a build (another mark: a cold one first)
 run b0.log build --only debug --only native
 cold b0.log "a cold build" 5
@@ -140,4 +143,10 @@ quiet b2.log "the second no-change build"
 find build -type f -exec touch -d '2040-01-01 00:00:00' {} +
 run b3.log build --only debug --only native
 quiet b3.log "a build with every file of build/ in the future"
+# the stamp ahead of the .sats: every C is made again by a build
+printf 'x' >> build/.sats_changed
+run b4.log build --only debug --only native
+cold b4.log "a build with the stamp ahead of the .sats" 3
+run b5.log build --only debug --only native
+quiet b5.log "the build after it"
 echo "build-content-keys: ok"

@@ -415,6 +415,288 @@ fn module_key {lph,lo,li:agz}
 in read && whole end
 
 (* ============================================================
+   The check memo (bats#267, item 3)
+   ============================================================ *)
+
+(* In check and test mode a module's C is the record that it type-checked.
+   Beside it, <C>.key says under what: the text
+
+     bats-memo 1
+     names <sha256 of the names of the .sats and .hats files of build/>
+     <path>               one line for each file patsopt read for the module
+     --                   (cache.bats's list_inputs: its .dats and every
+     <size>                file its staloads and includes reach, to the end)
+     ...                  one for each path, in order, then build/.bats_stamp's
+     <sha256>
+     ...                  one for each path, in order, then build/.bats_stamp's
+
+   with a .sats digested as its interface (helpers.bats's memo_entry_size
+   and memo_entry_hash). The module is skipped when that text, made again
+   from the files as they are now, is the one the key holds: the sizes first
+   (a different size is a changed file, with no hashing) and then the
+   hashes. No time is read. The list of paths is the key's own, read back
+   from it, so patsopt --depgen runs once, when patsopt ran, and not at
+   each lookup (bats#253 measured it at 0.4 s a module). A file that
+   patsopt would have read had it existed (a .sats of the same name earlier
+   on -IATS build -IATS build/src -IATS build/bats_modules) is in no list:
+   the names line closes that, as every .sats and .hats name of build/
+   (besides the stashes') is in it, so a file added or removed makes every
+   module be checked again. The key is written after patsopt and
+   check_emitted_flaws passed, to a temporary file renamed into place (so
+   it is read whole or not at all), and removed before they run (a failed
+   or killed run leaves none). A key that is missing, garbled, cut short or
+   of another format is not equal to what its files give, so the module is
+   checked. --cold and BATS_COLD ignore every key. *)
+
+#define MEMO_HEAD_LEN 83
+
+(* The sha256 of the sorted names of the .sats and .hats files of build/
+   (not those of the stashes of other targets), appended to out as 64 hex
+   digits; false when it cannot be had. Made at each call: a file added
+   after the last call would not be seen by a digest kept. *)
+fn names_digest (out: !$B.builder_v >> $B.builder_v): bool = let
+  var a1 : $B.builder_v = $B.create()
+  val () = bput_v(a1, "build/.bats_names")
+  val rc = sh_script("find build -path build/.stash -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print | LC_ALL=C sort > \"$1\"",
+    $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil()))
+  val lp = str_to_path_arr("build/.bats_names")
+  val @(fz_l, bv_l) = $A.freeze<byte>(lp)
+  val ok = (if rc = 0 then put_file_sha256(bv_l, out) else false): bool
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+in ok end
+
+(* Up to the end of the line that starts at or after i in c[0, n): the
+   position of its line feed, or the end *)
+fun line_end {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
+  (c: !$A.borrow(byte, l, m), i: int i, n: int, m: int m): [r:nat | i <= r] int r =
+  if i >= m then i
+  else if i >= n then i
+  else if byte2int0($A.read<byte>(c, i)) = 10 then i
+  else line_end(c, i + 1, n, m)
+
+(* Where the first line of c[i, n) that is "--" starts, or ~1 *)
+fun find_rule {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
+  (c: !$A.borrow(byte, l, m), i: int i, n: int, m: int m): int =
+  if i >= m then ~1
+  else if i >= n then ~1
+  else if byte2int0($A.read<byte>(c, i)) = 45 && peek(c, i + 1, m) = 45
+          && peek(c, i + 2, m) = 10 then i
+  else let
+    val e = line_end(c, i, n, m)
+  in find_rule(c, e + 1, n, m) end
+
+(* The size line of each of the paths in c[i, stop), one on each line (each
+   ends with a line feed), appended to out; ok and false when a file cannot
+   be read *)
+fun walk_sizes {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
+  (c: !$A.borrow(byte, l, m), i: int i, stop: int, m: int m,
+   line: $B.builder_v, out: !$B.builder_v >> $B.builder_v, ok: bool): bool =
+  if i >= m then let val () = $B.builder_free(line) in ok end
+  else if i >= stop then let val () = $B.builder_free(line) in ok end
+  else let
+    val b = byte2int0($A.read<byte>(c, i))
+  in
+    if b = 10 then let
+      var p = line
+      val () = put_char_v(p, 0)
+      val @(pa, _) = $B.to_arr(p)
+      val @(fz_pa, bv_pa) = $A.freeze<byte>(pa)
+      val good = memo_entry_size(bv_pa, out)
+      val () = $A.drop<byte>(fz_pa, bv_pa)
+      val () = $A.free<byte>($A.thaw<byte>(fz_pa))
+    in walk_sizes(c, i + 1, stop, m, $B.create(), out, ok && good) end
+    else let
+      var more = line
+      val () = put_char_v(more, b)
+    in walk_sizes(c, i + 1, stop, m, more, out, ok) end
+  end
+
+(* The same for the hash lines *)
+fun walk_hashes {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
+  (c: !$A.borrow(byte, l, m), i: int i, stop: int, m: int m,
+   line: $B.builder_v, out: !$B.builder_v >> $B.builder_v, ok: bool): bool =
+  if i >= m then let val () = $B.builder_free(line) in ok end
+  else if i >= stop then let val () = $B.builder_free(line) in ok end
+  else let
+    val b = byte2int0($A.read<byte>(c, i))
+  in
+    if b = 10 then let
+      var p = line
+      val () = put_char_v(p, 0)
+      val @(pa, _) = $B.to_arr(p)
+      val @(fz_pa, bv_pa) = $A.freeze<byte>(pa)
+      val good = memo_entry_hash(bv_pa, out)
+      val () = $A.drop<byte>(fz_pa, bv_pa)
+      val () = $A.free<byte>($A.thaw<byte>(fz_pa))
+    in walk_hashes(c, i + 1, stop, m, $B.create(), out, ok && good) end
+    else let
+      var more = line
+      val () = put_char_v(more, b)
+    in walk_hashes(c, i + 1, stop, m, more, out, ok) end
+  end
+
+(* The head of the key's text: its format, then the names line *)
+fn memo_head {ln:agz}
+  (names: !$A.borrow(byte, ln, 524288), out: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(out, "bats-memo 1\nnames ")
+  val () = copy_to_builder_v(names, 0, 64, 524288, out)
+in put_char_v(out, 10) end
+
+(* The key's text up to and including the sizes, for the paths in
+   c[from, stop) (each line ends with a line feed): the head, the paths,
+   the rule, their sizes and the stamp's *)
+fn memo_sizes_text {ln,lc:agz}{m:pos}{f:nat}
+  (names: !$A.borrow(byte, ln, 524288), c: !$A.borrow(byte, lc, m), from: int f, stop: int, m: int m,
+   out: !$B.builder_v >> $B.builder_v): bool = let
+  val () = memo_head(names, out)
+  val () = copy_to_builder_v(c, from, stop, m, out)
+  val () = bput_v(out, "--\n")
+  val sized = walk_sizes(c, from, stop, m, $B.create(), out, true)
+  val () = stamp_digest_sizes(out)
+in sized end
+
+(* ... and the hashes, appended to the text memo_sizes_text made *)
+fn memo_hashes_text {lc:agz}{m:pos}{f:nat}
+  (c: !$A.borrow(byte, lc, m), from: int f, stop: int, m: int m,
+   out: !$B.builder_v >> $B.builder_v): bool = let
+  val hashed = walk_hashes(c, from, stop, m, $B.create(), out, true)
+  val () = stamp_digest_hashes(out)
+in hashed end
+
+(* Whether the C at out_b is still the record of a check of the module
+   whose .dats is in_b: the key beside it equals what the files it lists
+   give now *)
+
+
+implement memo_fresh(out_b, in_b) = let
+  val @(oa, ol) = $B.to_arr(out_b)
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val @(ia, _) = $B.to_arr(in_b)
+  val () = $A.free<byte>(ia)
+  val there = $F.file_exists(bv_o, 524288)
+  val @(ka, _) = $B.to_arr(path_with(bv_o, ol, ".key"))
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  val fresh = (if ~there then false
+    else if is_cold() then false
+    else (case+ read_whole(bv_k, 524288) of
+      | ~whole_err(_) => false
+      | ~whole_ok(ar, piece, m, n) => let
+          val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+          val rule = find_rule(bv_c, MEMO_HEAD_LEN, n, m)
+          var nb : $B.builder_v = $B.create()
+          val named = (if rule >= MEMO_HEAD_LEN then names_digest(nb) else false): bool
+          val @(na, nl) = $B.to_arr(nb)
+          val @(fz_na, bv_na) = $A.freeze<byte>(na)
+          (* the sizes first *)
+          var eb : $B.builder_v = $B.create()
+          val sized = (if named && nl = 64
+            then memo_sizes_text(bv_na, bv_c, MEMO_HEAD_LEN, rule, m, eb) else false): bool
+          val @(ea, el) = $B.to_arr(eb)
+          val @(fz_e, bv_e) = $A.freeze<byte>(ea)
+          val same_sizes = (if sized then file_starts_with(bv_k, bv_e, el) else false): bool
+          var hb : $B.builder_v = $B.create()
+          val () = (if same_sizes then copy_to_builder_v(bv_e, 0, el, 524288, hb) else ())
+          val hashed = (if same_sizes
+            then memo_hashes_text(bv_c, MEMO_HEAD_LEN, rule, m, hb) else false): bool
+          val @(ha, hl) = $B.to_arr(hb)
+          val @(fz_h, bv_h) = $A.freeze<byte>(ha)
+          val equal = (if hashed then file_has_bytes(bv_k, bv_h, hl) else false): bool
+          val () = $A.drop<byte>(fz_h, bv_h)
+          val () = $A.free<byte>($A.thaw<byte>(fz_h))
+          val () = $A.drop<byte>(fz_e, bv_e)
+          val () = $A.free<byte>($A.thaw<byte>(fz_e))
+          val () = $A.drop<byte>(fz_na, bv_na)
+          val () = $A.free<byte>($A.thaw<byte>(fz_na))
+          val () = $A.drop<byte>(fz_c, bv_c)
+          val () = whole_free(ar, $A.thaw<byte>(fz_c))
+        in equal end)): bool
+  val () = (if fresh && is_verbose() then let
+      val () = print! ("  = ")
+      val () = print_borrow(bv_o, 0, ol - 1, 524288)
+    in println! (" (unchanged)") end else ())
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+in fresh end
+
+(* Whether the C at out_b is fresh: in check and test mode by the memo,
+   otherwise by build/.sats_changed and the .dats (c_fresh_bv) *)
+
+
+implement module_fresh(out_b, in_b) =
+  if is_test_mode() then memo_fresh(out_b, in_b) else c_fresh_bv(out_b, in_b)
+
+(* Whether the C at out_b is fresh by the memo in check and test mode;
+   false in a build, where nothing is skipped (for the modules that were
+   never skipped there) *)
+
+
+implement memo_fresh_in_check(out_b, in_b) =
+  if is_test_mode() then memo_fresh(out_b, in_b)
+  else let
+    val @(oa, _) = $B.to_arr(out_b)
+    val () = $A.free<byte>(oa)
+    val @(ia, _) = $B.to_arr(in_b)
+    val () = $A.free<byte>(ia)
+  in false end
+
+(* Writes <out>.key after patsopt passed on the module: names is the
+   digest of the names made before patsopt ran (nl bytes; the key is not
+   written unless they are the 64 of a sha256), listed whether
+   build/.bats_depgen holds this module's files already (module_key made
+   it) or list_inputs is to make it. The key is written beside its place
+   and renamed into it. *)
+fn memo_record {lph,ln,lo,li:agz}
+  (ph: !$A.borrow(byte, lph, 512), phlen: int,
+   names: !$A.borrow(byte, ln, 524288), nl: int, listed: bool,
+   out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
+   in_bv: !$A.borrow(byte, li, 524288), in_len: int): void = let
+  val have = (if nl <> 64 then false
+    else if listed then true
+    else list_inputs(ph, phlen, in_bv, in_len)): bool
+  val lp = str_to_path_arr("build/.bats_depgen")
+  val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
+  val () = (if ~have then ()
+    else (case+ read_whole(bv_lp, 524288) of
+      | ~whole_err(_) => ()
+      | ~whole_ok(ar, piece, m, n) => let
+          val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+          (* a list of whole lines *)
+          val whole_lines = (n > 0 && peek(bv_c, n - 1, m) = 10): bool
+          var b : $B.builder_v = $B.create()
+          val sized = (if whole_lines then memo_sizes_text(names, bv_c, 0, n, m, b) else false): bool
+          val hashed = (if sized then memo_hashes_text(bv_c, 0, n, m, b) else false): bool
+          val fits = ($B.length(b) < 524288): bool
+          val @(ba, bl) = $B.to_arr(b)
+          val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+          val () = (if hashed && fits then let
+              val @(ta, tl) = $B.to_arr(path_with(out_bv, out_len, ".key.new"))
+              val @(fz_t, bv_t) = $A.freeze<byte>(ta)
+              var content : $B.builder_v = $B.create()
+              val () = copy_to_builder_v(bv_b, 0, bl, 524288, content)
+              val wrote = write_file_from_builder(bv_t, 524288, content)
+              val @(ka, _) = $B.to_arr(path_with(out_bv, out_len, ".key"))
+              val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+              val _ = (if wrote = 0 then sh_script("mv -f \"$1\" \"$2\"",
+                  $L.list_vt_cons(path_arg(bv_t, tl), $L.list_vt_cons(path_arg(bv_k, tl), $L.list_vt_nil())))
+                else 0): int
+              val () = $A.drop<byte>(fz_k, bv_k)
+              val () = $A.free<byte>($A.thaw<byte>(fz_k))
+              val () = $A.drop<byte>(fz_t, bv_t)
+              val () = $A.free<byte>($A.thaw<byte>(fz_t))
+            in end else ())
+          val () = $A.drop<byte>(fz_b, bv_b)
+          val () = $A.free<byte>($A.thaw<byte>(fz_b))
+          val () = $A.drop<byte>(fz_c, bv_c)
+          val () = whole_free(ar, $A.thaw<byte>(fz_c))
+        in end))
+  val () = $A.drop<byte>(fz_lp, bv_lp)
+  val () = $A.free<byte>($A.thaw<byte>(fz_lp))
+in end
+
+(* ============================================================
    patsopt, through the cache
    ============================================================ *)
 
@@ -426,6 +708,13 @@ in read && whole end
 implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
   val () = key_drop(out_bv)
+  (* check and test mode: the names of the files patsopt could read, as
+     they are before it runs (see the check memo) *)
+  val memo_mode = is_test_mode()
+  var nm : $B.builder_v = $B.create()
+  val named = (if memo_mode then names_digest(nm) else false): bool
+  val @(nma, nml) = $B.to_arr(nm)
+  val @(fz_nma, bv_nma) = $A.freeze<byte>(nma)
   var dir : $B.builder_v = $B.create()
   val shared = cache_dir(dir)
   var hex : $B.builder_v = $B.create()
@@ -501,7 +790,11 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
         $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_cons(mk_arg(e2),
         $L.list_vt_cons(mk_arg(s2), $L.list_vt_nil()))))
     in end)
-  val () = (if rc2 = 0 then key_record(true, out_bv, in_bv) else ())
+  val () = (if rc2 <> 0 then ()
+    else if memo_mode then memo_record(ph, phlen, bv_nma, (if named then nml else 0), keyed, out_bv, out_len, in_bv, in_len)
+    else key_record(true, out_bv, in_bv))
+  val () = $A.drop<byte>(fz_nma, bv_nma)
+  val () = $A.free<byte>($A.thaw<byte>(fz_nma))
   val () = $A.drop<byte>(fz_ea, bv_ea)
   val () = $A.free<byte>($A.thaw<byte>(fz_ea))
   val () = $A.drop<byte>(fz_sa, bv_sa)

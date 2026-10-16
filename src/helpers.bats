@@ -74,6 +74,7 @@ implement find_null_bv_from (bv, p, n) =
 val g_verbose = ref<bool>(false)
 val g_quiet = ref<bool>(false)
 val g_test_mode = ref<bool>(false)
+val g_cold = ref<bool>(false)
 val g_lock_dev = ref<bool>(false)
 val g_repo: ref(string) = ref("")
 val g_bin: ref(string) = ref("")
@@ -107,6 +108,8 @@ val g_cap_exit = ref<int>(0)
 #pub fn set_quiet(v: bool): void
 
 #pub fn set_test_mode(v: bool): void
+
+#pub fn set_cold(v: bool): void
 
 #pub fn set_lock_dev(v: bool): void
 
@@ -156,6 +159,7 @@ implement is_to_c() = !g_to_c
 implement set_verbose(v) = !g_verbose := v
 implement set_quiet(v) = !g_quiet := v
 implement set_test_mode(v) = !g_test_mode := v
+implement set_cold(v) = !g_cold := v
 implement set_lock_dev(v) = !g_lock_dev := v
 implement is_lock_dev() = !g_lock_dev
 implement set_repo(s) = !g_repo := s
@@ -902,6 +906,20 @@ in b end
    fixture) calls input_digest_sizes and input_digest_hashes on its
    input, or input_digest for both: false when the input cannot be read,
    and then nothing it appended is a digest. *)
+(* The size line and the hash line of build/.bats_stamp, the last of every
+   digest: the part of a key that is the same for all of build/ *)
+#pub fn stamp_digest_sizes (b: !$B.builder_v >> $B.builder_v): void
+
+implement stamp_digest_sizes(b) = let
+  val () = put_int_v(b, size_of_built(bats_stamp_path()))
+in put_char_v(b, 10) end
+
+#pub fn stamp_digest_hashes (b: !$B.builder_v >> $B.builder_v): void
+
+implement stamp_digest_hashes(b) = let
+  val () = hash_of_built(bats_stamp_path(), b)
+in put_char_v(b, 10) end
+
 #pub fn input_digest_sizes {li:agz}
   (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
 
@@ -912,8 +930,7 @@ implement input_digest_sizes(is_c, in_bv, b) = let
   val () = (if is_c then let
       val () = put_int_v(b, size_of_built(sats_stamp_path()))
     in put_char_v(b, 10) end else ())
-  val () = put_int_v(b, size_of_built(bats_stamp_path()))
-  val () = put_char_v(b, 10)
+  val () = stamp_digest_sizes(b)
 in $AR.gte_int_int(z, 0) end
 
 #pub fn input_digest_hashes {li:agz}
@@ -925,8 +942,7 @@ implement input_digest_hashes(is_c, in_bv, b) = let
   val () = (if is_c then let
       val () = hash_of_built(sats_stamp_path(), b)
     in put_char_v(b, 10) end else ())
-  val () = hash_of_built(bats_stamp_path(), b)
-  val () = put_char_v(b, 10)
+  val () = stamp_digest_hashes(b)
 in ok end
 
 (* Sizes and then hashes, for a caller that has no use for the sizes alone *)
@@ -2849,6 +2865,158 @@ implement sats_moved (before, path) =
         val () = $A.drop<byte>(fz1, bv1)
         val () = whole_free(ar1, $A.thaw<byte>(fz1))
       in moved end)
+
+(* ---- The check memo's entries (bats#267, item 3) ----
+
+   In check and test mode a module's C is the record that it type-checked,
+   and what that rests on is every file patsopt read for it (cache.bats
+   lists them, from patsopt --depgen). Each is digested here as the other
+   digests are, a size and then a sha256, never a time, except that a
+   .sats is digested as its interface: its bytes with each run of line
+   feeds taken as one line feed, the equivalence sats_moved uses for a
+   .sats that only moved, so a declaration added before a module's #pub
+   ones (a static test's snippet) changes no module that staloads it. A
+   .sats's "size" is the length of that text, so it is still a negative
+   only: a different length is a different interface. *)
+
+(* Whether the NUL-terminated path ends in ".sats" *)
+fn is_sats_path {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool = let
+  val n = find_null_bv_from(p, 0, 524288)
+in
+  n >= 5 && peek(p, n - 5, 524288) = 46 && peek(p, n - 4, 524288) = 115
+  && peek(p, n - 3, 524288) = 97 && peek(p, n - 2, 524288) = 116
+  && peek(p, n - 1, 524288) = 115
+end
+
+(* src[i, k) written to dst from j without the line feeds that follow a
+   line feed (prev is the byte before src[i], 0 at the start of a file);
+   how many bytes were written *)
+fun _collapse_lines {la,lb:agz}{k:nat | k <= 65536}{i:nat | i <= k}{j:nat | j <= i} .<k - i>.
+  (src: !$A.arr(byte, la, 65536), dst: !$A.arr(byte, lb, 65536),
+   k: int k, i: int i, j: int j, prev: int, squeeze: bool): [r:nat | r <= k] int r =
+  if i >= k then j
+  else let
+    val b = peek_arr(src, i, 65536)
+  in
+    if squeeze && b = 10 && prev = 10 then _collapse_lines(src, dst, k, i + 1, j, b, squeeze)
+    else let
+      val () = poke_arr(dst, j, 65536, b)
+    in _collapse_lines(src, dst, k, i + 1, j + 1, b, squeeze) end
+  end
+
+(* The interface of the r bytes left of fd, a chunk at a time, fed to c;
+   len is the length so far, and the length of all of it is the answer *)
+fun _interface_chunks {lb,lc:agz}{r:int} .<max(r, 0)>.
+  (fd: !$F.fd, buf: !$A.arr(byte, lb, 65536), out: !$A.arr(byte, lc, 65536),
+   c: !$SHA.ctx, r: int r, prev: int, len: int, squeeze: bool): int =
+  if r <= 0 then len
+  else let
+    val k = (case+ $F.file_read(fd, buf, 65536) of
+      | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 65536] int k
+    val m = _collapse_lines(buf, out, k, 0, 0, prev, squeeze)
+    val () = $SHA.update(c, out, m)
+    val last = (if k > 0 then peek_arr(buf, k - 1, 65536) else prev): int
+  in
+    if k <= 0 then len else _interface_chunks(fd, buf, out, c, r - k, last, len + m, squeeze)
+  end
+
+(* The length of the interface of the file at p, or its sha256, appended
+   to b (the length when want_hash is false); false when it cannot be
+   opened. squeeze: each run of line feeds is taken as one. *)
+fn interface_digest {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), b: !$B.builder_v >> $B.builder_v, want_hash: bool,
+   squeeze: bool): bool =
+  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  | ~$R.ok(fd) => let
+      val buf = $A.alloc<byte>(65536)
+      val out = $A.alloc<byte>(65536)
+      val c = $SHA.init()
+      val size = (case+ $F.fd_size(fd) of
+        | ~$R.ok(s) => s | ~$R.err(_) => 0): [s:nat] int s
+      (* a tag first: the text was squeezed (C) or is as it is (R), so
+         the digest of one is never that of the other *)
+      val () = poke_arr(out, 0, 65536, (if squeeze then 67 else 82))
+      val () = $SHA.update(c, out, 1)
+      val len = _interface_chunks(fd, buf, out, c, size, 0, 1, squeeze)
+      val () = $A.free<byte>(buf)
+      val () = $A.free<byte>(out)
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+      val hex = $A.alloc<byte>(64)
+      val () = $SHA.finish(c, hex)
+      val @(fh, bh) = $A.freeze<byte>(hex)
+      val () = (if want_hash then copy_to_builder_v(bh, 0, 64, 64, b) else put_int_v(b, len))
+      val () = $A.drop<byte>(fh, bh)
+      val () = $A.free<byte>($A.thaw<byte>(fh))
+    in true end
+  | ~$R.err(_) => false
+
+(* Whether the .sats at p only has line feeds that may be squeezed (none
+   in a literal, as sats_moved asks), so that a run of them more or fewer
+   is no change; false when it cannot be read *)
+fn squeezable {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
+  case+ read_whole(p, 524288) of
+  | ~whole_err(_) => false
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz, bv) = $A.freeze<byte>(piece)
+      val ok = newlines_between_tokens(bv, n, 0, 0, 0)
+      val () = $A.drop<byte>(fz, bv)
+      val () = whole_free(ar, $A.thaw<byte>(fz))
+    in ok end
+
+(* The interface of the .sats at p: squeezed when sats_moved would take
+   a run of line feeds more or fewer for a move, else as it is *)
+fn interface_scan {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), b: !$B.builder_v >> $B.builder_v, want_hash: bool): bool = let
+  val squeeze = squeezable(p)
+in interface_digest(p, b, want_hash, squeeze) end
+
+(* The size line of one file of a closure: its size, or a .sats's
+   interface length; false when it cannot be read *)
+#pub fn memo_entry_size {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+implement memo_entry_size(p, out) = let
+  val ok = (if is_sats_path(p) then interface_scan(p, out, false)
+    else let
+      val z = size_of_file(p)
+      val () = put_int_v(out, z)
+    in z >= 0 end): bool
+  val () = put_char_v(out, 10)
+in ok end
+
+(* The hash line of one file of a closure: its sha256, or a .sats's
+   interface's *)
+#pub fn memo_entry_hash {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+implement memo_entry_hash(p, out) = let
+  val ok = (if is_sats_path(p) then interface_scan(p, out, true)
+    else put_file_sha256(p, out)): bool
+  val () = put_char_v(out, 10)
+in ok end
+
+(* Whether the file at path_bv begins with bv[0, len) *)
+#pub fn file_starts_with {lp:agz}{lb:agz}{n:nat | n <= 524288}
+  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int n): bool
+
+implement file_starts_with(path_bv, bv, len) = file_has_prefix(path_bv, bv, len)
+
+(* BATS_COLD: set to anything but "0", or --cold: the check memo is
+   ignored (and written again) *)
+#pub fn is_cold (): bool
+
+implement is_cold () =
+  if !g_cold then true
+  else let
+    var b : $B.builder_v = $B.create()
+    val set = env_value("BATS_COLD", b)
+    val @(a, k) = $B.to_arr(b)
+    val @(fz, bv) = $A.freeze<byte>(a)
+    val zero = (k = 1 && peek(bv, 0, 524288) = 48): bool
+    val () = $A.drop<byte>(fz, bv)
+    val () = $A.free<byte>($A.thaw<byte>(fz))
+  in set && ~zero end
+
 
 #pub fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 

@@ -58,6 +58,12 @@ ${CC:-cc} -o "$TMP/hog" "$TMP/hog.c"
 # the cap started it), then does what FAKE says, else runs the real one
 cat > "$H/.bats/ats2/bin/patsopt" <<SH
 #!/bin/sh
+# patsopt --depgen only lists the files a module reads (the check memo
+# runs it after a module passed, bats#267): it is not a solver run and is
+# started by sh, outside the cap, so it is neither logged nor made to fail
+for a in "\$@"; do
+  if [ "\$a" = --depgen ]; then exec "$REAL/bin/patsopt" "\$@"; fi
+done
 basename "\$(ps -o comm= -p \$PPID | tr -d ' ')" >> "$LOG"
 case "\${FAKE:-}" in
   sleep) exec sleep 60 ;;
