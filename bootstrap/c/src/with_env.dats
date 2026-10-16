@@ -1,4 +1,5 @@
 staload "./with_env.sats"
+staload "arith/src/lib.dats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"
 staload "env/src/lib.dats"
@@ -48,13 +49,16 @@ staload "result/src/lib.dats"
    than 1024 variables, a value that cannot be made because it uses a
    variable whose name is over 255 bytes or whose value is over 64 KiB, an entry
    over 131071 bytes (Linux's MAX_ARG_STRLEN less the NUL), variables together
-   over 1 MiB, a NUL byte in the file, a command line too long to be read whole) is status
+   over 524287 bytes (the process package's builder for the environment, 524288
+   bytes with the NUL after each entry, E2BIG beyond it; with-env holds no
+   machine slot, so spawn_child_with adds no BATS_SLOT_HELD entry), a NUL byte in the file, a command line too long to be read whole) is status
    2; a command that is found nowhere is 127 and one that cannot be run 126
    (with the system's reason). The status of a command that a signal ended is
    1: the process package's child_wait says only that it did not exit. *)
 
 #include "share/atspre_staload.hats"
 
+staload AR = "arith/src/lib.sats"
 staload A = "array/src/lib.sats"
 staload B = "builder/src/lib.sats"
 staload E = "env/src/lib.sats"
@@ -64,10 +68,6 @@ staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 
 staload "helpers.sats"
-
-(* The byte at p, whatever int p is, or 0 outside bv[0, n) *)
-fn byte_at {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), p: int, n: int n): int =
-  peek(bv, g1ofg0(p), n)
 
 (* The first position at or after p of bv[0, n) that holds byte c, or the
    first one at or after lim, or n *)
@@ -125,12 +125,12 @@ fun name_end {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
   else p
 
 (* Whether bv[a, ae) and bv[b, be) are the same bytes *)
-fun same_span {l:agz}{n:pos}{j:nat | j <= n} .<n - j>.
-  (bv: !$A.borrow(byte, l, n), a: int, ae: int, b: int, be: int, j: int j, n: int n): bool =
+fun same_span {l:agz}{n:pos}{a,ae,b,be:int}{j:nat | j <= n} .<n - j>.
+  (bv: !$A.borrow(byte, l, n), a: int a, ae: int ae, b: int b, be: int be, j: int j, n: int n): bool =
   if ae - a <> be - b then false
   else if a + j >= ae then true
   else if j >= n then true
-  else if byte_at(bv, a + j, n) <> byte_at(bv, b + j, n) then false
+  else if peek(bv, a + j, n) <> peek(bv, b + j, n) then false
   else same_span(bv, a, ae, b, be, j + 1, n)
 
 (* bv[a, b) appended to out *)
@@ -143,25 +143,20 @@ fun put_span {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
     val () = put_char_v(out, peek(bv, p, n))
   in put_span(bv, p + 1, b, n, out) end
 
-(* bv[a, b) appended to out, whatever ints a and b are *)
-fn put_range {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), a: int, b: int, n: int n,
-   out: !$B.builder_v >> $B.builder_v): void = let
-  val a1 = g1ofg0(a)
-in
-  if a1 < 0 then ()
-  else if a1 > n then ()
-  else put_span(bv, a1, b, n, out)
-end
+(* bv[a, b) appended to out *)
+fn put_range {l:agz}{n:pos}{a:nat | a <= n}
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int, n: int n,
+   out: !$B.builder_v >> $B.builder_v): void =
+  put_span(bv, a, b, n, out)
 
 (* bv[a, b) copied into name[j, 255), at most *)
-fun copy_name {l:agz}{ln:agz}{n:pos}{j:nat | j <= 255} .<255 - j>.
-  (bv: !$A.borrow(byte, l, n), a: int, b: int, n: int n,
-   name: !$A.arr(byte, ln, 256), j: int j): int =
+fun copy_name {l:agz}{ln:agz}{n:pos}{a:int}{j:nat | j <= 255} .<255 - j>.
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int, n: int n,
+   name: !$A.arr(byte, ln, 256), j: int j): [r:nat | r <= 255] int r =
   if j >= 255 then j
   else if a + j >= b then j
   else let
-    val () = poke_arr(name, j, 256, byte_at(bv, a + j, n))
+    val () = poke_arr(name, j, 256, peek(bv, a + j, n))
   in copy_name(bv, a, b, n, name, j + 1) end
 
 (* The bytes out holds *)
@@ -187,14 +182,14 @@ in ok end
 (* The value of the variable named bv[a, b) in this process's environment
    appended to out; nothing when it is unset. False, and nothing appended,
    when the name is over 255 bytes or the value over 64 KiB *)
-fn put_variable {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), a: int, b: int, n: int n,
+fn put_variable {l:agz}{n:pos}{a:int}
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int, n: int n,
    out: !$B.builder_v >> $B.builder_v): bool =
   if b - a > 255 then false
   else let
     val name = $A.alloc<byte>(256)
     val len = copy_name(bv, a, b, n, name, 0)
-    val () = poke_arr(name, g1ofg0(len), 256, 0)
+    val () = poke_arr(name, len, 256, 0)
     val ok = put_variable_named(name, out)
   in $A.free<byte>(name); ok end
 
@@ -246,16 +241,18 @@ fun put_expanded {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
 
 (* One line of the file that sets a variable: where its name is
    (bv[name_at, name_to)) and where its value starts *)
-typedef assignment = @{found= bool, name_at= int, name_to= int, value_at= int}
+typedef assignment (n:int) =
+  [a,b,v:nat | a <= n; b <= n; v <= n]
+  @{found= bool, name_at= int a, name_to= int b, value_at= int v}
 
-fn no_assignment (): assignment =
+fn no_assignment {n:pos} (): assignment(n) =
   @{found= false, name_at= 0, name_to= 0, value_at= 0}
 
 (* Whether bv[i, e) starts with export and a blank *)
-fn exported {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), i: int, e: int, n: int n): bool =
-  byte_at(bv, i, n) = 101 && byte_at(bv, i + 1, n) = 120 && byte_at(bv, i + 2, n) = 112
-  && byte_at(bv, i + 3, n) = 111 && byte_at(bv, i + 4, n) = 114 && byte_at(bv, i + 5, n) = 116
-  && (byte_at(bv, i + 6, n) = 32 || byte_at(bv, i + 6, n) = 9) && i + 6 < e
+fn exported {l:agz}{n:pos}{i:int} (bv: !$A.borrow(byte, l, n), i: int i, e: int, n: int n): bool =
+  peek(bv, i, n) = 101 && peek(bv, i + 1, n) = 120 && peek(bv, i + 2, n) = 112
+  && peek(bv, i + 3, n) = 111 && peek(bv, i + 4, n) = 114 && peek(bv, i + 5, n) = 116
+  && (peek(bv, i + 6, n) = 32 || peek(bv, i + 6, n) = 9) && i + 6 < e
 
 (* Where the name of a line starts, past an export *)
 fn name_start_of {l:agz}{n:pos}{i:nat | i <= n}{e:nat | e <= n}
@@ -267,21 +264,21 @@ fn name_start_of {l:agz}{n:pos}{i:nat | i <= n}{e:nat | e <= n}
 (* The assignment on the line bv[s, e): optional blanks, optional
    export and a blank, a name, = *)
 fn line_assignment {l:agz}{n:pos}{s:nat | s <= n}{e:nat | e <= n}
-  (bv: !$A.borrow(byte, l, n), s: int s, e: int e, n: int n): assignment = let
+  (bv: !$A.borrow(byte, l, n), s: int s, e: int e, n: int n): assignment(n) = let
   val i0 = skip_blank(bv, s, n, e)
 in
-  if i0 >= e then no_assignment()
-  else if byte_at(bv, i0, n) = 35 then no_assignment()
+  if i0 >= e then no_assignment{n}()
+  else if peek(bv, i0, n) = 35 then no_assignment{n}()
   else let
     val i1 = name_start_of(bv, i0, e, n)
   in
-    if i1 >= e then no_assignment()
-    else if ~is_name_start(byte_at(bv, i1, n)) then no_assignment()
+    if i1 >= e then no_assignment{n}()
+    else if ~is_name_start(peek(bv, i1, n)) then no_assignment{n}()
     else let
       val ne = name_end(bv, i1, n, e)
     in
-      if ne >= e then no_assignment()
-      else if byte_at(bv, ne, n) <> 61 then no_assignment()
+      if ne >= e then no_assignment{n}()
+      else if peek(bv, ne, n) <> 61 then no_assignment{n}()
       else @{found= true, name_at= i1, name_to= ne, value_at= ne + 1}
     end
   end
@@ -290,15 +287,10 @@ end
 (* The value of the assignment on a line ending at e, appended to out:
    single quotes literally, double quotes and none expanded; false when an
    expansion cannot be made (see put_variable) *)
-fn put_value {l:agz}{n:pos}{e:nat | e <= n}
-  (bv: !$A.borrow(byte, l, n), value_at: int, e: int e, n: int n,
+fn put_value {l:agz}{n:pos}{v:nat | v <= n}{e:nat | e <= n}
+  (bv: !$A.borrow(byte, l, n), v: int v, e: int e, n: int n,
    out: !$B.builder_v >> $B.builder_v): bool =
   let
-    val v = g1ofg0(value_at)
-  in
-  if v < 0 then true
-  else if v > n then true
-  else let
     val a = skip_blank(bv, v, n, e)
     val t = trim_end(bv, a, e, n)
   in
@@ -311,18 +303,6 @@ fn put_value {l:agz}{n:pos}{e:nat | e <= n}
       else put_expanded(bv, a, t, n, out))
     else put_expanded(bv, a, t, n, out)
   end
-  end
-
-(* put_value, whatever int e is *)
-fn put_value_at {l:agz}{n:pos}
-  (bv: !$A.borrow(byte, l, n), value_at: int, e: int, n: int n,
-   out: !$B.builder_v >> $B.builder_v): bool = let
-  val e1 = g1ofg0(e)
-in
-  if e1 < 0 then true
-  else if e1 > n then true
-  else put_value(bv, value_at, e1, n, out)
-end
 
 (* Which line sets which variable, found in one pass over the file: a table
    of ints, an entry per variable (five ints at 5 * k: where its name is,
@@ -338,86 +318,87 @@ end
    millisecond, and a file of 64 KiB can name 7000 of them, which took 1 GB
    and 3 seconds. *)
 
-fn table_get {lt:agz} (tab: !$A.arr(int, lt, 6144), p: int): int = let
-  val p1 = g1ofg0(p)
+(* The ints of the table are written as they come and read back through
+   table_read, the one place that checks anything: a value read from
+   memory has no index in its type (the array package has no array of
+   indexed ints: bats-lang/array#49), so it is taken to be 0 unless it is
+   in [0, m], which it always is, having been written from a position of
+   the file or an entry's number. Every other use of a position, an
+   entry's number or a table index is proved by its type. *)
+fn table_read {lt:agz}{p:nat | p < 6144}{m:nat}
+  (tab: !$A.arr(int, lt, 6144), p: int p, m: int m): [r:nat | r <= m] int r = let
+  val v = g1ofg0($A.get<int>(tab, p))
 in
-  if p1 < 0 then 0
-  else if p1 >= 6144 then 0
-  else $A.get<int>(tab, p1)
+  if v < 0 then 0
+  else if v > m then 0
+  else v
 end
 
-fn table_set {lt:agz} (tab: !$A.arr(int, lt, 6144), p: int, v: int): void = let
-  val p1 = g1ofg0(p)
-in
-  if p1 < 0 then ()
-  else if p1 >= 6144 then ()
-  else $A.set<int>(tab, p1, v)
-end
+fn table_write {lt:agz}{p:nat | p < 6144}
+  (tab: !$A.arr(int, lt, 6144), p: int p, v: int): void = $A.set<int>(tab, p, v)
 
 (* The hash of bv[p, b), below 1024, h being the hash so far *)
-fun hash_span {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
-  (bv: !$A.borrow(byte, l, n), p: int p, b: int, n: int n, h: int): int =
+fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, b: int, n: int n, h: int h)
+  : [r:nat | r < 1024] int r =
   if p >= n then h
   else if p >= b then h
-  else hash_span(bv, p + 1, b, n, (h * 31 + peek(bv, p, n)) % 1024)
-
-(* The hash of bv[a, b), whatever ints a and b are *)
-fn hash_range {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), a: int, b: int, n: int n): int = let
-  val a1 = g1ofg0(a)
-in
-  if a1 < 0 then 0
-  else if a1 > n then 0
-  else hash_span(bv, a1, b, n, 0)
-end
+  else hash_span(bv, p + 1, b, n, nmod(h * 31 + $AR.low_byte(peek(bv, p, n)), 1024))
 
 (* The entry (counted from 1) from entry k on along its chain whose name is
    bv[a, b), or 0; at most fuel entries are looked at *)
-fun chain_find {l:agz}{n:pos}{lt:agz}{f:nat} .<f>.
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int,
-   a: int, b: int, fuel: int f): int =
+fun chain_find {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024}{a,b:nat | a <= n; b <= n}{f:nat} .<f>.
+  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
+   a: int a, b: int b, fuel: int f): [r:nat | r <= 1024] int r =
   if k <= 0 then 0
   else if fuel <= 0 then 0
   else let
     val base = 5 * (k - 1)
+    val entry_at = table_read(tab, base, n)
+    val entry_to = table_read(tab, base + 1, n)
   in
-    if same_span(bv, table_get(tab, base), table_get(tab, base + 1), a, b, 0, n) then k
-    else chain_find(bv, n, tab, table_get(tab, base + 4), a, b, fuel - 1)
+    if same_span(bv, entry_at, entry_to, a, b, 0, n) then k
+    else chain_find(bv, n, tab, table_read(tab, base + 4, 1024), a, b, fuel - 1)
   end
 
 (* The assignment x, on a line ending at e, put in the table that holds
-   count entries: the number it holds then *)
-fn table_put {l:agz}{n:pos}{lt:agz}
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), x: assignment, e: int, count: int): int = let
-  val slot = 5120 + hash_range(bv, x.name_at, x.name_to, n)
-  val head = table_get(tab, slot)
+   count entries: the number it holds then (1025 for a table that would
+   hold more than 1024) *)
+fn table_put {l:agz}{n:pos}{lt:agz}{e:nat | e <= n}{c:nat | c <= 1024}
+  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144),
+   x: assignment(n), e: int e, count: int c): [r:nat | r <= 1025] int r = let
+  val bucket = hash_span(bv, x.name_at, x.name_to, n, 0)
+  val slot = 5120 + bucket
+  val head = table_read(tab, slot, 1024)
   val found = chain_find(bv, n, tab, head, x.name_at, x.name_to, 1100)
 in
   if found > 0 then let
     val base = 5 * (found - 1)
-    val () = table_set(tab, base + 2, x.value_at)
-    val () = table_set(tab, base + 3, e)
+    val () = table_write(tab, base + 2, x.value_at)
+    val () = table_write(tab, base + 3, e)
   in count end
   else if count >= 1024 then 1025
   else let
     val base = 5 * count
-    val () = table_set(tab, base, x.name_at)
-    val () = table_set(tab, base + 1, x.name_to)
-    val () = table_set(tab, base + 2, x.value_at)
-    val () = table_set(tab, base + 3, e)
-    val () = table_set(tab, base + 4, head)
-    val () = table_set(tab, slot, count + 1)
+    val () = table_write(tab, base, x.name_at)
+    val () = table_write(tab, base + 1, x.name_to)
+    val () = table_write(tab, base + 2, x.value_at)
+    val () = table_write(tab, base + 3, e)
+    val () = table_write(tab, base + 4, head)
+    val () = table_write(tab, slot, count + 1)
   in count + 1 end
 end
 
 (* The lines of bv[s, size) put in the table that holds count entries: the
    number it holds then *)
-fun table_fill {l:agz}{n:pos}{lt:agz}{s:nat | s <= n} .<n - s>.
-  (bv: !$A.borrow(byte, l, n), s: int s, size: int, n: int n, tab: !$A.arr(int, lt, 6144), count: int): int =
+fun table_fill {l:agz}{n:pos}{lt:agz}{s:nat | s <= n}{c:nat | c <= 1024} .<n - s>.
+  (bv: !$A.borrow(byte, l, n), s: int s, size: int, n: int n,
+   tab: !$A.arr(int, lt, 6144), count: int c): [r:nat | r <= 1025] int r =
   if s >= size then count
   else let
     val e = find_byte(bv, s, n, size, 10)
     val x = line_assignment(bv, s, e, n)
-    val count2 = (if x.found then table_put(bv, n, tab, x, e, count) else count): int
+    val count2 = (if x.found then table_put(bv, n, tab, x, e, count) else count): [r:nat | r <= 1025] int r
   in
     if count2 > 1024 then count2
     else if e + 1 > n then count2
@@ -425,9 +406,9 @@ fun table_fill {l:agz}{n:pos}{lt:agz}{s:nat | s <= n} .<n - s>.
   end
 
 (* Whether bv[a, b) is PATH *)
-fn is_path_name {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), a: int, b: int, n: int n): bool =
-  b - a = 4 && byte_at(bv, a, n) = 80 && byte_at(bv, a + 1, n) = 65
-  && byte_at(bv, a + 2, n) = 84 && byte_at(bv, a + 3, n) = 72
+fn is_path_name {l:agz}{n:pos}{a,b:int} (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n): bool =
+  b - a = 4 && peek(bv, a, n) = 80 && peek(bv, a + 1, n) = 65
+  && peek(bv, a + 2, n) = 84 && peek(bv, a + 3, n) = 72
 
 (* Frees the entries *)
 fun arguments_free {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
@@ -445,21 +426,21 @@ fun arguments_free {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
    bytes, or the entries would take more than the budget, the number of
    that entry and what has been made so far; else ~1. The value of PATH, when
    the file sets it, is also appended to path_out and the answer says so. *)
-fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat} .<k>.
+fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024} .<k>.
   (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
    budget: int, acc: $L.listv($P.arg_entry), has_path: bool, path_out: !$B.builder_v >> $B.builder_v)
-  : @(int, bool, $L.listv($P.arg_entry)) =
+  : @([b:int | ~1 <= b; b < 1024] int b, bool, $L.listv($P.arg_entry)) =
   if k <= 0 then @(~1, has_path, acc)
   else let
     val base = 5 * (k - 1)
-    val name_at = table_get(tab, base)
-    val name_to = table_get(tab, base + 1)
-    val value_at = table_get(tab, base + 2)
-    val line_end = table_get(tab, base + 3)
+    val name_at = table_read(tab, base, n)
+    val name_to = table_read(tab, base + 1, n)
+    val value_at = table_read(tab, base + 2, n)
+    val line_end = table_read(tab, base + 3, n)
     var entry : $B.builder_v = $B.create()
     val () = put_range(bv, name_at, name_to, n, entry)
     val () = put_char_v(entry, 61)
-    val made = put_value_at(bv, value_at, line_end, n, entry)
+    val made = put_value(bv, value_at, line_end, n, entry)
     val size = builder_size(entry)
     val fits = (size <= 131071 && size + 1 <= budget): bool
     val made_entry = mk_arg(entry)
@@ -467,7 +448,7 @@ fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat} .<k>.
     if made && fits then let
       val is_path = is_path_name(bv, name_at, name_to, n)
       val () = (if is_path then let
-          val _ = put_value_at(bv, value_at, line_end, n, path_out)
+          val _ = put_value(bv, value_at, line_end, n, path_out)
         in () end else ())
     in entries_make(bv, n, tab, k - 1, budget - size - 1, $L.list_vt_cons(made_entry, acc),
          (if is_path then true else has_path), path_out) end
@@ -479,16 +460,12 @@ fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat} .<k>.
 
 (* The NAME=VALUE entries of the table's first count entries; ~2 for a table
    that holds more than 1024 *)
-fn entries_made {l:agz}{n:pos}{lt:agz}
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), count: int,
+fn entries_made {l:agz}{n:pos}{lt:agz}{c:nat | c <= 1025}
+  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), count: int c,
    has_path: bool, path_out: !$B.builder_v >> $B.builder_v)
-  : @(int, bool, $L.listv($P.arg_entry)) = let
-  val k = g1ofg0(count)
-in
-  if k < 0 then @(~1, has_path, $L.list_vt_nil())
-  else if k > 1024 then @(~2, has_path, $L.list_vt_nil())
-  else entries_make(bv, n, tab, k, 1048576, $L.list_vt_nil(), has_path, path_out)
-end
+  : @([b:int | ~2 <= b; b < 1024] int b, bool, $L.listv($P.arg_entry)) =
+  if count > 1024 then @(~2, has_path, $L.list_vt_nil())
+  else entries_make(bv, n, tab, count, 524287, $L.list_vt_nil(), has_path, path_out)
 
 (* The NUL-terminated arguments of bv[p, total) as entries, reversed onto acc *)
 fun arguments {l:agz}{p:nat | p <= 4096} .<4096 - p>.
@@ -510,10 +487,10 @@ fn usage_error (): void = let
   val () = prerr_newline()
 in set_exit_code(2) end
 
-fn error_about {l:agz}
-  (bv: !$A.borrow(byte, l, 4096), at: int, to: int, before: string, after: string, status: int): void = let
+fn error_about {l:agz}{at:nat | at <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), at: int at, to: int, before: string, after: string, status: int): void = let
   val () = prerr! ("error: ", before)
-  val () = prerr_seg(bv, g1ofg0(at), to, 4096)
+  val () = prerr_seg(bv, at, to, 4096)
   val () = prerr! (after)
   val () = prerr_newline()
 in set_exit_code(status) end
@@ -548,9 +525,9 @@ in @(r, unused) end
    ("." when empty), as a NUL-terminated name, and 0 when there is no such
    file, 1 when there is one that cannot be run (a directory, no execute
    bit), 2 when there is one that can *)
-fn try_candidate {lp:agz}{lc:agz}
-  (bv_path: !$A.borrow(byte, lp, 524288), p: int, q: int,
-   bv: !$A.borrow(byte, lc, 4096), command_at: int, command_to: int)
+fn try_candidate {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096}
+  (bv_path: !$A.borrow(byte, lp, 524288), p: int p, q: int,
+   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int)
   : [l:agz] @(int, $A.arr(byte, l, 524288)) = let
   var candidate : $B.builder_v = $B.create()
   val () = (if q > p then put_range(bv_path, p, q, 524288, candidate)
@@ -571,9 +548,9 @@ in @(state, $A.thaw<byte>(fz_c)) end
    colon separated list, that holds the command as a file that can be run,
    as execvp looks: the resolution and the NUL-terminated name. denied says
    that an earlier directory held a file that could not be run *)
-fun search_path {lp:agz}{lc:agz}{p:nat | p <= 524288} .<524288 - p>.
+fun search_path {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096} .<524288 - p>.
   (bv_path: !$A.borrow(byte, lp, 524288), p: int p, plen: int,
-   bv: !$A.borrow(byte, lc, 4096), command_at: int, command_to: int, denied: bool)
+   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int, denied: bool)
   : [l:agz] @(resolution, $A.arr(byte, l, 524288)) =
   if p > plen then without_file(if denied then CommandNotAllowed() else CommandNotFound())
   else let
@@ -602,13 +579,8 @@ fn put_environment_path (out: !$B.builder_v >> $B.builder_v): bool = let
 in $A.free<byte>(name); ok end
 
 (* Whether bv[at, to) has a / in it *)
-fn has_slash {l:agz} (bv: !$A.borrow(byte, l, 4096), at: int, to: int): bool = let
-  val a = g1ofg0(at)
-in
-  if a < 0 then false
-  else if a > 4096 then false
-  else find_byte(bv, a, 4096, to, 47) < to
-end
+fn has_slash {l:agz}{at:nat | at <= 4096} (bv: !$A.borrow(byte, l, 4096), at: int at, to: int): bool =
+  find_byte(bv, at, 4096, to, 47) < to
 
 (* Where the command bv[command_at, command_to) is: a command with a / in it
    is the file of that name, any other is looked for as the shell does, in
@@ -616,8 +588,8 @@ end
    path_a[0, plen) (the file's PATH when it sets one, else this process's;
    known says it could be had; empty, the directories execvp uses). The name
    is NUL-terminated. *)
-fn resolve_command {l:agz}{lp:agz}
-  (bv: !$A.borrow(byte, l, 4096), command_at: int, command_to: int,
+fn resolve_command {l:agz}{lp:agz}{ca:nat | ca <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), command_at: int ca, command_to: int,
    known: bool, path_a: $A.arr(byte, lp, 524288), plen: int)
   : [lr:agz] @(resolution, $A.arr(byte, lr, 524288)) =
   if command_to <= command_at then let
@@ -639,10 +611,10 @@ fn resolve_command {l:agz}{lp:agz}
   in found end
 
 (* "error: bats with-env: cannot run <command>: <why>" for the error code *)
-fn cannot_run {l:agz}
-  (bv: !$A.borrow(byte, l, 4096), at: int, to: int, code: int): void = let
+fn cannot_run {l:agz}{at:nat | at <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), at: int at, to: int, code: int): void = let
   val () = prerr! ("error: bats with-env: cannot run ")
-  val () = prerr_seg(bv, g1ofg0(at), to, 4096)
+  val () = prerr_seg(bv, at, to, 4096)
   val () = prerr! (": ")
   val why = $A.alloc<byte>(256)
   val k = $P.os_error_text(code, why, 256)
@@ -699,8 +671,8 @@ in () end
 
 (* The file at the NUL-terminated name bv[at, to) read into a buffer of
    65537 bytes: its size, or ~1 when it cannot be read or is too large *)
-fn read_env_file {l:agz}{lf:agz}
-  (bv: !$A.borrow(byte, l, 4096), at: int, to: int,
+fn read_env_file {l:agz}{lf:agz}{at:nat | at <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), at: int at, to: int,
    content: !$A.arr(byte, lf, 65537)): int = let
   var path : $B.builder_v = $B.create()
   val () = put_range(bv, at, to, 4096, path)
@@ -731,23 +703,23 @@ in
 end
 
 (* The name of entry bad of the table, appended to out; nothing for ~1 *)
-fn bad_name_put {l:agz}{lt:agz}
-  (bv: !$A.borrow(byte, l, 65537), tab: !$A.arr(int, lt, 6144), bad: int,
+fn bad_name_put {l:agz}{lt:agz}{bad:int | bad < 1024}
+  (bv: !$A.borrow(byte, l, 65537), tab: !$A.arr(int, lt, 6144), bad: int bad,
    out: !$B.builder_v >> $B.builder_v): void =
   if bad < 0 then ()
-  else put_range(bv, table_get(tab, 5 * bad), table_get(tab, 5 * bad + 1), 65537, out)
+  else put_range(bv, table_read(tab, 5 * bad, 65537), table_read(tab, 5 * bad + 1, 65537), 65537, out)
 
 (* Says that the value of the variable name, set in the file at
    bv[file_at, file_to), cannot be made *)
-fn expansion_failed {l:agz}{ln:agz}
-  (bv: !$A.borrow(byte, l, 4096), file_at: int, file_to: int,
+fn expansion_failed {l:agz}{ln:agz}{file_at:nat | file_at <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), file_at: int file_at, file_to: int,
    name_a: $A.arr(byte, ln, 524288), name_len: int): void = let
   val @(fz_n, bv_n) = $A.freeze<byte>(name_a)
   val () = prerr! ("error: bats with-env: the value of ")
   val () = prerr_seg(bv_n, 0, name_len, 524288)
   val () = prerr! (" in ")
-  val () = prerr_seg(bv, g1ofg0(file_at), file_to, 4096)
-  val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 131071 bytes itself, or the variables of the file together are over 1 MiB")
+  val () = prerr_seg(bv, file_at, file_to, 4096)
+  val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 131071 bytes itself, or the variables of the file together are over 524287 bytes (a NUL counted after each)")
   val () = prerr_newline()
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
@@ -800,7 +772,7 @@ in
               val () = $A.free<byte>(search_a)
               val () = $A.free<byte>(bad_a)
               val () = prerr! ("error: bats with-env: the environment file ")
-              val () = prerr_seg(bv, g1ofg0(file_at), file_to, 4096)
+              val () = prerr_seg(bv, file_at, file_to, 4096)
               val () = prerr! (" has a NUL byte on line ", nul_at, "; it must be text")
               val () = prerr_newline()
             in set_exit_code(2) end

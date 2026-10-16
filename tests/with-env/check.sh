@@ -165,6 +165,27 @@ printf 'ONE=$BIG\nTWO=$BIG\n' > "$TMP/one.env"
 got=$(BIG=$BIG with_env "$TMP/one.env" sh -c 'echo ${#ONE} ${#TWO}')
 [ "$got" = '65536 65536' ] || fail "two values of 64 KiB: $got"
 
+# the exact bounds: an entry is at most 131071 bytes (Linux's MAX_ARG_STRLEN
+# less the NUL), and the entries together at most 524287 with a NUL after
+# each (the process package's builder for the environment, 524288 bytes)
+A=$(python3 -c "print('y' * 65534)")
+export A
+printf 'EE=${A}${A}\n' > "$TMP/entry-ok.env"
+got=$(with_env "$TMP/entry-ok.env" sh -c 'echo $((${#EE} + 3))')
+[ "$got" = '131071' ] || fail "an entry of 131071 bytes is not accepted: $got"
+printf 'EEE=${A}${A}\n' > "$TMP/entry-over.env"
+with_env "$TMP/entry-over.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "an entry of 131072 bytes is not 2"
+grep -q 'EEE' "$TMP/err" || fail "the error does not name the variable: $(cat "$TMP/err")"
+printf 'Ea=${A}${A}\nEb=${A}${A}\nEc=${A}${A}\nF=${A}${A}\n' > "$TMP/total-ok.env"
+got=$(with_env "$TMP/total-ok.env" sh -c 'echo ${#Ea} ${#F}')
+[ "$got" = '131068 131068' ] || fail "entries together 524287 bytes are not accepted: $got"
+printf 'Ea=${A}${A}\nEb=${A}${A}\nEc=${A}${A}\nFF=${A}${A}\n' > "$TMP/total-over.env"
+with_env "$TMP/total-over.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "entries together 524288 bytes are not 2 (and not a late 126)"
+grep -q 'cannot be made' "$TMP/err" || fail "the error is not the 'cannot be made' one: $(cat "$TMP/err")"
+printf 'Ea=${A}${A}\nEb=${A}${A}\nEc=${A}${A}\nEd=${A}${A}\n' > "$TMP/four.env"
+with_env "$TMP/four.env" true 2>/dev/null; [ $? -eq 2 ] || fail "four entries of 131071 bytes are not 2 (a late 126)"
+unset A
+
 # a NUL byte in the file is a usage error that names its line
 printf 'A=1\nB=2\0C=3\nD=4\n' > "$TMP/nul.env"
 with_env "$TMP/nul.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "a NUL in the file is not 2"
@@ -174,7 +195,9 @@ with_env "$TMP/nul1.env" sh -c 'echo "$B$C"' 2>/dev/null; [ $? -eq 2 ] || fail "
 
 # the usage text lists with-env
 "$BATS" --help | grep -q 'with-env <env-file> <command>' || fail "bats --help does not list with-env"
-"$BATS" completions bash | grep -q 'with-env' || fail "completions do not list with-env"
+for shell in bash zsh fish; do
+  "$BATS" completions $shell | grep -q 'with-env' || fail "$shell completions do not list with-env"
+done
 
 
 # standard input passes through, an empty argument stays
