@@ -12,6 +12,8 @@
 #  * the second run does nothing (no curl, the marker untouched)
 #  * a toolchain bats did not make is used as it is, never replaced
 #  * a marker of another pin is replaced; what a killed run left is cleared
+#  * a link to another pin's toolchain is refused before any download or build
+#  * a marker with no patsopt (half made) is replaced
 #  * no HOME is an error
 #  * the pin is in src/ats2.bats alone
 # usage: tests/ats2-install/check.sh <bats-binary> <repository-dir>
@@ -161,6 +163,23 @@ mkdir -p "$H/.bats/ats2"
 run || { cat "$TMP/out"; fail "an empty directory was refused"; }
 [ -x "$H/.bats/ats2/bin/patsopt" ] || fail "an empty directory was not installed into"
 ok "a directory bats did not make is never replaced (checked before and after), an empty one is"
+
+# a link to a toolchain of another pin is refused before anything is downloaded or built
+newhome linkforeign
+mkdir -p "$H/.bats" "$TMP/linked-foreign/bin"; printf '#!/bin/sh\n' > "$TMP/linked-foreign/bin/patsopt"; chmod +x "$TMP/linked-foreign/bin/patsopt"
+echo "ATS2-Postiats-gmp-0.0.1 0000" > "$TMP/linked-foreign/.bats-ats2"; ln -s "$TMP/linked-foreign" "$H/.bats/ats2"
+run && fail "a link to another pin's toolchain was replaced"
+grep -q "does not replace" "$TMP/out" || { cat "$TMP/out"; fail "the refusal does not say why"; }
+[ ! -s "$TMP/calls" ] || { cat "$TMP/calls"; fail "a link to another pin's toolchain downloaded or built before it was refused"; }
+[ -L "$H/.bats/ats2" ] && [ "$(cat "$TMP/linked-foreign/.bats-ats2")" = "ATS2-Postiats-gmp-0.0.1 0000" ] || fail "the link or its toolchain was touched"
+ok "a link to another pin's toolchain is refused before anything is downloaded"
+
+# a marker with no patsopt is what a killed or half-made install left: replaced
+newhome markeronly
+mkdir -p "$H/.bats/ats2"; echo "ATS2-Postiats-gmp-0.0.1 0000" > "$H/.bats/ats2/.bats-ats2"
+run || { cat "$TMP/out"; fail "a marker with no patsopt was not replaced"; }
+[ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$name $sha" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] || fail "the install over a marker with no patsopt is wrong"
+ok "a marker with no patsopt is replaced"
 
 newhome extra
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install extra > "$TMP/out" 2>&1 && fail "an extra argument was accepted"
