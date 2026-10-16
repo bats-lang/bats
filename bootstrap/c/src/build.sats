@@ -423,7 +423,6 @@ fn preprocess_one
 
 
 
-
 fn do_clean(): void
 
 
@@ -989,6 +988,17 @@ fn write_wasm_stubs(): int
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 fn read_unsafe_flag(): bool
 
 
@@ -1137,12 +1147,6 @@ fn do_build {lt:agz}
 
 
 fn do_build_plain(release: profile, build_target: target): void
-
-
-
-
-
-
 
 
 

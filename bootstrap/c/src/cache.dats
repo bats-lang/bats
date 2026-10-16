@@ -425,6 +425,7 @@ in read && whole end
 
 implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
+  val () = key_drop(out_bv)
   var dir : $B.builder_v = $B.create()
   val shared = cache_dir(dir)
   var hex : $B.builder_v = $B.create()
@@ -500,6 +501,7 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
         $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_cons(mk_arg(e2),
         $L.list_vt_cons(mk_arg(s2), $L.list_vt_nil()))))
     in end)
+  val () = (if rc2 = 0 then key_record(true, out_bv, in_bv) else ())
   val () = $A.drop<byte>(fz_ea, bv_ea)
   val () = $A.free<byte>($A.thaw<byte>(fz_ea))
   val () = $A.drop<byte>(fz_sa, bv_sa)
