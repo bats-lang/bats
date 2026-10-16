@@ -350,10 +350,21 @@ fun put_lines {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
    with the NUL), besides the toolchain's: the .dats and every file its
    staloads and includes name, and theirs, to the end, sorted, one per
    line into build/.bats_depgen. patsopt --depgen names each file's own
-   (one level), so each level's files are given to one --depgen. *)
+   (one level), so each level's files not yet known are given to one
+   --depgen, and what it says of each file is kept in a graph, a file with
+   a line "<file> <TAB> <its files>": with graph true that is
+   build/.bats_graph, which the first module of a pass fills with one
+   --depgen of every .dats and .sats of build/src and build/bats_modules,
+   is shared by the modules of the pass and is made
+   again after anything that moves a .sats or .hats (names_digest removes
+   it when it lists them again), so a file that many modules reach is read
+   by patsopt once; otherwise it is a temporary one. --depgen runs under
+   the caps of BATS_PATSOPT_TIMEOUT_S and BATS_PATSOPT_MEM_MB as patsopt_only
+   holds a patsopt run to them (the same wrapper, in sh): 0 when it listed,
+   124 when the time cap ended it, 125 when the memory cap did, else 1. *)
 fn list_inputs {lph,li:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int): bool = let
+   in_bv: !$A.borrow(byte, li, 524288), in_len: int, graph: bool): int = let
   var a1 : $B.builder_v = $B.create()
   val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
   val () = bput_v(a1, "/bin/patsopt")
@@ -361,10 +372,18 @@ fn list_inputs {lph,li:agz}
   val () = copy_to_builder_v(ph, 0, phlen, 512, a2)
   var a4 : $B.builder_v = $B.create()
   val () = bput_v(a4, "build/.bats_depgen")
-  val rc = sh_script("P=$1; PATSHOME=$2; export PATSHOME; out=$4; t=$(mktemp -d) || exit 1; trap 'rm -rf \"$t\"' EXIT; printf '%s\\n' \"$3\" > \"$t/seen\"; cp \"$t/seen\" \"$t/todo\"; while [ -s \"$t/todo\" ]; do set --; while IFS= read -r f; do case $f in *.sats) set -- \"$@\" -s \"$f\" ;; *) set -- \"$@\" -d \"$f\" ;; esac; done < \"$t/todo\"; \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" > \"$t/dep\" 2>/dev/null || exit 1; sed -e 's/^[^:]*:[ ]*//' \"$t/dep\" | tr ' ' '\\n' | sed -e '/^$/d' | LC_ALL=C sort -u > \"$t/found\"; LC_ALL=C sort -u \"$t/seen\" > \"$t/known\"; LC_ALL=C comm -23 \"$t/found\" \"$t/known\" > \"$t/todo\"; cat \"$t/todo\" >> \"$t/seen\"; done; LC_ALL=C sort -u \"$t/seen\" > \"$out\"",
+  var a5 : $B.builder_v = $B.create()
+  val () = put_int_v(a5, cap_mb_now())
+  var a6 : $B.builder_v = $B.create()
+  val () = put_int_v(a6, cap_secs_now())
+  var a7 : $B.builder_v = $B.create()
+  val () = (if graph then bput_v(a7, "build/.bats_graph") else bput_v(a7, ""))
+  val rc = sh_script("P=$1; PATSHOME=$2; export PATSHOME; in=$3; out=$4; mb=$5; secs=$6; g=$7; useg=$7\nt=$(mktemp -d) || exit 1; trap 'rm -rf \"$t\"' EXIT\n[ -n \"$g\" ] || g=\"$t/graph\"\ndg() {\n  if [ \"$mb\" = 0 ] && [ \"$secs\" = 0 ]; then \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" 2>/dev/null; return $?; fi\n  (\n    [ \"$mb\" = 0 ] || ulimit -v $((mb * 1024)) 2>/dev/null\n    if [ \"$secs\" = 0 ]; then \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" 2>/dev/null; exit $?; fi\n    \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" 2>/dev/null &\n    pid=$!\n    ( trap 'kill $sp 2>/dev/null; exit 0' TERM; sleep \"$secs\" & sp=$!; wait $sp; kill -s ALRM $pid 2>/dev/null ) >/dev/null 2>&1 &\n    wd=$!\n    wait $pid; rc=$?\n    kill $wd 2>/dev/null; wait $wd 2>/dev/null\n    [ $rc -eq 142 ] && exit 124\n    [ \"$mb\" != 0 ] && [ $rc -gt 128 ] && exit 125\n    exit $rc\n  )\n}\ndepsof() { sed -e 's/^[^:]*:[ ]*//' -e 's/[ ]*$//'; }\n[ -f \"$g\" ] || : > \"$g\"\nif [ -n \"$useg\" ] && [ ! -s \"$g\" ]; then\n  find build/src build/bats_modules -type f \\( -name '*.dats' -o -name '*.sats' \\) 2>/dev/null | LC_ALL=C sort > \"$t/all\"\n  if [ -s \"$t/all\" ]; then\n    set --; while IFS= read -r f; do case $f in *.sats) set -- \"$@\" -s \"$f\" ;; *) set -- \"$@\" -d \"$f\" ;; esac; done < \"$t/all\"\n    dg \"$@\" > \"$t/dep\"; rc=$?\n    [ $rc -eq 124 ] || [ $rc -eq 125 ] && exit $rc\n    if [ $rc -eq 0 ] && [ \"$(wc -l < \"$t/dep\")\" -eq \"$(wc -l < \"$t/all\")\" ]; then\n      depsof < \"$t/dep\" > \"$t/ds\"; paste -d '\\t' \"$t/all\" \"$t/ds\" >> \"$g\"\n    fi\n  fi\nfi\nprintf '%s\\n' \"$in\" > \"$t/seen\"; cp \"$t/seen\" \"$t/todo\"\nwhile [ -s \"$t/todo\" ]; do\n  awk -F'\\t' 'FILENAME==ARGV[1]{k[$1]=1; next} !($0 in k)' \"$g\" \"$t/todo\" > \"$t/miss\"\n  if [ -s \"$t/miss\" ]; then\n    set --; while IFS= read -r f; do case $f in *.sats) set -- \"$@\" -s \"$f\" ;; *) set -- \"$@\" -d \"$f\" ;; esac; done < \"$t/miss\"\n    dg \"$@\" > \"$t/dep\"; rc=$?; [ $rc -eq 0 ] || exit $rc\n    if [ \"$(wc -l < \"$t/dep\")\" -eq \"$(wc -l < \"$t/miss\")\" ]; then\n      depsof < \"$t/dep\" > \"$t/ds\"; paste -d '\\t' \"$t/miss\" \"$t/ds\" >> \"$g\"\n    else\n      while IFS= read -r f; do\n        case $f in *.sats) dg -s \"$f\" > \"$t/one\" ;; *) dg -d \"$f\" > \"$t/one\" ;; esac; rc=$?; [ $rc -eq 0 ] || exit $rc\n        printf '%s\\t%s\\n' \"$f\" \"$(depsof < \"$t/one\" | tr '\\n' ' ')\" >> \"$g\"\n      done < \"$t/miss\"\n    fi\n  fi\n  awk -F'\\t' 'FILENAME==ARGV[1]{d[$1]=$2; next} {n=split(d[$0],a,\" \"); for(i=1;i<=n;i++) print a[i]}' \"$g\" \"$t/todo\" | LC_ALL=C sort -u > \"$t/found\"\n  LC_ALL=C sort -u \"$t/seen\" > \"$t/known\"; LC_ALL=C comm -23 \"$t/found\" \"$t/known\" > \"$t/todo\"; cat \"$t/todo\" >> \"$t/seen\"\ndone\nLC_ALL=C sort -u \"$t/seen\" > \"$out\"\n",
     $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2),
-    $L.list_vt_cons(path_arg(in_bv, in_len), $L.list_vt_cons(mk_arg(a4), $L.list_vt_nil())))))
-in rc = 0 end
+    $L.list_vt_cons(path_arg(in_bv, in_len), $L.list_vt_cons(mk_arg(a4),
+    $L.list_vt_cons(mk_arg(a5), $L.list_vt_cons(mk_arg(a6),
+    $L.list_vt_cons(mk_arg(a7), $L.list_vt_nil()))))))))
+in (if rc = 0 then 0 else if rc = 124 then 124 else if rc = 125 then 125 else 1) end
 
 (* The key of patsopt's run on in into out, as 64 hex digits appended to
    hex; false when one of its parts cannot be had, and then the run is
@@ -384,7 +403,10 @@ fn module_key {lph,lo,li:agz}
   val () = bput_v(key, " -d ")
   val () = copy_to_builder_v(in_bv, 0, in_len - 1, 524288, key)
   val () = put_char_v(key, 10)
-  val listed = (if tool then list_inputs(ph, phlen, in_bv, in_len) else false): bool
+  val lrc = (if tool then list_inputs(ph, phlen, in_bv, in_len, false) else 1): int
+  val () = (if lrc = 124 then cap_stopped(true, in_bv, in_len)
+    else if lrc = 125 then cap_stopped(false, in_bv, in_len) else ())
+  val listed = (lrc = 0): bool
   val read = (if ~listed then false
     else let
       val lp = str_to_path_arr("build/.bats_depgen")
@@ -452,15 +474,24 @@ in read && whole end
 
 (* The sha256 of the sorted names of the .sats and .hats files of build/
    (not those of the stashes of other targets), appended to out as 64 hex
-   digits; false when it cannot be had. Made at each call: a file added
-   after the last call would not be seen by a digest kept. *)
+   digits; false when it cannot be had. The listing is made again only when
+   names_fresh says build/ may have changed (helpers.bats). *)
 fn names_digest (out: !$B.builder_v >> $B.builder_v): bool = let
-  var a1 : $B.builder_v = $B.create()
-  val () = bput_v(a1, "build/.bats_names")
-  val rc = sh_script("find build -path build/.stash -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print | LC_ALL=C sort > \"$1\"",
-    $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil()))
   val lp = str_to_path_arr("build/.bats_names")
   val @(fz_l, bv_l) = $A.freeze<byte>(lp)
+  (* listed once after anything moved a .sats or .hats (names_fresh), not
+     for each module; listing it again also removes the graph of
+     --depgen's answers, which is only as good as the files it was made
+     from *)
+  val have = (if names_fresh() then $F.file_exists(bv_l, 524288) else false): bool
+  val rc = (if have then 0
+    else let
+      var a1 : $B.builder_v = $B.create()
+      val () = bput_v(a1, "build/.bats_names")
+      val r = sh_script("rm -rf build/.bats_graph build/.bats_dg; mkdir -p build/.bats_dg; find build -path build/.stash -prune -o -path build/.bats_dg -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print | LC_ALL=C sort > \"$1\"",
+        $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil()))
+      val () = (if r = 0 then names_set_fresh(true) else ())
+    in r end): int
   val ok = (if rc = 0 then put_file_sha256(bv_l, out) else false): bool
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
@@ -653,9 +684,12 @@ fn memo_record {lph,ln,lo,li:agz}
    names: !$A.borrow(byte, ln, 524288), nl: int, listed: bool,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int): void = let
-  val have = (if nl <> 64 then false
-    else if listed then true
-    else list_inputs(ph, phlen, in_bv, in_len)): bool
+  val lrc = (if nl <> 64 then 1
+    else if listed then 0
+    else list_inputs(ph, phlen, in_bv, in_len, true)): int
+  val () = (if lrc = 124 then cap_stopped(true, in_bv, in_len)
+    else if lrc = 125 then cap_stopped(false, in_bv, in_len) else ())
+  val have = (lrc = 0): bool
   val lp = str_to_path_arr("build/.bats_depgen")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
   val () = (if ~have then ()
@@ -671,6 +705,10 @@ fn memo_record {lph,ln,lo,li:agz}
           val fits = ($B.length(b) < 524288): bool
           val @(ba, bl) = $B.to_arr(b)
           val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+          val () = (if hashed && ~fits && is_verbose() then let
+              val () = print! ("  ! no key for ")
+              val () = print_borrow(out_bv, 0, out_len - 1, 524288)
+            in println! (": it would reach 524288 bytes, the most bats writes, so the module is checked again next time") end else ())
           val () = (if hashed && fits then let
               val @(ta, tl) = $B.to_arr(path_with(out_bv, out_len, ".key.new"))
               val @(fz_t, bv_t) = $A.freeze<byte>(ta)

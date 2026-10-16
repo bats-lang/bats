@@ -395,6 +395,7 @@ end
 
 (* Removes each file of build/src whose module is no longer in src/ *)
 fn prune_orphans (): void = let
+  val () = names_set_fresh(false)
   fun prune_each {n,i:nat | i <= n} .<n - i>.
     (es: !$F.entries(n), i: int i, n: int n): void =
     if i >= n then ()
@@ -1092,6 +1093,7 @@ implement check_wasm_binary(path) =
    twice, every time. Each stash is a whole build/ that only ever saw its
    own mark, which the freshness rules already handle. *)
 fn cache_swap (mark: int): void = let
+  val () = names_set_fresh(false)
   val tgt_path = str_to_path_arr("build/.bats_target")
   val @(fz_t, bv_t) = $A.freeze<byte>(tgt_path)
   val held = (case+ $F.file_open(bv_t, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of

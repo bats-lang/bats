@@ -75,6 +75,7 @@ val g_verbose = ref<bool>(false)
 val g_quiet = ref<bool>(false)
 val g_test_mode = ref<bool>(false)
 val g_cold = ref<bool>(false)
+val g_names_fresh = ref<bool>(false)
 val g_lock_dev = ref<bool>(false)
 val g_repo: ref(string) = ref("")
 val g_bin: ref(string) = ref("")
@@ -110,6 +111,15 @@ val g_cap_exit = ref<int>(0)
 #pub fn set_test_mode(v: bool): void
 
 #pub fn set_cold(v: bool): void
+
+(* Whether the listing of the names of build/'s .sats and .hats (the check
+   memo's `names`, build/.bats_names) is still the one of build/ as it is:
+   it is made once after anything that adds, removes or moves such a file
+   (a .sats emitted, build/ swapped in, the orphans pruned) and not for
+   each module *)
+#pub fn names_fresh (): bool
+
+#pub fn names_set_fresh (v: bool): void
 
 #pub fn set_lock_dev(v: bool): void
 
@@ -160,6 +170,8 @@ implement set_verbose(v) = !g_verbose := v
 implement set_quiet(v) = !g_quiet := v
 implement set_test_mode(v) = !g_test_mode := v
 implement set_cold(v) = !g_cold := v
+implement names_fresh () = !g_names_fresh
+implement names_set_fresh (v) = !g_names_fresh := v
 implement set_lock_dev(v) = !g_lock_dev := v
 implement is_lock_dev() = !g_lock_dev
 implement set_repo(s) = !g_repo := s
@@ -759,6 +771,7 @@ in b end
 #pub fn touch_sats_stamp (): void
 
 implement touch_sats_stamp () = let
+  val () = names_set_fresh(false)
   val @(pa, _) = $B.to_arr(sats_stamp_path())
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   var nb : $B.builder_v = $B.create()
@@ -1885,6 +1898,23 @@ fn cap_report {li:agz}
   val () = !g_cap_exit := (if time then 124 else 125)
 in set_build_err() end
 
+(* The caps, read from the environment once: seconds (0: none) and
+   megabytes (0: none) *)
+#pub fn cap_secs_now (): int
+
+implement cap_secs_now () = let val () = caps_read() in !g_cap_secs end
+
+#pub fn cap_mb_now (): int
+
+implement cap_mb_now () = let val () = caps_read() in !g_cap_mb end
+
+(* A patsopt run (the check memo's --depgen too) the time cap (true) or
+   the memory cap ended: said, and the build fails with the cap's status *)
+#pub fn cap_stopped {li:agz}
+  (time: bool, in_bv: !$A.borrow(byte, li, 524288), in_len: int): void
+
+implement cap_stopped (time, in_bv, in_len) = cap_report(time, in_bv, in_len)
+
 (* patsopt run on the .dats in[0, in_len) (a NUL-terminated path),
    writing its C to out[0, out_len): 0, or patsopt's failure, reported,
    its output removed. What only cc would reject in the C is not looked
@@ -2622,13 +2652,18 @@ fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): int =
 #pub fn write_file_from_rope {lp:agz}{k:nat}
   (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): int
 
-implement write_file_from_rope (path_bv, cs) =
+implement write_file_from_rope (path_bv, cs) = let
+  (* a .sats or .dats is written: what is kept of the names and digests of
+     the files of build/ is no longer the files' *)
+  val () = names_set_fresh(false)
+in
   case+ $F.file_open(path_bv, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
   | ~$R.ok(fd) => let
       val w = fd_write_chunks(fd, cs)
       val c = (case+ $F.file_close(fd) of | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
     in if w < 0 then w else c end
   | ~$R.err(_) => ~1
+end
 
 (* ============================================================
    A file read whole (a module of any size)
@@ -2972,10 +3007,8 @@ in interface_digest(p, b, want_hash, squeeze) end
 
 (* The size line of one file of a closure: its size, or a .sats's
    interface length; false when it cannot be read *)
-#pub fn memo_entry_size {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
-
-implement memo_entry_size(p, out) = let
+fn memo_size_raw {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool = let
   val ok = (if is_sats_path(p) then interface_scan(p, out, false)
     else let
       val z = size_of_file(p)
@@ -2986,14 +3019,147 @@ in ok end
 
 (* The hash line of one file of a closure: its sha256, or a .sats's
    interface's *)
-#pub fn memo_entry_hash {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
-
-implement memo_entry_hash(p, out) = let
+fn memo_hash_raw {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool = let
   val ok = (if is_sats_path(p) then interface_scan(p, out, true)
     else put_file_sha256(p, out)): bool
   val () = put_char_v(out, 10)
 in ok end
+
+
+(* ---- Digests kept for a pass ----
+
+   A staloaded dependency's .dats and the .sats of the project are in the
+   closure of many modules, and digesting one (a sha256 of a few hundred
+   kilobytes, or a scan for its interface) for each of them was most of
+   what a no-change check cost over main's. The digest of such a file is
+   kept in build/.bats_dg/<its path, with / as %>: the path, a line feed,
+   the size line, the hash line. The directory is emptied whenever the
+   names are listed again (names_digest in cache.bats), which is after
+   anything that writes a .sats or a .dats of the project (names_fresh
+   is made false by touch_sats_stamp, write_file_from_rope, cache_swap and
+   prune_orphans), so an entry is never older than the file it digests
+   within a run, and none outlives a run. Only a .sats and the files
+   under build/bats_modules are kept; a module's own .dats is hashed
+   where it is needed. *)
+
+(* Whether p begins with "build/bats_modules/" *)
+fn in_modules {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool = let
+  fun same {lp:agz}{i:nat | i <= 19} .<19 - i>.
+    (p: !$A.borrow(byte, lp, 524288), s: string 19, i: int i): bool =
+    if i >= 19 then true
+    else if byte2int0($A.read<byte>(p, i)) = char2int0(string_get_at(s, i)) then same(p, s, i + 1)
+    else false
+in same(p, "build/bats_modules/", 0) end
+
+fn digest_kept {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
+  if is_sats_path(p) then true else in_modules(p)
+
+(* build/.bats_dg/<p with / as %>, NUL-terminated *)
+fn dg_path {lp:agz} (p: !$A.borrow(byte, lp, 524288)): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "build/.bats_dg/")
+  val n = find_null_bv_from(p, 0, 524288)
+  fun loop {lp:agz}{i:nat | i <= 524288} .<524288 - i>.
+    (p: !$A.borrow(byte, lp, 524288), i: int i, n: int, b: !$B.builder_v >> $B.builder_v): void =
+    if i >= 524288 then ()
+    else if i >= n then ()
+    else let
+      val c = byte2int0($A.read<byte>(p, i))
+      val () = put_char_v(b, (if c = 47 then 37 else c))
+    in loop(p, i + 1, n, b) end
+  val () = loop(p, 0, n, b)
+  val () = put_char_v(b, 0)
+in b end
+
+(* Whether c[0, k) is the NUL-terminated p[0, k) *)
+fun same_bytes {lp,lc:agz}{m:pos}{k:nat}{i:nat | i <= k} .<k - i>.
+  (p: !$A.borrow(byte, lp, 524288), c: !$A.borrow(byte, lc, m), m: int m, k: int k, i: int i): bool =
+  if i >= k then true
+  else if peek(p, i, 524288) = peek(c, i, m) then same_bytes(p, c, m, k, i + 1)
+  else false
+
+(* The kept size line (hashes false) or hash line of p, appended to out,
+   each with its line feed; false when none is kept *)
+fn digest_read {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), hashes: bool, out: !$B.builder_v >> $B.builder_v): bool = let
+  val @(ka, _) = $B.to_arr(dg_path(p))
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  val plen = find_null_bv_from(p, 0, 524288)
+  (* an entry is a few hundred bytes: read into a buffer, no arena *)
+  val ok = (case+ $F.file_open(bv_k, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+    | ~$R.err(_) => false
+    | ~$R.ok(fd) => let
+        val buf = $A.alloc<byte>(4096)
+        val n = (case+ $F.file_read(fd, buf, 4096) of
+          | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
+        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+        val @(fz_c, bv_c) = $A.freeze<byte>(buf)
+        (* path, line feed, size line (with its line feed), 65 bytes of hash line *)
+        val shaped = (n < 4096 && n >= plen + 4 + 65 && plen >= 0 && peek(bv_c, plen, 4096) = 10
+          && peek(bv_c, n - 66, 4096) = 10 && peek(bv_c, n - 1, 4096) = 10): bool
+        val same = (if plen >= 0 then (if shaped then same_bytes(p, bv_c, 4096, plen, 0) else false) else false): bool
+        val () = (if same then (if hashes then copy_to_builder_v(bv_c, n - 65, n, 4096, out)
+                                else copy_to_builder_v(bv_c, plen + 1, n - 65, 4096, out)) else ())
+        val () = $A.drop<byte>(fz_c, bv_c)
+        val () = $A.free<byte>($A.thaw<byte>(fz_c))
+      in same end)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in ok end
+
+(* Both lines of p, kept and appended (the one asked for); false when p
+   cannot be read *)
+fn digest_make {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), hashes: bool, out: !$B.builder_v >> $B.builder_v): bool = let
+  var sb : $B.builder_v = $B.create()
+  var hb : $B.builder_v = $B.create()
+  val a = memo_size_raw(p, sb)
+  val b = memo_hash_raw(p, hb)
+  val both = (a && b): bool
+  val @(sa, sl) = $B.to_arr(sb)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val @(ha, hl) = $B.to_arr(hb)
+  val @(fz_h, bv_h) = $A.freeze<byte>(ha)
+  val () = (if both then let
+      var e : $B.builder_v = $B.create()
+      val plen = find_null_bv_from(p, 0, 524288)
+      val () = copy_to_builder_v(p, 0, plen, 524288, e)
+      val () = put_char_v(e, 10)
+      val () = copy_to_builder_v(bv_s, 0, sl, 524288, e)
+      val () = copy_to_builder_v(bv_h, 0, hl, 524288, e)
+      val @(ka, _) = $B.to_arr(dg_path(p))
+      val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+      val _ = write_file_from_builder(bv_k, 524288, e)
+      val () = $A.drop<byte>(fz_k, bv_k)
+    in $A.free<byte>($A.thaw<byte>(fz_k)) end else ())
+  val () = (if hashes then copy_to_builder_v(bv_h, 0, hl, 524288, out)
+            else copy_to_builder_v(bv_s, 0, sl, 524288, out))
+  val () = $A.drop<byte>(fz_h, bv_h)
+  val () = $A.free<byte>($A.thaw<byte>(fz_h))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in both end
+
+(* The size line of one file of a closure: its size, or a .sats's
+   interface length; false when it cannot be read *)
+#pub fn memo_entry_size {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+implement memo_entry_size(p, out) =
+  if ~digest_kept(p) then memo_size_raw(p, out)
+  else if digest_read(p, false, out) then true
+  else digest_make(p, false, out)
+
+(* The hash line of one file of a closure: its sha256, or a .sats's
+   interface's *)
+#pub fn memo_entry_hash {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+implement memo_entry_hash(p, out) =
+  if ~digest_kept(p) then memo_hash_raw(p, out)
+  else if digest_read(p, true, out) then true
+  else digest_make(p, true, out)
 
 (* Whether the file at path_bv begins with bv[0, len) *)
 #pub fn file_starts_with {lp:agz}{lb:agz}{n:nat | n <= 524288}

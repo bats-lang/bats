@@ -55,7 +55,9 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 KILL_FLAG=$TMP/kill-flag
-printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
+DEPGEN_LOG=$TMP/depgen-starts
+: > "$DEPGEN_LOG"
+printf '#!/bin/sh\nfor a in "$@"; do if [ "$a" = --depgen ]; then echo x >> "%s"; fi; done\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$DEPGEN_LOG" "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 export HOME="$H"
 cd "$TMP/app"
@@ -72,7 +74,7 @@ ran() { grep -a -- '+ patsopt' "$1" | grep -ac "$2" || true; }
 total() { grep -a -- '+ patsopt' "$1" | grep -avc '(cached)' || true; }
 only() { # <log> <what> <module>...: patsopt ran on these and on nothing else
   l=$1; what=$2; shift 2
-  for m in base mid other lone tool; do
+  for m in base mid other lone tool tgt user web; do
     want=0
     for x in "$@"; do [ "$x" = "$m" ] && want=1; done
     got=$(ran "$l" "/${m}_dats.c")
@@ -94,7 +96,14 @@ quiet() { # <log> <what>
 # --- a cold check, then the very next ones
 run c0.log check
 [ "$(total c0.log)" -ge 8 ] || { echo "FAIL: a cold check ran patsopt $(total c0.log) times"; cat c0.log; exit 1; }
+# the files patsopt --depgen has told of are kept for the modules of a pass,
+# so a file that many reach is read once: fewer starts than modules checked
+d0=$(wc -l < "$DEPGEN_LOG")
+[ "$d0" -ge 1 ] && [ "$d0" -lt "$(total c0.log)" ] || { echo "FAIL: a cold check started patsopt --depgen $d0 times for $(total c0.log) modules"; exit 1; }
+echo "check-memo: a cold check: $(total c0.log) patsopt runs, $d0 depgen starts"
+: > "$DEPGEN_LOG"
 run c1.log check
+[ ! -s "$DEPGEN_LOG" ] || { echo "FAIL: a no-change check started patsopt --depgen"; exit 1; }
 quiet c1.log "the first no-change check"
 run c2.log check
 quiet c2.log "the second no-change check"
@@ -113,6 +122,7 @@ base 5
 touch -d '2001-01-01 00:00:00' "$A/base.bats"
 run b1.log check
 only b1.log "a body-only change of base" base
+echo "check-memo: a body-only change: $(total b1.log) patsopt runs, $(wc -l < "$DEPGEN_LOG") depgen starts"
 run b2.log check
 quiet b2.log "the check after it"
 # --- a changed .sats: base, mid, whose .sats staloads it, and the bin, which
@@ -146,6 +156,65 @@ run d1.log check
 only d1.log "a changed .sats of a dependency" plain/src/lib tool
 run d2.log check
 quiet d2.log "the check after it"
+# --- a .sats that is not the same in check's two passes (native, then
+# wasm): the digest of a .sats kept for a pass is not kept for the other
+cat > "$A/tgt.bats" <<'TGT'
+#include "share/atspre_staload.hats"
+
+#target native begin
+#pub fun tv (): int
+
+implement tv () = 1
+end
+#target wasm begin
+#pub fun tv (): int
+#pub fun tw (): int
+
+implement tv () = 1
+implement tw () = 2
+end
+TGT
+printf '#include "share/atspre_staload.hats"\nstaload "tgt.sats"\n\n#pub fun user (): int\n\nimplement user () = tv ()\n' > "$A/user.bats"
+# (a bin for the wasm pass, whose modules are checked only when it has one)
+printf '#target wasm binary\n#include "share/atspre_staload.hats"\nstaload "user.sats"\n\nimplement main0 () = let val _ = user () in () end\n' > "$A/bin/web.bats"
+run g1.log check
+run g2.log check
+quiet g2.log "the check after two modules were added"
+cat > "$A/tgt.bats" <<'TGT'
+#include "share/atspre_staload.hats"
+
+#target native begin
+#pub fun tv (): int
+
+implement tv () = 1
+end
+#target wasm begin
+#pub fun tv (): int
+#pub fun tw (): int
+#pub fun tw2 (): int
+
+implement tv () = 1
+implement tw () = 2
+implement tw2 () = 3
+end
+TGT
+run g3.log check
+only g3.log "a declaration added to the wasm pass's .sats alone" tgt user web
+run g4.log check
+quiet g4.log "the check after it"
+# --- a staload added to a module is in its closure: lone staloads other's
+# .sats now, and when that changes lone is checked again (and so is the bin
+# that staloads it)
+printf '#include "share/atspre_staload.hats"\nstaload "other.sats"\n\n#pub fun lone (): int\n\nimplement lone () = 4 + other ()\n' > "$A/lone.bats"
+run l1.log check
+only l1.log "a staload added" lone
+run l2.log check
+quiet l2.log "the check after it"
+printf '#include "share/atspre_staload.hats"\n\n#pub fun other (): int\n#pub fun other2 (): int\n\nimplement other () = 3\nimplement other2 () = 5\n' > "$A/other.bats"
+run l3.log check
+only l3.log "a changed .sats that a staload added reaches" other lone tool
+run l4.log check
+quiet l4.log "the check after it"
 # --- a file patsopt might have read instead: a module added makes a .sats
 # in build/ (a .sats of that name, earlier on -IATS, could be staloaded
 # instead of another); everything is checked again, and again when it goes

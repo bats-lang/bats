@@ -566,6 +566,37 @@ fn toolchain_digest {lph:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn memo_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
@@ -631,6 +662,13 @@ fn module_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 fn memo_fresh_in_check (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+
+
+
+
 
 
 

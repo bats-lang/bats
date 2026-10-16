@@ -428,6 +428,7 @@ fn preprocess_one
 
 
 
+
 fn do_clean(): void
 
 
@@ -1059,6 +1060,7 @@ fn read_unsafe_flag(): bool
 
 fn check_wasm_binary {l:agz}
   (path: !$A.borrow(byte, l, 524288)): target
+
 
 
 
