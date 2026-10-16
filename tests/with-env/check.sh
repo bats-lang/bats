@@ -10,7 +10,14 @@
 #    (BATS_REPOSITORY names the package repository);
 #  * a usage error (no file, no command, an unreadable file) is 2.
 #  * the file is read as dotenv (no shell is run): export, quotes, $NAME
-#    and ${NAME} from the caller's environment, a later line wins.
+#    and ${NAME} from the caller's environment, a later line wins;
+#  * the file's limits (64 KiB, 1024 variables, 255-byte names, 64 KiB
+#    values) are refused as usage errors, never cut short, and a file that
+#    sets one variable on many lines, or is all comments, takes no time;
+#  * a command with no / is looked for in the PATH the file gives it;
+#  * 126 says why; stdin and the empty argument pass through; a command a
+#    signal ends is status 1 and a signal to bats does not reach the command
+#    (both are limits of the process package, said in CLAUDE.md).
 # usage: tests/with-env/check.sh <bats-binary> <repository-dir>
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -56,4 +63,103 @@ A=last $plain ${plain}z
 DOT
 got=$(plain=P with_env "$TMP/dot.env" sh -c 'echo "[$A][$B][$C]"')
 [ "$got" = '[last P Pz][$plain][spaced]' ] || fail "dotenv parsing: $got"
+
+# the dotenv corners
+printf 'A=$\nB=${\nC=$UNSET_VARIABLE_FOR_TEST|\nD="unbalanced\nE=\\$plain\nF=x # not a comment\nG=\n' > "$TMP/corner.env"
+got=$(plain=P with_env "$TMP/corner.env" sh -c 'echo "[$A][$B][$C][$D][$E][$F][$G]"')
+[ "$got" = '[$][${][|]["unbalanced][\P][x # not a comment][]' ] || fail "dotenv corners: $got"
+printf 'A=1\r\nB="x y"\r\nexport C=3\r\n' > "$TMP/crlf.env"
+got=$(with_env "$TMP/crlf.env" sh -c 'printf "%s" "$A$B$C"' | od -An -c | tr -d ' \n')
+[ "$got" = '1xy3' ] || fail "CRLF left a carriage return: $got"
+
+# the 64 KiB limit is exact, and what is near it finishes quickly
+slow() { # slow <seconds> <command...>: the command's status, or fails when too slow
+  local limit=$1; shift
+  local start=$SECONDS
+  "$@" > /dev/null 2>&1; local status=$?
+  [ $((SECONDS - start)) -le "$limit" ] || fail "too slow: $*"
+  return $status
+}
+python3 -c "import sys; sys.stdout.write('A=' + 'x' * (65536 - 3) + '\n')" > "$TMP/exact.env"
+[ "$(wc -c < "$TMP/exact.env")" -eq 65536 ] || fail "test file is not 65536 bytes"
+slow 5 "$BATS" with-env "$TMP/exact.env" true || fail "a file of exactly 64 KiB is refused"
+python3 -c "import sys; sys.stdout.write('A=' + 'x' * (65537 - 3) + '\n')" > "$TMP/over.env"
+slow 5 "$BATS" with-env "$TMP/over.env" true; [ $? -eq 2 ] || fail "a file over 64 KiB is not 2"
+python3 -c "import sys; sys.stdout.write('#\n' * 32768)" > "$TMP/comments.env"
+slow 5 "$BATS" with-env "$TMP/comments.env" true || fail "a 64 KiB file of comments"
+python3 -c "import sys; sys.stdout.write('A=1\n' * 16384)" > "$TMP/repeated.env"
+slow 5 "$BATS" with-env "$TMP/repeated.env" true || fail "one variable on 16384 lines"
+python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(1024)))" > "$TMP/thousand.env"
+got=$(with_env "$TMP/thousand.env" sh -c 'echo $V0 $V1023')
+[ "$got" = 'x x' ] || fail "1024 variables: $got"
+python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(1025)))" > "$TMP/over-thousand.env"
+slow 5 "$BATS" with-env "$TMP/over-thousand.env" true; [ $? -eq 2 ] || fail "1025 variables are not refused"
+python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(9000)))" > "$TMP/many.env"
+slow 5 "$BATS" with-env "$TMP/many.env" true; [ $? -eq 2 ] || fail "a 64 KiB file of assignments is not refused quickly"
+
+# nothing is cut short: a name over 255 bytes and a value over 64 KiB
+# are usage errors that name the variable
+printf 'LONG_NAME=${%s}\n' "$(python3 -c "print('n' * 256)")" > "$TMP/longname.env"
+with_env "$TMP/longname.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "a name over 255 bytes is not 2"
+grep -q 'LONG_NAME' "$TMP/err" || fail "the error does not name the variable: $(cat "$TMP/err")"
+printf 'ok=1\nLONG_NAME=${%s}\n' "$(python3 -c "print('n' * 255)")" > "$TMP/name255.env"
+with_env "$TMP/name255.env" true || fail "a name of 255 bytes is refused"
+BIG=$(python3 -c "print('y' * 65537)")
+printf 'COPY=$BIG\n' > "$TMP/bigvalue.env"
+BIG=$BIG with_env "$TMP/bigvalue.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "a value over 64 KiB is not 2"
+grep -q 'COPY' "$TMP/err" || fail "the error does not name the variable: $(cat "$TMP/err")"
+BIG=$(python3 -c "print('y' * 65536)")
+got=$(BIG=$BIG with_env "$TMP/bigvalue.env" sh -c 'echo ${#COPY}')
+[ "$got" = '65536' ] || fail "a value of 64 KiB is cut: $got"
+
+# the command line: a program's arguments are 4095 bytes at most
+with_env "$TMP/env" true "$(python3 -c "print('x' * 4100)")" 2>/dev/null; [ $? -eq 2 ] || fail "a command line over 4095 bytes is not 2"
+
+# a command with no / is found in the PATH the file gives it
+mkdir -p "$TMP/bin"
+printf '#!/bin/sh\necho "mine $*"\n' > "$TMP/bin/mine-for-test"
+chmod +x "$TMP/bin/mine-for-test"
+printf 'PATH=%s/bin:$PATH\n' "$TMP" > "$TMP/path.env"
+got=$(with_env "$TMP/path.env" mine-for-test a b)
+[ "$got" = 'mine a b' ] || fail "a command only the file's PATH has: $got"
+with_env "$TMP/env" mine-for-test 2>/dev/null; [ $? -eq 127 ] || fail "found with the caller's PATH, which lacks it"
+printf 'PATH=%s/bin\n' "$TMP" > "$TMP/only.env"
+with_env "$TMP/only.env" sh -c 'true' 2>/dev/null; [ $? -eq 127 ] || fail "sh found outside the file's PATH"
+got=$(PATH="$TMP/bin:$PATH" with_env "$TMP/env" mine-for-test c)
+[ "$got" = 'mine c' ] || fail "the caller's PATH, the file setting none: $got"
+got=$(cd "$TMP/bin" && printf 'PATH=:/nonexistent\n' > "$TMP/dot.path.env" && with_env "$TMP/dot.path.env" mine-for-test d)
+[ "$got" = 'mine d' ] || fail "an empty PATH entry is the current directory: $got"
+
+# 126 says why; a directory or a file with no execute bit is not a command
+: > "$TMP/bin/not-executable"
+mkdir -p "$TMP/bin/a-directory"
+with_env "$TMP/path.env" not-executable 2> "$TMP/err"; [ $? -eq 126 ] || fail "no execute bit is not 126"
+grep -q 'Permission denied' "$TMP/err" || fail "126 does not say why: $(cat "$TMP/err")"
+with_env "$TMP/path.env" a-directory 2>/dev/null; [ $? -eq 126 ] || fail "a directory is not 126"
+with_env "$TMP/env" "$TMP/bin/a-directory" 2> "$TMP/err"; [ $? -eq 126 ] || fail "running a directory by path is not 126"
+grep -q 'cannot run' "$TMP/err" || fail "126 by path does not say so: $(cat "$TMP/err")"
+
+# standard input passes through, an empty argument stays
+got=$(printf 'from stdin' | with_env "$TMP/env" cat)
+[ "$got" = 'from stdin' ] || fail "stdin: $got"
+got=$(with_env "$TMP/env" sh -c 'echo "$#"' sh '' '' x)
+[ "$got" = '3' ] || fail "empty arguments: $got"
+
+# a command a signal ended has status 1 (the process package's child_wait
+# does not say which signal), and a signal to bats does not reach it (bats
+# does not replace itself with the command): both are said in CLAUDE.md and
+# are to change with bats-lang/process
+with_env "$TMP/env" sh -c 'kill -KILL $$'; [ $? -eq 1 ] || fail "a command killed by a signal has a status other than 1"
+rm -f "$TMP/child.pid"
+"$BATS" with-env "$TMP/env" sh -c 'echo $$ > "$1"; exec sleep 60' sh "$TMP/child.pid" &
+waiting=$!
+for _ in $(seq 100); do [ -s "$TMP/child.pid" ] && break; sleep 0.1; done
+[ -s "$TMP/child.pid" ] || fail "the command did not start"
+kill -TERM "$waiting"
+wait "$waiting" 2>/dev/null
+if kill -0 "$(cat "$TMP/child.pid")" 2>/dev/null; then
+  kill -KILL "$(cat "$TMP/child.pid")"
+else
+  fail "the signal reached the command: bats now replaces itself, so say it in CLAUDE.md and make this test expect it"
+fi
 echo "with-env: ok"
