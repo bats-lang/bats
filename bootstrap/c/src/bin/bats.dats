@@ -245,6 +245,60 @@ fun count_positionals {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     else count_positionals(buf, next + 1, len, (if dash then count else count + 1))
   end
 
+(* Where the command word starts: the first word that is neither an option
+   nor an option's value (the options are those count_positionals knows);
+   ~1 when there is none *)
+fun first_positional {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int): [r:int] int r =
+  if pos >= len then ~1
+  else if pos >= 4096 then ~1
+  else let
+    val next = $S.find_null_at(buf, pos, 4096)
+    val dash = peek_arr(buf, pos, 4096) = 45
+    val c1 = peek_arr(buf, min(pos + 1, 4095), 4096)
+    val c2 = peek_arr(buf, min(pos + 2, 4095), 4096)
+    val c3 = peek_arr(buf, min(pos + 3, 4095), 4096)
+    val valued = dash && c1 = 45
+      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || c2 = 102)
+  in
+    if ~dash then pos
+    else if next >= 4096 then ~1
+    else if valued then let
+      val vstart = next + 1
+    in
+      if vstart >= len then ~1
+      else if vstart >= 4096 then ~1
+      else let
+        val vend = $S.find_null_at(buf, vstart, 4096)
+      in
+        if vend >= 4096 then ~1
+        else first_positional(buf, vend + 1, len)
+      end
+    end
+    else first_positional(buf, next + 1, len)
+  end
+
+(* Where the command word starts: the second word of the command line (the
+   first is the program), skipping options *)
+fn command_word {l:agz} (buf: !$A.arr(byte, l, 4096), len: int): [r:int] int r = let
+  val program = first_positional(buf, 0, len)
+in
+  if program < 0 then ~1
+  else if program >= 4096 then ~1
+  else let
+    val nx = $S.find_null_at(buf, program, 4096)
+  in
+    if nx >= 4096 then ~1 else first_positional(buf, nx + 1, len)
+  end
+end
+
+(* Whether the command word at p0 is one of the commands setup runs
+   (ats2, clone-repository, record-commit), whose misuse is an error *)
+fn is_setup_word {l:agz}{q:int} (buf: !$A.arr(byte, l, 4096), p0: int q): bool =
+  if p0 < 0 then false
+  else if p0 > 4000 then false
+  else ((peek_arr(buf, p0 + 0, 4096) = 97 && peek_arr(buf, p0 + 1, 4096) = 116 && peek_arr(buf, p0 + 2, 4096) = 115 && peek_arr(buf, p0 + 3, 4096) = 50 && peek_arr(buf, p0 + 4, 4096) = 0) || (peek_arr(buf, p0 + 0, 4096) = 99 && peek_arr(buf, p0 + 1, 4096) = 108 && peek_arr(buf, p0 + 2, 4096) = 111 && peek_arr(buf, p0 + 3, 4096) = 110 && peek_arr(buf, p0 + 4, 4096) = 101 && peek_arr(buf, p0 + 5, 4096) = 45 && peek_arr(buf, p0 + 6, 4096) = 114 && peek_arr(buf, p0 + 7, 4096) = 101 && peek_arr(buf, p0 + 8, 4096) = 112 && peek_arr(buf, p0 + 9, 4096) = 111 && peek_arr(buf, p0 + 10, 4096) = 115 && peek_arr(buf, p0 + 11, 4096) = 105 && peek_arr(buf, p0 + 12, 4096) = 116 && peek_arr(buf, p0 + 13, 4096) = 111 && peek_arr(buf, p0 + 14, 4096) = 114 && peek_arr(buf, p0 + 15, 4096) = 121 && peek_arr(buf, p0 + 16, 4096) = 0) || (peek_arr(buf, p0 + 0, 4096) = 114 && peek_arr(buf, p0 + 1, 4096) = 101 && peek_arr(buf, p0 + 2, 4096) = 99 && peek_arr(buf, p0 + 3, 4096) = 111 && peek_arr(buf, p0 + 4, 4096) = 114 && peek_arr(buf, p0 + 5, 4096) = 100 && peek_arr(buf, p0 + 6, 4096) = 45 && peek_arr(buf, p0 + 7, 4096) = 99 && peek_arr(buf, p0 + 8, 4096) = 111 && peek_arr(buf, p0 + 9, 4096) = 109 && peek_arr(buf, p0 + 10, 4096) = 109 && peek_arr(buf, p0 + 11, 4096) = 105 && peek_arr(buf, p0 + 12, 4096) = 116 && peek_arr(buf, p0 + 13, 4096) = 0))
+
 (* The value of a string option copied to buf, and its length; 0 when
    the option was not given. *)
 fn opt_string_copy {l:agz}{n:pos}
@@ -304,6 +358,7 @@ in
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
           val argc = count_argc(cl_buf, effective_len)
           val positionals = count_positionals(cl_buf, 0, effective_len, 0)
+          val setup_word = is_setup_word(cl_buf, command_word(cl_buf, effective_len))
           val named_only = scan_only(cl_buf, 0, effective_len,
             @{debug= false, release= false, native= false, wasm= false})
           val @(fz_cb, bv_cb) = $A.freeze<byte>(cl_buf)
@@ -580,7 +635,7 @@ in
                 val install = is_install_arg(arg_buf, arg_len)
                 val () = $A.free<byte>(arg_buf)
               in
-                if positionals > 3 then let
+                if positionals > 3 || extra_len > 0 then let
                   val () = prerr! ("error: unexpected extra argument\nusage: bats ats2 install\n")
                 in set_build_err() end
                 else if install then (if ats2_ensure(Say()) then () else set_build_err())
@@ -591,14 +646,14 @@ in
               | CloneRepository() => let
                 val () = $AP.parse_result_free(r)
                 val @(fz_cm, bv_cm) = $A.freeze<byte>(arg_buf)
-                val () = (if positionals > 3 then let val () = prerr! ("error: unexpected extra argument\nusage: bats clone-repository <commit> --repository <dir>\n") in set_build_err() end
+                val () = (if positionals > 3 || extra_len > 0 then let val () = prerr! ("error: unexpected extra argument\nusage: bats clone-repository <commit> --repository <dir>\n") in set_build_err() end
                   else if clone_repository(bv_cm, arg_len, bv_repo, repo_len) then () else set_build_err())
                 val () = $A.drop<byte>(fz_cm, bv_cm)
               in $A.free<byte>($A.thaw<byte>(fz_cm)) end
               | RecordCommit() => let
                 val () = $AP.parse_result_free(r)
                 val @(fz_cm, bv_cm) = $A.freeze<byte>(arg_buf)
-                val () = (if positionals > 3 then let val () = prerr! ("error: unexpected extra argument\nusage: bats record-commit <commit>\n") in set_build_err() end
+                val () = (if positionals > 3 || extra_len > 0 then let val () = prerr! ("error: unexpected extra argument\nusage: bats record-commit <commit>\n") in set_build_err() end
                   else if record_commit(bv_cm, arg_len) then () else set_build_err())
                 val () = $A.drop<byte>(fz_cm, bv_cm)
               in $A.free<byte>($A.thaw<byte>(fz_cm)) end
@@ -622,7 +677,8 @@ in
           | ~$R.err(e) => let
               val () = $AP.parse_error_free(e)
               val () = $A.free<byte>(extra_buf)
-            in print_usage() end
+              val () = print_usage()
+            in (if setup_word then set_build_err() else ()) end
         end
       | ~$R.none() => let
           val () = $A.free<byte>(cl_buf)

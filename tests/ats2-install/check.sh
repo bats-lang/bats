@@ -55,7 +55,7 @@ SH
 chmod +x "$FAKE/curl" "$FAKE/make"
 newhome() { H="$TMP/home-$1"; rm -rf "$H"; mkdir -p "$H"; : > "$TMP/calls"; }
 run() { HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1; }
-leftovers() { [ ! -e "$H/.bats/ats2.new" ] && [ -z "$(ls -d "$H"/.bats/ats2-download.* 2>/dev/null)" ]; }
+leftovers() { [ ! -e "$H/.bats/ats2.new" ] && [ ! -e "$H/.bats/ats2.tgz.part" ] && [ -z "$(ls -d "$H"/.bats/ats2-download.* 2>/dev/null)" ]; }
 
 # a valid tarball of the same ATS2 with one file changed
 mkdir "$TMP/unpacked"; tar -xzf "$TMP/real.tgz" -C "$TMP/unpacked"
@@ -136,18 +136,41 @@ ok "a toolchain bats did not make is used as it is"
 newhome stale
 mkdir -p "$H/.bats/ats2/bin"; printf '#!/bin/sh\nold\n' > "$H/.bats/ats2/bin/patsopt"; chmod +x "$H/.bats/ats2/bin/patsopt"
 echo "ATS2-Postiats-gmp-0.0.1 0000" > "$H/.bats/ats2/.bats-ats2"
-mkdir -p "$H/.bats/ats2.new/x"; echo half > "$H/.bats/ats2.tgz.part"
+mkdir -p "$H/.bats/ats2.new/x" "$H/.bats/ats2-download.old"; echo half > "$H/.bats/ats2.tgz.part"
 run || { cat "$TMP/out"; fail "replacing an older pin failed"; }
 [ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$name $sha" ] || fail "the older pin stayed"
 leftovers || fail "what a killed run left stayed"
 ok "an older pin is replaced and a killed run's files are cleared"
+
+# anything bats did not make is replaced never: a directory with other files, a
+# link, and what a killed run of an older bats left
+newhome precious
+mkdir -p "$H/.bats/ats2/work"; echo precious > "$H/.bats/ats2/work/notes"
+before=$(cd "$H/.bats" && find ats2 | sort; cd ats2 && cksum work/notes)
+run && fail "a directory with other files was replaced"
+grep -q "does not replace" "$TMP/out" || { cat "$TMP/out"; fail "the refusal does not say why"; }
+after=$(cd "$H/.bats" && find ats2 | sort; cd ats2 && cksum work/notes)
+[ "$before" = "$after" ] || fail "the directory was touched"
+[ ! -s "$TMP/calls" ] || fail "something was downloaded or built for a directory that is not replaced"
+newhome link
+mkdir -p "$H/.bats" "$TMP/linked-target"; echo precious > "$TMP/linked-target/notes"; ln -s "$TMP/linked-target" "$H/.bats/ats2"
+run && fail "a link was replaced"
+[ -L "$H/.bats/ats2" ] && [ "$(cat "$TMP/linked-target/notes")" = precious ] || fail "the link or its target was touched"
+newhome emptydir
+mkdir -p "$H/.bats/ats2"
+run || { cat "$TMP/out"; fail "an empty directory was refused"; }
+[ -x "$H/.bats/ats2/bin/patsopt" ] || fail "an empty directory was not installed into"
+ok "a directory bats did not make is never replaced (checked before and after), an empty one is"
 
 newhome extra
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install extra > "$TMP/out" 2>&1 && fail "an extra argument was accepted"
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 > "$TMP/out" 2>&1 && fail "ats2 alone was accepted"
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats3 > /dev/null 2>&1 || true
 [ ! -e "$H/.bats/ats2" ] || fail "a refused command installed"
-ok "an extra argument, and no subcommand, are refused"
+HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install --release > "$TMP/out" 2>&1 && fail "an unknown option was accepted"
+HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install -- extra > "$TMP/out" 2>&1 && fail "words after -- were accepted"
+HOME="$H" PATH="$FAKE:$PATH" "$BATS" axs2 install > "$TMP/out" 2>&1; [ ! -e "$H/.bats/ats2" ] || fail "a command that only starts like ats2 installed"
+ok "an extra argument, an unknown option, words after --, and a near miss of the command word are refused"
 
 env -u HOME PATH="$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1 && fail "no HOME was accepted"
 grep -q "HOME" "$TMP/out" || fail "no HOME is not said"

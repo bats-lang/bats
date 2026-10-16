@@ -119,9 +119,28 @@ mkdir -p "$TMP/empty"
 [ "$(git -C "$TMP/empty" rev-parse HEAD)" = "$first" ] && [ "$(stat -c %a "$TMP/empty")" = 755 ] || fail "the empty directory did not become the clone"
 ok "a path with a space, a trailing slash, and an empty directory"
 
+# a link is neither followed nor replaced, and leaves no debris
+mkdir -p "$TMP/par2/real"; ln -s real "$TMP/par2/lnk"
+"$BATS" clone-repository "$first" --repository "$TMP/par2/lnk" > "$TMP/out" 2> "$TMP/err" && fail "a link was accepted"
+[ "$(ls -A "$TMP/par2" | sort | tr '\n' ' ')" = "lnk real " ] && [ -z "$(ls -A "$TMP/par2/real")" ] || fail "a link left debris: $(ls -A "$TMP/par2")"
+# a killed run's sibling is cleared (it is marked); one not marked is not ours
+mkdir -p "$TMP/par3/clone.new.AAAAAA" "$TMP/par3/clone.new.BBBBBB"; : > "$TMP/par3/clone.new.AAAAAA/.bats-clone-pending"; echo mine > "$TMP/par3/clone.new.BBBBBB/keep"
+"$BATS" clone-repository "$first" --repository "$TMP/par3/clone" > /dev/null 2>&1 || fail "the clone with a stale sibling failed"
+[ ! -e "$TMP/par3/clone.new.AAAAAA" ] && [ "$(cat "$TMP/par3/clone.new.BBBBBB/keep")" = mine ] || fail "stale siblings: the marked one stays or the unmarked one went"
+# a rename that fails leaves nothing and the empty directory as it was, with its mode
+mkdir -p "$TMP/failbin"; printf '#!/bin/sh\nexit 1\n' > "$TMP/failbin/mv"; chmod +x "$TMP/failbin/mv"
+mkdir -p "$TMP/par4/dir"; chmod 700 "$TMP/par4/dir"
+PATH="$TMP/failbin:$PATH" "$BATS" clone-repository "$first" --repository "$TMP/par4/dir" > /dev/null 2>&1 && fail "a failing rename was accepted"
+[ "$(ls -A "$TMP/par4")" = dir ] && [ -z "$(ls -A "$TMP/par4/dir")" ] && [ "$(stat -c %a "$TMP/par4/dir")" = 700 ] || fail "a failing rename left debris or changed the directory"
+"$BATS" clone-repository "$first" --repository "$TMP/par4/dir" > /dev/null 2>&1 || fail "the clone into the 700 directory failed"
+[ "$(stat -c %a "$TMP/par4/dir")" = 700 ] && [ "$(git -C "$TMP/par4/dir" rev-parse HEAD)" = "$first" ] || fail "the mode of the empty directory was not kept"
+ok "a link, a killed run's sibling, a failing rename, and the mode of an empty directory"
+
 "$BATS" clone-repository "$first" extra --repository "$TMP/x1" > /dev/null 2>&1 && fail "an extra argument was accepted"
 [ ! -e "$TMP/x1" ] || fail "an extra argument cloned"
-ok "an extra argument is refused"
+"$BATS" clone-repository "$first" --repository "$TMP/x2" -- extra > /dev/null 2>&1 && fail "words after -- were accepted"
+"$BATS" cXone-repository "$first" --repository "$TMP/x3" > /dev/null 2>&1; [ ! -e "$TMP/x3" ] || fail "a near miss of the command word cloned"
+ok "an extra argument, words after --, and a near miss of the command word are refused"
 
 "$BATS" clone-repository "$first" > "$TMP/out" 2> "$TMP/err" && fail "no directory was accepted"
 grep -q "BATS_REPOSITORY" "$TMP/err" || fail "no directory is not said"

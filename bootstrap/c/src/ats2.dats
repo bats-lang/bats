@@ -28,10 +28,13 @@ staload "result/src/lib.dats"
      bin/patsopt but no marker   a toolchain somebody else made (a
                                  developer's own, an -int build): used as
                                  it is, never replaced, said so
-     nothing                     installed
+     an empty directory, or nothing   installed
+     anything else (a directory with other files, a link to one)
+                                 refused, left as it was: bats replaces
+                                 only what it made
 
-   An install goes through ats2.tgz.part and ats2.new beside ats2 and is
-   moved into place whole, so a run that is killed leaves no half-made
+   An install goes through a download directory (ats2-download.XXXXXX) and
+   ats2.new beside ats2 and is moved into place whole, so a run that is killed leaves no half-made
    toolchain where patsopt is looked for, and the next run clears what it
    left. libgmp and its headers are the system's (libgmp-dev on Debian and
    Ubuntu, gmp with Homebrew): bats does not install packages. *)
@@ -105,8 +108,10 @@ fn home_set (): bool = let
 in has end
 
 (* 0: the pinned toolchain is installed; 3: a toolchain bats did not make
-   is there; 2: nothing usable (nothing, or an older pin's) *)
-#define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then exit 2; fi\n  exit 3\nfi\nexit 2\n"
+   is there; 4: something else bats did not make is there, which is not
+   replaced; 2: nothing usable (nothing, an empty directory, or an older
+   pin's) *)
+#define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then exit 2; fi\n  exit 3\nfi\nif [ -f \"$p/.bats-ats2\" ] && [ ! -L \"$p\" ]; then exit 2; fi\nif [ -L \"$p\" ]; then exit 4; fi\nif [ -e \"$p\" ]; then\n  if [ -d \"$p\" ] && [ -z \"$(ls -A \"$p\")\" ]; then exit 2; fi\n  exit 4\nfi\nexit 2\n"
 
 (* $1 the base. A private directory of this run's own, the download in it
    (fixed timeouts, a few retries); its path on stdout, or on failure what
@@ -119,12 +124,12 @@ in has end
 
 (* $1 the base, $2 the marker, $3 the download's directory: unpack, build
    patsopt, mark, and move into place *)
-#define BUILD "set -e\nn=\"$1/ats2.new\"\nmkdir \"$n\"\ntar -xzf \"$3/ats2.tgz\" --no-same-owner --strip-components=1 -C \"$n\"\nrm -rf \"$3\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\nprintf '%s\\n' \"$2\" > \"$n/.bats-ats2\"\nrm -rf \"$1/ats2\"\nmv \"$n\" \"$1/ats2\"\n"
+#define BUILD "set -e\nn=\"$1/ats2.new\"\nmkdir \"$n\"\ntar -xzf \"$3/ats2.tgz\" --no-same-owner --strip-components=1 -C \"$n\"\nrm -rf \"$3\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\nprintf '%s\\n' \"$2\" > \"$n/.bats-ats2\"\na=\"$1/ats2\"\nif [ -e \"$a\" ] || [ -L \"$a\" ]; then\n  if [ -f \"$a/.bats-ats2\" ] && [ ! -L \"$a\" ]; then rm -rf \"$a\"\n  elif [ -d \"$a\" ] && [ ! -L \"$a\" ] && [ -z \"$(ls -A \"$a\")\" ]; then rmdir \"$a\"\n  else echo \"error: $a exists and was not made by bats, so it is not replaced\" >&2; exit 1; fi\nfi\nmv \"$n\" \"$a\"\n"
 
 (* $1 the base, $2 a download's directory (or the base's own, to clear
    only what a run killed before this one left): this module's own files,
    ats2.new and ats2-download.* *)
-#define CLEAR "rm -rf \"$1/ats2.new\" \"$1\"/ats2-download.*\n"
+#define CLEAR "rm -rf \"$1/ats2.new\" \"$1/ats2.tgz.part\" \"$1\"/ats2-download.*\n"
 #define CLEAR_ONE "rm -rf \"$1/ats2.new\" \"$2\"\n"
 
 (* The lock that makes two installs one: $HOME/.bats/ats2.lock, held with
@@ -246,7 +251,10 @@ end
 (* A toolchain bats did not make: used as it is, and said on every run, on
    stderr, because an -int build computes in C int and accepts false
    statements (bats#264) *)
-fn warn_foreign (): void = let
+val g_warned = ref<bool>(false)
+
+fn warn_foreign (): void = if !g_warned then () else let
+  val () = !g_warned := true
   var b : $B.builder_v = $B.create()
   val _ = env_value("HOME", b)
   val () = bput_v(b, "/.bats/ats2")
@@ -271,6 +279,9 @@ implement ats2_ensure (talk) =
     else if state = 3 then let
       val () = warn_foreign()
     in true end
+    else if state = 4 then let
+      val () = prerr! ("error: ~/.bats/ats2 exists, is not a toolchain bats made and is not an empty directory, so bats does not replace it: move it away and run bats ats2 install\n")
+    in false end
     else if state <> 2 then false
     else let
       val lk = lock_take()
