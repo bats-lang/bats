@@ -17,6 +17,7 @@ staload "lexer.sats"
 staload "build.sats"
 staload "commands.sats"
 staload "lock.sats"
+staload "with_env.sats"
 staload "_bats_inputs.sats"
 
 (* The subcommands *)
@@ -100,6 +101,8 @@ fn print_usage(): void = let
   val () = println! ("  upload --repository <dir>    Package and upload a library")
   val () = println! ("  clean                        Remove generated artifacts")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
+  val () = println! ("  with-env <env-file> <command> [args...]")
+  val () = println! ("                               Run a command with the variables of a dotenv file")
 in end
 
 (* Copies src[s + i, e) to dst[i..], for bats run's arguments after
@@ -543,7 +546,10 @@ end
 (* Exit non-zero when any command recorded an error, so CI and scripts
    can rely on the exit status. *)
 implement main0 () = let
-  val () = bats_main ()
+  (* bats with-env runs the command it is given; argv[1] is read before
+     bats's own arguments are, so the command's own flags (--help, --) are
+     its alone *)
+  val () = (if with_env_main () then () else bats_main ())
 in
   if has_build_err () then exit_void (if get_cap_exit () <> 0 then get_cap_exit () else 1)
   else if get_exit_code () <> 0 then exit_void (get_exit_code ())
