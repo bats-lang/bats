@@ -72,6 +72,9 @@ staload "helpers.sats"
    an indexed one, which peek, digits_end and the like are given) *)
 typedef xi = [i:int] int i
 
+(* The length of a text read whole: at most 524288 bytes *)
+typedef tlen = [n:nat | n <= 524288] int n
+
 (* ============================================================
    Text: a file read whole, at most 524288 bytes, with its length
    ============================================================ *)
@@ -94,10 +97,14 @@ fun text_has_from {l:agz}{sl:nat}{i:nat | i <= sl} .<sl - i>.
 fn text_has {l:agz}{sl:nat} (bv: !$A.borrow(byte, l, 524288), len: xi, p: xi, s: string sl): bool =
   text_has_from(bv, len, p, s, g1u2i(string1_length(s)), 0)
 
-(* p after the text s when bv holds it at p, else ~1 (a p of ~1 stays ~1) *)
-fn step_text {l:agz}{sl:nat} (bv: !$A.borrow(byte, l, 524288), len: xi, p: xi, s: string sl): xi =
+(* p after the text s when bv holds it at p, else ~1 (a p below 0 stays ~1):
+   the text is within bv[0, len), which is checked, so what is answered
+   is a position of it *)
+fn step_text {l:agz}{len:nat | len <= 524288}{sl:nat}{p:int}
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, s: string sl): [r:int | r < 0 || (p <= r && r <= len)] int r =
   if p < 0 then ~1
-  else if text_has(bv, len, p, s) then p + g1u2i(string1_length(s))
+  else if p + g1u2i(string1_length(s)) <= len then
+    (if text_has_from(bv, len, p, s, g1u2i(string1_length(s)), 0) then p + g1u2i(string1_length(s)) else ~1)
   else ~1
 
 (* The first position at or after p holding a non-digit *)
@@ -111,8 +118,8 @@ fun digits_end {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
   end
 
 (* p after the digits at p (at least one), else ~1 *)
-fn step_digits {l:agz}{len:nat | len <= 524288}
-  (bv: !$A.borrow(byte, l, 524288), len: int len, p: xi): xi =
+fn step_digits {l:agz}{len:nat | len <= 524288}{p:int}
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p): [r:int | r < 0 || (p < r && r <= len)] int r =
   if p < 0 then ~1
   else if p >= len then ~1
   else let
@@ -159,10 +166,9 @@ fun skip_space {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
   else p
 
 (* b less the whitespace that ends bv[a, b) *)
-fun trim_end {l:agz}{len:nat | len <= 524288}{b:nat | b <= len} .<b>.
-  (bv: !$A.borrow(byte, l, 524288), len: int len, a: xi, b: int b): [r:nat | r <= b] int r =
-  if b <= 0 then b
-  else if b <= a then b
+fun trim_end {l:agz}{len:nat | len <= 524288}{a:nat}{b:nat | a <= b; b <= len} .<b>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, a: int a, b: int b): [r:nat | a <= r; r <= b] int r =
+  if b <= a then b
   else if is_space(peek(bv, b - 1, 524288)) then trim_end(bv, len, a, b - 1)
   else b
 
@@ -192,12 +198,10 @@ fun put_range {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
     val () = put_char_v(out, peek(bv, p, 524288))
   in put_range(bv, len, p + 1, b, out) end
 
-(* n as a length of a text: 0 to 524288, else 0 *)
-fn clamp_len (n: int): [k:nat | k <= 524288] int k = let
-  val m = g1ofg0(n)
-in
-  if m >= 0 then (if m <= 524288 then m else 0) else 0
-end
+(* The length a read_text answered as the length of a text: an unreadable
+   file (its answer is below 0, and the caller has said so) is an empty one *)
+fn text_len (k: [k:int | ~1 <= k; k <= 524288] int k): tlen =
+  if k >= 0 then k else 0
 
 (* The first position at or after p of a[0, len) that is not whitespace *)
 fun lead_blank {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
@@ -207,10 +211,9 @@ fun lead_blank {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
   else p
 
 (* b less the whitespace that ends a[lo, b) *)
-fun trail_blank {l:agz}{len:nat | len <= 524288}{b:nat | b <= len} .<b>.
-  (a: !$A.arr(byte, l, 524288), len: int len, lo: xi, b: int b): [r:nat | r <= b] int r =
-  if b <= 0 then b
-  else if b <= lo then b
+fun trail_blank {l:agz}{len:nat | len <= 524288}{lo:nat}{b:nat | lo <= b; b <= len} .<b>.
+  (a: !$A.arr(byte, l, 524288), len: int len, lo: int lo, b: int b): [r:nat | lo <= r; r <= b] int r =
+  if b <= lo then b
   else if is_space(peek_arr(a, b - 1, 524288)) then trail_blank(a, len, lo, b - 1)
   else b
 
@@ -224,7 +227,7 @@ fun shift_down {l:agz}{n:nat | n <= 524288}{i:nat | i <= n} .<n - i>.
 
 (* The file at the NUL-terminated path read into dst, and its length; ~1
    when it cannot be read or holds over 524288 bytes *)
-fn read_text {lp:agz}{ld:agz} (path: !$A.borrow(byte, lp, 524288), dst: !$A.arr(byte, ld, 524288)): int = let
+fn read_text {lp:agz}{ld:agz} (path: !$A.borrow(byte, lp, 524288), dst: !$A.arr(byte, ld, 524288)): [k:int | ~1 <= k; k <= 524288] int k = let
   fun copy_text {ls:agz}{m:pos}{n:nat | n < m; n <= 524288}{i:nat | i <= n} .<n - i>.
     (src: !$A.borrow(byte, ls, m), dst: !$A.arr(byte, ld, 524288), n: int n, i: int i): void =
     if i >= n then ()
@@ -236,7 +239,7 @@ in
   | ~whole_err(_) => ~1
   | ~whole_ok(ar, piece, m, n) => let
       val @(fz, bv) = $A.freeze<byte>(piece)
-      val k = (if n <= 524288 then let val () = copy_text(bv, dst, n, 0) in n end else ~1): int
+      val k = (if n <= 524288 then let val () = copy_text(bv, dst, n, 0) in n end else ~1): [k:int | ~1 <= k; k <= 524288] int k
       val () = $A.drop<byte>(fz, bv)
       val () = whole_free(ar, $A.thaw<byte>(fz))
     in k end
@@ -248,7 +251,7 @@ fn path_arr (b: $B.builder_v): [l:agz] $A.arr(byte, l, 524288) = let
 in a end
 
 (* The file whose NUL-terminated path is in b, read into dst as read_text does *)
-fn read_file_text {ld:agz} (b: $B.builder_v, dst: !$A.arr(byte, ld, 524288)): int = let
+fn read_file_text {ld:agz} (b: $B.builder_v, dst: !$A.arr(byte, ld, 524288)): [k:int | ~1 <= k; k <= 524288] int k = let
   val a = path_arr(b)
   val @(fz, bv) = $A.freeze<byte>(a)
   val r = read_text(bv, dst)
@@ -288,29 +291,47 @@ fun word_end {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
 
    at bv[a, b): whether it is one, where the path ends (before the colon),
    L, and where the message starts *)
-fn header_parse {l:agz}{len:nat | len <= 524288}{a:nat | a <= len}
-  (bv: !$A.borrow(byte, l, 524288), len: int len, a: int a, b: xi): @(bool, xi, int, xi) = let
+fn header_parse {l:agz}{len:nat | len <= 524288}{a:nat | a <= len}{b:nat | b <= len}
+  (bv: !$A.borrow(byte, l, 524288), len: int len, a: int a, b: int b):
+  @(bool, [pe:int | a <= pe; pe <= len] int pe, int, [m:int | a <= m; m <= len] int m) = let
   val w = word_end(bv, len, a, b)
-  val named = (w - a >= 7 && peek(bv, w - 1, 524288) = 58 && text_has(bv, len, w - 6, ".bats")
-    && w < b && peek(bv, w, 524288) = 32): bool
-  val p1 = (if named then w + 1 else ~1): xi
-  val p2 = step_digits(bv, len, p1)
-  val p3 = step_text(bv, len, p2, "(line=")
-  val p4 = step_digits(bv, len, p3)
-  val lineno = (if p3 >= 0 then (if p3 <= p4 then (if p4 <= len then digits_value(bv, len, p3, p4, 0) else 0) else 0) else 0): int
-  val p5 = step_text(bv, len, p4, ", offs=")
-  val p6 = step_digits(bv, len, p5)
-  val p7 = step_text(bv, len, p6, ") -- ")
-  val p8 = step_digits(bv, len, p7)
-  val p9 = step_text(bv, len, p8, "(line=")
-  val p10 = step_digits(bv, len, p9)
-  val p11 = step_text(bv, len, p10, ", offs=")
-  val p12 = step_digits(bv, len, p11)
-  val p13 = step_text(bv, len, p12, "): error(")
-  val p14 = step_digits(bv, len, p13)
-  val p15 = step_text(bv, len, p14, "): ")
 in
-  if p15 >= 0 && p15 <= b then @(true, w - 1, lineno, p15) else @(false, 0, 0, 0)
+  if w - a >= 7 then
+    (if w < b then
+      (if peek(bv, w - 1, 524288) = 58 && text_has(bv, len, w - 6, ".bats") && peek(bv, w, 524288) = 32 then
+let
+ val p2 = step_digits(bv, len, w + 1)
+in if p2 >= 0 then let
+ val p3 = step_text(bv, len, p2, "(line=")
+in if p3 >= 0 then let
+ val p4 = step_digits(bv, len, p3)
+in if p4 >= 0 then let
+val lineno = digits_value(bv, len, p3, p4, 0)
+ val p5 = step_text(bv, len, p4, ", offs=")
+in if p5 >= 0 then let
+ val p6 = step_digits(bv, len, p5)
+in if p6 >= 0 then let
+ val p7 = step_text(bv, len, p6, ") -- ")
+in if p7 >= 0 then let
+ val p8 = step_digits(bv, len, p7)
+in if p8 >= 0 then let
+ val p9 = step_text(bv, len, p8, "(line=")
+in if p9 >= 0 then let
+ val p10 = step_digits(bv, len, p9)
+in if p10 >= 0 then let
+ val p11 = step_text(bv, len, p10, ", offs=")
+in if p11 >= 0 then let
+ val p12 = step_digits(bv, len, p11)
+in if p12 >= 0 then let
+ val p13 = step_text(bv, len, p12, "): error(")
+in if p13 >= 0 then let
+ val p14 = step_digits(bv, len, p13)
+in if p14 >= 0 then let
+ val p15 = step_text(bv, len, p14, "): ")
+in if p15 >= 0 then (if p15 <= b then @(true, w - 1, lineno, p15) else @(false, a, 0, a)) else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end else @(false, a, 0, a) end
+      else @(false, a, 0, a))
+    else @(false, a, 0, a))
+  else @(false, a, 0, a)
 end
 
 (* An identifier's end: letters, digits and '_', from p *)
@@ -342,8 +363,11 @@ fn variable_end {l:agz}{len:nat | len <= 524288}{p:nat | p <= len}
       val s = p + 7
       val c = byte_at(bv, len, s)
       val named = ((c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c = 95): bool
-      val e = (if named then (if s < len then ident_end(bv, len, s) else ~1) else ~1)
-    in step_text(bv, len, step_digits(bv, len, step_text(bv, len, e, "(")), "))") end
+    in
+      if named then
+        (if s < len then step_text(bv, len, step_digits(bv, len, step_text(bv, len, ident_end(bv, len, s), "(")), "))") else ~1)
+      else ~1
+    end
     else ~1): int
   val r = g1ofg0(raw)
 in
@@ -492,23 +516,12 @@ fun enclosing {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
    Whether a reject fixture failed exactly as it says it must
    ============================================================ *)
 
-(* bv[a, b) appended to out, when a is a position of bv[0, len) *)
-fn put_between {l:agz}{len:nat | len <= 524288}
-  (bv: !$A.borrow(byte, l, 524288), len: int len, a: xi, b: xi, out: !$B.builder_v >> $B.builder_v): void =
-  if a >= 0 then (if a <= len then put_range(bv, len, a, b, out) else ()) else ()
-
-(* The text mv[0, mlen) appended to out *)
-fn put_text {l:agz} (mv: !$A.borrow(byte, l, 524288), mlen: xi, out: !$B.builder_v >> $B.builder_v): void =
-  if mlen >= 0 then (if mlen <= 524288 then put_range(mv, mlen, 0, mlen, out) else ()) else ()
-
 (* Whether the path bv[a, path_end) ends with "/" and the module mv[0, mlen) *)
 fn ends_with_module {l:agz}{ls:agz}
   (bv: !$A.borrow(byte, l, 524288), len: xi, a: xi, path_end: xi,
-   mv: !$A.borrow(byte, ls, 524288), mlen: xi): bool =
-  if mlen >= 0 then
-    (if path_end - mlen - 1 >= a then
-      (if byte_at(bv, len, path_end - mlen - 1) = 47 then same_range(bv, len, path_end - mlen, mv, mlen, 0, mlen, 0) else false)
-    else false)
+   mv: !$A.borrow(byte, ls, 524288), mlen: tlen): bool =
+  if path_end - mlen - 1 >= a then
+    (if byte_at(bv, len, path_end - mlen - 1) = 47 then same_range(bv, len, path_end - mlen, mv, mlen, 0, mlen, 0) else false)
   else false
 
 (* Walks the log's lines from p: each patsopt error is checked in turn
@@ -518,7 +531,7 @@ fn ends_with_module {l:agz}{ls:agz}
    and ends the walk. Returns the number of errors seen. *)
 fun walk_log {l:agz}{ls:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
   (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, in_error: bool, count: int,
-   mv: !$A.borrow(byte, ls, 524288), mlen: xi, first: int, want: int,
+   mv: !$A.borrow(byte, ls, 524288), mlen: tlen, first: int, want: int,
    raw: !$B.builder_v >> $B.builder_v, norm: !$B.builder_v >> $B.builder_v,
    problem: !$B.builder_v >> $B.builder_v): int = let
   val e = line_end(bv, len, p, true)
@@ -530,22 +543,22 @@ fun walk_log {l:agz}{ls:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - 
   val () = (if is_header then
       (if ~in_module then let
           val () = bput_v(problem, "an error is in ")
-          val () = put_between(bv, len, p, path_end, problem)
+          val () = put_range(bv, len, p, path_end, problem)
           val () = bput_v(problem, ", not ")
-          val () = put_text(mv, mlen, problem)
+          val () = put_range(mv, 524288, 0, mlen, problem)
           val () = bput_v(problem, ": ")
-        in put_between(bv, len, msg, e, problem) end
+        in put_range(bv, len, msg, e, problem) end
       else if snippet_line <> want then let
           val () = bput_v(problem, "an error is at line ")
           val () = put_int_v(problem, snippet_line)
           val () = bput_v(problem, " of its snippet, not ")
           val () = put_int_v(problem, want)
           val () = bput_v(problem, ": ")
-        in put_between(bv, len, msg, e, problem) end
+        in put_range(bv, len, msg, e, problem) end
       else let
-          val () = put_between(bv, len, msg, e, raw)
+          val () = put_range(bv, len, msg, e, raw)
           val () = put_char_v(raw, 10)
-          val () = (if msg >= 0 then (if msg <= len then put_unnumbered(bv, len, msg, e, norm) else ()) else ())
+          val () = put_unnumbered(bv, len, msg, e, norm)
         in put_char_v(norm, 10) end)
     else if continues then let
       val () = put_range(bv, len, p, e, raw)
@@ -569,7 +582,7 @@ fn after_word {l:agz}{kl:nat} (bv: !$A.borrow(byte, l, 524288), len: xi, a: xi, 
 (* Whether the name sv[ds, de) (the declaration the error is in, if ds is
    not negative) is the function ev[ns, ne) of the expect *)
 fn decl_is {l1,l2:agz}
-  (sv: !$A.borrow(byte, l1, 524288), slen: xi, ds: int, de: int,
+  (sv: !$A.borrow(byte, l1, 524288), slen: tlen, ds: int, de: int,
    ev: !$A.borrow(byte, l2, 524288), elen: xi, ns: xi, ne: xi): bool = let
   val ds1 = g1ofg0(ds)
   val de1 = g1ofg0(de)
@@ -588,10 +601,10 @@ end
    line is. Each check is made only when none before it found a problem;
    the builders are all consumed on the one path, so none is dropped. *)
 fn judge_in {l1,l2,l3,l4:agz}{elen:nat | elen <= 524288}
-  (lv: !$A.borrow(byte, l1, 524288), llen: xi,
+  (lv: !$A.borrow(byte, l1, 524288), llen: tlen,
    ev: !$A.borrow(byte, l2, 524288), elen: int elen,
-   sv: !$A.borrow(byte, l3, 524288), slen: xi,
-   mv: !$A.borrow(byte, l4, 524288), mlen: xi, first: int,
+   sv: !$A.borrow(byte, l3, 524288), slen: tlen,
+   mv: !$A.borrow(byte, l4, 524288), mlen: tlen, first: int,
    problem: !$B.builder_v >> $B.builder_v): void = let
   (* the expect: line 1 "function <name>", line 2 "line <n>", the rest *)
   val e1 = line_end(ev, elen, 0, false)
@@ -599,10 +612,10 @@ fn judge_in {l1,l2,l3,l4:agz}{elen:nat | elen <= 524288}
   val e2 = (if e1 < elen then line_end(ev, elen, s1, false) else elen): [r:nat | r <= elen] int r
   val whole_form = (e1 < elen && e2 < elen && text_has(ev, elen, 0, "function ")
     && text_has(ev, elen, s1, "line ")): bool
-  val ns = (if 9 <= elen then skip_space(ev, elen, 9, e1) else elen)
-  val ne = trim_end(ev, elen, ns, e1)
+  val ns = (if 9 <= elen then skip_space(ev, elen, 9, e1) else elen): [r:nat | r <= elen] int r
+  val ne = (if ns <= e1 then trim_end(ev, elen, ns, e1) else ns): [r:nat | r <= elen] int r
   val ls = (if whole_form then (if s1 + 5 <= elen then skip_space(ev, elen, s1 + 5, e2) else elen) else 0): [r:nat | r <= elen] int r
-  val le = (if whole_form then trim_end(ev, elen, ls, e2) else 0): [r:nat | r <= elen] int r
+  val le = (if whole_form then (if ls <= e2 then trim_end(ev, elen, ls, e2) else ls) else 0): [r:nat | r <= elen] int r
   val ld = (if whole_form then step_digits(ev, elen, ls) else ~1): int
   val numeric = (ld >= ls && ld = le && ld > ls): bool
   val wanted = (if numeric then (if ls <= le then digits_value(ev, elen, ls, le, 0) else 0) else 0): int
@@ -610,19 +623,18 @@ fn judge_in {l1,l2,l3,l4:agz}{elen:nat | elen <= 524288}
       bput_v(problem, "its expect is not \"function <name>\", \"line <n>\", then the error")
     else ())
   (* the declaration the error is said to be in *)
-  val @(ds, de) = enclosing(sv, clamp_len(slen), 0, 1, wanted, ~1, ~1)
+  val @(ds, de) = enclosing(sv, slen, 0, 1, wanted, ~1, ~1)
   val same = decl_is(sv, slen, ds, de, ev, elen, ns, ne)
   val () = (if bytes_in(problem) = 0 && ~same then let
       val () = bput_v(problem, "line ")
       val () = put_int_v(problem, wanted)
       val () = bput_v(problem, " of its snippet is not in ")
-    in put_between(ev, elen, ns, ne, problem) end
+    in put_range(ev, elen, ns, ne, problem) end
     else ())
   (* patsopt's errors: each checked, its text kept *)
   var raw : $B.builder_v = $B.create()
   var norm : $B.builder_v = $B.create()
-  val llen_n = clamp_len(llen)
-  val count = (if bytes_in(problem) = 0 then walk_log(lv, llen_n, 0, false, 0, mv, mlen, first, wanted, raw, norm, problem) else 0): int
+  val count = (if bytes_in(problem) = 0 then walk_log(lv, llen, 0, false, 0, mv, mlen, first, wanted, raw, norm, problem) else 0): int
   val () = (if bytes_in(problem) = 0 && count = 0 then bput_v(problem, "no error of patsopt's") else ())
   (* the expected text from the expect's third line, a line feed after each *)
   var want : $B.builder_v = $B.create()
@@ -649,13 +661,12 @@ fn judge_in {l1,l2,l3,l4:agz}{elen:nat | elen <= 524288}
 in end
 
 fn judge {l1,l2,l3,l4:agz}
-  (lv: !$A.borrow(byte, l1, 524288), llen: xi,
-   ev: !$A.borrow(byte, l2, 524288), elen0: xi,
-   sv: !$A.borrow(byte, l3, 524288), slen: xi,
-   mv: !$A.borrow(byte, l4, 524288), mlen: xi, first: int,
+  (lv: !$A.borrow(byte, l1, 524288), llen: tlen,
+   ev: !$A.borrow(byte, l2, 524288), elen0: tlen,
+   sv: !$A.borrow(byte, l3, 524288), slen: tlen,
+   mv: !$A.borrow(byte, l4, 524288), mlen: tlen, first: int,
    problem: !$B.builder_v >> $B.builder_v): void = let
-  val elen0n = clamp_len(elen0)
-  val elen = trim_feeds(ev, elen0n)
+  val elen = trim_feeds(ev, elen0)
 in judge_in(lv, llen, ev, elen, sv, slen, mv, mlen, first, problem) end
 
 (* ============================================================
@@ -710,32 +721,32 @@ fn cfg_arg {l:agz} (cfg: !$A.borrow(byte, l, 524288), s: xi): $P.arg_entry = let
 in mk_arg(b) end
 
 (* <directory>/<member>/<leaf> as a builder (no NUL) *)
-fn fixture_text {l:agz}{lm:agz}{sl:nat}
-  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: xi, e: xi, leaf: string sl): $B.builder_v = let
+fn fixture_text {l:agz}{lm:agz}{sl:nat}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e, leaf: string sl): $B.builder_v = let
   var b : $B.builder_v = $B.create()
   val () = put_cfg(cfg, w.directory, b)
   val () = bput_v(b, "/")
-  val () = put_between(mv, 524288, a, e, b)
+  val () = put_range(mv, 524288, a, e, b)
   val () = bput_v(b, "/")
   val () = bput_v(b, leaf)
 in b end
 
 (* The same, NUL-terminated, as a path *)
-fn fixture_path {l:agz}{lm:agz}{sl:nat}
-  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: xi, e: xi, leaf: string sl): $B.builder_v = let
+fn fixture_path {l:agz}{lm:agz}{sl:nat}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e, leaf: string sl): $B.builder_v = let
   var b = fixture_text(cfg, w, mv, a, e, leaf)
   val () = put_char_v(b, 0)
 in b end
 
 (* <work>/app/<module>, NUL-terminated, from the module name text *)
 fn app_module_path {l:agz}{lm:agz}{sl:nat}
-  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), mlen: xi, work_leaf: string sl): $B.builder_v = let
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), mlen: tlen, work_leaf: string sl): $B.builder_v = let
   var b : $B.builder_v = $B.create()
   val () = put_cfg(cfg, w.work, b)
   val () = bput_v(b, "/")
   val () = bput_v(b, work_leaf)
   val () = bput_v(b, "/")
-  val () = put_text(mv, mlen, b)
+  val () = put_range(mv, 524288, 0, mlen, b)
   val () = put_char_v(b, 0)
 in b end
 
@@ -786,7 +797,7 @@ fn read_elapsed {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): int = l
   val ta = $A.alloc<byte>(524288): [l_ta:agz] $A.arr(byte, l_ta, 524288)
   val tn = read_file_text(work_file(cfg, w, "check.seconds"), ta)
   val @(fz, bv) = $A.freeze<byte>(ta)
-  val n = clamp_len(tn)
+  val n = text_len(tn)
   val e = digits_end(bv, n, 0)
   val v = digits_value(bv, n, 0, e, 0)
   val () = $A.drop<byte>(fz, bv)
@@ -799,14 +810,14 @@ in v end
    exit status of the check (a snippet that could not be put in is 98).
    The splice and the run are the system's (head, awk, tail, a shell); which
    line, and what the output means, are decided here. *)
-fn check_with_snippet {l:agz}{lm:agz}{lx:agz}
-  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: xi, e: xi,
+fn check_with_snippet {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
    bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, at: int): int = let
   var app : $B.builder_v = $B.create()
   val () = put_cfg(cfg, w.work, app)
   val () = bput_v(app, "/app")
   var module : $B.builder_v = $B.create()
-  val () = put_between(bv_m, 524288, 0, mlen, module)
+  val () = put_range(bv_m, 524288, 0, mlen, module)
   val snippet = fixture_text(cfg, w, mv, a, e, "snippet.bats")
   var line : $B.builder_v = $B.create()
   val () = put_int_v(line, at)
@@ -821,7 +832,7 @@ fn check_with_snippet {l:agz}{lm:agz}{lx:agz}
   var project : $B.builder_v = $B.create()
   val () = bput_v(project, ".")
 in
-  run_sh("app=$1; m=$2; snip=$3; at=$4; prog=$5; repo=$6; log=$7; secs=$8; shift 8; proj=$1; f=\"$app/$m\"; { head -n $((at - 1)) \"$f\"; awk 1 \"$snip\"; echo; tail -n +\"$at\" \"$f\"; } > \"$f.fixture\" || exit 98; mv -f \"$f.fixture\" \"$f\" || exit 98; case $prog in */*) prog=$(cd \"$(dirname \"$prog\")\" && pwd)/$(basename \"$prog\") ;; esac; case $log in /*) ;; *) log=$PWD/$log ;; esac; case $secs in /*) ;; *) secs=$PWD/$secs ;; esac; case $repo in ''|/*) ;; *) repo=$PWD/$repo ;; esac; if [ -z \"${GIT_DIR:-}\" ]; then g=$(git -C \"$proj\" rev-parse --absolute-git-dir 2>/dev/null) && GIT_DIR=$g && export GIT_DIR; fi; s=$(date +%s); cd \"$app\" || exit 98; if [ -n \"$repo\" ]; then \"$prog\" check --repository \"$repo\"; else \"$prog\" check; fi > \"$log\" 2>&1; rc=$?; echo $(( $(date +%s) - s )) > \"$secs\"; exit $rc",
+  run_sh("app=$1; m=$2; snip=$3; at=$4; prog=$5; repo=$6; log=$7; secs=$8; shift 8; proj=$1; rm -f \"$log\" \"$secs\"; f=\"$app/$m\"; { head -n $((at - 1)) \"$f\"; awk 1 \"$snip\"; echo; tail -n +\"$at\" \"$f\"; } > \"$f.fixture\" || exit 98; mv -f \"$f.fixture\" \"$f\" || exit 98; case $prog in */*) prog=$(cd \"$(dirname \"$prog\")\" && pwd)/$(basename \"$prog\") ;; esac; case $log in /*) ;; *) log=$PWD/$log ;; esac; case $secs in /*) ;; *) secs=$PWD/$secs ;; esac; case $repo in ''|/*) ;; *) repo=$PWD/$repo ;; esac; if [ -z \"${GIT_DIR:-}\" ]; then g=$(git -C \"$proj\" rev-parse --absolute-git-dir 2>/dev/null) && GIT_DIR=$g && export GIT_DIR; fi; s=$(date +%s); cd \"$app\" || exit 98; if [ -n \"$repo\" ]; then \"$prog\" check --repository \"$repo\"; else \"$prog\" check; fi > \"$log\" 2>&1; rc=$?; echo $(( $(date +%s) - s )) > \"$secs\"; exit $rc",
     $L.list_vt_cons(mk_arg(app), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(snippet),
     $L.list_vt_cons(mk_arg(line), $L.list_vt_cons(cfg_arg(cfg, w.program), $L.list_vt_cons(mk_arg(repository),
     $L.list_vt_cons(mk_arg(log), $L.list_vt_cons(mk_arg(secs), $L.list_vt_cons(mk_arg(project), $L.list_vt_nil()))))))))))
@@ -833,7 +844,7 @@ fn restore_copy {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings, 
   var work : $B.builder_v = $B.create()
   val () = put_cfg(cfg, w.work, work)
   var module : $B.builder_v = $B.create()
-  val () = put_between(bv_m, 524288, 0, mlen, module)
+  val () = put_range(bv_m, 524288, 0, mlen, module)
   var project : $B.builder_v = $B.create()
   val () = bput_v(project, ".")
   val _ = run_sh("rm -rf \"$1/app/build\" && cp -a \"$1/build-checked\" \"$1/app/build\" && cp -p \"$2/$3\" \"$1/app/$3\"",
@@ -848,7 +859,7 @@ val g_passed = ref<int>(0)
 val g_failed = ref<int>(0)
 
 (* A decimal number as text *)
-fn say_failed_lines {l:agz} (lv: !$A.borrow(byte, l, 524288), llen: xi): void = let
+fn say_failed_lines {l:agz} (lv: !$A.borrow(byte, l, 524288), llen: tlen): void = let
   (* the first five lines of the log that name an error, as run.sh showed *)
   fun loop {len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
     (lv: !$A.borrow(byte, l, 524288), len: int len, p: int p, shown: xi): void =
@@ -871,7 +882,7 @@ fn say_failed_lines {l:agz} (lv: !$A.borrow(byte, l, 524288), llen: xi): void = 
       else loop(lv, len, e + 1, (if hit then shown + 1 else shown))
     end
 in
-  loop(lv, clamp_len(llen), 0, 0)
+  loop(lv, llen, 0, 0)
 end
 
 (* The member name mv[a, e) printed *)
@@ -885,8 +896,8 @@ in say_member(mv, a, e) end
 
 (* Runs the fixture whose name is mv[a, e) (accept/<name> or reject/<name>)
    in the checked copy, and says how it went *)
-fn run_member {l:agz}{lm:agz}
-  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: xi, e: xi): void = let
+fn run_member {l:agz}{lm:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e): void = let
   val is_accept = text_has(mv, e, a, "accept/")
   (* the module and the line the snippet goes before *)
   val fa = $A.alloc<byte>(524288): [l_fa:agz] $A.arr(byte, l_fa, 524288)
@@ -894,24 +905,26 @@ fn run_member {l:agz}{lm:agz}
   val ba = $A.alloc<byte>(524288): [l_ba:agz] $A.arr(byte, l_ba, 524288)
   val blen0 = read_file_text(fixture_path(cfg, w, mv, a, e, "before"), ba)
   val sa = $A.alloc<byte>(524288): [l_sa:agz] $A.arr(byte, l_sa, 524288)
-  val slen = read_file_text(fixture_path(cfg, w, mv, a, e, "snippet.bats"), sa)
+  val slen0 = read_file_text(fixture_path(cfg, w, mv, a, e, "snippet.bats"), sa)
   val xa = $A.alloc<byte>(524288): [l_xa:agz] $A.arr(byte, l_xa, 524288)
-  val xlen = read_file_text(fixture_path(cfg, w, mv, a, e, "expect"), xa)
+  val xlen0 = read_file_text(fixture_path(cfg, w, mv, a, e, "expect"), xa)
   (* `file`, as expect.py reads it, stripped (moved down in its array, so
      the module's name is fa[0, mlen)) *)
-  val flen = clamp_len(flen0)
+  val flen = text_len(flen0)
   val fstart = lead_blank(fa, flen, 0)
   val fstop = trail_blank(fa, flen, fstart, flen)
-  val mlen = clamp_len(fstop - fstart)
+  val mlen = fstop - fstart
   val () = shift_down(fa, fstart, mlen, 0)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
   val @(fz_b, bv_b) = $A.freeze<byte>(ba)
   val @(fz_s, bv_s) = $A.freeze<byte>(sa)
   val @(fz_x, bv_x) = $A.freeze<byte>(xa)
   (* `before`, as the shell reads it, without its trailing line feeds *)
-  val blen1 = clamp_len(blen0)
+  val blen1 = text_len(blen0)
+  val slen = text_len(slen0)
+  val xlen = text_len(xlen0)
   val blen = trim_feeds(bv_b, blen1)
-  val missing = (flen0 < 0 || blen0 < 0 || slen < 0 || (xlen < 0 && ~is_accept)): bool
+  val missing = (flen0 < 0 || blen0 < 0 || slen0 < 0 || (xlen0 < 0 && ~is_accept)): bool
 in
   if missing then let
     val () = fail_member(mv, a, e)
@@ -967,9 +980,10 @@ in
       val rc = check_with_snippet(cfg, w, mv, a, e, bv_f, mlen, at)
       val elapsed = read_elapsed(cfg, w)
       val la = $A.alloc<byte>(524288): [l_la:agz] $A.arr(byte, l_la, 524288)
-      val llen = read_file_text(log_path(cfg, w), la)
+      val llen0 = read_file_text(log_path(cfg, w), la)
+      val llen = text_len(llen0)
       val @(fz_l, bv_l) = $A.freeze<byte>(la)
-      val () = (if llen < 0 then let
+      val () = (if llen0 < 0 then let
           val () = fail_member(mv, a, e)
         in println! (": the check's log cannot be read") end
         else if is_accept then
@@ -981,14 +995,14 @@ in
           else let
               val () = fail_member(mv, a, e)
               val () = println! (": should type-check")
-            in say_failed_lines(bv_l, g1ofg0(llen)) end)
+            in say_failed_lines(bv_l, llen) end)
         else
           (if rc = 0 then let
               val () = fail_member(mv, a, e)
             in println! (": should be rejected") end
           else let
               var problem : $B.builder_v = $B.create()
-              val () = judge(bv_l, g1ofg0(llen), bv_x, g1ofg0(xlen), bv_s, g1ofg0(slen), bv_f, mlen, at, problem)
+              val () = judge(bv_l, llen, bv_x, xlen, bv_s, slen, bv_f, mlen, at, problem)
               val @(pa2, pl2) = $B.to_arr(problem)
               val @(fz_q, bv_q) = $A.freeze<byte>(pa2)
               val () = (if pl2 > 0 then let
@@ -996,7 +1010,7 @@ in
                   val () = print! (": rejected, but not as its expect says: ")
                   val () = print_borrow(bv_q, 0, pl2, 524288)
                   val () = println! ()
-                in say_failed_lines(bv_l, g1ofg0(llen)) end
+                in say_failed_lines(bv_l, llen) end
                 else let
                   val () = !g_passed := !g_passed + 1
                   val () = print! ("ok   ")
@@ -1125,7 +1139,7 @@ fun chosen {lm:agz}{l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
 (* Whether every --only value is a member listed in mv[0, mlen): the
    first that is not is returned as a span (~1 if all are) *)
 fun unlisted {lm:agz}{l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
-  (mv: !$A.borrow(byte, lm, 524288), mlen: xi, bv: !$A.borrow(byte, l, 4096), t: int t, p: int p): @(xi, xi) = let
+  (mv: !$A.borrow(byte, lm, 524288), mlen: tlen, bv: !$A.borrow(byte, l, 4096), t: int t, p: int p): @(xi, xi) = let
   fun listed {mlen:nat | mlen <= 524288}{q:nat | q <= mlen} .<mlen - q>.
     (mv: !$A.borrow(byte, lm, 524288), mlen: int mlen, q: int q, bv: !$A.borrow(byte, l, 4096), vs: xi, ve: xi): bool = let
     val e = line_end(mv, mlen, q, false)
@@ -1142,7 +1156,7 @@ in
     if arg_is(bv, p, we, "--only") then
       (if we + 1 < t then let
         val ve = word_stop(bv, t, we + 1)
-        val ok = listed(mv, clamp_len(mlen), 0, bv, we + 1, ve)
+        val ok = listed(mv, mlen, 0, bv, we + 1, ve)
       in
         if ~ok then @(we + 1, ve)
         else if ve + 1 <= t then unlisted(mv, mlen, bv, t, ve + 1)
@@ -1219,13 +1233,18 @@ fn fixtures_with {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}
   val ma = $A.alloc<byte>(524288): [l_ma:agz] $A.arr(byte, l_ma, 524288)
   val mn = read_file_text(work_file(cfg, w, "members"), ma)
   val @(fz_m, bv_m) = $A.freeze<byte>(ma)
-  val mlen = clamp_len(mn)
+  val mlen = text_len(mn)
   val @(bad_s, bad_e) = unlisted(bv_m, mlen, bv, t, o)
   val () = (
   if listed <> 0 || mn < 0 then let
     val () = prerr! ("error: bats fixtures: the fixtures in ")
     val () = prerr_cfg(cfg, w.directory)
     val () = prerr! (" cannot be listed\n")
+  in set_exit_code(2) end
+  else if mn = 0 then let
+    val () = prerr! ("error: bats fixtures: no fixtures in ")
+    val () = prerr_cfg(cfg, w.directory)
+    val () = prerr! (" (it holds accept/<name> and reject/<name> directories)\n")
   in set_exit_code(2) end
   else if bad_s >= 0 then let
     val () = prerr! ("error: bats fixtures: no fixture ")
@@ -1242,7 +1261,7 @@ fn fixtures_with {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}
       val () = put_cfg(cfg, w.work, work2)
       var project2 : $B.builder_v = $B.create()
       val () = bput_v(project2, ".")
-      val copied = run_sh("mkdir -p \"$1/app\" && find \"$1/app\" -mindepth 1 -maxdepth 1 ! -name build -exec rm -rf {} + && (cd \"$2\" && tar cf - --exclude=./build --exclude=./dist --exclude=./.git --exclude=./node_modules --exclude=./test-results .) | (cd \"$1/app\" && tar xf -)",
+      val copied = run_sh("mkdir -p \"$1/app\" && p=$(cd \"$2\" && pwd -P) && w=$(cd \"$1\" && pwd -P) && x=--exclude=./build && case $w in \"$p\"/*) x=--exclude=./${w#$p/} ;; esac && find \"$1/app\" -mindepth 1 -maxdepth 1 ! -name build -exec rm -rf {} + && (cd \"$2\" && tar cf - --exclude=./build --exclude=./dist --exclude=./.git --exclude=./node_modules --exclude=./test-results \"$x\" .) | (cd \"$1/app\" && tar xf -)",
         $L.list_vt_cons(mk_arg(work2), $L.list_vt_cons(mk_arg(project2), $L.list_vt_nil())))
       val checked = (if copied <> 0 then 97 else let
           var work3 : $B.builder_v = $B.create()

@@ -71,12 +71,25 @@ pattern match is nonexhaustive:
 fixture "$G" reject numbered "$SNORM" "function h
 line 1
 $ENORM"
+# a variable of the dynamic kind: patsopt's x$4738(-1) is compared as x$_(-1)
+fixture "$G" reject dollar 'absvtype lin_t
+
+fn h (x: lin_t): void = ()' 'function h
+line 3
+the linear dynamic variable [x$1(-1)] needs to be consumed but it is preserved with the type [S2Ecst(lin_t)] instead.'
+# a blank line ends the lines patsopt adds to an error: "second" is not the error's
+fixture "$G" reject blank-line 'fn g (x: int): int = x
+#error "first\n\nsecond"' 'function g
+line 2
+[#error] directive is encountered: first'
 run "$TMP/good.log" "$G" --cold
 [ $rc = 0 ] || { cat "$TMP/good.log"; fail "good fixtures: status $rc"; }
 okline "$TMP/good.log" accept/ok good
 okline "$TMP/good.log" reject/nonexhaustive good
 okline "$TMP/good.log" reject/numbered good
-said "$TMP/good.log" "fixtures: 3 ok, 0 failed" good
+okline "$TMP/good.log" reject/dollar good
+okline "$TMP/good.log" reject/blank-line good
+said "$TMP/good.log" "fixtures: 5 ok, 0 failed" good
 nofail "$TMP/good.log" good
 [ -z "$(ls "$TMP/tmp")" ] || fail "the run left a temporary directory: $(ls "$TMP/tmp")"
 # the project is as it was
@@ -192,9 +205,16 @@ run "$TMP/dir2.log" "$G" "$B"
 [ $rc = 2 ] || fail "two directories: status $rc, not 2"
 run "$TMP/val.log" "$G" --only
 [ $rc = 2 ] || fail "--only with no value: status $rc, not 2"
+# no fixtures at all is a usage error (a typo in a path must not pass)
 run "$TMP/empty.log" "$TMP/no-such-dir"
-[ $rc = 0 ] || fail "an empty directory: status $rc"
-said "$TMP/empty.log" "fixtures: 0 ok, 0 failed" "no fixtures"
+[ $rc = 2 ] || fail "a directory that is not there: status $rc, not 2"
+saidpart "$TMP/empty.log" "no fixtures in $TMP/no-such-dir" "no directory"
+mkdir -p "$TMP/empty-dir"
+run "$TMP/empty.log" "$TMP/empty-dir"
+[ $rc = 2 ] || fail "an empty directory: status $rc, not 2"
+mkdir -p "$TMP/only-accept-dirs/accept" "$TMP/only-accept-dirs/reject"
+run "$TMP/empty.log" "$TMP/only-accept-dirs"
+[ $rc = 2 ] || fail "a directory with no fixture in it: status $rc, not 2"
 
 # ---- --work: kept, and its build reused
 W=$TMP/work
@@ -207,6 +227,34 @@ okline "$TMP/w2.log" accept/ok "--work again"
 # a relative --work works as an absolute one does
 (cd "$TMP" && mkdir -p rel && cd proj && "$BATS" fixtures "$G" --work ../rel/w --only accept/ok > "$TMP/w3.log" 2>&1) || { cat "$TMP/w3.log"; fail "a relative --work"; }
 okline "$TMP/w3.log" accept/ok "relative --work"
+
+# ---- --work inside the project is not copied into the copy
+for wk in ./w "$P/w2"; do
+  for again in 1 2; do
+    (cd "$P" && "$BATS" fixtures "$G" --work "$wk" --only accept/ok > "$TMP/wi.log" 2>&1) || { cat "$TMP/wi.log"; fail "--work $wk inside the project (run $again)"; }
+    okline "$TMP/wi.log" accept/ok "--work inside"
+  done
+done
+[ ! -e "$P/w/app/w" ] && [ ! -e "$P/w2/app/w2" ] && [ ! -e "$P/w/app/w2" ] || fail "--work inside the project was copied into the copy"
+rm -rf "$P/w" "$P/w2"
+
+# ---- a snippet that cannot be put in is a FAIL of that fixture, judged
+# against no log (not the last fixture's)
+P2=$TMP/splice
+mkdir -p "$P2/src/other.bats.fixture"
+cp "$P/bats.toml" "$P2/"; cp "$P/src/lib.bats" "$P/src/other.bats" "$P2/src/"
+SP=$TMP/splicefx
+fixture "$SP" accept a-ok 'fn g (x: int): int = x'
+fixture "$SP" reject b-splice 'fn g (x: int): int = x' 'function g
+line 1
+anything'
+printf 'src/other.bats\n' > "$SP/reject/b-splice/file"
+printf 'implement one () = 1\n' > "$SP/reject/b-splice/before"
+(cd "$P2" && "$BATS" fixtures "$SP" > "$TMP/splice.log" 2>&1); rc=$?
+[ $rc = 1 ] || { cat "$TMP/splice.log"; fail "a snippet that cannot be put in: status $rc, not 1"; }
+okline "$TMP/splice.log" accept/a-ok splice
+saidpart "$TMP/splice.log" "FAIL reject/b-splice: the check's log cannot be read" splice
+notsaid "$TMP/splice.log" "no error of patsopt" "splice judged a stale log"
 
 # ---- a project that does not check fails the run, before any fixture
 BP=$TMP/broken
