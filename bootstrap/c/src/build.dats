@@ -61,8 +61,7 @@ implement preprocess_one
   val () = put_char_v(sb, 0)
   val @(sa, _) = $B.to_arr(sb)
   val @(fz_sa, bv_sa) = $A.freeze<byte>(sa)
-  val dats_there = (case+ $F.file_mtime(dats_bv, 524288) of
-    | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+  val dats_there = $F.file_exists(dats_bv, 524288)
   val @(ha, hlen) = $B.to_arr(hb)
   val @(fz_ha, bv_ha) = $A.freeze<byte>(ha)
   val fresh = (if target_changed then false
@@ -111,6 +110,11 @@ in
         else let
           val before = (if is_test_mode() then read_whole(sats_bv, 524288)
                         else whole_err($F.NotFound())): whole_file
+          (* the stamp first (see sats_stamp_save): a kill between the two
+             must not leave a C fresh that was built from the older .sats *)
+          val saved = (if is_test_mode() then sats_stamp_save()
+                       else whole_err($F.NotFound())): whole_file
+          val () = touch_sats_stamp()
           val r = write_file_from_rope(sats_bv, sc)
           val moved = (if r = 0 then sats_moved(before, sats_bv)
             else let
@@ -118,7 +122,7 @@ in
                 | ~whole_ok(ar, p, _, _) => whole_free(ar, p)
                 | ~whole_err(_) => ())
             in false end): bool
-          val () = (if moved then () else touch_sats_stamp())
+          val () = sats_stamp_end(saved, moved)
         in r end): int
       val () = $B.rope_list_free(sc)
       val [kd:int] dc = $B.rope_chunks(dats)
@@ -283,7 +287,21 @@ in case+ dr of
               val () = put_char_v(ib, 0)
               val @(ia, il) = $B.to_arr(ib)
               val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-              val _ = run_cc(ph, phlen, bv_o, ol, bv_i, il, rel)
+              (* fresh like a plain dependency's object (bats#254) *)
+              val cc_fresh = let
+                var fo : $B.builder_v = $B.create()
+                val () = copy_to_builder_v(dir_bv, 0, dl, 524288, fo)
+                val () = bput_v(fo, "/")
+                val () = copy_to_builder_v(bv_e, 0, stem, 1024, fo)
+                val () = bput_v(fo, ".o")
+                val () = put_char_v(fo, 0)
+                var fi : $B.builder_v = $B.create()
+                val () = copy_to_builder_v(dir_bv, 0, dl, 524288, fi)
+                val () = bput_v(fi, "/")
+                val () = copy_to_builder_v(bv_e, 0, el, 1024, fi)
+                val () = put_char_v(fi, 0)
+              in freshness_check_bv(fo, fi) end
+              val _ = (if cc_fresh then 0 else run_cc(ph, phlen, bv_o, ol, bv_i, il, rel)): int
               val () = $A.drop<byte>(fz_o, bv_o)
               val () = $A.free<byte>($A.thaw<byte>(fz_o))
               val () = $A.drop<byte>(fz_i, bv_i)
@@ -704,9 +722,20 @@ fn wasm_cc_file {l:agz}
   val () = copy_to_builder_v(path, 0, pl - 1, 524288, ob)
   val () = bput_v(ob, "wasm.o")
   val () = put_char_v(ob, 0)
+  (* fresh by content like every object (bats#254): the key of its C *)
+  var wfo : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(path, 0, pl - 1, 524288, wfo)
+  val () = bput_v(wfo, "wasm.o")
+  val () = put_char_v(wfo, 0)
+  var wfi : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(path, 0, pl, 524288, wfi)
+  val () = put_char_v(wfi, 0)
+  val wasm_fresh = freshness_check_bv(wfo, wfi)
   val @(oa, ol) = $B.to_arr(ob)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
-  val rc = run_wasm_cc(path, path_len, bv_o, ol)
+  val () = (if wasm_fresh then () else key_drop(bv_o))
+  val rc = (if wasm_fresh then 0 else run_wasm_cc(path, path_len, bv_o, ol)): int
+  val () = (if rc = 0 && ~wasm_fresh then key_record(false, bv_o, path) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in rc end
@@ -1308,9 +1337,7 @@ in
                     val () = put_char_v(chk_b, 0)
                     val @(chk_a, _) = $B.to_arr(chk_b)
                     val @(fz_chk, bv_chk) = $A.freeze<byte>(chk_a)
-                    val chk_or = $F.file_mtime(bv_chk, 524288)
-                    val is_pkg = (case+ chk_or of
-                      | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                    val is_pkg = $F.file_exists(bv_chk, 524288)
                     val () = $A.drop<byte>(fz_chk, bv_chk)
                     val () = $A.free<byte>($A.thaw<byte>(fz_chk))
                   in
@@ -1354,9 +1381,7 @@ in
                                     val () = put_char_v(ns_chk, 0)
                                     val @(ns_chk_a, _) = $B.to_arr(ns_chk)
                                     val @(fz_nsc, bv_nsc) = $A.freeze<byte>(ns_chk_a)
-                                    val ns_chk_or = $F.file_mtime(bv_nsc, 524288)
-                                    val ns_is_pkg = (case+ ns_chk_or of
-                                      | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                                    val ns_is_pkg = $F.file_exists(bv_nsc, 524288)
                                     val () = $A.drop<byte>(fz_nsc, bv_nsc)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_nsc))
                                   in
@@ -1911,8 +1936,7 @@ in
                                   val () = put_char_v(pk_b, 0)
                                   val @(pka, _) = $B.to_arr(pk_b)
                                   val @(fz_pk, bv_pk) = $A.freeze<byte>(pka)
-                                  val pk_r = $F.file_mtime(bv_pk, 524288)
-                                  val is_p = (case+ pk_r of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                                  val is_p = $F.file_exists(bv_pk, 524288)
                                   val () = $A.drop<byte>(fz_pk, bv_pk)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pk))
                                 in
@@ -1960,7 +1984,27 @@ in
                                                   val () = put_char_v(pi, 0)
                                                   val @(pia, pi_len) = $B.to_arr(pi)
                                                   val @(fz_pi, bv_pi) = $A.freeze<byte>(pia)
-                                                  val rc_ns = run_patsopt(ph2, ph2len, bv_po, po_len, bv_pi, pi_len)
+                                                  (* fresh like a plain dependency's lib_dats.c (bats#254): without
+                        this, patsopt ran on every dependency under a namespace
+                        (bridge, dom) in every pass of every build, which made
+                        its C newer than its object and ran cc on it again *)
+                     val ns_fresh = let
+                       var nfo : $B.builder_v = $B.create()
+                       val () = bput_v(nfo, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns_name, 0, ns_len, 1024, nfo)
+                       val () = bput_v(nfo, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nfo)
+                       val () = bput_v(nfo, "/src/lib_dats.c")
+                       val () = put_char_v(nfo, 0)
+                       var nfi : $B.builder_v = $B.create()
+                       val () = bput_v(nfi, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns_name, 0, ns_len, 1024, nfi)
+                       val () = bput_v(nfi, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nfi)
+                       val () = bput_v(nfi, "/src/lib.dats")
+                       val () = put_char_v(nfi, 0)
+                     in c_fresh_bv(nfo, nfi) end
+                     val rc_ns = (if ns_fresh then 0 else run_patsopt(ph2, ph2len, bv_po, po_len, bv_pi, pi_len)): int
                                                   val () = $A.drop<byte>(fz_po, bv_po)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_po))
                                                   val () = $A.drop<byte>(fz_pi, bv_pi)
@@ -2298,8 +2342,7 @@ in
                                   val () = put_char_v(pk_b3, 0)
                                   val @(pka3, _) = $B.to_arr(pk_b3)
                                   val @(fz_pk3, bv_pk3) = $A.freeze<byte>(pka3)
-                                  val pk_r3 = $F.file_mtime(bv_pk3, 524288)
-                                  val is_p3 = (case+ pk_r3 of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+                                  val is_p3 = $F.file_exists(bv_pk3, 524288)
                                   val () = $A.drop<byte>(fz_pk3, bv_pk3)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pk3))
                                 in
@@ -2347,7 +2390,24 @@ in
                                                   val () = put_char_v(ci, 0)
                                                   val @(cia, ci_len) = $B.to_arr(ci)
                                                   val @(fz_ci, bv_ci) = $A.freeze<byte>(cia)
-                                                  val _ = run_cc(ph3, ph3len, bv_co, co_len, bv_ci, ci_len, rr3)
+                                                  (* fresh like a plain dependency's object (bats#254) *)
+                     val ns_cc_fresh = let
+                       var nco : $B.builder_v = $B.create()
+                       val () = bput_v(nco, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns3, 0, ns3len, 1024, nco)
+                       val () = bput_v(nco, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nco)
+                       val () = bput_v(nco, "/src/lib_dats.o")
+                       val () = put_char_v(nco, 0)
+                       var nci : $B.builder_v = $B.create()
+                       val () = bput_v(nci, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns3, 0, ns3len, 1024, nci)
+                       val () = bput_v(nci, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nci)
+                       val () = bput_v(nci, "/src/lib_dats.c")
+                       val () = put_char_v(nci, 0)
+                     in freshness_check_bv(nco, nci) end
+                     val _ = (if ns_cc_fresh then 0 else run_cc(ph3, ph3len, bv_co, co_len, bv_ci, ci_len, rr3)): int
                                                   val () = $A.drop<byte>(fz_co, bv_co)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_co))
                                                   val () = $A.drop<byte>(fz_ci, bv_ci)

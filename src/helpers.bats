@@ -735,34 +735,17 @@ in
   else loop(bw, bv, i, lim)
 end
 
-#pub fn is_newer {l1:agz}{l2:agz}
-  (p1: !$A.borrow(byte, l1, 524288), p2: !$A.borrow(byte, l2, 524288)): bool
-
-implement is_newer(p1, p2) = let
-  val mt1 = (case+ $F.file_mtime(p1, 524288) of
-    | ~$R.ok(t) => t | ~$R.err(_) => ~1): int
-  val mt2 = (case+ $F.file_mtime(p2, 524288) of
-    | ~$R.ok(t) => t | ~$R.err(_) => ~1): int
-in $AR.gt_int_int(mt1, 0) && $AR.gt_int_int(mt1, mt2) end
-
 #pub fn freshness_check_bv
   (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
-implement freshness_check_bv(out_b, in_b) = let
-  val @(oa, _) = $B.to_arr(out_b)
-  val @(ia, _) = $B.to_arr(in_b)
-  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
-  val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-  val result = is_newer(bv_o, bv_i)
-  val () = $A.drop<byte>(fz_o, bv_o)
-  val () = $A.free<byte>($A.thaw<byte>(fz_o))
-  val () = $A.drop<byte>(fz_i, bv_i)
-  val () = $A.free<byte>($A.thaw<byte>(fz_i))
-in result end
+implement freshness_check_bv(out_b, in_b) = key_fresh(false, out_b, in_b)
 
-(* build/.sats_changed is written whenever an emitted .sats changes. A
-   module's C depends on its .dats and on every .sats it staloads, so it
-   is fresh only when newer than both its .dats and this stamp. *)
+(* build/.sats_changed is written whenever an emitted .sats changes, with
+   new bytes each time: the sha256 of what it held (a chain, so no content
+   comes back). A module's C is fresh only when the key recorded beside it
+   (<C>.key: the sha256 of its .dats and of this file) is the one its
+   inputs give now, so a change to a .sats rebuilds every module (bats#254:
+   a time cannot tell, a build and its inputs share a second) *)
 fn sats_stamp_path (): $B.builder_v = let
   var b : $B.builder_v = $B.create()
   val () = bput_v(b, "build/.sats_changed")
@@ -774,7 +757,10 @@ in b end
 implement touch_sats_stamp () = let
   val @(pa, _) = $B.to_arr(sats_stamp_path())
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val _ = write_file_from_builder(bv_p, 524288, $B.create())
+  var nb : $B.builder_v = $B.create()
+  val had = put_file_sha256(bv_p, nb)
+  val () = (if had then () else bput_v(nb, "1"))
+  val _ = write_file_from_builder(bv_p, 524288, nb)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in end
@@ -784,21 +770,7 @@ in end
 #pub fn c_fresh_bv
   (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
-implement c_fresh_bv(out_b, in_b) = let
-  val @(oa, _) = $B.to_arr(out_b)
-  val @(ia, _) = $B.to_arr(in_b)
-  val @(sa, _) = $B.to_arr(sats_stamp_path())
-  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
-  val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
-  val result = (if is_newer(bv_o, bv_i) then is_newer(bv_o, bv_s) else false): bool
-  val () = $A.drop<byte>(fz_o, bv_o)
-  val () = $A.free<byte>($A.thaw<byte>(fz_o))
-  val () = $A.drop<byte>(fz_i, bv_i)
-  val () = $A.free<byte>($A.thaw<byte>(fz_i))
-  val () = $A.drop<byte>(fz_s, bv_s)
-  val () = $A.free<byte>($A.thaw<byte>(fz_s))
-in result end
+implement c_fresh_bv(out_b, in_b) = key_fresh(true, out_b, in_b)
 
 (* Whether the file at path_bv holds exactly bv[0, len) *)
 #pub fn file_has_bytes {lp:agz}{lb:agz}
@@ -824,6 +796,208 @@ implement file_has_bytes {lp}{lb} (path_bv, bv, len) =
       val () = $A.free<byte>($A.thaw<byte>(fz_f))
     in eq end
   | ~$R.err(_) => false
+
+(* ============================================================
+   Content keys: when an output is fresh (bats#254)
+   ============================================================ *)
+
+(* An output (a module's C, an object) is fresh when the key recorded
+   beside it, <output>.key, equals the one its inputs give now, and the
+   output is there. The key of a C is the sha256 of its .dats, a line feed
+   and the sha256 of build/.sats_changed (which holds new bytes whenever a
+   .sats changed, so a changed .sats makes every C stale, as before); the
+   key of an object is the sha256 of its C (the flags, the target and the
+   mode are in build/.bats_stamp, which drops a build/ that differs). No
+   time is read: a build and its inputs made in one second, a stash moved
+   with its mtimes, a file touched or replaced with an old mtime, all give
+   the answer their bytes give. A key that is missing, short or garbled
+   is not equal, so the output is made again. The key is removed before
+   the tool runs and written after it passed, so an output a killed run
+   left half written has none. *)
+
+(* <out>.key for the NUL-terminated path out *)
+fn key_file_path {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288)): $B.builder_v = let
+  var kb : $B.builder_v = $B.create()
+  val n = find_null_bv_from(out_bv, 0, 524288)
+  val () = copy_to_builder_v(out_bv, 0, n, 524288, kb)
+  val () = bput_v(kb, ".key")
+  val () = put_char_v(kb, 0)
+in kb end
+
+(* The size of the file at the NUL-terminated path, or ~1 *)
+fn size_of_file {lp:agz} (p: !$A.borrow(byte, lp, 524288)): int =
+  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  | ~$R.ok(fd) => let
+      val z = (case+ $F.fd_size(fd) of
+        | ~$R.ok(z) => z | ~$R.err(_) => ~1): int
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+    in z end
+  | ~$R.err(_) => ~1
+
+(* Whether the file at path_bv begins with bv[0, len) *)
+fn file_has_prefix {lp:agz}{lb:agz}{n:nat | n <= 524288}
+  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int n): bool =
+  case+ $F.file_open(path_bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  | ~$R.ok(fd) => let
+      val buf = $A.alloc<byte>(524288)
+      val rr = $F.file_read(fd, buf, 524288)
+      val k = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 524288] int k
+      val cr = $F.file_close(fd)
+      val () = $R.discard<int><$F.io_error>(cr)
+      fun same {la:agz}{m:nat | m <= 524288}{j:nat | j <= m} .<m - j>.
+        (a: !$A.borrow(byte, la, 524288), bv: !$A.borrow(byte, lb, 524288), m: int m, j: int j): bool =
+        if j >= m then true
+        else if $AR.eq_int_int(byte2int0($A.read<byte>(a, j)), byte2int0($A.read<byte>(bv, j)))
+        then same(a, bv, m, j + 1)
+        else false
+      val @(fz_f, bv_f) = $A.freeze<byte>(buf)
+      val ok = (if len <= k then same(bv_f, bv, len, 0) else false): bool
+      val () = $A.drop<byte>(fz_f, bv_f)
+      val () = $A.free<byte>($A.thaw<byte>(fz_f))
+    in ok end
+  | ~$R.err(_) => false
+
+(* The size of the file named by the NUL-terminated builder, or ~1 *)
+fn size_of_built (pb: $B.builder_v): int = let
+  val @(sa, _) = $B.to_arr(pb)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val z = size_of_file(bv_s)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in z end
+
+(* Appends the sha256 of the file named by the NUL-terminated builder, or
+   "-" when it is not there *)
+fn hash_of_built (pb: $B.builder_v, b: !$B.builder_v >> $B.builder_v): void = let
+  val @(sa, _) = $B.to_arr(pb)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val has = put_file_sha256(bv_s, b)
+  val () = (if has then () else bput_v(b, "-"))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+in end
+
+fn bats_stamp_path (): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "build/.bats_stamp")
+  val () = put_char_v(b, 0)
+in b end
+
+(* ---- The input digest (bats#254, for #267's memos) ----
+
+   What a build step was made from, as text: the part that is sizes, one
+   per line, then the part that is sha256s (64 hex digits, or "-" for a
+   file that is not there), one per line, the same files in the same order:
+     1. the step's input: for a C its .dats, for an object its C;
+     2. for a C only, build/.sats_changed: it holds new bytes whenever any
+        emitted .sats changed, so it stands for every .sats a module may
+        staload (a coarse, sound stand-in for the files patsopt reads: a
+        .sats change makes every C stale, as it always did);
+     3. build/.bats_stamp: the digest of this bats, patsopt, cc, the flag
+        templates and the target and mode that made build/ (bats#273).
+   A size is a negative only: equal sizes say nothing until the hashes
+   agree. No time is read. The record of a step is this text in
+   <output>.key, written after the step passed and removed before it
+   runs. A caller that wants a digest of its own (a memo of a check, of a
+   fixture) calls input_digest_sizes and input_digest_hashes on its
+   input, or input_digest for both: false when the input cannot be read,
+   and then nothing it appended is a digest. *)
+#pub fn input_digest_sizes {li:agz}
+  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
+implement input_digest_sizes(is_c, in_bv, b) = let
+  val z = size_of_file(in_bv)
+  val () = put_int_v(b, z)
+  val () = put_char_v(b, 10)
+  val () = (if is_c then let
+      val () = put_int_v(b, size_of_built(sats_stamp_path()))
+    in put_char_v(b, 10) end else ())
+  val () = put_int_v(b, size_of_built(bats_stamp_path()))
+  val () = put_char_v(b, 10)
+in $AR.gte_int_int(z, 0) end
+
+#pub fn input_digest_hashes {li:agz}
+  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
+implement input_digest_hashes(is_c, in_bv, b) = let
+  val ok = put_file_sha256(in_bv, b)
+  val () = put_char_v(b, 10)
+  val () = (if is_c then let
+      val () = hash_of_built(sats_stamp_path(), b)
+    in put_char_v(b, 10) end else ())
+  val () = hash_of_built(bats_stamp_path(), b)
+  val () = put_char_v(b, 10)
+in ok end
+
+(* Sizes and then hashes, for a caller that has no use for the sizes alone *)
+#pub fn input_digest {li:agz}
+  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
+implement input_digest(is_c, in_bv, b) = let
+  val sized = input_digest_sizes(is_c, in_bv, b)
+in if sized then input_digest_hashes(is_c, in_bv, b) else false end
+
+#pub fn key_fresh (is_c: bool, out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+implement key_fresh(is_c, out_b, in_b) = let
+  val @(oa, _) = $B.to_arr(out_b)
+  val @(ia, _) = $B.to_arr(in_b)
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val @(fz_i, bv_i) = $A.freeze<byte>(ia)
+  val there = $F.file_exists(bv_o, 524288)
+  val @(ka, _) = $B.to_arr(key_file_path(bv_o))
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  (* sizes first: a different size is a changed file, with no hashing *)
+  var sb : $B.builder_v = $B.create()
+  val sized = input_digest_sizes(is_c, bv_i, sb)
+  val @(sa2, slen) = $B.to_arr(sb)
+  val @(fz_sz, bv_sz) = $A.freeze<byte>(sa2)
+  val same_sizes = (if there && sized then file_has_prefix(bv_k, bv_sz, slen) else false): bool
+  var hb : $B.builder_v = $B.create()
+  val () = (if same_sizes then let
+      val () = copy_to_builder_v(bv_sz, 0, slen, 524288, hb)
+    in () end else ())
+  val hashed = (if same_sizes then input_digest_hashes(is_c, bv_i, hb) else false): bool
+  val @(ha2, hlen) = $B.to_arr(hb)
+  val @(fz_h, bv_h) = $A.freeze<byte>(ha2)
+  val result = (if hashed then file_has_bytes(bv_k, bv_h, hlen) else false): bool
+  val () = $A.drop<byte>(fz_h, bv_h)
+  val () = $A.free<byte>($A.thaw<byte>(fz_h))
+  val () = $A.drop<byte>(fz_sz, bv_sz)
+  val () = $A.free<byte>($A.thaw<byte>(fz_sz))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_i, bv_i)
+  val () = $A.free<byte>($A.thaw<byte>(fz_i))
+in result end
+
+(* Writes <out>.key from the input now (after the tool passed) *)
+#pub fn key_record {lo:agz}{li:agz}
+  (is_c: bool, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
+
+implement key_record(is_c, out_bv, in_bv) = let
+  var tb : $B.builder_v = $B.create()
+  val ok = input_digest(is_c, in_bv, tb)
+  val tbv = tb
+  val @(ka, _) = $B.to_arr(key_file_path(out_bv))
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  val _ = (if ok then write_file_from_builder(bv_k, 524288, tbv)
+    else let val () = $B.builder_free(tbv) in 0 end): int
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in end
+
+(* Removes <out>.key (before the tool that makes out runs) *)
+#pub fn key_drop {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288)): void
+
+implement key_drop(out_bv) = let
+  val @(ka, kl) = $B.to_arr(key_file_path(out_bv))
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  val () = remove_output(bv_k, kl)
+  val () = $A.drop<byte>(fz_k, bv_k)
+in $A.free<byte>($A.thaw<byte>(fz_k)) end
 
 (* src[i, lim) appended to dst, stopping at the end of src or of the
    builder's capacity *)
@@ -1904,6 +2078,7 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(b5), append_vt(opt_args, tail))))))
+  val () = key_drop(out_bv)
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
     val () = print! ("  + cc -c -o ")
@@ -1942,6 +2117,7 @@ in
       in ec end
       else let
         val () = $A.free<byte>(eb)
+        val () = key_record(false, out_bv, in_bv)
       in 0 end
     end
   | ~$R.err(_) => ~1
@@ -2508,6 +2684,47 @@ implement read_whole (path, plen) =
 implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
+
+(* build/.sats_changed is touched BEFORE a .sats is written, so a bats
+   killed between the two leaves the stamp ahead (every C is made again),
+   never behind (a C built from the older .sats kept fresh). Where a .sats
+   turns out to have only moved (check and test mode), the stamp is put
+   back as it was: sats_stamp_save before the touch, and sats_stamp_end
+   after the write, with back = true to restore it, false to keep the
+   touched one. *)
+#pub fn sats_stamp_save (): whole_file
+
+implement sats_stamp_save () = let
+  val @(pa, _) = $B.to_arr(sats_stamp_path())
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val w = read_whole(bv_p, 524288)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in w end
+
+#pub fn sats_stamp_end (saved: whole_file, back: bool): void
+
+implement sats_stamp_end (saved, back) =
+  case+ saved of
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+      val () = (if back then let
+          var cb : $B.builder_v = $B.create()
+          val () = copy_to_builder_v(bv_c, 0, n, m, cb)
+          val @(pa, _) = $B.to_arr(sats_stamp_path())
+          val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+          val _ = write_file_from_builder(bv_p, 524288, cb)
+          val () = $A.drop<byte>(fz_p, bv_p)
+        in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
+      val () = $A.drop<byte>(fz_c, bv_c)
+    in whole_free(ar, $A.thaw<byte>(fz_c)) end
+  | ~whole_err(_) => (if back then let
+        val @(pa, pl) = $B.to_arr(sats_stamp_path())
+        val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+        val () = remove_output(bv_p, pl)
+        val () = $A.drop<byte>(fz_p, bv_p)
+      in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
+
 
 (* ============================================================
    A .sats that only moved: its declarations the same, at other lines
