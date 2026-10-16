@@ -111,6 +111,8 @@ fn print_usage(): void = let
   val () = println! ("  upload --repository <dir>    Package and upload a library")
   val () = println! ("  clean                        Remove generated artifacts")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
+  val () = println! ("  with-env <env-file> <command> [args...]")
+  val () = println! ("                               Run a command with the variables of a dotenv file")
 in end
 
 (* Copies src[s + i, e) to dst[i..], for bats run's arguments after

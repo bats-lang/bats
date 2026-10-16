@@ -38,8 +38,9 @@
 
    A usage error (no file, no command, an unreadable or too large file, more
    than 1024 variables, a value that cannot be made because it uses a
-   variable whose name is over 255 bytes or whose value is over 64 KiB or is
-   itself over 512 KiB, a command line too long to be read whole) is status
+   variable whose name is over 255 bytes or whose value is over 64 KiB, an entry
+   over 131071 bytes (Linux's MAX_ARG_STRLEN less the NUL), variables together
+   over 1 MiB, a NUL byte in the file, a command line too long to be read whole) is status
    2; a command that is found nowhere is 127 and one that cannot be run 126
    (with the system's reason). The status of a command that a signal ended is
    1: the process package's child_wait says only that it did not exit. *)
@@ -155,19 +156,25 @@ fun copy_name {l:agz}{ln:agz}{n:pos}{j:nat | j <= 255} .<255 - j>.
     val () = poke_arr(name, j, 256, byte_at(bv, a + j, n))
   in copy_name(bv, a, b, n, name, j + 1) end
 
+(* The bytes out holds *)
+fn builder_size (out: !$B.builder_v >> $B.builder_v): int = $B.length(out)
+
 (* The value of the variable whose NUL-terminated name is in name appended
-   to out (nothing when it is unset); false when the value is over 64 KiB,
-   which is then not appended, so no value is ever cut short *)
+   to out (nothing when it is unset); false when the value is over 64 KiB
+   or would take out over 131071 bytes (Linux's MAX_ARG_STRLEN, 131072,
+   less the NUL), in which case nothing is appended, so no value is ever
+   cut short and a value is never copied past what exec accepts *)
 fn put_variable_named {ln:agz}
   (name: !$A.arr(byte, ln, 256), out: !$B.builder_v >> $B.builder_v): bool = let
   val value = $A.alloc<byte>(65537)
   val got = $E.get_cstr(name, 256, value, 65537)
   val k = (case+ got of | ~$R.some(n) => n | ~$R.none() => 0): int
   val @(fz_v, bv_v) = $A.freeze<byte>(value)
-  val () = (if k <= 65536 then copy_to_builder_v(bv_v, 0, k, 65537, out) else ())
+  val ok = (k <= 65536 && k <= 131071 - builder_size(out)): bool
+  val () = (if ok then copy_to_builder_v(bv_v, 0, k, 65537, out) else ())
   val () = $A.drop<byte>(fz_v, bv_v)
   val () = $A.free<byte>($A.thaw<byte>(fz_v))
-in k <= 65536 end
+in ok end
 
 (* The value of the variable named bv[a, b) in this process's environment
    appended to out; nothing when it is unset. False, and nothing appended,
@@ -423,17 +430,16 @@ fun arguments_free {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
       val () = $A.free<byte>(entry_a)
     in arguments_free(tl) end
 
-(* The bytes out holds *)
-fn builder_size (out: !$B.builder_v >> $B.builder_v): int = $B.length(out)
-
 (* The NAME=VALUE entries of the table's first k entries, in order, consed
-   onto acc, the variables expanded. When the value of an entry cannot be
-   made (see put_variable), or the entry is over 512 KiB, the number of that
-   entry and what has been made so far; else ~1. The value of PATH, when
+   onto acc, the variables expanded, budget bytes (a NUL counted after each
+   entry) being what the entries together may take. When the value of an
+   entry cannot be made (see put_variable), or the entry is over 131071
+   bytes, or the entries would take more than the budget, the number of
+   that entry and what has been made so far; else ~1. The value of PATH, when
    the file sets it, is also appended to path_out and the answer says so. *)
 fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat} .<k>.
   (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
-   acc: $L.listv($P.arg_entry), has_path: bool, path_out: !$B.builder_v >> $B.builder_v)
+   budget: int, acc: $L.listv($P.arg_entry), has_path: bool, path_out: !$B.builder_v >> $B.builder_v)
   : @(int, bool, $L.listv($P.arg_entry)) =
   if k <= 0 then @(~1, has_path, acc)
   else let
@@ -446,7 +452,8 @@ fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat} .<k>.
     val () = put_range(bv, name_at, name_to, n, entry)
     val () = put_char_v(entry, 61)
     val made = put_value_at(bv, value_at, line_end, n, entry)
-    val fits = (builder_size(entry) < 524288): bool
+    val size = builder_size(entry)
+    val fits = (size <= 131071 && size + 1 <= budget): bool
     val made_entry = mk_arg(entry)
   in
     if made && fits then let
@@ -454,7 +461,7 @@ fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat} .<k>.
       val () = (if is_path then let
           val _ = put_value_at(bv, value_at, line_end, n, path_out)
         in () end else ())
-    in entries_make(bv, n, tab, k - 1, $L.list_vt_cons(made_entry, acc),
+    in entries_make(bv, n, tab, k - 1, budget - size - 1, $L.list_vt_cons(made_entry, acc),
          (if is_path then true else has_path), path_out) end
     else let
       val @(made_a, _) = made_entry
@@ -472,7 +479,7 @@ fn entries_made {l:agz}{n:pos}{lt:agz}
 in
   if k < 0 then @(~1, has_path, $L.list_vt_nil())
   else if k > 1024 then @(~2, has_path, $L.list_vt_nil())
-  else entries_make(bv, n, tab, k, $L.list_vt_nil(), has_path, path_out)
+  else entries_make(bv, n, tab, k, 1048576, $L.list_vt_nil(), has_path, path_out)
 end
 
 (* The NUL-terminated arguments of bv[p, total) as entries, reversed onto acc *)
@@ -703,6 +710,18 @@ fn read_env_file {l:agz}{lf:agz}
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in size end
 
+(* The number of the line of bv[0, size) that holds the first NUL byte, or 0 *)
+fn nul_line {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), size: int, n: int n): int = let
+  fun count {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
+    (bv: !$A.borrow(byte, l, n), p: int p, upto: int, n: int n, seen: int): int =
+    if p >= n then seen
+    else if p >= upto then seen
+    else count(bv, p + 1, upto, n, (if peek(bv, p, n) = 10 then seen + 1 else seen))
+  val z = find_byte(bv, 0, n, size, 0)
+in
+  if z >= size then 0 else 1 + count(bv, 0, z, n, 0)
+end
+
 (* The name of entry bad of the table, appended to out; nothing for ~1 *)
 fn bad_name_put {l:agz}{lt:agz}
   (bv: !$A.borrow(byte, l, 65537), tab: !$A.arr(int, lt, 6144), bad: int,
@@ -720,7 +739,7 @@ fn expansion_failed {l:agz}{ln:agz}
   val () = prerr_seg(bv_n, 0, name_len, 524288)
   val () = prerr! (" in ")
   val () = prerr_seg(bv, g1ofg0(file_at), file_to, 4096)
-  val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 512 KiB itself")
+  val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 131071 bytes itself, or the variables of the file together are over 1 MiB")
   val () = prerr_newline()
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
@@ -755,7 +774,8 @@ in
         else let
           val @(fz_c, bv_c) = $A.freeze<byte>(content)
           val tab = $A.alloc<int>(6144): [lt:agz] $A.arr(int, lt, 6144)
-          val count = table_fill(bv_c, 0, size, 65537, tab, 0)
+          val nul_at = nul_line(bv_c, size, 65537)
+          val count = table_fill(bv_c, 0, (if nul_at > 0 then 0 else size), 65537, tab, 0)
           var path_text : $B.builder_v = $B.create()
           val @(bad, has_path, extras) = entries_made(bv_c, 65537, tab, count, false, path_text)
           val known = (if has_path then true else put_environment_path(path_text)): bool
@@ -767,7 +787,16 @@ in
           val () = $A.drop<byte>(fz_c, bv_c)
           val () = $A.free<byte>($A.thaw<byte>(fz_c))
           val () = $A.free<int>(tab)
-          val () = (if bad = ~2 then let
+          val () = (if nul_at > 0 then let
+              val () = arguments_free(extras)
+              val () = $A.free<byte>(search_a)
+              val () = $A.free<byte>(bad_a)
+              val () = prerr! ("error: bats with-env: the environment file ")
+              val () = prerr_seg(bv, g1ofg0(file_at), file_to, 4096)
+              val () = prerr! (" has a NUL byte on line ", nul_at, "; it must be text")
+              val () = prerr_newline()
+            in set_exit_code(2) end
+            else if bad = ~2 then let
               val () = arguments_free(extras)
               val () = $A.free<byte>(search_a)
               val () = $A.free<byte>(bad_a)

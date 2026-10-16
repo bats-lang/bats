@@ -139,6 +139,44 @@ with_env "$TMP/path.env" a-directory 2>/dev/null; [ $? -eq 126 ] || fail "a dire
 with_env "$TMP/env" "$TMP/bin/a-directory" 2> "$TMP/err"; [ $? -eq 126 ] || fail "running a directory by path is not 126"
 grep -q 'cannot run' "$TMP/err" || fail "126 by path does not say so: $(cat "$TMP/err")"
 
+# a directory and a file with no execute bit are passed over for a real
+# command of the same name later in the PATH
+mkdir -p "$TMP/skip/first/dd" "$TMP/skip/second"
+printf '#!/bin/sh\necho "noexec second"\n' > "$TMP/skip/first/noexec"
+chmod 644 "$TMP/skip/first/noexec"
+printf '#!/bin/sh\necho "noexec second"\n' > "$TMP/skip/second/noexec"
+printf '#!/bin/sh\necho "dd second"\n' > "$TMP/skip/second/dd"
+chmod 755 "$TMP/skip/second/noexec" "$TMP/skip/second/dd"
+printf 'PATH=%s/skip/first:%s/skip/second\n' "$TMP" "$TMP" > "$TMP/skip.env"
+got=$(with_env "$TMP/skip.env" noexec)
+[ "$got" = 'noexec second' ] || fail "a file with no execute bit was not passed over: $got"
+got=$(with_env "$TMP/skip.env" dd)
+[ "$got" = 'dd second' ] || fail "a directory was not passed over: $got"
+
+# limits that exec would refuse late are refused at once
+BIG=$(python3 -c "print('y' * 65536)")
+python3 -c "import sys; sys.stdout.write(''.join('V%d=\$BIG\$BIG\$BIG\$BIG\$BIG\n' % i for i in range(1024)))" > "$TMP/expand.env"
+BIG=$BIG slow 5 "$BATS" with-env "$TMP/expand.env" true; [ $? -eq 2 ] || fail "1024 large expansions are not refused at once"
+BIG=$BIG with_env "$TMP/expand.env" true 2> "$TMP/err"
+grep -q 'V1023\|V0' "$TMP/err" || fail "the error does not name the variable: $(cat "$TMP/err")"
+printf 'TWO=$BIG$BIG\n' > "$TMP/two.env"
+BIG=$BIG with_env "$TMP/two.env" true 2>/dev/null; [ $? -eq 2 ] || fail "an entry over 131071 bytes is not refused"
+printf 'ONE=$BIG\nTWO=$BIG\n' > "$TMP/one.env"
+got=$(BIG=$BIG with_env "$TMP/one.env" sh -c 'echo ${#ONE} ${#TWO}')
+[ "$got" = '65536 65536' ] || fail "two values of 64 KiB: $got"
+
+# a NUL byte in the file is a usage error that names its line
+printf 'A=1\nB=2\0C=3\nD=4\n' > "$TMP/nul.env"
+with_env "$TMP/nul.env" true 2> "$TMP/err"; [ $? -eq 2 ] || fail "a NUL in the file is not 2"
+grep -q 'line 2' "$TMP/err" || fail "the error does not name the line: $(cat "$TMP/err")"
+printf 'A=1\0B=2\nC=3' > "$TMP/nul1.env"
+with_env "$TMP/nul1.env" sh -c 'echo "$B$C"' 2>/dev/null; [ $? -eq 2 ] || fail "a NUL on line 1 injects variables"
+
+# the usage text lists with-env
+"$BATS" --help | grep -q 'with-env <env-file> <command>' || fail "bats --help does not list with-env"
+"$BATS" completions bash | grep -q 'with-env' || fail "completions do not list with-env"
+
+
 # standard input passes through, an empty argument stays
 got=$(printf 'from stdin' | with_env "$TMP/env" cat)
 [ "$got" = 'from stdin' ] || fail "stdin: $got"
