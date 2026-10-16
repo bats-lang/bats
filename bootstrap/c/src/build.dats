@@ -283,7 +283,21 @@ in case+ dr of
               val () = put_char_v(ib, 0)
               val @(ia, il) = $B.to_arr(ib)
               val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-              val _ = run_cc(ph, phlen, bv_o, ol, bv_i, il, rel)
+              (* fresh like a plain dependency's object (bats#254) *)
+              val cc_fresh = let
+                var fo : $B.builder_v = $B.create()
+                val () = copy_to_builder_v(dir_bv, 0, dl, 524288, fo)
+                val () = bput_v(fo, "/")
+                val () = copy_to_builder_v(bv_e, 0, stem, 1024, fo)
+                val () = bput_v(fo, ".o")
+                val () = put_char_v(fo, 0)
+                var fi : $B.builder_v = $B.create()
+                val () = copy_to_builder_v(dir_bv, 0, dl, 524288, fi)
+                val () = bput_v(fi, "/")
+                val () = copy_to_builder_v(bv_e, 0, el, 1024, fi)
+                val () = put_char_v(fi, 0)
+              in freshness_check_bv(fo, fi) end
+              val _ = (if cc_fresh then 0 else run_cc(ph, phlen, bv_o, ol, bv_i, il, rel)): int
               val () = $A.drop<byte>(fz_o, bv_o)
               val () = $A.free<byte>($A.thaw<byte>(fz_o))
               val () = $A.drop<byte>(fz_i, bv_i)
@@ -1960,7 +1974,27 @@ in
                                                   val () = put_char_v(pi, 0)
                                                   val @(pia, pi_len) = $B.to_arr(pi)
                                                   val @(fz_pi, bv_pi) = $A.freeze<byte>(pia)
-                                                  val rc_ns = run_patsopt(ph2, ph2len, bv_po, po_len, bv_pi, pi_len)
+                                                  (* fresh like a plain dependency's lib_dats.c (bats#254): without
+                        this, patsopt ran on every dependency under a namespace
+                        (bridge, dom) in every pass of every build, which made
+                        its C newer than its object and ran cc on it again *)
+                     val ns_fresh = let
+                       var nfo : $B.builder_v = $B.create()
+                       val () = bput_v(nfo, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns_name, 0, ns_len, 1024, nfo)
+                       val () = bput_v(nfo, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nfo)
+                       val () = bput_v(nfo, "/src/lib_dats.c")
+                       val () = put_char_v(nfo, 0)
+                       var nfi : $B.builder_v = $B.create()
+                       val () = bput_v(nfi, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns_name, 0, ns_len, 1024, nfi)
+                       val () = bput_v(nfi, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nfi)
+                       val () = bput_v(nfi, "/src/lib.dats")
+                       val () = put_char_v(nfi, 0)
+                     in c_fresh_bv(nfo, nfi) end
+                     val rc_ns = (if ns_fresh then 0 else run_patsopt(ph2, ph2len, bv_po, po_len, bv_pi, pi_len)): int
                                                   val () = $A.drop<byte>(fz_po, bv_po)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_po))
                                                   val () = $A.drop<byte>(fz_pi, bv_pi)
@@ -2347,7 +2381,24 @@ in
                                                   val () = put_char_v(ci, 0)
                                                   val @(cia, ci_len) = $B.to_arr(ci)
                                                   val @(fz_ci, bv_ci) = $A.freeze<byte>(cia)
-                                                  val _ = run_cc(ph3, ph3len, bv_co, co_len, bv_ci, ci_len, rr3)
+                                                  (* fresh like a plain dependency's object (bats#254) *)
+                     val ns_cc_fresh = let
+                       var nco : $B.builder_v = $B.create()
+                       val () = bput_v(nco, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns3, 0, ns3len, 1024, nco)
+                       val () = bput_v(nco, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nco)
+                       val () = bput_v(nco, "/src/lib_dats.o")
+                       val () = put_char_v(nco, 0)
+                       var nci : $B.builder_v = $B.create()
+                       val () = bput_v(nci, "build/bats_modules/")
+                       val () = copy_to_builder_v(ns3, 0, ns3len, 1024, nci)
+                       val () = bput_v(nci, "/")
+                       val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nci)
+                       val () = bput_v(nci, "/src/lib_dats.c")
+                       val () = put_char_v(nci, 0)
+                     in freshness_check_bv(nco, nci) end
+                     val _ = (if ns_cc_fresh then 0 else run_cc(ph3, ph3len, bv_co, co_len, bv_ci, ci_len, rr3)): int
                                                   val () = $A.drop<byte>(fz_co, bv_co)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_co))
                                                   val () = $A.drop<byte>(fz_ci, bv_ci)
