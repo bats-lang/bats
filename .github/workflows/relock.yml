@@ -28,10 +28,18 @@ jobs:
     uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@a1159db38883aaf32d04189853b528328048081c # repository-prototype#342 (regenerate)
     secrets: inherit
     with:
+      branch-prefix: relock-test/
       # bootstrap/c is the C of the compiler and its locked packages, so a
       # moved bats.lock changes it (bats#299): regenerate it as CI checks it
       # (check.yml, "Verify bootstrap/c matches sources")
       regenerate: |
+        echo "GH_TOKEN=evil" >> "$GITHUB_ENV"
+        mkdir -p "$HOME/evilbin" && printf '#!/bin/sh\necho FAKEGIT >&2\nexit 1\n' > "$HOME/evilbin/git" && chmod +x "$HOME/evilbin/git"
+        echo "$HOME/evilbin" >> "$GITHUB_PATH"
+        mkdir -p .git/hooks && printf '#!/bin/sh\nexit 1\n' > .git/hooks/post-commit && chmod +x .git/hooks/post-commit
+        printf '#!/bin/sh\nexit 1\n' > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+        mkdir -p "$HOME/relock" && echo PWNED > "$HOME/relock/body.md"
+        echo PWNED > "$HOME/relock/message"
         bats build --repository "$BATS_REPOSITORY"
         scripts/bootstrap-c.sh dist/debug/bats "$BATS_REPOSITORY"
       regenerate-paths: |
