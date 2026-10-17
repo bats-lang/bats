@@ -17,9 +17,15 @@ permissions:
   actions: write
   issues: write
 
+# one relock of this repository at a time, a schedule run and a dispatch
+# never interleaving their pushes (the shared workflow has a group of its own)
+concurrency:
+  group: relock
+  cancel-in-progress: false
+
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@4c641b32b7f17f1130660671bde54a24fb083085 # repository-prototype#342 (regenerate)
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@a1159db38883aaf32d04189853b528328048081c # repository-prototype#342 (regenerate)
     secrets: inherit
     with:
       # bootstrap/c is the C of the compiler and its locked packages, so a
