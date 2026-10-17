@@ -27,6 +27,7 @@ staload "helpers.sats"
 staload "lexer.sats"
 staload "docs.sats"
 staload "recursion.sats"
+staload "validated.sats"
 
 
 
@@ -2153,6 +2154,112 @@ staload "recursion.sats"
 
 
 fn project_kind (): $R.option(package_kind)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

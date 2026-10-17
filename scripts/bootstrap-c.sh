@@ -33,6 +33,10 @@ rm -f "$TMP/c/.bats_toolchain" "$TMP/c/.bats_depgen"
 # machine's toolchain (bats-lang/bats#267), not the sources
 rm -f "$TMP/c/.bats_stamp" "$TMP/c/.bats_stamp.new" "$TMP/c/.bats_cc"
 
+# What validation judged (bats-lang/bats#296) is a record of this checkout's
+# files, there when the project's build/ was
+rm -rf "$TMP/c/.bats_valid"
+
 # Each C and object has a key beside it (bats#254) that hashes patsopt's
 # raw C, which names this machine's paths; the seed's Makefile uses none
 find "$TMP/c" -name '*.key' -exec rm -f {} +

@@ -214,7 +214,7 @@ fn relative_c {lr,lo:agz}
       | ~whole_err(_) => false
       | ~whole_ok(ar, piece, m, n) => let
           val @(fz_c, bv_c) = $A.freeze<byte>(piece)
-          val ok = (case+ $F.file_open(bv_n, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+          val ok = (case+ file_open_path(bv_n, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
             | ~$R.ok(fd) => let
                 val bw = $F.buf_writer_create(fd)
                 val () = put_relative(bv_c, 0, n, m, bv_p, pl, pl - 6, bv_m, ml, ml - 10, 524288, bw)
@@ -285,7 +285,7 @@ in ok end
 implement toolchain_digest (ph, phlen, out) = let
   val listing = str_to_path_arr("build/.bats_toolchain")
   val @(fz_l, bv_l) = $A.freeze<byte>(listing)
-  val have = (if !g_toolchain_listed then $F.file_exists(bv_l, 524288) else false): bool
+  val have = (if !g_toolchain_listed then file_exists_path(bv_l) else false): bool
   val listed = (if have then true
     else let
       var a1 : $B.builder_v = $B.create()
@@ -483,7 +483,7 @@ fn names_digest (out: !$B.builder_v >> $B.builder_v): bool = let
      for each module; listing it again also removes the graph of
      --depgen's answers, which is only as good as the files it was made
      from *)
-  val have = (if names_fresh() then $F.file_exists(bv_l, 524288) else false): bool
+  val have = (if names_fresh() then file_exists_path(bv_l) else false): bool
   val rc = (if have then 0
     else let
       var a1 : $B.builder_v = $B.create()
@@ -645,7 +645,7 @@ implement memo_fresh(out_b, in_b) = let
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
   val @(ia, _) = $B.to_arr(in_b)
   val () = $A.free<byte>(ia)
-  val there = $F.file_exists(bv_o, 524288)
+  val there = file_exists_path(bv_o)
   val @(ka, _) = $B.to_arr(path_with(bv_o, ol, ".key"))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
   val fresh = (if ~there then false

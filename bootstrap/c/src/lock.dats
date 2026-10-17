@@ -28,6 +28,7 @@ staload "helpers.sats"
 staload "lexer.sats"
 staload "docs.sats"
 staload "recursion.sats"
+staload "validated.sats"
 
 (* ============================================================
    Package names
@@ -1024,7 +1025,7 @@ end
    not be read *)
 fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.result($T.toml_doc, $F.io_error) = let
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fr = $F.file_open(bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fr = file_open_path(bv, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
@@ -1291,7 +1292,7 @@ fn is_fetched {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): bool = let
   val () = put_char_v(p, 0)
   val @(pa, _) = $B.to_arr(p)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val r = $F.file_exists(bv, 524288)
+  val r = file_exists_path(bv)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
@@ -1781,7 +1782,7 @@ fun lock_notes {la,lb:agz}{al,i:int} .<max(al - i, 0)>.
 fn read_old_lock (): @([l:agz] $A.arr(byte, l, LOCK_MAX), pos_t) = let
   val lp = str_to_path_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val fr = $F.file_open(bv_lp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fr = file_open_path(bv_lp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
   val buf = $A.alloc<byte>(LOCK_MAX)
@@ -2206,10 +2207,10 @@ fn copy_mode {ls,ld:agz}
 
 fn copy_file {ls,ld:agz}
   (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
-  case+ $F.file_open(s, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(s, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(_) => false
   | ~$R.ok(sf) =>
-    (case+ $F.file_open(d, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+    (case+ file_open_path(d, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
      | ~$R.err(_) => let
          val () = $R.discard<int><$F.io_error>($F.file_close(sf))
        in false end
@@ -2238,7 +2239,7 @@ end
 
 (* Whether the NUL-terminated path p is a directory *)
 fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
-  case+ $F.dir_open(p, 524288) of
+  case+ dir_open_path(p) of
   | ~$R.ok(d) => let
       val () = $R.discard<int><$F.io_error>($F.dir_close(d))
     in true end
@@ -2327,8 +2328,8 @@ fn copy_path_dep {la,lp:agz}
   val () = put_char_v(lb, 0)
   val @(la2, _) = $B.to_arr(lb)
   val @(fz_l, bv_l) = $A.freeze<byte>(la2)
-  val has_dir = $F.file_exists(bv_s, 524288)
-  val has_lib = $F.file_exists(bv_l, 524288)
+  val has_dir = file_exists_path(bv_s)
+  val has_lib = file_exists_path(bv_l)
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
   var db : $B.builder_v = $B.create()
@@ -2621,7 +2622,7 @@ fn use_missing {lp,ls:agz}{ns:pos}
       val () = put_char_v(lb, 0)
       val @(la, _) = $B.to_arr(lb)
       val @(fz_l, bv_l) = $A.freeze<byte>(la)
-      val found = $F.file_exists(bv_l, VMAX)
+      val found = file_exists_path(bv_l)
       val cnt2 = add_missing(found, p, pl, src, sm, n, ss, ps, pe, bv_l, lbl, cnt, errs)
       val () = $A.drop<byte>(fz_l, bv_l)
       val () = $A.free<byte>($A.thaw<byte>(fz_l))
@@ -2847,10 +2848,9 @@ fun pass_lex_errors {lp,ls:agz}{ns:pos}{k:nat} .<k>.
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its
    order), when wanted *)
-fn check_file {lp:agz}
-  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, wanted: bool, is_unsafe: bool,
+fn check_file_lexed {lp:agz}
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, is_unsafe: bool,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  if ~wanted then cnt else
   case+ read_whole(p, VMAX) of
   | ~whole_err(_) => cnt
   | ~whole_ok(ar, piece, sm, n) => let
@@ -2867,6 +2867,42 @@ fn check_file {lp:agz}
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = whole_free(ar, $A.thaw<byte>(fz_s))
     in c4 end
+
+(* cnt when held, else the errors of the file *)
+fn check_file_unless {lp:agz}
+  (held: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, is_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if held then cnt
+  else let
+    (* under -v, each file judged (the tests count them) *)
+    val () = (if is_verbose() then let
+        val () = print! ("  ~ lexed ")
+        val () = print_borrow(p, 0, pl, VMAX)
+      in print_newline() end else ())
+  in check_file_lexed(p, pl, is_unsafe, cnt, errs) end
+
+(* check_file_lexed, unless the file is recorded as having passed under
+   the same key (validated.bats, bats#296): the context ctx, the file's
+   bytes, its package's unsafe flag and its path. A file that passes is
+   recorded; reuse is false for --cold, which judges every file *)
+fn check_file {lp,lx:agz}
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   p: !$A.borrow(byte, lp, VMAX), pl: pos_t, wanted: bool, is_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int =
+  if ~wanted then cnt
+  else let
+    val @(usable, key) = valid_file_key(ctx, reuse, p, is_unsafe)
+    val @(fz_k, bv_k) = $A.freeze<byte>(key)
+    val slot = valid_slot_of_path(p)
+    val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+    val held = (if usable then valid_holds(bv_s, bv_k) else false): bool
+    val c = check_file_unless(held, p, pl, is_unsafe, cnt, errs)
+    val () = (if usable then (if held then () else (if c = cnt then valid_file_pend(ctx, p, is_unsafe, bv_s, bv_k, pend) else ())) else ())
+    val () = $A.drop<byte>(fz_s, bv_s)
+    val () = $A.free<byte>($A.thaw<byte>(fz_s))
+    val () = $A.drop<byte>(fz_k, bv_k)
+    val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  in c end
 
 (* Whether the bats.toml at the NUL-terminated path in pa sets
    unsafe = true *)
@@ -2931,9 +2967,10 @@ datatype checked = SharedModules | Dependencies | EveryFile
 
 (* Checks each file of the NUL-separated list files[off, len), as mode
    says *)
-fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
-  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, mode: checked, own_unsafe: bool,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+fun check_list {lf,lx:agz}{off:nat | off <= VMAX} .<VMAX - off>.
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, mode: checked, own_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int =
   if off >= len then cnt
   else let
     val e = $S.find_null_bv_at(files, off, VMAX)
@@ -2947,20 +2984,21 @@ fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
       | SharedModules() => (if in_bin(bv_p) then true else is_lib_name(bv_p, b0, pl))
       | _ => false): bool
     val uns = (case+ mode of Dependencies() => dep_unsafe(bv_p, pl) | _ => own_unsafe): bool
-    val cnt2 = check_file(bv_p, pl, ~skip, uns, cnt, errs)
+    val cnt2 = check_file(ctx, reuse, bv_p, pl, ~skip, uns, cnt, errs, pend)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
-  in if e >= VMAX then cnt2 else check_list(files, e + 1, len, mode, own_unsafe, cnt2, errs) end
+  in if e >= VMAX then cnt2 else check_list(ctx, reuse, files, e + 1, len, mode, own_unsafe, cnt2, errs, pend) end
 
 (* Checks the .bats files under dir (./src, ./bats_modules or
    ./src/bin) in mode, as check_list does *)
-fn check_dir {sn:nat} (dir: string sn, mode: checked, own_unsafe: bool,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+fn check_dir {sn:nat}{lx:agz} (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   dir: string sn, mode: checked, own_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int = let
   var d : $B.builder_v = $B.create()
   val () = bput_v(d, dir)
   val @(fa, flen) = sorted_bats_files(d)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
-  val c = check_list(bv_f, 0, flen, mode, own_unsafe, cnt, errs)
+  val c = check_list(ctx, reuse, bv_f, 0, flen, mode, own_unsafe, cnt, errs, pend)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
 in c end
@@ -3007,7 +3045,7 @@ fun add_cycle_errors {lf:agz}{k:nat} .<k>.
 
 (* cnt, with the errors for the implements on a call cycle among the
    files files[off, len) of one package *)
-fn check_cycles {lf:agz}{off:nat | off <= VMAX}
+fn check_cycles_lexed {lf:agz}{off:nat | off <= VMAX}
   (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
   val+ ~Cycles(hs, too_many) = implement_cycles(files, off, len)
   val c = add_cycle_errors(files, hs, cnt, errs)
@@ -3018,6 +3056,40 @@ in
     val () = bput_v(m, "more than 1048576 definitions in one package; they are not checked for recursion through an implement")
   in add_error(c, m, errs) end
 end
+
+(* cnt when held, else the errors of the package's call cycles *)
+fn check_cycles_unless {lf:agz}{off:nat | off <= VMAX}
+  (held: bool, files: !$A.borrow(byte, lf, VMAX), off: int off, len: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if held then cnt
+  else let
+    (* under -v, each package judged, by its first file *)
+    val () = (if is_verbose() then let
+        val () = print! ("  ~ call cycles of the package of ")
+        val () = print_borrow(files, off, $S.find_null_bv_at(files, off, VMAX), VMAX)
+      in print_newline() end else ())
+  in check_cycles_lexed(files, off, len, cnt, errs) end
+
+(* check_cycles_lexed, unless the package is recorded (as its files'
+   names and bytes under ctx) as having no implement on a call cycle
+   (validated.bats, bats#296); the record is named by name, which holds
+   what tells the package apart: "cycles <directory of the package>" *)
+fn check_cycles {lf,lx:agz}{off:nat | off <= VMAX}
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool, name: $B.builder_v,
+   files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int,
+   errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int = let
+  val @(usable, key) = valid_group_key(ctx, reuse, files, off, len)
+  val @(fz_k, bv_k) = $A.freeze<byte>(key)
+  val slot = valid_slot(name)
+  val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+  val held = (if usable then valid_holds(bv_s, bv_k) else false): bool
+  val c = check_cycles_unless(held, files, off, len, cnt, errs)
+  val () = (if usable then (if held then () else (if c = cnt then valid_group_pend(ctx, files, off, len, bv_s, bv_k, pend) else ())) else ())
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in c end
 
 (* Whether files[a, a + k) and files[b, b + k) hold the same bytes *)
 fun same_prefix {lf:agz}{i:nat | i <= VMAX} .<VMAX - i>.
@@ -3040,8 +3112,25 @@ fun group_end {lf:agz}{o:nat | o <= VMAX} .<VMAX - o>.
 (* cnt, with the recursion errors of each dependency package among the
    files files[off, len) of ./bats_modules, each package's files being
    together in the list *)
-fun check_dep_cycles {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
-  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+(* "cycles ./bats_modules/<pkg>": the record of the package whose files
+   begin at files[off] and whose root, with its slash, is k bytes *)
+fn cycles_name {lf:agz}{off:nat | off <= VMAX}
+  (files: !$A.borrow(byte, lf, VMAX), off: int off, k: int): $B.builder_v = let
+  var nm : $B.builder_v = $B.create()
+  val () = bput_v(nm, "cycles ")
+  val () = copy_to_builder_v(files, off, off + k - 1, VMAX, nm)
+in nm end
+
+(* The record of the package's own files *)
+fn cycles_name_src (): $B.builder_v = let
+  var nm : $B.builder_v = $B.create()
+  val () = bput_v(nm, "cycles ./src")
+in nm end
+
+fun check_dep_cycles {lf,lx:agz}{off:nat | off <= VMAX} .<VMAX - off>.
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int,
+   errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int =
   if off >= len then cnt
   else let
     val e = $S.find_null_bv_at(files, off, VMAX)
@@ -3053,27 +3142,17 @@ fun check_dep_cycles {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
     val k = dep_root_end(bv_p, 15, e - off) + 1
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
+    (* "cycles ./bats_modules/<pkg>", the record of this package *)
+    val nm = cycles_name(files, off, k)
   in
-    if e >= VMAX then check_cycles(files, off, e, cnt, errs)
+    if e >= VMAX then check_cycles(ctx, reuse, nm, files, off, e, cnt, errs, pend)
     else let
       val ge = group_end(files, e + 1, len, off, k)
-      val c = check_cycles(files, off, ge, cnt, errs)
+      val c = check_cycles(ctx, reuse, nm, files, off, ge, cnt, errs, pend)
     in
-      if ge >= VMAX then c else check_dep_cycles(files, ge, len, c, errs)
+      if ge >= VMAX then c else check_dep_cycles(ctx, reuse, files, ge, len, c, errs, pend)
     end
   end
-
-(* The recursion errors of the package's own files (dep = false) or of
-   each dependency (the files under ./bats_modules) *)
-fn check_dir_cycles {sn:nat} (dir: string sn, dep: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
-  var d : $B.builder_v = $B.create()
-  val () = bput_v(d, dir)
-  val @(fa, flen) = sorted_bats_files(d)
-  val @(fz_f, bv_f) = $A.freeze<byte>(fa)
-  val c = (if dep then check_dep_cycles(bv_f, 0, flen, cnt, errs) else check_cycles(bv_f, 0, flen, cnt, errs)): int
-  val () = $A.drop<byte>(fz_f, bv_f)
-  val () = $A.free<byte>($A.thaw<byte>(fz_f))
-in c end
 
 (* Prints cnt errors as Rust does; whether there were none *)
 fn report_errors (cnt: int, errs: $B.builder_v): bool =
@@ -3087,21 +3166,49 @@ fn report_errors (cnt: int, errs: $B.builder_v): bool =
     val () = set_build_err()
   in false end
 
+(* The records of what passed, written when nothing failed *)
+fn record_passed (passed: bool, pend: $B.builder_v): void =
+  if passed then valid_flush(pend) else $B.builder_free(pend)
+
 (* The errors Rust's preprocess_all finds in the package's modules, its
    dependencies, src/lib.bats and its binaries, in that order, collected
-   into errs; how many *)
+   into errs; how many. What passed is recorded when nothing failed *)
 fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
   val own_unsafe = toml_unsafe(str_to_path_arr("./bats.toml"))
-  val c1 = check_dir("./src", SharedModules(), own_unsafe, 0, errs)
-  val c2 = check_dir("./bats_modules", Dependencies(), own_unsafe, c1, errs)
+  (* The listings of ./src and ./bats_modules, once each: the checks of
+     the files and of the call cycles read the same ones, and the context
+     of the records holds the dependencies' (validated.bats) *)
+  var sd : $B.builder_v = $B.create()
+  val () = bput_v(sd, "./src")
+  val @(sa, slen) = sorted_bats_files(sd)
+  var dd : $B.builder_v = $B.create()
+  val () = bput_v(dd, "./bats_modules")
+  val @(da, dlen) = sorted_bats_files(dd)
+  val ctx = valid_context(da)
+  val reuse = ~is_cold()
+  (* what passed, recorded when nothing fails *)
+  var pend : $B.builder_v = $B.create()
+  val @(fz_x, bv_x) = $A.freeze<byte>(ctx)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val @(fz_d, bv_d) = $A.freeze<byte>(da)
+  val c1 = check_list(bv_x, reuse, bv_s, 0, slen, SharedModules(), own_unsafe, 0, errs, pend)
+  val c2 = check_list(bv_x, reuse, bv_d, 0, dlen, Dependencies(), own_unsafe, c1, errs, pend)
   val lp = str_to_path_arr("./src/lib.bats")
   val @(fz_l, bv_l) = $A.freeze<byte>(lp)
-  val c3 = check_file(bv_l, 14, $F.file_exists(bv_l, VMAX), own_unsafe, c2, errs)
+  val c3 = check_file(bv_x, reuse, bv_l, 14, file_exists_path(bv_l), own_unsafe, c2, errs, pend)
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
-  val c4 = check_dir("./src/bin", EveryFile(), own_unsafe, c3, errs)
-  val c5 = check_dir_cycles("./bats_modules", true, c4, errs)
-in check_dir_cycles("./src", false, c5, errs) end
+  val c4 = check_dir(bv_x, reuse, "./src/bin", EveryFile(), own_unsafe, c3, errs, pend)
+  val c5 = check_dep_cycles(bv_x, reuse, bv_d, 0, dlen, c4, errs, pend)
+  val c6 = check_cycles(bv_x, reuse, cycles_name_src(), bv_s, 0, slen, c5, errs, pend)
+  val () = $A.drop<byte>(fz_d, bv_d)
+  val () = $A.free<byte>($A.thaw<byte>(fz_d))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = record_passed(c6 = 0, pend)
+in c6 end
 
 (* Before check, build or test: the errors Rust's preprocess_all finds in
    the package's modules, its dependencies, src/lib.bats and its binaries,
@@ -3137,7 +3244,7 @@ in c <= 0 end
 fn lock_exists (): bool = let
   val lp = str_to_path_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val r = $F.file_exists(bv_lp, 524288)
+  val r = file_exists_path(bv_lp)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
 in r end
