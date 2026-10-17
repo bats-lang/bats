@@ -3,11 +3,15 @@
 # a full disk patsopt's own messages fail with ENOSPC, so its stderr is
 # empty and bats used to print "error: patsopt error:" with no text).
 # bats now says the module, the exit status and what patsopt wrote to
-# stdout (the first 4096 bytes, then [cut]), and, when the build's file system has
-# under 64 MB free (df -Pk build), "no space left on device (N MB free in
-# build)". A failure with no text is never reported as "error: patsopt
-# error:". The stand-in patsopt fails with the output FAKE names; the
-# stand-in df reports the free space FREE_KIB names.
+# stdout (the first 4096 bytes, then [cut]), and the free space of the build
+# as a fact, "(N MB free in build; if that is near 0 the disk is full)", read
+# from the last line of df -Pk build: the number before the first token that
+# is digits and a percent sign. No threshold: a disk with room says it too.
+# Without df's answer (df fails, is missing, or says no such token) the clause
+# is left out and nothing else changes. A failure with no text is never
+# reported as "error: patsopt error:". The stand-in patsopt fails with the
+# output FAKE names; the stand-in df reports the free space FREE_KIB names, in
+# the form DF names.
 # usage: tests/patsopt-silent/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -33,42 +37,63 @@ exit 1
 SH2
 chmod +x "$H/.bats/ats2/bin/patsopt"
 
-# the stand-in df: the Available column is FREE_KIB (the 1024-byte blocks)
+# the stand-in df: the Available column is FREE_KIB (the 1024-byte blocks), in
+# the form DF names: a file system name with a blank in it, a df that fails,
+# and an output with no Capacity column
 cat > "$TMP/fakebin/df" <<'SH2'
 #!/bin/sh
-printf 'Filesystem 1024-blocks Used Available Capacity Mounted on\n'
-printf '/dev/fake 1000000 900000 %s 90%% /\n' "${FREE_KIB:-5000000}"
+case "${DF:-plain}" in
+  plain)
+    printf 'Filesystem 1024-blocks Used Available Capacity Mounted on\n'
+    printf '/dev/fake 1000000 900000 %s 90%% /\n' "${FREE_KIB:-5000000}" ;;
+  blank)
+    printf 'Filesystem 1024-blocks Used Available Capacity Mounted on\n'
+    printf 'map auto_home 0 0 %s 100%% /System/Volumes/Data/home\n' "${FREE_KIB:-5000000}" ;;
+  fail)
+    printf 'df: cannot read the table\n' >&2
+    exit 1 ;;
+  nopercent)
+    printf 'Filesystem 1024-blocks Used Available Mounted on\n'
+    printf '/dev/fake 1000000 900000 %s /\n' "${FREE_KIB:-5000000}" ;;
+esac
 SH2
 chmod +x "$TMP/fakebin/df"
+# a PATH with every tool of the system's but df, for the case of no df at all
+mkdir "$TMP/nodf"
+for f in /usr/bin/* /bin/*; do
+  [ "${f##*/}" = df ] || ln -sf "$f" "$TMP/nodf/${f##*/}" 2>/dev/null || true
+done
 
 project() { # <directory>: a project of one binary, named p
   mkdir -p "$1/src/bin"
   printf '[package]\nname = "p"\nkind = "bin"\n' > "$1/bats.toml"
   printf 'implement main0 () = println! (1)\n' > "$1/src/bin/p.bats"
 }
-for d in silent stdout long stderr disk; do project "$TMP/$d"; done
+for d in silent stdout long stderr disk blank dffail nopercent nodf; do project "$TMP/$d"; done
 
-# run <directory> <fake> [free KiB]: check in the directory; the status in
-# $rc, the output in $TMP/<directory>.log (stdout and stderr together)
+# run <directory> <fake> [free KiB] [df form] [path]: check in the directory;
+# the status in $rc, the output in $TMP/<directory>.log (stdout and stderr
+# together)
 run() {
   d=$1
   rc=0
-  (cd "$TMP/$d" && NO_COLOR=1 HOME="$H" PATH="$TMP/fakebin:$PATH" FAKE="$2" FREE_KIB="${3:-5000000}" "$BATS" check) > "$TMP/$d.log" 2>&1 || rc=$?
+  (cd "$TMP/$d" && NO_COLOR=1 HOME="$H" PATH="${5:-$TMP/fakebin:$PATH}" FAKE="$2" FREE_KIB="${3:-5000000}" DF="${4:-plain}" "$BATS" check) > "$TMP/$d.log" 2>&1 || rc=$?
 }
 fail() { echo "FAIL: $1"; cat "$TMP/$2.log"; exit 1; }
 
-# no text, enough room: the module, the status, nothing else
+# no text, plenty of room: the module, the status, the free space as a fact
+# (5000000 KiB is 4882 MB) and no verdict
 run silent silent
 [ $rc = 1 ] || fail "a patsopt that fails silently: status $rc, not 1" silent
-grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/silent.log" \
-  || fail "a silent patsopt failure was not said as one, naming the module and the status" silent
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing (4882 MB free in build; if that is near 0 the disk is full)\.\$" "$TMP/silent.log" \
+  || fail "a silent patsopt failure was not said as one, naming the module, the status and the free space" silent
 if grep -q "patsopt error:" "$TMP/silent.log"; then fail "a silent failure was reported as 'error: patsopt error:'" silent; fi
 if grep -q "no space" "$TMP/silent.log"; then fail "room was 5 GB and the failure said no space" silent; fi
 
 # stdout is said, after the status
 run stdout stdout
 [ $rc = 1 ] || fail "a patsopt that writes to stdout and fails: status $rc" stdout
-grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing; stdout was: patsopt wrote this to stdout\$" "$TMP/stdout.log" \
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing (4882 MB free in build; if that is near 0 the disk is full); stdout was: patsopt wrote this to stdout\$" "$TMP/stdout.log" \
   || fail "patsopt's stdout was not said after the status" stdout
 
 # stdout is cut at 4096 bytes: 10000 bytes of digits give 4096 of them
@@ -85,10 +110,32 @@ run stderr stderr
 grep -q "^error: patsopt error:" "$TMP/stderr.log" || fail "a patsopt error with stderr was not reported as one" stderr
 if grep -q "printed nothing" "$TMP/stderr.log"; then fail "a failure with stderr said it printed nothing" stderr; fi
 
-# under 64 MB free in build/: the disk is named (2 MB here)
+# a nearly full disk: the same words with the small number (2 MB here)
 run disk silent 2048
 [ $rc = 1 ] || fail "a silent failure on a nearly full disk: status $rc" disk
-grep -q "^error: no space left on device (2 MB free in build): patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/disk.log" \
-  || fail "a nearly full disk was not named with its free space" disk
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing (2 MB free in build; if that is near 0 the disk is full)\.\$" "$TMP/disk.log" \
+  || fail "a nearly full disk was not shown with its free space" disk
+if grep -q "no space left" "$TMP/disk.log"; then fail "the message gave a verdict of no space from a number" disk; fi
+
+# a file system name with a blank in it shifts the columns: the free space is
+# still the number before the Capacity (7 MB here, not the Used column's 0)
+run blank silent 7168 blank
+[ $rc = 1 ] || fail "a silent failure, df with a blank in the name: status $rc" blank
+grep -q "printed nothing (7 MB free in build; if that is near 0 the disk is full)\.\$" "$TMP/blank.log" \
+  || fail "a blank in the file system's name gave the wrong free space" blank
+
+# df fails, is missing, or has no Capacity: the clause is left out, all else as it was
+run dffail silent 5000000 fail
+[ $rc = 1 ] || fail "a silent failure, df fails: status $rc" dffail
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/dffail.log" \
+  || fail "a failing df changed the message" dffail
+run nopercent silent 5000000 nopercent
+[ $rc = 1 ] || fail "a silent failure, df without a Capacity: status $rc" nopercent
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/nopercent.log" \
+  || fail "a df output with no Capacity changed the message" nopercent
+run nodf silent 5000000 plain "$TMP/nodf"
+[ $rc = 1 ] || fail "a silent failure, no df: status $rc" nodf
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/nodf.log" \
+  || fail "a missing df changed the message" nodf
 
 echo "patsopt-silent: ok"

@@ -1979,13 +1979,20 @@ in set_build_err() end
    disk its own messages fail with ENOSPC, so its stderr is empty, and
    "error: patsopt error:" with no text used to be all that was said.
    What bats says then: the module, the status, and what patsopt wrote to
-   stdout (its first 4096 bytes), and, when the build's file system has
-   under 64 MB free, "no space left on device (N MB free in build)".
+   stdout (its first 4096 bytes), and, as a fact and not a verdict, the free
+   space of the build's file system: "(N MB free in build; if that is near
+   0 the disk is full)". No threshold decides that the disk is full: cargo,
+   rustc and ld report the failed write's OS error, and apt and dpkg compare
+   an estimate of the space needed, none a fixed number of megabytes
+   (research in the comment of bats#313). Without df's answer the clause is
+   left out.
    patsopt's stdout is a file in build/ (truncated by each run, so it is
    not removed): a pipe would block patsopt once it wrote more than a
    pipe holds, while bats was still reading its stderr. Nothing else of
    the platform says free space (the file package has no statvfs), so
-   the free space is df -Pk's Available column, which POSIX fixes.
+   the free space is df -Pk's Available column, found from the Capacity
+   column after it (df runs only on this failure, never on a build that
+   succeeds).
    ============================================================ *)
 
 (* What patsopt's stdout is kept in *)
@@ -2073,29 +2080,50 @@ fun digits_at {l:agz}{i,j:nat | i <= j; j <= 4096} .<j - i>.
     else digits_at(e, i + 1, j, v * 10 + (c - 48))
   end
 
-(* The Available column (1024-byte blocks) of df -Pk's output in
-   e[0, n): its second line's fourth field, the first three fields being
-   the file system's name, its size and its use; -1 when the output is
-   not that. A file system name with a blank in it is not read as one
-   field: df -P is the only source, and such names are rare on the disks
-   bats builds on. *)
-fn df_available {l:agz}{n:nat | n <= 4096} (e: !$A.borrow(byte, l, 4096), n: int n): int = let
-  val nl = newline_at(e, 0, n)
+(* The end of e[0, n) without the blanks and newlines at its end *)
+fun trimmed_end {l:agz}{n:nat | n <= 4096} .<n>.
+  (e: !$A.borrow(byte, l, 4096), n: int n): [r:nat | r <= n] int r =
+  if n <= 0 then 0
+  else let val c = byte2int0($A.read<byte>(e, n - 1)) in
+    if is_blank_byte(c) || (c = 10) then trimmed_end(e, n - 1) else n
+  end
+
+(* The start of the last line of e[0, n): the position after the last
+   newline from i on (s is the start so far) *)
+fun last_line_from {l:agz}{i,n:nat | i <= n; n <= 4096}{s:nat | s <= n} .<n - i>.
+  (e: !$A.borrow(byte, l, 4096), i: int i, n: int n, s: int s): [r:nat | r <= n] int r =
+  if i >= n then s
+  else if byte2int0($A.read<byte>(e, i)) = 10 then last_line_from(e, i + 1, n, i + 1)
+  else last_line_from(e, i + 1, n, s)
+
+(* The number just before the first token of e[i, n) that is digits and a
+   percent sign; the previous token is e[ps, pe). -1 when there is no such
+   token, or what comes before it is no number *)
+fun number_before_percent {l:agz}{i,n,ps,pe:nat | i <= n; n <= 4096; ps <= pe; pe <= n} .<n - i>.
+  (e: !$A.borrow(byte, l, 4096), i: int i, n: int n, ps: int ps, pe: int pe): int = let
+  val a = blanks_end(e, i, n)
 in
-  if nl >= n then ~1
+  if a >= n then ~1
   else let
-    val a = blanks_end(e, nl + 1, n)
     val b = token_end(e, a, n)
-    val c = blanks_end(e, b, n)
-    val d = token_end(e, c, n)
-    val f = blanks_end(e, d, n)
-    val g = token_end(e, f, n)
-    val h = blanks_end(e, g, n)
-    val k = token_end(e, h, n)
   in
-    if k <= h then ~1 else digits_at(e, h, k, 0)
+    if b <= a then ~1
+    else if b - a >= 2 && byte2int0($A.read<byte>(e, b - 1)) = 37 && digits_at(e, a, b - 1, 0) >= 0 then
+      (if pe > ps then digits_at(e, ps, pe, 0) else ~1)
+    else number_before_percent(e, b, n, a, b)
   end
 end
+
+(* The free space (1024-byte blocks) in df -Pk's output e[0, n): the
+   number immediately before the first token of its last line that is
+   digits followed by a percent sign (the Capacity column), so that a
+   blank in the file system's name, which shifts the columns from the
+   left, does not matter (POSIX: Filesystem, 1024-blocks, Used, Available,
+   Capacity, Mounted on). -1 when there is no such token *)
+fn df_available {l:agz}{n:nat | n <= 4096} (e: !$A.borrow(byte, l, 4096), n: int n): int = let
+  val m = trimmed_end(e, n)
+  val s = last_line_from(e, 0, m, 0)
+in number_before_percent(e, s, m, s, s) end
 
 (* The free space in KiB of build/ (df -Pk build's Available column), or
    -1 when df gave none *)
@@ -2120,18 +2148,14 @@ fn disk_free_kib (): int = let
 in v end
 
 (* A patsopt run that failed and printed nothing on stderr: the module,
-   the status, the disk when it is nearly full, and stdout (consumes
-   out) *)
+   the status, the free space of build/ when df said it, and stdout
+   (consumes out) *)
 fn report_silent {li:agz}
   (ec: int, in_bv: !$A.borrow(byte, li, 524288), in_len: int,
    out: $B.builder_v, out_cut: bool): void = let
   val free_kib = disk_free_kib()
   var m : $B.builder_v = $B.create()
-  val () = (if free_kib >= 0 && free_kib < 65536 then let
-      val () = bput_v(m, "error: no space left on device (")
-      val () = put_int_v(m, free_kib / 1024)
-    in bput_v(m, " MB free in build): ") end
-    else bput_v(m, "error: "))
+  val () = bput_v(m, "error: ")
   val () = bput_v(m, "patsopt on ")
   val () = module_put(in_bv, in_len, m)
   val () = bput_v(m, " failed with ")
@@ -2140,6 +2164,11 @@ fn report_silent {li:agz}
     in put_int_v(m, ec) end
     else bput_v(m, "an unknown status"))
   val () = bput_v(m, " and printed nothing")
+  val () = (if free_kib >= 0 then let
+      val () = bput_v(m, " (")
+      val () = put_int_v(m, free_kib / 1024)
+    in bput_v(m, " MB free in build; if that is near 0 the disk is full)") end
+    else ())
   val () = (if $B.length(out) > 0 then let
       val () = bput_v(m, "; stdout was: ")
       val () = append_builder(m, out)
