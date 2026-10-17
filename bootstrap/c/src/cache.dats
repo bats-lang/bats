@@ -595,6 +595,46 @@ fn memo_hashes_text {lc:agz}{m:pos}{f:nat}
   val () = stamp_digest_hashes(out)
 in hashed end
 
+(* Whether the key at the NUL-terminated path key_bv is what the files it
+   lists give now (the same names, the same sizes and then the same hashes,
+   the stamp's included): the test of a module's key, and of the closure
+   of a fixture's entry (bats#267), which is a key of the same text *)
+
+
+implement closure_key_equal(bv_k) =
+  (case+ read_whole(bv_k, 524288) of
+    | ~whole_err(_) => false
+    | ~whole_ok(ar, piece, m, n) => let
+        val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+        val rule = find_rule(bv_c, MEMO_HEAD_LEN, n, m)
+        var nb : $B.builder_v = $B.create()
+        val named = (if rule >= MEMO_HEAD_LEN then names_digest(nb) else false): bool
+        val @(na, nl) = $B.to_arr(nb)
+        val @(fz_na, bv_na) = $A.freeze<byte>(na)
+        (* the sizes first *)
+        var eb : $B.builder_v = $B.create()
+        val sized = (if named && nl = 64
+          then memo_sizes_text(bv_na, bv_c, MEMO_HEAD_LEN, rule, m, eb) else false): bool
+        val @(ea, el) = $B.to_arr(eb)
+        val @(fz_e, bv_e) = $A.freeze<byte>(ea)
+        val same_sizes = (if sized then file_starts_with(bv_k, bv_e, el) else false): bool
+        var hb : $B.builder_v = $B.create()
+        val () = (if same_sizes then copy_to_builder_v(bv_e, 0, el, 524288, hb) else ())
+        val hashed = (if same_sizes
+          then memo_hashes_text(bv_c, MEMO_HEAD_LEN, rule, m, hb) else false): bool
+        val @(ha, hl) = $B.to_arr(hb)
+        val @(fz_h, bv_h) = $A.freeze<byte>(ha)
+        val equal = (if hashed then file_has_bytes(bv_k, bv_h, hl) else false): bool
+        val () = $A.drop<byte>(fz_h, bv_h)
+        val () = $A.free<byte>($A.thaw<byte>(fz_h))
+        val () = $A.drop<byte>(fz_e, bv_e)
+        val () = $A.free<byte>($A.thaw<byte>(fz_e))
+        val () = $A.drop<byte>(fz_na, bv_na)
+        val () = $A.free<byte>($A.thaw<byte>(fz_na))
+        val () = $A.drop<byte>(fz_c, bv_c)
+        val () = whole_free(ar, $A.thaw<byte>(fz_c))
+      in equal end)
+
 (* Whether the C at out_b is still the record of a check of the module
    whose .dats is in_b: the key beside it equals what the files it lists
    give now *)
@@ -610,38 +650,7 @@ implement memo_fresh(out_b, in_b) = let
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
   val fresh = (if ~there then false
     else if is_cold() then false
-    else (case+ read_whole(bv_k, 524288) of
-      | ~whole_err(_) => false
-      | ~whole_ok(ar, piece, m, n) => let
-          val @(fz_c, bv_c) = $A.freeze<byte>(piece)
-          val rule = find_rule(bv_c, MEMO_HEAD_LEN, n, m)
-          var nb : $B.builder_v = $B.create()
-          val named = (if rule >= MEMO_HEAD_LEN then names_digest(nb) else false): bool
-          val @(na, nl) = $B.to_arr(nb)
-          val @(fz_na, bv_na) = $A.freeze<byte>(na)
-          (* the sizes first *)
-          var eb : $B.builder_v = $B.create()
-          val sized = (if named && nl = 64
-            then memo_sizes_text(bv_na, bv_c, MEMO_HEAD_LEN, rule, m, eb) else false): bool
-          val @(ea, el) = $B.to_arr(eb)
-          val @(fz_e, bv_e) = $A.freeze<byte>(ea)
-          val same_sizes = (if sized then file_starts_with(bv_k, bv_e, el) else false): bool
-          var hb : $B.builder_v = $B.create()
-          val () = (if same_sizes then copy_to_builder_v(bv_e, 0, el, 524288, hb) else ())
-          val hashed = (if same_sizes
-            then memo_hashes_text(bv_c, MEMO_HEAD_LEN, rule, m, hb) else false): bool
-          val @(ha, hl) = $B.to_arr(hb)
-          val @(fz_h, bv_h) = $A.freeze<byte>(ha)
-          val equal = (if hashed then file_has_bytes(bv_k, bv_h, hl) else false): bool
-          val () = $A.drop<byte>(fz_h, bv_h)
-          val () = $A.free<byte>($A.thaw<byte>(fz_h))
-          val () = $A.drop<byte>(fz_e, bv_e)
-          val () = $A.free<byte>($A.thaw<byte>(fz_e))
-          val () = $A.drop<byte>(fz_na, bv_na)
-          val () = $A.free<byte>($A.thaw<byte>(fz_na))
-          val () = $A.drop<byte>(fz_c, bv_c)
-          val () = whole_free(ar, $A.thaw<byte>(fz_c))
-        in equal end)): bool
+    else closure_key_equal(bv_k)): bool
   val () = (if fresh && is_verbose() then let
       val () = print! ("  = ")
       val () = print_borrow(bv_o, 0, ol - 1, 524288)
@@ -673,6 +682,47 @@ implement memo_fresh_in_check(out_b, in_b) =
     val () = $A.free<byte>(ia)
   in false end
 
+(* The key's text for the paths listed in c[0, n) (whole lines): the head
+   with names, the paths, the sizes and then the hashes, into b; false when
+   a file cannot be read or the list is not whole lines (an empty list is
+   one: the closure of a module that reads nothing but itself) *)
+fn list_key_text {ln,lc:agz}{m:pos}{n:nat}
+  (names: !$A.borrow(byte, ln, 524288), c: !$A.borrow(byte, lc, m), n: int n, m: int m,
+   b: !$B.builder_v >> $B.builder_v): bool = let
+  val whole_lines = (n = 0 || (n > 0 && peek(c, n - 1, m) = 10)): bool
+  val sized = (if whole_lines then memo_sizes_text(names, c, 0, n, m, b) else false): bool
+in (if sized then memo_hashes_text(c, 0, n, m, b) else false) end
+
+(* Writes at the NUL-terminated path out_bv the key of the files listed
+   (one path a line, each line ending with a line feed) in the file at
+   list_bv, as the check memo's keys are written: false when a file cannot
+   be read, the key would not fit, or it cannot be written. It is a key of
+   the closure of a fixture's check, kept in the fixtures' memo (bats#267),
+   and read by closure_key_equal. *)
+
+
+
+implement closure_key_write(list_bv, out_bv) =
+  (case+ read_whole(list_bv, 524288) of
+    | ~whole_err(_) => false
+    | ~whole_ok(ar, piece, m, n) => let
+        val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+        var nb : $B.builder_v = $B.create()
+        val named = names_digest(nb)
+        val @(na, nl) = $B.to_arr(nb)
+        val @(fz_na, bv_na) = $A.freeze<byte>(na)
+        var b : $B.builder_v = $B.create()
+        val hashed = (if named && nl = 64 then list_key_text(bv_na, bv_c, n, m, b) else false): bool
+        val fits = ($B.length(b) < 524288): bool
+        val bf = b
+        val wrote = (if hashed && fits then (write_file_from_builder(out_bv, 524288, bf) = 0)
+          else let val () = $B.builder_free(bf) in false end): bool
+        val () = $A.drop<byte>(fz_na, bv_na)
+        val () = $A.free<byte>($A.thaw<byte>(fz_na))
+        val () = $A.drop<byte>(fz_c, bv_c)
+        val () = whole_free(ar, $A.thaw<byte>(fz_c))
+      in wrote end)
+
 (* Writes <out>.key after patsopt passed on the module: names is the
    digest of the names made before patsopt ran (nl bytes; the key is not
    written unless they are the 64 of a sha256), listed whether
@@ -697,11 +747,8 @@ fn memo_record {lph,ln,lo,li:agz}
       | ~whole_err(_) => ()
       | ~whole_ok(ar, piece, m, n) => let
           val @(fz_c, bv_c) = $A.freeze<byte>(piece)
-          (* a list of whole lines *)
-          val whole_lines = (n > 0 && peek(bv_c, n - 1, m) = 10): bool
           var b : $B.builder_v = $B.create()
-          val sized = (if whole_lines then memo_sizes_text(names, bv_c, 0, n, m, b) else false): bool
-          val hashed = (if sized then memo_hashes_text(bv_c, 0, n, m, b) else false): bool
+          val hashed = list_key_text(names, bv_c, n, m, b)
           val fits = ($B.length(b) < 524288): bool
           val @(ba, bl) = $B.to_arr(b)
           val @(fz_b, bv_b) = $A.freeze<byte>(ba)

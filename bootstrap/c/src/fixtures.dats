@@ -7,8 +7,9 @@ staload "file/src/lib.dats"
 staload "list/src/lib.dats"
 staload "process/src/lib.dats"
 staload "result/src/lib.dats"
+staload "sha256/src/lib.dats"
 (* fixtures -- bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>]
-   [--repository <dir>] (bats-lang/bats#267, item 4: quire's static-test
+   [--memo <dir>] [--prune] [--repository <dir>] (bats-lang/bats#267, item 4: quire's static-test
    runner, tests/static/run.sh and expect.py, folded into bats).
 
    <dir> holds fixtures, each a directory
@@ -50,9 +51,11 @@ staload "result/src/lib.dats"
      FAIL reject/<name>: rejected, but not as its expect says: <why>
 
    --only <member> (repeatable; accept/<name> or reject/<name>) runs only
-   those. --cold is accepted and changes nothing: nothing is remembered
-   between runs yet, so every run is cold. The exit status is 1 when
-   anything failed, 2 for a usage error. *)
+   those. The exit status is 1 when anything failed, 2 for a usage error.
+
+   The memo (below, "the memo") keeps the result of a fixture's check, so a
+   second run does not run patsopt on what it already said; --cold reads
+   no memo and audits it, --prune removes what a run did not use. *)
 
 #include "share/atspre_staload.hats"
 
@@ -64,8 +67,11 @@ staload F = "file/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
+staload SHA = "sha256/src/lib.sats"
 
 staload "helpers.sats"
+staload "cache.sats"
+staload "lock.sats"
 
 (* An int of any index: what a function takes or answers when its index is
    not needed outside it (the sort-less int the prelude writes int as is not
@@ -804,40 +810,1027 @@ fn read_elapsed {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): int = l
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in v end
 
-(* The memo's script (put_memo_script, below) is run as
-   `sh <work>/memo.sh <verb> ...`; its verbs return their statuses to this
-   side: probe 98 when the snippet could not be put in, 100 when the check
-   must be run, 0 and 1 for a memo hit (the check passed, or failed with the
-   log it left in <work>/check.log); store and prune 0 *)
-
 (* Puts the snippet of the fixture mv[a, e) into <work>/app's copy of the
-   module bv_m[0, mlen), before line `at` and followed by one blank line,
-   and looks the fixture up in the memo (the script's probe). The system
-   does the splice and the lookup (head, awk, tail, sha256sum, sed); which
-   line, and what the output means, are decided here. *)
-fn memo_probe {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+   module bv_m[0, mlen), before line `at` and followed by one blank line:
+   the exit status of the splice (98 when it could not be put in). The
+   system does the splice (head, awk, tail: bats#297's); which line is
+   decided here. *)
+fn splice_snippet {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
   (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
-   bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, at: int, is_accept: bool): int = let
-  var work : $B.builder_v = $B.create()
-  val () = put_cfg(cfg, w.work, work)
+   bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, at: int): int = let
+  var app : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, app)
+  val () = bput_v(app, "/app")
   var module : $B.builder_v = $B.create()
   val () = put_range(bv_m, 524288, 0, mlen, module)
-  var kind : $B.builder_v = $B.create()
-  val () = (if is_accept then bput_v(kind, "accept") else bput_v(kind, "reject"))
   val snippet = fixture_text(cfg, w, mv, a, e, "snippet.bats")
-  val before = fixture_text(cfg, w, mv, a, e, "before")
   var line : $B.builder_v = $B.create()
   val () = put_int_v(line, at)
-  var memo : $B.builder_v = $B.create()
-  val () = put_cfg(cfg, w.memo, memo)
-  var cold : $B.builder_v = $B.create()
-  val () = put_int_v(cold, w.cold)
 in
-  run_sh("sh \"$1/memo.sh\" probe \"$@\"",
-    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(kind),
-    $L.list_vt_cons(mk_arg(snippet), $L.list_vt_cons(mk_arg(before), $L.list_vt_cons(mk_arg(line),
-    $L.list_vt_cons(mk_arg(memo), $L.list_vt_cons(mk_arg(cold), $L.list_vt_nil())))))))))
+  run_sh("app=$1; m=$2; snip=$3; at=$4; f=\"$app/$m\"; { head -n $((at - 1)) \"$f\"; awk 1 \"$snip\"; echo; tail -n +\"$at\" \"$f\"; } > \"$f.fixture\" || exit 98; mv -f \"$f.fixture\" \"$f\" || exit 98",
+    $L.list_vt_cons(mk_arg(app), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(snippet),
+    $L.list_vt_cons(mk_arg(line), $L.list_vt_nil())))))
 end
+
+(* ============================================================
+   The fixtures' memo (bats-lang/bats#267, item 4b)
+
+   A memo stands in for patsopt's answer on the spliced module and for
+   nothing else: before it is asked, the project is validated as `bats
+   check` validates it (validate_clean: the lexer's rules and the call
+   cycles of every module, which have no patsopt in them), so a result
+   kept is never served for a project that a check would refuse before
+   patsopt. It lives in two files for each key:
+
+     <memo>/<2 hex>/<key>.key   a bats-memo key (the check memo's text, see
+                                cache.bats) of the files the module's check
+                                reads, less the module's own .dats and .sats
+     <memo>/<2 hex>/<key>.res   bats-fixture-result 2, the key, pass or log,
+                                the sha256 of the .key's bytes, the log, and
+                                the sha256 of every byte before it
+
+   The memo is trusted only as far as it is checked: no file is renamed into
+   place (the file package has no rename), a reader verifies the sum of the
+   .res and the key's own test (closure_key_equal), so a file torn by a
+   writer that died, or being written, is a miss and is written again.
+   ============================================================ *)
+
+(* A path (bytes, no NUL) as a NUL-terminated array *)
+fn nul_path (b: $B.builder_v): [l:agz] $A.arr(byte, l, 524288) = let
+  var p = b
+  val () = put_char_v(p, 0)
+in path_arr(p) end
+
+(* A builder holding the text s *)
+fn str_builder {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, s)
+in b end
+
+(* <memo><tail> as a builder *)
+fn memo_plus {lm:agz}{sl:nat} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen, tail: string sl): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(memo, 0, mlen, 524288, b)
+  val () = bput_v(b, tail)
+in b end
+
+(* <memo>/<2 hex of key><tail> as a builder *)
+fn memo_sub_plus {lm,lk:agz}{sl:nat} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  key: !$A.borrow(byte, lk, 524288), tail: string sl): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(memo, 0, mlen, 524288, b)
+  val () = put_char_v(b, 47)
+  val () = copy_to_builder_v(key, 0, 2, 524288, b)
+  val () = bput_v(b, tail)
+in b end
+
+fn path_exists (b: $B.builder_v): bool = let
+  val a = nul_path(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val r = $F.file_exists(bv, 524288)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* The sha256 of the file as 64 hex digits appended to out; false when it
+   cannot be read *)
+fn path_sha (b: $B.builder_v, out: !$B.builder_v >> $B.builder_v): bool = let
+  val a = nul_path(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val r = put_file_sha256(bv, out)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* content written to the file; whether it was *)
+fn path_write (b: $B.builder_v, content: $B.builder_v): bool = let
+  val a = nul_path(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val r = write_file_from_builder(bv, 524288, content)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r = 0 end
+
+(* rm -f of the file (the process package has no unlink) *)
+fn path_remove (b: $B.builder_v): void = let
+  var p = b
+  val n = $B.length(p) + 1
+  val () = put_char_v(p, 0)
+  val a = path_arr(p)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val () = remove_output(bv, n)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+fn path_mkdir (b: $B.builder_v): void = let
+  val a = nul_path(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val () = $R.discard<int><$F.io_error>($F.file_mkdir(bv, 524288, 493))
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+(* The directories of an absolute path made one after another (mkdir -p) *)
+fun mkdirs_from {l:agz}{len:nat | len <= 524288}{i:nat | i <= len} .<len - i>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, i: int i): void =
+  if i >= len then ()
+  else let
+    val () = (if i > 0 && byte_at(bv, len, i) = 47 then let
+        var pre : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(bv, 0, i, 524288, pre)
+      in path_mkdir(pre) end else ())
+  in mkdirs_from(bv, len, i + 1) end
+
+fn mkdir_p (b: $B.builder_v): void = let
+  val @(a, n) = $B.to_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val () = mkdirs_from(bv, n, 0)
+  var whole : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv, 0, n, 524288, whole)
+  val () = path_mkdir(whole)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+(* The sha256 of the bytes b holds, as 64 hex digits appended to out *)
+fn put_sha_of (b: $B.builder_v, out: !$B.builder_v >> $B.builder_v): void = let
+  val @(a, n) = $B.to_arr(b)
+  val c = $SHA.init()
+  val () = $SHA.update(c, a, n)
+  val () = $A.free<byte>(a)
+  val hex = $A.alloc<byte>(64)
+  val () = $SHA.finish(c, hex)
+  val @(fz, bv) = $A.freeze<byte>(hex)
+  val () = copy_to_builder_v(bv, 0, 64, 64, out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+(* The sha256 of bv[a, e), appended to out *)
+fn put_sha_range {l:agz}{a,e:int} (bv: !$A.borrow(byte, l, 524288), a: int a, e: int e, out: !$B.builder_v >> $B.builder_v): void = let
+  var tmp : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv, a, e, 524288, tmp)
+in put_sha_of(tmp, out) end
+
+(* Whether bv[0, len) holds the text s anywhere *)
+fun find_text_from {l:agz}{sl:nat}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, s: string sl): bool =
+  if p >= len then false
+  else if text_has(bv, len, p, s) then true
+  else find_text_from(bv, len, p + 1, s)
+
+(* Whether the log bv[0, len) has a line that is a patsopt error's first *)
+fun has_error_from {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p): bool = let
+  val e = line_end(bv, len, p, true)
+  val @(is_header, _, _, _) = header_parse(bv, len, p, e)
+in
+  if is_header then true
+  else if e >= len then false
+  else has_error_from(bv, len, next_line(bv, len, e, true))
+end
+
+(* bv[i, e) appended to out, each occurrence of pv[0, plen) written /app/ *)
+fun put_replaced {l:agz}{lp:agz}{len:nat | len <= 524288}{e:nat | e <= len}{i:nat | i <= e} .<e - i>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, i: int i, e: int e,
+   pv: !$A.borrow(byte, lp, 524288), plen: tlen, out: !$B.builder_v >> $B.builder_v): void =
+  if i >= e then ()
+  else if plen > 0 then
+    (if i + plen <= e then
+      (if same_range(bv, len, i, pv, plen, 0, plen, 0) then let
+        val () = bput_v(out, "/app/")
+      in put_replaced(bv, len, i + plen, e, pv, plen, out) end
+      else let
+        val () = put_char_v(out, byte_at(bv, len, i))
+      in put_replaced(bv, len, i + 1, e, pv, plen, out) end)
+    else let
+      val () = put_char_v(out, byte_at(bv, len, i))
+    in put_replaced(bv, len, i + 1, e, pv, plen, out) end)
+  else let
+    val () = put_char_v(out, byte_at(bv, len, i))
+  in put_replaced(bv, len, i + 1, e, pv, plen, out) end
+
+(* The log as it is kept: the work directory's path (pv, with its final
+   slash) written /app/, the lines a waiting bats and the warning about an
+   ATS2 bats did not install say dropped (they name this machine), a line
+   feed after each line *)
+fn normalize_line {l:agz}{lp:agz}{len:nat | len <= 524288}{p:nat | p <= len}{e:nat | p <= e; e <= len}
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, e: int e,
+   pv: !$A.borrow(byte, lp, 524288), plen: tlen, out: !$B.builder_v >> $B.builder_v): void =
+  if text_has(bv, len, p, "waiting for another bats") then ()
+  else if text_has(bv, len, p, "warning: the ATS2 in ") then ()
+  else let
+    val () = put_replaced(bv, len, p, e, pv, plen, out)
+  in put_char_v(out, 10) end
+
+fun normalize_from {l:agz}{lp:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p,
+   pv: !$A.borrow(byte, lp, 524288), plen: tlen, out: !$B.builder_v >> $B.builder_v): void =
+  if p >= len then ()
+  else let
+    val e = line_end(bv, len, p, false)
+    val () = normalize_line(bv, len, p, e, pv, plen, out)
+  in
+    if e >= len then () else normalize_from(bv, len, next_line(bv, len, e, false), pv, plen, out)
+  end
+
+(* The current directory as a path (no NUL); empty when it is not known *)
+fn cwd_into (out: !$B.builder_v >> $B.builder_v): void = let
+  val buf = $A.alloc<byte>(4096)
+  val k = (case+ $E.cwd_read(buf, 4096) of | ~$R.some(k) => k | ~$R.none() => 0): [k:nat | k <= 4096] int k
+  val @(fz, bv) = $A.freeze<byte>(buf)
+  val () = copy_to_builder_v(bv, 0, k, 4096, out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+fn chdir_path (b: $B.builder_v): bool = let
+  val a = nul_path(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val ok = (case+ $F.file_chdir(bv, 524288) of
+    | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in ok end
+
+(* ---- where the memo is ---- *)
+
+(* The memo's directory (an absolute path) appended to out: --memo, else
+   BATS_MEMO_DIR, else $XDG_CACHE_HOME/bats/fixtures, else
+   $HOME/.cache/bats/fixtures; false when none can be named *)
+fn memo_dir_into {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings, out: !$B.builder_v >> $B.builder_v): bool =
+  if w.memo >= 0 && byte_at(cfg, 524288, w.memo) <> 0 then let
+    val () = put_cfg(cfg, w.memo, out)
+  in true end
+  else if env_value("BATS_MEMO_DIR", out) then true
+  else if env_value("XDG_CACHE_HOME", out) then let
+    val () = bput_v(out, "/bats/fixtures")
+  in true end
+  else if env_value("HOME", out) then let
+    val () = bput_v(out, "/.cache/bats/fixtures")
+  in true end
+  else false
+
+(* <memo>/<2 hex of key>/<key><suffix> appended to out (no NUL) *)
+fn entry_into {lm,lk:agz}{sl:nat} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  key: !$A.borrow(byte, lk, 524288), suffix: string sl, out: !$B.builder_v >> $B.builder_v): void = let
+  val () = copy_to_builder_v(memo, 0, mlen, 524288, out)
+  val () = put_char_v(out, 47)
+  val () = copy_to_builder_v(key, 0, 2, 524288, out)
+  val () = put_char_v(out, 47)
+  val () = copy_to_builder_v(key, 0, 64, 524288, out)
+in bput_v(out, suffix) end
+
+(* The same as a builder *)
+fn entry_path {lm,lk:agz}{sl:nat} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  key: !$A.borrow(byte, lk, 524288), suffix: string sl): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = entry_into(memo, mlen, key, suffix, b)
+in b end
+
+(* <work>/<leaf> appended: a path (no NUL) of the work directory *)
+fn work_text {l:agz}{sl:nat} (cfg: !$A.borrow(byte, l, 524288), w: settings, leaf: string sl): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, b)
+  val () = put_char_v(b, 47)
+  val () = bput_v(b, leaf)
+in b end
+
+(* The file's bytes read into dst; the length, ~1 when it cannot be read *)
+fn path_read {ld:agz} (b: $B.builder_v, dst: !$A.arr(byte, ld, 524288)): [k:int | ~1 <= k; k <= 524288] int k = let
+  var p = b
+  val () = put_char_v(p, 0)
+in read_file_text(p, dst) end
+
+(* Whether the 64 hex digits builder b holds are bv[at, at + 64) *)
+fn hex_is {l:agz} (b: $B.builder_v, bv: !$A.borrow(byte, l, 524288), n: xi, at: xi): bool = let
+  val @(ba, bn) = $B.to_arr(b)
+  val @(fz, bb) = $A.freeze<byte>(ba)
+  val r = (bn = 64 && same_range(bb, bn, 0, bv, n, at, 64, 0)): bool
+  val () = $A.drop<byte>(fz, bb)
+in ($A.free<byte>($A.thaw<byte>(fz)); r) end
+
+(* key + a line feed added to <work>/memo-used (the keys this run asked
+   for, which --prune keeps) *)
+fn used_add {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings, key: $B.builder_v): void = let
+  val ra = $A.alloc<byte>(524288): [l_ra:agz] $A.arr(byte, l_ra, 524288)
+  val n = path_read(work_text(cfg, w, "memo-used"), ra)
+  val @(fz, bv) = $A.freeze<byte>(ra)
+  var out : $B.builder_v = $B.create()
+  val () = (if n > 0 then copy_to_builder_v(bv, 0, n, 524288, out) else ())
+  val () = append_builder(out, key)
+  val () = put_char_v(out, 10)
+  val _ = path_write(work_text(cfg, w, "memo-used"), out)
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
+
+(* The key's text of the fixture, appended to t; false when a file of it
+   cannot be read. The current directory is the app. *)
+fn key_text {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen, t: !$B.builder_v >> $B.builder_v): bool = let
+  val () = bput_v(t, "bats-fixture-key 2\nmodule ")
+  val () = put_range(bv_f, 524288, 0, mlen, t)
+  val () = bput_v(t, "\nbefore ")
+  val a1 = path_sha(fixture_text(cfg, w, mv, a, e, "before"), t)
+  val () = bput_v(t, "\nsnippet ")
+  val a2 = path_sha(fixture_text(cfg, w, mv, a, e, "snippet.bats"), t)
+  val () = bput_v(t, "\nspliced ")
+  var mp : $B.builder_v = $B.create()
+  val () = put_range(bv_f, 524288, 0, mlen, mp)
+  val a3 = path_sha(mp, t)
+  val () = bput_v(t, "\ntoml ")
+  val a4 = path_sha(str_builder("bats.toml"), t)
+  val () = bput_v(t, "\nlock ")
+  val lq = str_builder("bats.lock")
+  val a6 = (if path_exists(str_builder("bats.lock")) then path_sha(lq, t)
+    else let
+      val () = $B.builder_free(lq)
+      val () = bput_v(t, "none")
+    in true end): bool
+  val () = bput_v(t, "\nstamp ")
+  val a5 = path_sha(str_builder("build/.bats_stamp"), t)
+  val () = put_char_v(t, 10)
+in a1 && a2 && a3 && a4 && a5 && a6 end
+
+(* Whether bv[0, n) ends with the text s *)
+fn ends_with_text {l:agz}{sl:nat} (bv: !$A.borrow(byte, l, 524288), n: tlen, s: string sl): bool = let
+  val k = g1u2i(string1_length(s))
+in (if n >= k then text_has(bv, n, n - k, s) else false) end
+
+(* build/<the module's path less its .bats><suffix> (the module's path must
+   end with .bats: the caller has seen it does) *)
+fn built_path {l:agz}{sl:nat} (bv: !$A.borrow(byte, l, 524288), n: tlen, suffix: string sl): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "build/")
+  val () = put_range(bv, 524288, 0, (if n >= 5 then n - 5 else 0), b)
+  val () = bput_v(b, suffix)
+in b end
+
+(* Lines from p of the key kb[0, len): each path that is not own1 or own2 is
+   appended to out with a line feed, up to the rule "--"; whether the rule
+   was reached *)
+fn put_path_line {l:agz}{len:nat | len <= 524288}{p:nat | p <= len}{e:nat | p <= e; e <= len}
+  (kb: !$A.borrow(byte, l, 524288), len: int len, p: int p, e: int e, own: bool,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if own then ()
+  else if e = p then ()
+  else let
+    val () = put_range(kb, len, p, e, out)
+  in put_char_v(out, 10) end
+
+fun list_paths {l:agz}{l1,l2:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
+  (kb: !$A.borrow(byte, l, 524288), len: int len, p: int p,
+   o1: !$A.borrow(byte, l1, 524288), n1: tlen, o2: !$A.borrow(byte, l2, 524288), n2: tlen,
+   out: !$B.builder_v >> $B.builder_v): bool = let
+  val e = line_end(kb, len, p, false)
+in
+  if e - p = 2 && text_has(kb, len, p, "--") then true
+  else let
+    val own = ((e - p = n1 && same_range(kb, len, p, o1, n1, 0, n1, 0))
+      || (e - p = n2 && same_range(kb, len, p, o2, n2, 0, n2, 0))): bool
+    val () = put_path_line(kb, len, p, e, own, out)
+  in
+    if e >= len then false else list_paths(kb, len, next_line(kb, len, e, false), o1, n1, o2, n2, out)
+  end
+end
+
+(* The closure the module's check reads, from its key in the base build
+   (build/<module>_dats.c.key), less the module's own .dats and .sats:
+   one path a line to <work>/memo.paths, its key to <work>/memo.closure,
+   and the module's interface line to <work>/memo.iface. false when any
+   of them cannot be had (the fixture is then not kept). The current
+   directory is the app, whose build is the base's. *)
+fn closure_state {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
+  bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen): bool =
+  if ~ends_with_text(bv_f, mlen, ".bats") then false
+  else let
+    val @(oda, odn) = $B.to_arr(built_path(bv_f, mlen, ".dats"))
+    val @(fz_od, bv_od) = $A.freeze<byte>(oda)
+    val @(osa, osn) = $B.to_arr(built_path(bv_f, mlen, ".sats"))
+    val @(fz_os, bv_os) = $A.freeze<byte>(osa)
+    val ka = $A.alloc<byte>(524288): [l_ka:agz] $A.arr(byte, l_ka, 524288)
+    val kn = path_read(built_path(bv_f, mlen, "_dats.c.key"), ka)
+    val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+    var lst : $B.builder_v = $B.create()
+    val knt = text_len(kn)
+    val l1 = line_end(bv_k, knt, 0, false)
+    val found = (if kn > 0 then
+        (if l1 < knt then let
+          val l2 = line_end(bv_k, knt, l1 + 1, false)
+        in (if l2 < knt then list_paths(bv_k, knt, l2 + 1, bv_od, odn, bv_os, osn, lst) else false) end
+        else false)
+      else false): bool
+    val lst2 = lst
+    val wrote_list = (if found then path_write(work_text(cfg, w, "memo.paths"), lst2)
+      else let val () = $B.builder_free(lst2) in false end): bool
+    val keyed = (if wrote_list then let
+        val la = nul_path(work_text(cfg, w, "memo.paths"))
+        val @(fz_l, bv_l) = $A.freeze<byte>(la)
+        val ca = nul_path(work_text(cfg, w, "memo.closure"))
+        val @(fz_c, bv_c) = $A.freeze<byte>(ca)
+        val r = closure_key_write(bv_l, bv_c)
+        val () = $A.drop<byte>(fz_l, bv_l)
+        val () = $A.free<byte>($A.thaw<byte>(fz_l))
+        val () = $A.drop<byte>(fz_c, bv_c)
+        val () = $A.free<byte>($A.thaw<byte>(fz_c))
+      in r end else false): bool
+    (* the interface line of the module's .sats *)
+    val ia = nul_path(built_path(bv_f, mlen, ".sats"))
+    val @(fz_i, bv_i) = $A.freeze<byte>(ia)
+    var iline : $B.builder_v = $B.create()
+    val hashed = (if keyed then memo_entry_hash(bv_i, iline) else false): bool
+    val iline2 = iline
+    val wrote_iface = (if hashed then path_write(work_text(cfg, w, "memo.iface"), iline2)
+      else let val () = $B.builder_free(iline2) in false end): bool
+    val () = $A.drop<byte>(fz_i, bv_i)
+    val () = $A.free<byte>($A.thaw<byte>(fz_i))
+    val () = $A.drop<byte>(fz_k, bv_k)
+    val () = $A.free<byte>($A.thaw<byte>(fz_k))
+    val () = $A.drop<byte>(fz_od, bv_od)
+    val () = $A.free<byte>($A.thaw<byte>(fz_od))
+    val () = $A.drop<byte>(fz_os, bv_os)
+    val () = $A.free<byte>($A.thaw<byte>(fz_os))
+  in wrote_iface end
+
+(* ---- the .res file ---- *)
+
+(* bats-fixture-result 2, the key, pass or log, the sha256 of the .key's
+   bytes (closure_hex, 64 digits), the log (none for a pass), and the sha256
+   of every byte before it; consumes closure_hex *)
+fn res_content {lk:agz}{ll:agz} (key: !$A.borrow(byte, lk, 524288), pass: bool, closure_hex: $B.builder_v,
+  lv: !$A.borrow(byte, ll, 524288), ln: tlen): $B.builder_v = let
+  var r : $B.builder_v = $B.create()
+  val () = bput_v(r, "bats-fixture-result 2\n")
+  val () = copy_to_builder_v(key, 0, 64, 524288, r)
+  val () = put_char_v(r, 10)
+  val () = (if pass then bput_v(r, "pass\n") else bput_v(r, "log\n"))
+  val () = append_builder(r, closure_hex)
+  val () = put_char_v(r, 10)
+  val () = (if pass then () else copy_to_builder_v(lv, 0, ln, 524288, r))
+  val @(ra, rn) = $B.to_arr(r)
+  val @(fz, bv) = $A.freeze<byte>(ra)
+  var sum : $B.builder_v = $B.create()
+  val () = put_sha_range(bv, 0, rn, sum)
+  var out : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv, 0, rn, 524288, out)
+  val () = append_builder(out, sum)
+  val () = put_char_v(out, 10)
+  val () = $A.drop<byte>(fz, bv)
+in ($A.free<byte>($A.thaw<byte>(fz)); out) end
+
+(* Where the closure's sha256 line starts in the .res rv[0, n) that is
+   whole (its first line, the key, the kind asked for, its sum right), else
+   ~1; the log is rv[that + 65, n - 65) *)
+fn res_check {l:agz}{lk:agz} (rv: !$A.borrow(byte, l, 524288), n: tlen,
+  key: !$A.borrow(byte, lk, 524288), is_accept: bool): [c:int] int c =
+  if n < 221 then ~1
+  else if ~text_has(rv, n, 0, "bats-fixture-result 2\n") then ~1
+  else if ~same_range(rv, n, 22, key, 64, 0, 64, 0) then ~1
+  else if byte_at(rv, n, 86) <> 10 then ~1
+  else let
+    val ok_kind = (if is_accept then text_has(rv, n, 87, "pass\n") else text_has(rv, n, 87, "log\n")): bool
+    val cl = (if is_accept then 92 else 91): [c:int] int c
+    val shaped = (ok_kind && byte_at(rv, n, cl + 64) = 10 && cl + 65 + 65 <= n
+      && byte_at(rv, n, n - 1) = 10 && (if is_accept then cl + 65 + 65 = n else true)): bool
+  in
+    if ~shaped then ~1
+    else let
+      var sum : $B.builder_v = $B.create()
+      val () = put_sha_range(rv, 0, n - 65, sum)
+    in (if hex_is(sum, rv, n, n - 65) then cl else ~1) end
+  end
+
+(* ---- the probe ---- *)
+
+(* Looks the fixture up in the memo at memo[0, mlen) under key[0, 64): 0 or
+   1 for a hit, the status the check would have had (<work>/check.log is
+   then the log it printed, check.seconds 0 and check.memo says hit); 100 for
+   a miss. In a cold run (cold) an entry that would have been served is
+   not: its result (pass or log, and the log) is kept in <work>/memo.prior
+   for the audit of the run's own result, and the answer is a miss. *)
+fn lookup {l:agz}{lm:agz}{lk:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
+  is_accept: bool, cold: bool, memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  key: !$A.borrow(byte, lk, 524288)): int = let
+  val ra = $A.alloc<byte>(524288): [l_ra:agz] $A.arr(byte, l_ra, 524288)
+  val marked = path_exists(memo_plus(memo, mlen, "/.bats-fixtures-memo"))
+  val rpath = entry_path(memo, mlen, key, ".res")
+  val rn0 = path_read(rpath, ra)
+  val rn = text_len(rn0)
+  val @(fz_r, bv_r) = $A.freeze<byte>(ra)
+  val cl = (if marked then (if rn0 >= 0 then res_check(bv_r, rn, key, is_accept) else ~1) else ~1): [c:int] int c
+  (* the .key is the one the .res names, and its files are as it says *)
+  val kpath = entry_path(memo, mlen, key, ".key")
+  var kh : $B.builder_v = $B.create()
+  val kdone = (if cl >= 0 then path_sha(kpath, kh) else let val () = $B.builder_free(kpath) in false end): bool
+  val kh2 = kh
+  val same_key = (if kdone then hex_is(kh2, bv_r, rn, cl) else let val () = $B.builder_free(kh2) in false end): bool
+  val kpath2 = entry_path(memo, mlen, key, ".key")
+  val fresh = (if same_key then let
+      val a = nul_path(kpath2)
+      val @(fz_a, bv_a) = $A.freeze<byte>(a)
+      val r = closure_key_equal(bv_a)
+      val () = $A.drop<byte>(fz_a, bv_a)
+      val () = $A.free<byte>($A.thaw<byte>(fz_a))
+    in r end else let val () = $B.builder_free(kpath2) in false end): bool
+  val status = (if fresh then let
+      var lb : $B.builder_v = $B.create()
+      val () = (if is_accept then () else copy_to_builder_v(bv_r, cl + 65, rn - 65, 524288, lb))
+      val lb2 = lb
+    in
+      if cold then let
+        var pr : $B.builder_v = $B.create()
+        val () = (if is_accept then bput_v(pr, "pass\n") else bput_v(pr, "log\n"))
+        val () = append_builder(pr, lb2)
+        val _ = path_write(work_text(cfg, w, "memo.prior"), pr)
+      in 100 end
+      else let
+        val _ = path_write(work_text(cfg, w, "check.log"), lb2)
+        val _ = path_write(work_text(cfg, w, "check.seconds"), str_builder("0\n"))
+        val _ = path_write(work_text(cfg, w, "check.memo"), str_builder("hit"))
+      in (if is_accept then 0 else 1) end
+    end else 100): int
+  val () = $A.drop<byte>(fz_r, bv_r)
+in ($A.free<byte>($A.thaw<byte>(fz_r)); status) end
+
+(* The probe, in the app (the current directory): 100 when the check must be
+   run; the memo's state for the store that follows is then in the work
+   directory *)
+fn probe_in {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen, is_accept: bool, cold: bool): int = let
+  var md0 : $B.builder_v = $B.create()
+  val have_dir = memo_dir_into(cfg, w, md0)
+  val md = md0
+in
+  (* what has no patsopt in it is checked first, as a check does it: a
+     project that is refused there is not served from the memo *)
+  if ~have_dir then let val () = $B.builder_free(md) in 100 end
+  else if ~validate_clean() then let val () = $B.builder_free(md) in 100 end
+  else let
+    var t0 : $B.builder_v = $B.create()
+    val ok = key_text(cfg, w, mv, a, e, bv_f, mlen, t0)
+    val t = t0
+  in
+    if ~ok then let
+      val () = $B.builder_free(t)
+      val () = $B.builder_free(md)
+    in 100 end
+    else let
+      val @(ta, tn) = $B.to_arr(t)
+      val @(fz_t, bv_t) = $A.freeze<byte>(ta)
+      var kh : $B.builder_v = $B.create()
+      val () = put_sha_range(bv_t, 0, tn, kh)
+      val @(ka, kn) = $B.to_arr(kh)
+      val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+      var kc : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(bv_k, 0, 64, 524288, kc)
+      val () = put_char_v(kc, 10)
+      val _ = path_write(work_text(cfg, w, "memo.key"), kc)
+      var ku : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(bv_k, 0, 64, 524288, ku)
+      val () = used_add(cfg, w, ku)
+      val @(ma, mn) = $B.to_arr(md)
+      val @(fz_m, bv_m) = $A.freeze<byte>(ma)
+      val st = lookup(cfg, w, is_accept, cold, bv_m, mn, bv_k)
+      (* a miss: the closure the check will read, as the base has it *)
+      val st2 = (if st = 100 then let
+          val kept = closure_state(cfg, w, bv_f, mlen)
+          val _ = (if kept then true else path_write(work_text(cfg, w, "memo.nostore"), str_builder("no")))
+        in 100 end else st): int
+      val () = $A.drop<byte>(fz_m, bv_m)
+      val () = $A.free<byte>($A.thaw<byte>(fz_m))
+      val () = $A.drop<byte>(fz_k, bv_k)
+      val () = $A.free<byte>($A.thaw<byte>(fz_k))
+      val () = $A.drop<byte>(fz_t, bv_t)
+      val () = $A.free<byte>($A.thaw<byte>(fz_t))
+    in st2 end
+  end
+end
+
+(* The state of the last fixture removed *)
+fn memo_clear {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): void = let
+  val () = path_remove(work_text(cfg, w, "check.log"))
+  val () = path_remove(work_text(cfg, w, "check.seconds"))
+  val () = path_remove(work_text(cfg, w, "check.memo"))
+  val () = path_remove(work_text(cfg, w, "check.stale"))
+  val () = path_remove(work_text(cfg, w, "memo.key"))
+  val () = path_remove(work_text(cfg, w, "memo.prior"))
+  val () = path_remove(work_text(cfg, w, "memo.nostore"))
+  val () = path_remove(work_text(cfg, w, "memo.paths"))
+  val () = path_remove(work_text(cfg, w, "memo.closure"))
+in path_remove(work_text(cfg, w, "memo.iface")) end
+
+(* Looks the fixture up (the snippet is already in the app's module): 100 when
+   the check must be run, else the check's status, served from the memo *)
+fn memo_probe {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen, is_accept: bool): int = let
+  val () = memo_clear(cfg, w)
+  var here0 : $B.builder_v = $B.create()
+  val () = cwd_into(here0)
+  val here = here0
+  var back0 : $B.builder_v = $B.create()
+  val () = cwd_into(back0)
+  val back = back0
+  var app0 : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, app0)
+  val () = bput_v(app0, "/app")
+  val app = app0
+  val known = ($B.length(here) > 0): bool
+  val inside = (if known then chdir_path(app) else let val () = $B.builder_free(app) in false end): bool
+  val () = $B.builder_free(here)
+  val cold = (w.cold <> 0 || is_cold()): bool
+  val r = (if inside then probe_in(cfg, w, mv, a, e, bv_f, mlen, is_accept, cold) else 100): int
+  val _ = (if inside then chdir_path(back) else let val () = $B.builder_free(back) in false end)
+in r end
+
+(* ---- the store ---- *)
+
+(* Whether the snippet names a file to load (load, include, #use or
+   #require anywhere in it): it reads a file the closure of the base
+   module does not name *)
+fn snippet_loads {l:agz}{lm:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e): bool = let
+  val sa = $A.alloc<byte>(524288): [l_sa:agz] $A.arr(byte, l_sa, 524288)
+  val sn0 = read_file_text(fixture_path(cfg, w, mv, a, e, "snippet.bats"), sa)
+  val sn = text_len(sn0)
+  val @(fz, bv) = $A.freeze<byte>(sa)
+  val loads = (sn0 < 0 || find_text_from(bv, sn, 0, "load") || find_text_from(bv, sn, 0, "include")
+    || find_text_from(bv, sn, 0, "#use") || find_text_from(bv, sn, 0, "#require")): bool
+  val () = $A.drop<byte>(fz, bv)
+in ($A.free<byte>($A.thaw<byte>(fz)); loads) end
+
+(* bv[i, stop) appended to out with / written %: the name a digest is kept
+   under in build/.bats_dg *)
+fun put_flat {l:agz}{len:nat | len <= 524288}{i:nat | i <= len} .<len - i>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, i: int i, stop: int,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if i >= len then ()
+  else if i >= stop then ()
+  else let
+    val c = byte_at(bv, len, i)
+    val () = put_char_v(out, (if c = 47 then 37 else c))
+  in put_flat(bv, len, i + 1, stop, out) end
+
+(* Whether the module's interface line, as it is now, is the one the probe
+   kept in <work>/memo.iface: the kept digest of the .sats is dropped
+   first, so it is not the one the base build had *)
+fn iface_same {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
+  bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen): bool = let
+  var dg : $B.builder_v = $B.create()
+  val () = bput_v(dg, "build/.bats_dg/build%")
+  val () = put_flat(bv_f, mlen, 0, mlen - 5, dg)
+  val () = bput_v(dg, ".sats")
+  val () = path_remove(dg)
+  val ia = nul_path(built_path(bv_f, mlen, ".sats"))
+  val @(fz_i, bv_i) = $A.freeze<byte>(ia)
+  var cur : $B.builder_v = $B.create()
+  val ok = memo_entry_hash(bv_i, cur)
+  val ka = $A.alloc<byte>(524288): [l_ka:agz] $A.arr(byte, l_ka, 524288)
+  val kn = path_read(work_text(cfg, w, "memo.iface"), ka)
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  val @(ca, cn) = $B.to_arr(cur)
+  val @(fz_c, bv_c) = $A.freeze<byte>(ca)
+  val same = (ok && kn > 0 && cn = kn && same_range(bv_c, cn, 0, bv_k, kn, 0, cn, 0)): bool
+  val () = $A.drop<byte>(fz_c, bv_c)
+  val () = $A.free<byte>($A.thaw<byte>(fz_c))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  val () = $A.drop<byte>(fz_i, bv_i)
+in ($A.free<byte>($A.thaw<byte>(fz_i)); same) end
+
+(* Whether the memo at the absolute path memo can be written to: it holds
+   the mark, or it is empty or not there yet (then it is made and marked).
+   A directory that holds anything else is not a memo. *)
+fn memo_ready {lm:agz} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen): bool =
+  if path_exists(memo_plus(memo, mlen, "/.bats-fixtures-memo")) then true
+  else let
+    (* how many entries the directory has, . and .. included: ~1 when it is not there *)
+    val da = nul_path(memo_plus(memo, mlen, ""))
+    val @(fz_d, bv_d) = $A.freeze<byte>(da)
+    val held = (case+ $F.dir_read(bv_d, 524288) of
+      | ~$R.err(_) => ~1
+      | ~$R.ok(es) => let
+          val n = $F.entries_count(es)
+          val () = $F.entries_free(es)
+        in n end): int
+    val () = $A.drop<byte>(fz_d, bv_d)
+    val () = $A.free<byte>($A.thaw<byte>(fz_d))
+  in
+    if held > 2 then false
+    else let
+      val () = (if held < 0 then mkdir_p(memo_plus(memo, mlen, "")) else ())
+    in path_write(memo_plus(memo, mlen, "/.bats-fixtures-memo"), str_builder("bats-fixture-memo 2\n")) end
+  end
+
+(* <memo>/<2 hex of key>, made and marked when it is not: whether it can
+   be written to *)
+fn memo_subdir {lm:agz}{lk:agz} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  key: !$A.borrow(byte, lk, 524288)): bool = let
+  val () = path_mkdir(memo_sub_plus(memo, mlen, key, ""))
+in
+  if path_exists(memo_sub_plus(memo, mlen, key, "/.memo-dir")) then true
+  else path_write(memo_sub_plus(memo, mlen, key, "/.memo-dir"), str_builder("bats-fixture-memo 2\n"))
+end
+
+(* The audit of a cold run against the entry that would have been served
+   (<work>/memo.prior, its kind and its log): when the run's own result is
+   not what the entry says, the entry is dropped and <work>/check.stale
+   says so; whether it did *)
+fn audit {l:agz}{lm:agz}{lk:agz}{ln:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
+  want_pass: bool, want_log: bool, nv: !$A.borrow(byte, ln, 524288), nn: tlen, status: int,
+  memo: !$A.borrow(byte, lm, 524288), mlen: tlen, key: !$A.borrow(byte, lk, 524288)): bool = let
+  val pa = $A.alloc<byte>(524288): [l_pa:agz] $A.arr(byte, l_pa, 524288)
+  val pn0 = path_read(work_text(cfg, w, "memo.prior"), pa)
+  val pn = text_len(pn0)
+  val @(fz, pv) = $A.freeze<byte>(pa)
+  val prior_pass = (pn0 >= 0 && text_has(pv, pn, 0, "pass\n")): bool
+  val log_at = (if prior_pass then 5 else 4): [a:int] int a
+  val same_log = (want_log && nn = pn - log_at && same_range(pv, pn, log_at, nv, nn, 0, nn, 0)): bool
+  val stale = (pn0 >= 0 && (if prior_pass then ~want_pass else ~same_log)): bool
+  val () = (if stale then let
+      var m : $B.builder_v = $B.create()
+      val () = bput_v(m, "STALE MEMO: ")
+      val () = (if prior_pass then let
+          val () = bput_v(m, "the memo says the check passes, the cold run's status is ")
+        in put_int_v(m, status) end
+        else if ~want_log then let
+          val () = bput_v(m, "the memo holds the log of a check that fails, the cold run's status is ")
+        in put_int_v(m, status) end
+        else bput_v(m, "the log the memo holds is not the cold run's"))
+      val () = bput_v(m, " (key ")
+      val () = copy_to_builder_v(key, 0, 64, 524288, m)
+      val () = bput_v(m, ")\n")
+      val _ = path_write(work_text(cfg, w, "check.stale"), m)
+      val () = path_remove(entry_path(memo, mlen, key, ".res"))
+    in path_remove(entry_path(memo, mlen, key, ".key")) end else ())
+  val () = $A.drop<byte>(fz, pv)
+in ($A.free<byte>($A.thaw<byte>(fz)); stale) end
+
+(* The store, in the app (the current directory): what the check just run
+   said is audited (a cold run) and kept *)
+fn store_in {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen, is_accept: bool, status: int): void = let
+  val ka = $A.alloc<byte>(524288): [l_ka:agz] $A.arr(byte, l_ka, 524288)
+  val kn = path_read(work_text(cfg, w, "memo.key"), ka)
+  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  var md : $B.builder_v = $B.create()
+  val have_dir = memo_dir_into(cfg, w, md)
+  val @(ma, mn) = $B.to_arr(md)
+  val @(fz_m, bv_m) = $A.freeze<byte>(ma)
+  (* the log the check printed, as it is kept *)
+  val la = $A.alloc<byte>(524288): [l_la:agz] $A.arr(byte, l_la, 524288)
+  val ln0 = read_file_text(log_path(cfg, w), la)
+  val ln = text_len(ln0)
+  val @(fz_l, bv_l) = $A.freeze<byte>(la)
+  val want_pass = (is_accept && status = 0): bool
+  val want_log0 = (~is_accept && status = 1 && ln0 > 0 && has_error_from(bv_l, ln, 0)): bool
+  var pb : $B.builder_v = $B.create()
+  val () = cwd_into(pb)
+  val () = put_char_v(pb, 47)
+  val @(pa, pn) = $B.to_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  var nb : $B.builder_v = $B.create()
+  val () = (if want_log0 then normalize_from(bv_l, ln, 0, bv_p, pn, nb) else ())
+  val @(na, nn) = $B.to_arr(nb)
+  val @(fz_n, bv_n) = $A.freeze<byte>(na)
+  (* a log is kept when it leaves room in an entry *)
+  val want_log = (want_log0 && nn <= 262144): bool
+  val usable = (kn >= 64 && have_dir): bool
+  val stale = (if usable then audit(cfg, w, want_pass, want_log, bv_n, nn, status, bv_m, mn, bv_k) else false): bool
+  val keep = (usable && (want_pass || want_log)): bool
+  val clean = (if keep then
+      (~path_exists(work_text(cfg, w, "memo.nostore")) && ~snippet_loads(cfg, w, mv, a, e)
+        && iface_same(cfg, w, bv_f, mlen) && memo_ready(bv_m, mn) && memo_subdir(bv_m, mn, bv_k))
+    else false): bool
+  val () = (if clean then let
+      (* the closure's key, then the result that names it *)
+      val ca = $A.alloc<byte>(524288): [l_ca:agz] $A.arr(byte, l_ca, 524288)
+      val cn = path_read(work_text(cfg, w, "memo.closure"), ca)
+      val @(fz_c, bv_c) = $A.freeze<byte>(ca)
+      var kb : $B.builder_v = $B.create()
+      val () = (if cn > 0 then copy_to_builder_v(bv_c, 0, cn, 524288, kb) else ())
+      val kb2 = kb
+      val wrote_key = (if cn > 0 then path_write(entry_path(bv_m, mn, bv_k, ".key"), kb2)
+        else let val () = $B.builder_free(kb2) in false end): bool
+      var ch : $B.builder_v = $B.create()
+      val hashed = (if wrote_key then path_sha(entry_path(bv_m, mn, bv_k, ".key"), ch) else false): bool
+      val ch2 = ch
+      val () = (if hashed then let
+          val res = res_content(bv_k, want_pass, ch2, bv_n, nn)
+          val _ = path_write(entry_path(bv_m, mn, bv_k, ".res"), res)
+        in () end
+        else $B.builder_free(ch2))
+      val () = $A.drop<byte>(fz_c, bv_c)
+    in $A.free<byte>($A.thaw<byte>(fz_c)) end else ())
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+  val () = $A.drop<byte>(fz_m, bv_m)
+  val () = $A.free<byte>($A.thaw<byte>(fz_m))
+in ($A.drop<byte>(fz_k, bv_k); $A.free<byte>($A.thaw<byte>(fz_k))) end
+
+(* The store: the app is the current directory while it runs *)
+fn memo_store {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen, is_accept: bool, status: int): void = let
+  var here0 : $B.builder_v = $B.create()
+  val () = cwd_into(here0)
+  val here = here0
+  var back0 : $B.builder_v = $B.create()
+  val () = cwd_into(back0)
+  val back = back0
+  var app0 : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, app0)
+  val () = bput_v(app0, "/app")
+  val app = app0
+  val known = ($B.length(here) > 0): bool
+  val inside = (if known then chdir_path(app) else let val () = $B.builder_free(app) in false end): bool
+  val () = $B.builder_free(here)
+  val () = (if inside then store_in(cfg, w, mv, a, e, bv_f, mlen, is_accept, status) else ())
+  val _ = (if inside then chdir_path(back) else let val () = $B.builder_free(back) in false end)
+in end
+
+(* ---- --prune ---- *)
+
+fn is_hex_byte (c: int): bool = (c >= 48 && c <= 57) || (c >= 97 && c <= 102)
+
+(* name[0, k) appended to out *)
+fun name_copy {l:agz}{j:nat | j <= 1024} .<1024 - j>.
+  (name: !$A.arr(byte, l, 1024), j: int j, k: int, out: !$B.builder_v >> $B.builder_v): void =
+  if j >= 1024 then ()
+  else if j >= k then ()
+  else let
+    val () = put_char_v(out, byte2int0($A.get<byte>(name, j)))
+  in name_copy(name, j + 1, k, out) end
+
+(* Whether bv[0, len) is 64 hex digits then the suffix s *)
+fun hex_run {l:agz}{len:nat | len <= 524288}{i:nat | i <= 64} .<64 - i>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, i: int i): bool =
+  if i >= 64 then true
+  else if is_hex_byte(byte_at(bv, len, i)) then hex_run(bv, len, i + 1)
+  else false
+
+(* Whether the 64 hex digits at nv[0, 64) are a line of the used keys uv[p, un) *)
+fun key_used {l:agz}{ln:agz}{un:nat | un <= 524288}{p:nat | p <= un} .<un - p>.
+  (uv: !$A.borrow(byte, l, 524288), un: int un, p: int p, nv: !$A.borrow(byte, ln, 524288), nlen: tlen): bool =
+  if p + 64 > un then false
+  else if same_range(uv, un, p, nv, nlen, 0, 64, 0) then true
+  else key_used(uv, un, p + 1, nv, nlen)
+
+val g_pruned = ref<int>(0)
+val g_kept = ref<int>(0)
+
+(* Entry i of es, its name appended to out *)
+fn entry_name_into {n:nat}{i:nat | i < n} (es: !$F.entries(n), i: int i, out: !$B.builder_v >> $B.builder_v): void = let
+  val name = $A.alloc<byte>(1024)
+  val k = $F.entries_name(es, i, name, 1024)
+  val () = name_copy(name, 0, k, out)
+in $A.free<byte>(name) end
+
+(* The files of a two-digit directory dir[0, dlen) of the memo (an
+   absolute path, marked): each key file or result whose key is not among
+   the used keys uv[0, un) is removed and said; removed and kept are counted
+   in the cells *)
+fun prune_files {n:nat}{i:nat | i <= n}{ld,lu:agz}{un:nat | un <= 524288} .<n - i>.
+  (es: !$F.entries(n), n: int n, i: int i, dir: !$A.borrow(byte, ld, 524288), dlen: tlen,
+   uv: !$A.borrow(byte, lu, 524288), un: int un): void =
+  if i >= n then ()
+  else let
+    var nb : $B.builder_v = $B.create()
+    val () = entry_name_into(es, i, nb)
+    val @(na, nn) = $B.to_arr(nb)
+    val @(fz_n, bv_n) = $A.freeze<byte>(na)
+    (* <64 hex>.key or <64 hex>.res *)
+    val shaped = (nn = 68 && hex_run(bv_n, nn, 0)
+      && (text_has(bv_n, nn, 64, ".key") || text_has(bv_n, nn, 64, ".res"))): bool
+    val used = (if shaped then key_used(uv, un, 0, bv_n, nn) else true): bool
+    val () = (if shaped then (if used then !g_kept := !g_kept + 1 else let
+        var rm : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(dir, 0, dlen, 524288, rm)
+        val () = put_char_v(rm, 47)
+        val () = copy_to_builder_v(bv_n, 0, nn, 524288, rm)
+        val () = path_remove(rm)
+        val () = !g_pruned := !g_pruned + 1
+        val () = print! ("pruned ")
+        val () = print_borrow(dir, (if dlen >= 2 then dlen - 2 else 0), dlen, 524288)
+        val () = print! ("/")
+        val () = print_borrow(bv_n, 0, nn, 524288)
+      in println! () end) else ())
+    val () = $A.drop<byte>(fz_n, bv_n)
+    val () = $A.free<byte>($A.thaw<byte>(fz_n))
+  in prune_files(es, n, i + 1, dir, dlen, uv, un) end
+
+(* <memo>/<the two bytes of name><tail> as a builder *)
+fn memo_sub2 {lm,ln:agz}{sl:nat} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  name: !$A.borrow(byte, ln, 524288), tail: string sl): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(memo, 0, mlen, 524288, b)
+  val () = put_char_v(b, 47)
+  val () = copy_to_builder_v(name, 0, 2, 524288, b)
+  val () = bput_v(b, tail)
+in b end
+
+(* Whether <memo>/<name> is a directory of the memo itself and not a link to
+   one elsewhere: the physical path the process stands in after a chdir into
+   it (getcwd resolves links) is the memo's own physical path, a slash and the
+   name. The file package lists names and gives no type, so this is how a
+   link is told from a directory. The process is back where it was after *)
+fn physical_sub {lm,ln:agz} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  name: !$A.borrow(byte, ln, 524288)): bool = let
+  var home : $B.builder_v = $B.create()
+  val () = cwd_into(home)
+  val in_memo = chdir_path(memo_plus(memo, mlen, ""))
+  var pa : $B.builder_v = $B.create()
+  val () = cwd_into(pa)
+  val in_sub = chdir_path(memo_sub2(memo, mlen, name, ""))
+  var pb : $B.builder_v = $B.create()
+  val () = cwd_into(pb)
+  val _ = chdir_path(home)
+  val @(aa, an) = $B.to_arr(pa)
+  val @(fz_a, bv_a) = $A.freeze<byte>(aa)
+  val @(ba, bn) = $B.to_arr(pb)
+  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+  val plain = (in_memo && in_sub && an > 0 && bn = an + 3 && byte_at(bv_b, bn, an) = 47
+    && byte_at(bv_b, bn, an + 1) = byte_at(name, 2, 0) && byte_at(bv_b, bn, an + 2) = byte_at(name, 2, 1)
+    && same_range(bv_a, an, 0, bv_b, bn, 0, an, 0)): bool
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+  val () = $A.drop<byte>(fz_b, bv_b)
+in ($A.free<byte>($A.thaw<byte>(fz_b)); plain) end
+
+(* The directories of the memo named by two hex digits, each that holds the
+   memo's mark in turn *)
+fun prune_dirs {n:nat}{i:nat | i <= n}{lm,lu:agz}{un:nat | un <= 524288} .<n - i>.
+  (es: !$F.entries(n), n: int n, i: int i, memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+   uv: !$A.borrow(byte, lu, 524288), un: int un): void =
+  if i >= n then ()
+  else let
+    var nb : $B.builder_v = $B.create()
+    val () = entry_name_into(es, i, nb)
+    val @(na, nn) = $B.to_arr(nb)
+    val @(fz_n, bv_n) = $A.freeze<byte>(na)
+    val two = (nn = 2 && is_hex_byte(byte_at(bv_n, nn, 0)) && is_hex_byte(byte_at(bv_n, nn, 1))): bool
+    val () = (if two then let
+        val d1 = memo_sub2(memo, mlen, bv_n, "")
+        val dmarked = (path_exists(memo_sub2(memo, mlen, bv_n, "/.memo-dir")) && physical_sub(memo, mlen, bv_n)): bool
+      in
+        if dmarked then let
+          val @(da, dn) = $B.to_arr(d1)
+          val @(fz_d, bv_d) = $A.freeze<byte>(da)
+          val dp = nul_path(memo_sub2(memo, mlen, bv_n, ""))
+          val @(fz_p, bv_p) = $A.freeze<byte>(dp)
+          val () = (case+ $F.dir_read(bv_p, 524288) of
+            | ~$R.err(_) => ()
+            | ~$R.ok(fes) => let
+                val () = prune_files(fes, $F.entries_count(fes), 0, bv_d, dn, uv, un)
+              in $F.entries_free(fes) end)
+          val () = $A.drop<byte>(fz_p, bv_p)
+          val () = $A.free<byte>($A.thaw<byte>(fz_p))
+          val () = $A.drop<byte>(fz_d, bv_d)
+        in $A.free<byte>($A.thaw<byte>(fz_d)) end
+        else $B.builder_free(d1)
+      end else ())
+    val () = $A.drop<byte>(fz_n, bv_n)
+    val () = $A.free<byte>($A.thaw<byte>(fz_n))
+  in prune_dirs(es, n, i + 1, memo, mlen, uv, un) end
+
+(* Removes from the memo the files of the keys no fixture of this run asked
+   for, saying each; only in a directory that holds the memo's mark, only in
+   its two-digit directories that hold theirs, only files named by a key
+   (rm -f of a name, never through a directory) *)
+fn memo_prune {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): void = let
+  var md : $B.builder_v = $B.create()
+  val have_dir = memo_dir_into(cfg, w, md)
+  val @(ma, mn) = $B.to_arr(md)
+  val @(fz_m, bv_m) = $A.freeze<byte>(ma)
+  val marked = (have_dir && path_exists(memo_plus(bv_m, mn, "/.bats-fixtures-memo"))): bool
+  val ua = $A.alloc<byte>(524288): [l_ua:agz] $A.arr(byte, l_ua, 524288)
+  val un0 = path_read(work_text(cfg, w, "memo-used"), ua)
+  val un = text_len(un0)
+  val @(fz_u, bv_u) = $A.freeze<byte>(ua)
+  val () = (if ~marked then let
+      val () = print! ("memo: nothing pruned, ")
+      val () = print_borrow(bv_m, 0, mn, 524288)
+    in println! (" is not a fixtures memo") end
+    else let
+      val () = !g_pruned := 0
+      val () = !g_kept := 0
+      val da = nul_path(memo_plus(bv_m, mn, ""))
+      val @(fz_d, bv_d) = $A.freeze<byte>(da)
+      val () = (case+ $F.dir_read(bv_d, 524288) of
+        | ~$R.err(_) => ()
+        | ~$R.ok(es) => let
+            val () = prune_dirs(es, $F.entries_count(es), 0, bv_m, mn, bv_u, un)
+          in $F.entries_free(es) end)
+      val () = $A.drop<byte>(fz_d, bv_d)
+      val () = $A.free<byte>($A.thaw<byte>(fz_d))
+    in println! ("memo: pruned ", !g_pruned, " files, kept ", !g_kept) end)
+  val () = $A.drop<byte>(fz_u, bv_u)
+  val () = $A.free<byte>($A.thaw<byte>(fz_u))
+  val () = $A.drop<byte>(fz_m, bv_m)
+in $A.free<byte>($A.thaw<byte>(fz_m)) end
 
 (* Runs bats check in <work>/app with its output in <work>/check.log and the
    seconds it took in <work>/check.seconds: the exit status of the check *)
@@ -859,28 +1852,6 @@ in
   run_sh("app=$1; prog=$2; repo=$3; log=$4; secs=$5; proj=$6; case $prog in */*) prog=$(cd \"$(dirname \"$prog\")\" && pwd)/$(basename \"$prog\") ;; esac; case $log in /*) ;; *) log=$PWD/$log ;; esac; case $secs in /*) ;; *) secs=$PWD/$secs ;; esac; case $repo in ''|/*) ;; *) repo=$PWD/$repo ;; esac; if [ -z \"${GIT_DIR:-}\" ]; then g=$(git -C \"$proj\" rev-parse --absolute-git-dir 2>/dev/null) && GIT_DIR=$g && export GIT_DIR; fi; s=$(date +%s); cd \"$app\" || exit 98; if [ -n \"$repo\" ]; then \"$prog\" check --repository \"$repo\"; else \"$prog\" check; fi > \"$log\" 2>&1; rc=$?; echo $(( $(date +%s) - s )) > \"$secs\"; exit $rc",
     $L.list_vt_cons(mk_arg(app), $L.list_vt_cons(cfg_arg(cfg, w.program), $L.list_vt_cons(mk_arg(repository),
     $L.list_vt_cons(mk_arg(log), $L.list_vt_cons(mk_arg(secs), $L.list_vt_cons(mk_arg(project), $L.list_vt_nil())))))))
-end
-
-(* Keeps the result of the check just run in the memo, and audits the memo
-   in a cold run (the script's store) *)
-fn memo_store {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
-  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
-   bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, is_accept: bool, status: int): int = let
-  var work : $B.builder_v = $B.create()
-  val () = put_cfg(cfg, w.work, work)
-  var module : $B.builder_v = $B.create()
-  val () = put_range(bv_m, 524288, 0, mlen, module)
-  var kind : $B.builder_v = $B.create()
-  val () = (if is_accept then bput_v(kind, "accept") else bput_v(kind, "reject"))
-  var st : $B.builder_v = $B.create()
-  val () = put_int_v(st, status)
-  val snippet = fixture_text(cfg, w, mv, a, e, "snippet.bats")
-  var cold : $B.builder_v = $B.create()
-  val () = put_int_v(cold, w.cold)
-in
-  run_sh("sh \"$1/memo.sh\" store \"$@\"",
-    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(kind),
-    $L.list_vt_cons(mk_arg(st), $L.list_vt_cons(mk_arg(snippet), $L.list_vt_cons(mk_arg(cold), $L.list_vt_nil())))))))
 end
 
 (* The build and the module of <work>/app as the base check left them: the
@@ -1046,12 +2017,14 @@ in
       val () = $A.free<byte>($A.thaw<byte>(fz_p))
       (* put the snippet in and ask the memo; on a miss run the check and
          keep what it said; then read what it said *)
-      val probed = memo_probe(cfg, w, mv, a, e, bv_f, mlen, at, is_accept)
+      val () = memo_clear(cfg, w)
+      val spliced = splice_snippet(cfg, w, mv, a, e, bv_f, mlen, at)
+      val probed = (if spliced = 0 then memo_probe(cfg, w, mv, a, e, bv_f, mlen, is_accept) else spliced): int
       val hit = (probed = 0 || probed = 1): bool
       val rc = (if hit then probed
         else if probed = 100 then let
           val ran = run_check(cfg, w)
-          val _ = memo_store(cfg, w, mv, a, e, bv_f, mlen, is_accept, ran)
+          val () = memo_store(cfg, w, mv, a, e, bv_f, mlen, is_accept, ran)
         in ran end
         else probed): int
       val elapsed = read_elapsed(cfg, w)
@@ -1332,291 +2305,6 @@ fn usage (): void = let
   val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]\n")
 in set_exit_code(2) end
 
-(* BEGIN fixtures-memo.sh *)
-fn put_memo_script (out: !$B.builder_v >> $B.builder_v): void = let
-  val () = bput_v(out, "#!/bin/sh\n")
-  val () = bput_v(out, "# The memo of bats fixtures (bats-lang/bats#267, item 4b), run by it as\n")
-  val () = bput_v(out, "#   sh memo.sh probe <work> <module> <kind> <snippet> <before> <at> <memo> <cold>\n")
-  val () = bput_v(out, "#   sh memo.sh store <work> <module> <kind> <status> <snippet> <cold>\n")
-  val () = bput_v(out, "#   sh memo.sh prune <work> <memo>\n")
-  val () = bput_v(out, "# No time is read anywhere in it: an entry is trusted when the digests of the\n")
-  val () = bput_v(out, "# files it names, and a checksum of its own bytes, are those it holds.\n")
-  val () = bput_v(out, "LC_ALL=C\n")
-  val () = bput_v(out, "export LC_ALL\n")
-  val () = bput_v(out, "if command -v sha256sum >/dev/null 2>&1; then\n")
-  val () = bput_v(out, "  digest() { sha256sum | cut -d' ' -f1; }\n")
-  val () = bput_v(out, "else\n")
-  val () = bput_v(out, "  digest() { shasum -a 256 | cut -d' ' -f1; }\n")
-  val () = bput_v(out, "fi\n")
-  val () = bput_v(out, "# A file as the memo knows it: a .sats by its interface (its text with each\n")
-  val () = bput_v(out, "# run of line feeds as one, as bats's own check memo takes it), unless it\n")
-  val () = bput_v(out, "# has a line with an odd number of quotes (a string may run over lines, or\n")
-  val () = bput_v(out, "# a quote is in a comment) or a C block (%{), where a line feed may be part\n")
-  val () = bput_v(out, "# of what it says, then as it is. A file that is not there is\n")
-  val () = bput_v(out, "# MISSING.\n")
-  val () = bput_v(out, "file_digest() {\n")
-  val () = bput_v(out, "  if [ ! -f \"$1\" ]; then echo MISSING; return 0; fi\n")
-  val () = bput_v(out, "  case $1 in\n")
-  val () = bput_v(out, "    *.sats)\n")
-  val () = bput_v(out, "      if awk '{ l = $0; gsub(/\\\\\"/, \"\", l); gsub(/\\047\"\\047/, \"\", l); if (gsub(/\"/, \"\", l) % 2 == 1) bad = 1 } /%\\{/ { bad = 1 } END { exit bad }' \"$1\"\n")
-  val () = bput_v(out, "      then echo \"C $(tr -s '\\n' < \"$1\" | digest)\"\n")
-  val () = bput_v(out, "      else echo \"R $(digest < \"$1\")\"; fi ;;\n")
-  val () = bput_v(out, "    *) echo \"R $(digest < \"$1\")\" ;;\n")
-  val () = bput_v(out, "  esac\n")
-  val () = bput_v(out, "}\n")
-  val () = bput_v(out, "# The names patsopt might have read instead of a file it did read: the\n")
-  val () = bput_v(out, "# .sats and .hats of build/ (not the stashes' nor the digests' kept there),\n")
-  val () = bput_v(out, "# and the .bats of src and bats_modules (which bats checks the whole of\n")
-  val () = bput_v(out, "# before patsopt runs)\n")
-  val () = bput_v(out, "names_of() {\n")
-  val () = bput_v(out, "  (cd \"$1\" && {\n")
-  val () = bput_v(out, "    find build \\( -path build/.stash -o -path build/.bats_dg \\) -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print\n")
-  val () = bput_v(out, "    find src bats_modules -type f -name '*.bats' -print 2>/dev/null\n")
-  val () = bput_v(out, "  } | sort | digest)\n")
-  val () = bput_v(out, "}\n")
-  val () = bput_v(out, "# --memo, else BATS_MEMO_DIR, else the user's cache; empty when there is none\n")
-  val () = bput_v(out, "memo_dir() {\n")
-  val () = bput_v(out, "  if [ -n \"$1\" ]; then echo \"$1\"\n")
-  val () = bput_v(out, "  elif [ -n \"${BATS_MEMO_DIR:-}\" ]; then echo \"$BATS_MEMO_DIR\"\n")
-  val () = bput_v(out, "  elif [ -n \"${XDG_CACHE_HOME:-}\" ]; then echo \"$XDG_CACHE_HOME/bats/fixtures\"\n")
-  val () = bput_v(out, "  elif [ -n \"${HOME:-}\" ]; then echo \"$HOME/.cache/bats/fixtures\"\n")
-  val () = bput_v(out, "  fi\n")
-  val () = bput_v(out, "}\n")
-  val () = bput_v(out, "# A log as it is kept: the work directory's path as /app/, the line a\n")
-  val () = bput_v(out, "# waiting bats says dropped, a line feed at the end\n")
-  val () = bput_v(out, "normalize() {\n")
-  val () = bput_v(out, "  PHYS=$(cd \"$1\" && pwd -P) LOGI=$(cd \"$1\" && pwd) awk '\n")
-  val () = bput_v(out, "    BEGIN { n = 0; v[n++] = ENVIRON[\"PHYS\"] \"/\"; if (ENVIRON[\"LOGI\"] != ENVIRON[\"PHYS\"]) v[n++] = ENVIRON[\"LOGI\"] \"/\" }\n")
-  val () = bput_v(out, "    /^waiting for another bats/ { next }\n")
-  val () = bput_v(out, "    /^warning: the ATS2 in / { next }\n")
-  val () = bput_v(out, "    { s = $0; for (k = 0; k < n; k++) { out = \"\"; while ((i = index(s, v[k])) > 0) { out = out substr(s, 1, i - 1) \"/app/\"; s = substr(s, i + length(v[k])) } s = out s }\n")
-  val () = bput_v(out, "      print s }'\n")
-  val () = bput_v(out, "}\n")
-  val () = bput_v(out, "cold_wanted() {\n")
-  val () = bput_v(out, "  if [ \"$1\" = 1 ]; then echo 1\n")
-  val () = bput_v(out, "  elif [ -n \"${BATS_COLD:-}\" ] && [ \"${BATS_COLD}\" != 0 ]; then echo 1\n")
-  val () = bput_v(out, "  else echo 0; fi\n")
-  val () = bput_v(out, "}\n")
-  val () = bput_v(out, "# Whether the entry $1 is whole and is the one for key $2 and names $3 of\n")
-  val () = bput_v(out, "# kind $4 whose files, under directory $5, are as it says. It sets res (pass\n")
-  val () = bput_v(out, "# or log), cnt (its files) and loglines.\n")
-  val () = bput_v(out, "entry_ok() {\n")
-  val () = bput_v(out, "  e=$1\n")
-  val () = bput_v(out, "  [ -f \"$e\" ] && [ ! -L \"$e\" ] || return 1\n")
-  val () = bput_v(out, "  total=$(wc -l < \"$e\" | tr -d ' ')\n")
-  val () = bput_v(out, "  case $total in ''|*[!0-9]*) return 1 ;; esac\n")
-  val () = bput_v(out, "  [ \"$total\" -ge 16 ] || return 1\n")
-  val () = bput_v(out, "  last=$(tail -n 1 \"$e\")\n")
-  val () = bput_v(out, "  [ \"${last%% *}\" = sum ] || return 1\n")
-  val () = bput_v(out, "  [ \"$(sed '$d' \"$e\" | digest)\" = \"${last#sum }\" ] || return 1\n")
-  val () = bput_v(out, "  [ \"$(sed -n 1p \"$e\")\" = 'bats-fixture-memo 1' ] || return 1\n")
-  val () = bput_v(out, "  [ \"$(sed -n 2p \"$e\")\" = \"key $2\" ] || return 1\n")
-  val () = bput_v(out, "  res=$(sed -n 3p \"$e\"); res=${res#result }\n")
-  val () = bput_v(out, "  case \"$4:$res\" in accept:pass|reject:log) ;; *) return 1 ;; esac\n")
-  val () = bput_v(out, "  [ \"$(sed -n 4p \"$e\")\" = \"names $3\" ] || return 1\n")
-  val () = bput_v(out, "  cnt=$(sed -n 5p \"$e\"); cnt=${cnt#files }\n")
-  val () = bput_v(out, "  case $cnt in ''|*[!0-9]*) return 1 ;; esac\n")
-  val () = bput_v(out, "  loglines=$(sed -n \"$((6 + cnt))p\" \"$e\"); loglines=${loglines#log }\n")
-  val () = bput_v(out, "  case $loglines in ''|*[!0-9]*) return 1 ;; esac\n")
-  val () = bput_v(out, "  [ \"$total\" -eq $((cnt + loglines + 16)) ] || return 1\n")
-  val () = bput_v(out, "  if [ \"$cnt\" -gt 0 ]; then sed -n \"6,$((5 + cnt))p\" \"$e\"; fi > \"$work/memo.list\"\n")
-  val () = bput_v(out, "  while IFS= read -r l; do\n")
-  val () = bput_v(out, "    shape=${l%% *}; r=${l#* }; hex=${r%% *}; p=${r#* }\n")
-  val () = bput_v(out, "    [ \"$(file_digest \"$5/$p\")\" = \"$shape $hex\" ] || return 1\n")
-  val () = bput_v(out, "  done < \"$work/memo.list\"\n")
-  val () = bput_v(out, "  return 0\n")
-  val () = bput_v(out, "}\n")
-  val () = bput_v(out, "# The paths a bats-memo key lists (its lines from the third to its rule)\n")
-  val () = bput_v(out, "key_paths() { sed -n '3,$p' \"$1\" | sed '/^--$/,$d'; }\n")
-  val () = bput_v(out, "\n")
-  val () = bput_v(out, "verb=$1; shift\n")
-  val () = bput_v(out, "case $verb in\n")
-  val () = bput_v(out, "\n")
-  val () = bput_v(out, "probe)\n")
-  val () = bput_v(out, "  work=$1; module=$2; kind=$3; snippet=$4; before=$5; at=$6; memo_arg=$7; cold_arg=$8\n")
-  val () = bput_v(out, "  app=$work/app; f=$app/$module\n")
-  val () = bput_v(out, "  rm -f \"$work/check.log\" \"$work/check.seconds\" \"$work/check.memo\" \"$work/check.stale\" \"$work/memo.key\" \"$work/memo.prior\"\n")
-  val () = bput_v(out, "  { head -n $((at - 1)) \"$f\"; awk 1 \"$snippet\"; echo; tail -n +\"$at\" \"$f\"; } > \"$f.fixture\" || exit 98\n")
-  val () = bput_v(out, "  mv -f \"$f.fixture\" \"$f\" || exit 98\n")
-  val () = bput_v(out, "  memo=$(memo_dir \"$memo_arg\")\n")
-  val () = bput_v(out, "  [ -n \"$memo\" ] || exit 100\n")
-  val () = bput_v(out, "  case $memo in /*) ;; *) memo=$PWD/$memo ;; esac\n")
-  val () = bput_v(out, "  [ -f \"$app/build/.bats_stamp\" ] || exit 100\n")
-  val () = bput_v(out, "  toml=none; [ -f \"$app/bats.toml\" ] && toml=$(digest < \"$app/bats.toml\")\n")
-  val () = bput_v(out, "  lock=none; [ -f \"$app/bats.lock\" ] && lock=$(digest < \"$app/bats.lock\")\n")
-  val () = bput_v(out, "  text=$(printf 'bats-fixture-key 1\\nmodule %s\\nbefore %s\\nsnippet %s\\nspliced %s\\ntoml %s\\nlock %s\\nstamp %s\\n' \\\n")
-  val () = bput_v(out, "    \"$module\" \"$(digest < \"$before\")\" \"$(digest < \"$snippet\")\" \"$(digest < \"$f\")\" \"$toml\" \"$lock\" \\\n")
-  val () = bput_v(out, "    \"$(digest < \"$app/build/.bats_stamp\")\")\n")
-  val () = bput_v(out, "  key=$(printf '%s\\n' \"$text\" | digest)\n")
-  val () = bput_v(out, "  names=$(names_of \"$app\")\n")
-  val () = bput_v(out, "  printf '%s\\n' \"$key\" > \"$work/memo.key\"\n")
-  val () = bput_v(out, "  printf '%s\\n' \"$text\" > \"$work/memo.text\"\n")
-  val () = bput_v(out, "  printf '%s\\n' \"$names\" > \"$work/memo.names\"\n")
-  val () = bput_v(out, "  printf '%s\\n' \"$memo\" > \"$work/memo.dir\"\n")
-  val () = bput_v(out, "  echo \"$key\" >> \"$work/memo-used\"\n")
-  val () = bput_v(out, "  entry=$memo/$(printf '%s' \"$key\" | cut -c1-2)/$key\n")
-  val () = bput_v(out, "  if [ -f \"$memo/.bats-fixtures-memo\" ] && entry_ok \"$entry\" \"$key\" \"$names\" \"$kind\" \"$app\"; then\n")
-  val () = bput_v(out, "    if [ \"$(cold_wanted \"$cold_arg\")\" = 1 ]; then echo \"$entry\" > \"$work/memo.prior\"; exit 100; fi\n")
-  val () = bput_v(out, "    if [ \"$res\" = pass ]; then : > \"$work/check.log\"; status=0\n")
-  val () = bput_v(out, "    else sed -n \"$((7 + cnt)),$((6 + cnt + loglines))p\" \"$entry\" > \"$work/check.log\"; status=1; fi\n")
-  val () = bput_v(out, "    echo 0 > \"$work/check.seconds\"\n")
-  val () = bput_v(out, "    echo hit > \"$work/check.memo\"\n")
-  val () = bput_v(out, "    exit $status\n")
-  val () = bput_v(out, "  fi\n")
-  val () = bput_v(out, "  exit 100\n")
-  val () = bput_v(out, "  ;;\n")
-  val () = bput_v(out, "\n")
-  val () = bput_v(out, "store)\n")
-  val () = bput_v(out, "  work=$1; module=$2; kind=$3; status=$4; snippet=$5; cold_arg=$6\n")
-  val () = bput_v(out, "  [ -f \"$work/memo.key\" ] || exit 0\n")
-  val () = bput_v(out, "  key=$(cat \"$work/memo.key\"); names=$(cat \"$work/memo.names\"); memo=$(cat \"$work/memo.dir\")\n")
-  val () = bput_v(out, "  app=$work/app; base=$work/build-checked; log=$work/check.log\n")
-  val () = bput_v(out, "  entry=$memo/$(printf '%s' \"$key\" | cut -c1-2)/$key\n")
-  val () = bput_v(out, "  # what is to be kept: an accept that passed, or a reject that failed the\n")
-  val () = bput_v(out, "  # ordinary way (a patsopt error in a log of at most 524288 bytes); never a\n")
-  val () = bput_v(out, "  # failure of an accept, a reject that passed, a status 124 or 125 (a cap),\n")
-  val () = bput_v(out, "  # a signal, or a check that failed with no error of patsopt's\n")
-  val () = bput_v(out, "  want=none\n")
-  val () = bput_v(out, "  case \"$kind:$status\" in\n")
-  val () = bput_v(out, "    accept:0) want=pass ;;\n")
-  val () = bput_v(out, "    reject:1)\n")
-  val () = bput_v(out, "      if [ -f \"$log\" ] && grep -aq '): error([0-9][0-9]*): ' \"$log\"; then\n")
-  val () = bput_v(out, "        normalize \"$app\" < \"$log\" > \"$work/memo.log\"\n")
-  val () = bput_v(out, "        if [ \"$(wc -c < \"$work/memo.log\" | tr -d ' ')\" -le 524288 ]; then want=log; fi\n")
-  val () = bput_v(out, "      fi ;;\n")
-  val () = bput_v(out, "  esac\n")
-  val () = bput_v(out, "  # a cold run audits the memo that would have been served\n")
-  val () = bput_v(out, "  if [ -f \"$work/memo.prior\" ]; then\n")
-  val () = bput_v(out, "    prior=$(cat \"$work/memo.prior\")\n")
-  val () = bput_v(out, "    pres=$(sed -n 3p \"$prior\"); pres=${pres#result }\n")
-  val () = bput_v(out, "    pcnt=$(sed -n 5p \"$prior\"); pcnt=${pcnt#files }\n")
-  val () = bput_v(out, "    plines=$(sed -n \"$((6 + pcnt))p\" \"$prior\"); plines=${plines#log }\n")
-  val () = bput_v(out, "    stale=\n")
-  val () = bput_v(out, "    if [ \"$pres\" = pass ]; then\n")
-  val () = bput_v(out, "      [ \"$want\" = pass ] || stale=\"the memo says the check passes, the cold run's status is $status\"\n")
-  val () = bput_v(out, "    else\n")
-  val () = bput_v(out, "      if [ \"$want\" != log ]; then stale=\"the memo holds the log of a check that fails, the cold run's status is $status\"\n")
-  val () = bput_v(out, "      else\n")
-  val () = bput_v(out, "        sed -n \"$((7 + pcnt)),$((6 + pcnt + plines))p\" \"$prior\" > \"$work/memo.prior.log\"\n")
-  val () = bput_v(out, "        cmp -s \"$work/memo.prior.log\" \"$work/memo.log\" || stale=\"the log the memo holds is not the cold run's\"\n")
-  val () = bput_v(out, "      fi\n")
-  val () = bput_v(out, "    fi\n")
-  val () = bput_v(out, "    # a memo that lied is removed, so it is not served again\n")
-  val () = bput_v(out, "    if [ -n \"$stale\" ]; then\n")
-  val () = bput_v(out, "      printf 'STALE MEMO: %s (key %s)\\n' \"$stale\" \"$key\" > \"$work/check.stale\"\n")
-  val () = bput_v(out, "      rm -f \"$prior\"\n")
-  val () = bput_v(out, "    fi\n")
-  val () = bput_v(out, "  fi\n")
-  val () = bput_v(out, "  [ \"$want\" != none ] || exit 0\n")
-  val () = bput_v(out, "  # a snippet that loads a file (staload, include, #use) reads one the base\n")
-  val () = bput_v(out, "  # module's closure does not name: not kept\n")
-  val () = bput_v(out, "  if grep -Eq 'load|include|#use|#require' \"$snippet\"; then exit 0; fi\n")
-  val () = bput_v(out, "  own=build/${module%.bats}\n")
-  val () = bput_v(out, "  basekey=$base/${module%.bats}_dats.c.key\n")
-  val () = bput_v(out, "  [ -f \"$basekey\" ] || exit 0\n")
-  val () = bput_v(out, "  key_paths \"$basekey\" > \"$work/memo.paths\"\n")
-  val () = bput_v(out, "  # the interface of the module with the snippet in, against the base's: if\n")
-  val () = bput_v(out, "  # it changed, the modules that read it are in the entry too\n")
-  val () = bput_v(out, "  if [ \"$(file_digest \"$app/${own}.sats\")\" != \"$(file_digest \"$base/${own#build/}.sats\")\" ]; then\n")
-  val () = bput_v(out, "    wc_dats=$(find \"$base\" \\( -path \"$base/.stash\" -o -path \"$base/.bats_dg\" \\) -prune -o -name '*.dats' -print | wc -l | tr -d ' ')\n")
-  val () = bput_v(out, "    wc_keys=$(find \"$base\" \\( -path \"$base/.stash\" -o -path \"$base/.bats_dg\" \\) -prune -o -name '*_dats.c.key' -print | wc -l | tr -d ' ')\n")
-  val () = bput_v(out, "    [ \"$wc_dats\" = \"$wc_keys\" ] || exit 0\n")
-  val () = bput_v(out, "    find \"$base\" -path \"$base/.stash\" -prune -o -name '*_dats.c.key' -print | while IFS= read -r k; do\n")
-  val () = bput_v(out, "      if grep -qxF \"${own}.sats\" \"$k\"; then key_paths \"$k\"; fi\n")
-  val () = bput_v(out, "    done >> \"$work/memo.paths\"\n")
-  val () = bput_v(out, "  fi\n")
-  val () = bput_v(out, "  # the module's own .dats and .sats are those with the snippet in: the\n")
-  val () = bput_v(out, "  # spliced source stands for them in the key\n")
-  val () = bput_v(out, "  sort -u \"$work/memo.paths\" | grep -vxF -e \"${own}.dats\" -e \"${own}.sats\" > \"$work/memo.paths.sorted\"\n")
-  val () = bput_v(out, "  : > \"$work/memo.files\"\n")
-  val () = bput_v(out, "  while IFS= read -r p; do\n")
-  val () = bput_v(out, "    case $p in build/*) ;; *) exit 0 ;; esac\n")
-  val () = bput_v(out, "    d=$(file_digest \"$base/${p#build/}\")\n")
-  val () = bput_v(out, "    case $d in MISSING) exit 0 ;; esac\n")
-  val () = bput_v(out, "    printf '%s %s\\n' \"$d\" \"$p\" >> \"$work/memo.files\"\n")
-  val () = bput_v(out, "  done < \"$work/memo.paths.sorted\"\n")
-  val () = bput_v(out, "  nfiles=$(wc -l < \"$work/memo.files\" | tr -d ' ')\n")
-  val () = bput_v(out, "  if [ \"$want\" = log ]; then nlog=$(wc -l < \"$work/memo.log\" | tr -d ' '); else nlog=0; : > \"$work/memo.log\"; fi\n")
-  val () = bput_v(out, "  # a directory is a memo when it is marked or empty: another is not written\n")
-  val () = bput_v(out, "  # to (a path given by mistake is not filled with entries, nor pruned)\n")
-  val () = bput_v(out, "  mkdir -p \"$memo\" || exit 0\n")
-  val () = bput_v(out, "  if [ ! -f \"$memo/.bats-fixtures-memo\" ]; then\n")
-  val () = bput_v(out, "    [ -z \"$(ls -A \"$memo\")\" ] || exit 0\n")
-  val () = bput_v(out, "    echo 'bats-fixture-memo 1' > \"$memo/.bats-fixtures-memo\" || exit 0\n")
-  val () = bput_v(out, "  fi\n")
-  val () = bput_v(out, "  dir=$(dirname \"$entry\")\n")
-  val () = bput_v(out, "  mkdir -p \"$dir\" || exit 0\n")
-  val () = bput_v(out, "  tmp=$dir/.tmp.$key.$$\n")
-  val () = bput_v(out, "  {\n")
-  val () = bput_v(out, "    printf 'bats-fixture-memo 1\\nkey %s\\nresult %s\\nnames %s\\nfiles %s\\n' \"$key\" \"$want\" \"$names\" \"$nfiles\"\n")
-  val () = bput_v(out, "    cat \"$work/memo.files\"\n")
-  val () = bput_v(out, "    printf 'log %s\\n' \"$nlog\"\n")
-  val () = bput_v(out, "    cat \"$work/memo.log\"\n")
-  val () = bput_v(out, "    printf 'text 8\\n'\n")
-  val () = bput_v(out, "    cat \"$work/memo.text\"\n")
-  val () = bput_v(out, "  } > \"$tmp.body\" || { rm -f \"$tmp.body\"; exit 0; }\n")
-  val () = bput_v(out, "  { cat \"$tmp.body\"; printf 'sum %s\\n' \"$(digest < \"$tmp.body\")\"; } > \"$tmp\" && mv -f \"$tmp\" \"$entry\"\n")
-  val () = bput_v(out, "  rm -f \"$tmp.body\" \"$tmp\"\n")
-  val () = bput_v(out, "  exit 0\n")
-  val () = bput_v(out, "  ;;\n")
-  val () = bput_v(out, "\n")
-  val () = bput_v(out, "prune)\n")
-  val () = bput_v(out, "  work=$1; memo=$(memo_dir \"$2\")\n")
-  val () = bput_v(out, "  case $memo in /*) ;; *) memo=$PWD/$memo ;; esac\n")
-  val () = bput_v(out, "  if [ ! -d \"$memo\" ] || [ -L \"$memo\" ] || [ ! -f \"$memo/.bats-fixtures-memo\" ]; then\n")
-  val () = bput_v(out, "    echo \"memo: nothing pruned, $memo is not a fixtures memo\"\n")
-  val () = bput_v(out, "    exit 0\n")
-  val () = bput_v(out, "  fi\n")
-  val () = bput_v(out, "  kept=0; removed=0\n")
-  val () = bput_v(out, "  find \"$memo\" -mindepth 1 -maxdepth 1 -type d -name '[0-9a-f][0-9a-f]' > \"$work/memo.dirs\"\n")
-  val () = bput_v(out, "  while IFS= read -r d; do\n")
-  val () = bput_v(out, "    find \"$d\" -mindepth 1 -maxdepth 1 -type f > \"$work/memo.entries\"\n")
-  val () = bput_v(out, "    while IFS= read -r p; do\n")
-  val () = bput_v(out, "      name=${p##*/}\n")
-  val () = bput_v(out, "      case $name in\n")
-  val () = bput_v(out, "        .tmp.*.*)\n")
-  val () = bput_v(out, "          pid=${name##*.}\n")
-  val () = bput_v(out, "          if kill -0 \"$pid\" 2>/dev/null; then kept=$((kept + 1)); continue; fi ;;\n")
-  val () = bput_v(out, "        *[!0-9a-f]*) continue ;;\n")
-  val () = bput_v(out, "        *)\n")
-  val () = bput_v(out, "          [ ${#name} -eq 64 ] || continue\n")
-  val () = bput_v(out, "          if grep -qxF \"$name\" \"$work/memo-used\" 2>/dev/null; then kept=$((kept + 1)); continue; fi ;;\n")
-  val () = bput_v(out, "      esac\n")
-  val () = bput_v(out, "      rm -f \"$p\" && { echo \"pruned ${p#\"$memo\"/}\"; removed=$((removed + 1)); }\n")
-  val () = bput_v(out, "    done < \"$work/memo.entries\"\n")
-  val () = bput_v(out, "  done < \"$work/memo.dirs\"\n")
-  val () = bput_v(out, "  echo \"memo: pruned $removed entries, kept $kept\"\n")
-  val () = bput_v(out, "  exit 0\n")
-  val () = bput_v(out, "  ;;\n")
-  val () = bput_v(out, "\n")
-  val () = bput_v(out, "esac\n")
-  val () = bput_v(out, "exit 2\n")
-in end
-(* END fixtures-memo.sh *)
-
-(* <work>/memo.sh written: the script the memo's verbs are *)
-fn write_memo_script {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): void = let
-  var work : $B.builder_v = $B.create()
-  val () = put_cfg(cfg, w.work, work)
-  var script : $B.builder_v = $B.create()
-  val () = put_memo_script(script)
-  val _ = run_sh("rm -f \"$1/memo-used\"; printf '%s' \"$2\" > \"$1/memo.sh\"",
-    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(script), $L.list_vt_nil())))
-in end
-
-(* Removes from the memo the entries no fixture of this run used (the
-   script's prune, whose lines say what it removes, are printed from the
-   file they were written to: bats runs what it starts with its output
-   discarded) *)
-fn memo_prune {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): void = let
-  var work : $B.builder_v = $B.create()
-  val () = put_cfg(cfg, w.work, work)
-  var memo : $B.builder_v = $B.create()
-  val () = put_cfg(cfg, w.memo, memo)
-  val _ = run_sh("sh \"$1/memo.sh\" prune \"$1\" \"$2\" > \"$1/prune.out\" 2>&1",
-    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(memo), $L.list_vt_nil())))
-in print_text_there(cfg, w, "prune.out") end
-
 (* Runs the fixtures: the chosen ones of <dir> against a copy of the
    project in <work>/app *)
 fn fixtures_with {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}
@@ -1686,7 +2374,7 @@ fn fixtures_with {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}
           in () end)
       in () end
       else let
-        val () = write_memo_script(cfg, w)
+        val () = path_remove(work_text(cfg, w, "memo-used"))
         val ran = members_loop(cfg, w, bv_m, mlen, 0, bv, t, o, true, 0)
         val () = (if w.prune <> 0 then memo_prune(cfg, w) else ())
         val () = print! ("fixtures: ", !g_passed, " ok, ", !g_failed, " failed")
@@ -1698,6 +2386,17 @@ fn fixtures_with {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}
   val () = $A.drop<byte>(fz_m, bv_m)
   val () = $A.free<byte>($A.thaw<byte>(fz_m))
 in end
+
+(* The argument bv[s, e) appended to out as an absolute path: as it is when
+   it begins with a slash, else after the current directory cwd[0, cn) (the
+   memo works in the app, where a relative path would be another's) *)
+fn put_absolute {l:agz}{lc:agz}{s,e:int} (bv: !$A.borrow(byte, l, 4096), s: int s, e: int e,
+  cwd: !$A.borrow(byte, lc, 524288), cn: tlen, out: !$B.builder_v >> $B.builder_v): void =
+  if peek(bv, s, 4096) = 47 then copy_to_builder_v(bv, s, e, 4096, out)
+  else let
+    val () = copy_to_builder_v(cwd, 0, cn, 524288, out)
+    val () = put_char_v(out, 47)
+  in copy_to_builder_v(bv, s, e, 4096, out) end
 
 (* Runs bats fixtures for the arguments bv[0, t) *)
 fn fixtures_run {l:agz}{t:nat | t <= 4096} (bv: !$A.borrow(byte, l, 4096), t: int t): void = let
@@ -1733,14 +2432,18 @@ in
     else let
       (* the settings, as NUL-terminated strings in one buffer *)
       var cb : $B.builder_v = $B.create()
+      var cw : $B.builder_v = $B.create()
+      val () = cwd_into(cw)
+      val @(cwa, cwn) = $B.to_arr(cw)
+      val @(fz_cw, bv_cw) = $A.freeze<byte>(cwa)
       val () = copy_to_builder_v(bv, 0, a0, 4096, cb)
       val () = put_char_v(cb, 0)
       val off_dir = g1ofg0(bytes_in(cb))
-      val () = copy_to_builder_v(bv, o.dir_s, o.dir_e, 4096, cb)
+      val () = put_absolute(bv, o.dir_s, o.dir_e, bv_cw, cwn, cb)
       val () = put_char_v(cb, 0)
       val off_work = g1ofg0(bytes_in(cb))
       val @(fz_ma, bv_ma) = $A.freeze<byte>(ma)
-      val () = (if o.work_s >= 0 then copy_to_builder_v(bv, o.work_s, o.work_e, 4096, cb)
+      val () = (if o.work_s >= 0 then put_absolute(bv, o.work_s, o.work_e, bv_cw, cwn, cb)
         else copy_to_builder_v(bv_ma, 0, made_len, 524288, cb))
       val () = $A.drop<byte>(fz_ma, bv_ma)
       val () = $A.free<byte>($A.thaw<byte>(fz_ma))
@@ -1751,8 +2454,10 @@ in
       val () = put_char_v(cb, 0)
       val off_memo = g1ofg0(bytes_in(cb))
       val has_memo = (o.memo_s >= 0): bool
-      val () = (if has_memo then copy_to_builder_v(bv, o.memo_s, o.memo_e, 4096, cb) else ())
+      val () = (if has_memo then put_absolute(bv, o.memo_s, o.memo_e, bv_cw, cwn, cb) else ())
       val () = put_char_v(cb, 0)
+      val () = $A.drop<byte>(fz_cw, bv_cw)
+      val () = $A.free<byte>($A.thaw<byte>(fz_cw))
       val w = @{program= 0, directory= off_dir, work= off_work, repository= (if has_repo then off_repo else ~1),
         memo= off_memo, cold= o.cold, prune= o.prune}: settings
       val @(ca, _) = $B.to_arr(cb)
