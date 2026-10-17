@@ -19,8 +19,16 @@ permissions:
 
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@63cb39e57c56eb97bf8420b431efb3cd885401c6 # repository-prototype main
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@c8aeb1fc3d0c64dfa6bdc566c2d097ce39872e76 # repository-prototype#342 (regenerate)
     secrets: inherit
     with:
+      # bootstrap/c is the C of the compiler and its locked packages, so a
+      # moved bats.lock changes it (bats#299): regenerate it as CI checks it
+      # (check.yml, "Verify bootstrap/c matches sources")
+      regenerate: |
+        bats build --repository "$BATS_REPOSITORY"
+        scripts/bootstrap-c.sh dist/debug/bats "$BATS_REPOSITORY"
+      regenerate-paths: |
+        bootstrap/c
       workflow-pins: |
         bats-lang/repository-prototype/.github/workflows/relock-pins.yml
