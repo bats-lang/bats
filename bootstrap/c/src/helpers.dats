@@ -2068,15 +2068,16 @@ fun newline_at {l:agz}{i,n:nat | i <= n; n <= 4096} .<n - i>.
   else if byte2int0($A.read<byte>(e, i)) = 10 then i
   else newline_at(e, i + 1, n)
 
-(* The decimal number of e[i, j), saturating at a value of 9 digits; -1
-   when it holds a byte that is no digit *)
+(* The decimal number of e[i, j); -1 when it holds a byte that is no digit,
+   or when it has more than 9 digits (it would not fit an int: it is no
+   number here, never a smaller one) *)
 fun digits_at {l:agz}{i,j:nat | i <= j; j <= 4096} .<j - i>.
   (e: !$A.borrow(byte, l, 4096), i: int i, j: int j, v: int): int =
   if i >= j then v
   else let val c = byte2int0($A.read<byte>(e, i)) in
     if c < 48 then ~1
     else if c > 57 then ~1
-    else if v >= 100000000 then digits_at(e, i + 1, j, v)
+    else if v >= 100000000 then ~1
     else digits_at(e, i + 1, j, v * 10 + (c - 48))
   end
 

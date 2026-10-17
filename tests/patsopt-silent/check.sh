@@ -7,8 +7,10 @@
 # as a fact, "(N MB free in build; if that is near 0 the disk is full)", read
 # from the last line of df -Pk build: the number before the first token that
 # is digits and a percent sign. No threshold: a disk with room says it too.
-# Without df's answer (df fails, is missing, or says no such token) the clause
-# is left out and nothing else changes. A failure with no text is never
+# Without df's answer (df fails, is missing, says no such token, or an
+# Available of more than 9 digits, which an int cannot hold: about 954 GB
+# free or more, where a disk is not full and a smaller figure would be a wrong
+# fact) the clause is left out and nothing else changes. A failure with no text is never
 # reported as "error: patsopt error:". The stand-in patsopt fails with the
 # output FAKE names; the stand-in df reports the free space FREE_KIB names, in
 # the form DF names.
@@ -69,7 +71,7 @@ project() { # <directory>: a project of one binary, named p
   printf '[package]\nname = "p"\nkind = "bin"\n' > "$1/bats.toml"
   printf 'implement main0 () = println! (1)\n' > "$1/src/bin/p.bats"
 }
-for d in silent stdout long stderr disk blank dffail nopercent nodf; do project "$TMP/$d"; done
+for d in silent stdout long stderr disk blank dffail nopercent nodf nine ten eleven; do project "$TMP/$d"; done
 
 # run <directory> <fake> [free KiB] [df form] [path]: check in the directory;
 # the status in $rc, the output in $TMP/<directory>.log (stdout and stderr
@@ -137,5 +139,24 @@ run nodf silent 5000000 plain "$TMP/nodf"
 [ $rc = 1 ] || fail "a silent failure, no df: status $rc" nodf
 grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/nodf.log" \
   || fail "a missing df changed the message" nodf
+
+# the widest Available that fits is 9 digits: 999999999 KiB is 976562 MB, as
+# computed, not cut
+run nine silent 999999999
+[ $rc = 1 ] || fail "a silent failure, 9 digits free: status $rc" nine
+grep -q "printed nothing (976562 MB free in build; if that is near 0 the disk is full)\.\$" "$TMP/nine.log" \
+  || fail "a 9 digit Available was not said exactly" nine
+# 10 and 11 digits (about 954 GB and 9.3 TB free): the clause is left out,
+# never a figure of a truncated number (1000000000 KiB read as 97656 MB)
+run ten silent 1000000000
+[ $rc = 1 ] || fail "a silent failure, 10 digits free: status $rc" ten
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/ten.log" \
+  || fail "a 10 digit Available changed the message" ten
+if grep -q "MB free" "$TMP/ten.log"; then fail "a 10 digit Available was shown as a figure" ten; fi
+run eleven silent 10000000000
+[ $rc = 1 ] || fail "a silent failure, 11 digits free: status $rc" eleven
+grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed nothing\.\$" "$TMP/eleven.log" \
+  || fail "an 11 digit Available changed the message" eleven
+if grep -q "MB free" "$TMP/eleven.log"; then fail "an 11 digit Available was shown as a figure" eleven; fi
 
 echo "patsopt-silent: ok"
