@@ -23,6 +23,9 @@
 #   * a run stopped while patsopt ran leaves no key behind;
 #   * a key that is missing, garbled, cut short, of the old format, with a
 #     hash changed, or beside a C that is gone, is not trusted;
+#   * a native bin and a wasm bin using a target-dependent .sats, cold and
+#     when the wasm bin is added to a native-only project: the second and
+#     third checks run no patsopt (each pass names its own build's .sats);
 #   * four copies checked side by side, five rounds, never read a torn key.
 # usage: tests/check-memo/check.sh <bats-binary> <repository-dir>
 set -eu
@@ -304,6 +307,46 @@ sed "$((n + 1))s/.*/1/" "$good" > "$k"; again "a key with a size changed"
 # a C that is gone, its key still there
 c=${k%.key}
 rm -f "$c"; again "a C that is gone"
+# --- a native bin and a wasm bin that both use a module with a
+# target-dependent .sats (bats#300). Each pass's names are the .sats of its
+# own build/: the other target's are in its stash, which the names do not
+# take. So the second and third checks run nothing, both cold and when the
+# wasm bin is added to a native-only project (the first check there records
+# the native bin's names before the wasm pass's .sats exist).
+two_bins() { # <dir> <yes|no>: a native bin, and a wasm bin when yes
+  mkdir -p "$1/src/bin"
+  printf '[package]\nname = "tw"\nkind = "bin"\n' > "$1/bats.toml"
+  printf '#include "share/atspre_staload.hats"\n\n#target native begin\n#pub fun tv (): int\n\nimplement tv () = 1\nend\n#target wasm begin\n#pub fun tv (): int\n#pub fun tw (): int\n\nimplement tv () = 1\nimplement tw () = 2\nend\n' > "$1/src/tgt.bats"
+  printf '#include "share/atspre_staload.hats"\nstaload "tgt.sats"\n\n#pub fun user (): int\n\nimplement user () = tv ()\n' > "$1/src/user.bats"
+  printf '#target native\n#include "share/atspre_staload.hats"\nstaload "user.sats"\n\nimplement main0 () = println! ("got ", user ())\n' > "$1/src/bin/nat.bats"
+  if [ "$2" = yes ]; then
+    printf '#target wasm binary\n#include "share/atspre_staload.hats"\nstaload "user.sats"\n\nimplement main0 () = let val _ = user () in () end\n' > "$1/src/bin/web.bats"
+  fi
+}
+tw_check() { # <dir> <log>: bats -v check in dir, which must pass
+  (cd "$1" && "$BATS" -v check > "$2" 2>&1) || { echo "FAIL: two bins: check in $1 failed"; cat "$2"; exit 1; }
+}
+TB=$TMP/two-bins
+two_bins "$TB" yes
+tw_check "$TB" "$TMP/tb1.log"
+[ "$(total "$TMP/tb1.log")" -ge 8 ] || { echo "FAIL: a cold two-bin check ran patsopt $(total "$TMP/tb1.log") times"; cat "$TMP/tb1.log"; exit 1; }
+tw_check "$TB" "$TMP/tb2.log"
+quiet "$TMP/tb2.log" "the second check of two bins"
+tw_check "$TB" "$TMP/tb3.log"
+quiet "$TMP/tb3.log" "the third check of two bins"
+TA=$TMP/native-then-wasm
+two_bins "$TA" no
+tw_check "$TA" "$TMP/ta1.log"
+tw_check "$TA" "$TMP/ta2.log"
+quiet "$TMP/ta2.log" "the second check of a native-only project"
+two_bins "$TA" yes
+tw_check "$TA" "$TMP/ta3.log"
+[ "$(ran "$TMP/ta3.log" /web_dats.c)" -ge 1 ] || { echo "FAIL: the wasm bin added was not checked"; cat "$TMP/ta3.log"; exit 1; }
+tw_check "$TA" "$TMP/ta4.log"
+quiet "$TMP/ta4.log" "the check after a wasm bin is added"
+tw_check "$TA" "$TMP/ta5.log"
+quiet "$TMP/ta5.log" "the next check after a wasm bin is added"
+echo "check-memo: two bins, native and wasm: ok"
 # --- four copies side by side, five rounds: never a torn key (each copy
 # sits beside its own copy of the plain dependency)
 for i in 1 2 3 4; do
