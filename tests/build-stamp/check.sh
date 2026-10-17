@@ -200,4 +200,68 @@ say "$TMP/check.build.log" "cc differs"
 settle_check "$C"
 check "$C" "$TMP/check.last.log"
 kept "$TMP/check.last.log" "the last check"
+# The toolchain is judged by what it is, in each process (bats-lang/bats#305):
+# patsopt replaced in place, with the same name and size, is another
+# toolchain; a patsopt that is a link is judged by the file it reaches, so
+# that file changed in place is seen too; and a prelude file changed in
+# place, with the same size, is seen.
+T3=$TMP/tool
+mkdir -p "$T3/.bats/ats2"
+for d in bin prelude libats share ccomp; do cp -R "$HOME/.bats/ats2/$d" "$T3/.bats/ats2/"; done
+R3=$TMP/real-patsopt
+cp "$T3/.bats/ats2/bin/patsopt" "$R3"
+SZ=$(wc -c < "$R3")
+standin() { # <file> <pad>: a stand-in of patsopt's size that runs the real one, padded with <pad>
+  printf '#!/bin/sh\nexec %s "$@"\n' "$R3" > "$1"
+  head -c $(( SZ - $(wc -c < "$1") )) /dev/zero | tr '\0' "$2" >> "$1"
+  chmod +x "$1"
+  [ "$(wc -c < "$1")" -eq "$SZ" ] || { echo "FAIL: the stand-in is not the size of patsopt"; exit 1; }
+}
+P3=$TMP/p3
+mkdir -p "$P3"
+cp -R "$P/bats.toml" "$P/src" "$P3/"
+build "$P3" "$TMP/tool.cold.log" HOME="$T3"
+[ "$(dropped "$TMP/tool.cold.log")" = 0 ] || { echo "FAIL: a build with a new toolchain dropped build/"; cat "$TMP/tool.cold.log"; exit 1; }
+COLD3=$(ran "$TMP/tool.cold.log")
+[ "$COLD3" -ge 2 ] || { echo "FAIL: a cold build ran patsopt $COLD3 times"; cat "$TMP/tool.cold.log"; exit 1; }
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.same.log" HOME="$T3"
+kept "$TMP/tool.same.log" "a build with the same toolchain"
+
+standin "$T3/.bats/ats2/bin/patsopt" '#'
+build "$P3" "$TMP/tool.inplace.log" HOME="$T3"
+say "$TMP/tool.inplace.log" "patsopt differs"
+rebuilt "$TMP/tool.inplace.log" "$COLD3" "a build with patsopt replaced in place"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.inplace.again.log" HOME="$T3"
+kept "$TMP/tool.inplace.again.log" "the build after patsopt was replaced in place"
+
+standin "$TMP/linked" '%'
+rm -f "$T3/.bats/ats2/bin/patsopt"
+ln -s "$TMP/linked" "$T3/.bats/ats2/bin/patsopt"
+build "$P3" "$TMP/tool.link.log" HOME="$T3"
+say "$TMP/tool.link.log" "patsopt differs"
+rebuilt "$TMP/tool.link.log" "$COLD3" "a build with patsopt made a link"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.link.again.log" HOME="$T3"
+kept "$TMP/tool.link.again.log" "the build after patsopt was made a link"
+standin "$TMP/linked" '@'
+build "$P3" "$TMP/tool.target.log" HOME="$T3"
+say "$TMP/tool.target.log" "patsopt differs"
+rebuilt "$TMP/tool.target.log" "$COLD3" "a build with the file its link reaches changed in place"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.target.again.log" HOME="$T3"
+kept "$TMP/tool.target.again.log" "the build after the file its link reaches changed"
+
+printf '(* a *)\n' > "$T3/.bats/ats2/prelude/zz_probe_305.sats"
+build "$P3" "$TMP/tool.probe.log" HOME="$T3"
+say "$TMP/tool.probe.log" "patsopt differs"
+settle "$P3" HOME="$T3"
+printf '(* b *)\n' > "$T3/.bats/ats2/prelude/zz_probe_305.sats"
+build "$P3" "$TMP/tool.prelude.log" HOME="$T3"
+say "$TMP/tool.prelude.log" "patsopt differs"
+rebuilt "$TMP/tool.prelude.log" "$COLD3" "a build with a prelude file changed in place, the same size"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.prelude.again.log" HOME="$T3"
+kept "$TMP/tool.prelude.again.log" "the build after the prelude file changed"
 echo "build-stamp: ok"
