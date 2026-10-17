@@ -3170,15 +3170,11 @@ fn report_errors (cnt: int, errs: $B.builder_v): bool =
 fn record_passed (passed: bool, pend: $B.builder_v): void =
   if passed then valid_flush(pend) else $B.builder_free(pend)
 
-(* Before check, build or test: the errors Rust's preprocess_all finds in
-   the package's modules, its dependencies, src/lib.bats and its binaries,
-   in that order, printed as Rust prints them; false when there were
-   any *)
-
-
-implement validate_project () = let
+(* The errors Rust's preprocess_all finds in the package's modules, its
+   dependencies, src/lib.bats and its binaries, in that order, collected
+   into errs; how many. What passed is recorded when nothing failed *)
+fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
   val own_unsafe = toml_unsafe(str_to_path_arr("./bats.toml"))
-  var errs : $B.builder_v = $B.create()
   (* The listings of ./src and ./bats_modules, once each: the checks of
      the files and of the call cycles read the same ones, and the context
      of the records holds the dependencies' (validated.bats) *)
@@ -3212,9 +3208,32 @@ implement validate_project () = let
   val () = $A.drop<byte>(fz_x, bv_x)
   val () = $A.free<byte>($A.thaw<byte>(fz_x))
   val () = record_passed(c6 = 0, pend)
+in c6 end
+
+(* Before check, build or test: the errors Rust's preprocess_all finds in
+   the package's modules, its dependencies, src/lib.bats and its binaries,
+   in that order, printed as Rust prints them; false when there were
+   any *)
+
+
+implement validate_project () = let
+  var errs : $B.builder_v = $B.create()
+  val c = validate_collect(errs)
 in
-  report_errors(c6, errs)
+  report_errors(c, errs)
 end
+
+(* Whether the project has none of those errors, saying nothing and
+   marking no build as failed: what a memo of patsopt's results may ask
+   before it answers instead of a check, whose lexer-level steps (this one)
+   have no patsopt in them (bats#267, the fixtures' memo) *)
+
+
+implement validate_clean () = let
+  var errs : $B.builder_v = $B.create()
+  val c = validate_collect(errs)
+  val () = $B.builder_free(errs)
+in c <= 0 end
 
 (* ============================================================
    Locked dependencies: with a bats.lock, check, build, run and test

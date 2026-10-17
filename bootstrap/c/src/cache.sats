@@ -597,38 +597,47 @@ fn toolchain_digest {lph:agz}
 
 
 
+
+fn closure_key_equal {lk:agz} (key_bv: !$A.borrow(byte, lk, 524288)): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn memo_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -662,6 +671,44 @@ fn module_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 fn memo_fresh_in_check (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn closure_key_write {ll,lo:agz}
+  (list_bv: !$A.borrow(byte, ll, 524288), out_bv: !$A.borrow(byte, lo, 524288)): bool
+
+
+
+
+
+
+
+
+
 
 
 
