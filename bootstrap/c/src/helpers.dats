@@ -1646,18 +1646,6 @@ fn report_patsopt {li:agz}
   val () = $A.free<byte>($A.thaw<byte>(fz_e))
 in prerr_builder(out) end
 
-(* patsopt's exit code ec, reported as Rust reports a failure; consumes
-   its stderr err *)
-fn finish_patsopt {li:agz}
-  (ec: int, in_bv: !$A.borrow(byte, li, 524288), il: int, err: $B.builder_v): int =
-  if ec <> 0 then let
-    val () = report_patsopt(in_bv, il, err)
-    val () = set_build_err()
-  in ec end
-  else let
-    val () = $B.builder_free(err)
-  in 0 end
-
 (* ============================================================
    What patsopt emits but only cc rejects: a template instance with no
    implementation, a function that captures its environment
@@ -1986,6 +1974,210 @@ fn cap_report {li:agz}
   val () = !g_cap_exit := (if time then 124 else 125)
 in set_build_err() end
 
+(* ============================================================
+   A patsopt that fails and prints nothing (bats-lang/bats#301): on a full
+   disk its own messages fail with ENOSPC, so its stderr is empty, and
+   "error: patsopt error:" with no text used to be all that was said.
+   What bats says then: the module, the status, and what patsopt wrote to
+   stdout (its first 4096 bytes), and, when the build's file system has
+   under 64 MB free, "no space left on device (N MB free in build)".
+   patsopt's stdout is a file in build/ (truncated by each run, so it is
+   not removed): a pipe would block patsopt once it wrote more than a
+   pipe holds, while bats was still reading its stderr. Nothing else of
+   the platform says free space (the file package has no statvfs), so
+   the free space is df -Pk's Available column, which POSIX fixes.
+   ============================================================ *)
+
+(* What patsopt's stdout is kept in *)
+fn stdout_path_arr (): [l:agz] $A.arr(byte, l, 524288) =
+  str_to_path_arr("build/.patsopt_stdout")
+
+(* The stdout file for a run, truncated, as a stream for the child: the
+   flag says whether it could be made (else patsopt's stdout is /dev/null) *)
+fn stdout_config(): @(bool, $P.stream_config(false)) = let
+  val a = stdout_path_arr()
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val r = file_open_path(bv, $F.WriteOnly(), $F.CreateOrTruncate(), 420)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in
+  case+ r of
+  | ~$R.ok(fd) => @(true, $P.inherit_fd(fd))
+  | ~$R.err(_) => @(false, $P.dev_null())
+end
+
+(* The first 4096 bytes of the open file fd appended to out; whether the
+   file is longer (consumes r) *)
+fn stdout_fd_read (r: $R.result($F.fd, $F.io_error), out: !$B.builder_v >> $B.builder_v): bool =
+  case+ r of
+  | ~$R.err(_) => false
+  | ~$R.ok(fd) => let
+      val size = (case+ $F.fd_size(fd) of
+        | ~$R.ok(s) => s | ~$R.err(_) => 0): int
+      val buf = $A.alloc<byte>(4096)
+      val k = (case+ $F.file_read(fd, buf, 4096) of
+        | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
+      val @(fz, bv) = $A.freeze<byte>(buf)
+      val () = copy_to_builder_v(bv, 0, k, 4096, out)
+      val () = $A.drop<byte>(fz, bv)
+      val () = $A.free<byte>($A.thaw<byte>(fz))
+      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+    in size > 4096 end
+
+(* patsopt's stdout of the run (its first 4096 bytes, and whether it wrote
+   more), when the stdout file could be made (ok) *)
+fn stdout_take (ok: bool): @(bool, $B.builder_v) = let
+  var ob : $B.builder_v = $B.create()
+  val a = stdout_path_arr()
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val cut = (if ok then stdout_fd_read(file_open_path(bv, $F.ReadOnly(), $F.OpenExisting(), 0), ob)
+    else false): bool
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in @(cut, ob) end
+
+(* Whether e[i] is a space or a tab *)
+fn is_blank_byte (c: int): bool = (c = 32) || (c = 9)
+
+(* The position after the blanks from i, at most n *)
+fun blanks_end {l:agz}{i,n:nat | i <= n; n <= 4096} .<n - i>.
+  (e: !$A.borrow(byte, l, 4096), i: int i, n: int n): [r:nat | i <= r; r <= n] int r =
+  if i >= n then i
+  else if is_blank_byte(byte2int0($A.read<byte>(e, i))) then blanks_end(e, i + 1, n)
+  else i
+
+(* The position of the first blank, newline or n from i *)
+fun token_end {l:agz}{i,n:nat | i <= n; n <= 4096} .<n - i>.
+  (e: !$A.borrow(byte, l, 4096), i: int i, n: int n): [r:nat | i <= r; r <= n] int r =
+  if i >= n then i
+  else let val c = byte2int0($A.read<byte>(e, i)) in
+    if is_blank_byte(c) || (c = 10) then i else token_end(e, i + 1, n)
+  end
+
+(* The position of the first newline from i, or n *)
+fun newline_at {l:agz}{i,n:nat | i <= n; n <= 4096} .<n - i>.
+  (e: !$A.borrow(byte, l, 4096), i: int i, n: int n): [r:nat | i <= r; r <= n] int r =
+  if i >= n then i
+  else if byte2int0($A.read<byte>(e, i)) = 10 then i
+  else newline_at(e, i + 1, n)
+
+(* The decimal number of e[i, j), saturating at a value of 9 digits; -1
+   when it holds a byte that is no digit *)
+fun digits_at {l:agz}{i,j:nat | i <= j; j <= 4096} .<j - i>.
+  (e: !$A.borrow(byte, l, 4096), i: int i, j: int j, v: int): int =
+  if i >= j then v
+  else let val c = byte2int0($A.read<byte>(e, i)) in
+    if c < 48 then ~1
+    else if c > 57 then ~1
+    else if v >= 100000000 then digits_at(e, i + 1, j, v)
+    else digits_at(e, i + 1, j, v * 10 + (c - 48))
+  end
+
+(* The Available column (1024-byte blocks) of df -Pk's output in
+   e[0, n): its second line's fourth field, the first three fields being
+   the file system's name, its size and its use; -1 when the output is
+   not that. A file system name with a blank in it is not read as one
+   field: df -P is the only source, and such names are rare on the disks
+   bats builds on. *)
+fn df_available {l:agz}{n:nat | n <= 4096} (e: !$A.borrow(byte, l, 4096), n: int n): int = let
+  val nl = newline_at(e, 0, n)
+in
+  if nl >= n then ~1
+  else let
+    val a = blanks_end(e, nl + 1, n)
+    val b = token_end(e, a, n)
+    val c = blanks_end(e, b, n)
+    val d = token_end(e, c, n)
+    val f = blanks_end(e, d, n)
+    val g = token_end(e, f, n)
+    val h = blanks_end(e, g, n)
+    val k = token_end(e, h, n)
+  in
+    if k <= h then ~1 else digits_at(e, h, k, 0)
+  end
+end
+
+(* The free space in KiB of build/ (df -Pk build's Available column), or
+   -1 when df gave none *)
+fn disk_free_kib (): int = let
+  val exec = str_to_path_arr("df")
+  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  var b1 : $B.builder_v = $B.create()
+  val () = bput_v(b1, "df")
+  var b2 : $B.builder_v = $B.create()
+  val () = bput_v(b2, "-Pk")
+  var b3 : $B.builder_v = $B.create()
+  val () = bput_v(b3, "build")
+  val out = $A.alloc<byte>(4096)
+  val @(rc, k) = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1),
+    $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
+  val @(fz_o, bv_o) = $A.freeze<byte>(out)
+  val v = (if rc = 0 then df_available(bv_o, k) else ~1): int
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+in v end
+
+(* A patsopt run that failed and printed nothing on stderr: the module,
+   the status, the disk when it is nearly full, and stdout (consumes
+   out) *)
+fn report_silent {li:agz}
+  (ec: int, in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+   out: $B.builder_v, out_cut: bool): void = let
+  val free_kib = disk_free_kib()
+  var m : $B.builder_v = $B.create()
+  val () = (if free_kib >= 0 && free_kib < 65536 then let
+      val () = bput_v(m, "error: no space left on device (")
+      val () = put_int_v(m, free_kib / 1024)
+    in bput_v(m, " MB free in build): ") end
+    else bput_v(m, "error: "))
+  val () = bput_v(m, "patsopt on ")
+  val () = module_put(in_bv, in_len, m)
+  val () = bput_v(m, " failed with ")
+  val () = (if ec >= 0 then let
+      val () = bput_v(m, "status ")
+    in put_int_v(m, ec) end
+    else bput_v(m, "an unknown status"))
+  val () = bput_v(m, " and printed nothing")
+  val () = (if $B.length(out) > 0 then let
+      val () = bput_v(m, "; stdout was: ")
+      val () = append_builder(m, out)
+      val () = (if out_cut then bput_v(m, " [cut]") else ())
+      val () = put_newline_v(m)
+    in () end
+    else let
+      val () = $B.builder_free(out)
+      val () = bput_v(m, ".")
+    in put_newline_v(m) end)
+in prerr_builder(m) end
+
+(* patsopt's exit code ec, reported as Rust reports a failure. Its stderr
+   err is consumed, and out (its stdout, with whether it was cut) too.
+   A failure that printed nothing is said as such, never as a patsopt
+   error with no text *)
+fn finish_patsopt {li:agz}
+  (ec: int, in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+   err: $B.builder_v, out: $B.builder_v, out_cut: bool): int =
+  if ec <> 0 then let
+    val silent = ($B.length(err) = 0): bool
+  in
+    if silent then let
+      val () = $B.builder_free(err)
+      val () = report_silent(ec, in_bv, in_len, out, out_cut)
+      val () = set_build_err()
+    in ec end
+    else let
+      val () = $B.builder_free(out)
+      val () = report_patsopt(in_bv, in_len - 1, err)
+      val () = set_build_err()
+    in ec end
+  end
+  else let
+    val () = $B.builder_free(err)
+    val () = $B.builder_free(out)
+  in 0 end
+
 (* The caps, read from the environment once: seconds (0: none) and
    megabytes (0: none) *)
 
@@ -2112,8 +2304,9 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
     val () = print! (" -d ")
     val () = print_borrow(in_bv, 0, in_len, 524288)
   in print_newline() end else ())
+  val @(out_ok, out_cfg) = stdout_config()
   val sr = spawn_child_with(bv_exec, argv, envp,
-    $P.dev_null(), $P.dev_null(), $P.pipe_new())
+    $P.dev_null(), out_cfg, $P.pipe_new())
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
 in
@@ -2135,19 +2328,22 @@ in
       (* the time cap ended it: sh's status 124 (a patsopt that exits 124
          itself is made 1 there); the memory cap: it failed with a signal
          (ec < 0 direct, over 128 through sh) or said its allocator failed *)
+      val @(out_cut, ob) = stdout_take(out_ok)
       val time_hit = (secs > 0 && ec = 124): bool
       val signalled = (ec < 0 || ec > 128): bool
       val @(said, eb2) = memory_said(mb > 0 && ec <> 0 && ~time_hit && ~signalled, eb)
       val mem_hit = (mb > 0 && ec <> 0 && ~time_hit && (signalled || said)): bool
       val rc = (if time_hit then let
           val () = $B.builder_free(eb2)
+          val () = $B.builder_free(ob)
           val () = cap_report(true, in_bv, in_len)
         in 1 end
         else if mem_hit then let
           val () = $B.builder_free(eb2)
+          val () = $B.builder_free(ob)
           val () = cap_report(false, in_bv, in_len)
         in 1 end
-        else finish_patsopt(ec, in_bv, in_len - 1, eb2)): int
+        else finish_patsopt(ec, in_bv, in_len, eb2, ob, out_cut)): int
       val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
     in rc end
   | ~$R.err(_) => ~1
