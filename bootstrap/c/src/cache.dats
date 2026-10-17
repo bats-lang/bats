@@ -276,7 +276,10 @@ in ok end
    patsopt and of every file of the prelude and libraries it reads
    (which --depgen does not name), made once per process into
    build/.bats_toolchain. By content, not by mtime: a patsopt rebuilt or
-   a prelude edited in place is another toolchain. This is the stamp's
+   a prelude edited in place is another toolchain. Symbolic links are
+   followed (find -L): an install whose patsopt, or a directory of it, is
+   a link to another place is judged by what the link reaches, which a
+   plain -type f walk would not see at all (bats#305). This is the stamp's
    `patsopt` line and the cache key's toolchain. false when the listing
    cannot be made. *)
 
@@ -292,7 +295,7 @@ implement toolchain_digest (ph, phlen, out) = let
       val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
       var a2 : $B.builder_v = $B.create()
       val () = bput_v(a2, "build/.bats_toolchain")
-      val rc = sh_script("l=\"$(pwd -P)/$2\"; cd \"$1\" && find bin/patsopt prelude libats share ccomp -type f -exec cksum {} + | LC_ALL=C sort > \"$l\"",
+      val rc = sh_script("l=\"$(pwd -P)/$2\"; cd \"$1\" && find -L bin/patsopt prelude libats share ccomp -type f -exec cksum {} + | LC_ALL=C sort > \"$l\"",
         $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil())))
       val () = (if rc = 0 then !g_toolchain_listed := true else ())
     in rc = 0 end): bool
