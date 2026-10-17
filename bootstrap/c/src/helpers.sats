@@ -106,6 +106,8 @@ fn find_null_bv_from {l:agz}{n:pos}{p:int}
 
 
 
+
+
 fn is_verbose(): bool
 
 fn is_quiet(): bool
@@ -119,6 +121,17 @@ fn set_verbose(v: bool): void
 fn set_quiet(v: bool): void
 
 fn set_test_mode(v: bool): void
+
+fn set_cold(v: bool): void
+
+
+
+
+
+
+fn names_fresh (): bool
+
+fn names_set_fresh (v: bool): void
 
 fn set_lock_dev(v: bool): void
 
@@ -160,6 +173,9 @@ fn get_exit_code(): int
 
 
 fn get_cap_exit(): int
+
+
+
 
 
 
@@ -779,6 +795,7 @@ fn touch_sats_stamp (): void
 
 
 
+
 fn c_fresh_bv
   (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
@@ -914,6 +931,20 @@ fn file_has_bytes {lp:agz}{lb:agz}
 
 
 
+
+
+fn stamp_digest_sizes (b: !$B.builder_v >> $B.builder_v): void
+
+
+
+
+
+fn stamp_digest_hashes (b: !$B.builder_v >> $B.builder_v): void
+
+
+
+
+
 fn input_digest_sizes {li:agz}
   (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
 
@@ -927,10 +958,8 @@ fn input_digest_sizes {li:agz}
 
 
 
-
 fn input_digest_hashes {li:agz}
   (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
-
 
 
 
@@ -1883,6 +1912,23 @@ fn check_emitted_flaws {lo,li:agz}
 
 
 
+fn cap_secs_now (): int
+
+
+
+fn cap_mb_now (): int
+
+
+
+
+
+fn cap_stopped {li:agz}
+  (time: bool, in_bv: !$A.borrow(byte, li, 524288), in_len: int): void
+
+
+
+
+
 
 
 fn patsopt_only {lph:agz}{lo:agz}{li:agz}
@@ -2634,6 +2680,11 @@ fn write_file_from_rope {lp:agz}{k:nat}
 
 
 
+
+
+
+
+
 fn io_error_errno (e: $F.io_error): int
 
 
@@ -2848,6 +2899,289 @@ fn sats_moved {lp:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn memo_entry_size {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+fn memo_entry_hash {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+fn file_starts_with {lp:agz}{lb:agz}{n:nat | n <= 524288}
+  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int n): bool
+
+
+
+
+
+fn is_cold (): bool
 
 
 

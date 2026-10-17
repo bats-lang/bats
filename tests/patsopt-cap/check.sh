@@ -13,7 +13,8 @@
 #  * Generous caps change nothing but who starts patsopt: the C is the
 #    same, and no timer outlives the run (bats returns at once and the
 #    project is not left locked).
-#  * The time cap ends a run that does not finish, and says so.
+#  * The time cap ends a run that does not finish, and says so; so does it
+#    patsopt --depgen, which the check memo runs after a module passed.
 #  * The memory cap ends a run that allocates too much, whether it says
 #    so or aborts, and says so.
 #  * A patsopt error under a cap is still a patsopt error, exit status 1.
@@ -58,6 +59,16 @@ ${CC:-cc} -o "$TMP/hog" "$TMP/hog.c"
 # the cap started it), then does what FAKE says, else runs the real one
 cat > "$H/.bats/ats2/bin/patsopt" <<SH
 #!/bin/sh
+# patsopt --depgen lists the files a module reads (the check memo runs it
+# after a module passed, bats#267). It is held to the caps like any patsopt
+# run, but it is started by sh in every case, so its parent says nothing of
+# whether a cap is set: it is not logged. FAKE=depgen-sleep makes it hang.
+for a in "\$@"; do
+  if [ "\$a" = --depgen ]; then
+    if [ "\${FAKE:-}" = depgen-sleep ]; then exec sleep 60; fi
+    exec "$REAL/bin/patsopt" "\$@"
+  fi
+done
 basename "\$(ps -o comm= -p \$PPID | tr -d ' ')" >> "$LOG"
 case "\${FAKE:-}" in
   sleep) exec sleep 60 ;;
@@ -73,7 +84,7 @@ project() { # <directory>: a project of one binary, named p
   printf '[package]\nname = "p"\nkind = "bin"\n' > "$1/bats.toml"
   printf 'implement main0 () = println! (1)\n' > "$1/src/bin/p.bats"
 }
-for d in plain empty generous time mem broken warn; do project "$TMP/$d"; done
+for d in plain empty generous time mem broken warn depgen; do project "$TMP/$d"; done
 printf '#include "share/atspre_staload.hats"\n\nval x: int = "s"\nimplement main0 () = ()\n' > "$TMP/broken/src/bin/p.bats"
 
 # run <directory> <log>: check in the directory with the environment given
@@ -135,6 +146,13 @@ run time env FAKE=sleep BATS_PATSOPT_TIMEOUT_S=1
 [ $secs -lt 40 ] || fail "the time cap took ${secs}s: the run was not stopped" time
 grep -q "error: patsopt on src/bin/p.bats was stopped by the time cap: it did not finish within BATS_PATSOPT_TIMEOUT_S=1 seconds. Raise BATS_PATSOPT_TIMEOUT_S, or unset it for no time cap." "$TMP/time.log" || fail "the time cap was not said, naming the module" time
 if grep -q "patsopt error" "$TMP/time.log"; then fail "the time cap was reported as a patsopt error" time; fi
+
+# patsopt --depgen, which the check memo runs once a module passed, is held
+# to the time cap too: a hang there used to run on, outside every cap
+run depgen env FAKE=depgen-sleep BATS_PATSOPT_TIMEOUT_S=3
+[ $rc = 124 ] || fail "the time cap's status on --depgen was $rc, not 124" depgen
+[ $secs -lt 40 ] || fail "--depgen was not stopped by the time cap: it ran ${secs}s" depgen
+grep -q "was stopped by the time cap: it did not finish within BATS_PATSOPT_TIMEOUT_S=3 seconds" "$TMP/depgen.log" || fail "the time cap on --depgen was not said" depgen
 
 # the memory cap, where sh can lower the limit
 if sh -c 'ulimit -v 262144' 2>/dev/null; then

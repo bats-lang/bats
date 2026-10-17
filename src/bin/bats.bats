@@ -103,7 +103,8 @@ fn print_usage(): void = let
   val () = println! ("                               Build and run a binary")
   val () = println! ("  test [--only native|wasm] [--filter <name>] [--repository <dir>]")
   val () = println! ("                               Run tests")
-  val () = println! ("  check [--repository <dir>]   Type-check the project (no linking)")
+  val () = println! ("  check [--cold] [--repository <dir>]")
+  val () = println! ("                               Type-check the project (no linking); --cold (or BATS_COLD) checks every module again")
   val () = println! ("  tree [--repository <dir>]    Show dependency tree")
   val () = println! ("  upload --repository <dir>    Package and upload a library")
   val () = println! ("  clean                        Remove generated artifacts")
@@ -398,6 +399,9 @@ in
           var apn9 = @[char][7]('d', 'r', 'y', '-', 'r', 'u', 'n')
           var aph9 = @[char][12]('d', 'r', 'y', ' ', 'r', 'u', 'n', ' ', 'm', 'o', 'd', 'e')
           val @(p, h_dry_run) = ap_flag(p, apn9, 7, $R.none(), aph9, 12)
+          var apn14 = @[char][4]('c', 'o', 'l', 'd')
+          var aph14 = @[char][21]('i', 'g', 'n', 'o', 'r', 'e', ' ', 't', 'h', 'e', ' ', 'c', 'h', 'e', 'c', 'k', ' ', 'm', 'e', 'm', 'o')
+          val @(p, h_cold) = ap_flag(p, apn14, 4, $R.none(), aph14, 21)
           var apn10 = @[char][4]('h', 'e', 'l', 'p')
           var aph10 = @[char][9]('s', 'h', 'o', 'w', ' ', 'h', 'e', 'l', 'p')
           val @(p, h_help) = ap_flag(p, apn10, 4, $R.some(104), aph10, 9)
@@ -425,6 +429,7 @@ in
               else let
               val () = (if $AP.get_bool(r, h_verbose) then set_verbose(true) else ())
               val () = (if $AP.get_bool(r, h_quiet) then set_quiet(true) else ())
+              val () = (if $AP.get_bool(r, h_cold) then set_cold(true) else ())
               (* Handle --run-in *)
               val () = (if $AP.is_present(r, h_run_in) then let
                 val ri_buf = $A.alloc<byte>(4096)
