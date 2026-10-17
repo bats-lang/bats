@@ -241,19 +241,73 @@ in
   end
 end
 
+(* What a toolchain bats did not make does with a false statement (bats#264).
+   The probe is the statement of the issue: the -int build of the solver
+   accepts it (in well under a second here), the GMP build does not, and it
+   runs past 100 s on it here, so a cap ends it. A control, a true
+   statement, must be accepted first, so a patsopt that checks nothing is
+   no answer. The answer is patsopt's exit status, and no name or path
+   says it, so renaming a directory does not change it. The cap is 20 s:
+   the -int build's answer is far below it, and a slower machine gives
+   "cannot tell", never a wrong kind. The probe's files are in a temporary
+   directory under ~/.bats, removed by the script's exit. Exit 20:
+   accepted (the -int build); 21: refused; 22: no answer (the control
+   failed, or the probe ran past the cap); 23: no temporary directory.
+   An answer of 20 or 21, and 22 when the probe ran past the cap, is kept in
+   ~/.bats/ats2.solver, beside the toolchain's cksum (the bytes of bin/patsopt,
+   not its path), so a toolchain is probed once. A control failure is not kept:
+   it may be a broken environment, and is asked again. *)
+#define PROBE_CONTROL "#include \"share/atspre_staload.hats\"\nprfn bats_probe_true {n:nat | n < 65536} (): [n < 65536] void = ()\n"
+#define PROBE_FALSE "#include \"share/atspre_staload.hats\"\nprfn bats_probe_false {h,l:nat | h < 65536; l < 65536;\n  (h/256 + 256*(l%256))/256 + 256*((l/256 + 256*(h%256))%256) == l} (): [1 == 2] void = ()\n"
+#define PROBE_SOLVE "k=$(cksum < \"$1/ats2/bin/patsopt\" 2>/dev/null) || exit 22\nif [ -f \"$1/ats2.solver\" ]; then\n  case $(cat \"$1/ats2.solver\") in\n    \"$k 20\") exit 20 ;;\n    \"$k 21\") exit 21 ;;\n    \"$k 22\") exit 22 ;;\n  esac\nfi\nd=$(mktemp -d \"$1/ats2-probe.XXXXXX\") || exit 23\ntrap 'rm -rf \"$d\"' EXIT\nprintf '%s\\n' \"$2\" > \"$d/control.dats\"\nprintf '%s\\n' \"$3\" > \"$d/false.dats\"\nexport PATSHOME=\"$1/ats2\"\nP=\"$1/ats2/bin/patsopt\"\ncapped() {\n  rm -f \"$d/rc\" \"$d/pid\" \"$d/late\"\n  ( \"$P\" -tc -d \"$1\" > /dev/null 2>&1 & echo $! > \"$d/pid\"; wait $!; echo $? > \"$d/rc\" ) > /dev/null 2>&1 &\n  n=0\n  while [ ! -f \"$d/rc\" ]; do\n    sleep 1\n    n=$((n + 1))\n    if [ $n -ge 20 ] && [ ! -f \"$d/late\" ] && [ -f \"$d/pid\" ]; then touch \"$d/late\"; kill \"$(cat \"$d/pid\")\" 2>/dev/null; fi\n  done\n  if [ -f \"$d/late\" ]; then return 124; fi\n  return \"$(cat \"$d/rc\")\"\n}\ncapped \"$d/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$d/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then printf '%s\\n' \"$k 20\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 20; fi\nif [ $f -eq 124 ]; then printf '%s\\n' \"$k 22\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 22; fi
+printf '%s\\n' \"$k 21\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"\nexit 21\n"
+
+datatype solver_kind = SolverInt | SolverRefusesFalse | SolverNoAnswer
+
+fn probe_solver (): solver_kind = let
+  val rc = sh_exec(PROBE_SOLVE, base_arg(), text_arg(PROBE_CONTROL), text_arg(PROBE_FALSE))
+in
+  if rc = 20 then SolverInt()
+  else if rc = 21 then SolverRefusesFalse()
+  else SolverNoAnswer()
+end
+
+(* ~/.bats/ats2 as a builder (empty when HOME is not set) *)
+fn here_arg (): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val has = env_value("HOME", b)
+  val () = (if has then bput_v(b, "/.bats/ats2") else ())
+in b end
+
+fn say_solver (kind: solver_kind): void =
+  case+ kind of
+  | SolverInt() => let
+      val () = prerr! ("warning: the ATS2 in ")
+      val () = prerr_builder(here_arg())
+    in prerr! (" was not installed by bats, and its constraint solver accepts a false statement, so it is the -int build, which computes in C int and proves false things (bats#264). A local check can pass what CI refuses: CI uses the pinned ", ATS2_NAME, ". To use that one, move ~/.bats/ats2 away and run bats ats2 install\n") end
+  | SolverRefusesFalse() => let
+      val () = prerr! ("note: the ATS2 in ")
+      val () = prerr_builder(here_arg())
+    in prerr! (" was not installed by bats and is not the pinned ", ATS2_NAME, ". Its constraint solver refuses the false statement that the -int build accepts (bats#264)\n") end
+  | SolverNoAnswer() => let
+      val () = prerr! ("warning: the ATS2 in ")
+      val () = prerr_builder(here_arg())
+    in prerr! (" was not installed by bats, and bats cannot tell which constraint solver it has: it gave no answer to a false statement within 20 s (the -int build answers in well under a second; bats#264)\n") end
+
 (* A toolchain bats did not make: used as it is, and said on every run, on
-   stderr, because an -int build computes in C int and accepts false
-   statements (bats#264) *)
+   stderr, once, with what the probe found of its solver. An -int build is
+   said to be one (CI uses the GMP build, so a local check can pass what CI
+   refuses): a warning, not an error, since a user who knowingly uses it
+   keeps what they installed, and bats replaces only what it made. *)
 val g_warned = ref<bool>(false)
 
 fn warn_foreign (): void = if !g_warned then () else let
   val () = !g_warned := true
-  var b : $B.builder_v = $B.create()
-  val _ = env_value("HOME", b)
-  val () = bput_v(b, "/.bats/ats2")
-  val () = prerr! ("warning: the ATS2 in ")
-  val () = prerr_builder(b)
-in prerr! (" was not installed by bats and is not checked against the pinned ", ATS2_NAME, " (an -int build accepts false statements, bats#264)\n") end
+  val () = prerr! ("checking the ATS2 in ")
+  val () = prerr_builder(here_arg())
+  val () = prerr! (" (not installed by bats) with a false statement, up to 20 s ...\n")
+  val kind = probe_solver()
+in say_solver(kind) end
 
 #pub fn ats2_ensure (talk: ats2_talk): bool
 
