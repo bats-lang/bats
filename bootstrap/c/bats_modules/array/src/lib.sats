@@ -430,7 +430,90 @@ fun barr_of_arr {l:agz}{n:nat} (a: arr(byte, l, n)): [cs:cells] (CLEN(cs, n) | b
 fun barr_to_arr {l:agz}{n:nat}{cs:cells} (a: barr(l, n, cs)): arr(byte, l, n)
 
 
+
+
+
+
+
+
+
+
+absview arrx_lent(l:addr, n:int, o:addr)
+
+fun barr_of_arrx {l:agz}{n:nat}{o:addr} (a: arrx(byte, l, n, o))
+  : [cs:cells] (CLEN(cs, n), arrx_lent(l, n, o) | barr(l, n, cs))
+
+fun barr_to_arrx {l:agz}{n:nat}{o:addr}{cs:cells} (pf: arrx_lent(l, n, o) | a: barr(l, n, cs))
+  : arrx(byte, l, n, o)
+
+
 fun barr_copy {l:agz}{n:pos}{cs:cells} (a: !barr(l, n, cs), n: int n): [m:agz] barr(m, n, cs)
+
+
+
+
+
+
+
+
+
+
+absvtype cfrozen(l:addr, n:int, k:int, cs:cells) = ptr
+
+absvtype cborrow(l:addr, n:int, cs:cells) = ptr
+
+fun barr_freeze {l:agz}{n:nat}{cs:cells} (a: barr(l, n, cs))
+  : @(cfrozen(l, n, 1, cs), cborrow(l, n, cs))
+
+fun barr_thaw {l:agz}{n:nat}{cs:cells} (f: cfrozen(l, n, 0, cs)): barr(l, n, cs)
+
+fun cborrow_dup {l:agz}{n:nat}{cs:cells}{k:pos}
+  (f: !cfrozen(l, n, k, cs) >> cfrozen(l, n, k+1, cs), b: !cborrow(l, n, cs))
+  : cborrow(l, n, cs)
+
+fun cborrow_drop {l:agz}{n:nat}{cs:cells}{k:pos}
+  (f: !cfrozen(l, n, k, cs) >> cfrozen(l, n, k-1, cs), b: cborrow(l, n, cs)): void
+
+
+
+
+
+
+
+fun cborrow_view {l:agz}{n:nat}{cs:cells}{k:pos}
+  (f: !cfrozen(l, n, k, cs) >> cfrozen(l, n, k+1, cs), b: !cborrow(l, n, cs))
+  : borrow(byte, l, n)
+
+fun cborrow_view_drop {l:agz}{n:nat}{cs:cells}{k:pos}
+  (f: !cfrozen(l, n, k, cs) >> cfrozen(l, n, k-1, cs), b: borrow(byte, l, n)): void
+
+
+fun cborrow_get {l:agz}{n,i:nat | i < n}{cs:cells} (b: !cborrow(l, n, cs), i: int i)
+  : [v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
