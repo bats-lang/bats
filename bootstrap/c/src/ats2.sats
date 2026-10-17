@@ -47,6 +47,8 @@ staload R = "result/src/lib.sats"
 
 
 
+
+
 staload "helpers.sats"
 
 
@@ -261,7 +263,11 @@ datatype ats2_talk = Say | Quiet
 
 
 
+
 fn ats2_ensure (talk: ats2_talk): bool
+
+
+
 
 
 
