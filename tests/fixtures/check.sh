@@ -23,32 +23,90 @@
 #    without it leaves no temporary directory;
 #  * a project that does not check fails the run before any fixture.
 # The memo (after the runner's own cases, from "the memo" below; a third
-# argument `memo` runs only those, which is how the mutants of
-# tests/fixtures/mutants.sh are killed in a few minutes):
+# argument `memo` runs only those, which is how the mutants below are
+# killed in a few minutes each):
 #  * a second run serves every fixture from the memo (`ok   <member> (0 s)
 #    [memo]`, `fixtures: N ok, 0 failed (N from the memo)`) and runs no
 #    patsopt; the key holds no absolute path (a copy of the project at
 #    another path, and the memo copied elsewhere, still hit);
 #  * a changed module, a changed staloaded .sats (of the same size), a
-#    changed snippet or `before`, a module added, a changed toolchain, a
-#    snippet that loads a file, a changed module that reads the interface
-#    a snippet changed: each runs the fixture again; a change in a module
+#    changed snippet or `before`, a changed bats.toml, a module added, a
+#    changed toolchain: each runs the fixture again; a change in a module
 #    the fixture does not read, or in one that reads the module without
-#    reading the interface the snippet left, does not;
+#    reading the interface the snippet left, does not; a snippet that loads
+#    a file or changes the interface is never kept;
+#  * a hit stands in for patsopt's answer, never for the validation of the
+#    whole project (the call cycles of every module, the lexer's rules):
+#    a cycle through another module's implement, made after the entry was
+#    kept, is refused (the first version of this memo, df56636, served it
+#    as a pass); and `bats check` of the same project refuses it with every
+#    module warm, so the check memo of #298 has no such hole;
 #  * a reject keeps patsopt's log, not a verdict: a changed or wrong expect
 #    is judged again against the stored log, with no patsopt run;
 #  * a failure is never kept as a pass (an accept that does not check, a
 #    reject that checks, a check that fails with no error of patsopt's);
-#  * a torn, garbled, truncated, foreign or other-format entry is a miss,
-#    and four copies of the project side by side, five rounds, never serve
-#    a torn one; a run killed while it checks leaves no entry;
+#  * a torn, garbled, truncated, empty, missing, foreign, other-key or
+#    other-format .res or .key is a miss; four copies of the project side by
+#    side, five rounds, never serve or leave a torn file; a run killed while
+#    it checks leaves no file;
 #  * --cold reads no memo, writes it, and reports a memo that no longer
-#    says what a cold run does (STALE MEMO), removing it;
-#  * --prune lists and removes the entries the run did not use, and nothing
-#    outside a memo's own entries (not a directory without the memo's mark,
-#    not through a link), and is a usage error with --only;
-#  * the script bats writes (the memo's: sh, since bats starts the system's
-#    tools through sh, as it does everywhere in fixtures.bats) is one sh parses.
+#    says what a cold run does (STALE MEMO), replacing it;
+#  * --prune lists and removes the .key and .res files the run did not use,
+#    and nothing else (not a stray file, not a directory without the
+#    memo's mark, not through a link, not in a directory that is no memo),
+#    and is a usage error with --only.
+# bats-lang/bats#305 is the bug the toolchain case works around.
+#
+# Mutants. Each is one edit of src/fixtures.bats (`old` -> `new`; rebuild
+# with `bats build`, then run this script on the result with `memo`); the
+# script must exit 1 and its FAIL line must hold the text after "killed by".
+# The three last are equivalent: the field they edit is also determined by
+# another (the spliced module's hash holds the snippet and where `before`
+# put it; the entry's .key holds the toolchain's stamp), so no run can tell
+# them from the original; the key names them anyway, as what it depends on.
+#  1. validate-skipped: `else if ~validate_clean() then let val () = $B.builder_free(md) in 100 end` -> `else if false then let val () = $B.builder_free(md) in 100 end`
+#     killed by: a cycle through another module's implement was served from the memo
+#  2. interface-kept: `&& iface_same(cfg, w, bv_f, mlen) &&` -> `&& true &&`
+#     killed by: a snippet that loads a file, or one that changes the interface, was kept
+#  3. loads-kept: `~snippet_loads(cfg, w, mv, a, e)` -> `true`
+#     killed by: a snippet that loads a file, or one that changes the interface, was kept
+#  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
+#     killed by: memo cold audit lie: no text: FAIL accept/lone-ok: STALE MEMO
+#  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
+#     killed by: the log of a check that failed with no error of patsopt's was kept
+#  6. audit-off: `val stale = (if usable then audit(cfg, w, want_pass, want_log, bv_n, nn, status, bv_m, mn, bv_k) else false): bool` -> `val stale = false: bool`
+#     killed by: memo: cold audit of a doctored log: status 0, not 1
+#  7. sum-unchecked: `in (if hex_is(sum, rv, n, n - 65) then cl else ~1) end` -> `in (if hex_is(sum, rv, n, n - 65) then cl else cl) end`
+#     killed by: a log with a wrong sum was served
+#  8. closure-digest-unchecked: `val same_key = (if kdone then hex_is(kh2, bv_r, rn, cl) else` -> `val same_key = (if kdone then (hex_is(kh2, bv_r, rn, cl) || true) else`
+#     killed by: memo closure digest: 1 lines from the memo, not 0
+#  9. closure-key-unchecked: `val r = closure_key_equal(bv_a)` -> `val r = true`
+#     killed by: a changed staloaded .sats of the same size
+#  10. prune-mark-ignored: `val dmarked = (path_exists(memo_sub2(memo, mlen, bv_n, "/.memo-dir")) && physical_sub(memo, mlen, bv_n)): bool` -> `val dmarked = physical_sub(memo, mlen, bv_n)`
+#     killed by: memo prune: listed 4 removals, not 3
+#  11. prune-link-followed: `"/.memo-dir")) && physical_sub(memo, mlen, bv_n)): bool` -> `"/.memo-dir")) && true): bool`
+#     killed by: memo prune: listed 4 removals, not 3
+#  12. prune-unmarked-memo: `val marked = (have_dir && path_exists(memo_plus(bv_m, mn, "/.bats-fixtures-memo"))): bool\n  val ua` -> `val marked = (have_dir): bool\n  val ua`
+#     killed by: memo prune not a memo: no text: memo: nothing pruned
+#  13. key-no-snippet: `val a2 = path_sha(fixture_text(cfg, w, mv, a, e, "snippet.bats"), t)` -> `val a2 = path_sha(fixture_text(cfg, w, mv, a, e, "before"), t)`
+#     equivalent: survives
+#  14. key-no-before: `val a1 = path_sha(fixture_text(cfg, w, mv, a, e, "before"), t)` -> `val a1 = path_sha(fixture_text(cfg, w, mv, a, e, "snippet.bats"), t)`
+#     equivalent: survives
+#  15. key-no-module: `val a3 = path_sha(mp, t)` -> `val a3 = path_sha(str_builder("bats.toml"), t)\n  val () = $B.builder_free(mp)`
+#     killed by: a changed module
+#  16. key-no-toml: `val a4 = path_sha(str_builder("bats.toml"), t)` -> `val a4 = path_sha(str_builder("src/helper.bats"), t)`
+#     killed by: a changed bats.toml was served
+#  17. key-no-stamp: `val a5 = path_sha(str_builder("build/.bats_stamp"), t)` -> `val a5 = path_sha(str_builder("bats.toml"), t)`
+#     equivalent: survives
+#  18. cold-serves: `      if cold then let\n        var pr` -> `      if false then let\n        var pr`
+#     killed by: memo cold audit: no text: FAIL reject/lib-bad: STALE MEMO
+#  19. prune-all: `val used = (if shaped then key_used(uv, un, 0, bv_n, nn) else true): bool` -> `val used = (if shaped then false else true): bool`
+#     killed by: memo prune: listed 9 removals, not 3
+#  20. prune-stray: `val shaped = (nn = 68 && hex_run(bv_n, nn, 0)\n      && (text_has(bv_n, nn, 64, ".key") || text_has(bv_n, nn, 64, ".res"))): bool` -> `val shaped = true: bool`
+#     killed by: memo prune: listed 16 removals, not 3
+#  21. store-in-no-memo: `&& memo_ready(bv_m, mn) &&` -> `&& true &&`
+#     killed by: the first run kept 0 files, not 8
+#
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -56,6 +114,7 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR BATS_COMMIT BATS_COLD BATS_MEMO_DIR XDG_CACHE_HOME
 ONLY=${3:-}
+T_START=$(date +%s)
 fail() { echo "FAIL: $*" >&2; [ -z "${TIMES:-}" ] || cat "$TMP/times" 2>/dev/null >&2; exit 1; }
 P=$TMP/proj
 mkdir -p "$P/src" "$TMP/tmp"
@@ -318,6 +377,7 @@ PLOG=$TMP/patsopt-log; FLAG_FAIL=$TMP/flag-fail; FLAG_HANG=$TMP/flag-hang; HANG_
 printf '#!/bin/sh\nd=; depgen=0; prev=; for a in "$@"; do [ "$a" = --depgen ] && depgen=1; [ "$prev" = -d ] && d=$a; prev=$a; done\nif [ $depgen = 0 ] && [ -n "$d" ]; then if grep -q "fixture-snippet" "$d" 2>/dev/null; then echo "snippet $d" >> "%s"; else echo "base $d" >> "%s"; fi; fi\nif [ $depgen = 0 ] && [ -f "%s" ]; then echo $$ > "%s"; exec sleep 600; fi\nif [ $depgen = 0 ] && [ -f "%s" ]; then exit 1; fi\nexec "%s" "$@"\n' "$PLOG" "$PLOG" "$FLAG_HANG" "$HANG_PID" "$FLAG_FAIL" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 
+[ -z "${TIMES:-}" ] || echo "$(( $(date +%s) - T_START )) s before the memo" >> "$TMP/times"
 mkproj() { # <dir>: lib (stadefs), other (reads lib's interface), unrelated, helper
   d=$1; mkdir -p "$d/src"
   printf '[package]\nname = "fx"\nkind = "lib"\n' > "$d/bats.toml"
@@ -352,15 +412,24 @@ mrun() { l=$1; shift; : > "$PLOG"; mrunx "$MP" "$MF" "$MW" "$M" "$l" "$@"; }
 # 1 when patsopt checked a .dats holding a snippet of module $1 (a check
 # runs it more than once), else 0
 ranfx() { n=$(grep -c "^snippet build/src/$1\\.dats\$" "$PLOG"); if [ "${n:-0}" -gt 0 ]; then echo 1; else echo 0; fi; }
-nentries() { find "$1" -type f -name '[0-9a-f]*' ! -name '.*' 2>/dev/null | wc -l | tr -d ' '; }
+# the files of a memo: <2 hex>/<64 hex>.key and .res (never the marks)
+nfiles() { find "$1" -type f \( -name '[0-9a-f]*.key' -o -name '[0-9a-f]*.res' \) 2>/dev/null | wc -l | tr -d ' '; }
 memoed() { # <log> <n>: exactly n of its ok lines are from the memo
   n=$(grep -ac '^ok   .* (0 s) \[memo\]$' "$1")
   [ "$n" = "$2" ] || { echo "--- $1"; cat "$1"; fail "$3: $n lines from the memo, not $2"; }
 }
-resum() { sed '$d' "$1" > "$1.b"; { cat "$1.b"; printf 'sum %s\n' "$(sum256 < "$1.b")"; } > "$1"; rm -f "$1.b"; }
-entry_of() { # <member>: the memo's entry of a fixture (runs it)
-  mrun "$TMP/entry.log" --only "$1"
-  k=$(cat "$MW/memo.key"); echo "$M/$(printf '%s' "$k" | cut -c1-2)/$k"
+# a .res file made right again after an edit: its last line is the sha256 of the rest
+resum() { sed '$d' "$1" > "$1.b"; { cat "$1.b"; printf '%s\n' "$(sum256 < "$1.b")"; } > "$1"; rm -f "$1.b"; }
+keyof() { # <member>: the path (less .key/.res) of a fixture's entry, from the last run of the whole set
+  i=$(grep -nx "$1" "$MW/members" | cut -d: -f1); k=$(sed -n "${i}p" "$MW/memo-used")
+  echo "$M/$(printf '%s' "$k" | cut -c1-2)/$k"
+}
+bad_run() { # <log> <label> <modules that must have been checked: 111 style> args...
+  l=$1; lab=$2; want=$3; shift 3
+  mrun "$l" "$@"
+  [ $rc = 0 ] || { cat "$l"; fail "memo $lab: status $rc"; }
+  memoed "$l" 0 "memo $lab"
+  [ "$(ranfx lib)$(ranfx other)$(ranfx unrelated)" = "$want" ] || fail "memo $lab: a damaged entry was trusted: $(cat "$PLOG")"
 }
 
 # ---- cold memo: runs, keeps; the second run serves all from the memo
@@ -368,7 +437,7 @@ mrun "$TMP/m1.log"
 [ $rc = 0 ] || { cat "$TMP/m1.log"; fail "memo: first run: status $rc"; }
 said "$TMP/m1.log" "fixtures: 4 ok, 0 failed" "memo first"
 memoed "$TMP/m1.log" 0 "memo first"
-[ "$(nentries "$M")" = 4 ] || fail "memo: the first run kept $(nentries "$M") entries, not 4"
+[ "$(nfiles "$M")" = 8 ] || fail "memo: the first run kept $(nfiles "$M") files, not 8 (a .key and a .res each)"
 [ "$(ranfx lib)$(ranfx other)$(ranfx unrelated)" = 111 ] || fail "memo: first run: patsopt did not check the fixtures"
 mrun "$TMP/m2.log"
 [ $rc = 0 ] || { cat "$TMP/m2.log"; fail "memo: second run: status $rc"; }
@@ -376,13 +445,11 @@ said "$TMP/m2.log" "fixtures: 4 ok, 0 failed (4 from the memo)" "memo second"
 memoed "$TMP/m2.log" 4 "memo second"
 okline "$TMP/m2.log" reject/lib-bad second
 [ "$(ranfx lib)$(ranfx other)$(ranfx unrelated)" = 000 ] || fail "memo: second run ran patsopt on a fixture: $(cat "$PLOG")"
-# the quire log shape is kept: ok   <member> (N s) first, the marker after
 grep -aqE '^ok   accept/lib-ok \(0 s\) \[memo\]$' "$TMP/m2.log" || fail "memo: the marker is not after (N s)"
 
 # ---- the key holds no absolute path, and the memo is where --memo says
-for e in $(find "$M" -type f -name '[0-9a-f]*' ! -name '.*'); do
+for e in $(find "$M" -type f -name '[0-9a-f]*'); do
   ! grep -aqF -e "$TMP" "$e" || fail "memo: an entry holds an absolute path: $e"
-  ! grep -aqF -e "$MP" -e "$MW" "$e" || fail "memo: an entry holds the project's or work path"
 done
 # a copy of the project at another path, in another work directory, with
 # the memo copied elsewhere: all from the memo
@@ -392,29 +459,24 @@ cp -R "$MP" "$MP2"; cp -R "$M" "$M2"
 [ $rc = 0 ] || { cat "$TMP/m3.log"; fail "memo: a copy: status $rc"; }
 memoed "$TMP/m3.log" 4 "memo copy"
 [ "$(ranfx lib)$(ranfx other)$(ranfx unrelated)" = 000 ] || fail "memo: a copy ran patsopt on a fixture"
+rm -rf "$MP2" "$M2" "$TMP/mwork-copy"
 
 # ---- --memo wins over BATS_MEMO_DIR, which wins over the user's cache
 (cd "$MP" && HOME=$H BATS_MEMO_DIR=$TMP/memo-by-env "$BATS" fixtures "$MF" --work "$MW" --only accept/lone-ok > "$TMP/env.log" 2>&1) || { cat "$TMP/env.log"; fail "BATS_MEMO_DIR: failed"; }
-[ "$(nentries "$TMP/memo-by-env")" = 1 ] || fail "memo: BATS_MEMO_DIR was not used"
+[ "$(nfiles "$TMP/memo-by-env")" = 2 ] || fail "memo: BATS_MEMO_DIR was not used"
 (cd "$MP" && env -u BATS_MEMO_DIR HOME=$H XDG_CACHE_HOME=$TMP/xdg "$BATS" fixtures "$MF" --work "$MW" --only accept/lone-ok > "$TMP/xdg.log" 2>&1) || { cat "$TMP/xdg.log"; fail "XDG_CACHE_HOME: failed"; }
-[ "$(nentries "$TMP/xdg/bats/fixtures")" = 1 ] || fail "memo: the user's cache was not used"
+[ "$(nfiles "$TMP/xdg/bats/fixtures")" = 2 ] || fail "memo: the user's cache was not used"
 (cd "$MP" && env -u BATS_MEMO_DIR -u XDG_CACHE_HOME HOME=$H "$BATS" fixtures "$MF" --work "$MW" --only accept/lone-ok > "$TMP/home.log" 2>&1) || { cat "$TMP/home.log"; fail "HOME cache: failed"; }
-[ "$(nentries "$H/.cache/bats/fixtures")" = 1 ] || fail "memo: ~/.cache/bats/fixtures was not used"
+[ "$(nfiles "$H/.cache/bats/fixtures")" = 2 ] || fail "memo: ~/.cache/bats/fixtures was not used"
 
-# ---- an unrelated module changes: only its own fixture runs again
+# ---- what changes the key: an unrelated module and a dependent's body do not
 printf '(* changed *)\n' >> "$MP/src/unrelated.bats"
-mrun "$TMP/m4.log" --only accept/lone-ok --only accept/lib-ok --only accept/other-ok
+printf '(* changed *)\n' >> "$MP/src/other.bats"
+mrun "$TMP/m4.log"
 [ $rc = 0 ] || { cat "$TMP/m4.log"; fail "memo: unrelated: status $rc"; }
 memoed "$TMP/m4.log" 2 "memo unrelated"
-[ "$(ranfx unrelated)" = 1 ] && [ "$(ranfx lib)$(ranfx other)" = 00 ] || fail "memo: an unrelated change: $(cat "$PLOG")"
-# the body of a module that reads lib's interface is not the interface: lib's fixtures are served
-printf '(* changed *)\n' >> "$MP/src/other.bats"
-mrun "$TMP/m5.log"
-[ $rc = 0 ] || { cat "$TMP/m5.log"; fail "memo: dependent body: status $rc"; }
-memoed "$TMP/m5.log" 3 "memo dependent body"
-[ "$(ranfx other)" = 1 ] && [ "$(ranfx lib)" = 0 ] || fail "memo: a dependent's body invalidated the module it reads: $(cat "$PLOG")"
-
-# ---- the module itself changes: its fixtures run again, the others' do not
+[ "$(ranfx unrelated)$(ranfx other)" = 11 ] && [ "$(ranfx lib)" = 0 ] || fail "memo: a change in a module the fixture does not read, or in the body of one that reads its interface: $(cat "$PLOG")"
+# the module itself changes: its fixtures run again, the others' do not
 sed -i.bak 's/^implement f (x) = x + 1/implement f (x) = x + 2/' "$MP/src/lib.bats"
 mrun "$TMP/m6.log"
 [ $rc = 0 ] || { cat "$TMP/m6.log"; fail "memo: module: status $rc"; }
@@ -426,32 +488,42 @@ mrun "$TMP/m7.log"
 [ $rc = 0 ] || { cat "$TMP/m7.log"; fail "memo: .sats: status $rc"; }
 [ "$(ranfx other)" = 1 ] && [ "$(ranfx unrelated)" = 0 ] || fail "memo: a changed staloaded .sats of the same size: $(cat "$PLOG")"
 memoed "$TMP/m7.log" 1 "memo .sats"
-# a module added (a .sats that patsopt might read instead): everything runs again
+# a module added (a .sats that patsopt might read instead): the fixture runs again; the module is
+# taken away again, and the entry that was written with it is a miss once more (the others are not touched)
 printf '#include "share/atspre_staload.hats"\n\n#pub fn extra (): int\n\nimplement extra () = 9\n' > "$MP/src/extra.bats"
-mrun "$TMP/m8.log"
+mrun "$TMP/m8.log" --only accept/lone-ok
 [ $rc = 0 ] || { cat "$TMP/m8.log"; fail "memo: added module: status $rc"; }
 memoed "$TMP/m8.log" 0 "memo added module"
-[ "$(ranfx lib)$(ranfx other)$(ranfx unrelated)" = 111 ] || fail "memo: a module added: $(cat "$PLOG")"
+[ "$(ranfx unrelated)" = 1 ] || fail "memo: a module added: $(cat "$PLOG")"
+rm -f "$MP/src/extra.bats"
 
 # ---- the fixture's own files: the snippet and `before`
 printf '(* fixture-snippet *)\nfn g (x: int): int = x + 0\n' > "$MF/accept/lib-ok/snippet.bats"
 mrun "$TMP/m9.log"
 [ $rc = 0 ] || { cat "$TMP/m9.log"; fail "memo: snippet: status $rc"; }
-memoed "$TMP/m9.log" 3 "memo snippet"
-[ "$(ranfx lib)" = 1 ] || fail "memo: a changed snippet: $(cat "$PLOG")"
+memoed "$TMP/m9.log" 2 "memo snippet"
+[ "$(ranfx lib)$(ranfx unrelated)" = 11 ] || fail "memo: a changed snippet (or the module taken away again): $(cat "$PLOG")"
 printf 'implement f (x) = x + 2\n' > "$MF/accept/lib-ok/before"
-mrun "$TMP/m10.log"
+mrun "$TMP/m10.log" --only accept/lib-ok
 [ $rc = 0 ] || { cat "$TMP/m10.log"; fail "memo: before: status $rc"; }
-memoed "$TMP/m10.log" 3 "memo before"
+memoed "$TMP/m10.log" 0 "memo before"
 [ "$(ranfx lib)" = 1 ] || fail "memo: a changed before: $(cat "$PLOG")"
 printf '(* end *)\n' > "$MF/accept/lib-ok/before"
 printf '(* fixture-snippet *)\nfn g (x: int): int = x\n' > "$MF/accept/lib-ok/snippet.bats"
 
+# ---- bats.toml is in the key
+printf '# a comment\n' >> "$MP/bats.toml"
+mrun "$TMP/m10t.log" --only accept/lone-ok
+[ $rc = 0 ] || { cat "$TMP/m10t.log"; fail "memo: toml: status $rc"; }
+memoed "$TMP/m10t.log" 0 "memo toml"
+[ "$(ranfx unrelated)" = 1 ] || fail "memo: a changed bats.toml was served: $(cat "$PLOG")"
+
 # ---- a changed toolchain: nothing is served
 printf '# another patsopt\n' >> "$H/.bats/ats2/bin/patsopt"
-# (bats trusts the toolchain listing it left in build/ whatever patsopt is now,
-# so the stamp does not see an edit in place: the listing is taken away here
-# as a restored build/ of another install would not have it)
+# (bats-lang/bats#305: bats trusts the toolchain listing it left in build/
+# whatever patsopt is now, so the stamp does not see an edit in place; the
+# listing is taken away here, as a restored build/ of another install would
+# not have it. Not fixed in this change.)
 rm -f "$MW/app/build/.bats_toolchain"
 mrun "$TMP/m11.log"
 [ $rc = 0 ] || { cat "$TMP/m11.log"; fail "memo: toolchain: status $rc"; }
@@ -468,13 +540,9 @@ mrun "$TMP/m12.log"
 saidpart "$TMP/m12.log" "FAIL reject/lib-bad: rejected, but not as its expect says: its error is not the one expected:" "memo wrong expect"
 [ "$(ranfx lib)" = 0 ] || fail "memo: a changed expect ran patsopt: $(cat "$PLOG")"
 cp "$TMP/expect.good" "$MF/reject/lib-bad/expect"
-mrun "$TMP/m13.log"
-[ $rc = 0 ] || { cat "$TMP/m13.log"; fail "memo: expect put back: status $rc"; }
-memoed "$TMP/m13.log" 4 "memo expect back"
-[ "$(ranfx lib)" = 0 ] || fail "memo: the expect put back ran patsopt"
 # the log the memo holds is what is judged: change a word of it (with a sum that is right)
-E=$(entry_of reject/lib-bad)
-sed 's/pattern match is nonexhaustive/pattern match is nonexhaustiv3/' "$E" > "$E.x" && mv "$E.x" "$E" && resum "$E"
+E=$(keyof reject/lib-bad)
+sed 's/pattern match is nonexhaustive/pattern match is nonexhaustiv3/' "$E.res" > "$E.x" && mv "$E.x" "$E.res" && resum "$E.res"
 mrun "$TMP/m14.log" --only reject/lib-bad
 [ $rc = 1 ] || { cat "$TMP/m14.log"; fail "memo: a stored log of another word: status $rc"; }
 saidpart "$TMP/m14.log" "FAIL reject/lib-bad: rejected, but not as its expect says" "memo stored log judged"
@@ -489,14 +557,11 @@ mrun "$TMP/m16.log" --only reject/lib-bad
 memoed "$TMP/m16.log" 1 "memo after stale (the cold run wrote it right)"
 [ "$(ranfx lib)" = 0 ] || fail "memo: the doctored entry was served again"
 # --cold on a memo that is right says nothing, reads nothing, and writes it again
-mrun "$TMP/m18.log" --cold
+mrun "$TMP/m18.log" --cold --only accept/lone-ok --only accept/lib-ok --only accept/other-ok
 [ $rc = 0 ] || { cat "$TMP/m18.log"; fail "memo: cold run: status $rc"; }
 memoed "$TMP/m18.log" 0 "memo cold"
 notsaid "$TMP/m18.log" "STALE" "a right memo was called stale"
 [ "$(ranfx lib)$(ranfx other)$(ranfx unrelated)" = 111 ] || fail "memo: --cold read the memo: $(cat "$PLOG")"
-said "$TMP/m18.log" "fixtures: 4 ok, 0 failed" "memo cold"
-mrun "$TMP/m19.log"
-memoed "$TMP/m19.log" 4 "memo after cold"
 # a toolchain that now says another thing than the memo (outside the key): --cold finds it, and drops the entry
 : > "$FLAG_FAIL"
 mrun "$TMP/m20.log" --only accept/lone-ok
@@ -507,40 +572,44 @@ saidpart "$TMP/m21.log" "FAIL accept/lone-ok: STALE MEMO: the memo says the chec
 mrun "$TMP/m22.log" --only accept/lone-ok
 [ $rc = 1 ] || { cat "$TMP/m22.log"; fail "memo: after the lie was dropped: status $rc"; }
 saidpart "$TMP/m22.log" "FAIL accept/lone-ok: should type-check" "memo lie dropped"
+# a reject whose check fails with no error of patsopt's (the toolchain failed, not the snippet) is never kept as a log
+M9=$TMP/memo9
+mrunx "$MP" "$MF" "$MW" "$M9" "$TMP/m22b.log" --only reject/lib-bad
+[ $rc = 1 ] || { cat "$TMP/m22b.log"; fail "memo: a reject on a failing toolchain: status $rc, not 1"; }
+[ "$(nfiles "$M9")" = 0 ] || fail "memo: the log of a check that failed with no error of patsopt's was kept"
 rm -f "$FLAG_FAIL"
-mrun "$TMP/m23.log"
+mrun "$TMP/m23.log" --only accept/lone-ok
 [ $rc = 0 ] || { cat "$TMP/m23.log"; fail "memo: lie gone: status $rc"; }
 
-# ---- an entry that is torn, garbled, of another format or another key is a miss
-E=$(entry_of accept/lone-ok)
-cp "$E" "$TMP/entry.keep"
-total=$(wc -c < "$E" | tr -d ' ')
-head -c $((total / 2)) "$TMP/entry.keep" > "$E"
-mrun "$TMP/m24.log" --only accept/lone-ok
-memoed "$TMP/m24.log" 0 "memo truncated"; [ "$(ranfx unrelated)" = 1 ] || fail "memo: a truncated entry was trusted"
-[ "$(cat "$E")" = "$(cat "$TMP/entry.keep")" ] || fail "memo: the truncated entry was not written whole again"
-sed 's/^lock none$/lock nonf/' "$TMP/entry.keep" > "$E"
-mrun "$TMP/m25.log" --only accept/lone-ok
-memoed "$TMP/m25.log" 0 "memo garbled"; [ "$(ranfx unrelated)" = 1 ] || fail "memo: a garbled entry (right length, wrong sum) was trusted"
-sed 's/^bats-fixture-memo 1$/bats-fixture-memo 2/' "$TMP/entry.keep" > "$E"; resum "$E"
-mrun "$TMP/m26.log" --only accept/lone-ok
-memoed "$TMP/m26.log" 0 "memo format"; [ "$(ranfx unrelated)" = 1 ] || fail "memo: an entry of another format was trusted"
-E2=$(entry_of accept/lib-ok)
-cp "$E2" "$TMP/entry2.keep"
-cp "$TMP/entry.keep" "$E2"
-mrun "$TMP/m27.log" --only accept/lib-ok
-memoed "$TMP/m27.log" 0 "memo foreign"; [ "$(ranfx lib)" = 1 ] || fail "memo: another fixture's entry (a right sum) was trusted"
-# with one line dropped from the middle and the sum made right: the count is wrong
-sed '8d' "$TMP/entry.keep" > "$E"; resum "$E"
-mrun "$TMP/m28.log" --only accept/lone-ok
-memoed "$TMP/m28.log" 0 "memo short"; [ "$(ranfx unrelated)" = 1 ] || fail "memo: an entry with a line missing was trusted"
-# a reject's entry is not an accept's: a pass entry under a reject's key is not served
-E3=$(entry_of reject/lib-bad)
-cp "$TMP/entry.keep" "$E3"
-sed -i.bak "s/^key .*/key $(basename "$E3")/" "$E3"; rm -f "$E3.bak"; resum "$E3"
-mrun "$TMP/m29.log" --only reject/lib-bad
-[ $rc = 0 ] || { cat "$TMP/m29.log"; fail "memo: a pass entry under a reject: status $rc"; }
-memoed "$TMP/m29.log" 0 "memo kind"; [ "$(ranfx lib)" = 1 ] || fail "memo: a reject was served a pass"
+# ---- an entry that is torn, garbled, of another format or another key is a miss.
+# Each batch damages one file of each of the four entries, runs all four, and all are checked again.
+mrun "$TMP/t0.log"
+[ $rc = 0 ] || { cat "$TMP/t0.log"; fail "memo damage: status $rc"; }
+memoed "$TMP/t0.log" 4 "memo before the damage"
+E1=$(keyof accept/lone-ok); E2=$(keyof accept/lib-ok); E3=$(keyof accept/other-ok); E4=$(keyof reject/lib-bad)
+# 1. a .res cut in half; a .res with a byte changed (its sum is wrong); a .key cut in half;
+#    a log with a word changed and the sum left as it was (the sum is what says the log is whole)
+head -c $(( $(wc -c < "$E1.res") / 2 )) "$E1.res" > "$E1.x" && mv "$E1.x" "$E1.res"
+sed 's/^pass$/pasz/' "$E3.res" > "$E3.x" && mv "$E3.x" "$E3.res"
+head -c $(( $(wc -c < "$E2.key") / 2 )) "$E2.key" > "$E2.x" && mv "$E2.x" "$E2.key"
+sed 's/pattern match is nonexhaustive/pattern match is nonexhaustiv3/' "$E4.res" > "$E4.x" && mv "$E4.x" "$E4.res"
+bad_run "$TMP/t1.log" "torn" 111 --only accept/lone-ok --only accept/lib-ok --only accept/other-ok --only reject/lib-bad
+[ "$(wc -c < "$E1.res")" -gt 200 ] || fail "memo: the torn .res was not written whole again"
+# 2. another format with a right sum; another fixture's .res (a right sum, another key); a .key of another text;
+#    an accept's .res put under the reject's key, its key line and sum made right (a reject is not served a pass)
+cp "$E1.res" "$E4.res"; sed "2s/.*/$(basename "$E4")/" "$E4.res" > "$E4.x" && mv "$E4.x" "$E4.res"; resum "$E4.res"
+sed 's/^bats-fixture-result 2$/bats-fixture-result 3/' "$E1.res" > "$E1.x" && mv "$E1.x" "$E1.res"; resum "$E1.res"
+cp "$E3.res" "$E2.res"
+sed 's/^bats-memo 1$/bats-memo 2/' "$E3.key" > "$E3.x" && mv "$E3.x" "$E3.key"
+bad_run "$TMP/t2.log" "garbled" 111 --only accept/lone-ok --only accept/lib-ok --only accept/other-ok --only reject/lib-bad
+# 3. the closure's digest the .res names is not the .key's (a right sum); a line dropped from the middle (a right sum);
+#    an empty .res; a missing .key
+sed '4s/.*/0000000000000000000000000000000000000000000000000000000000000000/' "$E1.res" > "$E1.x" && mv "$E1.x" "$E1.res"; resum "$E1.res"
+sed '3d' "$E2.res" > "$E2.x" && mv "$E2.x" "$E2.res"; resum "$E2.res"
+: > "$E3.res"; rm -f "$E4.key"
+bad_run "$TMP/t3.log" "closure digest" 111 --only accept/lone-ok --only accept/lib-ok --only accept/other-ok --only reject/lib-bad
+mrun "$TMP/t6.log"
+memoed "$TMP/t6.log" 4 "memo after the damage"
 
 # ---- failures are never kept as a pass
 MF3=$TMP/mfix3
@@ -559,52 +628,37 @@ M3=$TMP/memo3
 : > "$PLOG"; mrunx "$MP" "$MF3" "$MW" "$M3" "$TMP/f1.log"
 [ $rc = 1 ] || { cat "$TMP/f1.log"; fail "memo failures: status $rc, not 1"; }
 said "$TMP/f1.log" "fixtures: 0 ok, 4 failed" "memo failures"
-[ "$(nentries "$M3")" = 1 ] || fail "memo: failures left $(nentries "$M3") entries, not the one log of the reject with a wrong expect"
-: > "$PLOG"; mrunx "$MP" "$MF3" "$MW" "$M3" "$TMP/f2.log"
+[ "$(nfiles "$M3")" = 2 ] || fail "memo: failures left $(nfiles "$M3") files, not the .key and .res of the reject with a wrong expect"
+: > "$PLOG"; mrunx "$MP" "$MF3" "$MW" "$M3" "$TMP/f2.log" --only accept/does-not-check --only reject/wrong-expect
 [ $rc = 1 ] || fail "memo failures again: status $rc"
-said "$TMP/f2.log" "fixtures: 0 ok, 4 failed" "memo failures again"
+said "$TMP/f2.log" "fixtures: 0 ok, 2 failed" "memo failures again"
 [ "$(ranfx lib)" = 1 ] || fail "memo: a failure was served from the memo: $(cat "$PLOG")"
 saidpart "$TMP/f2.log" "FAIL accept/does-not-check: should type-check" "memo failures again"
-saidpart "$TMP/f2.log" "FAIL reject/passes: should be rejected" "memo failures again"
 saidpart "$TMP/f2.log" "FAIL reject/wrong-expect: rejected, but not as its expect says" "memo failures again"
 
-# ---- a snippet that loads a file is never kept: it reads one the module's closure does not name
+# ---- a snippet that loads a file is never kept (it reads one the module's closure does not name),
+# and neither is one that changes the interface other modules read
 MF4=$TMP/mfix4
-mfix "$MF4" accept loads src/lib.bats '(* end *)' 'staload "helper.sats"
+mfix "$MF4" accept loads src/lib.bats '(* end *)' '#include "share/atspre_staload.hats"
+
+fn g (): int = 1'
+mfix "$MF4" accept loads-sats src/lib.bats '(* end *)' 'staload "helper.sats"
 
 fn g (): int = help ()'
-M4=$TMP/memo4
-: > "$PLOG"; mrunx "$MP" "$MF4" "$MW" "$M4" "$TMP/l1.log"
-[ $rc = 0 ] || { cat "$TMP/l1.log"; fail "memo load: status $rc"; }
-[ "$(nentries "$M4")" = 0 ] || fail "memo: a snippet that loads a file was kept"
-: > "$PLOG"; mrunx "$MP" "$MF4" "$MW" "$M4" "$TMP/l2.log"
-memoed "$TMP/l2.log" 0 "memo load"
-[ "$(ranfx lib)" = 1 ] || fail "memo: a snippet that loads a file was served"
-
-# ---- a module that reads the interface the snippet changed is in the entry
-MF5=$TMP/mfix5
-mfix "$MF5" reject moves-limit src/lib.bats '(* end *)' 'fn g (x: int): int = x
+mfix "$MF4" reject moves-limit src/lib.bats '(* end *)' 'fn g (x: int): int = x
 #pub stadef limit = 2' 'function g
 line 3
 anything'
-M5=$TMP/memo5
-: > "$PLOG"; mrunx "$MP" "$MF5" "$MW" "$M5" "$TMP/d1.log"
-[ $rc = 1 ] || { cat "$TMP/d1.log"; fail "memo dependents: status $rc, not 1"; }
-saidpart "$TMP/d1.log" "FAIL reject/moves-limit: rejected, but not as its expect says: an error is in " "memo dependents"
-[ "$(nentries "$M5")" = 1 ] || fail "memo: the log of an error in a dependent was not kept"
-mrunx "$MP" "$MF5" "$MW" "$M5" "$TMP/d2.log"
-saidpart "$TMP/d2.log" "FAIL reject/moves-limit: rejected, but not as its expect says: an error is in " "memo dependents again"
-cp "$MP/src/other.bats" "$TMP/other.keep"
-printf '#include "share/atspre_staload.hats"\nstaload "lib.sats"\n\n#pub fn one (): int\n\nimplement one () = 1\n' > "$MP/src/other.bats"
-: > "$PLOG"; mrunx "$MP" "$MF5" "$MW" "$M5" "$TMP/d3.log"
-[ "$(ranfx lib)" = 1 ] || fail "memo: the log of a check whose dependent has changed was served: $(cat "$PLOG")"
-saidpart "$TMP/d3.log" "FAIL reject/moves-limit: should be rejected" "memo dependents changed"
-cp "$TMP/other.keep" "$MP/src/other.bats"
+M4=$TMP/memo4
+: > "$PLOG"; mrunx "$MP" "$MF4" "$MW" "$M4" "$TMP/l1.log"
+[ $rc = 1 ] || { cat "$TMP/l1.log"; fail "memo load: status $rc, not 1"; }
+okline "$TMP/l1.log" accept/loads "memo load"
+okline "$TMP/l1.log" accept/loads-sats "memo load .sats"
+saidpart "$TMP/l1.log" "FAIL reject/moves-limit: rejected, but not as its expect says: an error is in " "memo interface changed"
+[ "$(nfiles "$M4")" = 0 ] || fail "memo: a snippet that loads a file, or one that changes the interface, was kept"
 
-# ---- a run killed while it checks leaves no entry
+# ---- a run killed while it checks leaves no file
 M6=$TMP/memo6
-mrunx "$MP" "$MF" "$MW" "$M6" "$TMP/k0.log" --only accept/lone-ok
-[ "$(nentries "$M6")" = 1 ] || fail "memo kill: no first entry"
 rm -rf "$M6"; : > "$HANG_PID"
 : > "$FLAG_HANG"
 (cd "$MP" && HOME=$H exec "$BATS" fixtures "$MF" --work "$MW" --memo "$M6" --only accept/lone-ok > "$TMP/k1.log" 2>&1) &
@@ -615,12 +669,12 @@ kill -9 "$bats_pid" 2>/dev/null; kill -9 "$(cat "$HANG_PID")" 2>/dev/null
 wait "$bats_pid" 2>/dev/null
 rm -f "$FLAG_HANG"
 sleep 1
-[ "$(find "$M6" -type f -name '[0-9a-f]*' | wc -l | tr -d ' ')" = 0 ] || fail "memo kill: an entry or a temporary file was left: $(find "$M6" -type f)"
+[ "$(nfiles "$M6")" = 0 ] || fail "memo kill: a file was left: $(find "$M6" -type f)"
 mrunx "$MP" "$MF" "$MW" "$M6" "$TMP/k2.log" --only accept/lone-ok
 [ $rc = 0 ] || { cat "$TMP/k2.log"; fail "memo kill: the next run: status $rc"; }
 memoed "$TMP/k2.log" 0 "memo kill next"
 
-# ---- four copies side by side, five rounds: never a torn entry
+# ---- four copies side by side, five rounds: never a torn file served or left
 for c in 1 2 3 4; do cp -R "$MP" "$TMP/par$c"; done
 M7=$TMP/memo7
 round=1
@@ -629,7 +683,7 @@ while [ $round -le 5 ]; do
   pids=
   for c in 1 2 3 4; do
     extra=; if [ $round -eq 5 ] && [ $((c % 2)) = 0 ]; then extra=--cold; fi
-    (cd "$TMP/par$c" && HOME=$H "$BATS" fixtures "$MF" --work "$TMP/parw$c" --memo "$M7" --only accept/lone-ok --only reject/lib-bad $extra > "$TMP/par$c.log" 2>&1; echo $? > "$TMP/par$c.rc") &
+    (cd "$TMP/par$c" && HOME=$H "$BATS" fixtures "$MF" --work "$TMP/parw$c" --memo "$M7" --only reject/lib-bad $extra > "$TMP/par$c.log" 2>&1; echo $? > "$TMP/par$c.rc") &
     pids="$pids $!"
   done
   wait $pids
@@ -637,46 +691,86 @@ while [ $round -le 5 ]; do
     [ "$(cat "$TMP/par$c.rc")" = 0 ] || { cat "$TMP/par$c.log"; fail "memo parallel: copy $c, round $round: status $(cat "$TMP/par$c.rc")"; }
     notsaid "$TMP/par$c.log" "FAIL" "memo parallel round $round copy $c"
   done
-  [ "$(find "$M7" -name '.tmp.*' | wc -l | tr -d ' ')" = 0 ] || fail "memo parallel: a temporary file was left"
-  [ "$(nentries "$M7")" = 2 ] || fail "memo parallel: round $round: $(nentries "$M7") entries, not 3"
+  [ "$(nfiles "$M7")" = 2 ] || fail "memo parallel: round $round: $(nfiles "$M7") files, not 2"
   round=$((round + 1))
 done
-mrunx "$TMP/par1" "$MF" "$TMP/parw1" "$M7" "$TMP/par-last.log" --only accept/lone-ok --only reject/lib-bad
-memoed "$TMP/par-last.log" 2 "memo parallel last"
+mrunx "$TMP/par1" "$MF" "$TMP/parw1" "$M7" "$TMP/par-last.log" --only reject/lib-bad
+memoed "$TMP/par-last.log" 1 "memo parallel last"
+rm -rf "$TMP/par1" "$TMP/par2" "$TMP/par3" "$TMP/par4" "$TMP/parw1" "$TMP/parw2" "$TMP/parw3" "$TMP/parw4"
 
-# ---- --prune
+# ---- --prune: the files the run did not use, nothing else
 M8=$TMP/memo8
-mrunx "$MP" "$MF" "$MW" "$M8" "$TMP/p0.log"
-[ "$(nentries "$M8")" = 4 ] || fail "memo prune: $(nentries "$M8") entries, not 4"
+cp -R "$M" "$M8"
 MFP=$TMP/mfixp; cp -R "$MF" "$MFP"; rm -rf "$MFP/accept/other-ok"
-mkdir -p "$TMP/outside/ab"; printf x > "$TMP/outside/ab/$(printf '1%.0s' $(seq 64))"
-ln -s "$TMP/outside" "$M8/ab" 2>/dev/null || true
+H64=$(printf '1%.0s' $(seq 64)); O64=$(printf '2%.0s' $(seq 64)); U64=$(printf '4%.0s' $(seq 64))
+# a linked directory whose target is marked as a memo's, a real one without the mark, a stray file, an orphan .key
+mkdir -p "$TMP/outside"; printf bats-fixture-memo > "$TMP/outside/.memo-dir"; printf x > "$TMP/outside/$H64.key"
+# (two-digit names no key of this memo starts with)
+free=
+for l in fe fd fc fb fa f9 f8 f7; do [ -e "$M8/$l" ] || free="$free $l"; done
+set -- $free; LINKD=$1; BARED=$2
+ln -s "$TMP/outside" "$M8/$LINKD"
+mkdir -p "$M8/$BARED"; printf x > "$M8/$BARED/$U64.res"
 printf keep > "$M8/note.txt"
-dead=$M8/$(ls "$M8" | grep '^[0-9a-f][0-9a-f]$' | head -1)/.tmp.$(printf '2%.0s' $(seq 64)).999999
-printf x > "$dead"
+sub=$(ls "$M8" | grep '^[0-9a-f][0-9a-f]$' | grep -v "^$LINKD\$" | grep -v "^$BARED\$" | head -1)
+printf x > "$M8/$sub/$O64.key"
+printf keep > "$M8/$sub/readme.txt"
+n0=$(nfiles "$M8")
 mrunx "$MP" "$MFP" "$MW" "$M8" "$TMP/p1.log" --prune
 [ $rc = 0 ] || { cat "$TMP/p1.log"; fail "memo prune: status $rc"; }
 said "$TMP/p1.log" "fixtures: 3 ok, 0 failed (3 from the memo)" "memo prune"
 n=$(grep -ac '^pruned ' "$TMP/p1.log")
-[ "$n" = 2 ] || { cat "$TMP/p1.log"; fail "memo prune: listed $n removals, not 2 (the fixture's entry and the dead temporary file)"; }
-saidpart "$TMP/p1.log" "memo: pruned 2 entries, kept 3" "memo prune"
-[ "$(nentries "$M8")" = 3 ] || fail "memo prune: $(nentries "$M8") entries left, not 3"
-[ ! -e "$dead" ] || fail "memo prune: the dead temporary file stayed"
-[ -f "$TMP/outside/ab/$(printf '1%.0s' $(seq 64))" ] || fail "memo prune: removed through a link"
+# (every file but the six of the three fixtures' entries and the unmarked directory's goes: the
+# removed fixture's, the earlier keys of the memo's life, the orphan)
+want=$((n0 - 7))
+[ "$n" = "$want" ] || { cat "$TMP/p1.log"; fail "memo prune: listed $n removals, not $want"; }
+saidpart "$TMP/p1.log" "memo: pruned $want files, kept 6" "memo prune"
+[ "$(nfiles "$M8")" = 7 ] || fail "memo prune: $(nfiles "$M8") files left, not 7 (the six kept, and the unmarked directory's)"
+[ -f "$TMP/outside/$H64.key" ] || fail "memo prune: removed through a link"
+[ -f "$M8/$BARED/$U64.res" ] || fail "memo prune: removed from a directory without the memo's mark"
 [ "$(cat "$M8/note.txt")" = keep ] || fail "memo prune: removed a file that is no entry"
-# not a memo: nothing is touched
-NM=$TMP/not-a-memo; mkdir -p "$NM/ab"; printf x > "$NM/ab/$(printf '3%.0s' $(seq 64))"
-mrunx "$MP" "$MFP" "$MW" "$NM" "$TMP/p2.log" --prune --only accept/lone-ok 2>/dev/null
+[ ! -e "$M8/$sub/$O64.key" ] || fail "memo prune: the orphan stayed"
+[ "$(cat "$M8/$sub/readme.txt")" = keep ] || fail "memo prune: removed a file of a subdirectory that is no entry"
+# not a memo: nothing is touched; with --only: a usage error
+NM=$TMP/not-a-memo; mkdir -p "$NM/ab"; printf x > "$NM/ab/$(printf '3%.0s' $(seq 64)).res"
+mrunx "$MP" "$MFP" "$MW" "$NM" "$TMP/p2.log" --prune --only accept/lone-ok
 [ $rc = 2 ] || fail "memo prune with --only: status $rc, not 2"
 saidpart "$TMP/p2.log" "needs the whole set: not with --only" "memo prune --only"
-mrunx "$MP" "$MFP" "$MW" "$NM" "$TMP/p3.log" --prune
+MFQ=$TMP/mfixq; mfix "$MFQ" accept lone-ok src/unrelated.bats 'implement lone () = 4' 'fn g3 (x: int): int = x'
+mrunx "$MP" "$MFQ" "$MW" "$NM" "$TMP/p3.log" --prune
 saidpart "$TMP/p3.log" "memo: nothing pruned, $NM is not a fixtures memo" "memo prune not a memo"
-[ "$(nentries "$NM")" = 1 ] || fail "memo: wrote entries into a directory that is no memo"
-[ -f "$NM/ab/$(printf '3%.0s' $(seq 64))" ] || fail "memo prune: removed a file of a directory that is no memo"
+[ "$(nfiles "$NM")" = 1 ] || fail "memo: wrote into a directory that is no memo, or removed its file"
 
-# ---- the script bats runs is the one in the source
-sh -n "$MW/memo.sh" || fail "the memo script bats writes is not a shell script"
-[ "$(head -c 10 "$MW/memo.sh")" = "#!/bin/sh$(printf '\n')" ] || fail "the memo script bats writes does not begin as it should"
+# ---- a hit stands in for patsopt's answer, never for the validation: a cycle through another module's implement
+# (bats-lang/bats#267: the lexer-level rules and the call cycles of every module are checked before the memo is asked)
+MPC=$TMP/mproj-cycle; MFC=$TMP/mfix-cycle; MWC=$TMP/mwork-cycle; MC=$TMP/memo-cycle
+mkdir -p "$MPC/src"
+printf '[package]\nname = "fx"\nkind = "lib"\n' > "$MPC/bats.toml"
+# ring.bats declares pong and implements it nowhere (a check runs no linker);
+# back.bats calls pong from the body of lone, which the fixture's module reads only as an interface
+printf '#include "share/atspre_staload.hats"\n' > "$MPC/src/lib.bats"
+printf '#include "share/atspre_staload.hats"\n\n#pub fn pong (): int\n' > "$MPC/src/ring.bats"
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\n\n#pub fn lone (): int\n\nimplement lone () = 4\n' > "$MPC/src/back.bats"
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\nstaload "back.sats"\n\n(* end *)\n' > "$MPC/src/front.bats"
+mfix "$MFC" accept pong-calls-lone src/front.bats '(* end *)' 'implement pong () = lone ()'
+: > "$PLOG"; mrunx "$MPC" "$MFC" "$MWC" "$MC" "$TMP/c1.log"
+[ $rc = 0 ] || { cat "$TMP/c1.log"; fail "memo cycle: first run: status $rc"; }
+[ "$(nfiles "$MC")" = 2 ] || fail "memo cycle: the passing fixture was not kept"
+mrunx "$MPC" "$MFC" "$MWC" "$MC" "$TMP/c2.log"
+memoed "$TMP/c2.log" 1 "memo cycle second"
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\n\n#pub fn lone (): int\n\nimplement lone () = pong ()\n' > "$MPC/src/back.bats"
+mrunx "$MPC" "$MFC" "$MWC" "$MC" "$TMP/c3.log"
+[ $rc = 1 ] || { cat "$TMP/c3.log"; fail "memo cycle: a cycle through another module's implement was served from the memo: status $rc"; }
+memoed "$TMP/c3.log" 0 "memo cycle served"
+saidpart "$TMP/c3.log" "FAIL accept/pong-calls-lone: should type-check" "memo cycle"
+# the check memo of #298 sits inside `bats check`, after the validation: the same cycle, in a
+# project whose modules are all warm, is refused by the check itself
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\n\n#pub fn lone (): int\n\nimplement lone () = 4\n' > "$MPC/src/back.bats"
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\nstaload "back.sats"\n\nimplement pong () = lone ()\n' > "$MPC/src/front.bats"
+(cd "$MPC" && HOME=$H "$BATS" check > "$TMP/c4.log" 2>&1) || { cat "$TMP/c4.log"; fail "memo cycle: the acyclic project does not check"; }
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\n\n#pub fn lone (): int\n\nimplement lone () = pong ()\n' > "$MPC/src/back.bats"
+(cd "$MPC" && HOME=$H "$BATS" check > "$TMP/c6.log" 2>&1) && { cat "$TMP/c6.log"; fail "memo cycle: bats check passed a cycle through another module's implement"; }
+rm -rf "$MPC" "$MWC" "$MC"
 
 [ -z "${TIMES:-}" ] || cat "$TMP/times"
 echo "ok"

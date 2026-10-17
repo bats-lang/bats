@@ -1,5 +1,5 @@
 (* fixtures -- bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>]
-   [--repository <dir>] (bats-lang/bats#267, item 4: quire's static-test
+   [--memo <dir>] [--prune] [--repository <dir>] (bats-lang/bats#267, item 4: quire's static-test
    runner, tests/static/run.sh and expect.py, folded into bats).
 
    <dir> holds fixtures, each a directory
@@ -41,9 +41,11 @@
      FAIL reject/<name>: rejected, but not as its expect says: <why>
 
    --only <member> (repeatable; accept/<name> or reject/<name>) runs only
-   those. --cold is accepted and changes nothing: nothing is remembered
-   between runs yet, so every run is cold. The exit status is 1 when
-   anything failed, 2 for a usage error. *)
+   those. The exit status is 1 when anything failed, 2 for a usage error.
+
+   The memo (below, "the memo") keeps the result of a fixture's check, so a
+   second run does not run patsopt on what it already said; --cold reads
+   no memo and audits it, --prune removes what a run did not use. *)
 
 #include "share/atspre_staload.hats"
 
@@ -1584,7 +1586,7 @@ fn store_in {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
   val want_log = (want_log0 && nn <= 262144): bool
   val usable = (kn >= 64 && have_dir): bool
   val stale = (if usable then audit(cfg, w, want_pass, want_log, bv_n, nn, status, bv_m, mn, bv_k) else false): bool
-  val keep = (usable && ~stale && (want_pass || want_log)): bool
+  val keep = (usable && (want_pass || want_log)): bool
   val clean = (if keep then
       (~path_exists(work_text(cfg, w, "memo.nostore")) && ~snippet_loads(cfg, w, mv, a, e)
         && iface_same(cfg, w, bv_f, mlen) && memo_ready(bv_m, mn) && memo_subdir(bv_m, mn, bv_k))
@@ -1720,6 +1722,34 @@ fn memo_sub2 {lm,ln:agz}{sl:nat} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen
   val () = bput_v(b, tail)
 in b end
 
+(* Whether <memo>/<name> is a directory of the memo itself and not a link to
+   one elsewhere: the physical path the process stands in after a chdir into
+   it (getcwd resolves links) is the memo's own physical path, a slash and the
+   name. The file package lists names and gives no type, so this is how a
+   link is told from a directory. The process is back where it was after *)
+fn physical_sub {lm,ln:agz} (memo: !$A.borrow(byte, lm, 524288), mlen: tlen,
+  name: !$A.borrow(byte, ln, 524288)): bool = let
+  var home : $B.builder_v = $B.create()
+  val () = cwd_into(home)
+  val in_memo = chdir_path(memo_plus(memo, mlen, ""))
+  var pa : $B.builder_v = $B.create()
+  val () = cwd_into(pa)
+  val in_sub = chdir_path(memo_sub2(memo, mlen, name, ""))
+  var pb : $B.builder_v = $B.create()
+  val () = cwd_into(pb)
+  val _ = chdir_path(home)
+  val @(aa, an) = $B.to_arr(pa)
+  val @(fz_a, bv_a) = $A.freeze<byte>(aa)
+  val @(ba, bn) = $B.to_arr(pb)
+  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+  val plain = (in_memo && in_sub && an > 0 && bn = an + 3 && byte_at(bv_b, bn, an) = 47
+    && byte_at(bv_b, bn, an + 1) = byte_at(name, 2, 0) && byte_at(bv_b, bn, an + 2) = byte_at(name, 2, 1)
+    && same_range(bv_a, an, 0, bv_b, bn, 0, an, 0)): bool
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+  val () = $A.drop<byte>(fz_b, bv_b)
+in ($A.free<byte>($A.thaw<byte>(fz_b)); plain) end
+
 (* The directories of the memo named by two hex digits, each that holds the
    memo's mark in turn *)
 fun prune_dirs {n:nat}{i:nat | i <= n}{lm,lu:agz}{un:nat | un <= 524288} .<n - i>.
@@ -1734,7 +1764,7 @@ fun prune_dirs {n:nat}{i:nat | i <= n}{lm,lu:agz}{un:nat | un <= 524288} .<n - i
     val two = (nn = 2 && is_hex_byte(byte_at(bv_n, nn, 0)) && is_hex_byte(byte_at(bv_n, nn, 1))): bool
     val () = (if two then let
         val d1 = memo_sub2(memo, mlen, bv_n, "")
-        val dmarked = path_exists(memo_sub2(memo, mlen, bv_n, "/.memo-dir"))
+        val dmarked = (path_exists(memo_sub2(memo, mlen, bv_n, "/.memo-dir")) && physical_sub(memo, mlen, bv_n)): bool
       in
         if dmarked then let
           val @(da, dn) = $B.to_arr(d1)
