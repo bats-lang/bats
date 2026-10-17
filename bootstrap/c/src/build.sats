@@ -1149,6 +1149,10 @@ fn check_wasm_binary {l:agz}
 
 
 
+
+
+
+
 fn do_build {lt:agz}
   (release: profile, build_target: target, to_c: !$A.borrow(byte, lt, 4096), tclen: int): void
 

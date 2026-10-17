@@ -108,6 +108,81 @@ fn find_null_bv_from {l:agz}{n:pos}{p:int}
 
 
 
+
+
+
+fn file_open_n {l:agz}{n:pos | n < 1048576}
+  (p: !$A.borrow(byte, l, n), n: int n, access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+
+fn file_open_path {l:agz}
+  (p: !$A.borrow(byte, l, 524288), access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+
+
+
+fn file_exists_path {l:agz} (p: !$A.borrow(byte, l, 524288)): bool
+
+
+
+
+
+
+
+
+
+
+fn dir_open_path {l:agz} (p: !$A.borrow(byte, l, 524288)): $R.result($F.dir, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn is_verbose(): bool
 
 fn is_quiet(): bool
@@ -2892,6 +2967,18 @@ fn sats_stamp_end (saved: whole_file, back: bool): void
 
 fn sats_moved {lp:agz}
   (before: whole_file, path: !$A.borrow(byte, lp, 524288)): bool
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

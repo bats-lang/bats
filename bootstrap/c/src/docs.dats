@@ -225,7 +225,7 @@ in case+ dr of
             val () = put_char_v(cb, 0)
             val @(ca, _) = $B.to_arr(cb)
             val @(fz_c, bv_c) = $A.freeze<byte>(ca)
-            val cr = $F.dir_open(bv_c, 524288)
+            val cr = dir_open_path(bv_c)
             val is_dir = (case+ cr of
               | ~$R.ok(cd) => let val () = $R.discard<int><$F.io_error>($F.dir_close(cd)) in true end
               | ~$R.err(_) => false): bool
@@ -532,7 +532,7 @@ fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 implement generate_lib_docs() = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in

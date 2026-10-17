@@ -143,7 +143,7 @@ fn lock_take (): $R.option($F.fd) = let
   val () = put_char_v(p, 0)
   val @(pa, _) = $B.to_arr(p)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val opened = $F.file_open(bv_p, 524288, $F.ReadWrite(), $F.CreateOrOpen(), 420)
+  val opened = file_open_path(bv_p, $F.ReadWrite(), $F.CreateOrOpen(), 420)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in

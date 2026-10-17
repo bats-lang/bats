@@ -560,7 +560,7 @@ fn write_with_version {lv:agz}{nv:pos}
   (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -652,7 +652,7 @@ fn package_value {lk:agz}{nk:pos}
   (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -866,7 +866,7 @@ implement do_upload {lr} (repo, rplen) = let
   (* Read bats.toml for package name and verify kind = "lib" *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1004,7 +1004,7 @@ in
                 val () = $A.free<byte>($A.thaw<byte>(fz_px))
                 val dp = str_to_path_arr("docs")
                 val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
-                val has_docs = $F.file_exists(bv_dp, 524288)
+                val has_docs = file_exists_path(bv_dp)
                 val () = $A.drop<byte>(fz_dp, bv_dp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_dp))
                 val zip_docs = (if has_docs then let
@@ -1119,7 +1119,7 @@ implement do_completions(target) =
 implement file_exists(path) = let
   val pa = str_to_path_arr(path)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fex_or = $F.file_open(bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fex_or = file_open_path(bv, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in case+ fex_or of
@@ -1206,7 +1206,7 @@ end
 
 (* Whether the NUL-terminated path in p exists. *)
 fn path_exists {l:agz} (p: !$A.borrow(byte, l, 524288)): bool =
-  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(p, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
   | ~$R.err(_) => false
 
@@ -1343,7 +1343,7 @@ implement do_init {la} (arg, alen, claude) =
 implement do_tree() = let
   val la = str_to_path_arr("bats.lock")
   val @(fz_la, bv_la) = $A.freeze<byte>(la)
-  val lock_or = $F.file_open(bv_la, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val lock_or = file_open_path(bv_la, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_la, bv_la)
   val () = $A.free<byte>($A.thaw<byte>(fz_la))
 in
@@ -1381,7 +1381,7 @@ implement do_add(bv, pkg_start, pkg_len, max) = let
   (* Read bats.toml *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1426,7 +1426,7 @@ end
 implement do_remove(bv, pkg_start, pkg_len, max) = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1543,7 +1543,7 @@ fn is_built {le:agz} (ent: !$A.borrow(byte, le, 1024), len: int, release: profil
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val built = (case+ $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val built = (case+ file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
     | ~$R.err(_) => false): bool
   val () = $A.drop<byte>(fz_p, bv_p)

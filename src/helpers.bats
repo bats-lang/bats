@@ -68,6 +68,81 @@ implement find_null_bv_from (bv, p, n) =
   else $S.find_null_bv_at(bv, p, n)
 
 (* ============================================================
+   Opening a path at its own length
+   ============================================================ *)
+
+(* Every path in bats is a NUL-terminated string in an array of 524288
+   bytes (the builder's capacity), and the file package copies the whole
+   of the length it is given to make the C string: file_open of such a
+   path allocated, zeroed and copied 512 KiB to open a name of 60 bytes
+   (bats#296: 20,000 opens made 37% of an unchanged check's instructions,
+   and the zeroing 19% more). These open the path at its own length: the
+   bytes up to and including its first NUL are copied into an array of
+   that size, which is the path the file package is given. A path with
+   no NUL in its array is given whole, as before. *)
+
+fun fill_path {l:agz}{lc:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+  (p: !$A.borrow(byte, l, n), c: !$A.arr(byte, lc, k + 1), i: int i, k: int k, n: int n): void =
+  if i >= k then ()
+  else let
+    val () = $A.set<byte>(c, i, $A.read<byte>(p, i))
+  in fill_path(p, c, i + 1, k, n) end
+
+(* The path's bytes up to its first NUL, and that NUL, in an array of
+   their number *)
+fn path_short {l:agz}{n:pos | n <= 524288} (p: !$A.borrow(byte, l, n), n: int n)
+  : [m:pos | m <= 524289][lc:agz] @($A.arr(byte, lc, m), int m) = let
+  val z = find_null_bv_from(p, 0, n)
+  val k = (if z >= 0 then (if z < n then z else n) else n): [k:nat | k <= n] int k
+  val c = $A.alloc<byte>(k + 1)
+  val () = fill_path(p, c, 0, k, n)
+in @(c, k + 1) end
+
+(* $F.file_open of the path p[0, n) at its own length *)
+#pub fn file_open_n {l:agz}{n:pos | n < 1048576}
+  (p: !$A.borrow(byte, l, n), n: int n, access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+implement file_open_n (p, n, access, opening, mode) =
+  if n <= 524288 then let
+    val @(c, m) = path_short(p, n)
+    val @(fz, bv) = $A.freeze<byte>(c)
+    val r = $F.file_open(bv, m, access, opening, mode)
+    val () = $A.drop<byte>(fz, bv)
+    val () = $A.free<byte>($A.thaw<byte>(fz))
+  in r end
+  else $F.file_open(p, n, access, opening, mode)
+
+(* ... of a path in an array of 524288 bytes *)
+#pub fn file_open_path {l:agz}
+  (p: !$A.borrow(byte, l, 524288), access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+implement file_open_path (p, access, opening, mode) = file_open_n(p, 524288, access, opening, mode)
+
+(* $F.file_exists of the path at its own length *)
+#pub fn file_exists_path {l:agz} (p: !$A.borrow(byte, l, 524288)): bool
+
+implement file_exists_path (p) = let
+  val @(c, m) = path_short(p, 524288)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_exists(bv, m)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.dir_open of the path at its own length *)
+#pub fn dir_open_path {l:agz} (p: !$A.borrow(byte, l, 524288)): $R.result($F.dir, $F.io_error)
+
+implement dir_open_path (p) = let
+  val @(c, m) = path_short(p, 524288)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.dir_open(bv, m)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* ============================================================
    Global state using ATS2 refs (replaces C statics)
    ============================================================ *)
 
@@ -794,7 +869,7 @@ implement c_fresh_bv(out_b, in_b) = key_fresh(true, out_b, in_b)
   (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int): bool
 
 implement file_has_bytes {lp}{lb} (path_bv, bv, len) =
-  case+ $F.file_open(path_bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(path_bv, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(524288)
       val rr = $F.file_read(fd, buf, 524288)
@@ -843,7 +918,7 @@ in kb end
 
 (* The size of the file at the NUL-terminated path, or ~1 *)
 fn size_of_file {lp:agz} (p: !$A.borrow(byte, lp, 524288)): int =
-  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(p, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val z = (case+ $F.fd_size(fd) of
         | ~$R.ok(z) => z | ~$R.err(_) => ~1): int
@@ -854,7 +929,7 @@ fn size_of_file {lp:agz} (p: !$A.borrow(byte, lp, 524288)): int =
 (* Whether the file at path_bv begins with bv[0, len) *)
 fn file_has_prefix {lp:agz}{lb:agz}{n:nat | n <= 524288}
   (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int n): bool =
-  case+ $F.file_open(path_bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(path_bv, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(524288)
       val rr = $F.file_read(fd, buf, 524288)
@@ -973,7 +1048,7 @@ implement key_fresh(is_c, out_b, in_b) = let
   val @(ia, _) = $B.to_arr(in_b)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
   val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-  val there = $F.file_exists(bv_o, 524288)
+  val there = file_exists_path(bv_o)
   val @(ka, _) = $B.to_arr(key_file_path(bv_o))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
   (* sizes first: a different size is a changed file, with no hashing *)
@@ -1420,7 +1495,7 @@ fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = l
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val n = (case+ $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val n = (case+ file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.err(_) => 0
     | ~$R.ok(fd) => let
         val buf = $A.alloc<byte>(16)
@@ -2236,7 +2311,7 @@ fn open_built (b: $B.builder_v, acc: $F.access, how: $F.opening): $R.result($F.f
   val () = put_char_v(p, 0)
   val @(pa, _) = $B.to_arr(p)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = $F.file_open(bv_p, 524288, acc, how, 420)
+  val r = file_open_path(bv_p, acc, how, 420)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
@@ -2483,7 +2558,7 @@ implement machine_slot_release (slot) =
 implement project_lock_take (heavy) = let
   val p = str_to_path_arr("bats.toml")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val opened = $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val opened = file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
   val project = (case+ opened of
@@ -2546,7 +2621,7 @@ in
     val () = set_build_err()
   in ~1 end
   else let
-  val fd_r = $F.file_open(path_bv, path_len, $F.WriteOnly(), $F.CreateOrTruncate(), 420)
+  val fd_r = file_open_n(path_bv, path_len, $F.WriteOnly(), $F.CreateOrTruncate(), 420)
 in case+ fd_r of
   | ~$R.ok(fd) => let
       val bw = $F.buf_writer_create(fd)
@@ -2618,7 +2693,7 @@ fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
   (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): bool
 
 implement file_has_rope (path_bv, cs) =
-  case+ $F.file_open(path_bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(path_bv, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val same = fd_has_chunks(fd, cs)
       (* and nothing after them *)
@@ -2657,7 +2732,7 @@ implement write_file_from_rope (path_bv, cs) = let
      the files of build/ is no longer the files' *)
   val () = names_set_fresh(false)
 in
-  case+ $F.file_open(path_bv, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+  case+ file_open_path(path_bv, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
   | ~$R.ok(fd) => let
       val w = fd_write_chunks(fd, cs)
       val c = (case+ $F.file_close(fd) of | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
@@ -2700,7 +2775,7 @@ implement io_error_errno (e) =
   (path: !$A.borrow(byte, lp, np), plen: int np): whole_file
 
 implement read_whole (path, plen) =
-  case+ $F.file_open(path, plen, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_n(path, plen, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(e) => whole_err(e)
   | ~$R.ok(fd) =>
     (case+ $F.fd_size(fd) of
@@ -2961,7 +3036,7 @@ fun _interface_chunks {lb,lc:agz}{r:int} .<max(r, 0)>.
 fn interface_digest {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), b: !$B.builder_v >> $B.builder_v, want_hash: bool,
    squeeze: bool): bool =
-  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(p, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(65536)
       val out = $A.alloc<byte>(65536)
@@ -3055,22 +3130,34 @@ in same(p, "build/bats_modules/", 0) end
 fn digest_kept {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
   if is_sats_path(p) then true else in_modules(p)
 
-(* build/.bats_dg/<p with / as %>, NUL-terminated *)
-fn dg_path {lp:agz} (p: !$A.borrow(byte, lp, 524288)): $B.builder_v = let
-  var b : $B.builder_v = $B.create()
-  val () = bput_v(b, "build/.bats_dg/")
-  val n = find_null_bv_from(p, 0, 524288)
-  fun loop {lp:agz}{i:nat | i <= 524288} .<524288 - i>.
-    (p: !$A.borrow(byte, lp, 524288), i: int i, n: int, b: !$B.builder_v >> $B.builder_v): void =
-    if i >= 524288 then ()
-    else if i >= n then ()
-    else let
-      val c = byte2int0($A.read<byte>(p, i))
-      val () = put_char_v(b, (if c = 47 then 37 else c))
-    in loop(p, i + 1, n, b) end
-  val () = loop(p, 0, n, b)
-  val () = put_char_v(b, 0)
-in b end
+(* p[i, k) with / as %, written to c from 15 + i on *)
+fun dg_fill {lp,lc:agz}{k:nat | k <= 524272}{i:nat | i <= k} .<k - i>.
+  (p: !$A.borrow(byte, lp, 524288), c: !$A.arr(byte, lc, k + 16), i: int i, k: int k): void =
+  if i >= k then ()
+  else let
+    val v = byte2int0($A.read<byte>(p, i))
+    val () = $A.set<byte>(c, 15 + i, int2byte0(if v = 47 then 37 else v))
+  in dg_fill(p, c, i + 1, k) end
+
+(* "build/.bats_dg/" written to c[0, 15) *)
+fun dg_prefix {lc:agz}{m:nat | m >= 15}{i:nat | i <= 15} .<15 - i>.
+  (c: !$A.arr(byte, lc, m), i: int i): void =
+  if i >= 15 then ()
+  else let
+    val () = $A.set<byte>(c, i, int2byte0(char2int0(string_get_at("build/.bats_dg/", i))))
+  in dg_prefix(c, i + 1) end
+
+(* build/.bats_dg/<p with / as %>, NUL-terminated, in an array of its own
+   size (a builder is 512 KiB zeroed for a path of 60 bytes, and this is
+   made for each file of each closure: bats#296) *)
+fn dg_path {lp:agz} (p: !$A.borrow(byte, lp, 524288))
+  : [m:pos | m <= 524288][lc:agz] @($A.arr(byte, lc, m), int m) = let
+  val z = find_null_bv_from(p, 0, 524288)
+  val k = (if z >= 0 then (if z <= 524272 then z else 524272) else 524272): [k:nat | k <= 524272] int k
+  val c = $A.alloc<byte>(k + 16)
+  val () = dg_prefix(c, 0)
+  val () = dg_fill(p, c, 0, k)
+in @(c, k + 16) end
 
 (* Whether c[0, k) is the NUL-terminated p[0, k) *)
 fun same_bytes {lp,lc:agz}{m:pos}{k:nat}{i:nat | i <= k} .<k - i>.
@@ -3083,11 +3170,11 @@ fun same_bytes {lp,lc:agz}{m:pos}{k:nat}{i:nat | i <= k} .<k - i>.
    each with its line feed; false when none is kept *)
 fn digest_read {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), hashes: bool, out: !$B.builder_v >> $B.builder_v): bool = let
-  val @(ka, _) = $B.to_arr(dg_path(p))
+  val @(ka, km) = dg_path(p)
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
   val plen = find_null_bv_from(p, 0, 524288)
   (* an entry is a few hundred bytes: read into a buffer, no arena *)
-  val ok = (case+ $F.file_open(bv_k, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val ok = (case+ file_open_n(bv_k, km, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.err(_) => false
     | ~$R.ok(fd) => let
         val buf = $A.alloc<byte>(4096)
@@ -3128,9 +3215,9 @@ fn digest_make {lp:agz}
       val () = put_char_v(e, 10)
       val () = copy_to_builder_v(bv_s, 0, sl, 524288, e)
       val () = copy_to_builder_v(bv_h, 0, hl, 524288, e)
-      val @(ka, _) = $B.to_arr(dg_path(p))
+      val @(ka, km) = dg_path(p)
       val @(fz_k, bv_k) = $A.freeze<byte>(ka)
-      val _ = write_file_from_builder(bv_k, 524288, e)
+      val _ = write_file_from_builder(bv_k, km, e)
       val () = $A.drop<byte>(fz_k, bv_k)
     in $A.free<byte>($A.thaw<byte>(fz_k)) end else ())
   val () = (if hashes then copy_to_builder_v(bv_h, 0, hl, 524288, out)
@@ -3341,7 +3428,7 @@ fun _hash_chunks {lb:agz}{r:int} .<max(r, 0)>.
   (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
 
 implement put_file_sha256 {lp} (p, out) =
-  case+ $F.file_open(p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(p, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(afd) => let
       val buf = $A.alloc<byte>(65536)
       val c = $SHA.init()
