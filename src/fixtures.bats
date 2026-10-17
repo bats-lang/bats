@@ -688,7 +688,7 @@ in rc end
    The settings of a run, as NUL-terminated strings in one buffer
    ============================================================ *)
 
-typedef settings = @{program= xi, directory= xi, work= xi, repository= xi}
+typedef settings = @{program= xi, directory= xi, work= xi, repository= xi, memo= xi, cold= int, prune= int}
 
 (* The string at s of cfg (up to its NUL) appended to out *)
 fun put_cfg_from {l:agz}{s:nat | s <= 524288} .<524288 - s>.
@@ -795,23 +795,47 @@ fn read_elapsed {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): int = l
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in v end
 
+(* The memo's script (put_memo_script, below) is run as
+   `sh <work>/memo.sh <verb> ...`; its verbs return their statuses to this
+   side: probe 98 when the snippet could not be put in, 100 when the check
+   must be run, 0 and 1 for a memo hit (the check passed, or failed with the
+   log it left in <work>/check.log); store and prune 0 *)
+
 (* Puts the snippet of the fixture mv[a, e) into <work>/app's copy of the
    module bv_m[0, mlen), before line `at` and followed by one blank line,
-   and runs bats check there with its output in <work>/check.log: the
-   exit status of the check (a snippet that could not be put in is 98).
-   The splice and the run are the system's (head, awk, tail, a shell); which
+   and looks the fixture up in the memo (the script's probe). The system
+   does the splice and the lookup (head, awk, tail, sha256sum, sed); which
    line, and what the output means, are decided here. *)
-fn check_with_snippet {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+fn memo_probe {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
   (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
-   bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, at: int): int = let
+   bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, at: int, is_accept: bool): int = let
+  var work : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, work)
+  var module : $B.builder_v = $B.create()
+  val () = put_range(bv_m, 524288, 0, mlen, module)
+  var kind : $B.builder_v = $B.create()
+  val () = (if is_accept then bput_v(kind, "accept") else bput_v(kind, "reject"))
+  val snippet = fixture_text(cfg, w, mv, a, e, "snippet.bats")
+  val before = fixture_text(cfg, w, mv, a, e, "before")
+  var line : $B.builder_v = $B.create()
+  val () = put_int_v(line, at)
+  var memo : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.memo, memo)
+  var cold : $B.builder_v = $B.create()
+  val () = put_int_v(cold, w.cold)
+in
+  run_sh("sh \"$1/memo.sh\" probe \"$@\"",
+    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(kind),
+    $L.list_vt_cons(mk_arg(snippet), $L.list_vt_cons(mk_arg(before), $L.list_vt_cons(mk_arg(line),
+    $L.list_vt_cons(mk_arg(memo), $L.list_vt_cons(mk_arg(cold), $L.list_vt_nil())))))))))
+end
+
+(* Runs bats check in <work>/app with its output in <work>/check.log and the
+   seconds it took in <work>/check.seconds: the exit status of the check *)
+fn run_check {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): int = let
   var app : $B.builder_v = $B.create()
   val () = put_cfg(cfg, w.work, app)
   val () = bput_v(app, "/app")
-  var module : $B.builder_v = $B.create()
-  val () = put_range(bv_m, 524288, 0, mlen, module)
-  val snippet = fixture_text(cfg, w, mv, a, e, "snippet.bats")
-  var line : $B.builder_v = $B.create()
-  val () = put_int_v(line, at)
   var repository : $B.builder_v = $B.create()
   val () = (if w.repository >= 0 then put_cfg(cfg, w.repository, repository) else ())
   var log : $B.builder_v = $B.create()
@@ -823,23 +847,48 @@ fn check_with_snippet {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
   var project : $B.builder_v = $B.create()
   val () = bput_v(project, ".")
 in
-  run_sh("app=$1; m=$2; snip=$3; at=$4; prog=$5; repo=$6; log=$7; secs=$8; shift 8; proj=$1; rm -f \"$log\" \"$secs\"; f=\"$app/$m\"; { head -n $((at - 1)) \"$f\"; awk 1 \"$snip\"; echo; tail -n +\"$at\" \"$f\"; } > \"$f.fixture\" || exit 98; mv -f \"$f.fixture\" \"$f\" || exit 98; case $prog in */*) prog=$(cd \"$(dirname \"$prog\")\" && pwd)/$(basename \"$prog\") ;; esac; case $log in /*) ;; *) log=$PWD/$log ;; esac; case $secs in /*) ;; *) secs=$PWD/$secs ;; esac; case $repo in ''|/*) ;; *) repo=$PWD/$repo ;; esac; if [ -z \"${GIT_DIR:-}\" ]; then g=$(git -C \"$proj\" rev-parse --absolute-git-dir 2>/dev/null) && GIT_DIR=$g && export GIT_DIR; fi; s=$(date +%s); cd \"$app\" || exit 98; if [ -n \"$repo\" ]; then \"$prog\" check --repository \"$repo\"; else \"$prog\" check; fi > \"$log\" 2>&1; rc=$?; echo $(( $(date +%s) - s )) > \"$secs\"; exit $rc",
-    $L.list_vt_cons(mk_arg(app), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(snippet),
-    $L.list_vt_cons(mk_arg(line), $L.list_vt_cons(cfg_arg(cfg, w.program), $L.list_vt_cons(mk_arg(repository),
-    $L.list_vt_cons(mk_arg(log), $L.list_vt_cons(mk_arg(secs), $L.list_vt_cons(mk_arg(project), $L.list_vt_nil()))))))))))
+  run_sh("app=$1; prog=$2; repo=$3; log=$4; secs=$5; proj=$6; case $prog in */*) prog=$(cd \"$(dirname \"$prog\")\" && pwd)/$(basename \"$prog\") ;; esac; case $log in /*) ;; *) log=$PWD/$log ;; esac; case $secs in /*) ;; *) secs=$PWD/$secs ;; esac; case $repo in ''|/*) ;; *) repo=$PWD/$repo ;; esac; if [ -z \"${GIT_DIR:-}\" ]; then g=$(git -C \"$proj\" rev-parse --absolute-git-dir 2>/dev/null) && GIT_DIR=$g && export GIT_DIR; fi; s=$(date +%s); cd \"$app\" || exit 98; if [ -n \"$repo\" ]; then \"$prog\" check --repository \"$repo\"; else \"$prog\" check; fi > \"$log\" 2>&1; rc=$?; echo $(( $(date +%s) - s )) > \"$secs\"; exit $rc",
+    $L.list_vt_cons(mk_arg(app), $L.list_vt_cons(cfg_arg(cfg, w.program), $L.list_vt_cons(mk_arg(repository),
+    $L.list_vt_cons(mk_arg(log), $L.list_vt_cons(mk_arg(secs), $L.list_vt_cons(mk_arg(project), $L.list_vt_nil())))))))
+end
+
+(* Keeps the result of the check just run in the memo, and audits the memo
+   in a cold run (the script's store) *)
+fn memo_store {l:agz}{lm:agz}{lx:agz}{a,e:nat | a <= e; e <= 524288}
+  (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e,
+   bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, is_accept: bool, status: int): int = let
+  var work : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, work)
+  var module : $B.builder_v = $B.create()
+  val () = put_range(bv_m, 524288, 0, mlen, module)
+  var kind : $B.builder_v = $B.create()
+  val () = (if is_accept then bput_v(kind, "accept") else bput_v(kind, "reject"))
+  var st : $B.builder_v = $B.create()
+  val () = put_int_v(st, status)
+  val snippet = fixture_text(cfg, w, mv, a, e, "snippet.bats")
+  var cold : $B.builder_v = $B.create()
+  val () = put_int_v(cold, w.cold)
+in
+  run_sh("sh \"$1/memo.sh\" store \"$@\"",
+    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(module), $L.list_vt_cons(mk_arg(kind),
+    $L.list_vt_cons(mk_arg(st), $L.list_vt_cons(mk_arg(snippet), $L.list_vt_cons(mk_arg(cold), $L.list_vt_nil())))))))
 end
 
 (* The build and the module of <work>/app as the base check left them: the
    build from <work>/build-checked, the module from the project *)
-fn restore_copy {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings, bv_m: !$A.borrow(byte, lx, 524288), mlen: xi): void = let
+fn restore_copy {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings, bv_m: !$A.borrow(byte, lx, 524288), mlen: xi, hit: bool): void = let
   var work : $B.builder_v = $B.create()
   val () = put_cfg(cfg, w.work, work)
   var module : $B.builder_v = $B.create()
   val () = put_range(bv_m, 524288, 0, mlen, module)
   var project : $B.builder_v = $B.create()
   val () = bput_v(project, ".")
-  val _ = run_sh("rm -rf \"$1/app/build\" && cp -a \"$1/build-checked\" \"$1/app/build\" && cp -p \"$2/$3\" \"$1/app/$3\"",
-    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(project), $L.list_vt_cons(mk_arg(module), $L.list_vt_nil()))))
+  var served : $B.builder_v = $B.create()
+  val () = (if hit then bput_v(served, "hit") else bput_v(served, "run"))
+  (* a memo hit ran no check, so the build is as the base check left it *)
+  val _ = run_sh("if [ \"$4\" = run ]; then rm -rf \"$1/app/build\" && cp -a \"$1/build-checked\" \"$1/app/build\"; fi && cp -p \"$2/$3\" \"$1/app/$3\"",
+    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(project), $L.list_vt_cons(mk_arg(module),
+    $L.list_vt_cons(mk_arg(served), $L.list_vt_nil())))))
 in end
 
 (* ============================================================
@@ -848,6 +897,25 @@ in end
 
 val g_passed = ref<int>(0)
 val g_failed = ref<int>(0)
+val g_memo = ref<int>(0)
+
+(* The length of the file <leaf> of the work directory (~1 when it is not
+   there) *)
+fn read_text_there {l:agz}{sl:nat} (cfg: !$A.borrow(byte, l, 524288), w: settings, leaf: string sl): int = let
+  val ta = $A.alloc<byte>(524288): [l_ta:agz] $A.arr(byte, l_ta, 524288)
+  val tn = read_file_text(work_file(cfg, w, leaf), ta)
+  val () = $A.free<byte>(ta)
+in tn end
+
+(* The file <leaf> of the work directory to the output *)
+fn print_text_there {l:agz}{sl:nat} (cfg: !$A.borrow(byte, l, 524288), w: settings, leaf: string sl): void = let
+  val ta = $A.alloc<byte>(524288): [l_ta:agz] $A.arr(byte, l_ta, 524288)
+  val tn = read_file_text(work_file(cfg, w, leaf), ta)
+  val @(fz, bv) = $A.freeze<byte>(ta)
+  val () = (if tn > 0 then print_borrow(bv, 0, text_len(tn), 524288) else ())
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in end
 
 (* A decimal number as text *)
 fn say_failed_lines {l:agz} (lv: !$A.borrow(byte, l, 524288), llen: tlen): void = let
@@ -967,22 +1035,37 @@ in
     else let
       val () = $A.drop<byte>(fz_p, bv_p)
       val () = $A.free<byte>($A.thaw<byte>(fz_p))
-      (* put the snippet in, run the check, and read what it said *)
-      val rc = check_with_snippet(cfg, w, mv, a, e, bv_f, mlen, at)
+      (* put the snippet in and ask the memo; on a miss run the check and
+         keep what it said; then read what it said *)
+      val probed = memo_probe(cfg, w, mv, a, e, bv_f, mlen, at, is_accept)
+      val hit = (probed = 0 || probed = 1): bool
+      val rc = (if hit then probed
+        else if probed = 100 then let
+          val ran = run_check(cfg, w)
+          val _ = memo_store(cfg, w, mv, a, e, bv_f, mlen, is_accept, ran)
+        in ran end
+        else probed): int
       val elapsed = read_elapsed(cfg, w)
+      val stale = (read_text_there(cfg, w, "check.stale") > 0): bool
+      val marker = (if hit then " [memo]" else ""): string
       val la = $A.alloc<byte>(524288): [l_la:agz] $A.arr(byte, l_la, 524288)
       val llen0 = read_file_text(log_path(cfg, w), la)
       val llen = text_len(llen0)
       val @(fz_l, bv_l) = $A.freeze<byte>(la)
-      val () = (if llen0 < 0 then let
+      val () = (if stale then let
+          val () = fail_member(mv, a, e)
+          val () = print! (": ")
+        in print_text_there(cfg, w, "check.stale") end
+        else if llen0 < 0 then let
           val () = fail_member(mv, a, e)
         in println! (": the check's log cannot be read") end
         else if is_accept then
           (if rc = 0 then let
               val () = !g_passed := !g_passed + 1
+              val () = (if hit then !g_memo := !g_memo + 1 else ())
               val () = print! ("ok   ")
               val () = say_member(mv, a, e)
-            in println! (" (", elapsed, " s)") end
+            in println! (" (", elapsed, " s)", marker) end
           else let
               val () = fail_member(mv, a, e)
               val () = println! (": should type-check")
@@ -1004,15 +1087,16 @@ in
                 in say_failed_lines(bv_l, llen) end
                 else let
                   val () = !g_passed := !g_passed + 1
+                  val () = (if hit then !g_memo := !g_memo + 1 else ())
                   val () = print! ("ok   ")
                   val () = say_member(mv, a, e)
-                in println! (" (", elapsed, " s)") end)
+                in println! (" (", elapsed, " s)", marker) end)
               val () = $A.drop<byte>(fz_q, bv_q)
               val () = $A.free<byte>($A.thaw<byte>(fz_q))
             in () end))
       val () = $A.drop<byte>(fz_l, bv_l)
       val () = $A.free<byte>($A.thaw<byte>(fz_l))
-      val () = restore_copy(cfg, w, bv_f, mlen)
+      val () = restore_copy(cfg, w, bv_f, mlen, hit)
       val () = $A.drop<byte>(fz_f, bv_f)
       val () = $A.free<byte>($A.thaw<byte>(fz_f))
       val () = $A.drop<byte>(fz_b, bv_b)
@@ -1048,12 +1132,44 @@ fun arg_is_from {l:agz}{sl:nat}{i:nat | i <= sl} .<sl - i>.
 fn arg_is {l:agz}{sl:nat} (bv: !$A.borrow(byte, l, 4096), a: xi, e: xi, s: string sl): bool =
   e - a = g1u2i(string1_length(s)) && arg_is_from(bv, a, s, g1u2i(string1_length(s)), 0)
 
-(* What the options said: the spans of the directory, --work and
-   --repository (~1 when not given), and the first thing wrong with the line
-   (kind 1: an option that is not one of ours, 2: an option with no value,
-   3: a second directory), as a span *)
+(* What the options said: the spans of the directory, --work, --repository
+   and --memo (~1 when not given), whether --cold, --prune and --only were
+   given (1 or 0), and the first thing wrong with the line (kind 1: an
+   option that is not one of ours, 2: an option with no value, 3: a second
+   directory), as a span *)
 typedef options = @{dir_s= xi, dir_e= xi, work_s= xi, work_e= xi, repo_s= xi, repo_e= xi,
+  memo_s= xi, memo_e= xi, cold= int, prune= int, only= int,
   bad_kind= int, bad_s= xi, bad_e= xi}
+
+fn opt_dir (o: options, s: xi, e: xi): options =
+  @{dir_s= s, dir_e= e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
+
+fn opt_work (o: options, s: xi, e: xi): options =
+  @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= s, work_e= e, repo_s= o.repo_s, repo_e= o.repo_e,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
+
+fn opt_repo (o: options, s: xi, e: xi): options =
+  @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= s, repo_e= e,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
+
+fn opt_memo (o: options, s: xi, e: xi): options =
+  @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
+    memo_s= s, memo_e= e, cold= o.cold, prune= o.prune, only= o.only,
+    bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
+
+fn opt_flags (o: options, cold: int, prune: int, only: int): options =
+  @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= cold, prune= prune, only= only,
+    bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
+
+fn opt_bad (o: options, kind: int, s: xi, e: xi): options =
+  @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    bad_kind= kind, bad_s= s, bad_e= e}
 
 fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
   (bv: !$A.borrow(byte, l, 4096), t: int t, p: int p, o: options): options =
@@ -1062,34 +1178,31 @@ fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
   else let
     val e = word_stop(bv, t, p)
     val nxt = e + 1
-    val valued = (arg_is(bv, p, e, "--only") || arg_is(bv, p, e, "--work") || arg_is(bv, p, e, "--repository")): bool
+    val valued = (arg_is(bv, p, e, "--only") || arg_is(bv, p, e, "--work") || arg_is(bv, p, e, "--repository")
+      || arg_is(bv, p, e, "--memo")): bool
   in
-    if arg_is(bv, p, e, "--cold") then
-      (if nxt <= t then parse_options(bv, t, nxt, o) else o)
+    if arg_is(bv, p, e, "--cold") then let
+      val o2 = opt_flags(o, 1, o.prune, o.only)
+    in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
+    else if arg_is(bv, p, e, "--prune") then let
+      val o2 = opt_flags(o, o.cold, 1, o.only)
+    in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
     else if valued then
-      (if nxt >= t then @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e,
-          repo_s= o.repo_s, repo_e= o.repo_e, bad_kind= 2, bad_s= p, bad_e= e}
+      (if nxt >= t then opt_bad(o, 2, p, e)
       else let
         val ve = word_stop(bv, t, nxt)
-        val o2 = (if arg_is(bv, p, e, "--work") then
-            @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= nxt, work_e= ve, repo_s= o.repo_s, repo_e= o.repo_e,
-              bad_kind= 0, bad_s= ~1, bad_e= ~1}
-          else if arg_is(bv, p, e, "--repository") then
-            @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= nxt, repo_e= ve,
-              bad_kind= 0, bad_s= ~1, bad_e= ~1}
+        val o2 = (if arg_is(bv, p, e, "--work") then opt_work(o, nxt, ve)
+          else if arg_is(bv, p, e, "--repository") then opt_repo(o, nxt, ve)
+          else if arg_is(bv, p, e, "--memo") then opt_memo(o, nxt, ve)
+          else if arg_is(bv, p, e, "--only") then opt_flags(o, o.cold, o.prune, 1)
           else o): options
       in
         if ve + 1 <= t then parse_options(bv, t, ve + 1, o2) else o2
       end)
-    else if e - p >= 2 && peek(bv, p, 4096) = 45 && peek(bv, p + 1, 4096) = 45 then
-      @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e,
-        repo_s= o.repo_s, repo_e= o.repo_e, bad_kind= 1, bad_s= p, bad_e= e}
-    else if o.dir_s >= 0 then
-      @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e,
-        repo_s= o.repo_s, repo_e= o.repo_e, bad_kind= 3, bad_s= p, bad_e= e}
+    else if e - p >= 2 && peek(bv, p, 4096) = 45 && peek(bv, p + 1, 4096) = 45 then opt_bad(o, 1, p, e)
+    else if o.dir_s >= 0 then opt_bad(o, 3, p, e)
     else let
-      val o2 = @{dir_s= p, dir_e= e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
-        bad_kind= 0, bad_s= ~1, bad_e= ~1}
+      val o2 = opt_dir(o, p, e)
     in
       if nxt <= t then parse_options(bv, t, nxt, o2) else o2
     end
@@ -1207,8 +1320,293 @@ in prerr_builder(b) end
 fn prerr_args {l:agz} (bv: !$A.borrow(byte, l, 4096), s: xi, e: xi): void = prerr_seg(bv, s, e, 4096)
 
 fn usage (): void = let
-  val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--repository <dir>]\n")
+  val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]\n")
 in set_exit_code(2) end
+
+(* BEGIN fixtures-memo.sh *)
+fn put_memo_script (out: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(out, "#!/bin/sh\n")
+  val () = bput_v(out, "# The memo of bats fixtures (bats-lang/bats#267, item 4b), run by it as\n")
+  val () = bput_v(out, "#   sh memo.sh probe <work> <module> <kind> <snippet> <before> <at> <memo> <cold>\n")
+  val () = bput_v(out, "#   sh memo.sh store <work> <module> <kind> <status> <snippet> <cold>\n")
+  val () = bput_v(out, "#   sh memo.sh prune <work> <memo>\n")
+  val () = bput_v(out, "# No time is read anywhere in it: an entry is trusted when the digests of the\n")
+  val () = bput_v(out, "# files it names, and a checksum of its own bytes, are those it holds.\n")
+  val () = bput_v(out, "LC_ALL=C\n")
+  val () = bput_v(out, "export LC_ALL\n")
+  val () = bput_v(out, "if command -v sha256sum >/dev/null 2>&1; then\n")
+  val () = bput_v(out, "  digest() { sha256sum | cut -d' ' -f1; }\n")
+  val () = bput_v(out, "else\n")
+  val () = bput_v(out, "  digest() { shasum -a 256 | cut -d' ' -f1; }\n")
+  val () = bput_v(out, "fi\n")
+  val () = bput_v(out, "# A file as the memo knows it: a .sats by its interface (its text with each\n")
+  val () = bput_v(out, "# run of line feeds as one, as bats's own check memo takes it), unless it\n")
+  val () = bput_v(out, "# has a line with an odd number of quotes (a string may run over lines, or\n")
+  val () = bput_v(out, "# a quote is in a comment) or a C block (%{), where a line feed may be part\n")
+  val () = bput_v(out, "# of what it says, then as it is. A file that is not there is\n")
+  val () = bput_v(out, "# MISSING.\n")
+  val () = bput_v(out, "file_digest() {\n")
+  val () = bput_v(out, "  if [ ! -f \"$1\" ]; then echo MISSING; return 0; fi\n")
+  val () = bput_v(out, "  case $1 in\n")
+  val () = bput_v(out, "    *.sats)\n")
+  val () = bput_v(out, "      if awk '{ l = $0; gsub(/\\\\\"/, \"\", l); gsub(/\\047\"\\047/, \"\", l); if (gsub(/\"/, \"\", l) % 2 == 1) bad = 1 } /%\\{/ { bad = 1 } END { exit bad }' \"$1\"\n")
+  val () = bput_v(out, "      then echo \"C $(tr -s '\\n' < \"$1\" | digest)\"\n")
+  val () = bput_v(out, "      else echo \"R $(digest < \"$1\")\"; fi ;;\n")
+  val () = bput_v(out, "    *) echo \"R $(digest < \"$1\")\" ;;\n")
+  val () = bput_v(out, "  esac\n")
+  val () = bput_v(out, "}\n")
+  val () = bput_v(out, "# The names patsopt might have read instead of a file it did read: the\n")
+  val () = bput_v(out, "# .sats and .hats of build/ (not the stashes' nor the digests' kept there),\n")
+  val () = bput_v(out, "# and the .bats of src and bats_modules (which bats checks the whole of\n")
+  val () = bput_v(out, "# before patsopt runs)\n")
+  val () = bput_v(out, "names_of() {\n")
+  val () = bput_v(out, "  (cd \"$1\" && {\n")
+  val () = bput_v(out, "    find build \\( -path build/.stash -o -path build/.bats_dg \\) -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print\n")
+  val () = bput_v(out, "    find src bats_modules -type f -name '*.bats' -print 2>/dev/null\n")
+  val () = bput_v(out, "  } | sort | digest)\n")
+  val () = bput_v(out, "}\n")
+  val () = bput_v(out, "# --memo, else BATS_MEMO_DIR, else the user's cache; empty when there is none\n")
+  val () = bput_v(out, "memo_dir() {\n")
+  val () = bput_v(out, "  if [ -n \"$1\" ]; then echo \"$1\"\n")
+  val () = bput_v(out, "  elif [ -n \"${BATS_MEMO_DIR:-}\" ]; then echo \"$BATS_MEMO_DIR\"\n")
+  val () = bput_v(out, "  elif [ -n \"${XDG_CACHE_HOME:-}\" ]; then echo \"$XDG_CACHE_HOME/bats/fixtures\"\n")
+  val () = bput_v(out, "  elif [ -n \"${HOME:-}\" ]; then echo \"$HOME/.cache/bats/fixtures\"\n")
+  val () = bput_v(out, "  fi\n")
+  val () = bput_v(out, "}\n")
+  val () = bput_v(out, "# A log as it is kept: the work directory's path as /app/, the line a\n")
+  val () = bput_v(out, "# waiting bats says dropped, a line feed at the end\n")
+  val () = bput_v(out, "normalize() {\n")
+  val () = bput_v(out, "  PHYS=$(cd \"$1\" && pwd -P) LOGI=$(cd \"$1\" && pwd) awk '\n")
+  val () = bput_v(out, "    BEGIN { n = 0; v[n++] = ENVIRON[\"PHYS\"] \"/\"; if (ENVIRON[\"LOGI\"] != ENVIRON[\"PHYS\"]) v[n++] = ENVIRON[\"LOGI\"] \"/\" }\n")
+  val () = bput_v(out, "    /^waiting for another bats/ { next }\n")
+  val () = bput_v(out, "    /^warning: the ATS2 in / { next }\n")
+  val () = bput_v(out, "    { s = $0; for (k = 0; k < n; k++) { out = \"\"; while ((i = index(s, v[k])) > 0) { out = out substr(s, 1, i - 1) \"/app/\"; s = substr(s, i + length(v[k])) } s = out s }\n")
+  val () = bput_v(out, "      print s }'\n")
+  val () = bput_v(out, "}\n")
+  val () = bput_v(out, "cold_wanted() {\n")
+  val () = bput_v(out, "  if [ \"$1\" = 1 ]; then echo 1\n")
+  val () = bput_v(out, "  elif [ -n \"${BATS_COLD:-}\" ] && [ \"${BATS_COLD}\" != 0 ]; then echo 1\n")
+  val () = bput_v(out, "  else echo 0; fi\n")
+  val () = bput_v(out, "}\n")
+  val () = bput_v(out, "# Whether the entry $1 is whole and is the one for key $2 and names $3 of\n")
+  val () = bput_v(out, "# kind $4 whose files, under directory $5, are as it says. It sets res (pass\n")
+  val () = bput_v(out, "# or log), cnt (its files) and loglines.\n")
+  val () = bput_v(out, "entry_ok() {\n")
+  val () = bput_v(out, "  e=$1\n")
+  val () = bput_v(out, "  [ -f \"$e\" ] && [ ! -L \"$e\" ] || return 1\n")
+  val () = bput_v(out, "  total=$(wc -l < \"$e\" | tr -d ' ')\n")
+  val () = bput_v(out, "  case $total in ''|*[!0-9]*) return 1 ;; esac\n")
+  val () = bput_v(out, "  [ \"$total\" -ge 16 ] || return 1\n")
+  val () = bput_v(out, "  last=$(tail -n 1 \"$e\")\n")
+  val () = bput_v(out, "  [ \"${last%% *}\" = sum ] || return 1\n")
+  val () = bput_v(out, "  [ \"$(sed '$d' \"$e\" | digest)\" = \"${last#sum }\" ] || return 1\n")
+  val () = bput_v(out, "  [ \"$(sed -n 1p \"$e\")\" = 'bats-fixture-memo 1' ] || return 1\n")
+  val () = bput_v(out, "  [ \"$(sed -n 2p \"$e\")\" = \"key $2\" ] || return 1\n")
+  val () = bput_v(out, "  res=$(sed -n 3p \"$e\"); res=${res#result }\n")
+  val () = bput_v(out, "  case \"$4:$res\" in accept:pass|reject:log) ;; *) return 1 ;; esac\n")
+  val () = bput_v(out, "  [ \"$(sed -n 4p \"$e\")\" = \"names $3\" ] || return 1\n")
+  val () = bput_v(out, "  cnt=$(sed -n 5p \"$e\"); cnt=${cnt#files }\n")
+  val () = bput_v(out, "  case $cnt in ''|*[!0-9]*) return 1 ;; esac\n")
+  val () = bput_v(out, "  loglines=$(sed -n \"$((6 + cnt))p\" \"$e\"); loglines=${loglines#log }\n")
+  val () = bput_v(out, "  case $loglines in ''|*[!0-9]*) return 1 ;; esac\n")
+  val () = bput_v(out, "  [ \"$total\" -eq $((cnt + loglines + 16)) ] || return 1\n")
+  val () = bput_v(out, "  if [ \"$cnt\" -gt 0 ]; then sed -n \"6,$((5 + cnt))p\" \"$e\"; fi > \"$work/memo.list\"\n")
+  val () = bput_v(out, "  while IFS= read -r l; do\n")
+  val () = bput_v(out, "    shape=${l%% *}; r=${l#* }; hex=${r%% *}; p=${r#* }\n")
+  val () = bput_v(out, "    [ \"$(file_digest \"$5/$p\")\" = \"$shape $hex\" ] || return 1\n")
+  val () = bput_v(out, "  done < \"$work/memo.list\"\n")
+  val () = bput_v(out, "  return 0\n")
+  val () = bput_v(out, "}\n")
+  val () = bput_v(out, "# The paths a bats-memo key lists (its lines from the third to its rule)\n")
+  val () = bput_v(out, "key_paths() { sed -n '3,$p' \"$1\" | sed '/^--$/,$d'; }\n")
+  val () = bput_v(out, "\n")
+  val () = bput_v(out, "verb=$1; shift\n")
+  val () = bput_v(out, "case $verb in\n")
+  val () = bput_v(out, "\n")
+  val () = bput_v(out, "probe)\n")
+  val () = bput_v(out, "  work=$1; module=$2; kind=$3; snippet=$4; before=$5; at=$6; memo_arg=$7; cold_arg=$8\n")
+  val () = bput_v(out, "  app=$work/app; f=$app/$module\n")
+  val () = bput_v(out, "  rm -f \"$work/check.log\" \"$work/check.seconds\" \"$work/check.memo\" \"$work/check.stale\" \"$work/memo.key\" \"$work/memo.prior\"\n")
+  val () = bput_v(out, "  { head -n $((at - 1)) \"$f\"; awk 1 \"$snippet\"; echo; tail -n +\"$at\" \"$f\"; } > \"$f.fixture\" || exit 98\n")
+  val () = bput_v(out, "  mv -f \"$f.fixture\" \"$f\" || exit 98\n")
+  val () = bput_v(out, "  memo=$(memo_dir \"$memo_arg\")\n")
+  val () = bput_v(out, "  [ -n \"$memo\" ] || exit 100\n")
+  val () = bput_v(out, "  case $memo in /*) ;; *) memo=$PWD/$memo ;; esac\n")
+  val () = bput_v(out, "  [ -f \"$app/build/.bats_stamp\" ] || exit 100\n")
+  val () = bput_v(out, "  toml=none; [ -f \"$app/bats.toml\" ] && toml=$(digest < \"$app/bats.toml\")\n")
+  val () = bput_v(out, "  lock=none; [ -f \"$app/bats.lock\" ] && lock=$(digest < \"$app/bats.lock\")\n")
+  val () = bput_v(out, "  text=$(printf 'bats-fixture-key 1\\nmodule %s\\nbefore %s\\nsnippet %s\\nspliced %s\\ntoml %s\\nlock %s\\nstamp %s\\n' \\\n")
+  val () = bput_v(out, "    \"$module\" \"$(digest < \"$before\")\" \"$(digest < \"$snippet\")\" \"$(digest < \"$f\")\" \"$toml\" \"$lock\" \\\n")
+  val () = bput_v(out, "    \"$(digest < \"$app/build/.bats_stamp\")\")\n")
+  val () = bput_v(out, "  key=$(printf '%s\\n' \"$text\" | digest)\n")
+  val () = bput_v(out, "  names=$(names_of \"$app\")\n")
+  val () = bput_v(out, "  printf '%s\\n' \"$key\" > \"$work/memo.key\"\n")
+  val () = bput_v(out, "  printf '%s\\n' \"$text\" > \"$work/memo.text\"\n")
+  val () = bput_v(out, "  printf '%s\\n' \"$names\" > \"$work/memo.names\"\n")
+  val () = bput_v(out, "  printf '%s\\n' \"$memo\" > \"$work/memo.dir\"\n")
+  val () = bput_v(out, "  echo \"$key\" >> \"$work/memo-used\"\n")
+  val () = bput_v(out, "  entry=$memo/$(printf '%s' \"$key\" | cut -c1-2)/$key\n")
+  val () = bput_v(out, "  if [ -f \"$memo/.bats-fixtures-memo\" ] && entry_ok \"$entry\" \"$key\" \"$names\" \"$kind\" \"$app\"; then\n")
+  val () = bput_v(out, "    if [ \"$(cold_wanted \"$cold_arg\")\" = 1 ]; then echo \"$entry\" > \"$work/memo.prior\"; exit 100; fi\n")
+  val () = bput_v(out, "    if [ \"$res\" = pass ]; then : > \"$work/check.log\"; status=0\n")
+  val () = bput_v(out, "    else sed -n \"$((7 + cnt)),$((6 + cnt + loglines))p\" \"$entry\" > \"$work/check.log\"; status=1; fi\n")
+  val () = bput_v(out, "    echo 0 > \"$work/check.seconds\"\n")
+  val () = bput_v(out, "    echo hit > \"$work/check.memo\"\n")
+  val () = bput_v(out, "    exit $status\n")
+  val () = bput_v(out, "  fi\n")
+  val () = bput_v(out, "  exit 100\n")
+  val () = bput_v(out, "  ;;\n")
+  val () = bput_v(out, "\n")
+  val () = bput_v(out, "store)\n")
+  val () = bput_v(out, "  work=$1; module=$2; kind=$3; status=$4; snippet=$5; cold_arg=$6\n")
+  val () = bput_v(out, "  [ -f \"$work/memo.key\" ] || exit 0\n")
+  val () = bput_v(out, "  key=$(cat \"$work/memo.key\"); names=$(cat \"$work/memo.names\"); memo=$(cat \"$work/memo.dir\")\n")
+  val () = bput_v(out, "  app=$work/app; base=$work/build-checked; log=$work/check.log\n")
+  val () = bput_v(out, "  entry=$memo/$(printf '%s' \"$key\" | cut -c1-2)/$key\n")
+  val () = bput_v(out, "  # what is to be kept: an accept that passed, or a reject that failed the\n")
+  val () = bput_v(out, "  # ordinary way (a patsopt error in a log of at most 524288 bytes); never a\n")
+  val () = bput_v(out, "  # failure of an accept, a reject that passed, a status 124 or 125 (a cap),\n")
+  val () = bput_v(out, "  # a signal, or a check that failed with no error of patsopt's\n")
+  val () = bput_v(out, "  want=none\n")
+  val () = bput_v(out, "  case \"$kind:$status\" in\n")
+  val () = bput_v(out, "    accept:0) want=pass ;;\n")
+  val () = bput_v(out, "    reject:1)\n")
+  val () = bput_v(out, "      if [ -f \"$log\" ] && grep -aq '): error([0-9][0-9]*): ' \"$log\"; then\n")
+  val () = bput_v(out, "        normalize \"$app\" < \"$log\" > \"$work/memo.log\"\n")
+  val () = bput_v(out, "        if [ \"$(wc -c < \"$work/memo.log\" | tr -d ' ')\" -le 524288 ]; then want=log; fi\n")
+  val () = bput_v(out, "      fi ;;\n")
+  val () = bput_v(out, "  esac\n")
+  val () = bput_v(out, "  # a cold run audits the memo that would have been served\n")
+  val () = bput_v(out, "  if [ -f \"$work/memo.prior\" ]; then\n")
+  val () = bput_v(out, "    prior=$(cat \"$work/memo.prior\")\n")
+  val () = bput_v(out, "    pres=$(sed -n 3p \"$prior\"); pres=${pres#result }\n")
+  val () = bput_v(out, "    pcnt=$(sed -n 5p \"$prior\"); pcnt=${pcnt#files }\n")
+  val () = bput_v(out, "    plines=$(sed -n \"$((6 + pcnt))p\" \"$prior\"); plines=${plines#log }\n")
+  val () = bput_v(out, "    stale=\n")
+  val () = bput_v(out, "    if [ \"$pres\" = pass ]; then\n")
+  val () = bput_v(out, "      [ \"$want\" = pass ] || stale=\"the memo says the check passes, the cold run's status is $status\"\n")
+  val () = bput_v(out, "    else\n")
+  val () = bput_v(out, "      if [ \"$want\" != log ]; then stale=\"the memo holds the log of a check that fails, the cold run's status is $status\"\n")
+  val () = bput_v(out, "      else\n")
+  val () = bput_v(out, "        sed -n \"$((7 + pcnt)),$((6 + pcnt + plines))p\" \"$prior\" > \"$work/memo.prior.log\"\n")
+  val () = bput_v(out, "        cmp -s \"$work/memo.prior.log\" \"$work/memo.log\" || stale=\"the log the memo holds is not the cold run's\"\n")
+  val () = bput_v(out, "      fi\n")
+  val () = bput_v(out, "    fi\n")
+  val () = bput_v(out, "    # a memo that lied is removed, so it is not served again\n")
+  val () = bput_v(out, "    if [ -n \"$stale\" ]; then\n")
+  val () = bput_v(out, "      printf 'STALE MEMO: %s (key %s)\\n' \"$stale\" \"$key\" > \"$work/check.stale\"\n")
+  val () = bput_v(out, "      rm -f \"$prior\"\n")
+  val () = bput_v(out, "    fi\n")
+  val () = bput_v(out, "  fi\n")
+  val () = bput_v(out, "  [ \"$want\" != none ] || exit 0\n")
+  val () = bput_v(out, "  # a snippet that loads a file (staload, include, #use) reads one the base\n")
+  val () = bput_v(out, "  # module's closure does not name: not kept\n")
+  val () = bput_v(out, "  if grep -Eq 'load|include|#use|#require' \"$snippet\"; then exit 0; fi\n")
+  val () = bput_v(out, "  own=build/${module%.bats}\n")
+  val () = bput_v(out, "  basekey=$base/${module%.bats}_dats.c.key\n")
+  val () = bput_v(out, "  [ -f \"$basekey\" ] || exit 0\n")
+  val () = bput_v(out, "  key_paths \"$basekey\" > \"$work/memo.paths\"\n")
+  val () = bput_v(out, "  # the interface of the module with the snippet in, against the base's: if\n")
+  val () = bput_v(out, "  # it changed, the modules that read it are in the entry too\n")
+  val () = bput_v(out, "  if [ \"$(file_digest \"$app/${own}.sats\")\" != \"$(file_digest \"$base/${own#build/}.sats\")\" ]; then\n")
+  val () = bput_v(out, "    wc_dats=$(find \"$base\" \\( -path \"$base/.stash\" -o -path \"$base/.bats_dg\" \\) -prune -o -name '*.dats' -print | wc -l | tr -d ' ')\n")
+  val () = bput_v(out, "    wc_keys=$(find \"$base\" \\( -path \"$base/.stash\" -o -path \"$base/.bats_dg\" \\) -prune -o -name '*_dats.c.key' -print | wc -l | tr -d ' ')\n")
+  val () = bput_v(out, "    [ \"$wc_dats\" = \"$wc_keys\" ] || exit 0\n")
+  val () = bput_v(out, "    find \"$base\" -path \"$base/.stash\" -prune -o -name '*_dats.c.key' -print | while IFS= read -r k; do\n")
+  val () = bput_v(out, "      if grep -qxF \"${own}.sats\" \"$k\"; then key_paths \"$k\"; fi\n")
+  val () = bput_v(out, "    done >> \"$work/memo.paths\"\n")
+  val () = bput_v(out, "  fi\n")
+  val () = bput_v(out, "  # the module's own .dats and .sats are those with the snippet in: the\n")
+  val () = bput_v(out, "  # spliced source stands for them in the key\n")
+  val () = bput_v(out, "  sort -u \"$work/memo.paths\" | grep -vxF -e \"${own}.dats\" -e \"${own}.sats\" > \"$work/memo.paths.sorted\"\n")
+  val () = bput_v(out, "  : > \"$work/memo.files\"\n")
+  val () = bput_v(out, "  while IFS= read -r p; do\n")
+  val () = bput_v(out, "    case $p in build/*) ;; *) exit 0 ;; esac\n")
+  val () = bput_v(out, "    d=$(file_digest \"$base/${p#build/}\")\n")
+  val () = bput_v(out, "    case $d in MISSING) exit 0 ;; esac\n")
+  val () = bput_v(out, "    printf '%s %s\\n' \"$d\" \"$p\" >> \"$work/memo.files\"\n")
+  val () = bput_v(out, "  done < \"$work/memo.paths.sorted\"\n")
+  val () = bput_v(out, "  nfiles=$(wc -l < \"$work/memo.files\" | tr -d ' ')\n")
+  val () = bput_v(out, "  if [ \"$want\" = log ]; then nlog=$(wc -l < \"$work/memo.log\" | tr -d ' '); else nlog=0; : > \"$work/memo.log\"; fi\n")
+  val () = bput_v(out, "  # a directory is a memo when it is marked or empty: another is not written\n")
+  val () = bput_v(out, "  # to (a path given by mistake is not filled with entries, nor pruned)\n")
+  val () = bput_v(out, "  mkdir -p \"$memo\" || exit 0\n")
+  val () = bput_v(out, "  if [ ! -f \"$memo/.bats-fixtures-memo\" ]; then\n")
+  val () = bput_v(out, "    [ -z \"$(ls -A \"$memo\")\" ] || exit 0\n")
+  val () = bput_v(out, "    echo 'bats-fixture-memo 1' > \"$memo/.bats-fixtures-memo\" || exit 0\n")
+  val () = bput_v(out, "  fi\n")
+  val () = bput_v(out, "  dir=$(dirname \"$entry\")\n")
+  val () = bput_v(out, "  mkdir -p \"$dir\" || exit 0\n")
+  val () = bput_v(out, "  tmp=$dir/.tmp.$key.$$\n")
+  val () = bput_v(out, "  {\n")
+  val () = bput_v(out, "    printf 'bats-fixture-memo 1\\nkey %s\\nresult %s\\nnames %s\\nfiles %s\\n' \"$key\" \"$want\" \"$names\" \"$nfiles\"\n")
+  val () = bput_v(out, "    cat \"$work/memo.files\"\n")
+  val () = bput_v(out, "    printf 'log %s\\n' \"$nlog\"\n")
+  val () = bput_v(out, "    cat \"$work/memo.log\"\n")
+  val () = bput_v(out, "    printf 'text 8\\n'\n")
+  val () = bput_v(out, "    cat \"$work/memo.text\"\n")
+  val () = bput_v(out, "  } > \"$tmp.body\" || { rm -f \"$tmp.body\"; exit 0; }\n")
+  val () = bput_v(out, "  { cat \"$tmp.body\"; printf 'sum %s\\n' \"$(digest < \"$tmp.body\")\"; } > \"$tmp\" && mv -f \"$tmp\" \"$entry\"\n")
+  val () = bput_v(out, "  rm -f \"$tmp.body\" \"$tmp\"\n")
+  val () = bput_v(out, "  exit 0\n")
+  val () = bput_v(out, "  ;;\n")
+  val () = bput_v(out, "\n")
+  val () = bput_v(out, "prune)\n")
+  val () = bput_v(out, "  work=$1; memo=$(memo_dir \"$2\")\n")
+  val () = bput_v(out, "  case $memo in /*) ;; *) memo=$PWD/$memo ;; esac\n")
+  val () = bput_v(out, "  if [ ! -d \"$memo\" ] || [ -L \"$memo\" ] || [ ! -f \"$memo/.bats-fixtures-memo\" ]; then\n")
+  val () = bput_v(out, "    echo \"memo: nothing pruned, $memo is not a fixtures memo\"\n")
+  val () = bput_v(out, "    exit 0\n")
+  val () = bput_v(out, "  fi\n")
+  val () = bput_v(out, "  kept=0; removed=0\n")
+  val () = bput_v(out, "  find \"$memo\" -mindepth 1 -maxdepth 1 -type d -name '[0-9a-f][0-9a-f]' > \"$work/memo.dirs\"\n")
+  val () = bput_v(out, "  while IFS= read -r d; do\n")
+  val () = bput_v(out, "    find \"$d\" -mindepth 1 -maxdepth 1 -type f > \"$work/memo.entries\"\n")
+  val () = bput_v(out, "    while IFS= read -r p; do\n")
+  val () = bput_v(out, "      name=${p##*/}\n")
+  val () = bput_v(out, "      case $name in\n")
+  val () = bput_v(out, "        .tmp.*.*)\n")
+  val () = bput_v(out, "          pid=${name##*.}\n")
+  val () = bput_v(out, "          if kill -0 \"$pid\" 2>/dev/null; then kept=$((kept + 1)); continue; fi ;;\n")
+  val () = bput_v(out, "        *[!0-9a-f]*) continue ;;\n")
+  val () = bput_v(out, "        *)\n")
+  val () = bput_v(out, "          [ ${#name} -eq 64 ] || continue\n")
+  val () = bput_v(out, "          if grep -qxF \"$name\" \"$work/memo-used\" 2>/dev/null; then kept=$((kept + 1)); continue; fi ;;\n")
+  val () = bput_v(out, "      esac\n")
+  val () = bput_v(out, "      rm -f \"$p\" && { echo \"pruned ${p#\"$memo\"/}\"; removed=$((removed + 1)); }\n")
+  val () = bput_v(out, "    done < \"$work/memo.entries\"\n")
+  val () = bput_v(out, "  done < \"$work/memo.dirs\"\n")
+  val () = bput_v(out, "  echo \"memo: pruned $removed entries, kept $kept\"\n")
+  val () = bput_v(out, "  exit 0\n")
+  val () = bput_v(out, "  ;;\n")
+  val () = bput_v(out, "\n")
+  val () = bput_v(out, "esac\n")
+  val () = bput_v(out, "exit 2\n")
+in end
+(* END fixtures-memo.sh *)
+
+(* <work>/memo.sh written: the script the memo's verbs are *)
+fn write_memo_script {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): void = let
+  var work : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, work)
+  var script : $B.builder_v = $B.create()
+  val () = put_memo_script(script)
+  val _ = run_sh("rm -f \"$1/memo-used\"; printf '%s' \"$2\" > \"$1/memo.sh\"",
+    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(script), $L.list_vt_nil())))
+in end
+
+(* Removes from the memo the entries no fixture of this run used (the
+   script's prune, whose lines say what it removes, are printed from the
+   file they were written to: bats runs what it starts with its output
+   discarded) *)
+fn memo_prune {l:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings): void = let
+  var work : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.work, work)
+  var memo : $B.builder_v = $B.create()
+  val () = put_cfg(cfg, w.memo, memo)
+  val _ = run_sh("sh \"$1/memo.sh\" prune \"$1\" \"$2\" > \"$1/prune.out\" 2>&1",
+    $L.list_vt_cons(mk_arg(work), $L.list_vt_cons(mk_arg(memo), $L.list_vt_nil())))
+in print_text_there(cfg, w, "prune.out") end
 
 (* Runs the fixtures: the chosen ones of <dir> against a copy of the
    project in <work>/app *)
@@ -1279,8 +1677,12 @@ fn fixtures_with {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}
           in () end)
       in () end
       else let
+        val () = write_memo_script(cfg, w)
         val ran = members_loop(cfg, w, bv_m, mlen, 0, bv, t, o, true, 0)
-        val () = println! ("fixtures: ", !g_passed, " ok, ", !g_failed, " failed")
+        val () = (if w.prune <> 0 then memo_prune(cfg, w) else ())
+        val () = print! ("fixtures: ", !g_passed, " ok, ", !g_failed, " failed")
+        val () = (if !g_memo > 0 then print! (" (", !g_memo, " from the memo)") else ())
+        val () = println! ()
       in (if !g_failed > 0 then set_exit_code(1) else ()) end
     end
   end): void
@@ -1293,7 +1695,8 @@ fn fixtures_run {l:agz}{t:nat | t <= 4096} (bv: !$A.borrow(byte, l, 4096), t: in
   val a0 = word_stop(bv, t, 0)
   val a1 = a0 + 1
   val a1e = (if a1 <= t then word_stop(bv, t, a1) else t): [r:nat | r <= t] int r
-  val none = @{dir_s= ~1, dir_e= ~1, work_s= ~1, work_e= ~1, repo_s= ~1, repo_e= ~1, bad_kind= 0, bad_s= ~1, bad_e= ~1}: options
+  val none = @{dir_s= ~1, dir_e= ~1, work_s= ~1, work_e= ~1, repo_s= ~1, repo_e= ~1,
+    memo_s= ~1, memo_e= ~1, cold= 0, prune= 0, only= 0, bad_kind= 0, bad_s= ~1, bad_e= ~1}: options
   val o = (if a1e + 1 <= t then parse_options(bv, t, a1e + 1, none) else none): options
 in
   if o.bad_kind <> 0 then let
@@ -1304,6 +1707,9 @@ in
     val () = prerr_newline()
   in usage() end
   else if o.dir_s < 0 then usage()
+  else if o.prune <> 0 && o.only <> 0 then let
+    val () = prerr! ("error: bats fixtures: --prune removes what no fixture of the run used, so it needs the whole set: not with --only\n")
+  in set_exit_code(2) end
   else let
     (* the work directory: --work, else a temporary one, removed at the end *)
     var made : $B.builder_v = $B.create()
@@ -1334,7 +1740,12 @@ in
       val has_repo = (o.repo_s >= 0): bool
       val () = (if has_repo then copy_to_builder_v(bv, o.repo_s, o.repo_e, 4096, cb) else ())
       val () = put_char_v(cb, 0)
-      val w = @{program= 0, directory= off_dir, work= off_work, repository= (if has_repo then off_repo else ~1)}: settings
+      val off_memo = g1ofg0(bytes_in(cb))
+      val has_memo = (o.memo_s >= 0): bool
+      val () = (if has_memo then copy_to_builder_v(bv, o.memo_s, o.memo_e, 4096, cb) else ())
+      val () = put_char_v(cb, 0)
+      val w = @{program= 0, directory= off_dir, work= off_work, repository= (if has_repo then off_repo else ~1),
+        memo= off_memo, cold= o.cold, prune= o.prune}: settings
       val @(ca, _) = $B.to_arr(cb)
       val @(fz_c, bv_c) = $A.freeze<byte>(ca)
       val () = (if a1e + 1 <= t then fixtures_with(bv_c, w, bv, t, a1e + 1) else fixtures_with(bv_c, w, bv, t, t))
