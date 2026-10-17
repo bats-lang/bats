@@ -50,7 +50,7 @@ implement preprocess_one
   val () = put_char_v(sb, 0)
   val @(sa, _) = $B.to_arr(sb)
   val @(fz_sa, bv_sa) = $A.freeze<byte>(sa)
-  val dats_there = $F.file_exists(dats_bv, 524288)
+  val dats_there = file_exists_path(dats_bv)
   val @(ha, hlen) = $B.to_arr(hb)
   val @(fz_ha, bv_ha) = $A.freeze<byte>(ha)
   val fresh = (if target_changed then false
@@ -360,7 +360,7 @@ in
     val () = put_char_v(source, 0)
     val @(source_arr, _) = $B.to_arr(source)
     val @(fz_source, bv_source) = $A.freeze<byte>(source_arr)
-    val present = $F.file_exists(bv_source, 524288)
+    val present = file_exists_path(bv_source)
     val () = $A.drop<byte>(fz_source, bv_source)
     val () = $A.free<byte>($A.thaw<byte>(fz_source))
     val () = (if present then ()
@@ -414,7 +414,7 @@ end
 fn dir_present {sn:nat | sn < $B.BUILDER_CAP} (name: string sn): int = let
   val p = str_to_path_arr(name)
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val e = $F.file_exists(bv_p, 524288)
+  val e = file_exists_path(bv_p)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in if e then 1 else 0 end
@@ -1000,7 +1000,7 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
 implement read_unsafe_flag() = let
   val bt = str_to_path_arr("bats.toml")
   val @(fz_bt, bv_bt) = $A.freeze<byte>(bt)
-  val r = $F.file_open(bv_bt, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val r = file_open_path(bv_bt, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_bt, bv_bt)
   val () = $A.free<byte>($A.thaw<byte>(fz_bt))
 in case+ r of
@@ -1080,12 +1080,14 @@ implement check_wasm_binary(path) =
    check builds native and then wasm, so without this each pass found the
    other's cache, made every .dats again and patsopt ran on every module
    twice, every time. Each stash is a whole build/ that only ever saw its
-   own mark, which the freshness rules already handle. *)
+   own mark, which the freshness rules already handle. build/.bats_valid
+   (validated.bats) is no mark's: it stays, and a stash that holds one is
+   not put back over it. *)
 fn cache_swap (mark: int): void = let
   val () = names_set_fresh(false)
   val tgt_path = str_to_path_arr("build/.bats_target")
   val @(fz_t, bv_t) = $A.freeze<byte>(tgt_path)
-  val held = (case+ $F.file_open(bv_t, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val held = (case+ file_open_path(bv_t, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.ok(fd) => let
         val tb = $A.alloc<byte>(16)
         val tr = $F.file_read(fd, tb, 16)
@@ -1114,13 +1116,15 @@ in
     val () = put_int_v(b3, held)
     val () = bput_v(b3, " && mkdir -p .stash/")
     val () = put_int_v(b3, held)
-    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash -exec mv {} .stash/")
+    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid -exec mv {} .stash/")
     val () = put_int_v(b3, held)
     val () = bput_v(b3, "/ \\; && if [ -d .stash/")
     val () = put_int_v(b3, mark)
     val () = bput_v(b3, " ]; then find .stash/")
     val () = put_int_v(b3, mark)
-    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 -exec mv {} . \\; && rmdir .stash/")
+    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 ! -name .bats_valid -exec mv {} . \\; && rm -rf .stash/")
+    val () = put_int_v(b3, mark)
+    val () = bput_v(b3, "/.bats_valid && rmdir .stash/")
     val () = put_int_v(b3, mark)
     val () = bput_v(b3, "; fi")
     val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
@@ -1245,7 +1249,7 @@ in
          there is no stale object left to remove. *)
       val tgt_path_r = str_to_path_arr("build/.bats_target")
       val @(fz_tgtr, bv_tgtr) = $A.freeze<byte>(tgt_path_r)
-      val old_tgt_or = $F.file_open(bv_tgtr, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+      val old_tgt_or = file_open_path(bv_tgtr, $F.ReadOnly(), $F.OpenExisting(), 0)
       val old_target = (case+ old_tgt_or of
         | ~$R.ok(otfd) => let
             val otb = $A.alloc<byte>(16)
@@ -1328,7 +1332,7 @@ in
                     val () = put_char_v(chk_b, 0)
                     val @(chk_a, _) = $B.to_arr(chk_b)
                     val @(fz_chk, bv_chk) = $A.freeze<byte>(chk_a)
-                    val is_pkg = $F.file_exists(bv_chk, 524288)
+                    val is_pkg = file_exists_path(bv_chk)
                     val () = $A.drop<byte>(fz_chk, bv_chk)
                     val () = $A.free<byte>($A.thaw<byte>(fz_chk))
                   in
@@ -1372,7 +1376,7 @@ in
                                     val () = put_char_v(ns_chk, 0)
                                     val @(ns_chk_a, _) = $B.to_arr(ns_chk)
                                     val @(fz_nsc, bv_nsc) = $A.freeze<byte>(ns_chk_a)
-                                    val ns_is_pkg = $F.file_exists(bv_nsc, 524288)
+                                    val ns_is_pkg = file_exists_path(bv_nsc)
                                     val () = $A.drop<byte>(fz_nsc, bv_nsc)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_nsc))
                                   in
@@ -1927,7 +1931,7 @@ in
                                   val () = put_char_v(pk_b, 0)
                                   val @(pka, _) = $B.to_arr(pk_b)
                                   val @(fz_pk, bv_pk) = $A.freeze<byte>(pka)
-                                  val is_p = $F.file_exists(bv_pk, 524288)
+                                  val is_p = file_exists_path(bv_pk)
                                   val () = $A.drop<byte>(fz_pk, bv_pk)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pk))
                                 in
@@ -2333,7 +2337,7 @@ in
                                   val () = put_char_v(pk_b3, 0)
                                   val @(pka3, _) = $B.to_arr(pk_b3)
                                   val @(fz_pk3, bv_pk3) = $A.freeze<byte>(pka3)
-                                  val is_p3 = $F.file_exists(bv_pk3, 524288)
+                                  val is_p3 = file_exists_path(bv_pk3)
                                   val () = $A.drop<byte>(fz_pk3, bv_pk3)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_pk3))
                                 in
@@ -2985,7 +2989,7 @@ in
       (* Run patsopt on src/lib.bats if scan_src_modules preprocessed it *)
       val lib_d_path = str_to_path_arr("build/src/lib.dats")
       val @(fz_ldp, bv_ldp) = $A.freeze<byte>(lib_d_path)
-      val lib_or = $F.file_open(bv_ldp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+      val lib_or = file_open_path(bv_ldp, $F.ReadOnly(), $F.OpenExisting(), 0)
       val () = $A.drop<byte>(fz_ldp, bv_ldp)
       val () = $A.free<byte>($A.thaw<byte>(fz_ldp))
       val lib_exists = (case+ lib_or of
