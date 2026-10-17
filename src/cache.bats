@@ -285,7 +285,7 @@ implement toolchain_digest (ph, phlen, out) = let
       val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
       var a2 : $B.builder_v = $B.create()
       val () = bput_v(a2, "build/.bats_toolchain")
-      val rc = sh_script("l=\"$(pwd -P)/$2\"; cd \"$1\" && find -L bin/patsopt prelude libats share ccomp -type f -exec cksum {} + | LC_ALL=C sort > \"$l\"",
+      val rc = sh_script("l=\"$(pwd -P)/$2\"; t=\"$l.raw\"; cd \"$1\" || exit 1; for r in bin/patsopt prelude libats share ccomp; do [ -e \"$r\" ] || { echo \"error: the toolchain at $1 has no $r, so the stamp cannot be made from it: ATS2 is not whole\" >&2; exit 1; }; done; find -L bin/patsopt prelude libats share ccomp -type f -exec cksum {} + > \"$t\" || { rm -f \"$t\"; echo \"error: the toolchain at $1 cannot be listed, so the stamp cannot be made from it\" >&2; exit 1; }; LC_ALL=C sort \"$t\" > \"$l\" || { rm -f \"$t\" \"$l\"; exit 1; }; rm -f \"$t\"",
         $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil())))
       val () = (if rc = 0 then !g_toolchain_listed := true else ())
     in rc = 0 end): bool

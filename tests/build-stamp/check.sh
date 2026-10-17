@@ -264,4 +264,39 @@ rebuilt "$TMP/tool.prelude.log" "$COLD3" "a build with a prelude file changed in
 settle "$P3" HOME="$T3"
 build "$P3" "$TMP/tool.prelude.again.log" HOME="$T3"
 kept "$TMP/tool.prelude.again.log" "the build after the prelude file changed"
+# A toolchain with a part missing is not stamped from what is left of it
+# (bats-lang/bats#316): the listing that makes the stamp names each root
+# (bin/patsopt, prelude, libats, share, ccomp) and a check fails at once with
+# that name, before patsopt runs, and no stamp is written. Each farm is the
+# five parts hard-linked (cheap) with one of them removed, and no install
+# marker, so ATS2 is used as it is, as in the other farms above.
+FULL=$TMP/ats2-full
+mkdir -p "$FULL"
+for d in bin prelude libats share ccomp; do cp -Rl "$HOME/.bats/ats2/$d" "$FULL/"; done
+P5=$TMP/p5
+for r in prelude libats share ccomp bin/patsopt; do
+  n=$(echo "$r" | tr / _)
+  F=$TMP/missing-$n
+  mkdir -p "$F/.bats/ats2"
+  cp -Rl "$FULL/." "$F/.bats/ats2/"
+  rm -rf "$F/.bats/ats2/$r"
+  rm -rf "$P5"; mkdir -p "$P5"; cp -R "$P/bats.toml" "$P/src" "$P5/"
+  if (cd "$P5" && HOME="$F" "$BATS" check) > "$TMP/missing-$n.log" 2>&1; then
+    echo "FAIL: a check with no $r passed"; cat "$TMP/missing-$n.log"; exit 1
+  fi
+  grep -q "has no $r" "$TMP/missing-$n.log" || { echo "FAIL: the check does not name $r"; cat "$TMP/missing-$n.log"; exit 1; }
+  [ ! -e "$P5/build/.bats_stamp" ] || { echo "FAIL: a stamp was written from a toolchain with no $r"; cat "$P5/build/.bats_stamp"; exit 1; }
+done
+# A part the listing cannot pass through (a link back to its own parent) is
+# refused the same way, with the name of what cannot be listed
+F=$TMP/missing-loop
+mkdir -p "$F/.bats/ats2"
+cp -Rl "$FULL/." "$F/.bats/ats2/"
+ln -s .. "$F/.bats/ats2/share/loop"
+rm -rf "$P5"; mkdir -p "$P5"; cp -R "$P/bats.toml" "$P/src" "$P5/"
+if (cd "$P5" && HOME="$F" "$BATS" check) > "$TMP/missing-loop.log" 2>&1; then
+  echo "FAIL: a check with a link loop in the toolchain passed"; cat "$TMP/missing-loop.log"; exit 1
+fi
+grep -q "cannot be listed" "$TMP/missing-loop.log" || { echo "FAIL: the check does not say the toolchain cannot be listed"; cat "$TMP/missing-loop.log"; exit 1; }
+[ ! -e "$P5/build/.bats_stamp" ] || { echo "FAIL: a stamp was written from a toolchain with a link loop"; exit 1; }
 echo "build-stamp: ok"

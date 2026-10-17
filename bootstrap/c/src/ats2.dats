@@ -32,6 +32,8 @@ staload "result/src/lib.dats"
      anything else (a directory with other files, a link to one)
                                  refused, left as it was: bats replaces
                                  only what it made
+     a directory with other files and no bin/patsopt
+                                 refused, naming bin/patsopt, left as it was
 
    An install goes through a download directory (ats2-download.XXXXXX) and
    ats2.new beside ats2 and is moved into place whole, so a run that is killed leaves no half-made
@@ -109,9 +111,10 @@ in has end
 
 (* 0: the pinned toolchain is installed; 3: a toolchain bats did not make
    is there; 4: something else bats did not make is there, which is not
-   replaced; 2: nothing usable (nothing, an empty directory, or an older
-   pin's) *)
-#define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then if [ -L \"$p\" ]; then exit 4; fi; exit 2; fi\n  exit 3\nfi\nif [ -f \"$p/.bats-ats2\" ] && [ ! -L \"$p\" ]; then exit 2; fi\nif [ -L \"$p\" ]; then exit 4; fi\nif [ -e \"$p\" ]; then\n  if [ -d \"$p\" ] && [ -z \"$(ls -A \"$p\")\" ]; then exit 2; fi\n  exit 4\nfi\nexit 2\n"
+   replaced; 5: a directory bats did not make, with files and no bin/patsopt
+   (a part of a toolchain: named as such, not replaced); 2: nothing usable
+   (nothing, an empty directory, or an older pin's) *)
+#define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then if [ -L \"$p\" ]; then exit 4; fi; exit 2; fi\n  exit 3\nfi\nif [ -f \"$p/.bats-ats2\" ] && [ ! -L \"$p\" ]; then exit 2; fi\nif [ -L \"$p\" ]; then exit 4; fi\nif [ -e \"$p\" ]; then\n  if [ -d \"$p\" ] && [ -z \"$(ls -A \"$p\")\" ]; then exit 2; fi\n  if [ -d \"$p\" ] && [ ! -L \"$p\" ] && [ ! -e \"$p/bin/patsopt\" ]; then exit 5; fi\n  exit 4\nfi\nexit 2\n"
 
 (* $1 the base. A private directory of this run's own, the download in it
    (fixed timeouts, a few retries); its path on stdout, or on failure what
@@ -281,6 +284,9 @@ implement ats2_ensure (talk) =
     in true end
     else if state = 4 then let
       val () = prerr! ("error: ~/.bats/ats2 exists, is not a toolchain bats made and is not an empty directory, so bats does not replace it: move it away and run bats ats2 install\n")
+    in false end
+    else if state = 5 then let
+      val () = prerr! ("error: the toolchain at ~/.bats/ats2 has no bin/patsopt, and it is not one bats made, so bats does not replace it: move it away and run bats ats2 install\n")
     in false end
     else if state <> 2 then false
     else let
