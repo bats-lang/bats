@@ -65,47 +65,47 @@
 # put it; the entry's .key holds the toolchain's stamp), so no run can tell
 # them from the original; the key names them anyway, as what it depends on.
 #  1. validate-skipped: `else if ~validate_clean() then let val () = $B.builder_free(md) in 100 end` -> `else if false then let val () = $B.builder_free(md) in 100 end`
-#     killed by: a cycle through another module's implement was served from the memo
+#     killed by: "a cycle through another module's implement was served from the memo"
 #  2. interface-kept: `&& iface_same(cfg, w, bv_f, mlen) &&` -> `&& true &&`
-#     killed by: a snippet that loads a file, or one that changes the interface, was kept
+#     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
 #  3. loads-kept: `~snippet_loads(cfg, w, mv, a, e)` -> `true`
-#     killed by: a snippet that loads a file, or one that changes the interface, was kept
+#     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
 #  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
-#     killed by: memo cold audit lie: no text: FAIL accept/lone-ok: STALE MEMO
+#     killed by: "memo cold audit lie"
 #  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
-#     killed by: the log of a check that failed with no error of patsopt's was kept
+#     killed by: "the log of a check that failed with no error of patsopt's was kept"
 #  6. audit-off: `val stale = (if usable then audit(cfg, w, want_pass, want_log, bv_n, nn, status, bv_m, mn, bv_k) else false): bool` -> `val stale = false: bool`
-#     killed by: memo: cold audit of a doctored log: status 0, not 1
+#     killed by: "memo: cold audit of a doctored log: status 0, not 1"
 #  7. sum-unchecked: `in (if hex_is(sum, rv, n, n - 65) then cl else ~1) end` -> `in (if hex_is(sum, rv, n, n - 65) then cl else cl) end`
-#     killed by: a log with a wrong sum was served
+#     killed by: "memo torn: status 1"
 #  8. closure-digest-unchecked: `val same_key = (if kdone then hex_is(kh2, bv_r, rn, cl) else` -> `val same_key = (if kdone then (hex_is(kh2, bv_r, rn, cl) || true) else`
-#     killed by: memo closure digest: 1 lines from the memo, not 0
+#     killed by: "memo closure digest: 1 lines from the memo, not 0"
 #  9. closure-key-unchecked: `val r = closure_key_equal(bv_a)` -> `val r = true`
-#     killed by: a changed staloaded .sats of the same size
+#     killed by: "a changed staloaded .sats of the same size"
 #  10. prune-mark-ignored: `val dmarked = (path_exists(memo_sub2(memo, mlen, bv_n, "/.memo-dir")) && physical_sub(memo, mlen, bv_n)): bool` -> `val dmarked = physical_sub(memo, mlen, bv_n)`
-#     killed by: memo prune: listed 4 removals, not 3
+#     killed by: "memo prune: listed"
 #  11. prune-link-followed: `"/.memo-dir")) && physical_sub(memo, mlen, bv_n)): bool` -> `"/.memo-dir")) && true): bool`
-#     killed by: memo prune: listed 4 removals, not 3
+#     killed by: "memo prune: listed"
 #  12. prune-unmarked-memo: `val marked = (have_dir && path_exists(memo_plus(bv_m, mn, "/.bats-fixtures-memo"))): bool\n  val ua` -> `val marked = (have_dir): bool\n  val ua`
-#     killed by: memo prune not a memo: no text: memo: nothing pruned
+#     killed by: "memo prune not a memo"
 #  13. key-no-snippet: `val a2 = path_sha(fixture_text(cfg, w, mv, a, e, "snippet.bats"), t)` -> `val a2 = path_sha(fixture_text(cfg, w, mv, a, e, "before"), t)`
 #     equivalent: survives
 #  14. key-no-before: `val a1 = path_sha(fixture_text(cfg, w, mv, a, e, "before"), t)` -> `val a1 = path_sha(fixture_text(cfg, w, mv, a, e, "snippet.bats"), t)`
 #     equivalent: survives
 #  15. key-no-module: `val a3 = path_sha(mp, t)` -> `val a3 = path_sha(str_builder("bats.toml"), t)\n  val () = $B.builder_free(mp)`
-#     killed by: a changed module
+#     killed by: "memo unrelated: 4 lines from the memo, not 2"
 #  16. key-no-toml: `val a4 = path_sha(str_builder("bats.toml"), t)` -> `val a4 = path_sha(str_builder("src/helper.bats"), t)`
-#     killed by: a changed bats.toml was served
+#     killed by: "memo toml: 1 lines from the memo, not 0"
 #  17. key-no-stamp: `val a5 = path_sha(str_builder("build/.bats_stamp"), t)` -> `val a5 = path_sha(str_builder("bats.toml"), t)`
 #     equivalent: survives
 #  18. cold-serves: `      if cold then let\n        var pr` -> `      if false then let\n        var pr`
-#     killed by: memo cold audit: no text: FAIL reject/lib-bad: STALE MEMO
+#     killed by: "memo cold audit"
 #  19. prune-all: `val used = (if shaped then key_used(uv, un, 0, bv_n, nn) else true): bool` -> `val used = (if shaped then false else true): bool`
-#     killed by: memo prune: listed 9 removals, not 3
+#     killed by: "memo prune: listed"
 #  20. prune-stray: `val shaped = (nn = 68 && hex_run(bv_n, nn, 0)\n      && (text_has(bv_n, nn, 64, ".key") || text_has(bv_n, nn, 64, ".res"))): bool` -> `val shaped = true: bool`
-#     killed by: memo prune: listed 16 removals, not 3
+#     killed by: "memo prune: listed"
 #  21. store-in-no-memo: `&& memo_ready(bv_m, mn) &&` -> `&& true &&`
-#     killed by: the first run kept 0 files, not 8
+#     killed by: "the first run kept 0 files, not 8"
 #
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
