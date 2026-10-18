@@ -18,7 +18,7 @@ trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR
 # The variables the C compiler and the wasm linker read (put_cc_environment,
 # bats-lang/bats#322) are unset here, so each case sets its own
-for v in CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH OBJCPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH SDKROOT DEVELOPER_DIR MACOSX_DEPLOYMENT_TARGET SOURCE_DATE_EPOCH CCC_OVERRIDE_OPTIONS CLANG_NO_DEFAULT_CONFIG LLVM_OVERRIDE_PRODUCER LLD_IN_TEST LLD_VERSION; do
+for v in CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH OBJCPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH SDKROOT DEVELOPER_DIR MACOSX_DEPLOYMENT_TARGET IPHONEOS_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET DRIVERKIT_DEPLOYMENT_TARGET RC_DEBUG_PREFIX_MAP RC_DEBUG_OPTIONS CCC_OVERRIDE_OPTIONS CLANG_NO_DEFAULT_CONFIG; do
   unset "$v"
 done
 P=$TMP/p
@@ -166,8 +166,8 @@ settle "$P"
 build "$P" "$TMP/cc.kept.log"
 kept "$TMP/cc.kept.log" "the build after the clang came back"
 
-# The C compiler's environment (bats-lang/bats#322): a variable clang or lld
-# reads that changes what they make is digested into the cc line, so a
+# The C compiler's environment (bats-lang/bats#322): a variable clang
+# reads that changes what it makes is digested into the cc line, so a
 # build/ made with one value is dropped by a build with another, as by
 # another clang. The issue's reproduction: CPATH holds a stdlib.h that adds a
 # weak symbol, which the objects gain only in a build that sees it. Same
@@ -209,11 +209,17 @@ kept "$TMP/env.empty.same.log" "a build with CPATH empty again"
 build "$EV" "$TMP/env.empty.unset.log" -u CPATH
 say "$TMP/env.empty.unset.log" "cc differs"
 rebuilt "$TMP/env.empty.unset.log" "$COLD" "a build with CPATH unset after empty"
-# Another value of a variable the linker reads is digested too
-settle_env SOURCE_DATE_EPOCH=1
-build "$EV" "$TMP/env.sde.log" SOURCE_DATE_EPOCH=2
-say "$TMP/env.sde.log" "cc differs"
-rebuilt "$TMP/env.sde.log" "$COLD" "a build with another SOURCE_DATE_EPOCH"
+# SOURCE_DATE_EPOCH is not in the list (clang reads it only for __DATE__ and
+# __TIME__, which no emitted C uses, and a reproducible-build setup sets it
+# per commit): a value of it keeps build/
+settle_env CPATH=
+build "$EV" "$TMP/env.sde.log" CPATH= SOURCE_DATE_EPOCH=2
+kept "$TMP/env.sde.log" "a build with another SOURCE_DATE_EPOCH"
+# A Darwin deployment target is in the list: the Darwin driver picks the
+# target the objects are made for by it (not run on a Mac here)
+build "$EV" "$TMP/env.ios.log" CPATH= IPHONEOS_DEPLOYMENT_TARGET=17
+say "$TMP/env.ios.log" "cc differs"
+rebuilt "$TMP/env.ios.log" "$COLD" "a build with IPHONEOS_DEPLOYMENT_TARGET"
 
 # A build/ copied to another directory is kept: no path is in the stamp
 Q=$TMP/elsewhere/deeper/q

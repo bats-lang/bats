@@ -11,7 +11,7 @@
                share and ccomp (cache.bats's toolchain_digest)>
      cc       <sha256 of clang --version and clang -dumpmachine, of
                wasm-ld --version for a wasm mark, and of the environment
-               those read: CPATH, LIBRARY_PATH and the others named in
+               clang reads: CPATH, LIBRARY_PATH and the others named in
                put_cc_environment, each a name and its value, digested and
                not stored (bats-lang/bats#322)>
      flags    <the flag templates patsopt and cc are run with for this
@@ -111,31 +111,56 @@ fn cc_listed (mark: int): bool = let
   val () = $A.free<byte>(none)
 in r.0 = 0 end
 
-(* The environment the C compiler and the wasm linker read, whose values
-   change what they make (bats-lang/bats#322). They are digested into the
-   cc line, not stored: a build/ made with one value is dropped by a build
-   with another, as by another clang. The list is the one place these
-   names are written (put_cc_environment). Research (on #322): clang's
-   manual names CPATH, C_INCLUDE_PATH, CPLUS_INCLUDE_PATH,
-   OBJC_INCLUDE_PATH, OBJCPLUS_INCLUDE_PATH and MACOSX_DEPLOYMENT_TARGET
-   (clang.llvm.org/docs/CommandGuide/clang.html, ENVIRONMENT); the
-   clang 18.1.3 driver's library (libclang-cpp.so.18.1) also reads
-   LIBRARY_PATH, COMPILER_PATH, SDKROOT, SOURCE_DATE_EPOCH,
-   CCC_OVERRIDE_OPTIONS and CLANG_NO_DEFAULT_CONFIG, and libLLVM reads
-   LLVM_OVERRIDE_PRODUCER: each is a name the binary holds, checked with
-   strings(1), so each is in the list. DEVELOPER_DIR (Apple's xcrun picks
-   the SDK by it on Darwin) is named by Apple's toolchain, not checked
-   here. wasm-ld (lld 18) holds LLD_IN_TEST, LLD_VERSION and
-   SOURCE_DATE_EPOCH. ccache's manual names no hashed variable and
-   sccache's architecture doc says its hash covers "Environment
-   variables" without naming them, so this list is bats's own. Left out,
-   each reads no compiled output: TMPDIR, TEMP and TMP (temporary files),
-   CLANG_MODULE_CACHE_PATH (the module cache, used with -fmodules only),
-   CLANG_CRASH_DIAGNOSTICS_DIR, CC_LOG_* and CC_PRINT_* (logs), the LLVM
-   symbolizer's, FORCE_CLANG_DIAGNOSTICS_CRASH, and LLD_REPRODUCE (a
-   reproducer archive). The value is read whole: a value of 128 KiB or
-   more is not digested short, the stamp is refused instead (exec itself
-   refuses a string that long). *)
+(* The environment the C compiler reads, whose values change what it makes
+   (bats-lang/bats#322). They are digested into the cc line, never stored:
+   a build/ made with one value is dropped by a build with another, as by
+   another clang. The list is the one place these names are written
+   (put_cc_environment). The wasm linker reads none of them: the wasm
+   mark's cc line digests the same list only because its C is compiled by
+   clang too, and the linker's version is in the same line.
+
+   What was verified, and how: the names clang's manual documents
+   (clang.llvm.org/docs/CommandGuide/clang.html, ENVIRONMENT) are CPATH,
+   C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, OBJC_INCLUDE_PATH,
+   OBJCPLUS_INCLUDE_PATH and MACOSX_DEPLOYMENT_TARGET. The clang 18.1.3
+   driver (strings(1) of libclang-cpp.so.18.1, and llvm-project
+   llvmorg-18.1.3 source) also reads LIBRARY_PATH and COMPILER_PATH
+   (Driver.cpp), SDKROOT (Darwin.cpp), CLANG_NO_DEFAULT_CONFIG
+   (Driver.cpp) and CCC_OVERRIDE_OPTIONS (tools/driver/driver.cpp). The
+   Darwin driver also reads RC_DEBUG_PREFIX_MAP and RC_DEBUG_OPTIONS
+   (-fdebug-prefix-map and debug options, which change the debug
+   profile's objects) and the deployment targets of the other Apple
+   platforms, IPHONEOS_, TVOS_, WATCHOS_ and DRIVERKIT_DEPLOYMENT_TARGET,
+   which pick the target the objects are made for. NOT CHECKED: those
+   Darwin names and DEVELOPER_DIR (Apple's xcrun picks the SDK by it) were
+   not run on a Mac here; they are listed from the same sources and cost
+   nothing on another machine.
+
+   Removed from the list, and why:
+   - SOURCE_DATE_EPOCH: clang reads it only for __DATE__ and __TIME__.
+     No C that patsopt emits and no ATS2 header uses them, so it changes no
+     object here. Reproducible-build setups set it to the commit time, so
+     it would drop build/ on every commit and defeat the incremental
+     build; a package whose own C uses __DATE__ or __TIME__ is not a pure
+     function of its inputs anyway (a clean build differs by time without
+     it).
+   - LLD_IN_TEST: a test-harness switch of lld's driver (lld.cpp); it
+     changes no output.
+   - LLD_VERSION: read only by lld's ELF writer for the .comment text, and
+     wasm-ld does not read it (the string is the ELF code linked in); bats
+     links native with the system's clang and never lld's ELF.
+   - LLVM_OVERRIDE_PRODUCER: the bitcode producer string; no bitcode is
+     produced (no -flto in either flag template).
+
+   Left out, each reads no compiled output: TMPDIR, TEMP and TMP (temporary
+   files), CLANG_MODULE_CACHE_PATH (the module cache, used with -fmodules
+   only), CLANG_CRASH_DIAGNOSTICS_DIR, CC_LOG_* and CC_PRINT_* (logs), the
+   LLVM symbolizer's, FORCE_CLANG_DIAGNOSTICS_CRASH, and LLD_REPRODUCE (a
+   reproducer archive).
+
+   ccache's manual names no hashed variable and sccache's architecture doc
+   says its hash covers "Environment variables" without naming them, so
+   this list is bats's own. *)
 
 (* The bytes of a builder, hashed into c; the builder is consumed *)
 fn hash_builder (c: !$SHA.ctx, b: $B.builder_v): void = let
@@ -144,9 +169,8 @@ fn hash_builder (c: !$SHA.ctx, b: $B.builder_v): void = let
   val () = $A.free<byte>(ba)
 in end
 
-(* One environment variable into c: its name, then " unset" when it is not
-   set (so unset and empty differ), else " <length>" and its value. false
-   when its value is 128 KiB or more. *)
+(* A variable that is not set, into c: its name, then " unset" (so unset and
+   empty differ). *)
 fn hash_env_unset {sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, c: !$SHA.ctx): void = let
   var h : $B.builder_v = $B.create()
@@ -165,6 +189,12 @@ fn hash_env_set {sn:nat | sn < $B.BUILDER_CAP}{l:agz}
   val () = bput_v(h, "\n")
 in hash_builder(c, h) end
 
+(* One environment variable into c, its name first (hash_env_unset,
+   hash_env_set). The value is read whole: getenv's copy is cut at the
+   buffer, so a value of 128 KiB or more is not digested short. It is
+   refused, with the variable's name and size said, and the stamp is not
+   written (exec refuses a string that long, so this is for an environment
+   changed inside the process). *)
 fn hash_env_var {sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, c: !$SHA.ctx): bool = let
   val na = str_to_path_arr(name)
@@ -179,6 +209,8 @@ fn hash_env_var {sn:nat | sn < $B.BUILDER_CAP}
     | ~$R.some(k) =>
         if k >= 131072 then let
           val () = $A.free<byte>(buf)
+          val () = set_build_err()
+          val () = prerr! ("error: the value of ", name, " is ", k, " bytes or more: the stamp of build/ cannot be made with it (the C compiler reads it; set it shorter)\n")
         in false end
         else let
           val @(fz_b, bv_b) = $A.freeze<byte>(buf)
@@ -188,10 +220,10 @@ fn hash_env_var {sn:nat | sn < $B.BUILDER_CAP}
         in true end): bool
 in ok end
 
-(* The environment the C compiler and the wasm linker read (the names
-   the research comment above hash_builder gives), hashed into c in this
-   order. One list, for both marks: a native build with one of the wasm
-   linker's set is dropped, which costs a rebuild and never a wrong object. *)
+(* The environment the C compiler reads (the names the research comment
+   above hash_builder gives), hashed into c in this order. One list, for
+   both marks: a native build with one of the wasm mark's set (the same
+   list) is dropped, which costs a rebuild and never a wrong object. *)
 fn put_cc_environment (c: !$SHA.ctx): bool =
   hash_env_var("CPATH", c)
   && hash_env_var("C_INCLUDE_PATH", c)
@@ -203,12 +235,14 @@ fn put_cc_environment (c: !$SHA.ctx): bool =
   && hash_env_var("SDKROOT", c)
   && hash_env_var("DEVELOPER_DIR", c)
   && hash_env_var("MACOSX_DEPLOYMENT_TARGET", c)
-  && hash_env_var("SOURCE_DATE_EPOCH", c)
+  && hash_env_var("IPHONEOS_DEPLOYMENT_TARGET", c)
+  && hash_env_var("TVOS_DEPLOYMENT_TARGET", c)
+  && hash_env_var("WATCHOS_DEPLOYMENT_TARGET", c)
+  && hash_env_var("DRIVERKIT_DEPLOYMENT_TARGET", c)
+  && hash_env_var("RC_DEBUG_PREFIX_MAP", c)
+  && hash_env_var("RC_DEBUG_OPTIONS", c)
   && hash_env_var("CCC_OVERRIDE_OPTIONS", c)
   && hash_env_var("CLANG_NO_DEFAULT_CONFIG", c)
-  && hash_env_var("LLVM_OVERRIDE_PRODUCER", c)
-  && hash_env_var("LLD_IN_TEST", c)
-  && hash_env_var("LLD_VERSION", c)
 
 (* The cc line's digest, 64 hex digits appended to out: the sha256 of
    build/.bats_cc's digest and of the environment above. false when the
@@ -264,7 +298,7 @@ in ok && wrote end
 implement stamp_check (ph, phlen, mark) =
   if ~stamp_write(ph, phlen, mark) then let
     val () = set_build_err()
-  in prerr! ("error: the stamp of build/ (bats, the toolchain and the C compiler) cannot be made: is clang installed and is ATS2 whole?\n") end
+  in prerr! ("error: the stamp of build/ (bats, the toolchain and the C compiler) cannot be made: the C compiler's version or environment could not be read (a message above says which)\n") end
   else let
     var d : $B.builder_v = $B.create()
     val () = put_int_v(d, mark)
