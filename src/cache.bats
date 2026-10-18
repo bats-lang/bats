@@ -481,7 +481,9 @@ fn names_digest (out: !$B.builder_v >> $B.builder_v): bool = let
     else let
       var a1 : $B.builder_v = $B.create()
       val () = bput_v(a1, "build/.bats_names")
-      val r = sh_script("rm -rf build/.bats_graph build/.bats_dg; mkdir -p build/.bats_dg; find build -path build/.stash -prune -o -path build/.bats_dg -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print | LC_ALL=C sort > \"$1\"",
+      (* the digests kept for the pass are of files that may have moved *)
+      val () = digests_forget()
+      val r = sh_script("rm -rf build/.bats_graph build/.bats_dg; find build -path build/.stash -prune -o -type f \\( -name '*.sats' -o -name '*.hats' \\) -print | LC_ALL=C sort > \"$1\"",
         $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil()))
       val () = (if r = 0 then names_set_fresh(true) else ())
     in r end): int

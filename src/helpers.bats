@@ -3390,15 +3390,36 @@ in ok end
    closure of many modules, and digesting one (a sha256 of a few hundred
    kilobytes, or a scan for its interface) for each of them was most of
    what a no-change check cost over main's. The digest of such a file is
-   kept in build/.bats_dg/<its path, with / as %>: the path, a line feed,
-   the size line, the hash line. The directory is emptied whenever the
-   names are listed again (names_digest in cache.bats), which is after
-   anything that writes a .sats or a .dats of the project (names_fresh
-   is made false by touch_sats_stamp, write_file_from_rope, cache_swap and
-   prune_orphans), so an entry is never older than the file it digests
-   within a run, and none outlives a run. Only a .sats and the files
-   under build/bats_modules are kept; a module's own .dats is hashed
-   where it is needed. *)
+   kept in memory for the pass, in one table of this process, not in a file
+   each (an unchanged check of a project of quire's size read about 5,000
+   small files for them, an open each: bats#311). Only a .sats and the files
+   under build/bats_modules are kept; a module's own .dats is hashed where
+   it is needed.
+
+   The table is one array of 1 MiB of entries and one of 16384 ints, the
+   slots of an open-addressing index. An entry is the file's path, a line
+   feed, the size line and the hash line (each ends with its line feed, the
+   hash line is 64 hex digits and its line feed), the text memo_size_raw and
+   memo_hash_raw make; a slot holds an entry's offset plus one, 0 being
+   empty. A file is looked up by the full path, compared byte for byte, so
+   a slot that holds another path is passed over. The table is emptied
+   (digests_forget) wherever the names are listed again (names_digest in
+   cache.bats), which is after anything that writes a .sats or a .dats of
+   the project (names_fresh is made false by touch_sats_stamp,
+   write_file_from_rope, cache_swap and prune_orphans), so an entry is never
+   older than the file it digests within a run, and it lives in the memory
+   of one process, so none outlives a run. A table that is full keeps no
+   more: those files are digested each time, as before.
+
+   What is proved is every read and write of the two arrays by its index
+   (an entry is read only inside the first u bytes, which are the bytes
+   written, and u is at most the array's size) and the termination of every
+   loop. What is not: a slot is an int read back from memory, which has no
+   index in its type (the array package has no array of indexed ints:
+   bats-lang/array#49), so slot_read takes a value outside [0, u] to be 0, an
+   empty slot, as with_env's table_read does; it cannot happen, since only
+   dg_insert writes a slot, with an offset it has just written an entry at,
+   and a slot read as empty is a miss, which digests the file again. *)
 
 (* Whether p begins with "build/bats_modules/" *)
 fn in_modules {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool = let
@@ -3412,75 +3433,170 @@ in same(p, "build/bats_modules/", 0) end
 fn digest_kept {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
   if is_sats_path(p) then true else in_modules(p)
 
-(* p[i, k) with / as %, written to c from 15 + i on *)
-fun dg_fill {lp,lc:agz}{k:nat | k <= 524272}{i:nat | i <= k} .<k - i>.
-  (p: !$A.borrow(byte, lp, 524288), c: !$A.arr(byte, lc, k + 16), i: int i, k: int k): void =
-  if i >= k then ()
-  else let
-    val v = byte2int0($A.read<byte>(p, i))
-    val () = $A.set<byte>(c, 15 + i, int2byte0(if v = 47 then 37 else v))
-  in dg_fill(p, c, i + 1, k) end
+datavtype digest_table =
+  | table_none of ()
+  | {li,lt:agz}{u:nat | u <= 1048576}
+    table_some of ($A.arr(int, li, 16384), $A.arr(byte, lt, 1048576), int u)
 
-(* "build/.bats_dg/" written to c[0, 15) *)
-fun dg_prefix {lc:agz}{m:nat | m >= 15}{i:nat | i <= 15} .<15 - i>.
-  (c: !$A.arr(byte, lc, m), i: int i): void =
-  if i >= 15 then ()
-  else let
-    val () = $A.set<byte>(c, i, int2byte0(char2int0(string_get_at("build/.bats_dg/", i))))
-  in dg_prefix(c, i + 1) end
+val g_digests = ref<digest_table>(table_none())
 
-(* build/.bats_dg/<p with / as %>, NUL-terminated, in an array of its own
-   size (a builder is 512 KiB zeroed for a path of 60 bytes, and this is
-   made for each file of each closure: bats#296) *)
-fn dg_path {lp:agz} (p: !$A.borrow(byte, lp, 524288))
-  : [m:pos | m <= 524288][lc:agz] @($A.arr(byte, lc, m), int m) = let
+fn table_free (t: digest_table): void =
+  case+ t of
+  | ~table_none() => ()
+  | ~table_some(ix, tx, _) => let
+      val () = $A.free<int>(ix)
+    in $A.free<byte>(tx) end
+
+(* Forgets every digest kept: the next ones are made from the files *)
+#pub fn digests_forget (): void
+
+implement digests_forget () = let
+  var taken : digest_table = table_none()
+  val () = ref_exch_elt<digest_table>(g_digests, taken)
+in table_free(taken) end
+
+(* The length of the NUL-terminated path in p, at most 524272 *)
+fn path_length {lp:agz} (p: !$A.borrow(byte, lp, 524288)): [k:nat | k <= 524272] int k = let
   val z = find_null_bv_from(p, 0, 524288)
-  val k = (if z >= 0 then (if z <= 524272 then z else 524272) else 524272): [k:nat | k <= 524272] int k
-  val c = $A.alloc<byte>(k + 16)
-  val () = dg_prefix(c, 0)
-  val () = dg_fill(p, c, 0, k)
-in @(c, k + 16) end
+in (if z >= 0 then (if z <= 524272 then z else 524272) else 524272) end
 
-(* Whether c[0, k) is the NUL-terminated p[0, k) *)
-fun same_bytes {lp,lc:agz}{m:pos}{k:nat}{i:nat | i <= k} .<k - i>.
-  (p: !$A.borrow(byte, lp, 524288), c: !$A.borrow(byte, lc, m), m: int m, k: int k, i: int i): bool =
+(* The slot at which the path p[0, stop) starts being looked for: its hash,
+   below 16384, h being the hash so far *)
+fun dg_hash {lp:agz}{i:nat | i <= 524288}{h:nat | h < 16384} .<524288 - i>.
+  (p: !$A.borrow(byte, lp, 524288), i: int i, stop: int, h: int h): [r:nat | r < 16384] int r =
+  if i >= 524288 then h
+  else if i >= stop then h
+  else dg_hash(p, i + 1, stop, nmod(h * 31 + $AR.low_byte(byte2int0($A.read<byte>(p, i))), 16384))
+
+(* The offset kept in slot s: an entry's offset plus one, or 0 for an empty
+   slot (and for a value read that is none of those) *)
+fn slot_read {li:agz}{s:nat | s < 16384}{u:nat | u <= 1048576}
+  (ix: !$A.arr(int, li, 16384), s: int s, u: int u): [r:nat | r <= u] int r = let
+  val v = g1ofg0($A.get<int>(ix, s))
+in
+  if v < 0 then 0
+  else if v > u then 0
+  else v
+end
+
+(* Whether p[i, k) is tx[off + i, off + k) *)
+fun bytes_equal {lp,lt:agz}{k:nat | k <= 524272}{u:nat | u <= 1048576}{off:nat | off + k < u}{i:nat | i <= k} .<k - i>.
+  (p: !$A.borrow(byte, lp, 524288), tx: !$A.borrow(byte, lt, 1048576),
+   off: int off, i: int i, k: int k, u: int u): bool =
   if i >= k then true
-  else if peek(p, i, 524288) = peek(c, i, m) then same_bytes(p, c, m, k, i + 1)
+  else if byte2int0($A.read<byte>(p, i)) = byte2int0($A.read<byte>(tx, off + i))
+  then bytes_equal(p, tx, off, i + 1, k, u)
   else false
 
-(* The kept size line (hashes false) or hash line of p, appended to out,
-   each with its line feed; false when none is kept *)
-fn digest_read {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), hashes: bool, out: !$B.builder_v >> $B.builder_v): bool = let
-  val @(ka, km) = dg_path(p)
-  val @(fz_k, bv_k) = $A.freeze<byte>(ka)
-  val plen = find_null_bv_from(p, 0, 524288)
-  (* an entry is a few hundred bytes: read into a buffer, no arena *)
-  val ok = (case+ file_open_n(bv_k, km, $F.ReadOnly(), $F.OpenExisting(), 0) of
-    | ~$R.err(_) => false
-    | ~$R.ok(fd) => let
-        val buf = $A.alloc<byte>(4096)
-        val n = (case+ $F.file_read(fd, buf, 4096) of
-          | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
-        val () = $R.discard<int><$F.io_error>($F.file_close(fd))
-        val @(fz_c, bv_c) = $A.freeze<byte>(buf)
-        (* path, line feed, size line (with its line feed), 65 bytes of hash line *)
-        val shaped = (n < 4096 && n >= plen + 4 + 65 && plen >= 0 && peek(bv_c, plen, 4096) = 10
-          && peek(bv_c, n - 66, 4096) = 10 && peek(bv_c, n - 1, 4096) = 10): bool
-        val same = (if plen >= 0 then (if shaped then same_bytes(p, bv_c, 4096, plen, 0) else false) else false): bool
-        val () = (if same then (if hashes then copy_to_builder_v(bv_c, n - 65, n, 4096, out)
-                                else copy_to_builder_v(bv_c, plen + 1, n - 65, 4096, out)) else ())
-        val () = $A.drop<byte>(fz_c, bv_c)
-        val () = $A.free<byte>($A.thaw<byte>(fz_c))
-      in same end)
-  val () = $A.drop<byte>(fz_k, bv_k)
-  val () = $A.free<byte>($A.thaw<byte>(fz_k))
-in ok end
+(* Whether the entry at off, in the first u bytes of tx, is the path p[0, k) *)
+fn entry_is {lp,lt:agz}{k:nat | k <= 524272}{u:nat | u <= 1048576}{off:nat | off <= u}
+  (p: !$A.borrow(byte, lp, 524288), k: int k, tx: !$A.borrow(byte, lt, 1048576),
+   off: int off, u: int u): bool =
+  if off + k + 1 > u then false
+  else if bytes_equal(p, tx, off, 0, k, u) then byte2int0($A.read<byte>(tx, off + k)) = 10
+  else false
 
-(* Both lines of p, kept and appended (the one asked for); false when p
-   cannot be read *)
-fn digest_make {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), hashes: bool, out: !$B.builder_v >> $B.builder_v): bool = let
+(* The offset of the entry for p[0, k), or ~1 when there is none, looking
+   from slot s and at most fuel slots on; an empty slot ends the look *)
+fun dg_find {lp,li,lt:agz}{k:nat | k <= 524272}{u:nat | u <= 1048576}{s:nat | s < 16384}{f:nat} .<f>.
+  (p: !$A.borrow(byte, lp, 524288), k: int k, ix: !$A.arr(int, li, 16384),
+   tx: !$A.borrow(byte, lt, 1048576), u: int u, s: int s, fuel: int f)
+  : [r:int | ~1 <= r; r <= u] int r =
+  if fuel <= 0 then ~1
+  else let
+    val v = slot_read(ix, s, u)
+  in
+    if v <= 0 then ~1
+    else if entry_is(p, k, tx, v - 1, u) then v - 1
+    else dg_find(p, k, ix, tx, u, nmod(s + 1, 16384), fuel - 1)
+  end
+
+(* The first empty slot from s on, or ~1 when fuel slots are all taken *)
+fun dg_empty {li:agz}{u:nat | u <= 1048576}{s:nat | s < 16384}{f:nat} .<f>.
+  (ix: !$A.arr(int, li, 16384), u: int u, s: int s, fuel: int f): [r:int | ~1 <= r; r < 16384] int r =
+  if fuel <= 0 then ~1
+  else if slot_read(ix, s, u) <= 0 then s
+  else dg_empty(ix, u, nmod(s + 1, 16384), fuel - 1)
+
+(* The first line feed of tx[i, u), or u *)
+fun lf_from {lt:agz}{u:nat | u <= 1048576}{i:nat | i <= u} .<u - i>.
+  (tx: !$A.borrow(byte, lt, 1048576), i: int i, u: int u): [r:nat | i <= r; r <= u] int r =
+  if i >= u then i
+  else if byte2int0($A.read<byte>(tx, i)) = 10 then i
+  else lf_from(tx, i + 1, u)
+
+(* Where the size line (hashes false) or the hash line of the entry at off,
+   whose path has k bytes, lies in tx: true and its first byte and the one
+   after its line feed; false when the entry is not whole *)
+fn dg_span {lt:agz}{k:nat | k <= 524272}{u:nat | u <= 1048576}{off:nat | off <= u}
+  (tx: !$A.borrow(byte, lt, 1048576), off: int off, k: int k, u: int u, hashes: bool)
+  : [a,b:int] @(bool, int a, int b) = let
+  val s = off + k + 1
+in
+  if s > u then @(false, 0, 0)
+  else let
+    val e = lf_from(tx, s, u)
+  in
+    if e + 66 > u then @(false, 0, 0)
+    else if hashes then @(true, e + 1, e + 66)
+    else @(true, s, e + 1)
+  end
+end
+
+(* src[base + i, base + k) written to tx from u + i on *)
+fun blit {lt,ls:agz}{n:pos}{u:nat}{base:int}{k:nat | u + k <= 1048576}{i:nat | i <= k} .<k - i>.
+  (tx: !$A.arr(byte, lt, 1048576), u: int u, src: !$A.borrow(byte, ls, n), n: int n,
+   base: int base, i: int i, k: int k): void =
+  if i >= k then ()
+  else let
+    val () = $A.set<byte>(tx, u + i, int2byte0(peek(src, base + i, n)))
+  in blit(tx, u, src, n, base, i + 1, k) end
+
+(* Whether sb[i, sl) is digits and then the line feed that ends it: a size line *)
+fun size_line_shaped {ls:agz}{sl:nat | sl <= 524288}{i:nat | i <= sl} .<sl - i>.
+  (sb: !$A.borrow(byte, ls, 524288), sl: int sl, i: int i): bool =
+  if i >= sl then false
+  else if i + 1 = sl then byte2int0($A.read<byte>(sb, i)) = 10
+  else let
+    val c = byte2int0($A.read<byte>(sb, i))
+  in
+    if c >= 48 then (if c <= 57 then size_line_shaped(sb, sl, i + 1) else false) else false
+  end
+
+(* The entry p[0, k), a line feed, sb[0, sl) and hb[0, hl) put in the table
+   that holds u bytes and indexes from slot s: the bytes it holds then. Not
+   put (u again) when the lines are not a size line and a hash line, when
+   the entry does not fit or when no slot is free. *)
+fn dg_insert {lp,li,lt,ls,lh:agz}{k:nat | k <= 524272}{u:nat | u <= 1048576}{s:nat | s < 16384}
+  {sl,hl:nat | sl <= 524288; hl <= 524288}
+  (p: !$A.borrow(byte, lp, 524288), k: int k, ix: !$A.arr(int, li, 16384),
+   tx: !$A.arr(byte, lt, 1048576), u: int u, s: int s,
+   sb: !$A.borrow(byte, ls, 524288), sl: int sl, hb: !$A.borrow(byte, lh, 524288), hl: int hl)
+  : [u2:nat | u2 <= 1048576] int u2 =
+  if hl <> 65 then u
+  else if sl > 24 then u
+  else if ~size_line_shaped(sb, sl, 0) then u
+  else if u + k + 1 + sl + hl > 1048576 then u
+  else let
+    val slot = dg_empty(ix, u, s, 16384)
+  in
+    if slot < 0 then u
+    else let
+      val () = blit(tx, u, p, 524288, 0, 0, k)
+      val () = $A.set<byte>(tx, u + k, int2byte0(10))
+      val () = blit(tx, u + k + 1, sb, 524288, 0, 0, sl)
+      val () = blit(tx, u + k + 1 + sl, hb, 524288, 0, 0, hl)
+      val () = $A.set<int>(ix, slot, u + 1)
+    in u + k + 1 + sl + hl end
+  end
+
+(* Digests p, appends the line asked for to out and, when both lines could
+   be made, puts them in the table: false when p cannot be read; the bytes
+   the table holds then *)
+fn digest_miss {lp,li,lt:agz}{k:nat | k <= 524272}{u:nat | u <= 1048576}{s:nat | s < 16384}
+  (p: !$A.borrow(byte, lp, 524288), k: int k, ix: !$A.arr(int, li, 16384),
+   tx: !$A.arr(byte, lt, 1048576), u: int u, s: int s, hashes: bool,
+   out: !$B.builder_v >> $B.builder_v): [u2:nat | u2 <= 1048576] @(bool, int u2) = let
   var sb : $B.builder_v = $B.create()
   var hb : $B.builder_v = $B.create()
   val a = memo_size_raw(p, sb)
@@ -3490,25 +3606,44 @@ fn digest_make {lp:agz}
   val @(fz_s, bv_s) = $A.freeze<byte>(sa)
   val @(ha, hl) = $B.to_arr(hb)
   val @(fz_h, bv_h) = $A.freeze<byte>(ha)
-  val () = (if both then let
-      var e : $B.builder_v = $B.create()
-      val plen = find_null_bv_from(p, 0, 524288)
-      val () = copy_to_builder_v(p, 0, plen, 524288, e)
-      val () = put_char_v(e, 10)
-      val () = copy_to_builder_v(bv_s, 0, sl, 524288, e)
-      val () = copy_to_builder_v(bv_h, 0, hl, 524288, e)
-      val @(ka, km) = dg_path(p)
-      val @(fz_k, bv_k) = $A.freeze<byte>(ka)
-      val _ = write_file_from_builder(bv_k, km, e)
-      val () = $A.drop<byte>(fz_k, bv_k)
-    in $A.free<byte>($A.thaw<byte>(fz_k)) end else ())
+  val u2 = (if both then dg_insert(p, k, ix, tx, u, s, bv_s, sl, bv_h, hl) else u): [u2:nat | u2 <= 1048576] int u2
   val () = (if hashes then copy_to_builder_v(bv_h, 0, hl, 524288, out)
             else copy_to_builder_v(bv_s, 0, sl, 524288, out))
   val () = $A.drop<byte>(fz_h, bv_h)
   val () = $A.free<byte>($A.thaw<byte>(fz_h))
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
-in both end
+in @(both, u2) end
+
+(* The kept size line (hashes false) or hash line of p, appended to out,
+   each with its line feed: made and kept when none is kept; false when p
+   cannot be read *)
+fn digest_entry {lp:agz}
+  (p: !$A.borrow(byte, lp, 524288), hashes: bool, out: !$B.builder_v >> $B.builder_v): bool = let
+  var taken : digest_table = table_none()
+  val () = ref_exch_elt<digest_table>(g_digests, taken)
+  val @(ix, tx, u) = (case+ taken of
+    | ~table_none() => let
+        val fresh_ix = $A.alloc<int>(16384)
+        val fresh_tx = $A.alloc<byte>(1048576)
+      in @(fresh_ix, fresh_tx, 0) end
+    | ~table_some(ix, tx, u) => @(ix, tx, u))
+    : [li,lt:agz][u:nat | u <= 1048576] @($A.arr(int, li, 16384), $A.arr(byte, lt, 1048576), int u)
+  val k = path_length(p)
+  val start = dg_hash(p, 0, k, 0)
+  val @(fz_x, bv_x) = $A.freeze<byte>(tx)
+  val off = dg_find(p, k, ix, bv_x, u, start, 16384)
+  val span = (if off >= 0 then dg_span(bv_x, off, k, u, hashes) else @(false, 0, 0)): [a,b:int] @(bool, int a, int b)
+  val @(hit, first, past) = span
+  val () = (if hit then copy_to_builder_v(bv_x, first, past, 1048576, out) else ())
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val tx1 = $A.thaw<byte>(fz_x)
+  val @(ok, u2) = (if hit then @(true, u) else digest_miss(p, k, ix, tx1, u, start, hashes, out))
+    : [u2:nat | u2 <= 1048576] @(bool, int u2)
+  var back : digest_table = table_some(ix, tx1, u2)
+  val () = ref_exch_elt<digest_table>(g_digests, back)
+  val () = table_free(back)
+in ok end
 
 (* The size line of one file of a closure: its size, or a .sats's
    interface length; false when it cannot be read *)
@@ -3517,8 +3652,7 @@ in both end
 
 implement memo_entry_size(p, out) =
   if ~digest_kept(p) then memo_size_raw(p, out)
-  else if digest_read(p, false, out) then true
-  else digest_make(p, false, out)
+  else digest_entry(p, false, out)
 
 (* The hash line of one file of a closure: its sha256, or a .sats's
    interface's *)
@@ -3527,8 +3661,7 @@ implement memo_entry_size(p, out) =
 
 implement memo_entry_hash(p, out) =
   if ~digest_kept(p) then memo_hash_raw(p, out)
-  else if digest_read(p, true, out) then true
-  else digest_make(p, true, out)
+  else digest_entry(p, true, out)
 
 (* Whether the file at path_bv begins with bv[0, len) *)
 #pub fn file_starts_with {lp:agz}{lb:agz}{n:nat | n <= 524288}

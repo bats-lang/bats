@@ -3460,6 +3460,141 @@ fn sats_moved {lp:agz}
 
 
 
+fn digests_forget (): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3533,10 +3668,8 @@ fn memo_entry_size {lp:agz}
 
 
 
-
 fn memo_entry_hash {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
-
 
 
 
