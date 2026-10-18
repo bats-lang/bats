@@ -13,7 +13,10 @@
 #  * a source whose bytes change with its size kept, and its time put
 #    back, is made again, and only its module (its .sats is the same);
 #  * a changed .sats makes every module made again;
-#  * a key that is missing or garbled makes its output made again.
+#  * a key that is missing or garbled makes its output made again;
+#  * a build of the other profile (release over debug, and the reverse)
+#    makes a native object again, since the profile is in its key
+#    (bats-lang/bats#320), and its debug info is the profile's.
 # usage: tests/build-content-keys/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -149,4 +152,35 @@ run b4.log build --only debug --only native
 cold b4.log "a build with the stamp ahead of the .sats" 3
 run b5.log build --only debug --only native
 quiet b5.log "the build after it"
+# The profile is in a native object's key (bats-lang/bats#320): the two
+# profiles share build/, and the release object was reused by a debug build
+# (and the other way round). Each switch makes the bin's object again, the
+# object has the debug info of its profile, and the same profile again
+# reuses it. A garbled or missing key makes it again.
+obj=build/src/bin/tool_dats.o
+# (verbose prints the output path and the input path with a NUL between
+# them, so the pattern ends at the path's own last byte)
+ccs() { grep -ac -- "+ cc -c -o $obj" "$1" || true; }
+has_debug_info() { grep -aq '\.debug_info' "$obj"; }
+run r0.log build --only release --only native
+[ "$(ccs r0.log)" = 1 ] || { echo "FAIL: a release build after a debug one did not make the bin's object again"; cat r0.log; exit 1; }
+if has_debug_info; then echo "FAIL: the release object has debug info"; exit 1; fi
+run r1.log build --only debug --only native
+[ "$(ccs r1.log)" = 1 ] || { echo "FAIL: a debug build reused the release object"; cat r1.log; exit 1; }
+has_debug_info || { echo "FAIL: the debug object has no debug info"; exit 1; }
+run r2.log build --only debug --only native
+[ "$(ccs r2.log)" = 0 ] || { echo "FAIL: a second debug build made the bin's object again"; cat r2.log; exit 1; }
+run r3.log build --only release --only native
+[ "$(ccs r3.log)" = 1 ] || { echo "FAIL: a release build reused the debug object"; cat r3.log; exit 1; }
+if has_debug_info; then echo "FAIL: the release object has debug info after a release build"; exit 1; fi
+run r4.log build --only release --only native
+[ "$(ccs r4.log)" = 0 ] || { echo "FAIL: a second release build made the bin's object again"; cat r4.log; exit 1; }
+printf 'garbled\n' > "$obj.key"
+run r5.log build --only release --only native
+[ "$(ccs r5.log)" = 1 ] || { echo "FAIL: a garbled object key did not make the object again, once"; cat r5.log; exit 1; }
+rm -f "$obj.key"
+run r6.log build --only release --only native
+[ "$(ccs r6.log)" = 1 ] || { echo "FAIL: a missing object key did not make the object again, once"; cat r6.log; exit 1; }
+run r7.log build --only release --only native
+quiet r7.log "the build after those"
 echo "build-content-keys: ok"

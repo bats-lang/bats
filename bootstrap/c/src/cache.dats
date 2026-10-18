@@ -880,7 +880,7 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
     in end)
   val () = (if rc2 <> 0 then ()
     else if memo_mode then memo_record(ph, phlen, bv_nma, (if named then nml else 0), keyed, out_bv, out_len, in_bv, in_len)
-    else key_record(true, out_bv, in_bv))
+    else key_record(KeyOfCFile(), out_bv, in_bv))
   val () = $A.drop<byte>(fz_nma, bv_nma)
   val () = $A.free<byte>($A.thaw<byte>(fz_nma))
   val () = $A.drop<byte>(fz_ea, bv_ea)
