@@ -327,3 +327,156 @@ implement valid_group_pend (ctx, files, off, len, slot, key, pend) = let
   val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, key, pend) else ()) else ())
   val () = $A.drop<byte>(fz_a, bv_a)
 in $A.free<byte>($A.thaw<byte>(fz_a)) end
+
+(* ---- The #use packages of a file (bats#310) ----
+
+   collect_uses (lock.bats) lexes every .bats file of a directory for its
+   #use lines. resolve_deps does that for the project's src, each path
+   dependency and each package of bats_modules, before every check, so a
+   check in which nothing had changed still lexed them all (8% of one on
+   quire's set). The names a file gives depend on its bytes and on bats's
+   lexer, and on nothing else, so a file that was lexed leaves a record
+   under build/.bats_valid/, named "uses " and the file's path:
+
+     <64 hex>   the key: the sha256 of
+                  bats-uses 1 file
+                  bats <bats_inputs_sha256>
+                  <path>
+                  <sha256 of the file>
+     <64 hex>   the sha256 of the body below
+     <body>     the names the file's #use lines give, in order, each
+                followed by a NUL. A package name holds no NUL (the lexer
+                ends it at a space, a tab, a line feed or a NUL), so the
+                NULs divide the names.
+
+   A record is used only when the file has the key it has now and the body
+   has the sha256 the record names, so a torn or garbled record is not used
+   and the file is lexed again. A record is written only when the body fits
+   under the builder's capacity with its header, so a body is never kept cut
+   short, into a build/.bats_valid/ that is there (a record does not make
+   build/: a validation that fails leaves none), and only when the file still
+   has the key it was lexed under. No time is read. --cold lexes every file
+   and writes the records again. *)
+
+(* The key of the .bats file at the NUL-terminated path p, and whether the
+   file could be read (only then is its record kept) *)
+
+
+
+implement uses_key (p) = let
+  var t : $B.builder_v = $B.create()
+  val () = bput_v(t, "bats-uses 1 file\nbats ")
+  val () = bput_v(t, bats_inputs_sha256())
+  val () = put_char_v(t, 10)
+  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, 524288), 524288, t)
+  val () = put_char_v(t, 10)
+  val found = put_file_sha256(p, t)
+  val () = put_char_v(t, 10)
+  val whole = ($B.length(t) < 524288): bool
+in @(found && whole, key_of(t)) end
+
+(* Whether the file at p still has the key it was keyed with: it is hashed
+   again, so a file that changed while it was lexed is not recorded as what
+   it was (the rule of the validated records, valid_file_pend) *)
+
+
+implement uses_same (p, key) = let
+  val @(usable, again) = uses_key(p)
+  val @(fz_a, bv_a) = $A.freeze<byte>(again)
+  val same = (if usable then same_keys(bv_a, key) else false): bool
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+in same end
+
+(* build/.bats_valid/uses <path>, NUL-terminated: where the record of the
+   file at p is *)
+
+
+implement uses_slot (p) = let
+  var name : $B.builder_v = $B.create()
+  val () = bput_v(name, "uses ")
+  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, 524288), 524288, name)
+in valid_slot(name) end
+
+(* Whether the file (n bytes, of which the first 130 are its record's
+   header) has the header that the key and the sha256 of its body make;
+   with the body (which the caller uses only when it holds) *)
+fn record_holds {lf,lk:agz}{m:pos}
+  (file: !$A.borrow(byte, lf, m), size: int m, n: int, key: !$A.borrow(byte, lk, 64))
+  : @(bool, $B.builder_v) =
+  if n < 130 then @(false, $B.create())
+  else let
+    var body_copy : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(file, 130, n, size, body_copy)
+    val digest = key_of(body_copy)
+    val @(fd, bd) = $A.freeze<byte>(digest)
+    var expected : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(key, 0, 64, 64, expected)
+    val () = put_char_v(expected, 10)
+    val () = copy_to_builder_v(bd, 0, 64, 64, expected)
+    val () = put_char_v(expected, 10)
+    val () = $A.drop<byte>(fd, bd)
+    val () = $A.free<byte>($A.thaw<byte>(fd))
+    var head : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(file, 0, 130, size, head)
+    val @(expected_arr, _) = $B.to_arr(expected)
+    val @(fe, expected_bytes) = $A.freeze<byte>(expected_arr)
+    val @(head_arr, _) = $B.to_arr(head)
+    val @(fh, head_bytes) = $A.freeze<byte>(head_arr)
+    val same = same_key(expected_bytes, head_bytes, 130, 0): bool
+    val () = $A.drop<byte>(fe, expected_bytes)
+    val () = $A.free<byte>($A.thaw<byte>(fe))
+    val () = $A.drop<byte>(fh, head_bytes)
+    val () = $A.free<byte>($A.thaw<byte>(fh))
+    val body = $B.create()
+    val () = copy_to_builder_v(file, 130, n, size, body)
+  in @(same, body) end
+
+(* The body of the record at slot, when reuse is true and the record holds
+   the key (record_holds); false with an empty body otherwise, and when the
+   record cannot be read *)
+
+
+
+
+implement uses_hit (reuse, slot, key) =
+  if ~reuse then @(false, $B.create())
+  else case+ read_whole(slot, 524288) of
+  | ~whole_err(_) => @(false, $B.create())
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz, bv) = $A.freeze<byte>(piece)
+      val @(held, body) = record_holds(bv, m, n, key)
+      val () = $A.drop<byte>(fz, bv)
+      val () = whole_free(ar, $A.thaw<byte>(fz))
+    in @(held, body) end
+
+(* The record's text at slot, when build/.bats_valid/ is there (a check made
+   it): a record never makes build/ (a failed validation leaves none), so
+   the first check of a project writes none, and the next writes them *)
+fn put_record {ls:agz} (slot: !$A.borrow(byte, ls, 524288), text: $B.builder_v): void = let
+  val _ = write_file_from_builder(slot, 524288, text)
+in end
+
+(* Writes the record at slot for the key and the body (of len bytes), unless
+   the body does not fit with its header under the builder's capacity *)
+
+
+
+
+implement uses_write (slot, key, body, len) =
+  if len >= 524288 - 130 then ()
+  else let
+    var body_copy : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(body, 0, len, 524288, body_copy)
+    val digest = key_of(body_copy)
+    val @(fd, bd) = $A.freeze<byte>(digest)
+    var text : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(key, 0, 64, 64, text)
+    val () = put_char_v(text, 10)
+    val () = copy_to_builder_v(bd, 0, 64, 64, text)
+    val () = put_char_v(text, 10)
+    val () = copy_to_builder_v(body, 0, len, 524288, text)
+    val () = $A.drop<byte>(fd, bd)
+    val () = $A.free<byte>($A.thaw<byte>(fd))
+    val () = put_record(slot, text)
+  in end
