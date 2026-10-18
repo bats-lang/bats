@@ -838,11 +838,6 @@ fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
 
 
 
-fn freshness_check_bv
-  (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
-
-
 
 
 
@@ -879,6 +874,50 @@ fn c_fresh_bv
 
 fn file_has_bytes {lp:agz}{lb:agz}
   (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datatype profile = Debug | Release
+
+fn is_release (p: profile): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+datatype key_of = KeyOfCFile | KeyOfWasmObject | KeyOfDebugObject | KeyOfReleaseObject
+
+fn object_key (rel: profile): key_of
+
 
 
 
@@ -1021,7 +1060,8 @@ fn stamp_digest_hashes (b: !$B.builder_v >> $B.builder_v): void
 
 
 fn input_digest_sizes {li:agz}
-  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+  (kind: key_of, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+
 
 
 
@@ -1034,7 +1074,7 @@ fn input_digest_sizes {li:agz}
 
 
 fn input_digest_hashes {li:agz}
-  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+  (kind: key_of, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -1047,13 +1087,16 @@ fn input_digest_hashes {li:agz}
 
 
 fn input_digest {li:agz}
-  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+  (kind: key_of, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
 
 
 
 
 
-fn key_fresh (is_c: bool, out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+fn key_fresh (kind: key_of, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
@@ -1091,7 +1134,7 @@ fn key_fresh (is_c: bool, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 fn key_record {lo:agz}{li:agz}
-  (is_c: bool, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
+  (kind: key_of, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
 
 
 
@@ -1102,6 +1145,27 @@ fn key_record {lo:agz}{li:agz}
 
 
 
+
+
+
+
+
+
+fn native_object_fresh (rel: profile, out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+fn wasm_object_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+fn native_object_record {lo:agz}{li:agz}
+  (rel: profile, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
+
+
+
+fn wasm_object_record {lo:agz}{li:agz}
+  (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
 
 
 
@@ -2375,14 +2439,6 @@ fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): 
 
 
 
-
-
-
-
-
-datatype profile = Debug | Release
-
-fn is_release (p: profile): bool
 
 
 

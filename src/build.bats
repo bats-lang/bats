@@ -289,7 +289,7 @@ in case+ dr of
                 val () = bput_v(fi, "/")
                 val () = copy_to_builder_v(bv_e, 0, el, 1024, fi)
                 val () = put_char_v(fi, 0)
-              in freshness_check_bv(fo, fi) end
+              in native_object_fresh(rel, fo, fi) end
               val _ = (if cc_fresh then 0 else run_cc(ph, phlen, bv_o, ol, bv_i, il, rel)): int
               val () = $A.drop<byte>(fz_o, bv_o)
               val () = $A.free<byte>($A.thaw<byte>(fz_o))
@@ -720,12 +720,12 @@ fn wasm_cc_file {l:agz}
   var wfi : $B.builder_v = $B.create()
   val () = copy_to_builder_v(path, 0, pl, 524288, wfi)
   val () = put_char_v(wfi, 0)
-  val wasm_fresh = freshness_check_bv(wfo, wfi)
+  val wasm_fresh = wasm_object_fresh(wfo, wfi)
   val @(oa, ol) = $B.to_arr(ob)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
   val () = (if wasm_fresh then () else key_drop(bv_o))
   val rc = (if wasm_fresh then 0 else run_wasm_cc(path, path_len, bv_o, ol)): int
-  val () = (if rc = 0 && ~wasm_fresh then key_record(false, bv_o, path) else ())
+  val () = (if rc = 0 && ~wasm_fresh then wasm_object_record(bv_o, path) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in rc end
@@ -2401,7 +2401,7 @@ in
                        val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nci)
                        val () = bput_v(nci, "/src/lib_dats.c")
                        val () = put_char_v(nci, 0)
-                     in freshness_check_bv(nco, nci) end
+                     in native_object_fresh(rr3, nco, nci) end
                      val _ = (if ns_cc_fresh then 0 else run_cc(ph3, ph3len, bv_co, co_len, bv_ci, ci_len, rr3)): int
                                                   val () = $A.drop<byte>(fz_co, bv_co)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_co))
@@ -2444,7 +2444,7 @@ in
                                     val () = copy_to_builder_v(bv_de, 0, dlen, 1024, ib)
                                     val () = bput_v(ib, "/src/lib_dats.c")
                                     val () = put_char_v(ib, 0)
-                                  in (if freshness_check_bv(ob, ib) then 1 else 0): int end
+                                  in (if native_object_fresh(rr, ob, ib) then 1 else 0): int end
                                   val () = (if cc_fresh > 0 then ()
                                   else let
                                   var co_b : $B.builder_v = $B.create()
@@ -2520,7 +2520,7 @@ in
                                                     val () = bput_v(fi, "/src/")
                                                     val () = copy_to_builder_v(bv_d4, 0, dl4, 1024, fi)
                                                     val () = put_char_v(fi, 0)
-                                                  in (if freshness_check_bv(fo, fi) then 1 else 0): int end
+                                                  in (if native_object_fresh(rr2, fo, fi) then 1 else 0): int end
                                                   val () = (if cf > 0 then ()
                                                   else let
                                                     var xo : $B.builder_v = $B.create()
@@ -2607,7 +2607,7 @@ in
                                     val () = bput_v(fi, "build/src/")
                                     val () = copy_to_builder_v(bv_dcsm, 0, dl_csm, 1024, fi)
                                     val () = put_char_v(fi, 0)
-                                  in (if freshness_check_bv(fo, fi) then 1 else 0): int end
+                                  in (if native_object_fresh(rr_cm, fo, fi) then 1 else 0): int end
                                   val () = (if cf_sm > 0 then ()
                                   else let
                                     var xo_sm : $B.builder_v = $B.create()
@@ -2798,7 +2798,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ib)
                       val () = bput_v(ib, "_dats.c")
                       val () = put_char_v(ib, 0)
-                    in (if freshness_check_bv(ob, ib) then 1 else 0): int end
+                    in (if native_object_fresh(rel, ob, ib) then 1 else 0): int end
                     val () = (if bin_cc_fresh > 0 then ()
                     else let
                     var co_b : $B.builder_v = $B.create()
@@ -2834,7 +2834,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ib)
                       val () = bput_v(ib, "_dats.c")
                       val () = put_char_v(ib, 0)
-                    in (if freshness_check_bv(ob, ib) then 1 else 0): int end
+                    in (if native_object_fresh(rel, ob, ib) then 1 else 0): int end
                     val () = (if ent_cc_fresh > 0 then ()
                     else let
                     var ceo_b : $B.builder_v = $B.create()

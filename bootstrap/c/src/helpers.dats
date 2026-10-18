@@ -839,11 +839,6 @@ in
   else loop(bw, bv, i, lim)
 end
 
-
-
-
-implement freshness_check_bv(out_b, in_b) = key_fresh(false, out_b, in_b)
-
 (* build/.sats_changed is written whenever an emitted .sats changes, with
    new bytes each time: the sha256 of what it held (a chain, so no content
    comes back). A module's C is fresh only when the key recorded beside it
@@ -875,7 +870,7 @@ in end
 
 
 
-implement c_fresh_bv(out_b, in_b) = key_fresh(true, out_b, in_b)
+implement c_fresh_bv(out_b, in_b) = key_fresh(KeyOfCFile(), out_b, in_b)
 
 (* Whether the file at path_bv holds exactly bv[0, len) *)
 
@@ -902,9 +897,53 @@ implement file_has_bytes {lp}{lb} (path_bv, bv, len) =
     in eq end
   | ~$R.err(_) => false
 
+(* The profile a build makes: debug (-g -O0, into dist/debug) or release
+   (-O2, into dist/release) *)
+
+
+
+
+implement is_release (p) = case+ p of Release() => true | Debug() => false
+
 (* ============================================================
    Content keys: when an output is fresh (bats#254)
    ============================================================ *)
+
+(* The kind of output a key is for. A native object's bytes depend on the
+   profile (its cc flags: -g -O0 or -O2), so its key names the profile
+   (bats-lang/bats#320); a C's bytes do not (patsopt's output is the same
+   in both profiles), and a wasm object's are fixed (run_wasm_cc passes
+   -O2 always), so neither names it. Every key is written and checked by
+   key_fresh and key_record alone. *)
+
+
+
+
+implement object_key (rel) = case+ rel of
+  | Release() => KeyOfReleaseObject()
+  | Debug() => KeyOfDebugObject()
+
+(* Whether the key's output is a C (its key takes build/.sats_changed) *)
+fn key_is_c (kind: key_of): bool = case+ kind of
+  | KeyOfCFile() => true
+  | KeyOfWasmObject() => false
+  | KeyOfDebugObject() => false
+  | KeyOfReleaseObject() => false
+
+(* The first line of the sizes part for a native object's profile; none
+   for the others, so their keys keep their text *)
+fn key_profile_line (kind: key_of, b: !$B.builder_v >> $B.builder_v): void =
+  case+ kind of
+  | KeyOfCFile() => ()
+  | KeyOfWasmObject() => ()
+  | KeyOfDebugObject() => let
+      val () = bput_v(b, "debug")
+      val () = put_char_v(b, 10)
+    in end
+  | KeyOfReleaseObject() => let
+      val () = bput_v(b, "release")
+      val () = put_char_v(b, 10)
+    in end
 
 (* An output (a module's C, an object) is fresh when the key recorded
    beside it, <output>.key, equals the one its inputs give now, and the
@@ -1024,11 +1063,12 @@ in put_char_v(b, 10) end
 
 
 
-implement input_digest_sizes(is_c, in_bv, b) = let
+implement input_digest_sizes(kind, in_bv, b) = let
+  val () = key_profile_line(kind, b)
   val z = size_of_file(in_bv)
   val () = put_int_v(b, z)
   val () = put_char_v(b, 10)
-  val () = (if is_c then let
+  val () = (if key_is_c(kind) then let
       val () = put_int_v(b, size_of_built(sats_stamp_path()))
     in put_char_v(b, 10) end else ())
   val () = stamp_digest_sizes(b)
@@ -1037,10 +1077,10 @@ in $AR.gte_int_int(z, 0) end
 
 
 
-implement input_digest_hashes(is_c, in_bv, b) = let
+implement input_digest_hashes(kind, in_bv, b) = let
   val ok = put_file_sha256(in_bv, b)
   val () = put_char_v(b, 10)
-  val () = (if is_c then let
+  val () = (if key_is_c(kind) then let
       val () = hash_of_built(sats_stamp_path(), b)
     in put_char_v(b, 10) end else ())
   val () = stamp_digest_hashes(b)
@@ -1050,13 +1090,16 @@ in ok end
 
 
 
-implement input_digest(is_c, in_bv, b) = let
-  val sized = input_digest_sizes(is_c, in_bv, b)
-in if sized then input_digest_hashes(is_c, in_bv, b) else false end
+implement input_digest(kind, in_bv, b) = let
+  val sized = input_digest_sizes(kind, in_bv, b)
+in if sized then input_digest_hashes(kind, in_bv, b) else false end
+
+(* The one reader of an output's key: fresh when <output>.key is the key
+   the input gives now (see the comment above). Every object kind comes
+   through here with its own key_of. *)
 
 
-
-implement key_fresh(is_c, out_b, in_b) = let
+implement key_fresh(kind, out_b, in_b) = let
   val @(oa, _) = $B.to_arr(out_b)
   val @(ia, _) = $B.to_arr(in_b)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
@@ -1066,7 +1109,7 @@ implement key_fresh(is_c, out_b, in_b) = let
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
   (* sizes first: a different size is a changed file, with no hashing *)
   var sb : $B.builder_v = $B.create()
-  val sized = input_digest_sizes(is_c, bv_i, sb)
+  val sized = input_digest_sizes(kind, bv_i, sb)
   val @(sa2, slen) = $B.to_arr(sb)
   val @(fz_sz, bv_sz) = $A.freeze<byte>(sa2)
   val same_sizes = (if there && sized then file_has_prefix(bv_k, bv_sz, slen) else false): bool
@@ -1074,7 +1117,7 @@ implement key_fresh(is_c, out_b, in_b) = let
   val () = (if same_sizes then let
       val () = copy_to_builder_v(bv_sz, 0, slen, 524288, hb)
     in () end else ())
-  val hashed = (if same_sizes then input_digest_hashes(is_c, bv_i, hb) else false): bool
+  val hashed = (if same_sizes then input_digest_hashes(kind, bv_i, hb) else false): bool
   val @(ha2, hlen) = $B.to_arr(hb)
   val @(fz_h, bv_h) = $A.freeze<byte>(ha2)
   val result = (if hashed then file_has_bytes(bv_k, bv_h, hlen) else false): bool
@@ -1094,9 +1137,9 @@ in result end
 
 
 
-implement key_record(is_c, out_bv, in_bv) = let
+implement key_record(kind, out_bv, in_bv) = let
   var tb : $B.builder_v = $B.create()
-  val ok = input_digest(is_c, in_bv, tb)
+  val ok = input_digest(kind, in_bv, tb)
   val tbv = tb
   val @(ka, _) = $B.to_arr(key_file_path(out_bv))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
@@ -1105,6 +1148,27 @@ implement key_record(is_c, out_bv, in_bv) = let
   val () = $A.drop<byte>(fz_k, bv_k)
   val () = $A.free<byte>($A.thaw<byte>(fz_k))
 in end
+
+(* The keys of the objects: a native object's names its profile, a wasm
+   object's does not (bats-lang/bats#320). Written and read by key_record
+   and key_fresh alone. *)
+
+
+implement native_object_fresh(rel, out_b, in_b) = key_fresh(object_key(rel), out_b, in_b)
+
+
+
+implement wasm_object_fresh(out_b, in_b) = key_fresh(KeyOfWasmObject(), out_b, in_b)
+
+
+
+
+implement native_object_record(rel, out_bv, in_bv) = key_record(object_key(rel), out_bv, in_bv)
+
+
+
+
+implement wasm_object_record(out_bv, in_bv) = key_record(KeyOfWasmObject(), out_bv, in_bv)
 
 (* Removes <out>.key (before the tool that makes out runs) *)
 
@@ -2379,14 +2443,6 @@ in
   | ~$R.err(_) => ~1
 end
 
-(* The profile a build makes: debug (-g -O0, into dist/debug) or release
-   (-O2, into dist/release) *)
-
-
-
-
-implement is_release (p) = case+ p of Release() => true | Debug() => false
-
 
 
 
@@ -2477,7 +2533,7 @@ in
       in ec end
       else let
         val () = $A.free<byte>(eb)
-        val () = key_record(false, out_bv, in_bv)
+        val () = native_object_record(rel, out_bv, in_bv)
       in 0 end
     end
   | ~$R.err(_) => ~1
