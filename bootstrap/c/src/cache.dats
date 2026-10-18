@@ -666,12 +666,14 @@ implement memo_fresh(out_b, in_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in fresh end
 
-(* Whether the C at out_b is fresh: in check and test mode by the memo,
-   otherwise by build/.sats_changed and the .dats (c_fresh_bv) *)
+(* Whether the C at out_b is fresh, in every mode, by the memo: the key
+   beside it names the files patsopt read for the module (its .dats, every
+   .sats and .hats it staloads or includes and a staloaded dependency's
+   .dats, whose templates are instantiated in this module's C: bats#323),
+   and in a build also build/.sats_changed (memo_record) *)
 
 
-implement module_fresh(out_b, in_b) =
-  if is_test_mode() then memo_fresh(out_b, in_b) else c_fresh_bv(out_b, in_b)
+implement module_fresh(out_b, in_b) = memo_fresh(out_b, in_b)
 
 (* Whether the C at out_b is fresh by the memo in check and test mode;
    false in a build, where nothing is skipped (for the modules that were
@@ -735,7 +737,7 @@ implement closure_key_write(list_bv, out_bv) =
    it) or list_inputs is to make it. The key is written beside its place
    and renamed into it. *)
 fn memo_record {lph,ln,lo,li:agz}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int,
+  (ph: !$A.borrow(byte, lph, 512), phlen: int, stamped: bool,
    names: !$A.borrow(byte, ln, 524288), nl: int, listed: bool,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int): void = let
@@ -747,6 +749,16 @@ fn memo_record {lph,ln,lo,li:agz}
   val have = (lrc = 0): bool
   val lp = str_to_path_arr("build/.bats_depgen")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
+  (* a build also names build/.sats_changed, which holds new bytes whenever
+     any emitted .sats changed: a C that is shipped is not trusted to a
+     closure bats cannot prove complete, so a changed .sats makes every
+     module's C again, as it always did (check and test mode do not) *)
+  val () = (if have && stamped then let
+      var sa : $B.builder_v = $B.create()
+      val () = bput_v(sa, "build/.sats_changed")
+      val _ = sh_script("printf '%s\\n' \"$1\" >> build/.bats_depgen",
+        $L.list_vt_cons(mk_arg(sa), $L.list_vt_nil()))
+    in end else ())
   val () = (if ~have then ()
     else (case+ read_whole(bv_lp, 524288) of
       | ~whole_err(_) => ()
@@ -798,11 +810,12 @@ in end
 implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
   val () = key_drop(out_bv)
-  (* check and test mode: the names of the files patsopt could read, as
-     they are before it runs (see the check memo) *)
-  val memo_mode = is_test_mode()
+  (* the names of the files patsopt could read, as they are before it runs
+     (see the check memo): in a build too (bats#323), where the key also
+     names build/.sats_changed *)
+  val stamped = ~is_test_mode()
   var nm : $B.builder_v = $B.create()
-  val named = (if memo_mode then names_digest(nm) else false): bool
+  val named = names_digest(nm)
   val @(nma, nml) = $B.to_arr(nm)
   val @(fz_nma, bv_nma) = $A.freeze<byte>(nma)
   var dir : $B.builder_v = $B.create()
@@ -881,8 +894,7 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
         $L.list_vt_cons(mk_arg(s2), $L.list_vt_nil()))))
     in end)
   val () = (if rc2 <> 0 then ()
-    else if memo_mode then memo_record(ph, phlen, bv_nma, (if named then nml else 0), keyed, out_bv, out_len, in_bv, in_len)
-    else key_record(KeyOfCFile(), out_bv, in_bv))
+    else memo_record(ph, phlen, stamped, bv_nma, (if named then nml else 0), keyed, out_bv, out_len, in_bv, in_len))
   val () = $A.drop<byte>(fz_nma, bv_nma)
   val () = $A.free<byte>($A.thaw<byte>(fz_nma))
   val () = $A.drop<byte>(fz_ea, bv_ea)

@@ -828,10 +828,11 @@ end
 
 (* build/.sats_changed is written whenever an emitted .sats changes, with
    new bytes each time: the sha256 of what it held (a chain, so no content
-   comes back). A module's C is fresh only when the key recorded beside it
-   (<C>.key: the sha256 of its .dats and of this file) is the one its
-   inputs give now, so a change to a .sats rebuilds every module (bats#254:
-   a time cannot tell, a build and its inputs share a second) *)
+   comes back). In a build a module's C is fresh only when the key recorded
+   beside it (<C>.key, cache.bats's memo_record: the files patsopt read for
+   the module, and this file) is the one its inputs give now, so a change to
+   a .sats rebuilds every module (bats#254: a time cannot tell, a build and
+   its inputs share a second) *)
 fn sats_stamp_path (): $B.builder_v = let
   var b : $B.builder_v = $B.create()
   val () = bput_v(b, "build/.sats_changed")
@@ -851,13 +852,6 @@ implement touch_sats_stamp () = let
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in end
-
-(* Whether the C at out_b, patsopt's output for the .dats at in_b, is
-   fresh: newer than the .dats and than the last .sats change *)
-#pub fn c_fresh_bv
-  (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
-implement c_fresh_bv(out_b, in_b) = key_fresh(KeyOfCFile(), out_b, in_b)
 
 (* Whether the file at path_bv holds exactly bv[0, len) *)
 #pub fn file_has_bytes {lp:agz}{lb:agz}
@@ -898,11 +892,12 @@ implement is_release (p) = case+ p of Release() => true | Debug() => false
 
 (* The kind of output a key is for. A native object's bytes depend on the
    profile (its cc flags: -g -O0 or -O2), so its key names the profile
-   (bats-lang/bats#320); a C's bytes do not (patsopt's output is the same
-   in both profiles), and a wasm object's are fixed (run_wasm_cc passes
-   -O2 always), so neither names it. Every key is written and checked by
-   key_fresh and key_record alone. *)
-#pub datatype key_of = KeyOfCFile | KeyOfWasmObject | KeyOfDebugObject | KeyOfReleaseObject
+   (bats-lang/bats#320); a wasm object's are fixed (run_wasm_cc passes
+   -O2 always), so it does not. Every key is written and checked by
+   key_fresh and key_record alone. A module's C has no kind of its own: its
+   key is the check memo's, of the files patsopt read for it, in a build
+   too (bats#323; cache.bats's memo_record). *)
+#pub datatype key_of = KeyOfWasmObject | KeyOfDebugObject | KeyOfReleaseObject
 
 #pub fn object_key (rel: profile): key_of
 
@@ -910,18 +905,10 @@ implement object_key (rel) = case+ rel of
   | Release() => KeyOfReleaseObject()
   | Debug() => KeyOfDebugObject()
 
-(* Whether the key's output is a C (its key takes build/.sats_changed) *)
-fn key_is_c (kind: key_of): bool = case+ kind of
-  | KeyOfCFile() => true
-  | KeyOfWasmObject() => false
-  | KeyOfDebugObject() => false
-  | KeyOfReleaseObject() => false
-
 (* The first line of the sizes part for a native object's profile; none
    for the others, so their keys keep their text *)
 fn key_profile_line (kind: key_of, b: !$B.builder_v >> $B.builder_v): void =
   case+ kind of
-  | KeyOfCFile() => ()
   | KeyOfWasmObject() => ()
   | KeyOfDebugObject() => let
       val () = bput_v(b, "debug")
@@ -934,10 +921,7 @@ fn key_profile_line (kind: key_of, b: !$B.builder_v >> $B.builder_v): void =
 
 (* An output (a module's C, an object) is fresh when the key recorded
    beside it, <output>.key, equals the one its inputs give now, and the
-   output is there. The key of a C is the sha256 of its .dats, a line feed
-   and the sha256 of build/.sats_changed (which holds new bytes whenever a
-   .sats changed, so a changed .sats makes every C stale, as before); the
-   key of an object is the sha256 of its C (the flags, the target and the
+   output is there. The key of an object is the sha256 of its C (the flags, the target and the
    mode are in build/.bats_stamp, which drops a build/ that differs). No
    time is read: a build and its inputs made in one second, a stash moved
    with its mtimes, a file touched or replaced with an old mtime, all give
@@ -1019,12 +1003,9 @@ in b end
    What a build step was made from, as text: the part that is sizes, one
    per line, then the part that is sha256s (64 hex digits, or "-" for a
    file that is not there), one per line, the same files in the same order:
-     1. the step's input: for a C its .dats, for an object its C;
-     2. for a C only, build/.sats_changed: it holds new bytes whenever any
-        emitted .sats changed, so it stands for every .sats a module may
-        staload (a coarse, sound stand-in for the files patsopt reads: a
-        .sats change makes every C stale, as it always did);
-     3. build/.bats_stamp: the digest of this bats, patsopt, cc, the flag
+     1. the step's input: for an object its C (a module's C has its own
+        key, the check memo's: cache.bats, bats#323);
+     2. build/.bats_stamp: the digest of this bats, patsopt, cc, the flag
         templates and the target and mode that made build/ (bats#273).
    A size is a negative only: equal sizes say nothing until the hashes
    agree. No time is read. The record of a step is this text in
@@ -1055,9 +1036,6 @@ implement input_digest_sizes(kind, in_bv, b) = let
   val z = size_of_file(in_bv)
   val () = put_int_v(b, z)
   val () = put_char_v(b, 10)
-  val () = (if key_is_c(kind) then let
-      val () = put_int_v(b, size_of_built(sats_stamp_path()))
-    in put_char_v(b, 10) end else ())
   val () = stamp_digest_sizes(b)
 in $AR.gte_int_int(z, 0) end
 
@@ -1067,9 +1045,6 @@ in $AR.gte_int_int(z, 0) end
 implement input_digest_hashes(kind, in_bv, b) = let
   val ok = put_file_sha256(in_bv, b)
   val () = put_char_v(b, 10)
-  val () = (if key_is_c(kind) then let
-      val () = hash_of_built(sats_stamp_path(), b)
-    in put_char_v(b, 10) end else ())
   val () = stamp_digest_hashes(b)
 in ok end
 
