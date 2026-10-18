@@ -16,7 +16,8 @@
 #  * a template body changed in a dependency's .dats (its .sats the same)
 #    makes the C and object of a bin that instantiates it again in a build
 #    (bats-lang/bats#323), and a dependency file it does not staload does not;
-#  * a key that is missing or garbled makes its output made again;
+#  * a key that is missing or garbled makes its output made again, and a
+#    key whose append of build/.sats_changed failed is not written (#333);
 #  * a build of the other profile (release over debug, and the reverse)
 #    makes a native object again, since the profile is in its key
 #    (bats-lang/bats#320), and its debug info is the profile's;
@@ -209,6 +210,25 @@ run t8.log build --only debug --only native
 [ "$(ran_on t8.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: a module with no key was not made again"; cat t8.log; exit 1; }
 run t9.log build --only debug --only native
 quiet t9.log "the build after it"
+# a build whose append of build/.sats_changed to a module's key fails
+# (bats#333) writes no key for it, which -v says, so a later change to a
+# .sats cannot leave its C fresh; the shell that appends is a stand-in that
+# fails that one script while a flag file is there, else the real sh
+APPEND_FLAG=$TMP/append-flag
+REAL_SH=$(command -v sh)
+mkdir -p "$TMP/shsim"
+printf '#!%s\nif [ -f "%s" ]; then case "$2" in *">> build/.bats_depgen"*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$REAL_SH" "$APPEND_FLAG" "$REAL_SH" > "$TMP/shsim/sh"
+chmod +x "$TMP/shsim/sh"
+printf '#pub fun g (): int\n\nimplement g () = 20\n' > "$TMP/mine/src/util.bats"
+: > "$APPEND_FLAG"
+PATH="$TMP/shsim:$PATH" run a0.log build --only debug --only native
+rm -f "$APPEND_FLAG"
+grep -aq 'no key for build/bats_modules/ns.example/mine/src/util_dats.c (appending build/.sats_changed failed)' a0.log || { echo "FAIL: a failed append was not said"; cat a0.log; exit 1; }
+[ ! -f build/bats_modules/ns.example/mine/src/util_dats.c.key ] || { echo "FAIL: a key was written after a failed append"; exit 1; }
+run a1.log build --only debug --only native
+[ "$(ran_on a1.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: a module whose key could not be completed was not made again"; cat a1.log; exit 1; }
+run a2.log build --only debug --only native
+quiet a2.log "the build after it"
 # The profile is in a native object's key (bats-lang/bats#320): the two
 # profiles share build/, and the release object was reused by a debug build
 # (and the other way round). Each switch makes the bin's object again, the

@@ -749,13 +749,19 @@ fn memo_record {lph,ln,lo,li:agz}
      any emitted .sats changed: a C that is shipped is not trusted to a
      closure bats cannot prove complete, so a changed .sats makes every
      module's C again, as it always did (check and test mode do not) *)
-  val () = (if have && stamped then let
+  val appended = (if have && stamped then let
       var sa : $B.builder_v = $B.create()
       val () = bput_v(sa, "build/.sats_changed")
-      val _ = sh_script("printf '%s\\n' \"$1\" >> build/.bats_depgen",
+      val arc = sh_script("printf '%s\\n' \"$1\" >> build/.bats_depgen",
         $L.list_vt_cons(mk_arg(sa), $L.list_vt_nil()))
-    in end else ())
-  val () = (if ~have then ()
+    in arc = 0 end else true): bool
+  (* a key is written whole or not at all (bats#333): a key without that
+     line would leave the C fresh after a changed .sats *)
+  val () = (if have && ~appended && is_verbose() then let
+      val () = print! ("  ! no key for ")
+      val () = print_borrow(out_bv, 0, out_len - 1, 524288)
+    in println! (" (appending build/.sats_changed failed): the module is made again next time") end else ())
+  val () = (if ~have || ~appended then ()
     else (case+ read_whole(bv_lp, 524288) of
       | ~whole_err(_) => ()
       | ~whole_ok(ar, piece, m, n) => let
