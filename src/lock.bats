@@ -86,6 +86,19 @@ fn put_name {la:agz}
    The #use packages of a directory (Rust: collect_packages)
    ============================================================ *)
 
+(* seen, with the name a[0, k) added when it is a #use's package not
+   already there; an empty name is none (add_use's rule, shared with the
+   names a record gives back, validated.bats) *)
+fn add_name {l:agz}{m:nat}{k:nat | k <= 256}
+  (a: $A.arr(byte, l, 256), k: int k, seen: names(m)): [m2:nat] names(m2) =
+  if k <= 0 then let
+    val () = $A.free<byte>(a)
+  in seen end
+  else if names_has(seen, a, k) then let
+    val () = $A.free<byte>(a)
+  in seen end
+  else names_cons(a, k, seen)
+
 (* seen, with the package of sp added when sp is a #use of a package
    not already there *)
 fn add_use {l:agz}{n:pos}{m:nat}
@@ -94,15 +107,7 @@ fn add_use {l:agz}{n:pos}{m:nat}
   | SUse(_, _, _, s, e, _, _) => let
       val a = $A.alloc<byte>(256)
       val k = copy_name(src, s, e, n, a, 0)
-    in
-      if k <= 0 then let
-        val () = $A.free<byte>(a)
-      in seen end
-      else if names_has(seen, a, k) then let
-        val () = $A.free<byte>(a)
-      in seen end
-      else names_cons(a, k, seen)
-    end
+    in add_name(a, k, seen) end
   | _ => seen
 
 (* Adds the packages of the #use spans of xs to seen, newest first,
@@ -113,19 +118,127 @@ fun add_uses {l:agz}{n:pos}{m:nat}{k:nat} .<k>.
   | spans_nil() => seen
   | spans_cons(sp, tl) => add_uses(src, n, tl, add_use(src, n, sp, seen))
 
-(* Adds the #use packages of the file at the NUL-terminated path p *)
-fn add_file_uses {lp:agz}{m:nat}
-  (p: !$A.borrow(byte, lp, 524288), seen: names(m)): [m2:nat] names(m2) =
+(* The name a[0, k) and a NUL, appended to b, and a freed; an empty name
+   is only freed (add_name's rule: none is a name) *)
+fn put_name_nul_or_free {la:agz}{k:nat | k <= 256}
+  (a: $A.arr(byte, la, 256), k: int k, b: !$B.builder_v >> $B.builder_v): void =
+  if k <= 0 then let
+    val () = $A.free<byte>(a)
+  in end
+  else let
+    val () = put_name(a, k, b)
+    val () = put_char_v(b, 0)
+    val () = $A.free<byte>(a)
+  in end
+
+(* The #use package of sp, NUL-ended, appended to b when it has a name *)
+fn put_use {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), n: int n, sp: !span(n), b: !$B.builder_v >> $B.builder_v): void =
+  case+ sp of
+  | SUse(_, _, _, s, e, _, _) => let
+      val a = $A.alloc<byte>(256)
+      val k = copy_name(src, s, e, n, a, 0)
+    in put_name_nul_or_free(a, k, b) end
+  | _ => ()
+
+(* put_use for each #use span of xs, in order *)
+fun put_uses {l:agz}{n:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, l, n), n: int n, xs: !spans(n, k), b: !$B.builder_v >> $B.builder_v): void =
+  case+ xs of
+  | spans_nil() => ()
+  | spans_cons(sp, tl) => let
+      val () = put_use(src, n, sp, b)
+    in put_uses(src, n, tl, b) end
+
+(* seen, with the names of a record's body added in order, as add_use
+   adds them: the body's len bytes, each name NUL-ended from off on *)
+fun body_names {lb:agz}{off:nat | off <= 524288}{m:nat} .<524288 - off>.
+  (body: !$A.borrow(byte, lb, 524288), off: int off, len: int, seen: names(m)): [m2:nat] names(m2) =
+  if off >= len then seen
+  else let
+    val e = $S.find_null_bv_at(body, off, 524288)
+    val a = $A.alloc<byte>(256)
+    val k = copy_name(body, off, e, 524288, a, 0)
+    val seen2 = add_name(a, k, seen)
+  in if e >= 524288 then seen2 else body_names(body, e + 1, len, seen2) end
+
+(* Adds the names of a held record (its body), which is freed with the
+   key and the slot *)
+fn add_held {m:nat}{lk,ls:agz}
+  (body: $B.builder_v, key: $A.arr(byte, lk, 64), slot: $A.arr(byte, ls, 524288),
+   seen: names(m)): [m2:nat] names(m2) = let
+  val @(ba, bl) = $B.to_arr(body)
+  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+  val seen2 = body_names(bv_b, 0, bl, seen)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  val () = $A.free<byte>(key)
+  val () = $A.free<byte>(slot)
+in seen2 end
+
+(* The #use packages of the file at p, lexed (the file is read whole, as
+   add_file_uses always read it); its names are recorded at slot under key
+   when usable and the file still has that key (uses_same), and added in
+   the file's order *)
+fn lex_recorded {lp,lk,ls:agz}{m:nat}
+  (p: !$A.borrow(byte, lp, 524288), usable: bool, key: !$A.borrow(byte, lk, 64),
+   slot: !$A.borrow(byte, ls, 524288), seen: names(m)): [m2:nat] names(m2) =
   case+ read_whole(p, 524288) of
-  | ~whole_ok(ar, piece, m, nbytes) => let
+  | ~whole_ok(ar, piece, m1, nbytes) => let
       val @(fz_src, bv_src) = $A.freeze<byte>(piece)
-      val xs = lex_spans(bv_src, nbytes, m)
-      val seen2 = add_uses(bv_src, m, xs, seen)
+      val xs = lex_spans(bv_src, nbytes, m1)
+      val seen2 = add_uses(bv_src, m1, xs, seen)
+      var names_body : $B.builder_v = $B.create()
+      val () = put_uses(bv_src, m1, xs, names_body)
+      val @(ba, bl) = $B.to_arr(names_body)
+      val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+      val () = (if usable then (if uses_same(p, key) then uses_write(slot, key, bv_b, bl) else ()) else ())
+      val () = $A.drop<byte>(fz_b, bv_b)
+      val () = $A.free<byte>($A.thaw<byte>(fz_b))
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = whole_free(ar, $A.thaw<byte>(fz_src))
     in seen2 end
   | ~whole_err(_) => seen
+
+(* A file that is lexed: its record is written (lex_recorded), and the
+   names are added. The body that was held (empty here) is freed *)
+fn add_lexed {lp:agz}{m:nat}{lk,ls:agz}
+  (p: !$A.borrow(byte, lp, 524288), usable: bool, key: $A.arr(byte, lk, 64),
+   slot: $A.arr(byte, ls, 524288), body: $B.builder_v, seen: names(m)): [m2:nat] names(m2) = let
+  val () = $B.builder_free(body)
+  val () = (if is_verbose() then let
+      val () = print! ("  ~ uses lexed ")
+      val () = print_borrow(p, 0, $S.find_null_bv_at(p, 0, 524288), 524288)
+    in print_newline() end else ())
+  val @(fz_k, bv_k) = $A.freeze<byte>(key)
+  val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+  val seen2 = lex_recorded(p, usable, bv_k, bv_s, seen)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in seen2 end
+
+(* Adds the #use packages of the file at the NUL-terminated path p, in the
+   order add_uses adds them. Its record (validated.bats, bats#310) gives
+   them when the file has the key it has now and the record holds it; else
+   the file is lexed and its record is written. --cold lexes it always *)
+fn add_file_uses {lp:agz}{m:nat}
+  (p: !$A.borrow(byte, lp, 524288), seen: names(m)): [m2:nat] names(m2) = let
+  val @(usable, key) = uses_key(p)
+  val slot = uses_slot(p)
+  val @(fz_k, bv_k) = $A.freeze<byte>(key)
+  val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+  val @(held, body) = uses_hit((~is_cold()) && usable, bv_s, bv_k)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val key2 = $A.thaw<byte>(fz_k)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val slot2 = $A.thaw<byte>(fz_s)
+in
+  if held then add_held(body, key2, slot2, seen)
+  else add_lexed(p, usable, key2, slot2, body, seen)
+end
 
 (* Adds the #use packages of each file in the NUL-separated list
    files[off, len), in order *)
