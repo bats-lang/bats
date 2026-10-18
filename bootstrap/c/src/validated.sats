@@ -95,7 +95,8 @@ fn valid_context {l:agz} (listing: !$A.arr(byte, l, 524288))
 
 
 
-fn valid_slot (name: $B.builder_v): [l:agz] $A.arr(byte, l, 524288)
+fn valid_slot (name: $B.builder_v)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
 
 
 
@@ -110,7 +111,8 @@ fn valid_slot (name: $B.builder_v): [l:agz] $A.arr(byte, l, 524288)
 
 
 
-fn valid_slot_of_path {lp:agz} (p: !$A.borrow(byte, lp, 524288)): [l:agz] $A.arr(byte, l, 524288)
+fn valid_slot_of_path {lp:agz} (p: !$A.borrow(byte, lp, 524288))
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
 
 
 
@@ -126,8 +128,8 @@ fn valid_slot_of_path {lp:agz} (p: !$A.borrow(byte, lp, 524288)): [l:agz] $A.arr
 
 
 
-fn valid_holds {ls,lk:agz}
-  (slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64)): bool
+fn valid_holds {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
+  (slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64)): bool
 
 
 
@@ -260,9 +262,9 @@ fn valid_file_key {lx,lp:agz}
 
 
 
-fn valid_file_pend {lx,lp,ls,lk:agz}
+fn valid_file_pend {lx,lp,ls,lk:agz}{ns:pos}{sm:nat | sm <= ns}
   (ctx: !$A.borrow(byte, lx, 64), p: !$A.borrow(byte, lp, 524288), is_unsafe: bool,
-   slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64),
+   slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64),
    pend: !$B.builder_v >> $B.builder_v): void
 
 
@@ -315,9 +317,9 @@ fn valid_group_key {lx,lf:agz}{off:nat | off <= 524288}
 
 
 
-fn valid_group_pend {lx,lf,ls,lk:agz}{off:nat | off <= 524288}
+fn valid_group_pend {lx,lf,ls,lk:agz}{off:nat | off <= 524288}{ns:pos}{sm:nat | sm <= ns}
   (ctx: !$A.borrow(byte, lx, 64), files: !$A.borrow(byte, lf, 524288), off: int off, len: int,
-   slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64),
+   slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64),
    pend: !$B.builder_v >> $B.builder_v): void
 
 
@@ -359,7 +361,7 @@ fn valid_group_pend {lx,lf,ls,lk:agz}{off:nat | off <= 524288}
 
 
 
-fn uses_key {lp:agz} (p: !$A.borrow(byte, lp, 524288))
+fn uses_key {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
   : @(bool, [lk:agz] $A.arr(byte, lk, 64))
 
 
@@ -377,7 +379,8 @@ fn uses_key {lp:agz} (p: !$A.borrow(byte, lp, 524288))
 
 
 
-fn uses_same {lp,lk:agz} (p: !$A.borrow(byte, lp, 524288), key: !$A.borrow(byte, lk, 64)): bool
+fn uses_same {lp,lk:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, key: !$A.borrow(byte, lk, 64)): bool
 
 
 
@@ -389,21 +392,8 @@ fn uses_same {lp,lk:agz} (p: !$A.borrow(byte, lp, 524288), key: !$A.borrow(byte,
 
 
 
-fn uses_slot {lp:agz} (p: !$A.borrow(byte, lp, 524288)): [l:agz] $A.arr(byte, l, 524288)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+fn uses_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
 
 
 
@@ -434,8 +424,22 @@ fn uses_slot {lp:agz} (p: !$A.borrow(byte, lp, 524288)): [l:agz] $A.arr(byte, l,
 
 
 
-fn uses_hit {ls,lk:agz}
-  (reuse: bool, slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn uses_hit {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
+  (reuse: bool, slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64))
   : @(bool, $B.builder_v)
 
 
@@ -458,9 +462,10 @@ fn uses_hit {ls,lk:agz}
 
 
 
-fn uses_write {ls,lk,lb:agz}
-  (slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64),
-   body: !$A.borrow(byte, lb, 524288), len: int): void
+
+fn uses_write {ls,lk,lb:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}{nb:pos}{len:nat | len <= nb}
+  (slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64),
+   body: !$A.borrow(byte, lb, nb), len: int len): void
 
 
 
