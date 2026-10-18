@@ -2472,18 +2472,6 @@ staload "lock.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 fn fixtures_main (): bool
 
 
