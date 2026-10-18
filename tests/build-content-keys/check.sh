@@ -50,6 +50,17 @@ KILL_FLAG=$TMP/kill-flag
 DEPGEN_FLAG=$TMP/depgen-flag
 printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nif [ -f "%s" ]; then case "$*" in *--depgen*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$DEPGEN_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
+# same <a> <b> <message>: the two files are the same bytes; if not, say how
+# they differ (sizes and the first 40 lines of a diff) so a failure carries
+# the data (bats-lang/bats#354)
+same() {
+  cmp -s "$1" "$2" && return 0
+  echo "FAIL: $3"
+  echo "sizes: $1 $(wc -c < "$1") bytes, $2 $(wc -c < "$2") bytes"
+  diff "$1" "$2" | head -40 || true
+  if [ -n "${KEEP_DIR:-}" ]; then cp "$1" "$KEEP_DIR/a.c"; cp "$2" "$KEEP_DIR/b.c"; fi
+  exit 1
+}
 cd "$TMP/app"
 N=0
 run() { # <log> <command...>: bats -v <command>
@@ -181,15 +192,24 @@ tmpl 'x'
 run t2.log build --only debug --only native
 [ "$(ran_on t2.log 'src/bin/tool_dats.c')" = 1 ] || { echo "FAIL: a changed template body in a dependency did not make its dependent's C again"; cat t2.log; exit 1; }
 [ "$(grep -ac -- "+ cc -c -o $tool_obj" t2.log || true)" = 1 ] || { echo "FAIL: a changed template body in a dependency did not make its dependent's object again"; cat t2.log; exit 1; }
-if cmp -s "$TMP/tool.before.c" "$tool_dats"; then echo "FAIL: the dependent's C holds the old template body"; exit 1; fi
+if cmp -s "$TMP/tool.before.c" "$tool_dats"; then echo "FAIL: the dependent's C holds the old template body"; echo "size $(wc -c < "$tool_dats") bytes, the same as before"; exit 1; fi
 # what a cold build of the same sources makes
 cp "$tool_dats" "$TMP/tool.after.c"
 run t3.log build --only debug --only native
 quiet t3.log "the build after a changed template body"
-cmp -s "$TMP/tool.after.c" "$tool_dats" || { echo "FAIL: a no-change build changed the dependent's C"; exit 1; }
+same "$TMP/tool.after.c" "$tool_dats" "a no-change build changed the dependent's C"
 rm -rf build
 run t4.log build --only debug --only native
-cmp -s "$TMP/tool.after.c" "$tool_dats" || { echo "FAIL: the incremental C is not a cold build's"; exit 1; }
+same "$TMP/tool.after.c" "$tool_dats" "the incremental C is not a cold build's"
+# patsopt dates its C to the minute ("** The starting compilation time is:
+# 2026-10-18: 22h:29m"); a cold build and an incremental one that straddled a
+# minute differed in that line alone (bats-lang/bats#354). bats writes the
+# line as one text, in every C (the dependencies', the bin's and the entry's),
+# so whether the minute changed between two builds can no longer matter
+for c in $(find build -name '*_dats.c'); do
+  [ "$(grep -ac 'The starting compilation time is' "$c")" = 1 ] || { echo "FAIL: $c has not one line dating the build"; exit 1; }
+  grep -aqx '[*][*] The starting compilation time is: left out' "$c" || { echo "FAIL: $c holds the time it was made at:"; grep -a 'The starting compilation time is' "$c"; exit 1; }
+done
 # a dependency's file the module does not staload does not make it again:
 # mine's util is not in the bin's closure
 cp "$tool_dats" "$TMP/tool.keep.c"

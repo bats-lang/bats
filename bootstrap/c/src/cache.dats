@@ -178,6 +178,16 @@ fn path_with {lp:agz}{sn:nat} (p: !$A.borrow(byte, lp, 524288), len: int, ext: s
   val () = put_char_v(b, 0)
 in b end
 
+(* The sed command that makes the line patsopt writes at the head of every
+   C ("** The starting compilation time is: 2026-10-18: 22h:29m", the time
+   of the run to the minute) a fixed text of the same shape. It is the only
+   thing in patsopt's C that depends on when it ran; scripts/bootstrap-c.sh
+   still finds the line by its start. *)
+fn date_line_arg (): $P.arg_entry = let
+  var b : $B.builder_v = $B.create()
+  val () = bput_v(b, "s/^[*][*] The starting compilation time is: .*$/** The starting compilation time is: left out/")
+in mk_arg(b) end
+
 (* The C at raw (patsopt's, just written) put at out with the project's
    directory left out of its paths. Every file patsopt reads of the
    project is under build/, so only a path followed by build/ (or, in a
@@ -223,15 +233,19 @@ fn relative_c {lr,lo:agz}
           val () = $A.drop<byte>(fz_c, bv_c)
           val () = whole_free(ar, $A.thaw<byte>(fz_c))
         in ok end)): bool
-  (* the rewritten C into place, else patsopt's as it is *)
+  (* the rewritten C into place, else patsopt's as it is; either way with
+     the line patsopt dates its C by (to the minute) made one text, so the
+     same sources give the same bytes whenever they are built
+     (bats-lang/bats#354: a cold build and an incremental one that
+     straddled a minute differed in that line alone) *)
   val rc = (if written then
-      sh_script("mv -f \"$1\" \"$2\" && rm -f \"$3\"",
+      sh_script("t=\"$2.sed\"; LC_ALL=C sed -e \"$4\" \"$1\" > \"$t\" && mv -f \"$t\" \"$2\" && rm -f \"$1\" \"$3\" || { rm -f \"$t\"; exit 1; }",
         $L.list_vt_cons(path_arg(bv_n, 524288), $L.list_vt_cons(path_arg(out_bv, out_len),
-        $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_nil()))))
+        $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_cons(date_line_arg(), $L.list_vt_nil())))))
     else
-      sh_script("rm -f \"$1\"; mv -f \"$2\" \"$3\"",
+      sh_script("rm -f \"$1\"; t=\"$3.sed\"; LC_ALL=C sed -e \"$4\" \"$2\" > \"$t\" && mv -f \"$t\" \"$3\" && rm -f \"$2\" || { rm -f \"$t\"; exit 1; }",
         $L.list_vt_cons(path_arg(bv_n, 524288), $L.list_vt_cons(path_arg(raw_bv, raw_len),
-        $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_nil()))))): int
+        $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_cons(date_line_arg(), $L.list_vt_nil())))))): int
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
   val () = $A.drop<byte>(fz_p, bv_p)
