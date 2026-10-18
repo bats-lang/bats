@@ -1,9 +1,9 @@
 #!/bin/sh
 # Freshness is by content, never by time (bats-lang/bats#254): a module's
 # C is made again only when the key beside it (<C>.key: the sizes and
-# sha256 of its .dats and of build/.sats_changed) differs from the one its
-# inputs give, and an object when the key of its C does. This plays the
-# cases a time gets wrong, with a native and a wasm bin, a dependency under
+# sha256 of the files patsopt read for it, and in a build of
+# build/.sats_changed) differs from the one its inputs give, and an object
+# when the key of its C does. This plays the cases a time gets wrong, with a native and a wasm bin, a dependency under
 # a namespace (bats_modules/<namespace>/<name>, as bridge and dom) and a
 # plain one, each of two modules:
 #  * the very next no-change check and build, after a cold one, run no
@@ -13,6 +13,9 @@
 #  * a source whose bytes change with its size kept, and its time put
 #    back, is made again, and only its module (its .sats is the same);
 #  * a changed .sats makes every module made again;
+#  * a template body changed in a dependency's .dats (its .sats the same)
+#    makes the C and object of a bin that instantiates it again in a build
+#    (bats-lang/bats#323), and a dependency file it does not staload does not;
 #  * a key that is missing or garbled makes its output made again;
 #  * a build of the other profile (release over debug, and the reverse)
 #    makes a native object again, since the profile is in its key
@@ -43,7 +46,8 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 KILL_FLAG=$TMP/kill-flag
-printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
+DEPGEN_FLAG=$TMP/depgen-flag
+printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nif [ -f "%s" ]; then case "$*" in *--depgen*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$DEPGEN_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 cd "$TMP/app"
 N=0
@@ -154,6 +158,57 @@ run b4.log build --only debug --only native
 cold b4.log "a build with the stamp ahead of the .sats" 3
 run b5.log build --only debug --only native
 quiet b5.log "the build after it"
+# A dependency's .dats is staloaded by its dependents, so a template body
+# changed in it (its .sats the same) is instantiated again in their C
+# (bats-lang/bats#323): the dependent's C and object were kept, with the
+# old body. The bin calls a template of the plain dependency; a build with
+# the template added, then one with its body changed.
+tmpl() { # <body>: plain's lib with the template implemented as <body>
+  printf '#pub fun h (): int\n#pub fun h2 (): int\n#pub fun {a:t@ype} tmpl_id (x: a): a\n\nimplement h () = 4\nimplement h2 () = 6\nimplement {a} tmpl_id (x) = %s\n' "$1" > "$TMP/plain/src/lib.bats"
+}
+tmpl 'let val _ = 1 in x end'
+printf '#target native\n#include "share/atspre_staload.hats"\n#use ns.example/mine as M\n#use plain as PL\n\nimplement main0 () = println! ("got ", $M.f () + $PL.h () + $PL.tmpl_id<int> (3))\n' > "$TMP/app/src/bin/tool.bats"
+run t0.log build --only debug --only native
+cold t0.log "a build with a template added" 3
+run t1.log build --only debug --only native
+quiet t1.log "the build after it"
+cp build/src/bin/tool_dats.c "$TMP/tool.before.c"
+tool_dats=build/src/bin/tool_dats.c
+tool_obj=build/src/bin/tool_dats.o
+# the body only: the dependency's .sats is the same
+tmpl 'x'
+run t2.log build --only debug --only native
+[ "$(ran_on t2.log 'src/bin/tool_dats.c')" = 1 ] || { echo "FAIL: a changed template body in a dependency did not make its dependent's C again"; cat t2.log; exit 1; }
+[ "$(grep -ac -- "+ cc -c -o $tool_obj" t2.log || true)" = 1 ] || { echo "FAIL: a changed template body in a dependency did not make its dependent's object again"; cat t2.log; exit 1; }
+if cmp -s "$TMP/tool.before.c" "$tool_dats"; then echo "FAIL: the dependent's C holds the old template body"; exit 1; fi
+# what a cold build of the same sources makes
+cp "$tool_dats" "$TMP/tool.after.c"
+run t3.log build --only debug --only native
+quiet t3.log "the build after a changed template body"
+cmp -s "$TMP/tool.after.c" "$tool_dats" || { echo "FAIL: a no-change build changed the dependent's C"; exit 1; }
+rm -rf build
+run t4.log build --only debug --only native
+cmp -s "$TMP/tool.after.c" "$tool_dats" || { echo "FAIL: the incremental C is not a cold build's"; exit 1; }
+# a dependency's file the module does not staload does not make it again:
+# mine's util is not in the bin's closure
+cp "$tool_dats" "$TMP/tool.keep.c"
+printf '#pub fun g (): int\n\nimplement g () = 18\n' > "$TMP/mine/src/util.bats"
+run t5.log build --only debug --only native
+[ "$(ran_on t5.log 'src/bin/tool_dats.c')" = 0 ] || { echo "FAIL: a dependency's module the bin does not staload made the bin's C again"; cat t5.log; exit 1; }
+[ "$(ran_on t5.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: the changed dependency module was not made again"; cat t5.log; exit 1; }
+run t6.log build --only debug --only native
+quiet t6.log "the build after it"
+# a module whose --depgen fails gets no key, which -v says, and is made
+# again at the next build (when in doubt, recompute)
+printf '#pub fun g (): int\n\nimplement g () = 19\n' > "$TMP/mine/src/util.bats"
+: > "$DEPGEN_FLAG"
+run t7.log build --only debug --only native
+rm -f "$DEPGEN_FLAG"
+grep -aq 'no key for build/bats_modules/ns.example/mine/src/util_dats.c' t7.log || { echo "FAIL: a module with no key was not said"; cat t7.log; exit 1; }
+run t8.log build --only debug --only native
+[ "$(ran_on t8.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: a module with no key was not made again"; cat t8.log; exit 1; }
+run t9.log build --only debug --only native
+quiet t9.log "the build after it"
 # The profile is in a native object's key (bats-lang/bats#320): the two
 # profiles share build/, and the release object was reused by a debug build
 # (and the other way round). Each switch makes the bin's object again, the

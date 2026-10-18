@@ -850,6 +850,7 @@ fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
 
 
 
+
 fn touch_sats_stamp (): void
 
 
@@ -861,13 +862,6 @@ fn touch_sats_stamp (): void
 
 
 
-
-
-
-
-
-fn c_fresh_bv
-  (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
@@ -914,23 +908,10 @@ fn is_release (p: profile): bool
 
 
 
-datatype key_of = KeyOfCFile | KeyOfWasmObject | KeyOfDebugObject | KeyOfReleaseObject
+
+datatype key_of = KeyOfWasmObject | KeyOfDebugObject | KeyOfReleaseObject
 
 fn object_key (rel: profile): key_of
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1070,14 +1051,8 @@ fn input_digest_sizes {li:agz}
 
 
 
-
-
-
 fn input_digest_hashes {li:agz}
   (kind: key_of, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
-
-
-
 
 
 

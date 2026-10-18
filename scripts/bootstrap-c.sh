@@ -29,6 +29,10 @@ rm -f "$TMP/c/.sats_changed"
 # So are the shared cache's working files (BATS_CACHE_DIR's toolchain
 # listing and depgen output), there only when the build used it
 rm -f "$TMP/c/.bats_toolchain" "$TMP/c/.bats_depgen"
+# A build keeps the files of each module's key (bats#323), as a check does:
+# the listing of the project's .sats and .hats names, the graph of
+# patsopt --depgen's answers and the digests kept for the run
+rm -rf "$TMP/c/.bats_names" "$TMP/c/.bats_graph" "$TMP/c/.bats_dg"
 # patsopt's stdout (bats-lang/bats#301), an empty file after a clean run
 rm -f "$TMP/c/.patsopt_stdout"
 # The build's stamp and the listing of the C compiler it hashes name this
