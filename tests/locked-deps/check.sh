@@ -114,6 +114,18 @@ grep -qx "fetched lm v2026.1.2.2" "$TMP/err" || { echo "FAIL: other recorded sha
 rm -rf bats_modules/lm
 "$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: not installed"; cat "$TMP/err"; exit 1; }
 grep -qx "fetched lm v2026.1.2.2" "$TMP/err" || { echo "FAIL: not installed was not fetched"; cat "$TMP/err"; exit 1; }
+# a failed unzip leaves no directory and no stamp, says why, and the next run fetches
+rm -rf bats_modules/lm
+mkdir -p "$TMP/failing"; printf '#!/bin/sh\nexit 9\n' > "$TMP/failing/unzip"; chmod +x "$TMP/failing/unzip"
+rc=0; PATH="$TMP/failing:$PATH" "$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || rc=$?
+[ "$rc" != 0 ] && grep -qx "error: cannot unpack the archive into bats_modules/lm" "$TMP/err" ||
+  { echo "FAIL: failing unzip"; cat "$TMP/err"; exit 1; }
+[ ! -e bats_modules/lm ] || { echo "FAIL: failing unzip left a directory"; ls -a bats_modules/lm; exit 1; }
+rc=0; "$BATS" check > /dev/null 2> "$TMP/err" || rc=$?
+[ "$rc" != 0 ] && grep -qx "error: bats.lock locks lm v2026.1.2.2, which is not in bats_modules. Use --repository <dir> to fetch it." "$TMP/err" ||
+  { echo "FAIL: after a failing unzip, no repository"; cat "$TMP/err"; exit 1; }
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: after a failing unzip"; cat "$TMP/err"; exit 1; }
+grep -qx "fetched lm v2026.1.2.2" "$TMP/err" || { echo "FAIL: not refetched after a failing unzip"; cat "$TMP/err"; exit 1; }
 # the unlocked walk (bats lock) still reads the version off the stamp's first line
 "$BATS" lock --repository "$TMP/repo" > /dev/null 2>&1 || { echo "FAIL: lock with stamps"; exit 1; }
 "$BATS" lock --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: second lock"; cat "$TMP/err"; exit 1; }

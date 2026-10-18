@@ -2274,6 +2274,67 @@ staload "validated.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn project_kind (): $R.option(package_kind)
 
 
@@ -3348,6 +3409,10 @@ fn validate_project (): bool
 
 
 fn validate_clean (): bool
+
+
+
+
 
 
 
