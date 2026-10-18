@@ -1,9 +1,11 @@
 staload "./stamp.sats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"
+staload "env/src/lib.dats"
 staload "list/src/lib.dats"
 staload "process/src/lib.dats"
 staload "result/src/lib.dats"
+staload "sha256/src/lib.dats"
 (* stamp -- who made build/, and whether this bats may trust it
    (bats-lang/bats#267).
 
@@ -15,8 +17,11 @@ staload "result/src/lib.dats"
      bats     <the digest of the running bats's own inputs, _bats_inputs>
      patsopt  <sha256 of the cksum listing of bin/patsopt, prelude, libats,
                share and ccomp (cache.bats's toolchain_digest)>
-     cc       <sha256 of clang --version and clang -dumpmachine, and of
-               wasm-ld --version for a wasm mark>
+     cc       <sha256 of clang --version and clang -dumpmachine, of
+               wasm-ld --version for a wasm mark, and of the environment
+               those read: CPATH, LIBRARY_PATH and the others named in
+               put_cc_environment, each a name and its value, digested and
+               not stored (bats-lang/bats#322)>
      flags    <the flag templates patsopt and cc are run with for this
                mark, PATSHOME written $(PATSHOME)>
      mark     <the target and mode digit of build/.bats_target>
@@ -46,9 +51,11 @@ staload "result/src/lib.dats"
 
 staload A = "array/src/lib.sats"
 staload B = "builder/src/lib.sats"
+staload E = "env/src/lib.sats"
 staload L = "list/src/lib.sats"
 staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
+staload SHA = "sha256/src/lib.sats"
 
 staload "helpers.sats"
 staload "cache.sats"
@@ -112,6 +119,122 @@ fn cc_listed (mark: int): bool = let
   val () = $A.free<byte>(none)
 in r.0 = 0 end
 
+(* The environment the C compiler and the wasm linker read, whose values
+   change what they make (bats-lang/bats#322). They are digested into the
+   cc line, not stored: a build/ made with one value is dropped by a build
+   with another, as by another clang. The list is the one place these
+   names are written (put_cc_environment). Research (on #322): clang's
+   manual names CPATH, C_INCLUDE_PATH, CPLUS_INCLUDE_PATH,
+   OBJC_INCLUDE_PATH, OBJCPLUS_INCLUDE_PATH and MACOSX_DEPLOYMENT_TARGET
+   (clang.llvm.org/docs/CommandGuide/clang.html, ENVIRONMENT); the
+   clang 18.1.3 driver's library (libclang-cpp.so.18.1) also reads
+   LIBRARY_PATH, COMPILER_PATH, SDKROOT, SOURCE_DATE_EPOCH,
+   CCC_OVERRIDE_OPTIONS and CLANG_NO_DEFAULT_CONFIG, and libLLVM reads
+   LLVM_OVERRIDE_PRODUCER: each is a name the binary holds, checked with
+   strings(1), so each is in the list. DEVELOPER_DIR (Apple's xcrun picks
+   the SDK by it on Darwin) is named by Apple's toolchain, not checked
+   here. wasm-ld (lld 18) holds LLD_IN_TEST, LLD_VERSION and
+   SOURCE_DATE_EPOCH. ccache's manual names no hashed variable and
+   sccache's architecture doc says its hash covers "Environment
+   variables" without naming them, so this list is bats's own. Left out,
+   each reads no compiled output: TMPDIR, TEMP and TMP (temporary files),
+   CLANG_MODULE_CACHE_PATH (the module cache, used with -fmodules only),
+   CLANG_CRASH_DIAGNOSTICS_DIR, CC_LOG_* and CC_PRINT_* (logs), the LLVM
+   symbolizer's, FORCE_CLANG_DIAGNOSTICS_CRASH, and LLD_REPRODUCE (a
+   reproducer archive). The value is read whole: a value of 128 KiB or
+   more is not digested short, the stamp is refused instead (exec itself
+   refuses a string that long). *)
+
+(* The bytes of a builder, hashed into c; the builder is consumed *)
+fn hash_builder (c: !$SHA.ctx, b: $B.builder_v): void = let
+  val @(ba, bl) = $B.to_arr(b)
+  val () = $SHA.update(c, ba, bl)
+  val () = $A.free<byte>(ba)
+in end
+
+(* One environment variable into c: its name, then " unset" when it is not
+   set (so unset and empty differ), else " <length>" and its value. false
+   when its value is 128 KiB or more. *)
+fn hash_env_unset {sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, c: !$SHA.ctx): void = let
+  var h : $B.builder_v = $B.create()
+  val () = bput_v(h, name)
+  val () = bput_v(h, " unset\n")
+in hash_builder(c, h) end
+
+fn hash_env_set {sn:nat | sn < $B.BUILDER_CAP}{l:agz}
+  (name: string sn, bv: !$A.borrow(byte, l, 131072), k: int, c: !$SHA.ctx): void = let
+  var h : $B.builder_v = $B.create()
+  val () = bput_v(h, name)
+  val () = bput_v(h, " ")
+  val () = put_int_v(h, k)
+  val () = bput_v(h, "\n")
+  val () = copy_to_builder_v(bv, 0, k, 131072, h)
+  val () = bput_v(h, "\n")
+in hash_builder(c, h) end
+
+fn hash_env_var {sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, c: !$SHA.ctx): bool = let
+  val na = str_to_path_arr(name)
+  val buf = $A.alloc<byte>(131072)
+  val got = $E.get_cstr(na, 524288, buf, 131072)
+  val () = $A.free<byte>(na)
+  val ok = (case+ got of
+    | ~$R.none() => let
+        val () = hash_env_unset(name, c)
+        val () = $A.free<byte>(buf)
+      in true end
+    | ~$R.some(k) =>
+        if k >= 131072 then let
+          val () = $A.free<byte>(buf)
+        in false end
+        else let
+          val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+          val () = hash_env_set(name, bv_b, k, c)
+          val () = $A.drop<byte>(fz_b, bv_b)
+          val () = $A.free<byte>($A.thaw<byte>(fz_b))
+        in true end): bool
+in ok end
+
+(* The environment the C compiler and the wasm linker read (the names
+   the research comment above hash_builder gives), hashed into c in this
+   order. One list, for both marks: a native build with one of the wasm
+   linker's set is dropped, which costs a rebuild and never a wrong object. *)
+fn put_cc_environment (c: !$SHA.ctx): bool =
+  hash_env_var("CPATH", c)
+  && hash_env_var("C_INCLUDE_PATH", c)
+  && hash_env_var("CPLUS_INCLUDE_PATH", c)
+  && hash_env_var("OBJC_INCLUDE_PATH", c)
+  && hash_env_var("OBJCPLUS_INCLUDE_PATH", c)
+  && hash_env_var("LIBRARY_PATH", c)
+  && hash_env_var("COMPILER_PATH", c)
+  && hash_env_var("SDKROOT", c)
+  && hash_env_var("DEVELOPER_DIR", c)
+  && hash_env_var("MACOSX_DEPLOYMENT_TARGET", c)
+  && hash_env_var("SOURCE_DATE_EPOCH", c)
+  && hash_env_var("CCC_OVERRIDE_OPTIONS", c)
+  && hash_env_var("CLANG_NO_DEFAULT_CONFIG", c)
+  && hash_env_var("LLVM_OVERRIDE_PRODUCER", c)
+  && hash_env_var("LLD_IN_TEST", c)
+  && hash_env_var("LLD_VERSION", c)
+
+(* The cc line's digest, 64 hex digits appended to out: the sha256 of
+   build/.bats_cc's digest and of the environment above. false when the
+   listing cannot be digested or a value is too long. *)
+fn put_cc_digest (out: !$B.builder_v >> $B.builder_v): bool = let
+  var lst : $B.builder_v = $B.create()
+  val listed = put_file_digest("build/.bats_cc", lst)
+  val c = $SHA.init()
+  val () = hash_builder(c, lst)
+  val env = put_cc_environment(c)
+  val digest = $A.alloc<byte>(64)
+  val () = $SHA.finish(c, digest)
+  val @(fz_d, bv_d) = $A.freeze<byte>(digest)
+  val () = copy_to_builder_v(bv_d, 0, 64, 64, out)
+  val () = $A.drop<byte>(fz_d, bv_d)
+  val () = $A.free<byte>($A.thaw<byte>(fz_d))
+in listed && env end
+
 (* The script that judges build/ against build/.bats_stamp.new, the stamp
    this bats would write, with the mark's digit as $1. Nothing to judge
    (no .bats_target and no stamp): the new stamp is put in place. Else
@@ -129,7 +252,7 @@ fn stamp_write {lph:agz}
   val () = bput_v(st, "\npatsopt ")
   val tool = toolchain_digest(ph, phlen, st)
   val () = bput_v(st, "\ncc ")
-  val cc = (if cc_listed(mark) then put_file_digest("build/.bats_cc", st) else false): bool
+  val cc = (if cc_listed(mark) then put_cc_digest(st) else false): bool
   val () = bput_v(st, "\nflags ")
   val () = (if mark_is_wasm(mark) then bput_v(st, FLAGS_WASM) else bput_v(st, FLAGS_NATIVE))
   val () = bput_v(st, "\nmark ")
