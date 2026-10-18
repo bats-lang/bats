@@ -1482,15 +1482,18 @@ in
 end
 
 (* Whether bats_modules/<a[0, k)> holds the version v of the package:
-   fetch's stamp says so, or, without one (a package unpacked otherwise),
-   its bats.toml's version is v *)
+   fetch's stamp says so (its first line), or, without one (a package
+   unpacked otherwise), its bats.toml's version is v. The archive's
+   sha256 on the stamp's second line is not looked at here: this is for
+   a walk with no lock to compare it with (resolve_all) *)
 fn installed_at {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool = let
   val @(pa, _) = stamp_path(a, k)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   val r = (case+ read_whole(bv_p, 524288) of
     | ~whole_ok(ar, piece, m, nbytes) => let
         val @(fz_s, bv_s) = $A.freeze<byte>(piece)
-        val c = text_cand(bv_s, m, nbytes)
+        val first_line_end = find_byte(bv_s, m, 0, nbytes, 10)
+        val c = text_cand(bv_s, m, first_line_end)
         val () = $A.drop<byte>(fz_s, bv_s)
         val () = whole_free(ar, $A.thaw<byte>(fz_s))
       in cand_is(c, v) end
@@ -1503,15 +1506,47 @@ in r end
 fn say (m: $B.builder_v): void =
   if is_quiet() then $B.builder_free(m) else prerr_builder(m)
 
-(* Unpacks the archive arc[0, alen) into bats_modules/<name> and says so
-   (Rust: fetch_package) *)
+(* The step of fetch that failed *)
+datatype fetch_step = StepMake | StepUnpack | StepStamp
+
+(* Writes the stamp s to path when go, else drops it; 0 when written *)
+fn write_stamp {lp:agz} (go: bool, path: !$A.borrow(byte, lp, 524288), s: $B.builder_v): int =
+  if go then write_file_from_builder(path, 524288, s)
+  else let val () = $B.builder_free(s) in ~1 end
+
+(* Says that fetch failed at step, for the package a[0, k) *)
+fn fetch_failed {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, step: fetch_step): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "error: cannot ")
+  val () = (case+ step of
+    | StepMake() => bput_v(m, "make")
+    | StepUnpack() => bput_v(m, "unpack the archive into")
+    | StepStamp() => bput_v(m, "write the version stamp in"))
+  val () = bput_v(m, " bats_modules/")
+  val () = put_name(a, k, m)
+  val () = put_char_v(m, 10)
+in prerr_builder(m) end
+
+(* Unpacks the archive arc[0, alen) into bats_modules/<name>, writes the
+   stamp installed_at and installed_locked read, and says so (Rust:
+   fetch_package). The stamp names the archive's sha256 (#321): hash is
+   the hex digest the caller has already checked, which is what is
+   recorded (the archive is not read again after it was checked), or empty
+   when nothing was checked (the walk with no lock), when it is the
+   archive's digest read here before the unzip. The stamp is written last
+   and only when the unzip and the write both succeeded; otherwise the
+   directory is removed, so no stamp ever stands over a copy that is not
+   the archive's, the failure is said as an error and false is answered.
+   Consumes hash *)
 fn fetch {lc,la:agz}
   (arc: !$A.borrow(byte, lc, 524288), alen: int,
-   a: !$A.arr(byte, la, 256), k: nlen, v: !cand): void = let
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool = let
+  var hashed : $B.builder_v = hash
+  val () = (if $B.length(hashed) = 0 then let val _ = put_file_sha256(arc, hashed) in () end else ())
   var md : $B.builder_v = $B.create()
   val () = bput_v(md, "bats_modules/")
   val () = put_name(a, k, md)
-  val _ = run_mkdir(md)
+  val made = run_mkdir(md)
   val uz = str_to_path_arr("unzip")
   val @(fz_uz, bv_uz) = $A.freeze<byte>(uz)
   var u1 = $B.create()
@@ -1527,37 +1562,66 @@ fn fetch {lc,la:agz}
   var u6 = $B.create()
   val () = bput_v(u6, "bats_modules/")
   val () = put_name(a, k, u6)
-  val _ = run_cmd(bv_uz, $L.list_vt_cons(mk_arg(u1), $L.list_vt_cons(mk_arg(u2),
+  val unzipped = run_cmd(bv_uz, $L.list_vt_cons(mk_arg(u1), $L.list_vt_cons(mk_arg(u2),
     $L.list_vt_cons(mk_arg(u3), $L.list_vt_cons(mk_arg(u4), $L.list_vt_cons(mk_arg(u5),
     $L.list_vt_cons(mk_arg(u6), $L.list_vt_nil())))))))
   val () = $A.drop<byte>(fz_uz, bv_uz)
   val () = $A.free<byte>($A.thaw<byte>(fz_uz))
-  (* The stamp installed_at reads *)
-  val @(sa, slen) = stamp_path(a, k)
-  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  (* The stamp: "<version>\n<sha256>\n"; an archive that could not be
+     read leaves no second line, which no lock matches *)
   var stamp : $B.builder_v = $B.create()
   val () = put_cand(v, stamp)
   val () = put_char_v(stamp, 10)
-  val _ = write_file_from_builder(bv_s, 524288, stamp)
+  val hashed_len = $B.length(hashed)
+  val @(hash_arr, _) = $B.to_arr(hashed)
+  val @(fz_h, bv_h) = $A.freeze<byte>(hash_arr)
+  val () = (if hashed_len > 0 then let
+      val () = copy_to_builder_v(bv_h, 0, hashed_len, 524288, stamp)
+    in put_char_v(stamp, 10) end else ())
+  val () = $A.drop<byte>(fz_h, bv_h)
+  val () = $A.free<byte>($A.thaw<byte>(fz_h))
+  val @(sa, slen) = stamp_path(a, k)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val written = write_stamp(unzipped = 0, bv_s, stamp)
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
-  var msg : $B.builder_v = $B.create()
-  val () = bput_v(msg, "fetched ")
-  val () = put_name(a, k, msg)
-  val () = bput_v(msg, " v")
-  val () = put_cand(v, msg)
-  val () = put_char_v(msg, 10)
-in say(msg) end
+in
+  if written = 0 then let
+    var msg : $B.builder_v = $B.create()
+    val () = bput_v(msg, "fetched ")
+    val () = put_name(a, k, msg)
+    val () = bput_v(msg, " v")
+    val () = put_cand(v, msg)
+    val () = put_char_v(msg, 10)
+    val () = say(msg)
+  in true end
+  else let
+    val () = fetch_failed(a, k, (if made <> 0 then StepMake()
+                                 else if unzipped <> 0 then StepUnpack()
+                                 else StepStamp()): fetch_step)
+    var dir : $B.builder_v = $B.create()
+    val () = bput_v(dir, "bats_modules/")
+    val () = put_name(a, k, dir)
+    val () = remove_tree(dir)
+  in false end
+end
 
 (* fetch, into an emptied bats_modules/<name> *)
 fn refetch {lc,la:agz}
   (arc: !$A.borrow(byte, lc, 524288), alen: int,
-   a: !$A.arr(byte, la, 256), k: nlen, v: !cand): void = let
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool = let
   var dir : $B.builder_v = $B.create()
   val () = bput_v(dir, "bats_modules/")
   val () = put_name(a, k, dir)
   val () = remove_tree(dir)
-in fetch(arc, alen, a, k, v) end
+in fetch(arc, alen, a, k, v, hash) end
+
+(* refetch when go, else false; consumes hash *)
+fn refetch_if {lc,la:agz}
+  (go: bool, arc: !$A.borrow(byte, lc, 524288), alen: int,
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool =
+  if go then refetch(arc, alen, a, k, v, hash)
+  else let val () = $B.builder_free(hash) in false end
 
 (* The #use packages of bats_modules/<name>/src, newest first *)
 fn dep_uses {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): [m:nat] names(m) = let
@@ -1718,11 +1782,13 @@ fun resolve_all {s,m,nc,np,u:nat}{lr:agz} .<u, s>.
             val @(arc, alen) = archive_path(repo, rl, a, k, v)
             val @(fz_c, bv_c) = $A.freeze<byte>(arc)
             (* What bats_modules holds of another version is replaced *)
-            val () = (if installed_at(a, k, v) then () else refetch(bv_c, alen, a, k, v))
+            val fetched = (if installed_at(a, k, v) then true
+                           else refetch(bv_c, alen, a, k, v, $B.create())): bool
             val cs2 = cons_append(cs, dep_cons(a, k))
             val ts = dep_uses(a, k)
-            val ok = put_lock_line(bv_c, a, k, v, lock)
-            val () = (if ok then () else cannot_read(bv_c, alen))
+            val line_ok = put_lock_line(bv_c, a, k, v, lock)
+            val () = (if fetched then (if line_ok then () else cannot_read(bv_c, alen)) else ())
+            val ok = (fetched && line_ok): bool
             val () = $A.drop<byte>(fz_c, bv_c)
             val () = $A.free<byte>($A.thaw<byte>(fz_c))
             val () = cand_free(v)
@@ -2219,12 +2285,15 @@ fun fetch_missing {n,nc:nat}{lr:agz} .<n>.
      | ~$R.some(v) => let
          val @(arc, alen) = archive_path(repo, rl, a, k, v)
          val @(fz_c, bv_c) = $A.freeze<byte>(arc)
-         val () = fetch(bv_c, alen, a, k, v)
+         val fetched = fetch(bv_c, alen, a, k, v, $B.create())
          val () = $A.drop<byte>(fz_c, bv_c)
          val () = $A.free<byte>($A.thaw<byte>(fz_c))
          val () = cand_free(v)
          val () = $A.free<byte>(a)
-       in fetch_missing(rest, cs, repo, rl) end)
+       in
+         if fetched then fetch_missing(rest, cs, repo, rl)
+         else let val () = names_free(rest) in false end
+       end)
 
 (* Fetches missing under the project's constraints, when cst says they
    were read; otherwise reports err; consumes err *)
@@ -3406,6 +3475,56 @@ in
   in @(vs, ve, hash_start, hash_end) end
 end
 
+(* Whether bats_modules/<a[0, k)> was unpacked from the archive of version
+   v whose sha256 is t[hash_start, hash_end), the lock's (#321): fetch's
+   stamp is exactly "<version>\n<sha256>\n", and the text it would write
+   for the lock's version and sha256 is compared with it byte for byte.
+   A stamp with no sha256 (a copy unpacked by an older bats), a stamp that
+   is missing (a copy unpacked otherwise, a bats.toml alone) and a copy of
+   another archive are all not installed, so the caller fetches the locked
+   archive, checking its sha256. What is recorded is the archive's sha256,
+   not the unpacked files': a copy edited in place after the fetch is not
+   noticed. Comparable: Cargo checks a downloaded crate against the
+   checksum in Cargo.lock when it is downloaded, not each unpacked file at
+   each build; Go's module cache is read-only and go.sum is checked at the
+   download, files rehashed only by `go mod verify`; npm checks the
+   tarball's integrity at install. Hashing every installed file at every
+   run is not done *)
+fn installed_locked {lt,la:agz}
+  (a: !$A.arr(byte, la, 256), k: nlen, v: !cand,
+   t: !$A.borrow(byte, lt, LOCK_MAX), hash_start: pos_t, hash_end: pos_t): bool = let
+  var want : $B.builder_v = $B.create()
+  val () = put_cand(v, want)
+  val () = put_char_v(want, 10)
+  val () = copy_to_builder_v(t, hash_start, hash_end, LOCK_MAX, want)
+  val () = put_char_v(want, 10)
+  val want_len = $B.length(want)
+  val @(want_arr, _) = $B.to_arr(want)
+  val @(fz_w, bv_w) = $A.freeze<byte>(want_arr)
+  val @(pa, _) = stamp_path(a, k)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = (case+ read_whole(bv_p, 524288) of
+    | ~whole_ok(ar, piece, m, nbytes) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        var got : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(bv_s, 0, nbytes, m, got)
+        val got_len = $B.length(got)
+        val @(got_arr, _) = $B.to_arr(got)
+        val @(fz_g, bv_g) = $A.freeze<byte>(got_arr)
+        val same = (if got_len = want_len then lock_bytes_eq(bv_g, 0, bv_w, 0, want_len)
+                    else false): bool
+        val () = $A.drop<byte>(fz_g, bv_g)
+        val () = $A.free<byte>($A.thaw<byte>(fz_g))
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+      in same end
+    | ~whole_err(_) => false): bool
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  val () = $A.drop<byte>(fz_w, bv_w)
+  val () = $A.free<byte>($A.thaw<byte>(fz_w))
+in r end
+
 (* "error: bats.lock locks <name> v<v>" *)
 fn put_locked {la:agz}
   (a: !$A.arr(byte, la, 256), k: nlen, v: !cand, out: !$B.builder_v >> $B.builder_v): void = let
@@ -3440,9 +3559,13 @@ fn install_locked {lr,lt,la:agz}
     val @(hash_arr, _) = $B.to_arr(hash)
     val @(fz_h, bv_h) = $A.freeze<byte>(hash_arr)
     val same = (if found then lock_range_eq(bv_h, 0, 64, t, hash_start, hash_end) else false): bool
+    (* The digest that was checked is the one fetch records (#321) *)
+    var verified : $B.builder_v = $B.create()
+    val () = (if same then copy_to_builder_v(bv_h, 0, 64, 524288, verified) else ())
     val () = $A.drop<byte>(fz_h, bv_h)
     val () = $A.free<byte>($A.thaw<byte>(fz_h))
-    val () = (if same then refetch(bv_c, alen, a, k, v)
+    val fetched = refetch_if(same, bv_c, alen, a, k, v, verified)
+    val () = (if same then ()
       else let
         var m : $B.builder_v = $B.create()
         val () = put_locked(a, k, v, m)
@@ -3455,7 +3578,7 @@ fn install_locked {lr,lt,la:agz}
       in prerr_builder(m) end)
     val () = $A.drop<byte>(fz_c, bv_c)
     val () = $A.free<byte>($A.thaw<byte>(fz_c))
-  in same end
+  in fetched end
 
 (* "error: <name> is used but bats.lock does not lock it" and the hint *)
 fn not_locked {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): void = let
@@ -3542,7 +3665,7 @@ fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
               val () = names_free(avail2)
             in false end
             else let
-              val installed = (if installed_at(a, k, v) then true
+              val installed = (if installed_locked(a, k, v, t, hash_start, hash_end) then true
                                else install_locked(repo, rl, t, hash_start, hash_end, a, k, v)): bool
               val () = cand_free(v)
             in
