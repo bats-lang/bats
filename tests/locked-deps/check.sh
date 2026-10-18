@@ -7,7 +7,9 @@
 # not match the project (a package used but not locked, one locked but
 # not used, a version bats.toml rules out). Without the lock they
 # fetched the newest version of each package src/ uses and never read
-# bats.lock. `bats lock` replaces what bats_modules holds of another
+# bats.lock. A copy bats_modules already holds is used only if it was
+# unpacked from the archive whose sha256 bats.lock gives (#321): fetch
+# records the archive's sha256 with the copy. `bats lock` replaces what bats_modules holds of another
 # version, so a relock's transitive packages are read from the versions
 # it locks.
 # usage: tests/locked-deps/check.sh <bats-binary> <repository-dir>
@@ -73,6 +75,50 @@ fails_with "missing locked version" "error: bats.lock locks ld v2025.1.1.1, whic
 # as does an archive whose sha256 is not the lock's
 sed 's/^\(ld 2026.1.1.1\) .*/\1 0000/' "$TMP/old.lock" > bats.lock
 fails_with "sha256" "error: bats.lock locks ld v2026.1.1.1, but its archive '$TMP/repo/ld/ld_2026.1.1.1.bats' does not have the sha256 bats.lock gives"
+# #321: the lock's sha256 of a package bats_modules already holds is compared
+# with the archive the copy was unpacked from. State: bats_modules holds the
+# locked ld and lm (the failed runs above left some of them out).
+cp "$TMP/old.lock" bats.lock
+rm -rf bats_modules
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: refill"; cat "$TMP/err"; exit 1; }
+[ "$(sed -n 2p bats_modules/ld/.bats-version)" = "$(sed -n 's/^ld [^ ]* //p' "$TMP/old.lock")" ] ||
+  { echo "FAIL: fetch did not record the archive's sha256"; cat bats_modules/ld/.bats-version; exit 1; }
+# a changed sha256 of an installed package is an error, with the repository
+# (the new sha256 is checked at the fetch) and without it
+sed 's/^\(ld 2026.1.1.1\) .*/\1 0000/' "$TMP/old.lock" > bats.lock
+fails_with "installed, other sha256" "error: bats.lock locks ld v2026.1.1.1, but its archive '$TMP/repo/ld/ld_2026.1.1.1.bats' does not have the sha256 bats.lock gives"
+rc=0; "$BATS" build --only debug --only native > /dev/null 2> "$TMP/err" || rc=$?
+[ "$rc" != 0 ] && grep -qx "error: bats.lock locks ld v2026.1.1.1, which is not in bats_modules. Use --repository <dir> to fetch it." "$TMP/err" ||
+  { echo "FAIL: installed, other sha256, no repository"; cat "$TMP/err"; exit 1; }
+# restored, it passes again: the copy is fetched anew, checked against the lock
+cp "$TMP/old.lock" bats.lock
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: restored lock"; cat "$TMP/err"; exit 1; }
+# with the right sha256 an installed copy is kept: nothing fetched, no repository needed
+"$BATS" check > /dev/null 2> "$TMP/err" || { echo "FAIL: installed, no repository"; cat "$TMP/err"; exit 1; }
+# a copy with no recorded sha256 (an older bats' stamp, or a stamp that is gone)
+# is not the locked archive: refetched with the repository, an error without it
+printf '2026.1.1.1\n' > bats_modules/ld/.bats-version
+rc=0; "$BATS" check > /dev/null 2> "$TMP/err" || rc=$?
+[ "$rc" != 0 ] && grep -qx "error: bats.lock locks ld v2026.1.1.1, which is not in bats_modules. Use --repository <dir> to fetch it." "$TMP/err" ||
+  { echo "FAIL: no recorded sha256, no repository"; cat "$TMP/err"; exit 1; }
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: no recorded sha256"; cat "$TMP/err"; exit 1; }
+grep -qx "fetched ld v2026.1.1.1" "$TMP/err" || { echo "FAIL: no recorded sha256 was not refetched"; cat "$TMP/err"; exit 1; }
+rm bats_modules/ld/.bats-version
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: no stamp"; cat "$TMP/err"; exit 1; }
+grep -qx "fetched ld v2026.1.1.1" "$TMP/err" || { echo "FAIL: no stamp was not refetched"; cat "$TMP/err"; exit 1; }
+# the stamp of another archive's sha256 is a copy of another archive
+sed -i '2s/.*/0000/' bats_modules/lm/.bats-version
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: other recorded sha256"; cat "$TMP/err"; exit 1; }
+grep -qx "fetched lm v2026.1.2.2" "$TMP/err" || { echo "FAIL: other recorded sha256 was not refetched"; cat "$TMP/err"; exit 1; }
+# a package not installed is fetched, as before
+rm -rf bats_modules/lm
+"$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: not installed"; cat "$TMP/err"; exit 1; }
+grep -qx "fetched lm v2026.1.2.2" "$TMP/err" || { echo "FAIL: not installed was not fetched"; cat "$TMP/err"; exit 1; }
+# the unlocked walk (bats lock) still reads the version off the stamp's first line
+"$BATS" lock --repository "$TMP/repo" > /dev/null 2>&1 || { echo "FAIL: lock with stamps"; exit 1; }
+"$BATS" lock --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: second lock"; cat "$TMP/err"; exit 1; }
+! grep -q "^fetched" "$TMP/err" || { echo "FAIL: lock fetched again what the stamps say is installed"; cat "$TMP/err"; exit 1; }
+cp "$TMP/old.lock" bats.lock
 # A lock that does not match the project is stale
 STALE="; bats.lock is stale: run 'bats lock --repository <dir>' and commit it"
 grep -v '^ld ' "$TMP/old.lock" > bats.lock

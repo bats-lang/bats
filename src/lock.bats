@@ -1471,15 +1471,18 @@ in
 end
 
 (* Whether bats_modules/<a[0, k)> holds the version v of the package:
-   fetch's stamp says so, or, without one (a package unpacked otherwise),
-   its bats.toml's version is v *)
+   fetch's stamp says so (its first line), or, without one (a package
+   unpacked otherwise), its bats.toml's version is v. The archive's
+   sha256 on the stamp's second line is not looked at here: this is for
+   a walk with no lock to compare it with (resolve_all) *)
 fn installed_at {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool = let
   val @(pa, _) = stamp_path(a, k)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   val r = (case+ read_whole(bv_p, 524288) of
     | ~whole_ok(ar, piece, m, nbytes) => let
         val @(fz_s, bv_s) = $A.freeze<byte>(piece)
-        val c = text_cand(bv_s, m, nbytes)
+        val first_line_end = find_byte(bv_s, m, 0, nbytes, 10)
+        val c = text_cand(bv_s, m, first_line_end)
         val () = $A.drop<byte>(fz_s, bv_s)
         val () = whole_free(ar, $A.thaw<byte>(fz_s))
       in cand_is(c, v) end
@@ -1527,6 +1530,11 @@ fn fetch {lc,la:agz}
   var stamp : $B.builder_v = $B.create()
   val () = put_cand(v, stamp)
   val () = put_char_v(stamp, 10)
+  (* The archive's sha256 on a second line (#321): installed_locked
+     compares it with the lock's. An archive that cannot be read leaves
+     no second line, which no lock matches *)
+  val hashed = put_file_sha256(arc, stamp)
+  val () = (if hashed then put_char_v(stamp, 10) else ())
   val _ = write_file_from_builder(bv_s, 524288, stamp)
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
@@ -3395,6 +3403,56 @@ in
   in @(vs, ve, hash_start, hash_end) end
 end
 
+(* Whether bats_modules/<a[0, k)> was unpacked from the archive of version
+   v whose sha256 is t[hash_start, hash_end), the lock's (#321): fetch's
+   stamp is exactly "<version>\n<sha256>\n", and the text it would write
+   for the lock's version and sha256 is compared with it byte for byte.
+   A stamp with no sha256 (a copy unpacked by an older bats), a stamp that
+   is missing (a copy unpacked otherwise, a bats.toml alone) and a copy of
+   another archive are all not installed, so the caller fetches the locked
+   archive, checking its sha256. What is recorded is the archive's sha256,
+   not the unpacked files': a copy edited in place after the fetch is not
+   noticed. Comparable: Cargo checks a downloaded crate against the
+   checksum in Cargo.lock when it is downloaded, not each unpacked file at
+   each build; Go's module cache is read-only and go.sum is checked at the
+   download, files rehashed only by `go mod verify`; npm checks the
+   tarball's integrity at install. Hashing every installed file at every
+   run is not done *)
+fn installed_locked {lt,la:agz}
+  (a: !$A.arr(byte, la, 256), k: nlen, v: !cand,
+   t: !$A.borrow(byte, lt, LOCK_MAX), hash_start: pos_t, hash_end: pos_t): bool = let
+  var want : $B.builder_v = $B.create()
+  val () = put_cand(v, want)
+  val () = put_char_v(want, 10)
+  val () = copy_to_builder_v(t, hash_start, hash_end, LOCK_MAX, want)
+  val () = put_char_v(want, 10)
+  val want_len = $B.length(want)
+  val @(want_arr, _) = $B.to_arr(want)
+  val @(fz_w, bv_w) = $A.freeze<byte>(want_arr)
+  val @(pa, _) = stamp_path(a, k)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = (case+ read_whole(bv_p, 524288) of
+    | ~whole_ok(ar, piece, m, nbytes) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        var got : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(bv_s, 0, nbytes, m, got)
+        val got_len = $B.length(got)
+        val @(got_arr, _) = $B.to_arr(got)
+        val @(fz_g, bv_g) = $A.freeze<byte>(got_arr)
+        val same = (if got_len = want_len then lock_bytes_eq(bv_g, 0, bv_w, 0, want_len)
+                    else false): bool
+        val () = $A.drop<byte>(fz_g, bv_g)
+        val () = $A.free<byte>($A.thaw<byte>(fz_g))
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+      in same end
+    | ~whole_err(_) => false): bool
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  val () = $A.drop<byte>(fz_w, bv_w)
+  val () = $A.free<byte>($A.thaw<byte>(fz_w))
+in r end
+
 (* "error: bats.lock locks <name> v<v>" *)
 fn put_locked {la:agz}
   (a: !$A.arr(byte, la, 256), k: nlen, v: !cand, out: !$B.builder_v >> $B.builder_v): void = let
@@ -3531,7 +3589,7 @@ fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
               val () = names_free(avail2)
             in false end
             else let
-              val installed = (if installed_at(a, k, v) then true
+              val installed = (if installed_locked(a, k, v, t, hash_start, hash_end) then true
                                else install_locked(repo, rl, t, hash_start, hash_end, a, k, v)): bool
               val () = cand_free(v)
             in
