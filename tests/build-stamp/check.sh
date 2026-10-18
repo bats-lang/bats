@@ -16,6 +16,11 @@ BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR
+# The variables the C compiler and the wasm linker read (put_cc_environment,
+# bats-lang/bats#322) are unset here, so each case sets its own
+for v in CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH OBJCPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH SDKROOT DEVELOPER_DIR MACOSX_DEPLOYMENT_TARGET IPHONEOS_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET DRIVERKIT_DEPLOYMENT_TARGET RC_DEBUG_PREFIX_MAP RC_DEBUG_OPTIONS CCC_OVERRIDE_OPTIONS CLANG_NO_DEFAULT_CONFIG; do
+  unset "$v"
+done
 P=$TMP/p
 mkdir -p "$P/src/bin"
 printf '[package]\nname = "bs"\nkind = "bin"\n' > "$P/bats.toml"
@@ -160,6 +165,61 @@ say "$TMP/cc.back.log" "cc differs"
 settle "$P"
 build "$P" "$TMP/cc.kept.log"
 kept "$TMP/cc.kept.log" "the build after the clang came back"
+
+# The C compiler's environment (bats-lang/bats#322): a variable clang
+# reads that changes what it makes is digested into the cc line, so a
+# build/ made with one value is dropped by a build with another, as by
+# another clang. The issue's reproduction: CPATH holds a stdlib.h that adds a
+# weak symbol, which the objects gain only in a build that sees it. Same
+# value keeps build/; a variable no compiler reads changes nothing; unset and
+# empty are different values.
+EV=$TMP/env
+mkdir -p "$EV" "$TMP/cpath"
+cp -R "$P/bats.toml" "$P/src" "$EV/"
+printf '#include_next <stdlib.h>\n__attribute__((weak)) int bats_cpath_probe = 7;\n' > "$TMP/cpath/stdlib.h"
+probe() { grep -rq bats_cpath_probe "$EV/build"; }
+build "$EV" "$TMP/env.cold.log"
+[ "$(dropped "$TMP/env.cold.log")" = 0 ] || { echo "FAIL: a cold build with no CPATH dropped build/"; cat "$TMP/env.cold.log"; exit 1; }
+settle "$EV"
+probe && { echo "FAIL: the probe is in the objects without CPATH"; exit 1; } || true
+settle_env() { settle "$EV" "$@"; }
+# CPATH set after a build without it: dropped, named, and the probe is found
+build "$EV" "$TMP/env.cpath.log" "CPATH=$TMP/cpath"
+say "$TMP/env.cpath.log" "cc differs"
+rebuilt "$TMP/env.cpath.log" "$COLD" "a build with CPATH"
+probe || { echo "FAIL: a build with CPATH does not have the probe the issue names"; cat "$TMP/env.cpath.log"; exit 1; }
+settle_env "CPATH=$TMP/cpath"
+build "$EV" "$TMP/env.same.log" "CPATH=$TMP/cpath"
+kept "$TMP/env.same.log" "a build with the same CPATH"
+# An unrelated variable changes nothing
+build "$EV" "$TMP/env.foo.log" "CPATH=$TMP/cpath" FOO=1
+kept "$TMP/env.foo.log" "a build with an unrelated variable"
+# CPATH unset after one with it: dropped
+build "$EV" "$TMP/env.unset.log" -u CPATH
+say "$TMP/env.unset.log" "cc differs"
+rebuilt "$TMP/env.unset.log" "$COLD" "a build with CPATH unset"
+settle_env
+# CPATH empty is not unset: dropped, and kept again for empty
+build "$EV" "$TMP/env.empty.log" CPATH=
+say "$TMP/env.empty.log" "cc differs"
+rebuilt "$TMP/env.empty.log" "$COLD" "a build with CPATH empty"
+settle_env CPATH=
+build "$EV" "$TMP/env.empty.same.log" CPATH=
+kept "$TMP/env.empty.same.log" "a build with CPATH empty again"
+build "$EV" "$TMP/env.empty.unset.log" -u CPATH
+say "$TMP/env.empty.unset.log" "cc differs"
+rebuilt "$TMP/env.empty.unset.log" "$COLD" "a build with CPATH unset after empty"
+# SOURCE_DATE_EPOCH is not in the list (clang reads it only for __DATE__ and
+# __TIME__, which no emitted C uses, and a reproducible-build setup sets it
+# per commit): a value of it keeps build/
+settle_env CPATH=
+build "$EV" "$TMP/env.sde.log" CPATH= SOURCE_DATE_EPOCH=2
+kept "$TMP/env.sde.log" "a build with another SOURCE_DATE_EPOCH"
+# A Darwin deployment target is in the list: the Darwin driver picks the
+# target the objects are made for by it (not run on a Mac here)
+build "$EV" "$TMP/env.ios.log" CPATH= IPHONEOS_DEPLOYMENT_TARGET=17
+say "$TMP/env.ios.log" "cc differs"
+rebuilt "$TMP/env.ios.log" "$COLD" "a build with IPHONEOS_DEPLOYMENT_TARGET"
 
 # A build/ copied to another directory is kept: no path is in the stamp
 Q=$TMP/elsewhere/deeper/q

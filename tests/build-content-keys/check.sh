@@ -46,7 +46,8 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 KILL_FLAG=$TMP/kill-flag
-printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
+DEPGEN_FLAG=$TMP/depgen-flag
+printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nif [ -f "%s" ]; then case "$*" in *--depgen*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$DEPGEN_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 cd "$TMP/app"
 N=0
@@ -197,6 +198,17 @@ run t5.log build --only debug --only native
 [ "$(ran_on t5.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: the changed dependency module was not made again"; cat t5.log; exit 1; }
 run t6.log build --only debug --only native
 quiet t6.log "the build after it"
+# a module whose --depgen fails gets no key, which -v says, and is made
+# again at the next build (when in doubt, recompute)
+printf '#pub fun g (): int\n\nimplement g () = 19\n' > "$TMP/mine/src/util.bats"
+: > "$DEPGEN_FLAG"
+run t7.log build --only debug --only native
+rm -f "$DEPGEN_FLAG"
+grep -aq 'no key for build/bats_modules/ns.example/mine/src/util_dats.c' t7.log || { echo "FAIL: a module with no key was not said"; cat t7.log; exit 1; }
+run t8.log build --only debug --only native
+[ "$(ran_on t8.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: a module with no key was not made again"; cat t8.log; exit 1; }
+run t9.log build --only debug --only native
+quiet t9.log "the build after it"
 # The profile is in a native object's key (bats-lang/bats#320): the two
 # profiles share build/, and the release object was reused by a debug build
 # (and the other way round). Each switch makes the bin's object again, the

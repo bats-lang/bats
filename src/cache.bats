@@ -737,6 +737,12 @@ fn memo_record {lph,ln,lo,li:agz}
   val () = (if lrc = 124 then cap_stopped(true, in_bv, in_len)
     else if lrc = 125 then cap_stopped(false, in_bv, in_len) else ())
   val have = (lrc = 0): bool
+  (* no key without the list: the module is made again at each run, which
+     -v says, so that it is not silent (bats#323) *)
+  val () = (if ~have && is_verbose() then let
+      val () = print! ("  ! no key for ")
+      val () = print_borrow(out_bv, 0, out_len - 1, 524288)
+    in println! (" (depgen failed): the module is made again next time") end else ())
   val lp = str_to_path_arr("build/.bats_depgen")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
   (* a build also names build/.sats_changed, which holds new bytes whenever
