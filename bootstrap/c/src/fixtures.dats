@@ -1225,6 +1225,8 @@ fn closure_state {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
         val @(fz_l, bv_l) = $A.freeze<byte>(la)
         val ca = nul_path(work_text(cfg, w, "memo.closure"))
         val @(fz_c, bv_c) = $A.freeze<byte>(ca)
+        (* the base check ran in a process of its own, after any digest kept here *)
+        val () = digests_forget()
         val r = closure_key_write(bv_l, bv_c)
         val () = $A.drop<byte>(fz_l, bv_l)
         val () = $A.free<byte>($A.thaw<byte>(fz_l))
@@ -1325,6 +1327,8 @@ fn lookup {l:agz}{lm:agz}{lk:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings
   val fresh = (if same_key then let
       val a = nul_path(kpath2)
       val @(fz_a, bv_a) = $A.freeze<byte>(a)
+      (* a check ran in a process of its own since any digest kept here *)
+      val () = digests_forget()
       val r = closure_key_equal(bv_a)
       val () = $A.drop<byte>(fz_a, bv_a)
       val () = $A.free<byte>($A.thaw<byte>(fz_a))
@@ -1457,28 +1461,12 @@ fn snippet_loads {l:agz}{lm:agz}{a,e:nat | a <= e; e <= 524288}
   val () = $A.drop<byte>(fz, bv)
 in ($A.free<byte>($A.thaw<byte>(fz)); loads) end
 
-(* bv[i, stop) appended to out with / written %: the name a digest is kept
-   under in build/.bats_dg *)
-fun put_flat {l:agz}{len:nat | len <= 524288}{i:nat | i <= len} .<len - i>.
-  (bv: !$A.borrow(byte, l, 524288), len: int len, i: int i, stop: int,
-   out: !$B.builder_v >> $B.builder_v): void =
-  if i >= len then ()
-  else if i >= stop then ()
-  else let
-    val c = byte_at(bv, len, i)
-    val () = put_char_v(out, (if c = 47 then 37 else c))
-  in put_flat(bv, len, i + 1, stop, out) end
-
 (* Whether the module's interface line, as it is now, is the one the probe
-   kept in <work>/memo.iface: the kept digest of the .sats is dropped
-   first, so it is not the one the base build had *)
+   kept in <work>/memo.iface: the digests kept in memory are dropped
+   first, so the .sats is digested as it is now, not as it was *)
 fn iface_same {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
   bv_f: !$A.borrow(byte, lx, 524288), mlen: tlen): bool = let
-  var dg : $B.builder_v = $B.create()
-  val () = bput_v(dg, "build/.bats_dg/build%")
-  val () = put_flat(bv_f, mlen, 0, mlen - 5, dg)
-  val () = bput_v(dg, ".sats")
-  val () = path_remove(dg)
+  val () = digests_forget()
   val ia = nul_path(built_path(bv_f, mlen, ".sats"))
   val @(fz_i, bv_i) = $A.freeze<byte>(ia)
   var cur : $B.builder_v = $B.create()

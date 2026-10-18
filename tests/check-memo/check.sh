@@ -23,6 +23,10 @@
 #   * a run stopped while patsopt ran leaves no key behind;
 #   * a key that is missing, garbled, cut short, of the old format, with a
 #     hash changed, or beside a C that is gone, is not trusted;
+#   * the digests kept in memory for a pass (bats#311): three .sats whose
+#     paths share a slot of the table are each told apart (a change to one is
+#     that one's), a body-only change of a dependency's file is noticed, and
+#     the files an older bats kept in build/.bats_dg are neither read nor kept;
 #   * a native bin and a wasm bin using a target-dependent .sats, cold and
 #     when the wasm bin is added to a native-only project: the second and
 #     third checks run no patsopt (each pass names its own build's .sats);
@@ -77,7 +81,7 @@ ran() { grep -a -- '+ patsopt' "$1" | grep -ac "$2" || true; }
 total() { grep -a -- '+ patsopt' "$1" | grep -avc '(cached)' || true; }
 only() { # <log> <what> <module>...: patsopt ran on these and on nothing else
   l=$1; what=$2; shift 2
-  for m in base mid other lone tool tgt user web; do
+  for m in base mid other lone tool tgt user web caaaa carbq cbddb cuser; do
     want=0
     for x in "$@"; do [ "$x" = "$m" ] && want=1; done
     got=$(ran "$l" "/${m}_dats.c")
@@ -218,6 +222,47 @@ run l3.log check
 only l3.log "a changed .sats that a staload added reaches" other lone tool
 run l4.log check
 quiet l4.log "the check after it"
+# --- the digests kept for a pass (bats#311). A .sats and every file of
+# build/bats_modules is digested once for the modules that reach it, in a
+# table of the process, found by the whole path. Three .sats whose paths
+# fall in one slot of that table (caaaa, carbq and cbddb: the slot of
+# build/src/<name>.sats is the same for the three) are staloaded by one
+# module, and a change to the interface of one is the change of that one:
+# a lookup that took another entry's digest for it would miss the change.
+for name in caaaa carbq cbddb; do
+  printf '#include "share/atspre_staload.hats"\n\n#pub fun %s (): int\n\nimplement %s () = 1\n' "$name" "$name" > "$A/$name.bats"
+done
+printf '#include "share/atspre_staload.hats"\nstaload "caaaa.sats"\nstaload "carbq.sats"\nstaload "cbddb.sats"\n\n#pub fun cuser (): int\n\nimplement cuser () = caaaa () + carbq () + cbddb ()\n' > "$A/cuser.bats"
+run h1.log check
+run h2.log check
+quiet h2.log "the check after three modules whose .sats share a slot were added"
+printf '#include "share/atspre_staload.hats"\n\n#pub fun carbq (): int\n#pub fun carbq2 (): int\n\nimplement carbq () = 1\nimplement carbq2 () = 2\n' > "$A/carbq.bats"
+run h3.log check
+only h3.log "a changed .sats among three that share a slot" carbq cuser
+run h4.log check
+quiet h4.log "the check after it"
+printf '#include "share/atspre_staload.hats"\n\n#pub fun cbddb (): int\n#pub fun cbddb2 (): int\n\nimplement cbddb () = 1\nimplement cbddb2 () = 2\n' > "$A/cbddb.bats"
+run h5.log check
+only h5.log "a changed .sats of the last of three that share a slot" cbddb cuser
+run h6.log check
+quiet h6.log "the check after it"
+# a body changed with its size kept, in a dependency (a file of
+# build/bats_modules, whose digest is kept for the pass): the module that
+# staloads it is checked again, and the check after it is quiet
+printf '#pub fun h (): int\n#pub fun h2 (): int\n\nimplement h () = 8\nimplement h2 () = 11\n' > "$TMP/plain/src/lib.bats"
+run h7.log check
+only h7.log "a body-only change of a dependency" plain/src/lib tool
+run h8.log check
+quiet h8.log "the check after it"
+# the digests an older bats kept in files (build/.bats_dg) are not read, and
+# are removed: entries that say other digests for the files of a pass do
+# not make a module be checked again, nor hide a change
+mkdir -p build/.bats_dg
+printf 'build/src/base.sats\n1\n0000000000000000000000000000000000000000000000000000000000000000\n' > 'build/.bats_dg/build%src%base.sats'
+printf 'garbled' > 'build/.bats_dg/build%src%mid.sats'
+run h9.log check
+quiet h9.log "a check with digests of an older bats in build/.bats_dg"
+[ ! -e build/.bats_dg ] || { echo "FAIL: a check left build/.bats_dg"; ls build/.bats_dg; exit 1; }
 # --- a file patsopt might have read instead: a module added makes a .sats
 # in build/ (a .sats of that name, earlier on -IATS, could be staloaded
 # instead of another); everything is checked again, and again when it goes
