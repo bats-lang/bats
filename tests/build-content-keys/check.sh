@@ -16,7 +16,9 @@
 #  * a key that is missing or garbled makes its output made again;
 #  * a build of the other profile (release over debug, and the reverse)
 #    makes a native object again, since the profile is in its key
-#    (bats-lang/bats#320), and its debug info is the profile's.
+#    (bats-lang/bats#320), and its debug info is the profile's;
+#  * a wasm object is kept across release, debug and release builds (its
+#    cc flags are fixed, -O2 and no -g, so its key names no profile).
 # usage: tests/build-content-keys/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -183,4 +185,20 @@ run r6.log build --only release --only native
 [ "$(ccs r6.log)" = 1 ] || { echo "FAIL: a missing object key did not make the object again, once"; cat r6.log; exit 1; }
 run r7.log build --only release --only native
 quiet r7.log "the build after those"
+# A wasm object's key names no profile (its cc flags are fixed: -O2, no -g):
+# it is made once, and a build of the other profile keeps it. The wasm cc is
+# found on the PATH, so a stand-in notes each run that writes a keyed .wasm.o (the
+# runtime's is made at every build, whatever changed, and is not counted).
+CC_LOG=$TMP/wasm-cc-runs
+mkdir -p "$TMP/shim"
+REAL_CLANG=$(command -v clang)
+printf '#!/bin/sh\ncase "$*" in *-o\ build/_bats_wasm_runtime*) ;; *.wasm.o*) echo "$*" >> "%s";; esac\nexec "%s" "$@"\n' "$CC_LOG" "$REAL_CLANG" > "$TMP/shim/clang"
+chmod +x "$TMP/shim/clang"
+: > "$CC_LOG"
+PATH="$TMP/shim:$PATH" run w0.log build --only release --only wasm
+[ "$(wc -l < "$CC_LOG")" -ge 1 ] || { echo "FAIL: a cold wasm build ran no wasm cc"; cat w0.log; exit 1; }
+wasm_runs=$(wc -l < "$CC_LOG")
+PATH="$TMP/shim:$PATH" run w1.log build --only debug --only wasm
+PATH="$TMP/shim:$PATH" run w2.log build --only release --only wasm
+[ "$(wc -l < "$CC_LOG")" = "$wasm_runs" ] || { echo "FAIL: a wasm object was made again by a build of the other profile"; cat "$CC_LOG"; cat w1.log w2.log; exit 1; }
 echo "build-content-keys: ok"
