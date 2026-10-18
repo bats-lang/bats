@@ -56,7 +56,7 @@ staload "_bats_inputs.sats"
 
 (* The sha256 of the text, as 64 hex digits *)
 fn key_of (text: $B.builder_v): [l:agz] $A.arr(byte, l, 64) = let
-  val @(ta, tl) = $B.to_arr(text)
+  val @(ta, tl) = $B.into_arr(text)
   val c = $SHA.init()
   val () = $SHA.update(c, ta, tl)
   val () = $A.free<byte>(ta)
@@ -75,7 +75,7 @@ implement valid_context (listing) = let
   val () = bput_v(h, "bats-valid 1\nbats ")
   val () = bput_v(h, bats_inputs_sha256())
   val () = put_char_v(h, 10)
-  val @(ha, hl) = $B.to_arr(h)
+  val @(ha, hl) = $B.into_arr(h)
   val c = $SHA.init()
   val () = $SHA.update(c, ha, hl)
   val () = $A.free<byte>(ha)
@@ -86,31 +86,33 @@ in digest end
 
 (* The path p[0, first NUL) with / as %, after the directory of the
    records, NUL-terminated: where the record named name is *)
-fun mangle_name {l:agz}{n:pos}{i:nat | i <= n} .<n - i>.
-  (a: !$A.borrow(byte, l, n), i: int i, k: int, n: int n, out: !$B.builder_v >> $B.builder_v): void =
-  if i >= n then ()
+fun mangle_name {l:agz}{n:pos}{m:nat | m <= n}{i:nat | i <= m} .<m - i>.
+  (a: !$A.borrow(byte, l, n), i: int i, k: int, m: int m, out: !$B.builder_v >> $B.builder_v): void =
+  if i >= m then ()
   else if i >= k then ()
   else let
     val c = byte2int0($A.read<byte>(a, i))
     val () = put_char_v(out, (if c = 47 then 37 else c))
-  in mangle_name(a, i + 1, k, n, out) end
+  in mangle_name(a, i + 1, k, m, out) end
 
 (* build/.bats_valid/<name with / as %>, NUL-terminated *)
+
 
 
 implement valid_slot (name) = let
   var out : $B.builder_v = $B.create()
   val () = bput_v(out, "build/.bats_valid/")
-  val @(na, nl) = $B.to_arr(name)
+  val @(na, nl) = $B.into_arr(name)
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
-  val () = mangle_name(bv_n, 0, nl, 524288, out)
+  val () = mangle_name(bv_n, 0, nl, nl, out)
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
   val () = put_char_v(out, 0)
-  val @(oa, _) = $B.to_arr(out)
-in oa end
+  val @(oa, ol) = $B.into_arr(out)
+in @(oa, ol) end
 
 (* The record of the file at the NUL-terminated path p *)
+
 
 
 implement valid_slot_of_path (p) = let
@@ -130,8 +132,8 @@ fun same_key {la,lb:agz}{na,nb:pos}{k:nat | k <= na; k <= nb}{j:nat | j <= k} .<
 
 
 
-implement valid_holds (slot, key) =
-  case+ file_open_path(slot, $F.ReadOnly(), $F.OpenExisting(), 0) of
+implement valid_holds (slot, sm, key) =
+  case+ file_open_m(slot, sm, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(_) => false
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(128)
@@ -165,12 +167,12 @@ in $A.free<byte>($A.thaw<byte>(fz_v)) end
 
 (* Writes the 64 digits of key to the record at slot; the directories
    are made when the first write finds them missing *)
-fn keep {ls,lk:agz}
-  (slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64)): void =
-  if write_file_from_builder(slot, 524288, key_text(key)) = 0 then ()
+fn keep {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
+  (slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64)): void =
+  if write_file_from_builder_m(slot, sm, key_text(key)) = 0 then ()
   else let
     val () = make_directories()
-    val _ = write_file_from_builder(slot, 524288, key_text(key))
+    val _ = write_file_from_builder_m(slot, sm, key_text(key))
   in end
 
 (* Whether a[0, 64) and b[0, 64) are the same key *)
@@ -185,44 +187,44 @@ fn same_keys {la,lb:agz} (a: !$A.borrow(byte, la, 64), b: !$A.borrow(byte, lb, 6
    when nothing failed *)
 
 (* slot and key added to pend *)
-fn pend_add {ls,lk:agz}
-  (slot: !$A.borrow(byte, ls, 524288), key: !$A.borrow(byte, lk, 64),
+fn pend_add {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns}
+  (slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64),
    pend: !$B.builder_v >> $B.builder_v): void = let
-  val () = copy_to_builder_v(slot, 0, find_null_bv_from(slot, 0, 524288), 524288, pend)
+  val () = copy_to_builder_v(slot, 0, find_null_bv_from(slot, 0, sm), sm, pend)
   val () = put_char_v(pend, 0)
 in copy_to_builder_v(key, 0, 64, 64, pend) end
 
 (* The 64 bytes of src from `from` on, into key *)
-fun key_from {lk:agz}{lf:agz}{f:int}{i:nat | i <= 64} .<64 - i>.
-  (src: !$A.borrow(byte, lf, 524288), from: int f, key: !$A.arr(byte, lk, 64), i: int i): void =
+fun key_from {lk:agz}{lf:agz}{np:pos}{pm:nat | pm <= np}{f:int}{i:nat | i <= 64} .<64 - i>.
+  (src: !$A.borrow(byte, lf, np), pm: int pm, from: int f, key: !$A.arr(byte, lk, 64), i: int i): void =
   if i >= 64 then ()
   else let
-    val () = $A.set<byte>(key, i, int2byte0(peek(src, from + i, 524288)))
-  in key_from(src, from, key, i + 1) end
+    val () = $A.set<byte>(key, i, int2byte0(peek(src, from + i, pm)))
+  in key_from(src, pm, from, key, i + 1) end
 
 (* Writes the records of pend[off, len) *)
-fun flush_entries {lf:agz}{off:nat | off <= 524288} .<524288 - off>.
-  (pend: !$A.borrow(byte, lf, 524288), off: int off, len: int): void =
+fun flush_entries {lf:agz}{np:pos}{pm:nat | pm <= np}{off:nat | off <= pm} .<pm - off>.
+  (pend: !$A.borrow(byte, lf, np), pm: int pm, off: int off, len: int): void =
   if off >= len then ()
   else let
-    val e = $S.find_null_bv_at(pend, off, 524288)
+    val e = nul_in(pend, off, pm)
   in
     if e + 65 > len then ()
     else let
       var sb : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(pend, off, e + 1, 524288, sb)
-      val @(sa, _) = $B.to_arr(sb)
+      val () = copy_to_builder_v(pend, off, e + 1, pm, sb)
+      val @(sa, sl) = $B.into_arr(sb)
       val @(fz_s, bv_s) = $A.freeze<byte>(sa)
       val key = $A.alloc<byte>(64)
-      val () = key_from(pend, e + 1, key, 0)
+      val () = key_from(pend, pm, e + 1, key, 0)
       val @(fz_k, bv_k) = $A.freeze<byte>(key)
-      val () = keep(bv_s, bv_k)
+      val () = keep(bv_s, sl, bv_k)
       val () = $A.drop<byte>(fz_k, bv_k)
       val () = $A.free<byte>($A.thaw<byte>(fz_k))
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
     in
-      if e + 65 >= 524288 then () else flush_entries(pend, e + 65, len)
+      if e + 65 >= pm then () else flush_entries(pend, pm, e + 65, len)
     end
   end
 
@@ -230,9 +232,9 @@ fun flush_entries {lf:agz}{off:nat | off <= 524288} .<524288 - off>.
 
 
 implement valid_flush (pend) = let
-  val @(pa, pl) = $B.to_arr(pend)
+  val @(pa, pl) = $B.into_arr(pend)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val () = (if pl < 524288 then flush_entries(bv_p, 0, pl) else ())
+  val () = (if pl < 524288 then flush_entries(bv_p, pl, 0, pl) else ())
   val () = $A.drop<byte>(fz_p, bv_p)
 in $A.free<byte>($A.thaw<byte>(fz_p)) end
 
@@ -266,10 +268,10 @@ implement valid_file_key (ctx, reuse, p, is_unsafe) =
 
 
 
-implement valid_file_pend (ctx, p, is_unsafe, slot, key, pend) = let
+implement valid_file_pend (ctx, p, is_unsafe, slot, sm, key, pend) = let
   val @(usable, again) = valid_file_key(ctx, true, p, is_unsafe)
   val @(fz_a, bv_a) = $A.freeze<byte>(again)
-  val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, key, pend) else ()) else ())
+  val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, sm, key, pend) else ()) else ())
   val () = $A.drop<byte>(fz_a, bv_a)
 in $A.free<byte>($A.thaw<byte>(fz_a)) end
 
@@ -284,11 +286,11 @@ fun group_text {lf:agz}{off:nat | off <= 524288} .<524288 - off>.
     val e = $S.find_null_bv_at(files, off, 524288)
     var pb : $B.builder_v = $B.create()
     val () = copy_to_builder_v(files, off, e + 1, 524288, pb)
-    val @(pa, _) = $B.to_arr(pb)
+    val @(pa, pl) = $B.into_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
     val () = copy_to_builder_v(files, off, e, 524288, t)
     val () = put_char_v(t, 10)
-    val found = put_file_sha256(bv_p, t)
+    val found = put_file_sha256_m(bv_p, pl, t)
     val () = put_char_v(t, 10)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
@@ -321,10 +323,10 @@ implement valid_group_key (ctx, reuse, files, off, len) =
 
 
 
-implement valid_group_pend (ctx, files, off, len, slot, key, pend) = let
+implement valid_group_pend (ctx, files, off, len, slot, sm, key, pend) = let
   val @(usable, again) = valid_group_key(ctx, true, files, off, len)
   val @(fz_a, bv_a) = $A.freeze<byte>(again)
-  val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, key, pend) else ()) else ())
+  val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, sm, key, pend) else ()) else ())
   val () = $A.drop<byte>(fz_a, bv_a)
 in $A.free<byte>($A.thaw<byte>(fz_a)) end
 
@@ -363,14 +365,14 @@ in $A.free<byte>($A.thaw<byte>(fz_a)) end
 
 
 
-implement uses_key (p) = let
+implement uses_key (p, pm) = let
   var t : $B.builder_v = $B.create()
   val () = bput_v(t, "bats-uses 1 file\nbats ")
   val () = bput_v(t, bats_inputs_sha256())
   val () = put_char_v(t, 10)
-  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, 524288), 524288, t)
+  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, pm), pm, t)
   val () = put_char_v(t, 10)
-  val found = put_file_sha256(p, t)
+  val found = put_file_sha256_m(p, pm, t)
   val () = put_char_v(t, 10)
   val whole = ($B.length(t) < 524288): bool
 in @(found && whole, key_of(t)) end
@@ -380,8 +382,9 @@ in @(found && whole, key_of(t)) end
    it was (the rule of the validated records, valid_file_pend) *)
 
 
-implement uses_same (p, key) = let
-  val @(usable, again) = uses_key(p)
+
+implement uses_same (p, pm, key) = let
+  val @(usable, again) = uses_key(p, pm)
   val @(fz_a, bv_a) = $A.freeze<byte>(again)
   val same = (if usable then same_keys(bv_a, key) else false): bool
   val () = $A.drop<byte>(fz_a, bv_a)
@@ -392,10 +395,11 @@ in same end
    file at p is *)
 
 
-implement uses_slot (p) = let
+
+implement uses_slot (p, pm) = let
   var name : $B.builder_v = $B.create()
   val () = bput_v(name, "uses ")
-  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, 524288), 524288, name)
+  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, pm), pm, name)
 in valid_slot(name) end
 
 (* Whether the file (n bytes, of which the first 130 are its record's
@@ -419,11 +423,11 @@ fn record_holds {lf,lk:agz}{m:pos}
     val () = $A.free<byte>($A.thaw<byte>(fd))
     var head : $B.builder_v = $B.create()
     val () = copy_to_builder_v(file, 0, 130, size, head)
-    val @(expected_arr, _) = $B.to_arr(expected)
+    val @(expected_arr, el) = $B.into_arr(expected)
     val @(fe, expected_bytes) = $A.freeze<byte>(expected_arr)
-    val @(head_arr, _) = $B.to_arr(head)
+    val @(head_arr, hl) = $B.into_arr(head)
     val @(fh, head_bytes) = $A.freeze<byte>(head_arr)
-    val same = same_key(expected_bytes, head_bytes, 130, 0): bool
+    val same = (if el = 130 then (if hl = 130 then same_key(expected_bytes, head_bytes, 130, 0) else false) else false): bool
     val () = $A.drop<byte>(fe, expected_bytes)
     val () = $A.free<byte>($A.thaw<byte>(fe))
     val () = $A.drop<byte>(fh, head_bytes)
@@ -439,9 +443,9 @@ fn record_holds {lf,lk:agz}{m:pos}
 
 
 
-implement uses_hit (reuse, slot, key) =
+implement uses_hit (reuse, slot, sm, key) =
   if ~reuse then @(false, $B.create())
-  else case+ read_whole(slot, 524288) of
+  else case+ read_whole_m(slot, sm) of
   | ~whole_err(_) => @(false, $B.create())
   | ~whole_ok(ar, piece, m, n) => let
       val @(fz, bv) = $A.freeze<byte>(piece)
@@ -453,8 +457,9 @@ implement uses_hit (reuse, slot, key) =
 (* The record's text at slot, when build/.bats_valid/ is there (a check made
    it): a record never makes build/ (a failed validation leaves none), so
    the first check of a project writes none, and the next writes them *)
-fn put_record {ls:agz} (slot: !$A.borrow(byte, ls, 524288), text: $B.builder_v): void = let
-  val _ = write_file_from_builder(slot, 524288, text)
+fn put_record {ls:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
+  (slot: !$A.borrow(byte, ls, ns), sm: int sm, text: $B.builder_v): void = let
+  val _ = write_file_from_builder_m(slot, sm, text)
 in end
 
 (* Writes the record at slot for the key and the body (of len bytes), unless
@@ -463,11 +468,11 @@ in end
 
 
 
-implement uses_write (slot, key, body, len) =
+implement uses_write (slot, sm, key, body, len) =
   if len >= 524288 - 130 then ()
   else let
     var body_copy : $B.builder_v = $B.create()
-    val () = copy_to_builder_v(body, 0, len, 524288, body_copy)
+    val () = copy_to_builder_v(body, 0, len, len, body_copy)
     val digest = key_of(body_copy)
     val @(fd, bd) = $A.freeze<byte>(digest)
     var text : $B.builder_v = $B.create()
@@ -475,8 +480,8 @@ implement uses_write (slot, key, body, len) =
     val () = put_char_v(text, 10)
     val () = copy_to_builder_v(bd, 0, 64, 64, text)
     val () = put_char_v(text, 10)
-    val () = copy_to_builder_v(body, 0, len, 524288, text)
+    val () = copy_to_builder_v(body, 0, len, len, text)
     val () = $A.drop<byte>(fd, bd)
     val () = $A.free<byte>($A.thaw<byte>(fd))
-    val () = put_record(slot, text)
+    val () = put_record(slot, sm, text)
   in end

@@ -32,26 +32,26 @@
 staload "helpers.sats"
 
 (* bv[0, n) as a builder *)
-fn builder_of {l:agz} (bv: !$A.borrow(byte, l, 524288), n: int): $B.builder_v = let
+fn builder_of {l:agz}{nb:pos}{n:nat | n <= nb} (bv: !$A.borrow(byte, l, nb), n: int n): $B.builder_v = let
   var b : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(bv, 0, n, 524288, b)
+  val () = copy_to_builder_v(bv, 0, n, n, b)
 in b end
 
 (* Writes b to the path when the file does not hold exactly its bytes:
    whether it wrote; b is consumed *)
 fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): bool = let
-  val p = str_to_path_arr(path)
+  val @(p, pl) = str_into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val @(ba, bl) = $B.to_arr(b)
+  val @(ba, bl) = $B.into_arr(b)
   val @(fz_b, bv_b) = $A.freeze<byte>(ba)
-  val same = file_has_bytes(bv_p, bv_b, bl)
+  val same = file_has_bytes_m(bv_p, pl, bv_b, bl)
   val again = builder_of(bv_b, bl)
   val () = $A.drop<byte>(fz_b, bv_b)
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
   val wrote = (if same then let
       val () = $B.builder_free(again)
     in false end
-    else write_file_from_builder(bv_p, 524288, again) = 0): bool
+    else write_file_from_builder_m(bv_p, pl, again) = 0): bool
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in wrote end
@@ -87,9 +87,9 @@ in rc = 0 end
 fn put_path_sha256 (b: $B.builder_v, out: !$B.builder_v >> $B.builder_v): bool = let
   var p = b
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pal) = $B.into_arr(p)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val ok = put_file_sha256(bv_p, out)
+  val ok = put_file_sha256_m(bv_p, pal, out)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in ok end
@@ -114,12 +114,12 @@ fun add_lines {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
     if b = 10 then let
       var path : $B.builder_v = $B.create()
       val () = append_builder(path, line)
-      val @(pa, pl) = $B.to_arr(path)
+      val @(pa, pl) = $B.into_arr(path)
       val @(fz_pa, bv_pa) = $A.freeze<byte>(pa)
-      val () = copy_to_builder_v(bv_pa, 0, pl, 524288, key)
+      val () = copy_to_builder_v(bv_pa, 0, pl, pl, key)
       val () = put_char_v(key, 32)
       var again : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(bv_pa, 0, pl, 524288, again)
+      val () = copy_to_builder_v(bv_pa, 0, pl, pl, again)
       val () = $A.drop<byte>(fz_pa, bv_pa)
       val () = $A.free<byte>($A.thaw<byte>(fz_pa))
       val hashed = put_path_sha256(again, key)
@@ -161,7 +161,7 @@ fn inputs_digest (): @(bool, $B.builder_v) = let
   val _ = sh_run("rm -f \"$1\"", $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil()))
   (* a listing past the builder's size would have lost bytes *)
   val whole = $B.length(key) < 524288
-  val @(ka, kl) = $B.to_arr(key)
+  val @(ka, kl) = $B.into_arr(key)
   val c = $SHA.init()
   val () = $SHA.update(c, ka, kl)
   val () = $A.free<byte>(ka)
