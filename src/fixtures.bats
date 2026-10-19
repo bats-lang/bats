@@ -998,14 +998,17 @@ fun put_replaced {l:agz}{lp:agz}{len:nat | len <= 524288}{e:nat | e <= len}{i:na
   in put_replaced(bv, len, i + 1, e, pv, plen, out) end
 
 (* The log as it is kept: the work directory's path (pv, with its final
-   slash) written /app/, the lines a waiting bats and the warning about an
-   ATS2 bats did not install say dropped (they name this machine), a line
-   feed after each line *)
+   slash) written /app/, the lines a waiting bats and what bats says of an
+   ATS2 it did not install (that it is checking it, and the warning or note
+   with what the check found, bats#264) say dropped (they name this
+   machine), a line feed after each line *)
 fn normalize_line {l:agz}{lp:agz}{len:nat | len <= 524288}{p:nat | p <= len}{e:nat | p <= e; e <= len}
   (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, e: int e,
    pv: !$A.borrow(byte, lp, 524288), plen: tlen, out: !$B.builder_v >> $B.builder_v): void =
   if text_has(bv, len, p, "waiting for another bats") then ()
   else if text_has(bv, len, p, "warning: the ATS2 in ") then ()
+  else if text_has(bv, len, p, "note: the ATS2 in ") then ()
+  else if text_has(bv, len, p, "checking the ATS2 in ") then ()
   else let
     val () = put_replaced(bv, len, p, e, pv, plen, out)
   in put_char_v(out, 10) end
