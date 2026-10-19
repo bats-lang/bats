@@ -197,7 +197,7 @@ in r end
 fn write_to {sn:nat | sn < 524288} (s: string sn, b: $B.builder_v): int = let
   val pa = str_to_path_arr(s)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = write_file_from_builder(bv_p, 524288, b)
+  val r = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
@@ -260,7 +260,7 @@ fn runner_write {sn:nat | sn < 4096} (wasm: bool, rel: string sn, b: $B.builder_
   val () = put_char_v(pb, 0)
   val @(pa, _) = $B.to_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = write_file_from_builder(bv_p, 524288, b)
+  val r = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
@@ -418,7 +418,8 @@ fn finish_sidecar {lz:agz}
     val () = put_char_v(sp, 0)
     val @(spa, _) = $B.to_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
-    val _ = write_file_from_builder(bv_sp, 524288, line)
+    (* said, and the build failed, if the sidecar cannot be written *)
+    val _ = write_settle(bv_sp, 524288, write_file_from_builder(bv_sp, 524288, line))
     val () = $A.drop<byte>(fz_sp, bv_sp)
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
   in end
@@ -581,7 +582,7 @@ in
       val _ = run_mkdir(dir)
       val upath = str_to_path_arr("build/upload/bats.toml")
       val @(fz_op, bv_op) = $A.freeze<byte>(upath)
-      val rc = write_file_from_builder(bv_op, 524288, out)
+      val rc = write_settle(bv_op, 524288, write_file_from_builder(bv_op, 524288, out))
       val () = $A.drop<byte>(fz_op, bv_op)
       val () = $A.free<byte>($A.thaw<byte>(fz_op))
     in rc end
@@ -1172,7 +1173,7 @@ implement write_claude_rules() = let
   val () = $B.bput(rb, "- No semicolons at end of expressions\n")
   val rp = str_to_path_arr(".claude/rules/bats.md")
   val @(fz_rp, bv_rp) = $A.freeze<byte>(rp)
-  val _ = write_file_from_builder(bv_rp, 524288, rb)
+  val _ = write_settle(bv_rp, 524288, write_file_from_builder(bv_rp, 524288, rb))
   val () = $A.drop<byte>(fz_rp, bv_rp)
   val () = $A.free<byte>($A.thaw<byte>(fz_rp))
 in end
@@ -1237,7 +1238,7 @@ in p end
 
 (* Writes b to the NUL-terminated path in p; 0 on success. *)
 fn write_to {lp:agz} (p: !$A.borrow(byte, lp, 524288), b: $B.builder_v): int =
-  write_file_from_builder(p, 524288, b)
+  write_settle(p, 524288, write_file_from_builder(p, 524288, b))
 
 (* bats init <kind>: as the Rust bats's cmd_init. arg: the kind argument
    in arg[0, alen). *)
@@ -1402,7 +1403,7 @@ in
       val () = bput_v(out_b, "\" = \"\"\n")
       val tp3 = str_to_path_arr("bats.toml")
       val @(fz_tp3, bv_tp3) = $A.freeze<byte>(tp3)
-      val rc = write_file_from_builder(bv_tp3, 524288, out_b)
+      val rc = write_settle(bv_tp3, 524288, write_file_from_builder(bv_tp3, 524288, out_b))
       val () = $A.drop<byte>(fz_tp3, bv_tp3)
       val () = $A.free<byte>($A.thaw<byte>(fz_tp3))
     in
@@ -1410,7 +1411,8 @@ in
           val () = print! ("added '")
           val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
         in println! ("' to [dependencies]") end
-      else println! ("error: cannot write bats.toml")
+      (* write_settle said which file and why *)
+      else ()
     end
   | ~$R.err(_) => println! ("error: cannot open bats.toml")
 end

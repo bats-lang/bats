@@ -252,32 +252,160 @@ end
    no answer. The answer is patsopt's exit status, and no name or path
    says it, so renaming a directory does not change it. The cap is 20 s:
    the -int build's answer is far below it, and a slower machine gives
-   "cannot tell", never a wrong kind. The probe's files are in a temporary
-   directory under ~/.bats, removed by the script's exit. Exit 20:
-   accepted (the -int build); 21: refused; 22: no answer (the control
-   failed, the probe ran past the cap, or patsopt died without an answer
-   or ended by a signal); 23: no temporary directory.
-   An answer of 20 or 21, and 22 when the probe ran past the cap, is kept in
-   ~/.bats/ats2.solver, beside the toolchain's cksum (the bytes of bin/patsopt,
-   not its path), so a toolchain is probed once. A control failure, a patsopt
-   that dies without an answer (its status never written, 125) and one that
-   ends by a signal or with a status other than 1 are not kept: they may be a
-   broken environment, and are asked again. Every wait is bounded: a patsopt
-   that has not answered at 20 s is sent TERM, and KILL at 25 s, which is
-   "no answer" (124); one whose process is gone for 3 s with no status
-   written (killed with its parent, say) is 125. No file's time is read. *)
+   "cannot tell", never a wrong kind.
+
+   The shell only runs patsopt and says its status. Every file the probe
+   writes is bats's, through write_settle (bats-lang/bats#359): the two
+   sources, in a directory the shell made with mktemp and removes after the
+   run, and the answer kept in ~/.bats/ats2.solver. The run's exit status:
+   20 accepted (the -int build); 21 refused; 22 no answer, not kept (the
+   control failed, patsopt died without an answer, ended by a signal, or
+   exited with a status other than 1); 24 no answer within the cap, kept as
+   22. A patsopt that is past the cap is sent TERM at 20 s and KILL at 25 s,
+   and a status of 143 or 137 is taken for that; 23: no temporary
+   directory. An answer of 20 or 21, and 22 for a probe past the cap, is
+   kept in ~/.bats/ats2.solver as "<cksum of bin/patsopt> <20|21|22>" (the
+   bytes, not the path, so a toolchain is probed once and a renamed one is
+   not). A patsopt that is killed together with its shell gives no status
+   and is not kept. No file's time is read. *)
 #define PROBE_CONTROL "#include \"share/atspre_staload.hats\"\nprfn bats_probe_true {n:nat | n < 65536} (): [n < 65536] void = ()\n"
 #define PROBE_FALSE "#include \"share/atspre_staload.hats\"\nprfn bats_probe_false {h,l:nat | h < 65536; l < 65536;\n  (h/256 + 256*(l%256))/256 + 256*((l/256 + 256*(h%256))%256) == l} (): [1 == 2] void = ()\n"
-#define PROBE_SOLVE "k=$(cksum < \"$1/ats2/bin/patsopt\" 2>/dev/null) || exit 22\nif [ -f \"$1/ats2.solver\" ]; then\n  case $(cat \"$1/ats2.solver\") in\n    \"$k 20\") exit 20 ;;\n    \"$k 21\") exit 21 ;;\n    \"$k 22\") exit 22 ;;\n  esac\nfi\nd=$(mktemp -d \"$1/ats2-probe.XXXXXX\") || exit 23\ntrap 'rm -rf \"$d\"' EXIT\nprintf '%s\\n' \"$2\" > \"$d/control.dats\"\nprintf '%s\\n' \"$3\" > \"$d/false.dats\"\nexport PATSHOME=\"$1/ats2\"\nP=\"$1/ats2/bin/patsopt\"\ncapped() {\n  rm -f \"$d/rc\" \"$d/pid\" \"$d/late\"\n  ( \"$P\" -tc -d \"$1\" > /dev/null 2>&1 & echo $! > \"$d/pid\"; wait $!; echo $? > \"$d/rc\" ) > /dev/null 2>&1 &\n  n=0\n  g=0\n  while [ ! -f \"$d/rc\" ]; do\n    sleep 1\n    n=$((n + 1))\n    if [ -f \"$d/pid\" ] && ! kill -0 \"$(cat \"$d/pid\")\" 2>/dev/null; then g=$((g + 1)); else g=0; fi\n    if [ $g -ge 3 ] && [ ! -f \"$d/rc\" ]; then return 125; fi\n    if [ -f \"$d/late\" ]; then\n      if [ $n -ge 25 ]; then kill -9 \"$(cat \"$d/pid\")\" 2>/dev/null; return 124; fi\n    elif [ $n -ge 20 ]; then touch \"$d/late\"; kill \"$(cat \"$d/pid\")\" 2>/dev/null; fi\n  done\n  if [ -f \"$d/late\" ]; then return 124; fi\n  r=$(cat \"$d/rc\"); return \"${r:-125}\"\n}\ncapped \"$d/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$d/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then printf '%s\\n' \"$k 20\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 20; fi\nif [ $f -eq 124 ]; then printf '%s\\n' \"$k 22\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 22; fi\nif [ $f -ne 1 ]; then exit 22; fi\nprintf '%s\\n' \"$k 21\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"\nexit 21\n"
+
+(* The cksum of bin/patsopt, as cksum prints it, with no newline *)
+#define PROBE_SUM "c=$(cksum < \"$1/ats2/bin/patsopt\") || exit 22\nprintf '%s' \"$c\"\n"
+
+(* The kept answer for the cksum $2: its exit status is the answer, 9 when none is kept *)
+#define PROBE_KEPT "if [ -f \"$1/ats2.solver\" ]; then\n  case $(cat \"$1/ats2.solver\") in\n    \"$2 20\") exit 20 ;;\n    \"$2 21\") exit 21 ;;\n    \"$2 22\") exit 22 ;;\n  esac\nfi\nexit 9\n"
+
+(* A new directory of the probe's, its name printed *)
+#define PROBE_MAKE "d=$(mktemp -d \"$1/ats2-probe.XXXXXX\") || exit 23\nprintf '%s' \"$d\"\n"
+
+(* patsopt on the control, then on the false statement in $2, each capped; its
+   status is the answer (see above). Its output is dropped, as a probe's is. *)
+#define PROBE_RUN "P=\"$1/ats2/bin/patsopt\"\nexport PATSHOME=\"$1/ats2\"\ncapped() {\n  \"$P\" -tc -d \"$1\" > /dev/null 2>&1 &\n  p=$!\n  ( sleep 20; kill -TERM \"$p\" 2>/dev/null; sleep 5; kill -KILL \"$p\" 2>/dev/null ) 2>&- &\n  w=$!\n  wait \"$p\"\n  r=$?\n  kill \"$w\" 2>/dev/null\n  wait \"$w\" 2>/dev/null\n  case $r in 137|143) return 124 ;; esac\n  return $r\n}\ncapped \"$2/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$2/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then exit 20; fi\nif [ $f -eq 124 ]; then exit 24; fi\nif [ $f -eq 1 ]; then exit 21; fi\nexit 22\n"
+
+#define PROBE_CLEAR "rm -rf \"$1\"\n"
 
 datatype solver_kind = SolverInt | SolverRefusesFalse | SolverNoAnswer
 
-fn probe_solver (): solver_kind = let
-  val rc = sh_exec(PROBE_SOLVE, base_arg(), text_arg(PROBE_CONTROL), text_arg(PROBE_FALSE))
-in
-  if rc = 20 then SolverInt()
-  else if rc = 21 then SolverRefusesFalse()
+(* sh -c with two arguments, its stdout kept in out (at most 4096 bytes) *)
+fn sh_capture {sn:nat}{lo:agz}
+  (script: string sn, a1: $B.builder_v, a2: $B.builder_v, out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) = let
+  val exec = str_to_path_arr("sh")
+  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  var b1 = $B.create()
+  val () = bput_v(b1, "sh")
+  var b2 = $B.create()
+  val () = bput_v(b2, "-c")
+  var b3 = $B.create()
+  val () = bput_v(b3, script)
+  var b4 = $B.create()
+  val () = bput_v(b4, "sh")
+  val r = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+    $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
+    $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil())))))), out)
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+in r end
+
+(* The status of a script, and what it printed (at most 4096 bytes) *)
+fn capture_text {sn:nat} (script: string sn, a1: $B.builder_v): @(int, $B.builder_v) = let
+  val out = $A.alloc<byte>(4096)
+  val @(rc, k) = sh_capture(script, a1, empty_arg(), out)
+  val @(fz_o, bv_o) = $A.freeze<byte>(out)
+  val b = dir_arg(bv_o, k)
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+in @(rc, b) end
+
+(* dir/name, written with content: write_settle says why it failed, and the
+   result is its 0 or ~1 *)
+fn probe_write {l:agz}{sa:nat}{sb:nat}
+  (out: !$A.borrow(byte, l, 4096), n: int, name: string sa, content: string sb): int = let
+  var p : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(out, 0, n, 4096, p)
+  val () = bput_v(p, "/")
+  val () = bput_v(p, name)
+  val @(pa, pal) = $B.into_arr(p)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  var c : $B.builder_v = $B.create()
+  val () = bput_v(c, content)
+  val rc = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, c))
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in rc end
+
+(* the two sources are written and patsopt run on them: the code of the run,
+   or ~1 when a source could not be written or no directory was made *)
+fn probe_answer {l:agz} (rc_m: int, bv_o: !$A.borrow(byte, l, 4096), n: int): int =
+  if rc_m <> 0 then ~1
+  else if probe_write(bv_o, n, "control.dats", PROBE_CONTROL) <> 0 then ~1
+  else if probe_write(bv_o, n, "false.dats", PROBE_FALSE) <> 0 then ~1
+  else sh_exec(PROBE_RUN, base_arg(), dir_arg(bv_o, n), empty_arg())
+
+fn kind_of_code (code: int): solver_kind =
+  if code = 20 then SolverInt()
+  else if code = 21 then SolverRefusesFalse()
   else SolverNoAnswer()
+
+(* the answer a run's code keeps, or ~1 for a code that is not kept *)
+fn kept_of_code (code: int): int =
+  if code = 20 then 20
+  else if code = 21 then 21
+  else if code = 24 then 22
+  else ~1
+
+(* ~/.bats/ats2.solver: "<cksum> <answer>", written by bats. The write's
+   failure fails the build, as every write of bats's does (#359). *)
+fn keep_answer (answer: int): int = let
+  val @(rc, key) = capture_text(PROBE_SUM, base_arg())
+in
+  if rc <> 0 then let
+    val () = $B.builder_free(key)
+  in 0 end
+  else let
+    val () = bput_v(key, " ")
+    val () = (if answer = 20 then bput_v(key, "20")
+      else if answer = 21 then bput_v(key, "21")
+      else bput_v(key, "22"))
+    val () = put_char_v(key, 10)
+    var p : $B.builder_v = base_arg()
+    val () = bput_v(p, "/ats2.solver")
+    val @(pa, pal) = $B.into_arr(p)
+    val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+    val rc2 = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, key))
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in rc2 end
+end
+
+(* a probe made now: its directory is removed whatever it found *)
+fn probe_fresh (): solver_kind = let
+  val out = $A.alloc<byte>(4096)
+  val @(rc_m, n) = sh_capture(PROBE_MAKE, base_arg(), empty_arg(), out)
+  val @(fz_o, bv_o) = $A.freeze<byte>(out)
+  val code = probe_answer(rc_m, bv_o, n)
+  val _ = (if rc_m = 0 then sh_exec(PROBE_CLEAR, dir_arg(bv_o, n), empty_arg(), empty_arg()) else 0)
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val kept = kept_of_code(code)
+  val _ = (if kept >= 0 then keep_answer(kept) else 0)
+in kind_of_code(code) end
+
+fn probe_solver (): solver_kind = let
+  val @(rc_s, key) = capture_text(PROBE_SUM, base_arg())
+in
+  if rc_s <> 0 then let
+    val () = $B.builder_free(key)
+  in SolverNoAnswer() end
+  else let
+    val kept = sh_exec(PROBE_KEPT, base_arg(), key, empty_arg())
+  in
+    if kept = 20 then SolverInt()
+    else if kept = 21 then SolverRefusesFalse()
+    else if kept = 22 then SolverNoAnswer()
+    else probe_fresh()
+  end
 end
 
 (* ~/.bats/ats2 as a builder (empty when HOME is not set) *)

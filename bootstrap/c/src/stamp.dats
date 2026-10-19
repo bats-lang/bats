@@ -276,10 +276,16 @@ in listed && env end
    differs is named on stdout, and build/ but its stash goes. *)
 #define JUDGE "cd build || exit 1\nif [ ! -f .bats_target ] && [ ! -f .bats_stamp ]; then mv -f .bats_stamp.new .bats_stamp; exit 0; fi\nwhy=\nif [ ! -f .bats_stamp ]; then why='no stamp'\nelif [ \"$(sed -n 1p .bats_stamp)\" != 'bats-stamp 1' ]; then why='the stamp format differs'\nelse\n  for n in bats patsopt cc flags mark; do\n    a=$(sed -n \"s/^$n //p\" .bats_stamp); b=$(sed -n \"s/^$n //p\" .bats_stamp.new)\n    if [ \"$a\" != \"$b\" ]; then why=\"$n differs\"; break; fi\n  done\nfi\nif [ -z \"$why\" ] && [ \"$(cat .bats_target 2>/dev/null)\" != \"$1\" ]; then why='mark differs'; fi\nif [ -z \"$why\" ] && ! cmp -s .bats_stamp .bats_stamp.new; then why='the stamp differs'; fi\nif [ -n \"$why\" ]; then\n  echo \"bats: dropping build/ (made by another bats: $why)\"\n  find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_stamp.new -exec rm -rf {} +\n  mkdir -p src/bin bats_modules\nfi\nmv -f .bats_stamp.new .bats_stamp\n"
 
-(* The stamp this bats would write for the mark, into build/.bats_stamp.new:
-   false (and said) when a part of it cannot be had *)
+(* What became of the stamp this bats would write for the mark, into
+   build/.bats_stamp.new: written; a part of it could not be had (said
+   already); or the file could not be written (said, with the reason) *)
+datatype stamp_made =
+  | StampMade
+  | StampPartMissing
+  | StampNotWritten
+
 fn stamp_write {lph:agz}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int, mark: int): bool = let
+  (ph: !$A.borrow(byte, lph, 512), phlen: int, mark: int): stamp_made = let
   var st : $B.builder_v = $B.create()
   val () = bput_v(st, "bats-stamp 1\nbats ")
   val () = bput_v(st, bats_inputs_sha256())
@@ -295,19 +301,25 @@ fn stamp_write {lph:agz}
   val ok = (if tool && cc then true else false): bool
   val p = str_to_path_arr("build/.bats_stamp.new")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val wrote = (write_file_from_builder(bv_p, 524288, st) = 0): bool
+  val stv = st
+  val made = (if ok then
+      (if write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, stv)) = 0 then StampMade() else StampNotWritten())
+    else let val () = $B.builder_free(stv) in StampPartMissing() end): stamp_made
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in ok && wrote end
+in made end
 
 
 
 
 implement stamp_check (ph, phlen, mark) =
-  if ~stamp_write(ph, phlen, mark) then let
+  case+ stamp_write(ph, phlen, mark) of
+  | StampPartMissing() => let
     val () = set_build_err()
   in prerr! ("error: the stamp of build/ (bats, the toolchain and the C compiler) cannot be made: the C compiler's version or environment could not be read (a message above says which)\n") end
-  else let
+  (* write_settle said why, and failed the build *)
+  | StampNotWritten() => ()
+  | StampMade() => let
     var d : $B.builder_v = $B.create()
     val () = put_int_v(d, mark)
     val out = $A.alloc<byte>(4096)

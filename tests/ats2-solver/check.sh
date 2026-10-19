@@ -160,3 +160,13 @@ grep -q "HOME is not set" "$TMP/out" || { cat "$TMP/out"; fail "with HOME unset 
 grep -q "checking the ATS2" "$TMP/out" && { cat "$TMP/out"; fail "with HOME unset something was checked"; }
 [ "$(runs)" = 0 ] || fail "with HOME unset patsopt was run"
 ok "with HOME unset there is no probe"
+
+# The answer is written by bats, through write_settle (bats-lang/bats#359): an
+# answer that cannot be kept is said with its path and the system's reason,
+# fails the build, and leaves no probe directory behind
+new_home refuses unwritable
+mkdir -p "$H/.bats/ats2.solver"
+if HOME="$H" "$BATS" ats2 install > "$TMP/out" 2>&1; then cat "$TMP/out"; fail "an answer that cannot be kept did not fail the build"; fi
+grep -q "error: cannot write '.*ats2.solver': Is a directory (os error 21)" "$TMP/out" || { cat "$TMP/out"; fail "an answer that cannot be kept is not said"; }
+[ -z "$(ls -d "$H"/.bats/ats2-probe.* 2>/dev/null)" ] || fail "a probe directory was left behind by a failed answer"
+ok "an answer that cannot be written is said, fails the build, and leaves no probe directory"

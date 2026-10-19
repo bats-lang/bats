@@ -51,8 +51,16 @@ fn preprocess_changed {l1,l2,l3,ls:agz}{nsa:pos}{msa:nat | msa <= nsa; msa <= 52
    sats_bv: !$A.borrow(byte, l2, 524288),
    dats_bv: !$A.borrow(byte, l3, 524288),
    bv_sa: !$A.borrow(byte, ls, nsa), sl: int msa, hs: $B.builder_v,
-   build_target: target, is_unsafe: bool): int =
-  case+ read_whole(src_bv, 524288) of
+   build_target: target, is_unsafe: bool): int = let
+  (* the .src first emptied, before anything of the module is written: a
+     .src that still holds the old hash, beside a .dats or .sats cut short
+     by a write that failed, would make them fresh (bats-lang/bats#359) *)
+  val emptied = write_settle(bv_sa, sl, write_file_from_builder_m(bv_sa, sl, $B.create()))
+in
+  if emptied <> 0 then let
+    val () = $B.builder_free(hs)
+  in ~1 end
+  else case+ read_whole(src_bv, 524288) of
   | ~whole_ok(ar, piece, m, nbytes) => let
       val @(fz_src, bv_src) = $A.freeze<byte>(piece)
       val xs = lex_spans(bv_src, nbytes, m)
@@ -86,8 +94,9 @@ fn preprocess_changed {l1,l2,l3,ls:agz}{nsa:pos}{msa:nat | msa <= nsa; msa <= 52
              must not leave a C fresh that was built from the older .sats *)
           val saved = (if is_test_mode() then sats_stamp_save()
                        else whole_err($F.NotFound())): whole_file
-          val () = touch_sats_stamp()
-          val r = write_file_from_rope(sats_bv, sc)
+          val stamped = touch_sats_stamp()
+          val r = (if stamped = 0 then write_settle(sats_bv, 524288, write_file_from_rope(sats_bv, sc))
+            else ~1): int
           val moved = (if r = 0 then sats_moved(before, sats_bv)
             else let
               val () = (case+ before of
@@ -98,7 +107,9 @@ fn preprocess_changed {l1,l2,l3,ls:agz}{nsa:pos}{msa:nat | msa <= nsa; msa <= 52
         in r end): int
       val () = $B.rope_list_free(sc)
       val [kd:int] dc = $B.rope_chunks(dats)
-      val r2 = write_file_from_rope(dats_bv, dc)
+      (* a write that failed stops the module: nothing more of it is written *)
+      val r2 = (if r1 = 0 then write_settle(dats_bv, 524288, write_file_from_rope(dats_bv, dc))
+        else ~1): int
       val () = $B.rope_list_free(dc)
       (* <dats>.pre: its prelude line count, for mapping patsopt's line
          numbers back to the .bats (Rust: DatsFile.prelude_offset) *)
@@ -111,24 +122,25 @@ fn preprocess_changed {l1,l2,l3,ls:agz}{nsa:pos}{msa:nat | msa <= nsa; msa <= 52
       val @(fz_pa, bv_pa) = $A.freeze<byte>(pa)
       var nb : $B.builder_v = $B.create()
       val () = put_int_v(nb, pre_lines)
-      val _ = write_file_from_builder_m(bv_pa, pa_len, nb)
+      val nbv = nb
+      val r3 = (if r1 = 0 && r2 = 0 then write_settle(bv_pa, pa_len, write_file_from_builder_m(bv_pa, pa_len, nbv))
+        else let val () = $B.builder_free(nbv) in ~1 end): int
       val () = $A.drop<byte>(fz_pa, bv_pa)
       val () = $A.free<byte>($A.thaw<byte>(fz_pa))
-      val rc = (if safety_errors > 0 then safety_errors
-        else if r1 = 0 then (if r2 = 0 then 0 else ~1) else ~1): int
+      val rc0 = (if safety_errors > 0 then safety_errors
+        else if r1 = 0 then (if r2 = 0 then (if r3 = 0 then 0 else ~1) else ~1) else ~1): int
       (* <dats>.src: the source's hash when the emission succeeded, else
-         empty, so that a failed emission is never fresh *)
-      val () = (if rc = 0 then let
-          val _ = write_file_from_builder_m(bv_sa, sl, hs)
-        in end
+         it stays empty (above), so that a failed emission is never fresh;
+         a hash that cannot be written whole is a failure too *)
+      val rc = (if rc0 = 0 then write_settle(bv_sa, sl, write_file_from_builder_m(bv_sa, sl, hs))
         else let
           val () = $B.builder_free(hs)
-          val _ = write_file_from_builder_m(bv_sa, sl, $B.create())
-        in end): void
+        in rc0 end): int
     in rc end
   | ~whole_err(_) => let
       val () = $B.builder_free(hs)
     in ~1 end
+end
 
 implement preprocess_one
   (src_bv, sm, sats_bv, ss, dats_bv, sd, build_target, is_unsafe, target_changed) = let
@@ -555,7 +567,7 @@ implement write_native_runtime_h (dir, dlen) = let
   val () = put_char_v(pb, 0)
   val @(pa, pa_len) = $B.into_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val rc = write_file_from_builder_m(bv_p, pa_len, b)
+  val rc = write_settle(bv_p, pa_len, write_file_from_builder_m(bv_p, pa_len, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
   (* the stubs *)
@@ -573,7 +585,7 @@ implement write_native_runtime_h (dir, dlen) = let
     val () = put_char_v(sp, 0)
     val @(spa, spa_len) = $B.into_arr(sp)
     val @(fz_s, bv_s) = $A.freeze<byte>(spa)
-    val rc = write_file_from_builder_m(bv_s, spa_len, sb)
+    val rc = write_settle(bv_s, spa_len, write_file_from_builder_m(bv_s, spa_len, sb))
     val () = $A.drop<byte>(fz_s, bv_s)
     val () = $A.free<byte>($A.thaw<byte>(fz_s))
   in rc end
@@ -600,7 +612,7 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#endif\n")
   val p = str_to_path_arr("build/_bats_wasm_runtime.h")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val rc = write_file_from_builder(bv_p, 524288, b)
+  val rc = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
@@ -635,7 +647,7 @@ implement write_wasm_runtime_c() = let
   val () = bput_v(b, "else{*(void**)ptr=ward_fl_over;ward_fl_over=ptr;}}\n")
   val p = str_to_path_arr("build/_bats_wasm_runtime.c")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val rc = write_file_from_builder(bv_p, 524288, b)
+  val rc = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
@@ -652,14 +664,14 @@ implement write_wasm_stubs() = let
     val () = bput_v(sb, stub)
     val pp = str_to_path_arr(path)
     val @(fz_pp, bv_pp) = $A.freeze<byte>(pp)
-    val rc = write_file_from_builder(bv_pp, 524288, sb)
+    val rc = write_settle(bv_pp, 524288, write_file_from_builder(bv_pp, 524288, sb))
     val () = $A.drop<byte>(fz_pp, bv_pp)
     val () = $A.free<byte>($A.thaw<byte>(fz_pp))
   in rc end
-  val _ = write_stub("build/_bats_wasm_stubs/libats/libc/CATS/stdio.cats")
-  val _ = write_stub("build/_bats_wasm_stubs/libats/libc/CATS/sys/stat.cats")
-  val _ = write_stub("build/_bats_wasm_stubs/libats/libc/CATS/sys/types.cats")
-in r0 end
+  val r1 = write_stub("build/_bats_wasm_stubs/libats/libc/CATS/stdio.cats")
+  val r2 = write_stub("build/_bats_wasm_stubs/libats/libc/CATS/sys/stat.cats")
+  val r3 = write_stub("build/_bats_wasm_stubs/libats/libc/CATS/sys/types.cats")
+in r0 + r1 + r2 + r3 end
 
 fn compile_wasm_runtime(): int = let
   val exec = str_to_path_arr("clang")
@@ -1309,7 +1321,7 @@ in
       val () = put_char_v(tgt_b, 48 + mode_mark)
       val tgt_path = str_to_path_arr("build/.bats_target")
       val @(fz_tgtp, bv_tgtp) = $A.freeze<byte>(tgt_path)
-      val _ = write_file_from_builder(bv_tgtp, 524288, tgt_b)
+      val _ = write_settle(bv_tgtp, 524288, write_file_from_builder(bv_tgtp, 524288, tgt_b))
       val () = $A.drop<byte>(fz_tgtp, bv_tgtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_tgtp))
 
@@ -1323,7 +1335,7 @@ in
       val () = bput_v(nrt_b, "void *atsruntime_realloc_undef(void *ptr, size_t bsz) { return realloc(ptr, bsz); }\n")
       val nrt_path = str_to_path_arr("build/_bats_native_runtime.c")
       val @(fz_nrtp, bv_nrtp) = $A.freeze<byte>(nrt_path)
-      val _ = write_file_from_builder(bv_nrtp, 524288, nrt_b)
+      val _ = write_settle(bv_nrtp, 524288, write_file_from_builder(bv_nrtp, 524288, nrt_b))
       val () = $A.drop<byte>(fz_nrtp, bv_nrtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_nrtp))
       val nrt_exec = str_to_path_arr("clang")
@@ -1930,13 +1942,11 @@ in
                     val () = put_char_v(ep, 0)
                     val @(epa, epa_len) = $B.into_arr(ep)
                     val @(fz_ep, bv_ep) = $A.freeze<byte>(epa)
-                    val ew = write_file_from_builder_m(bv_ep, epa_len, entry)
+                    val ew = write_settle(bv_ep, epa_len, write_file_from_builder_m(bv_ep, epa_len, entry))
                     val () = $A.drop<byte>(fz_ep, bv_ep)
                     val () = $A.free<byte>($A.thaw<byte>(fz_ep))
-                    val () = (if ew <> 0 then let
-                      val () = set_build_err()
-                    in println! ("error: failed to write synthetic entry") end
-                      else ())
+                    (* write_settle said why, and failed the build *)
+                    val () = (if ew <> 0 then set_build_err() else ())
 
                     (* Step 6: Run patsopt on all .dats files *)
                     (* patsopt for dep modules *)
@@ -3144,7 +3154,7 @@ in
                 val () = put_char_v(mfp, 0)
                 val @(mfpa, mfpa_len) = $B.into_arr(mfp)
                 val @(fz_mfp, bv_mfp) = $A.freeze<byte>(mfpa)
-                val _ = write_file_from_builder_m(bv_mfp, mfpa_len, mf)
+                val _ = write_settle(bv_mfp, mfpa_len, write_file_from_builder_m(bv_mfp, mfpa_len, mf))
                 val () = $A.drop<byte>(fz_mfp, bv_mfp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_mfp))
                 val () = (if ~is_quiet() then println! ("  to-c: generated") else ())

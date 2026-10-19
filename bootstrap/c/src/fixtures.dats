@@ -906,7 +906,7 @@ in r end
 fn path_write (b: $B.builder_v, content: $B.builder_v): bool = let
   val a = nul_path(b)
   val @(fz, bv) = $A.freeze<byte>(a)
-  val r = write_file_from_builder(bv, 524288, content)
+  val r = write_settle(bv, 524288, write_file_from_builder(bv, 524288, content))
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r = 0 end
