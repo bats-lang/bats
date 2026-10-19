@@ -169,11 +169,20 @@ in $A.free<byte>($A.thaw<byte>(fz_v)) end
    are made when the first write finds them missing *)
 fn keep {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
   (slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64)): void =
-  if write_file_from_builder_m(slot, sm, key_text(key)) = 0 then ()
-  else let
-    val () = make_directories()
-    val _ = write_file_from_builder_m(slot, sm, key_text(key))
-  in end
+  case+ write_file_from_builder_m(slot, sm, key_text(key)) of
+  | ~Wrote() => ()
+  (* the directories are not there yet: made, and the write tried again *)
+  | ~NotWritten($F.NotFound()) => let
+      val () = make_directories()
+      val _ = write_settle(slot, sm, write_file_from_builder_m(slot, sm, key_text(key)))
+    in end
+  (* anything else is said, and the build fails *)
+  | ~NotWritten(e) => let
+      val _ = write_settle(slot, sm, NotWritten(e))
+    in end
+  | ~WriteTooLarge() => let
+      val _ = write_settle(slot, sm, WriteTooLarge())
+    in end
 
 (* Whether a[0, 64) and b[0, 64) are the same key *)
 fn same_keys {la,lb:agz} (a: !$A.borrow(byte, la, 64), b: !$A.borrow(byte, lb, 64)): bool =
@@ -458,9 +467,17 @@ implement uses_hit (reuse, slot, sm, key) =
    it): a record never makes build/ (a failed validation leaves none), so
    the first check of a project writes none, and the next writes them *)
 fn put_record {ls:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
-  (slot: !$A.borrow(byte, ls, ns), sm: int sm, text: $B.builder_v): void = let
-  val _ = write_file_from_builder_m(slot, sm, text)
-in end
+  (slot: !$A.borrow(byte, ls, ns), sm: int sm, text: $B.builder_v): void =
+  case+ write_file_from_builder_m(slot, sm, text) of
+  | ~Wrote() => ()
+  (* no build/.bats_valid/: no record, by design (above) *)
+  | ~NotWritten($F.NotFound()) => ()
+  | ~NotWritten(e) => let
+      val _ = write_settle(slot, sm, NotWritten(e))
+    in end
+  | ~WriteTooLarge() => let
+      val _ = write_settle(slot, sm, WriteTooLarge())
+    in end
 
 (* Writes the record at slot for the key and the body (of len bytes), unless
    the body does not fit with its header under the builder's capacity *)

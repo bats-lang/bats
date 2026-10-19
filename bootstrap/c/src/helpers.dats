@@ -872,28 +872,134 @@ in
   else loop(bv, pos, max, last)
 end
 
-(* bv[i, lim) to bw *)
+(* b's bytes to stderr; consumes b *)
+
+
+implement prerr_builder (b) = let
+  val @(ba, bl) = $B.into_arr(b)
+  fun loop {lb:agz}{cap:pos}{i,n:nat | i <= n; n <= cap} .<n - i>.
+    (a: !$A.arr(byte, lb, cap), i: int i, n: int n): void =
+    if i >= n then ()
+    else let
+      val () = prerr_char(int2char0(byte2int0($A.get<byte>(a, i))))
+    in loop(a, i + 1, n) end
+  val () = loop(ba, 0, bl)
+in $A.free<byte>(ba) end
+
+(* ============================================================
+   What a write came to (bats-lang/bats#359)
+   ============================================================ *)
+
+(* A file written: every byte handed to the file system, the buffer
+   flushed, the file closed, or why not. A write that fails part way
+   leaves the file cut short, so the result is the first error and
+   nothing is written after it. It is linear: a caller matches it, or
+   hands it to write_settle, which says it, so a failed write is never
+   dropped and a file cut short is never taken for whole. The file
+   package's richer answer (a full, partial, empty or failed write,
+   bats-lang/file#60) will refine NotWritten; its present answer is
+   a result whose error is the first failure, and a write that returns
+   writes every byte (_file_write is Rust's write_all). *)
+
+
+
+
+
+(* bv[i, lim) to bw, the first error stopping it (a failed write empties
+   the writer's buffer, so going on would write the bytes after the
+   gap) *)
 
 
 
 (* bv[i, lim) to bw, of the first m bytes of bv *)
 fn wbw_range {l:agz}{n:pos}{m:nat | m <= n}
-  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, n), i: pos_t, lim: int, m: int m): void = let
+  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, n), i: pos_t, lim: int, m: int m): write_result = let
   fun loop {l:agz}{j:nat | j <= m} .<m - j>.
-    (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, n), j: int j, lim: int, m: int m): void =
-    if j >= m then ()
-    else if j >= lim then ()
-    else let
-      val wr = $F.buf_write_byte(bw, byte2int0($A.read<byte>(bv, j)))
-      val () = $R.discard<int><$F.io_error>(wr)
-    in loop(bw, bv, j + 1, lim, m) end
+    (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, n), j: int j, lim: int, m: int m): write_result =
+    if j >= m then Wrote()
+    else if j >= lim then Wrote()
+    else (case+ $F.buf_write_byte(bw, byte2int0($A.read<byte>(bv, j))) of
+      | ~$R.ok(_) => loop(bw, bv, j + 1, lim, m)
+      | ~$R.err(e) => NotWritten(e))
 in
   if i < 0 then loop(bw, bv, 0, lim, m)
-  else if i > m then ()
+  else if i > m then Wrote()
   else loop(bw, bv, i, lim, m)
 end
 
 implement wbw_loop(bw, bv, i, lim) = wbw_range(bw, bv, i, lim, 524288)
+
+(* The writer closed after r, the result of what was written to it: r
+   when that failed, else the flush's, else the close's. The file
+   package's buf_writer_close drops its own flush's error, so the flush
+   is asked for here, where its result is kept. Consumes bw and r. *)
+
+
+implement writer_finish (bw, r) =
+  case+ r of
+  | ~Wrote() =>
+    (case+ $F.buf_flush(bw) of
+     | ~$R.ok(_) =>
+       (case+ $F.buf_writer_close(bw) of
+        | ~$R.ok(_) => Wrote()
+        | ~$R.err(e) => NotWritten(e))
+     | ~$R.err(e) => let
+         (* the close is for the descriptor; the flush's error is the answer *)
+         val () = $R.discard<int><$F.io_error>($F.buf_writer_close(bw))
+       in NotWritten(e) end)
+  | ~NotWritten(e) => let
+      val () = $R.discard<int><$F.io_error>($F.buf_writer_close(bw))
+    in NotWritten(e) end
+  | ~WriteTooLarge() => let
+      val () = $R.discard<int><$F.io_error>($F.buf_writer_close(bw))
+    in WriteTooLarge() end
+
+(* What became of a file that is written only when it differs from what
+   it holds: it held these bytes already, it was written, or it could not
+   be (said, with the reason, and the build failed) *)
+
+
+
+
+
+(* The errno a failure is reported with, as the Rust bats reported the
+   io::Error ("<text> (os error <errno>)"): file's io_error keeps the
+   kind, not the number, so each kind has its Linux errno; Unrecognized
+   is EIO's *)
+
+
+implement io_error_errno (e) =
+  case+ e of
+  | $F.NotFound() => 2 | $F.PermissionDenied() => 13 | $F.AlreadyExists() => 17
+  | $F.NotADirectory() => 20 | $F.IsADirectory() => 21 | $F.DirectoryNotEmpty() => 39
+  | $F.ReadOnlyFilesystem() => 30 | $F.FilesystemLoop() => 40 | $F.InvalidFilename() => 36
+  | $F.InvalidInput() => 22 | $F.FileTooLarge() => 27 | $F.StorageFull() => 28
+  | $F.TooManyOpenFiles() => 24 | $F.OutOfMemory() => 12 | $F.ResourceBusy() => 16
+  | $F.BrokenPipe() => 32 | $F.WouldBlock() => 11 | $F.BadDescriptor() => 9
+  | $F.DeviceError() => 5 | $F.Unsupported() => 95 | $F.CrossesDevices() => 18
+  | $F.Unrecognized() => 5
+
+(* The system's words for an io_error, as Rust's io::Error says them:
+   "<text> (os error <errno>)" *)
+fn put_os_error (e: $F.io_error, b: !$B.builder_v >> $B.builder_v): void = let
+  val errno = io_error_errno(e)
+  val buf = $A.alloc<byte>(256)
+  val k = $P.os_error_text(errno, buf, 256)
+  val @(fz_b, bv_b) = $A.freeze<byte>(buf)
+  val () = copy_to_builder_v(bv_b, 0, k, 256, b)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  val () = bput_v(b, " (os error ")
+  val () = put_int_v(b, errno)
+in bput_v(b, ")") end
+
+(* Says why path_bv[0, m) was not written, and fails the build: "error:
+   cannot write 'path': <the system's reason> (os error n)", and for a
+   disk with no room (bats-lang/bats#314) the free space of build/ as a
+   fact, as a patsopt that fails and prints nothing says it. 0 when it was
+   written. Consumes r. *)
+
+
 
 (* build/.sats_changed is written whenever an emitted .sats changes, with
    new bytes each time: the sha256 of what it held (a chain, so no content
@@ -908,6 +1014,7 @@ fn sats_stamp_path (): $B.builder_v = let
   val () = put_char_v(b, 0)
 in b end
 
+(* 0 when the stamp was written, else ~1 after saying why *)
 
 
 implement touch_sats_stamp () = let
@@ -917,10 +1024,10 @@ implement touch_sats_stamp () = let
   var nb : $B.builder_v = $B.create()
   val had = put_file_sha256_m(bv_p, pal, nb)
   val () = (if had then () else bput_v(nb, "1"))
-  val _ = write_file_from_builder_m(bv_p, pal, nb)
+  val rc = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, nb))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in end
+in rc end
 
 (* Whether the file at path_bv holds exactly bv[0, len) *)
 
@@ -1183,7 +1290,10 @@ implement key_record(kind, out_bv, om, in_bv, im) = let
   val tbv = tb
   val @(ka, kl) = $B.into_arr(key_file_path(out_bv, om))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
-  val _ = (if ok then write_file_from_builder_m(bv_k, kl, tbv)
+  (* a key that cannot be written is said, and the build fails; none is
+     kept as a whole one: a key cut short is not the inputs' (it makes the
+     output again) *)
+  val _ = (if ok then write_settle(bv_k, kl, write_file_from_builder_m(bv_k, kl, tbv))
     else let val () = $B.builder_free(tbv) in 0 end): int
   val () = $A.drop<byte>(fz_k, bv_k)
   val () = $A.free<byte>($A.thaw<byte>(fz_k))
@@ -1594,20 +1704,6 @@ in
     in @(ec, olen) end
   | ~$R.err(e) => @(0 - e, 0)
 end
-
-(* b's bytes to stderr; consumes b *)
-
-
-implement prerr_builder (b) = let
-  val @(ba, bl) = $B.into_arr(b)
-  fun loop {lb:agz}{cap:pos}{i,n:nat | i <= n; n <= cap} .<n - i>.
-    (a: !$A.arr(byte, lb, cap), i: int i, n: int n): void =
-    if i >= n then ()
-    else let
-      val () = prerr_char(int2char0(byte2int0($A.get<byte>(a, i))))
-    in loop(a, i + 1, n) end
-  val () = loop(ba, 0, bl)
-in $A.free<byte>(ba) end
 
 (* The prelude line count in <in>.pre, written next to the .dats
    in[0, il) by preprocess_one; 0 when there is none *)
@@ -2266,6 +2362,39 @@ fn disk_free_kib (): int = let
   val () = $A.free<byte>($A.thaw<byte>(fz_x))
 in v end
 
+implement write_settle (path_bv, m, r) =
+  case+ r of
+  | ~Wrote() => 0
+  | ~NotWritten(e) => let
+      var msg : $B.builder_v = $B.create()
+      val () = bput_v(msg, "error: cannot write '")
+      val () = copy_to_builder_v(path_bv, 0, find_null_bv_from(path_bv, 0, m), m, msg)
+      val () = bput_v(msg, "': ")
+      val () = put_os_error(e, msg)
+      val () = (case+ e of
+        | $F.StorageFull() => let
+            val free_kib = disk_free_kib()
+          in
+            if free_kib >= 0 then let
+                val () = bput_v(msg, "; ")
+                val () = put_int_v(msg, free_kib / 1024)
+              in bput_v(msg, " MB free in build") end
+            else ()
+          end
+        | _ => ())
+      val () = bput_v(msg, "\n")
+      val () = prerr_builder(msg)
+      val () = set_build_err()
+    in ~1 end
+  | ~WriteTooLarge() => let
+      var msg : $B.builder_v = $B.create()
+      val () = bput_v(msg, "error: the output for '")
+      val () = copy_to_builder_v(path_bv, 0, find_null_bv_from(path_bv, 0, m), m, msg)
+      val () = bput_v(msg, "' is larger than 524288 bytes, the most bats can write\n")
+      val () = prerr_builder(msg)
+      val () = set_build_err()
+    in ~1 end
+
 (* A patsopt run that failed and printed nothing on stderr: the module,
    the status, the free space of build/ when df said it, and stdout
    (consumes out) *)
@@ -2704,7 +2833,11 @@ fun slot_free {i,n:nat} .<max(n - i, 0)>. (i: int i, n: int n): @(slot_found, in
     | ~SlotUnlockable() => @(SlotUnlockable(), i))
 
 (* Writes the bytes b holds (b is consumed) at the start of the file at
-   the path p holds (p is consumed), over what was there *)
+   the path p holds (p is consumed), over what was there. A failure is
+   matched and left unsaid on purpose: the note is a hint to a bats that
+   waits for the slot, which names who holds it; without it that bats
+   says the slot is taken and not by whom, and no file bats trusts is
+   written. *)
 fn note_write (p: $B.builder_v, b: $B.builder_v): void =
   case+ open_built(p, $F.WriteOnly(), $F.OpenExisting()) of
   | ~$R.err(_) => $B.builder_free(b)
@@ -2712,10 +2845,15 @@ fn note_write (p: $B.builder_v, b: $B.builder_v): void =
       val bw = $F.buf_writer_create(fd)
       val @(ba, bl) = $B.to_arr(b)
       val @(fz_b, bv_b) = $A.freeze<byte>(ba)
-      val () = wbw_loop(bw, bv_b, 0, bl)
+      val r = wbw_loop(bw, bv_b, 0, bl)
       val () = $A.drop<byte>(fz_b, bv_b)
       val () = $A.free<byte>($A.thaw<byte>(fz_b))
-    in $R.discard<int><$F.io_error>($F.buf_writer_close(bw)) end
+    in
+      (case+ writer_finish(bw, r) of
+       | ~Wrote() => ()
+       | ~NotWritten(_) => ()
+       | ~WriteTooLarge() => ())
+    end
 
 (* Notes in slot i's file who took it, "bats check in <directory>", its
    first line, for a bats that waits for it to name. A slot's file is
@@ -2967,27 +3105,16 @@ implement project_lock_release (lk) =
 
 
 fn write_opened {l:agz}{n:pos}{k:nat | k <= n}
-  (fd_r: $R.result($F.fd, $F.io_error), content_arr: $A.arr(byte, l, n), content_len: int k): int =
+  (fd_r: $R.result($F.fd, $F.io_error), content_arr: $A.arr(byte, l, n), content_len: int k): write_result =
   case+ fd_r of
   | ~$R.ok(fd) => let
       val bw = $F.buf_writer_create(fd)
       val @(fz_c, bv_c) = $A.freeze<byte>(content_arr)
-      val () = wbw_range(bw, bv_c, 0, content_len, content_len)
+      val r = wbw_range(bw, bv_c, 0, content_len, content_len)
       val () = $A.drop<byte>(fz_c, bv_c)
       val () = $A.free<byte>($A.thaw<byte>(fz_c))
-      val cr = $F.buf_writer_close(bw)
-      val () = $R.discard<int><$F.io_error>(cr)
-    in 0 end
-  | ~$R.err(_) => let val () = $A.free<byte>(content_arr) in ~1 end
-
-fn too_large_message {lp:agz}{n:pos}{m:nat | m <= n}
-  (path_bv: !$A.borrow(byte, lp, n), m: int m): void = let
-  var msg : $B.builder_v = $B.create()
-  val () = bput_v(msg, "error: the output for '")
-  val () = copy_to_builder_v(path_bv, 0, find_null_bv_from(path_bv, 0, m), m, msg)
-  val () = bput_v(msg, "' is larger than 524288 bytes, the most bats can write\n")
-  val () = prerr_builder(msg)
-in set_build_err() end
+    in writer_finish(bw, r) end
+  | ~$R.err(e) => let val () = $A.free<byte>(content_arr) in NotWritten(e) end
 
 implement write_file_from_builder(path_bv, path_len, content_b) = let
   val @(content_arr, content_len) = $B.into_arr(content_b)
@@ -2996,8 +3123,7 @@ in
      cut short, so it is not written *)
   if content_len >= 524288 then let
     val () = $A.free<byte>(content_arr)
-    val () = too_large_message(path_bv, path_len)
-  in ~1 end
+  in WriteTooLarge() end
   else write_opened(file_open_n(path_bv, path_len, $F.WriteOnly(), $F.CreateOrTruncate(), 420),
                     content_arr, content_len)
 end
@@ -3007,8 +3133,7 @@ implement write_file_from_builder_m(path_bv, pm, content_b) = let
 in
   if content_len >= 524288 then let
     val () = $A.free<byte>(content_arr)
-    val () = too_large_message(path_bv, pm)
-  in ~1 end
+  in WriteTooLarge() end
   else write_opened(file_open_m(path_bv, pm, $F.WriteOnly(), $F.CreateOrTruncate(), 420),
                     content_arr, content_len)
 end
@@ -3082,25 +3207,29 @@ implement file_has_rope (path_bv, cs) =
     in if same then ~more else false end
   | ~$R.err(_) => false
 
-(* The texts of cs to fd, in order; 0, or ~1 after a failed write *)
-fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): int =
+(* The texts of cs to fd, in order, the first error stopping it *)
+fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): write_result =
   case+ cs of
-  | $B.rope_nil() => 0
+  | $B.rope_nil() => Wrote()
   | @$B.rope_cons(a, n, tl) => let
-      val w = (if n <= 0 then 0 else let
+      val w = (if n <= 0 then Wrote() else let
           val @(fz, bv) = $A.freeze<byte>(a)
           val @(left, right) = $A.borrow_split<byte>(fz, bv, n)
           val ok = (case+ $F.file_write(fd, left, n) of
-            | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
+            | ~$R.ok(_) => Wrote() | ~$R.err(e) => NotWritten(e)): write_result
           val () = $A.drop<byte>(fz, $A.borrow_join<byte>(fz, left, right))
           val () = a := $A.thaw<byte>(fz)
-        in ok end): int
-      val r = (if w < 0 then w else fd_write_chunks(fd, tl)): int
+        in ok end): write_result
+      val r = (case+ w of
+        | ~Wrote() => fd_write_chunks(fd, tl)
+        | ~NotWritten(e) => NotWritten(e)
+        | ~WriteTooLarge() => WriteTooLarge()): write_result
       prval () = fold@(cs)
     in r end
 
-(* The text of cs written to the file at path (created, or truncated);
-   0, or ~1 when it cannot be opened or written *)
+(* The text of cs written to the file at path (created, or truncated):
+   written and closed, or why not (a file that cannot be opened, written
+   or closed) *)
 
 
 
@@ -3112,31 +3241,19 @@ in
   case+ file_open_path(path_bv, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
   | ~$R.ok(fd) => let
       val w = fd_write_chunks(fd, cs)
-      val c = (case+ $F.file_close(fd) of | ~$R.ok(_) => 0 | ~$R.err(_) => ~1): int
-    in if w < 0 then w else c end
-  | ~$R.err(_) => ~1
+      val c = $F.file_close(fd)
+    in
+      (case+ w of
+       | ~Wrote() => (case+ c of | ~$R.ok(_) => Wrote() | ~$R.err(e) => NotWritten(e))
+       | ~NotWritten(e) => let val () = $R.discard<int><$F.io_error>(c) in NotWritten(e) end
+       | ~WriteTooLarge() => let val () = $R.discard<int><$F.io_error>(c) in WriteTooLarge() end)
+    end
+  | ~$R.err(e) => NotWritten(e)
 end
 
 (* ============================================================
    A file read whole (a module of any size)
    ============================================================ *)
-
-(* The errno a failure is reported with, as the Rust bats reported the
-   io::Error ("<text> (os error <errno>)"): file's io_error keeps the
-   kind, not the number, so each kind has its Linux errno; Unrecognized
-   is EIO's *)
-
-
-implement io_error_errno (e) =
-  case+ e of
-  | $F.NotFound() => 2 | $F.PermissionDenied() => 13 | $F.AlreadyExists() => 17
-  | $F.NotADirectory() => 20 | $F.IsADirectory() => 21 | $F.DirectoryNotEmpty() => 39
-  | $F.ReadOnlyFilesystem() => 30 | $F.FilesystemLoop() => 40 | $F.InvalidFilename() => 36
-  | $F.InvalidInput() => 22 | $F.FileTooLarge() => 27 | $F.StorageFull() => 28
-  | $F.TooManyOpenFiles() => 24 | $F.OutOfMemory() => 12 | $F.ResourceBusy() => 16
-  | $F.BrokenPipe() => 32 | $F.WouldBlock() => 11 | $F.BadDescriptor() => 9
-  | $F.DeviceError() => 5 | $F.Unsupported() => 95 | $F.CrossesDevices() => 18
-  | $F.Unrecognized() => 5
 
 (* The n bytes of a file, then a NUL (m = n + 1), in the one piece of an
    arena of its own; or what failed *)
@@ -3225,7 +3342,9 @@ implement sats_stamp_end (saved, back) =
           val () = copy_to_builder_v(bv_c, 0, n, m, cb)
           val @(pa, pal) = $B.into_arr(sats_stamp_path())
           val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-          val _ = write_file_from_builder_m(bv_p, pal, cb)
+          (* said, and the build fails, if it cannot: the stamp then holds
+             what it held or less, which no key's file names *)
+          val _ = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, cb))
           val () = $A.drop<byte>(fz_p, bv_p)
         in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
       val () = $A.drop<byte>(fz_c, bv_c)

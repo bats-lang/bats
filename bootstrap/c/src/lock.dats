@@ -1517,7 +1517,7 @@ datatype fetch_step = StepMake | StepUnpack | StepStamp
 (* Writes the stamp s to path when go, else drops it; 0 when written *)
 fn write_stamp {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (go: bool, path: !$A.borrow(byte, lp, n), m: int m, s: $B.builder_v): int =
-  if go then write_file_from_builder_m(path, m, s)
+  if go then write_settle(path, m, write_file_from_builder_m(path, m, s))
   else let val () = $B.builder_free(s) in ~1 end
 
 (* Says that fetch failed at step, for the package a[0, k) *)
@@ -2055,11 +2055,13 @@ fn finish_lock (st: int, n: int, lock: $B.builder_v, dry: bool): void =
   else let
     val lp = str_to_path_arr("bats.lock")
     val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-    val _ = write_file_from_builder(bv_lp, 524288, lock)
+    (* said, and the build failed, if bats.lock cannot be written *)
+    val written = write_settle(bv_lp, 524288, write_file_from_builder(bv_lp, 524288, lock))
     val () = $A.drop<byte>(fz_lp, bv_lp)
     val () = $A.free<byte>($A.thaw<byte>(fz_lp))
   in
-    if is_quiet() then ()
+    if written <> 0 then ()
+    else if is_quiet() then ()
     else if n = 0 then prerr! ("wrote bats.lock (no dependencies)\n")
     else prerr! ("wrote bats.lock (", n, " dependencies)\n")
   end
@@ -2423,8 +2425,9 @@ fn copy_file {ls,ld:agz}
      | ~$R.ok(df) => let
          val ok = (case+ $F.fd_copy(sf, df) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
          val () = $R.discard<int><$F.io_error>($F.file_close(sf))
-         val () = $R.discard<int><$F.io_error>($F.file_close(df))
-       in if ok then copy_mode(s, d) else false end)
+         (* the copy's close is where a write that was cached can fail *)
+         val closed = (case+ $F.file_close(df) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+       in if ok && closed then copy_mode(s, d) else false end)
 
 (* Whether e[0, el) is ".", "..", or a directory Rust's copy skips:
    build, dist, docs or bats_modules *)

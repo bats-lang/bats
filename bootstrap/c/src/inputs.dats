@@ -46,8 +46,8 @@ fn builder_of {l:agz}{nb:pos}{n:nat | n <= nb} (bv: !$A.borrow(byte, l, nb), n: 
 in b end
 
 (* Writes b to the path when the file does not hold exactly its bytes:
-   whether it wrote; b is consumed *)
-fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): bool = let
+   what became of it (file_changed); b is consumed *)
+fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed = let
   val @(p, pl) = str_into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
   val @(ba, bl) = $B.into_arr(b)
@@ -58,8 +58,9 @@ fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
   val wrote = (if same then let
       val () = $B.builder_free(again)
-    in false end
-    else write_file_from_builder_m(bv_p, pl, again) = 0): bool
+    in FileSame() end
+    else (if write_settle(bv_p, pl, write_file_from_builder_m(bv_p, pl, again)) = 0 then FileWritten()
+      else FileNotWritten())): file_changed
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in wrote end
@@ -206,7 +207,14 @@ implement write_inputs () =
       val () = bput_v(sats, "(* the sha256 of bats.toml, bats.lock and every src/**.bats, 64 hex digits *)\n")
       val () = bput_v(sats, "fun bats_inputs_sha256 (): string 64\n")
       val sats_new = write_changed("build/src/_bats_inputs.sats", sats)
-      val () = (if sats_new then touch_sats_stamp() else ())
+      val () = (case+ sats_new of
+        | FileWritten() => let
+            (* said, and the build failed, if the stamp cannot be written *)
+            val _ = touch_sats_stamp()
+          in end
+        | FileSame() => ()
+        (* said by write_changed *)
+        | FileNotWritten() => ())
       var dats : $B.builder_v = $B.create()
       val () = bput_v(dats, "(* _bats_inputs -- written by bats from the inputs it names *)\n\n")
       val () = bput_v(dats, "#include \"share/atspre_staload.hats\"\n\n")

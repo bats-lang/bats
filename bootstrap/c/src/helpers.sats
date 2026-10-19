@@ -872,8 +872,100 @@ fn find_basename_start {l:agz}{n:pos}  (bv: !$A.borrow(byte, l, n), pos: pos_t, 
 
 
 
+fn prerr_builder (b: $B.builder_v): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datavtype write_result =
+  | Wrote of ()
+  | NotWritten of ($F.io_error)
+  | WriteTooLarge of ()   (* more than a builder holds: nothing was written *)
+
+
+
+
 fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
-   i: pos_t, lim: int): void
+   i: pos_t, lim: int): write_result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn writer_finish (bw: $F.buf_writer, r: write_result): write_result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datatype file_changed =
+  | FileSame
+  | FileWritten
+  | FileNotWritten
+
+
+
+
+
+fn io_error_errno (e: $F.io_error): int
 
 
 
@@ -905,9 +997,24 @@ fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
 
 
 
+fn write_settle {lp:agz}{n:pos}{m:nat | m <= n}
+  (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): int
 
 
-fn touch_sats_stamp (): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn touch_sats_stamp (): int
 
 
 
@@ -1175,6 +1282,9 @@ fn key_fresh (kind: key_of, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 fn key_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (kind: key_of, out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
+
+
+
 
 
 
@@ -1595,20 +1705,6 @@ fn run_cmd_capture {le:agz}{lo:agz}
 
 
 
-fn prerr_builder (b: $B.builder_v): void
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1901,6 +1997,39 @@ fn prerr_builder (b: $B.builder_v): void
 
 fn check_emitted_flaws {lo,li:agz}
   (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2898,6 +3027,15 @@ fn machine_slot_release (slot: machine_slot): void
 
 
 
+
+
+
+
+
+
+
+
+
 datavtype project_lock =
   | ProjectLocked of ($F.fd, machine_slot)
   | ProjectUnlocked of machine_slot
@@ -2959,24 +3097,11 @@ fn project_lock_release (lk: project_lock): void
 
 fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
   (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
-   content_b: $B.builder_v): int
+   content_b: $B.builder_v): write_result
 
 
 fn write_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
-  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, content_b: $B.builder_v): int
-
-
-
-
-
-
-
-
-
-
-
-
-
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, content_b: $B.builder_v): write_result
 
 
 
@@ -3100,8 +3225,12 @@ fn file_has_rope {lp:agz}{k:nat}
 
 
 
+
+
+
+
 fn write_file_from_rope {lp:agz}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): int
+  (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): write_result
 
 
 
@@ -3113,18 +3242,6 @@ fn write_file_from_rope {lp:agz}{k:nat}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-fn io_error_errno (e: $F.io_error): int
 
 
 
@@ -3214,6 +3331,8 @@ fn sats_stamp_save (): whole_file
 
 
 fn sats_stamp_end (saved: whole_file, back: bool): void
+
+
 
 
 
