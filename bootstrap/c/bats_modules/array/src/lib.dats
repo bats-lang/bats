@@ -430,7 +430,66 @@ primplement nth_functional {cs}{i}{v,w} (p, q) = _nth_functional(p, q)
 (* The array without its cells, to be written by what knows nothing of them *)
 
 
+(* A piece of an arena (or any arrx) lent as a barr. The lend keeps the
+   owner: barr_of_arrx consumes the piece and gives the barr and the proof
+   arrx_lent(l, n, o) that the memory at l belongs to o; the proof is a
+   linear view, made only here and consumed only by barr_to_arrx, which
+   takes the barr back and gives the piece of o again. While it is lent the
+   piece has not been returned (the arena's count k is unchanged, so
+   arena_destroy cannot be called), and the proof is of this l and n, so
+   the piece cannot be given back as another, or to another owner. The
+   cells are as for barr_of_arr: nothing is known of them. *)
+
+
+
+
+
+
+
+
 (* Another array holding the same cells *)
+
+
+(* ============================================================
+   Borrowing an array whose cells are known
+   ============================================================ *)
+
+(* The freeze / thaw / borrow protocol of arrx and borrow above, for a
+   barr: the borrow is indexed by the same cells, so a read through it
+   gives NTH(cs, i, v) as barr_get does, and thawing gives back the barr
+   with those very cells. k borrows are out; barr_thaw needs k = 0, so
+   no cell is set while a borrow is out. *)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(* The same bytes as a plain borrow(byte, l, n), for what reads through
+   that type (read, write_borrow, ...), counted like a cborrow: it is one
+   more borrow out, so barr_thaw (k = 0) is refused until the view is
+   given back to cborrow_view_drop. Both borrows are held at once and no
+   cell is settable meanwhile. The view is indexed by l and n only, so what
+   is read through it is not known (use cborrow_get for the cells' proof). *)
+
+
+
+
+
+
+
+(* Cell i, with the proof that it is cell i of the cells *)
+
 
 
 (* ============================================================
@@ -506,6 +565,9 @@ local
   assume frozenx(a, l, n, k, o) = ptr l
   assume arena(a, l, max, used, k) = ptr l
   assume borrow(a, l, n) = ptr l
+  assume cfrozen(l, n, k, cs) = ptr l
+  assume cborrow(l, n, cs) = ptr l
+  assume arrx_lent(l, n, o) = unit_v
   assume text(n) = ptr
   assume text_builder(n, i) = ptr
 
@@ -564,6 +626,15 @@ implement barr_of_arr {l}{n} (a) =
 implement barr_to_arr {l}{n}{cs} (a) =
    $UNSAFE.castvwtp0{arr(byte, l, n)}(a) 
 
+implement barr_of_arrx {l}{n}{o} (a) =
+   $UNSAFE.castvwtp0{[cs:cells] (CLEN(cs, n), arrx_lent(l, n, o) | barr(l, n, cs))}(a) 
+
+implement barr_to_arrx {l}{n}{o}{cs} (pf | a) = let
+  prval unit_v() = pf
+in
+   $UNSAFE.castvwtp0{arrx(byte, l, n, o)}(a) 
+end
+
 implement barr_copy {l}{n}{cs} (a, n) = let
   val copy =  _calloc(n, sizeof<byte>) 
   fun go {i:nat | i <= n} .<n - i>. (i: int i): void =
@@ -577,6 +648,23 @@ implement barr_copy {l}{n}{cs} (a, n) = let
 in
    $UNSAFE.castvwtp0{[m:agz] barr(m, n, cs)}(copy) 
 end
+
+implement barr_freeze {l}{n}{cs} (a) = @(a, a)
+
+implement barr_thaw {l}{n}{cs} (f) = f
+
+implement cborrow_dup {l}{n}{cs}{k} (f, b) = b
+
+implement cborrow_drop {l}{n}{cs}{k} (f, b) = ()
+
+implement cborrow_view {l}{n}{cs}{k} (f, b) = b
+
+implement cborrow_view_drop {l}{n}{cs}{k} (f, b) = ()
+
+implement cborrow_get {l}{n,i}{cs} (b, i) =
+  
+    $UNSAFE.cast{[v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)}(byte2int0($UNSAFE.ptr0_get<byte>(ptr_add<byte>(b, i))))
+  
 
 (* -- Element access -- *)
 

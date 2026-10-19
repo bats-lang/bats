@@ -36,8 +36,9 @@ staload SHA = "sha256/src/lib.sats"
 typedef pos_t = [p:int] int p
 
 
-fn peek {l:agz}{n:pos}{p:int}
-  (src: !$A.borrow(byte, l, n), p: int p, n: int n): int
+
+fn peek {l:agz}{n:pos}{m:nat | m <= n}{p:int}
+  (src: !$A.borrow(byte, l, n), p: int p, m: int m): int
 
 
 
@@ -71,8 +72,134 @@ fn find_null_from {l:agz}{n:pos}{p:int}
 
 
 
-fn find_null_bv_from {l:agz}{n:pos}{p:int}
-  (bv: !$A.borrow(byte, l, n), p: int p, n: int n): pos_t
+
+
+
+
+
+
+
+
+
+fn nul_in {l:agz}{n:pos}{m:nat | m <= n}{i:nat | i <= m}
+  (bv: !$A.borrow(byte, l, n), i: int i, m: int m): [r:nat | i <= r; r <= m] int r
+
+
+
+fn find_null_bv_from {l:agz}{n:pos}{m:nat | m <= n}{p:int}
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m): pos_t
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn file_open_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+fn file_open_n {l:agz}{n:pos | n < 1048576}
+  (p: !$A.borrow(byte, l, n), n: int n, access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+
+
+
+
+
+fn file_open_path {l:agz}
+  (p: !$A.borrow(byte, l, 524288), access: $F.access, opening: $F.opening, mode: int)
+  : $R.result($F.fd, $F.io_error)
+
+
+
+
+fn file_exists_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): bool
+
+
+
+
+
+
+
+
+
+fn file_exists_path {l:agz} (p: !$A.borrow(byte, l, 524288)): bool
+
+
+
+
+fn dir_open_path {l:agz} (p: !$A.borrow(byte, l, 524288)): $R.result($F.dir, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+fn dir_open_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result($F.dir, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+fn dir_read_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result([k:nat] $F.entries(k), $F.io_error)
+
+
+
 
 
 
@@ -627,7 +754,7 @@ fn prerr_seg {l:agz}{m:pos}
 
 
 
-fn print_borrow {l:agz}{n:pos}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int n): void
+fn print_borrow {l:agz}{n:pos}{m:nat | m <= n}  (buf: !$A.borrow(byte, l, n), i: pos_t, len: int, max: int m): void
 
 
 
@@ -685,8 +812,8 @@ fn put_newline_v(out: !$B.builder_v >> $B.builder_v): void
 
 
 
-fn copy_to_builder_v {l:agz}{n:pos}
-  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int n,
+fn copy_to_builder_v {l:agz}{n:pos}{m:nat | m <= n}
+  (src: !$A.borrow(byte, l, n), start: pos_t, stop: int, max: int m,
    dst: !$B.builder_v >> $B.builder_v): void
 
 
@@ -763,8 +890,8 @@ fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
 
 
 
-fn freshness_check_bv
-  (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
 
 
 
@@ -795,17 +922,15 @@ fn touch_sats_stamp (): void
 
 
 
-
-fn c_fresh_bv
-  (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
+fn file_has_bytes {lp:agz}{lb:agz}{len:nat | len <= 524288}
+  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int len): bool
 
 
 
-fn file_has_bytes {lp:agz}{lb:agz}
-  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int): bool
 
 
+fn file_has_bytes_m {lp:agz}{lb:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{nb:pos}{len:nat | len <= nb; len <= 524288}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, lb, nb), len: int len): bool
 
 
 
@@ -817,6 +942,43 @@ fn file_has_bytes {lp:agz}{lb:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datatype profile = Debug | Release
+
+fn is_release (p: profile): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datatype key_of = KeyOfWasmObject | KeyOfDebugObject | KeyOfReleaseObject
+
+fn object_key (rel: profile): key_of
 
 
 
@@ -945,8 +1107,8 @@ fn stamp_digest_hashes (b: !$B.builder_v >> $B.builder_v): void
 
 
 
-fn input_digest_sizes {li:agz}
-  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
+fn input_digest_sizes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -956,29 +1118,29 @@ fn input_digest_sizes {li:agz}
 
 
 
+fn input_digest_hashes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
 
 
-fn input_digest_hashes {li:agz}
-  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
 
 
 
 
 
 
+fn input_digest {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
 
 
 
 
 
-fn input_digest {li:agz}
-  (is_c: bool, in_bv: !$A.borrow(byte, li, 524288), b: !$B.builder_v >> $B.builder_v): bool
 
 
 
+fn key_fresh (kind: key_of, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
-fn key_fresh (is_c: bool, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
@@ -1011,12 +1173,12 @@ fn key_fresh (is_c: bool, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
+fn key_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
+  (kind: key_of, out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
 
 
 
 
-fn key_record {lo:agz}{li:agz}
-  (is_c: bool, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
 
 
 
@@ -1029,9 +1191,27 @@ fn key_record {lo:agz}{li:agz}
 
 
 
+fn native_object_fresh (rel: profile, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
-fn key_drop {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288)): void
+
+fn wasm_object_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
+
+
+
+fn native_object_record {lo:agz}{li:agz}
+  (rel: profile, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
+
+
+
+
+fn wasm_object_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
+  (out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
+
+
+
+
+fn key_drop {lo:agz}{no:pos}{om:nat | om <= no; om <= 524288} (out_bv: !$A.borrow(byte, lo, no), om: int om): void
 
 
 
@@ -1158,6 +1338,19 @@ fn split_spaces_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
 
 fn run_mkdir
   (path_b: $B.builder_v): int
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1706,20 +1899,242 @@ fn prerr_builder (b: $B.builder_v): void
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 fn check_emitted_flaws {lo,li:agz}
   (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1937,6 +2352,11 @@ fn patsopt_only {lph:agz}{lo:agz}{li:agz}
    in_bv: !$A.borrow(byte, li, 524288), in_len: int): int
 
 
+
+fn remove_output_m {lo:agz}{n:pos}{m:nat | m <= n}
+  (out_bv: !$A.borrow(byte, lo, n), out_len: int, m: int m): void
+
+
 fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void
 
 
@@ -2079,9 +2499,7 @@ fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): 
 
 
 
-datatype profile = Debug | Release
 
-fn is_release (p: profile): bool
 
 
 
@@ -2544,6 +2962,27 @@ fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
    content_b: $B.builder_v): int
 
 
+fn write_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, content_b: $B.builder_v): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2736,6 +3175,15 @@ fn read_whole {lp:agz}{np:pos | np < 1048576}
 
 
 
+
+
+
+
+
+
+
+fn read_whole_m {lp:agz}{np:pos}{m:nat | m <= np; m <= 524288}
+  (path: !$A.borrow(byte, lp, np), m: int m): whole_file
 
 
 
@@ -3103,6 +3551,7 @@ fn sats_moved {lp:agz}
 
 
 
+fn digests_forget (): void
 
 
 
@@ -3155,8 +3604,6 @@ fn sats_moved {lp:agz}
 
 
 
-fn memo_entry_size {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -3165,8 +3612,6 @@ fn memo_entry_size {lp:agz}
 
 
 
-fn memo_entry_hash {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -3174,8 +3619,156 @@ fn memo_entry_hash {lp:agz}
 
 
 
-fn file_starts_with {lp:agz}{lb:agz}{n:nat | n <= 524288}
-  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int n): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn memo_entry_size {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+fn memo_entry_hash {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+fn file_starts_with {lp:agz}{lb:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{nb:pos}{len:nat | len <= nb; len <= 524288}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, lb, nb), len: int len): bool
 
 
 
@@ -3188,6 +3781,20 @@ fn is_cold (): bool
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+fn str_into_arr {sn:nat} (s: string sn)
+  : [n:nat | n <= $B.BUILDER_CAP][cap:pos | n <= cap; cap <= $B.BUILDER_CAP][l:agz] @($A.arr(byte, l, cap), int n)
 
 
 
@@ -3351,6 +3958,12 @@ fn ap_string_pos {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn
 
 fn put_file_sha256 {lp:agz}
   (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
+
+
+fn put_file_sha256_m {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
+
+
 
 
 

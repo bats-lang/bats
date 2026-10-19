@@ -113,7 +113,7 @@ fn print_usage(): void = let
   val () = println! ("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>")
   val () = println! ("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
-  val () = println! ("  fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--repository <dir>]")
+  val () = println! ("  fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]")
   val () = println! ("                               Run the accept and reject fixtures of <dir> against a copy of the project")
   val () = println! ("  with-env <env-file> <command> [args...]")
   val () = println! ("                               Run a command with the variables of a dotenv file")

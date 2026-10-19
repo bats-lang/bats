@@ -507,7 +507,7 @@ datatype resolution =
 
 (* Whether the NUL-terminated name in bv is a directory *)
 fn is_directory {l:agz} (bv: !$A.borrow(byte, l, 524288)): bool =
-  case+ $F.dir_open(bv, 524288) of
+  case+ dir_open_path(bv) of
   | ~$R.ok(d) => let val () = $R.discard<int><$F.io_error>($F.dir_close(d)) in true end
   | ~$R.err(_) => false
 
@@ -540,7 +540,7 @@ fn try_candidate {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096}
   val () = put_char_v(candidate, 0)
   val @(candidate_a, _) = $B.to_arr(candidate)
   val @(fz_c, bv_c) = $A.freeze<byte>(candidate_a)
-  val state = (if ~($F.file_exists(bv_c, 524288)) then 0
+  val state = (if ~(file_exists_path(bv_c)) then 0
     else if is_directory(bv_c) then 1
     else if is_executable(bv_c) then 2
     else 1): int
@@ -682,7 +682,7 @@ fn read_env_file {l:agz}{lf:agz}{at:nat | at <= 4096}
   val () = put_char_v(path, 0)
   val @(path_a, path_len) = $B.to_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
-  val size = (case+ $F.file_open(bv_p, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val size = (case+ file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.ok(fd) => let
         val k = (case+ $F.file_read(fd, content, 65537) of
           | ~$R.ok(k) => k | ~$R.err(_) => ~1): int

@@ -182,16 +182,28 @@ fn path_at {l:agz} (lst: !$A.borrow(byte, l, 524288), off: pos_t): [lo:agz] $A.a
   val @(pa, _) = $B.to_arr(pb)
 in pa end
 
+(* The path in lst[off, len), NUL-terminated, in the builder's own array
+   (the array is larger than the path: bats#327) *)
+fn path_at_m {l:agz}{n:pos}{len:nat | len <= n} (lst: !$A.borrow(byte, l, n), off: pos_t, len: int len)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][lo:agz] @($A.arr(byte, lo, cap), int k) = let
+  var pb : $B.builder_v = $B.create()
+  val e = find_null_bv_from(lst, off, len)
+  val () = copy_to_builder_v(lst, off, e, len, pb)
+  val () = put_char_v(pb, 0)
+  val @(pa, pl) = $B.into_arr(pb)
+in @(pa, pl) end
+
 (* Appends dir/<name> for each entry of dir, NUL-terminated: directories
-   to dirs, .bats files to files. dir is NUL-terminated at dlen. *)
-fn list_dir {ld:agz}
-  (dir: !$A.borrow(byte, ld, 524288), dlen: pos_t,
+   to dirs, .bats files to files. dir is NUL-terminated at dlen, in its
+   first dm bytes. *)
+fn list_dir {ld:agz}{nd:pos}{dm:nat | dm <= nd; dm <= 524288}
+  (dir: !$A.borrow(byte, ld, nd), dm: int dm, dlen: pos_t,
    dirs: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void = let
-  val dr = $F.dir_read(dir, 524288)
+  val dr = dir_read_m(dir, dm)
 in case+ dr of
   | ~$R.ok(d) => let
       fun loop {n,i:nat | i <= n} .<n - i>.
-        (d: !$F.entries(n), i: int i, n: int n, dir: !$A.borrow(byte, ld, 524288), dlen: pos_t,
+        (d: !$F.entries(n), i: int i, n: int n, dir: !$A.borrow(byte, ld, nd), dm: int dm, dlen: pos_t,
          dirs: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void =
         if i >= n then ()
         else let
@@ -201,53 +213,52 @@ in case+ dr of
           val c1 = peek_arr(e, 1, 1024)
         in
           if el = 0 then let val () = $A.free<byte>(e)
-            in loop(d, i + 1, n, dir, dlen, dirs, files) end
+            in loop(d, i + 1, n, dir, dm, dlen, dirs, files) end
           else if el <= 2 && c0 = 46 && (el = 1 || c1 = 46) then let
             val () = $A.free<byte>(e)
-          in loop(d, i + 1, n, dir, dlen, dirs, files) end
+          in loop(d, i + 1, n, dir, dm, dlen, dirs, files) end
           else let
             val is_bats = has_bats_ext(e, el, 1024)
             val @(fz_e, bv_e) = $A.freeze<byte>(e)
             var cb : $B.builder_v = $B.create()
-            val () = copy_to_builder_v(dir, 0, dlen, 524288, cb)
+            val () = copy_to_builder_v(dir, 0, dlen, dm, cb)
             val () = put_char_v(cb, 47)
             val () = copy_to_builder_v(bv_e, 0, el, 1024, cb)
             val () = $A.drop<byte>(fz_e, bv_e)
             val () = $A.free<byte>($A.thaw<byte>(fz_e))
-            val clen = $B.length(cb)
             val () = put_char_v(cb, 0)
-            val @(ca, _) = $B.to_arr(cb)
+            val @(ca, cl) = $B.into_arr(cb)
             val @(fz_c, bv_c) = $A.freeze<byte>(ca)
-            val cr = $F.dir_open(bv_c, 524288)
+            val cr = dir_open_m(bv_c, cl)
             val is_dir = (case+ cr of
               | ~$R.ok(cd) => let val () = $R.discard<int><$F.io_error>($F.dir_close(cd)) in true end
               | ~$R.err(_) => false): bool
-            val () = (if is_dir then copy_to_builder_v(bv_c, 0, clen + 1, 524288, dirs)
-                      else if is_bats then copy_to_builder_v(bv_c, 0, clen + 1, 524288, files)
+            val () = (if is_dir then copy_to_builder_v(bv_c, 0, cl, cl, dirs)
+                      else if is_bats then copy_to_builder_v(bv_c, 0, cl, cl, files)
                       else ())
             val () = $A.drop<byte>(fz_c, bv_c)
             val () = $A.free<byte>($A.thaw<byte>(fz_c))
-          in loop(d, i + 1, n, dir, dlen, dirs, files) end
+          in loop(d, i + 1, n, dir, dm, dlen, dirs, files) end
         end
-      val () = loop(d, 0, $F.entries_count(d), dir, dlen, dirs, files)
+      val () = loop(d, 0, $F.entries_count(d), dir, dm, dlen, dirs, files)
     in $F.entries_free(d) end
   | ~$R.err(_) => ()
 end
 
 (* Lists every directory in the NUL-separated list lvl[off, len): their
    subdirectories to next, their .bats files to files *)
-fun walk_level {l:agz}{off:nat | off <= 524288} .<524288 - off>.
-  (lvl: !$A.borrow(byte, l, 524288), off: int off, len: int,
+fun walk_level {l:agz}{n:pos}{len:nat | len <= n}{off:nat | off <= len} .<len - off>.
+  (lvl: !$A.borrow(byte, l, n), off: int off, len: int len,
    next: !$B.builder_v >> $B.builder_v, files: !$B.builder_v >> $B.builder_v): void =
   if off >= len then ()
   else let
-    val e = $S.find_null_bv_at(lvl, off, 524288)
-    val da = path_at(lvl, off)
+    val e = nul_in(lvl, off, len)
+    val @(da, dl) = path_at_m(lvl, off, len)
     val @(fz_d, bv_d) = $A.freeze<byte>(da)
-    val () = list_dir(bv_d, e - off, next, files)
+    val () = list_dir(bv_d, dl, e - off, next, files)
     val () = $A.drop<byte>(fz_d, bv_d)
     val () = $A.free<byte>($A.thaw<byte>(fz_d))
-  in if e >= 524288 then () else walk_level(lvl, e + 1, len, next, files) end
+  in if e >= len then () else walk_level(lvl, e + 1, len, next, files) end
 
 (* The directories lvl, then the next level down, until no directories
    are left, at most depth levels (Rust's find_bats_files has no limit,
@@ -255,7 +266,7 @@ fun walk_level {l:agz}{off:nat | off <= 524288} .<524288 - off>.
    directories are an error *)
 fun walk_levels {d:nat} .<d>.
   (lvl: $B.builder_v, files: !$B.builder_v >> $B.builder_v, depth: int d): void = let
-  val @(la, llen) = $B.to_arr(lvl)
+  val @(la, llen) = $B.into_arr(lvl)
 in
   if llen <= 0 then $A.free<byte>(la)
   else if depth <= 0 then let
@@ -525,7 +536,7 @@ fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 implement generate_lib_docs() = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = $F.file_open(bv_tp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in

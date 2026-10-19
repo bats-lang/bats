@@ -25,6 +25,8 @@
      anything else (a directory with other files, a link to one)
                                  refused, left as it was: bats replaces
                                  only what it made
+     a directory with other files and no bin/patsopt
+                                 refused, naming bin/patsopt, left as it was
 
    An install goes through a download directory (ats2-download.XXXXXX) and
    ats2.new beside ats2 and is moved into place whole, so a run that is killed leaves no half-made
@@ -102,9 +104,10 @@ in has end
 
 (* 0: the pinned toolchain is installed; 3: a toolchain bats did not make
    is there; 4: something else bats did not make is there, which is not
-   replaced; 2: nothing usable (nothing, an empty directory, or an older
-   pin's) *)
-#define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then if [ -L \"$p\" ]; then exit 4; fi; exit 2; fi\n  exit 3\nfi\nif [ -f \"$p/.bats-ats2\" ] && [ ! -L \"$p\" ]; then exit 2; fi\nif [ -L \"$p\" ]; then exit 4; fi\nif [ -e \"$p\" ]; then\n  if [ -d \"$p\" ] && [ -z \"$(ls -A \"$p\")\" ]; then exit 2; fi\n  exit 4\nfi\nexit 2\n"
+   replaced; 5: a directory bats did not make, with files and no bin/patsopt
+   (a part of a toolchain: named as such, not replaced); 2: nothing usable
+   (nothing, an empty directory, or an older pin's) *)
+#define STATE "p=\"$1/ats2\"\nif [ -x \"$p/bin/patsopt\" ]; then\n  if [ \"$(cat \"$p/.bats-ats2\" 2>/dev/null)\" = \"$2\" ]; then exit 0; fi\n  if [ -f \"$p/.bats-ats2\" ]; then if [ -L \"$p\" ]; then exit 4; fi; exit 2; fi\n  exit 3\nfi\nif [ -f \"$p/.bats-ats2\" ] && [ ! -L \"$p\" ]; then exit 2; fi\nif [ -L \"$p\" ]; then exit 4; fi\nif [ -e \"$p\" ]; then\n  if [ -d \"$p\" ] && [ -z \"$(ls -A \"$p\")\" ]; then exit 2; fi\n  if [ -d \"$p\" ] && [ ! -L \"$p\" ] && [ ! -e \"$p/bin/patsopt\" ]; then exit 5; fi\n  exit 4\nfi\nexit 2\n"
 
 (* $1 the base. A private directory of this run's own, the download in it
    (fixed timeouts, a few retries); its path on stdout, or on failure what
@@ -134,9 +137,9 @@ fn lock_take (): $R.option($F.fd) = let
   val _ = env_value("HOME", p)
   val () = bput_v(p, "/.bats/ats2.lock")
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pal) = $B.into_arr(p)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val opened = $F.file_open(bv_p, 524288, $F.ReadWrite(), $F.CreateOrOpen(), 420)
+  val opened = file_open_m(bv_p, pal, $F.ReadWrite(), $F.CreateOrOpen(), 420)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in
@@ -174,10 +177,10 @@ fn download_digest {l:agz} (out: !$A.borrow(byte, l, 4096), n: int): $B.builder_
   val () = copy_to_builder_v(out, 0, n, 4096, path)
   val () = bput_v(path, "/ats2.tgz")
   val () = put_char_v(path, 0)
-  val @(pa, _) = $B.to_arr(path)
+  val @(pa, pal) = $B.into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   var got : $B.builder_v = $B.create()
-  val _ = put_file_sha256(bv_p, got)
+  val _ = put_file_sha256_m(bv_p, pal, got)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in got end
@@ -328,6 +331,9 @@ implement ats2_ensure (talk) =
     in true end
     else if state = 4 then let
       val () = prerr! ("error: ~/.bats/ats2 exists, is not a toolchain bats made and is not an empty directory, so bats does not replace it: move it away and run bats ats2 install\n")
+    in false end
+    else if state = 5 then let
+      val () = prerr! ("error: the toolchain at ~/.bats/ats2 has no bin/patsopt, and it is not one bats made, so bats does not replace it: move it away and run bats ats2 install\n")
     in false end
     else if state <> 2 then false
     else let

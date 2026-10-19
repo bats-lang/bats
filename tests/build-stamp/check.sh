@@ -16,6 +16,11 @@ BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR
+# The variables the C compiler and the wasm linker read (put_cc_environment,
+# bats-lang/bats#322) are unset here, so each case sets its own
+for v in CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH OBJCPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH SDKROOT DEVELOPER_DIR MACOSX_DEPLOYMENT_TARGET IPHONEOS_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET DRIVERKIT_DEPLOYMENT_TARGET RC_DEBUG_PREFIX_MAP RC_DEBUG_OPTIONS CCC_OVERRIDE_OPTIONS CLANG_NO_DEFAULT_CONFIG; do
+  unset "$v"
+done
 P=$TMP/p
 mkdir -p "$P/src/bin"
 printf '[package]\nname = "bs"\nkind = "bin"\n' > "$P/bats.toml"
@@ -161,6 +166,61 @@ settle "$P"
 build "$P" "$TMP/cc.kept.log"
 kept "$TMP/cc.kept.log" "the build after the clang came back"
 
+# The C compiler's environment (bats-lang/bats#322): a variable clang
+# reads that changes what it makes is digested into the cc line, so a
+# build/ made with one value is dropped by a build with another, as by
+# another clang. The issue's reproduction: CPATH holds a stdlib.h that adds a
+# weak symbol, which the objects gain only in a build that sees it. Same
+# value keeps build/; a variable no compiler reads changes nothing; unset and
+# empty are different values.
+EV=$TMP/env
+mkdir -p "$EV" "$TMP/cpath"
+cp -R "$P/bats.toml" "$P/src" "$EV/"
+printf '#include_next <stdlib.h>\n__attribute__((weak)) int bats_cpath_probe = 7;\n' > "$TMP/cpath/stdlib.h"
+probe() { grep -rq bats_cpath_probe "$EV/build"; }
+build "$EV" "$TMP/env.cold.log"
+[ "$(dropped "$TMP/env.cold.log")" = 0 ] || { echo "FAIL: a cold build with no CPATH dropped build/"; cat "$TMP/env.cold.log"; exit 1; }
+settle "$EV"
+probe && { echo "FAIL: the probe is in the objects without CPATH"; exit 1; } || true
+settle_env() { settle "$EV" "$@"; }
+# CPATH set after a build without it: dropped, named, and the probe is found
+build "$EV" "$TMP/env.cpath.log" "CPATH=$TMP/cpath"
+say "$TMP/env.cpath.log" "cc differs"
+rebuilt "$TMP/env.cpath.log" "$COLD" "a build with CPATH"
+probe || { echo "FAIL: a build with CPATH does not have the probe the issue names"; cat "$TMP/env.cpath.log"; exit 1; }
+settle_env "CPATH=$TMP/cpath"
+build "$EV" "$TMP/env.same.log" "CPATH=$TMP/cpath"
+kept "$TMP/env.same.log" "a build with the same CPATH"
+# An unrelated variable changes nothing
+build "$EV" "$TMP/env.foo.log" "CPATH=$TMP/cpath" FOO=1
+kept "$TMP/env.foo.log" "a build with an unrelated variable"
+# CPATH unset after one with it: dropped
+build "$EV" "$TMP/env.unset.log" -u CPATH
+say "$TMP/env.unset.log" "cc differs"
+rebuilt "$TMP/env.unset.log" "$COLD" "a build with CPATH unset"
+settle_env
+# CPATH empty is not unset: dropped, and kept again for empty
+build "$EV" "$TMP/env.empty.log" CPATH=
+say "$TMP/env.empty.log" "cc differs"
+rebuilt "$TMP/env.empty.log" "$COLD" "a build with CPATH empty"
+settle_env CPATH=
+build "$EV" "$TMP/env.empty.same.log" CPATH=
+kept "$TMP/env.empty.same.log" "a build with CPATH empty again"
+build "$EV" "$TMP/env.empty.unset.log" -u CPATH
+say "$TMP/env.empty.unset.log" "cc differs"
+rebuilt "$TMP/env.empty.unset.log" "$COLD" "a build with CPATH unset after empty"
+# SOURCE_DATE_EPOCH is not in the list (clang reads it only for __DATE__ and
+# __TIME__, which no emitted C uses, and a reproducible-build setup sets it
+# per commit): a value of it keeps build/
+settle_env CPATH=
+build "$EV" "$TMP/env.sde.log" CPATH= SOURCE_DATE_EPOCH=2
+kept "$TMP/env.sde.log" "a build with another SOURCE_DATE_EPOCH"
+# A Darwin deployment target is in the list: the Darwin driver picks the
+# target the objects are made for by it (not run on a Mac here)
+build "$EV" "$TMP/env.ios.log" CPATH= IPHONEOS_DEPLOYMENT_TARGET=17
+say "$TMP/env.ios.log" "cc differs"
+rebuilt "$TMP/env.ios.log" "$COLD" "a build with IPHONEOS_DEPLOYMENT_TARGET"
+
 # A build/ copied to another directory is kept: no path is in the stamp
 Q=$TMP/elsewhere/deeper/q
 mkdir -p "$Q"
@@ -200,4 +260,103 @@ say "$TMP/check.build.log" "cc differs"
 settle_check "$C"
 check "$C" "$TMP/check.last.log"
 kept "$TMP/check.last.log" "the last check"
+# The toolchain is judged by what it is, in each process (bats-lang/bats#305):
+# patsopt replaced in place, with the same name and size, is another
+# toolchain; a patsopt that is a link is judged by the file it reaches, so
+# that file changed in place is seen too; and a prelude file changed in
+# place, with the same size, is seen.
+T3=$TMP/tool
+mkdir -p "$T3/.bats/ats2"
+for d in bin prelude libats share ccomp; do cp -R "$HOME/.bats/ats2/$d" "$T3/.bats/ats2/"; done
+R3=$TMP/real-patsopt
+cp "$T3/.bats/ats2/bin/patsopt" "$R3"
+SZ=$(wc -c < "$R3")
+standin() { # <file> <pad>: a stand-in of patsopt's size that runs the real one, padded with <pad>
+  printf '#!/bin/sh\nexec %s "$@"\n' "$R3" > "$1"
+  head -c $(( SZ - $(wc -c < "$1") )) /dev/zero | tr '\0' "$2" >> "$1"
+  chmod +x "$1"
+  [ "$(wc -c < "$1")" -eq "$SZ" ] || { echo "FAIL: the stand-in is not the size of patsopt"; exit 1; }
+}
+P3=$TMP/p3
+mkdir -p "$P3"
+cp -R "$P/bats.toml" "$P/src" "$P3/"
+build "$P3" "$TMP/tool.cold.log" HOME="$T3"
+[ "$(dropped "$TMP/tool.cold.log")" = 0 ] || { echo "FAIL: a build with a new toolchain dropped build/"; cat "$TMP/tool.cold.log"; exit 1; }
+COLD3=$(ran "$TMP/tool.cold.log")
+[ "$COLD3" -ge 2 ] || { echo "FAIL: a cold build ran patsopt $COLD3 times"; cat "$TMP/tool.cold.log"; exit 1; }
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.same.log" HOME="$T3"
+kept "$TMP/tool.same.log" "a build with the same toolchain"
+
+standin "$T3/.bats/ats2/bin/patsopt" '#'
+build "$P3" "$TMP/tool.inplace.log" HOME="$T3"
+say "$TMP/tool.inplace.log" "patsopt differs"
+rebuilt "$TMP/tool.inplace.log" "$COLD3" "a build with patsopt replaced in place"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.inplace.again.log" HOME="$T3"
+kept "$TMP/tool.inplace.again.log" "the build after patsopt was replaced in place"
+
+standin "$TMP/linked" '%'
+rm -f "$T3/.bats/ats2/bin/patsopt"
+ln -s "$TMP/linked" "$T3/.bats/ats2/bin/patsopt"
+build "$P3" "$TMP/tool.link.log" HOME="$T3"
+say "$TMP/tool.link.log" "patsopt differs"
+rebuilt "$TMP/tool.link.log" "$COLD3" "a build with patsopt made a link"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.link.again.log" HOME="$T3"
+kept "$TMP/tool.link.again.log" "the build after patsopt was made a link"
+standin "$TMP/linked" '@'
+build "$P3" "$TMP/tool.target.log" HOME="$T3"
+say "$TMP/tool.target.log" "patsopt differs"
+rebuilt "$TMP/tool.target.log" "$COLD3" "a build with the file its link reaches changed in place"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.target.again.log" HOME="$T3"
+kept "$TMP/tool.target.again.log" "the build after the file its link reaches changed"
+
+printf '(* a *)\n' > "$T3/.bats/ats2/prelude/zz_probe_305.sats"
+build "$P3" "$TMP/tool.probe.log" HOME="$T3"
+say "$TMP/tool.probe.log" "patsopt differs"
+settle "$P3" HOME="$T3"
+printf '(* b *)\n' > "$T3/.bats/ats2/prelude/zz_probe_305.sats"
+build "$P3" "$TMP/tool.prelude.log" HOME="$T3"
+say "$TMP/tool.prelude.log" "patsopt differs"
+rebuilt "$TMP/tool.prelude.log" "$COLD3" "a build with a prelude file changed in place, the same size"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/tool.prelude.again.log" HOME="$T3"
+kept "$TMP/tool.prelude.again.log" "the build after the prelude file changed"
+# A toolchain with a part missing is not stamped from what is left of it
+# (bats-lang/bats#316): the listing that makes the stamp names each root
+# (bin/patsopt, prelude, libats, share, ccomp) and a check fails at once with
+# that name, before patsopt runs, and no stamp is written. Each farm is the
+# five parts hard-linked (cheap) with one of them removed, and no install
+# marker, so ATS2 is used as it is, as in the other farms above.
+FULL=$TMP/ats2-full
+mkdir -p "$FULL"
+for d in bin prelude libats share ccomp; do cp -Rl "$HOME/.bats/ats2/$d" "$FULL/"; done
+P5=$TMP/p5
+for r in prelude libats share ccomp bin/patsopt; do
+  n=$(echo "$r" | tr / _)
+  F=$TMP/missing-$n
+  mkdir -p "$F/.bats/ats2"
+  cp -Rl "$FULL/." "$F/.bats/ats2/"
+  rm -rf "$F/.bats/ats2/$r"
+  rm -rf "$P5"; mkdir -p "$P5"; cp -R "$P/bats.toml" "$P/src" "$P5/"
+  if (cd "$P5" && HOME="$F" "$BATS" check) > "$TMP/missing-$n.log" 2>&1; then
+    echo "FAIL: a check with no $r passed"; cat "$TMP/missing-$n.log"; exit 1
+  fi
+  grep -q "has no $r" "$TMP/missing-$n.log" || { echo "FAIL: the check does not name $r"; cat "$TMP/missing-$n.log"; exit 1; }
+  [ ! -e "$P5/build/.bats_stamp" ] || { echo "FAIL: a stamp was written from a toolchain with no $r"; cat "$P5/build/.bats_stamp"; exit 1; }
+done
+# A part the listing cannot pass through (a link back to its own parent) is
+# refused the same way, with the name of what cannot be listed
+F=$TMP/missing-loop
+mkdir -p "$F/.bats/ats2"
+cp -Rl "$FULL/." "$F/.bats/ats2/"
+ln -s .. "$F/.bats/ats2/share/loop"
+rm -rf "$P5"; mkdir -p "$P5"; cp -R "$P/bats.toml" "$P/src" "$P5/"
+if (cd "$P5" && HOME="$F" "$BATS" check) > "$TMP/missing-loop.log" 2>&1; then
+  echo "FAIL: a check with a link loop in the toolchain passed"; cat "$TMP/missing-loop.log"; exit 1
+fi
+grep -q "cannot be listed" "$TMP/missing-loop.log" || { echo "FAIL: the check does not say the toolchain cannot be listed"; cat "$TMP/missing-loop.log"; exit 1; }
+[ ! -e "$P5/build/.bats_stamp" ] || { echo "FAIL: a stamp was written from a toolchain with a link loop"; exit 1; }
 echo "build-stamp: ok"

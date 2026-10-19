@@ -17,6 +17,7 @@ staload "helpers.sats"
 staload "lexer.sats"
 staload "docs.sats"
 staload "recursion.sats"
+staload "validated.sats"
 
 (* ============================================================
    Package names
@@ -58,8 +59,8 @@ fun names_has {n:nat}{lb:agz}{kb:pos | kb <= 256} .<n>.
     in r end
 
 (* src[s, e), at most 256 bytes of it, copied into a name array *)
-fun copy_name {l:agz}{n:pos}{la:agz}{i:nat | i <= 256} .<256 - i>.
-  (src: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n,
+fun copy_name {l:agz}{n:pos}{m:nat | m <= n}{la:agz}{i:nat | i <= 256} .<256 - i>.
+  (src: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int m,
    a: !$A.arr(byte, la, 256), i: int i): [k:nat | k <= 256] int k =
   if i >= 256 then i
   else if s + i >= e then i
@@ -85,6 +86,19 @@ fn put_name {la:agz}
    The #use packages of a directory (Rust: collect_packages)
    ============================================================ *)
 
+(* seen, with the name a[0, k) added when it is a #use's package not
+   already there; an empty name is none (add_use's rule, shared with the
+   names a record gives back, validated.bats) *)
+fn add_name {l:agz}{m:nat}{k:nat | k <= 256}
+  (a: $A.arr(byte, l, 256), k: int k, seen: names(m)): [m2:nat] names(m2) =
+  if k <= 0 then let
+    val () = $A.free<byte>(a)
+  in seen end
+  else if names_has(seen, a, k) then let
+    val () = $A.free<byte>(a)
+  in seen end
+  else names_cons(a, k, seen)
+
 (* seen, with the package of sp added when sp is a #use of a package
    not already there *)
 fn add_use {l:agz}{n:pos}{m:nat}
@@ -93,15 +107,7 @@ fn add_use {l:agz}{n:pos}{m:nat}
   | SUse(_, _, _, s, e, _, _) => let
       val a = $A.alloc<byte>(256)
       val k = copy_name(src, s, e, n, a, 0)
-    in
-      if k <= 0 then let
-        val () = $A.free<byte>(a)
-      in seen end
-      else if names_has(seen, a, k) then let
-        val () = $A.free<byte>(a)
-      in seen end
-      else names_cons(a, k, seen)
-    end
+    in add_name(a, k, seen) end
   | _ => seen
 
 (* Adds the packages of the #use spans of xs to seen, newest first,
@@ -112,19 +118,127 @@ fun add_uses {l:agz}{n:pos}{m:nat}{k:nat} .<k>.
   | spans_nil() => seen
   | spans_cons(sp, tl) => add_uses(src, n, tl, add_use(src, n, sp, seen))
 
-(* Adds the #use packages of the file at the NUL-terminated path p *)
-fn add_file_uses {lp:agz}{m:nat}
-  (p: !$A.borrow(byte, lp, 524288), seen: names(m)): [m2:nat] names(m2) =
-  case+ read_whole(p, 524288) of
-  | ~whole_ok(ar, piece, m, nbytes) => let
+(* The name a[0, k) and a NUL, appended to b, and a freed; an empty name
+   is only freed (add_name's rule: none is a name) *)
+fn put_name_nul_or_free {la:agz}{k:nat | k <= 256}
+  (a: $A.arr(byte, la, 256), k: int k, b: !$B.builder_v >> $B.builder_v): void =
+  if k <= 0 then let
+    val () = $A.free<byte>(a)
+  in end
+  else let
+    val () = put_name(a, k, b)
+    val () = put_char_v(b, 0)
+    val () = $A.free<byte>(a)
+  in end
+
+(* The #use package of sp, NUL-ended, appended to b when it has a name *)
+fn put_use {l:agz}{n:pos}
+  (src: !$A.borrow(byte, l, n), n: int n, sp: !span(n), b: !$B.builder_v >> $B.builder_v): void =
+  case+ sp of
+  | SUse(_, _, _, s, e, _, _) => let
+      val a = $A.alloc<byte>(256)
+      val k = copy_name(src, s, e, n, a, 0)
+    in put_name_nul_or_free(a, k, b) end
+  | _ => ()
+
+(* put_use for each #use span of xs, in order *)
+fun put_uses {l:agz}{n:pos}{k:nat} .<k>.
+  (src: !$A.borrow(byte, l, n), n: int n, xs: !spans(n, k), b: !$B.builder_v >> $B.builder_v): void =
+  case+ xs of
+  | spans_nil() => ()
+  | spans_cons(sp, tl) => let
+      val () = put_use(src, n, sp, b)
+    in put_uses(src, n, tl, b) end
+
+(* seen, with the names of a record's body added in order, as add_use
+   adds them: the body's len bytes, each name NUL-ended from off on *)
+fun body_names {lb:agz}{n:pos}{len:nat | len <= n}{off:nat | off <= len}{m:nat} .<len - off>.
+  (body: !$A.borrow(byte, lb, n), off: int off, len: int len, seen: names(m)): [m2:nat] names(m2) =
+  if off >= len then seen
+  else let
+    val e = nul_in(body, off, len)
+    val a = $A.alloc<byte>(256)
+    val k = copy_name(body, off, e, len, a, 0)
+    val seen2 = add_name(a, k, seen)
+  in if e >= len then seen2 else body_names(body, e + 1, len, seen2) end
+
+(* Adds the names of a held record (its body), which is freed with the
+   key and the slot *)
+fn add_held {m:nat}{lk,ls:agz}{ns:pos}
+  (body: $B.builder_v, key: $A.arr(byte, lk, 64), slot: $A.arr(byte, ls, ns),
+   seen: names(m)): [m2:nat] names(m2) = let
+  val @(ba, bl) = $B.into_arr(body)
+  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+  val seen2 = body_names(bv_b, 0, bl, seen)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  val () = $A.free<byte>(key)
+  val () = $A.free<byte>(slot)
+in seen2 end
+
+(* The #use packages of the file at p, lexed (the file is read whole, as
+   add_file_uses always read it); its names are recorded at slot under key
+   when usable and the file still has that key (uses_same), and added in
+   the file's order *)
+fn lex_recorded {lp,lk,ls:agz}{m:nat}{np:pos}{pm:nat | pm <= np; pm <= 524288}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, usable: bool, key: !$A.borrow(byte, lk, 64),
+   slot: !$A.borrow(byte, ls, ns), sm: int sm, seen: names(m)): [m2:nat] names(m2) =
+  case+ read_whole_m(p, pm) of
+  | ~whole_ok(ar, piece, m1, nbytes) => let
       val @(fz_src, bv_src) = $A.freeze<byte>(piece)
-      val xs = lex_spans(bv_src, nbytes, m)
-      val seen2 = add_uses(bv_src, m, xs, seen)
+      val xs = lex_spans(bv_src, nbytes, m1)
+      val seen2 = add_uses(bv_src, m1, xs, seen)
+      var names_body : $B.builder_v = $B.create()
+      val () = put_uses(bv_src, m1, xs, names_body)
+      val @(ba, bl) = $B.into_arr(names_body)
+      val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+      val () = (if usable then (if uses_same(p, pm, key) then uses_write(slot, sm, key, bv_b, bl) else ()) else ())
+      val () = $A.drop<byte>(fz_b, bv_b)
+      val () = $A.free<byte>($A.thaw<byte>(fz_b))
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = whole_free(ar, $A.thaw<byte>(fz_src))
     in seen2 end
   | ~whole_err(_) => seen
+
+(* A file that is lexed: its record is written (lex_recorded), and the
+   names are added. The body that was held (empty here) is freed *)
+fn add_lexed {lp:agz}{m:nat}{np:pos}{pm:nat | pm <= np; pm <= 524288}{lk,ls:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, usable: bool, key: $A.arr(byte, lk, 64),
+   slot: $A.arr(byte, ls, ns), sm: int sm, body: $B.builder_v, seen: names(m)): [m2:nat] names(m2) = let
+  val () = $B.builder_free(body)
+  val () = (if is_verbose() then let
+      val () = print! ("  ~ uses lexed ")
+      val () = print_borrow(p, 0, find_null_bv_from(p, 0, pm), pm)
+    in print_newline() end else ())
+  val @(fz_k, bv_k) = $A.freeze<byte>(key)
+  val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+  val seen2 = lex_recorded(p, pm, usable, bv_k, bv_s, sm, seen)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in seen2 end
+
+(* Adds the #use packages of the file at the NUL-terminated path p, in the
+   order add_uses adds them. Its record (validated.bats, bats#310) gives
+   them when the file has the key it has now and the record holds it; else
+   the file is lexed and its record is written. --cold lexes it always *)
+fn add_file_uses {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{m:nat}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, seen: names(m)): [m2:nat] names(m2) = let
+  val @(usable, key) = uses_key(p, pm)
+  val @(slot, sm) = uses_slot(p, pm)
+  val @(fz_k, bv_k) = $A.freeze<byte>(key)
+  val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+  val @(held, body) = uses_hit((~is_cold()) && usable, bv_s, sm, bv_k)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val key2 = $A.thaw<byte>(fz_k)
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val slot2 = $A.thaw<byte>(fz_s)
+in
+  if held then add_held(body, key2, slot2, seen)
+  else add_lexed(p, pm, usable, key2, slot2, sm, body, seen)
+end
 
 (* Adds the #use packages of each file in the NUL-separated list
    files[off, len), in order *)
@@ -136,9 +250,9 @@ fun add_files_uses {lf:agz}{off:nat | off <= 524288}{m:nat} .<524288 - off>.
     val e = $S.find_null_bv_at(files, off, 524288)
     var pb : $B.builder_v = $B.create()
     val () = copy_to_builder_v(files, off, e + 1, 524288, pb)
-    val @(pa, _) = $B.to_arr(pb)
+    val @(pa, pal) = $B.into_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-    val seen2 = add_file_uses(bv_p, seen)
+    val seen2 = add_file_uses(bv_p, pal, seen)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
   in if e >= 524288 then seen2 else add_files_uses(files, e + 1, len, seen2) end
@@ -278,8 +392,8 @@ in
 end
 
 (* src[0, n) (n <= 256 checked) into a new name-sized array *)
-fun copy_text {ls,ld:agz}{i:nat | i <= 256} .<256 - i>.
-  (src: !$A.arr(byte, ls, 524288), n: int, dst: !$A.arr(byte, ld, 256), i: int i): void =
+fun copy_text {ls,ld:agz}{cap:pos}{m:nat | m <= cap}{i:nat | i <= 256} .<256 - i>.
+  (src: !$A.arr(byte, ls, cap), n: int m, dst: !$A.arr(byte, ld, 256), i: int i): void =
   if i >= 256 then ()
   else if i >= n then ()
   else let
@@ -297,8 +411,7 @@ fn parse_cand {le:agz}{n:pos}
   val be = (if dev then ve - 4 else ve): pos_t
   var out : $B.builder_v = $B.create()
   val @(bs, bz) = parse_version_parts(e, vs, be, n, out)
-  val vl = $B.length(out)
-  val @(va, _) = $B.to_arr(out)
+  val @(va, vl) = $B.into_arr(out)
 in
   if bs >= 0 then let
     val () = $A.free<byte>(va)
@@ -534,12 +647,12 @@ fn put_why {lp:agz}
     val () = $B.builder_free(why)
   in bput_v(err, "") end
   else let
-    val @(wa, wl) = $B.to_arr(why)
+    val @(wa, wl) = $B.into_arr(why)
     val @(fz_w, bv_w) = $A.freeze<byte>(wa)
     val () = bput_v(err, "in [dependencies] '")
     val () = put_name(p, pk, err)
     val () = bput_v(err, "': ")
-    val () = copy_to_builder_v(bv_w, 0, wl, 524288, err)
+    val () = copy_to_builder_v(bv_w, 0, wl, wl, err)
     val () = $A.drop<byte>(fz_w, bv_w)
   in $A.free<byte>($A.thaw<byte>(fz_w)) end
 
@@ -1011,9 +1124,10 @@ end
 
 (* The TOML file at the NUL-terminated path pa, parsed, or why it could
    not be read *)
-fn read_toml {lp:agz} (pa: $A.arr(byte, lp, 524288)): $R.result($T.toml_doc, $F.io_error) = let
+fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
+  : $R.result($T.toml_doc, $F.io_error) = let
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fr = $F.file_open(bv, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fr = file_open_m(bv, m, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
@@ -1058,11 +1172,16 @@ fn put_cannot_read (failure: $F.io_error, err: !$B.builder_v >> $B.builder_v): v
   val () = put_int_v(err, e)
 in bput_v(err, ")") end
 
+(* The TOML file named name, parsed, or why it could not be read *)
+fn read_toml_named {sn:nat} (name: string sn): $R.result($T.toml_doc, $F.io_error) = let
+  val @(tp, tpl) = str_into_arr(name)
+in read_toml(tp, tpl) end
+
 (* The constraints of the project's bats.toml, from its [package] name:
    @(1, them), or @(~1, none) after writing Rust's message to err, as
    when bats.toml cannot be read (Rust: cmd_lock's config::load) *)
 fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
-  case+ read_toml(str_to_path_arr("bats.toml")) of
+  case+ read_toml_named("bats.toml") of
   | ~$R.err(e) => let
       val () = put_cannot_read(e, err)
     in @(~1, cons_nil()) end
@@ -1093,9 +1212,9 @@ fn dep_cons {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): [n:nat] cons(n) = let
   val () = put_name(a, k, p)
   val () = bput_v(p, "/bats.toml")
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pal) = $B.into_arr(p)
 in
-  case+ read_toml(pa) of
+  case+ read_toml(pa, pal) of
   | ~$R.err(_) => cons_nil()
   | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
@@ -1121,15 +1240,15 @@ fn unsatisfied {n:nat}{la:agz} (cs: !cons(n), a: !$A.arr(byte, la, 256), k: nlen
 in prerr_builder(m) end
 
 (* Whether the file name e[0, el) is <pfx><version>.bats *)
-fn is_archive_of {le,lp:agz}
+fn is_archive_of {le,lp:agz}{np:pos}{pm:nat | pm <= np}
   (e: !$A.borrow(byte, le, 1024), el: pos_t,
-   pfx: !$A.borrow(byte, lp, 524288), pl: pos_t): bool = let
+   pfx: !$A.borrow(byte, lp, np), pm: int pm, pl: pos_t): bool = let
   var b_c = @[char][5]('.', 'b', 'a', 't', 's')
   fun starts {i,pl:int} .<max(pl - i, 0)>.
-    (e: !$A.borrow(byte, le, 1024), pfx: !$A.borrow(byte, lp, 524288),
+    (e: !$A.borrow(byte, le, 1024), pfx: !$A.borrow(byte, lp, np),
      i: int i, pl: int pl): bool =
     if i >= pl then true
-    else if $AR.eq_int_int(peek(e, i, 1024), peek(pfx, i, 524288))
+    else if $AR.eq_int_int(peek(e, i, 1024), peek(pfx, i, pm))
     then starts(e, pfx, i + 1, pl)
     else false
 in
@@ -1141,8 +1260,8 @@ end
 (* The newest version among the archives in the directory d whose names
    start with pfx[0, pl) that meets the constraints cs on the package
    a[0, k); dev versions only when dev *)
-fun scan_versions {n,i:nat | i <= n}{lp,la:agz}{nc:nat} .<n - i>.
-  (d: !$F.entries(n), i: int i, n: int n, pfx: !$A.borrow(byte, lp, 524288), pl: pos_t, dev: bool,
+fun scan_versions {n,i:nat | i <= n}{lp,la:agz}{np:pos}{pm:nat | pm <= np}{nc:nat} .<n - i>.
+  (d: !$F.entries(n), i: int i, n: int n, pfx: !$A.borrow(byte, lp, np), pm: int pm, pl: pos_t, dev: bool,
    cs: !cons(nc), a: !$A.arr(byte, la, 256), k: nlen,
    best: $R.option(cand)): $R.option(cand) =
   if i >= n then best
@@ -1152,7 +1271,7 @@ fun scan_versions {n,i:nat | i <= n}{lp,la:agz}{nc:nat} .<n - i>.
   in
     let
       val @(fz_e, bv_e) = $A.freeze<byte>(e)
-      val c = (if is_archive_of(bv_e, el, pfx, pl)
+      val c = (if is_archive_of(bv_e, el, pfx, pm, pl)
                then file_cand(bv_e, pl, el - 5) else $R.none()): $R.option(cand)
       val () = $A.drop<byte>(fz_e, bv_e)
       val () = $A.free<byte>($A.thaw<byte>(fz_e))
@@ -1166,7 +1285,7 @@ fun scan_versions {n,i:nat | i <= n}{lp,la:agz}{nc:nat} .<n - i>.
           in best end
           else keep_newer(best, cv)
         | ~$R.none() => best): $R.option(cand)
-    in scan_versions(d, i + 1, n, pfx, pl, dev, cs, a, k, best2) end
+    in scan_versions(d, i + 1, n, pfx, pm, pl, dev, cs, a, k, best2) end
   end
 
 (* The name a[0, k) with '/' made '_', then '_' (Rust: package_to_prefix) *)
@@ -1194,19 +1313,19 @@ fn find_latest {lr,la:agz}{nc:nat}
   var dp : $B.builder_v = $B.create()
   val () = put_pkg_dir(repo, rl, a, k, dp)
   val () = put_char_v(dp, 0)
-  val @(da, _) = $B.to_arr(dp)
+  val @(da, dal) = $B.into_arr(dp)
   val @(fz_d, bv_d) = $A.freeze<byte>(da)
-  val dr = $F.dir_read(bv_d, 524288)
+  val dr = dir_read_m(bv_d, dal)
   val () = $A.drop<byte>(fz_d, bv_d)
   val () = $A.free<byte>($A.thaw<byte>(fz_d))
   var pb : $B.builder_v = $B.create()
   val () = put_prefix(a, 0, k, pb)
   val pl = $B.length(pb)
-  val @(pa, _) = $B.to_arr(pb)
+  val @(pa, pal) = $B.into_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   val r = (case+ dr of
     | ~$R.ok(d) => let
-        val best = scan_versions(d, 0, $F.entries_count(d), bv_p, pl, dev, cs, a, k, $R.none())
+        val best = scan_versions(d, 0, $F.entries_count(d), bv_p, pal, pl, dev, cs, a, k, $R.none())
         val () = $F.entries_free(d)
       in best end
     | ~$R.err(_) => $R.none()): $R.option(cand)
@@ -1278,9 +1397,9 @@ fn is_fetched {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): bool = let
   val () = put_name(a, k, p)
   val () = bput_v(p, "/src/lib.bats")
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pal) = $B.into_arr(p)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val r = $F.file_exists(bv, 524288)
+  val r = file_exists_m(bv, pal)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
@@ -1300,15 +1419,15 @@ in $A.free<byte>($A.thaw<byte>(fz_x)) end
 
 (* bats_modules/<a[0, k)>/.bats-version, NUL-terminated, and its length
    without the NUL: the version fetch unpacked there *)
-fn stamp_path {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): @([lo:agz] $A.arr(byte, lo, 524288), int) = let
+fn stamp_path {la:agz} (a: !$A.arr(byte, la, 256), k: nlen)
+  : [n:nat | n <= $B.BUILDER_CAP][cap:pos | n <= cap; cap <= $B.BUILDER_CAP][lo:agz] @($A.arr(byte, lo, cap), int n) = let
   var p : $B.builder_v = $B.create()
   val () = bput_v(p, "bats_modules/")
   val () = put_name(a, k, p)
   val () = bput_v(p, "/.bats-version")
-  val plen = $B.length(p)
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
-in @(pa, plen) end
+  val @(pa, pal) = $B.into_arr(p)
+in @(pa, pal) end
 
 (* The version in the file of s[0, n) trimmed, when it parses *)
 fn text_cand {ls:agz}{m:pos}{n:nat} (s: !$A.borrow(byte, ls, m), m: int m, n: int n): $R.option(cand) = let
@@ -1332,9 +1451,9 @@ fn toml_version_is {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool
   val () = put_name(a, k, p)
   val () = bput_v(p, "/bats.toml")
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pal) = $B.into_arr(p)
 in
-  case+ read_toml(pa) of
+  case+ read_toml(pa, pal) of
   | ~$R.err(_) => false
   | ~$R.ok(doc) => let
       var section_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
@@ -1357,15 +1476,18 @@ in
 end
 
 (* Whether bats_modules/<a[0, k)> holds the version v of the package:
-   fetch's stamp says so, or, without one (a package unpacked otherwise),
-   its bats.toml's version is v *)
+   fetch's stamp says so (its first line), or, without one (a package
+   unpacked otherwise), its bats.toml's version is v. The archive's
+   sha256 on the stamp's second line is not looked at here: this is for
+   a walk with no lock to compare it with (resolve_all) *)
 fn installed_at {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool = let
-  val @(pa, _) = stamp_path(a, k)
+  val @(pa, pal) = stamp_path(a, k)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = (case+ read_whole(bv_p, 524288) of
+  val r = (case+ read_whole_m(bv_p, pal) of
     | ~whole_ok(ar, piece, m, nbytes) => let
         val @(fz_s, bv_s) = $A.freeze<byte>(piece)
-        val c = text_cand(bv_s, m, nbytes)
+        val first_line_end = find_byte(bv_s, m, 0, nbytes, 10)
+        val c = text_cand(bv_s, m, first_line_end)
         val () = $A.drop<byte>(fz_s, bv_s)
         val () = whole_free(ar, $A.thaw<byte>(fz_s))
       in cand_is(c, v) end
@@ -1378,15 +1500,48 @@ in r end
 fn say (m: $B.builder_v): void =
   if is_quiet() then $B.builder_free(m) else prerr_builder(m)
 
-(* Unpacks the archive arc[0, alen) into bats_modules/<name> and says so
-   (Rust: fetch_package) *)
+(* The step of fetch that failed *)
+datatype fetch_step = StepMake | StepUnpack | StepStamp
+
+(* Writes the stamp s to path when go, else drops it; 0 when written *)
+fn write_stamp {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (go: bool, path: !$A.borrow(byte, lp, n), m: int m, s: $B.builder_v): int =
+  if go then write_file_from_builder_m(path, m, s)
+  else let val () = $B.builder_free(s) in ~1 end
+
+(* Says that fetch failed at step, for the package a[0, k) *)
+fn fetch_failed {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, step: fetch_step): void = let
+  var m : $B.builder_v = $B.create()
+  val () = bput_v(m, "error: cannot ")
+  val () = (case+ step of
+    | StepMake() => bput_v(m, "make")
+    | StepUnpack() => bput_v(m, "unpack the archive into")
+    | StepStamp() => bput_v(m, "write the version stamp in"))
+  val () = bput_v(m, " bats_modules/")
+  val () = put_name(a, k, m)
+  val () = put_char_v(m, 10)
+in prerr_builder(m) end
+
+(* Unpacks the archive arc[0, alen) into bats_modules/<name>, writes the
+   stamp installed_at and installed_locked read, and says so (Rust:
+   fetch_package). The stamp names the archive's sha256 (#321): hash is
+   the hex digest the caller has already checked, which is what is
+   recorded (the archive is not read again after it was checked), or empty
+   when nothing was checked (the walk with no lock), when it is the
+   archive's digest read here before the unzip. The stamp is written last
+   and only when the unzip and the write both succeeded; otherwise the
+   directory is removed, so no stamp ever stands over a copy that is not
+   the archive's, the failure is said as an error and false is answered.
+   Consumes hash *)
 fn fetch {lc,la:agz}
   (arc: !$A.borrow(byte, lc, 524288), alen: int,
-   a: !$A.arr(byte, la, 256), k: nlen, v: !cand): void = let
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool = let
+  var hashed : $B.builder_v = hash
+  val () = (if $B.length(hashed) = 0 then let val _ = put_file_sha256(arc, hashed) in () end else ())
   var md : $B.builder_v = $B.create()
   val () = bput_v(md, "bats_modules/")
   val () = put_name(a, k, md)
-  val _ = run_mkdir(md)
+  val made = run_mkdir(md)
   val uz = str_to_path_arr("unzip")
   val @(fz_uz, bv_uz) = $A.freeze<byte>(uz)
   var u1 = $B.create()
@@ -1402,37 +1557,65 @@ fn fetch {lc,la:agz}
   var u6 = $B.create()
   val () = bput_v(u6, "bats_modules/")
   val () = put_name(a, k, u6)
-  val _ = run_cmd(bv_uz, $L.list_vt_cons(mk_arg(u1), $L.list_vt_cons(mk_arg(u2),
+  val unzipped = run_cmd(bv_uz, $L.list_vt_cons(mk_arg(u1), $L.list_vt_cons(mk_arg(u2),
     $L.list_vt_cons(mk_arg(u3), $L.list_vt_cons(mk_arg(u4), $L.list_vt_cons(mk_arg(u5),
     $L.list_vt_cons(mk_arg(u6), $L.list_vt_nil())))))))
   val () = $A.drop<byte>(fz_uz, bv_uz)
   val () = $A.free<byte>($A.thaw<byte>(fz_uz))
-  (* The stamp installed_at reads *)
-  val @(sa, slen) = stamp_path(a, k)
-  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  (* The stamp: "<version>\n<sha256>\n"; an archive that could not be
+     read leaves no second line, which no lock matches *)
   var stamp : $B.builder_v = $B.create()
   val () = put_cand(v, stamp)
   val () = put_char_v(stamp, 10)
-  val _ = write_file_from_builder(bv_s, 524288, stamp)
+  val @(hash_arr, hashed_len) = $B.into_arr(hashed)
+  val @(fz_h, bv_h) = $A.freeze<byte>(hash_arr)
+  val () = (if hashed_len > 0 then let
+      val () = copy_to_builder_v(bv_h, 0, hashed_len, hashed_len, stamp)
+    in put_char_v(stamp, 10) end else ())
+  val () = $A.drop<byte>(fz_h, bv_h)
+  val () = $A.free<byte>($A.thaw<byte>(fz_h))
+  val @(sa, slen) = stamp_path(a, k)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val written = write_stamp(unzipped = 0, bv_s, slen, stamp)
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
-  var msg : $B.builder_v = $B.create()
-  val () = bput_v(msg, "fetched ")
-  val () = put_name(a, k, msg)
-  val () = bput_v(msg, " v")
-  val () = put_cand(v, msg)
-  val () = put_char_v(msg, 10)
-in say(msg) end
+in
+  if written = 0 then let
+    var msg : $B.builder_v = $B.create()
+    val () = bput_v(msg, "fetched ")
+    val () = put_name(a, k, msg)
+    val () = bput_v(msg, " v")
+    val () = put_cand(v, msg)
+    val () = put_char_v(msg, 10)
+    val () = say(msg)
+  in true end
+  else let
+    val () = fetch_failed(a, k, (if made <> 0 then StepMake()
+                                 else if unzipped <> 0 then StepUnpack()
+                                 else StepStamp()): fetch_step)
+    var dir : $B.builder_v = $B.create()
+    val () = bput_v(dir, "bats_modules/")
+    val () = put_name(a, k, dir)
+    val () = remove_tree(dir)
+  in false end
+end
 
 (* fetch, into an emptied bats_modules/<name> *)
 fn refetch {lc,la:agz}
   (arc: !$A.borrow(byte, lc, 524288), alen: int,
-   a: !$A.arr(byte, la, 256), k: nlen, v: !cand): void = let
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool = let
   var dir : $B.builder_v = $B.create()
   val () = bput_v(dir, "bats_modules/")
   val () = put_name(a, k, dir)
   val () = remove_tree(dir)
-in fetch(arc, alen, a, k, v) end
+in fetch(arc, alen, a, k, v, hash) end
+
+(* refetch when go, else false; consumes hash *)
+fn refetch_if {lc,la:agz}
+  (go: bool, arc: !$A.borrow(byte, lc, 524288), alen: int,
+   a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool =
+  if go then refetch(arc, alen, a, k, v, hash)
+  else let val () = $B.builder_free(hash) in false end
 
 (* The #use packages of bats_modules/<name>/src, newest first *)
 fn dep_uses {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): [m:nat] names(m) = let
@@ -1593,11 +1776,13 @@ fun resolve_all {s,m,nc,np,u:nat}{lr:agz} .<u, s>.
             val @(arc, alen) = archive_path(repo, rl, a, k, v)
             val @(fz_c, bv_c) = $A.freeze<byte>(arc)
             (* What bats_modules holds of another version is replaced *)
-            val () = (if installed_at(a, k, v) then () else refetch(bv_c, alen, a, k, v))
+            val fetched = (if installed_at(a, k, v) then true
+                           else refetch(bv_c, alen, a, k, v, $B.create())): bool
             val cs2 = cons_append(cs, dep_cons(a, k))
             val ts = dep_uses(a, k)
-            val ok = put_lock_line(bv_c, a, k, v, lock)
-            val () = (if ok then () else cannot_read(bv_c, alen))
+            val line_ok = put_lock_line(bv_c, a, k, v, lock)
+            val () = (if fetched then (if line_ok then () else cannot_read(bv_c, alen)) else ())
+            val ok = (fetched && line_ok): bool
             val () = $A.drop<byte>(fz_c, bv_c)
             val () = $A.free<byte>($A.thaw<byte>(fz_c))
             val () = cand_free(v)
@@ -1639,40 +1824,59 @@ fn lock_fields {lt:agz}
   val ve = (if pe < e then find_byte(t, LOCK_MAX, pe + 1, e, 32) else e): pos_t
 in @(pe, ve) end
 
-(* Whether a[i, i + k) = b[j, j + k) *)
-fun lock_bytes_eq {la,lb:agz}{k:int} .<max(k, 0)>.
-  (a: !$A.borrow(byte, la, LOCK_MAX), i: pos_t, b: !$A.borrow(byte, lb, LOCK_MAX), j: pos_t,
+(* Whether a[i, i + k) = b[j, j + k), of the first ma bytes of an array of
+   na and the first mb of an array of nb (a builder's own array, bats#327);
+   a byte outside them is 0 *)
+fun lock_bytes_eq_m {la,lb:agz}{na,nb:pos}{ma:nat | ma <= na}{mb:nat | mb <= nb}{k:int} .<max(k, 0)>.
+  (a: !$A.borrow(byte, la, na), i: pos_t, ma: int ma, b: !$A.borrow(byte, lb, nb), j: pos_t, mb: int mb,
    k: int k): bool =
   if k <= 0 then true
-  else if peek(a, i, LOCK_MAX) <> peek(b, j, LOCK_MAX) then false
-  else lock_bytes_eq(a, i + 1, b, j + 1, k - 1)
+  else if peek(a, i, ma) <> peek(b, j, mb) then false
+  else lock_bytes_eq_m(a, i + 1, ma, b, j + 1, mb, k - 1)
+
+(* Whether a[i, i + k) = b[j, j + k) *)
+fn lock_bytes_eq {la,lb:agz}{k:int}
+  (a: !$A.borrow(byte, la, LOCK_MAX), i: pos_t, b: !$A.borrow(byte, lb, LOCK_MAX), j: pos_t,
+   k: int k): bool = lock_bytes_eq_m(a, i, LOCK_MAX, b, j, LOCK_MAX, k)
+
+(* Whether a[a0, a1) = b[b0, b1), of the first ma bytes of an array of na
+   and the first mb of an array of nb *)
+fn lock_range_eq_m {la,lb:agz}{na,nb:pos}{ma:nat | ma <= na}{mb:nat | mb <= nb}
+  (a: !$A.borrow(byte, la, na), ma: int ma, a0: pos_t, a1: pos_t,
+   b: !$A.borrow(byte, lb, nb), mb: int mb, b0: pos_t, b1: pos_t): bool =
+  if a1 - a0 <> b1 - b0 then false
+  else lock_bytes_eq_m(a, a0, ma, b, b0, mb, a1 - a0)
 
 (* Whether a[a0, a1) = b[b0, b1) *)
 fn lock_range_eq {la,lb:agz}
   (a: !$A.borrow(byte, la, LOCK_MAX), a0: pos_t, a1: pos_t,
    b: !$A.borrow(byte, lb, LOCK_MAX), b0: pos_t, b1: pos_t): bool =
-  if a1 - a0 <> b1 - b0 then false
-  else lock_bytes_eq(a, a0, b, b0, a1 - a0)
+  lock_range_eq_m(a, LOCK_MAX, a0, a1, b, LOCK_MAX, b0, b1)
 
 (* The version of the first line of t[i, tl) whose package is
    u[xs, xe), or @(~1, ~1) *)
-fun lock_find {lt,lu:agz}{tl,i:int} .<max(tl - i, 0)>.
+fun lock_find_m {lt,lu:agz}{nu:pos}{mu:nat | mu <= nu}{tl,i:int} .<max(tl - i, 0)>.
   (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i,
-   u: !$A.borrow(byte, lu, LOCK_MAX), xs: pos_t, xe: pos_t): @(pos_t, pos_t) =
+   u: !$A.borrow(byte, lu, nu), mu: int mu, xs: pos_t, xe: pos_t): @(pos_t, pos_t) =
   if i >= tl then @(~1, ~1)
   else let
     val @(ts, te, le) = lock_line(t, tl, i)
   in
-    if ts >= te then lock_find(t, tl, le + 1, u, xs, xe)
+    if ts >= te then lock_find_m(t, tl, le + 1, u, mu, xs, xe)
     else let
       val @(pe, ve) = lock_fields(t, ts, te)
     in
       if pe < te then
-        (if lock_range_eq(t, ts, pe, u, xs, xe) then @(pe + 1, ve)
-         else lock_find(t, tl, le + 1, u, xs, xe))
-      else lock_find(t, tl, le + 1, u, xs, xe)
+        (if lock_range_eq_m(t, LOCK_MAX, ts, pe, u, mu, xs, xe) then @(pe + 1, ve)
+         else lock_find_m(t, tl, le + 1, u, mu, xs, xe))
+      else lock_find_m(t, tl, le + 1, u, mu, xs, xe)
     end
   end
+
+fn lock_find {lt,lu:agz}{tl,i:int}
+  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i,
+   u: !$A.borrow(byte, lu, LOCK_MAX), xs: pos_t, xe: pos_t): @(pos_t, pos_t) =
+  lock_find_m(t, tl, i, u, LOCK_MAX, xs, xe)
 
 (* The first line of t[i, tl) without a space, trimmed, or @(~1, ~1)
    (Rust: read_lockfile's "malformed lockfile line") *)
@@ -1770,7 +1974,7 @@ fun lock_notes {la,lb:agz}{al,i:int} .<max(al - i, 0)>.
 fn read_old_lock (): @([l:agz] $A.arr(byte, l, LOCK_MAX), pos_t) = let
   val lp = str_to_path_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val fr = $F.file_open(bv_lp, 524288, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fr = file_open_path(bv_lp, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
   val buf = $A.alloc<byte>(LOCK_MAX)
@@ -1969,7 +2173,7 @@ in ds end
 
 (* The project's path dependencies; none when bats.toml cannot be read *)
 fn project_pdeps (): [n:nat] pdeps(n) =
-  case+ read_toml(str_to_path_arr("bats.toml")) of
+  case+ read_toml_named("bats.toml") of
   | ~$R.err(_) => pd_nil()
   | ~$R.ok(doc) => let
       val ds = doc_pdeps(doc)
@@ -1995,9 +2199,9 @@ fn pdep_cons {la,lp:agz}
   val () = put_name(p, pl, b)
   val () = bput_v(b, "/bats.toml")
   val () = put_char_v(b, 0)
-  val @(ba, _) = $B.to_arr(b)
+  val @(ba, bal) = $B.into_arr(b)
 in
-  case+ read_toml(ba) of
+  case+ read_toml(ba, bal) of
   | ~$R.err(_) => cons_nil()
   | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
@@ -2094,12 +2298,15 @@ fun fetch_missing {n,nc:nat}{lr:agz} .<n>.
      | ~$R.some(v) => let
          val @(arc, alen) = archive_path(repo, rl, a, k, v)
          val @(fz_c, bv_c) = $A.freeze<byte>(arc)
-         val () = fetch(bv_c, alen, a, k, v)
+         val fetched = fetch(bv_c, alen, a, k, v, $B.create())
          val () = $A.drop<byte>(fz_c, bv_c)
          val () = $A.free<byte>($A.thaw<byte>(fz_c))
          val () = cand_free(v)
          val () = $A.free<byte>(a)
-       in fetch_missing(rest, cs, repo, rl) end)
+       in
+         if fetched then fetch_missing(rest, cs, repo, rl)
+         else let val () = names_free(rest) in false end
+       end)
 
 (* Fetches missing under the project's constraints, when cst says they
    were read; otherwise reports err; consumes err *)
@@ -2147,7 +2354,7 @@ fn report_config (known: bool, err: $B.builder_v): void =
 implement project_kind () = let
   var err : $B.builder_v = $B.create()
   val () = bput_v(err, "error: ")
-  val kind = (case+ read_toml(str_to_path_arr("bats.toml")) of
+  val kind = (case+ read_toml_named("bats.toml") of
     | ~$R.err(e) => let
         val () = put_cannot_read(e, err)
       in $R.none() end
@@ -2195,10 +2402,10 @@ fn copy_mode {ls,ld:agz}
 
 fn copy_file {ls,ld:agz}
   (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
-  case+ $F.file_open(s, 524288, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  case+ file_open_path(s, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(_) => false
   | ~$R.ok(sf) =>
-    (case+ $F.file_open(d, 524288, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+    (case+ file_open_path(d, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
      | ~$R.err(_) => let
          val () = $R.discard<int><$F.io_error>($F.file_close(sf))
        in false end
@@ -2227,7 +2434,7 @@ end
 
 (* Whether the NUL-terminated path p is a directory *)
 fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
-  case+ $F.dir_open(p, 524288) of
+  case+ dir_open_path(p) of
   | ~$R.ok(d) => let
       val () = $R.discard<int><$F.io_error>($F.dir_close(d))
     in true end
@@ -2316,8 +2523,8 @@ fn copy_path_dep {la,lp:agz}
   val () = put_char_v(lb, 0)
   val @(la2, _) = $B.to_arr(lb)
   val @(fz_l, bv_l) = $A.freeze<byte>(la2)
-  val has_dir = $F.file_exists(bv_s, 524288)
-  val has_lib = $F.file_exists(bv_l, 524288)
+  val has_dir = file_exists_path(bv_s)
+  val has_lib = file_exists_path(bv_l)
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
   var db : $B.builder_v = $B.create()
@@ -2578,9 +2785,9 @@ fun base_start {lp:agz}{i:int} .<max(i, 0)>. (p: !$A.borrow(byte, lp, VMAX), i: 
   else base_start(p, i - 1)
 
 (* cnt, with Rust's "dependency not found" error added to errs unless found *)
-fn add_missing {lp,ls,ll:agz}{ns:pos}
+fn add_missing {lp,ls,ll:agz}{ns:pos}{nl:pos}{lm:nat | lm <= nl}
   (found: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, src: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
-   ss: pos_t, ps: pos_t, pe: pos_t, lib: !$A.borrow(byte, ll, VMAX), lbl: int,
+   ss: pos_t, ps: pos_t, pe: pos_t, lib: !$A.borrow(byte, ll, nl), lm: int lm, lbl: int,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
   if found then cnt
   else let
@@ -2588,7 +2795,7 @@ fn add_missing {lp,ls,ll:agz}{ns:pos}
     val () = bput_v(m, "dependency '")
     val () = copy_to_builder_v(src, ps, pe, sm, m)
     val () = bput_v(m, "' not found (expected ")
-    val () = copy_to_builder_v(lib, 0, lbl, VMAX, m)
+    val () = copy_to_builder_v(lib, 0, lbl, lm, m)
     val () = put_char_v(m, 41)
     var fy : $B.builder_v = $B.create()
     val () = put_fancy(p, 0, pl, src, sm, n, ss, m, fy)
@@ -2608,10 +2815,10 @@ fn use_missing {lp,ls:agz}{ns:pos}
       val () = bput_v(lb, "/src/lib.bats")
       val lbl = $B.length(lb)
       val () = put_char_v(lb, 0)
-      val @(la, _) = $B.to_arr(lb)
-      val @(fz_l, bv_l) = $A.freeze<byte>(la)
-      val found = $F.file_exists(bv_l, VMAX)
-      val cnt2 = add_missing(found, p, pl, src, sm, n, ss, ps, pe, bv_l, lbl, cnt, errs)
+      val @(lib_arr, lib_arr_len) = $B.into_arr(lb)
+      val @(fz_l, bv_l) = $A.freeze<byte>(lib_arr)
+      val found = file_exists_m(bv_l, lib_arr_len)
+      val cnt2 = add_missing(found, p, pl, src, sm, n, ss, ps, pe, bv_l, lib_arr_len, lbl, cnt, errs)
       val () = $A.drop<byte>(fz_l, bv_l)
       val () = $A.free<byte>($A.thaw<byte>(fz_l))
     in cnt2 end
@@ -2836,10 +3043,9 @@ fun pass_lex_errors {lp,ls:agz}{ns:pos}{k:nat} .<k>.
 (* The errors of the file at the NUL-terminated path p[0, pl), whose
    package is unsafe or not, added to errs (Rust: preprocess_one, in its
    order), when wanted *)
-fn check_file {lp:agz}
-  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, wanted: bool, is_unsafe: bool,
+fn check_file_lexed {lp:agz}
+  (p: !$A.borrow(byte, lp, VMAX), pl: pos_t, is_unsafe: bool,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  if ~wanted then cnt else
   case+ read_whole(p, VMAX) of
   | ~whole_err(_) => cnt
   | ~whole_ok(ar, piece, sm, n) => let
@@ -2857,10 +3063,46 @@ fn check_file {lp:agz}
       val () = whole_free(ar, $A.thaw<byte>(fz_s))
     in c4 end
 
+(* cnt when held, else the errors of the file *)
+fn check_file_unless {lp:agz}
+  (held: bool, p: !$A.borrow(byte, lp, VMAX), pl: pos_t, is_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if held then cnt
+  else let
+    (* under -v, each file judged (the tests count them) *)
+    val () = (if is_verbose() then let
+        val () = print! ("  ~ lexed ")
+        val () = print_borrow(p, 0, pl, VMAX)
+      in print_newline() end else ())
+  in check_file_lexed(p, pl, is_unsafe, cnt, errs) end
+
+(* check_file_lexed, unless the file is recorded as having passed under
+   the same key (validated.bats, bats#296): the context ctx, the file's
+   bytes, its package's unsafe flag and its path. A file that passes is
+   recorded; reuse is false for --cold, which judges every file *)
+fn check_file {lp,lx:agz}
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   p: !$A.borrow(byte, lp, VMAX), pl: pos_t, wanted: bool, is_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int =
+  if ~wanted then cnt
+  else let
+    val @(usable, key) = valid_file_key(ctx, reuse, p, is_unsafe)
+    val @(fz_k, bv_k) = $A.freeze<byte>(key)
+    val @(slot, sm) = valid_slot_of_path(p)
+    val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+    val held = (if usable then valid_holds(bv_s, sm, bv_k) else false): bool
+    val c = check_file_unless(held, p, pl, is_unsafe, cnt, errs)
+    val () = (if usable then (if held then () else (if c = cnt then valid_file_pend(ctx, p, is_unsafe, bv_s, sm, bv_k, pend) else ())) else ())
+    val () = $A.drop<byte>(fz_s, bv_s)
+    val () = $A.free<byte>($A.thaw<byte>(fz_s))
+    val () = $A.drop<byte>(fz_k, bv_k)
+    val () = $A.free<byte>($A.thaw<byte>(fz_k))
+  in c end
+
 (* Whether the bats.toml at the NUL-terminated path in pa sets
    unsafe = true *)
-fn toml_unsafe {lp:agz} (pa: $A.arr(byte, lp, 524288)): bool =
-  case+ read_toml(pa) of
+fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m): bool =
+  case+ read_toml(pa, m) of
   | ~$R.err(_) => false
   | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
@@ -2900,8 +3142,8 @@ fn dep_unsafe {lp:agz} (p: !$A.borrow(byte, lp, VMAX), pl: pos_t): bool = let
   val () = copy_to_builder_v(p, 0, re, VMAX, b)
   val () = bput_v(b, "/bats.toml")
   val () = put_char_v(b, 0)
-  val @(ba, _) = $B.to_arr(b)
-in toml_unsafe(ba) end
+  val @(ba, bl) = $B.into_arr(b)
+in toml_unsafe(ba, bl) end
 
 (* Whether the file p[b0, pl) is named lib.bats *)
 fn is_lib_name {lp:agz} (p: !$A.borrow(byte, lp, VMAX), b0: pos_t, pl: pos_t): bool = let
@@ -2920,9 +3162,10 @@ datatype checked = SharedModules | Dependencies | EveryFile
 
 (* Checks each file of the NUL-separated list files[off, len), as mode
    says *)
-fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
-  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, mode: checked, own_unsafe: bool,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+fun check_list {lf,lx:agz}{off:nat | off <= VMAX} .<VMAX - off>.
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, mode: checked, own_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int =
   if off >= len then cnt
   else let
     val e = $S.find_null_bv_at(files, off, VMAX)
@@ -2936,20 +3179,21 @@ fun check_list {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
       | SharedModules() => (if in_bin(bv_p) then true else is_lib_name(bv_p, b0, pl))
       | _ => false): bool
     val uns = (case+ mode of Dependencies() => dep_unsafe(bv_p, pl) | _ => own_unsafe): bool
-    val cnt2 = check_file(bv_p, pl, ~skip, uns, cnt, errs)
+    val cnt2 = check_file(ctx, reuse, bv_p, pl, ~skip, uns, cnt, errs, pend)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
-  in if e >= VMAX then cnt2 else check_list(files, e + 1, len, mode, own_unsafe, cnt2, errs) end
+  in if e >= VMAX then cnt2 else check_list(ctx, reuse, files, e + 1, len, mode, own_unsafe, cnt2, errs, pend) end
 
 (* Checks the .bats files under dir (./src, ./bats_modules or
    ./src/bin) in mode, as check_list does *)
-fn check_dir {sn:nat} (dir: string sn, mode: checked, own_unsafe: bool,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+fn check_dir {sn:nat}{lx:agz} (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   dir: string sn, mode: checked, own_unsafe: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int = let
   var d : $B.builder_v = $B.create()
   val () = bput_v(d, dir)
   val @(fa, flen) = sorted_bats_files(d)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
-  val c = check_list(bv_f, 0, flen, mode, own_unsafe, cnt, errs)
+  val c = check_list(ctx, reuse, bv_f, 0, flen, mode, own_unsafe, cnt, errs, pend)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
 in c end
@@ -2996,7 +3240,7 @@ fun add_cycle_errors {lf:agz}{k:nat} .<k>.
 
 (* cnt, with the errors for the implements on a call cycle among the
    files files[off, len) of one package *)
-fn check_cycles {lf:agz}{off:nat | off <= VMAX}
+fn check_cycles_lexed {lf:agz}{off:nat | off <= VMAX}
   (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
   val+ ~Cycles(hs, too_many) = implement_cycles(files, off, len)
   val c = add_cycle_errors(files, hs, cnt, errs)
@@ -3007,6 +3251,40 @@ in
     val () = bput_v(m, "more than 1048576 definitions in one package; they are not checked for recursion through an implement")
   in add_error(c, m, errs) end
 end
+
+(* cnt when held, else the errors of the package's call cycles *)
+fn check_cycles_unless {lf:agz}{off:nat | off <= VMAX}
+  (held: bool, files: !$A.borrow(byte, lf, VMAX), off: int off, len: int,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  if held then cnt
+  else let
+    (* under -v, each package judged, by its first file *)
+    val () = (if is_verbose() then let
+        val () = print! ("  ~ call cycles of the package of ")
+        val () = print_borrow(files, off, $S.find_null_bv_at(files, off, VMAX), VMAX)
+      in print_newline() end else ())
+  in check_cycles_lexed(files, off, len, cnt, errs) end
+
+(* check_cycles_lexed, unless the package is recorded (as its files'
+   names and bytes under ctx) as having no implement on a call cycle
+   (validated.bats, bats#296); the record is named by name, which holds
+   what tells the package apart: "cycles <directory of the package>" *)
+fn check_cycles {lf,lx:agz}{off:nat | off <= VMAX}
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool, name: $B.builder_v,
+   files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int,
+   errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int = let
+  val @(usable, key) = valid_group_key(ctx, reuse, files, off, len)
+  val @(fz_k, bv_k) = $A.freeze<byte>(key)
+  val @(slot, sm) = valid_slot(name)
+  val @(fz_s, bv_s) = $A.freeze<byte>(slot)
+  val held = (if usable then valid_holds(bv_s, sm, bv_k) else false): bool
+  val c = check_cycles_unless(held, files, off, len, cnt, errs)
+  val () = (if usable then (if held then () else (if c = cnt then valid_group_pend(ctx, files, off, len, bv_s, sm, bv_k, pend) else ())) else ())
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in c end
 
 (* Whether files[a, a + k) and files[b, b + k) hold the same bytes *)
 fun same_prefix {lf:agz}{i:nat | i <= VMAX} .<VMAX - i>.
@@ -3029,8 +3307,25 @@ fun group_end {lf:agz}{o:nat | o <= VMAX} .<VMAX - o>.
 (* cnt, with the recursion errors of each dependency package among the
    files files[off, len) of ./bats_modules, each package's files being
    together in the list *)
-fun check_dep_cycles {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
-  (files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+(* "cycles ./bats_modules/<pkg>": the record of the package whose files
+   begin at files[off] and whose root, with its slash, is k bytes *)
+fn cycles_name {lf:agz}{off:nat | off <= VMAX}
+  (files: !$A.borrow(byte, lf, VMAX), off: int off, k: int): $B.builder_v = let
+  var nm : $B.builder_v = $B.create()
+  val () = bput_v(nm, "cycles ")
+  val () = copy_to_builder_v(files, off, off + k - 1, VMAX, nm)
+in nm end
+
+(* The record of the package's own files *)
+fn cycles_name_src (): $B.builder_v = let
+  var nm : $B.builder_v = $B.create()
+  val () = bput_v(nm, "cycles ./src")
+in nm end
+
+fun check_dep_cycles {lf,lx:agz}{off:nat | off <= VMAX} .<VMAX - off>.
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool,
+   files: !$A.borrow(byte, lf, VMAX), off: int off, len: int, cnt: int,
+   errs: !$B.builder_v >> $B.builder_v, pend: !$B.builder_v >> $B.builder_v): int =
   if off >= len then cnt
   else let
     val e = $S.find_null_bv_at(files, off, VMAX)
@@ -3042,27 +3337,17 @@ fun check_dep_cycles {lf:agz}{off:nat | off <= VMAX} .<VMAX - off>.
     val k = dep_root_end(bv_p, 15, e - off) + 1
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
+    (* "cycles ./bats_modules/<pkg>", the record of this package *)
+    val nm = cycles_name(files, off, k)
   in
-    if e >= VMAX then check_cycles(files, off, e, cnt, errs)
+    if e >= VMAX then check_cycles(ctx, reuse, nm, files, off, e, cnt, errs, pend)
     else let
       val ge = group_end(files, e + 1, len, off, k)
-      val c = check_cycles(files, off, ge, cnt, errs)
+      val c = check_cycles(ctx, reuse, nm, files, off, ge, cnt, errs, pend)
     in
-      if ge >= VMAX then c else check_dep_cycles(files, ge, len, c, errs)
+      if ge >= VMAX then c else check_dep_cycles(ctx, reuse, files, ge, len, c, errs, pend)
     end
   end
-
-(* The recursion errors of the package's own files (dep = false) or of
-   each dependency (the files under ./bats_modules) *)
-fn check_dir_cycles {sn:nat} (dir: string sn, dep: bool, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
-  var d : $B.builder_v = $B.create()
-  val () = bput_v(d, dir)
-  val @(fa, flen) = sorted_bats_files(d)
-  val @(fz_f, bv_f) = $A.freeze<byte>(fa)
-  val c = (if dep then check_dep_cycles(bv_f, 0, flen, cnt, errs) else check_cycles(bv_f, 0, flen, cnt, errs)): int
-  val () = $A.drop<byte>(fz_f, bv_f)
-  val () = $A.free<byte>($A.thaw<byte>(fz_f))
-in c end
 
 (* Prints cnt errors as Rust does; whether there were none *)
 fn report_errors (cnt: int, errs: $B.builder_v): bool =
@@ -3076,6 +3361,51 @@ fn report_errors (cnt: int, errs: $B.builder_v): bool =
     val () = set_build_err()
   in false end
 
+(* The records of what passed, written when nothing failed *)
+fn record_passed (passed: bool, pend: $B.builder_v): void =
+  if passed then valid_flush(pend) else $B.builder_free(pend)
+
+(* The errors Rust's preprocess_all finds in the package's modules, its
+   dependencies, src/lib.bats and its binaries, in that order, collected
+   into errs; how many. What passed is recorded when nothing failed *)
+fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
+  val @(own_toml, own_toml_len) = str_into_arr("./bats.toml")
+  val own_unsafe = toml_unsafe(own_toml, own_toml_len)
+  (* The listings of ./src and ./bats_modules, once each: the checks of
+     the files and of the call cycles read the same ones, and the context
+     of the records holds the dependencies' (validated.bats) *)
+  var sd : $B.builder_v = $B.create()
+  val () = bput_v(sd, "./src")
+  val @(sa, slen) = sorted_bats_files(sd)
+  var dd : $B.builder_v = $B.create()
+  val () = bput_v(dd, "./bats_modules")
+  val @(da, dlen) = sorted_bats_files(dd)
+  val ctx = valid_context(da)
+  val reuse = ~is_cold()
+  (* what passed, recorded when nothing fails *)
+  var pend : $B.builder_v = $B.create()
+  val @(fz_x, bv_x) = $A.freeze<byte>(ctx)
+  val @(fz_s, bv_s) = $A.freeze<byte>(sa)
+  val @(fz_d, bv_d) = $A.freeze<byte>(da)
+  val c1 = check_list(bv_x, reuse, bv_s, 0, slen, SharedModules(), own_unsafe, 0, errs, pend)
+  val c2 = check_list(bv_x, reuse, bv_d, 0, dlen, Dependencies(), own_unsafe, c1, errs, pend)
+  val lp = str_to_path_arr("./src/lib.bats")
+  val @(fz_l, bv_l) = $A.freeze<byte>(lp)
+  val c3 = check_file(bv_x, reuse, bv_l, 14, file_exists_path(bv_l), own_unsafe, c2, errs, pend)
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+  val c4 = check_dir(bv_x, reuse, "./src/bin", EveryFile(), own_unsafe, c3, errs, pend)
+  val c5 = check_dep_cycles(bv_x, reuse, bv_d, 0, dlen, c4, errs, pend)
+  val c6 = check_cycles(bv_x, reuse, cycles_name_src(), bv_s, 0, slen, c5, errs, pend)
+  val () = $A.drop<byte>(fz_d, bv_d)
+  val () = $A.free<byte>($A.thaw<byte>(fz_d))
+  val () = $A.drop<byte>(fz_s, bv_s)
+  val () = $A.free<byte>($A.thaw<byte>(fz_s))
+  val () = $A.drop<byte>(fz_x, bv_x)
+  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = record_passed(c6 = 0, pend)
+in c6 end
+
 (* Before check, build or test: the errors Rust's preprocess_all finds in
    the package's modules, its dependencies, src/lib.bats and its binaries,
    in that order, printed as Rust prints them; false when there were
@@ -3083,21 +3413,23 @@ fn report_errors (cnt: int, errs: $B.builder_v): bool =
 #pub fn validate_project (): bool
 
 implement validate_project () = let
-  val own_unsafe = toml_unsafe(str_to_path_arr("./bats.toml"))
   var errs : $B.builder_v = $B.create()
-  val c1 = check_dir("./src", SharedModules(), own_unsafe, 0, errs)
-  val c2 = check_dir("./bats_modules", Dependencies(), own_unsafe, c1, errs)
-  val lp = str_to_path_arr("./src/lib.bats")
-  val @(fz_l, bv_l) = $A.freeze<byte>(lp)
-  val c3 = check_file(bv_l, 14, $F.file_exists(bv_l, VMAX), own_unsafe, c2, errs)
-  val () = $A.drop<byte>(fz_l, bv_l)
-  val () = $A.free<byte>($A.thaw<byte>(fz_l))
-  val c4 = check_dir("./src/bin", EveryFile(), own_unsafe, c3, errs)
-  val c5 = check_dir_cycles("./bats_modules", true, c4, errs)
-  val c6 = check_dir_cycles("./src", false, c5, errs)
+  val c = validate_collect(errs)
 in
-  report_errors(c6, errs)
+  report_errors(c, errs)
 end
+
+(* Whether the project has none of those errors, saying nothing and
+   marking no build as failed: what a memo of patsopt's results may ask
+   before it answers instead of a check, whose lexer-level steps (this one)
+   have no patsopt in them (bats#267, the fixtures' memo) *)
+#pub fn validate_clean (): bool
+
+implement validate_clean () = let
+  var errs : $B.builder_v = $B.create()
+  val c = validate_collect(errs)
+  val () = $B.builder_free(errs)
+in c <= 0 end
 
 (* ============================================================
    Locked dependencies: with a bats.lock, check, build, run and test
@@ -3108,7 +3440,7 @@ end
 fn lock_exists (): bool = let
   val lp = str_to_path_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val r = $F.file_exists(bv_lp, 524288)
+  val r = file_exists_path(bv_lp)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
 in r end
@@ -3143,9 +3475,9 @@ fn lock_entry {lt,la:agz}{tl:int}
   : @(pos_t, pos_t, pos_t, pos_t) = let
   var name : $B.builder_v = $B.create()
   val () = put_name(a, k, name)
-  val @(name_arr, _) = $B.to_arr(name)
+  val @(name_arr, name_len) = $B.into_arr(name)
   val @(fz_n, bv_n) = $A.freeze<byte>(name_arr)
-  val @(vs, ve) = lock_find(t, tl, 0, bv_n, 0, k)
+  val @(vs, ve) = lock_find_m(t, tl, 0, bv_n, name_len, 0, k)
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
 in
@@ -3156,6 +3488,54 @@ in
     val hash_start = (if ve < hash_end then ve + 1 else hash_end): pos_t
   in @(vs, ve, hash_start, hash_end) end
 end
+
+(* Whether bats_modules/<a[0, k)> was unpacked from the archive of version
+   v whose sha256 is t[hash_start, hash_end), the lock's (#321): fetch's
+   stamp is exactly "<version>\n<sha256>\n", and the text it would write
+   for the lock's version and sha256 is compared with it byte for byte.
+   A stamp with no sha256 (a copy unpacked by an older bats), a stamp that
+   is missing (a copy unpacked otherwise, a bats.toml alone) and a copy of
+   another archive are all not installed, so the caller fetches the locked
+   archive, checking its sha256. What is recorded is the archive's sha256,
+   not the unpacked files': a copy edited in place after the fetch is not
+   noticed. Comparable: Cargo checks a downloaded crate against the
+   checksum in Cargo.lock when it is downloaded, not each unpacked file at
+   each build; Go's module cache is read-only and go.sum is checked at the
+   download, files rehashed only by `go mod verify`; npm checks the
+   tarball's integrity at install. Hashing every installed file at every
+   run is not done *)
+fn installed_locked {lt,la:agz}
+  (a: !$A.arr(byte, la, 256), k: nlen, v: !cand,
+   t: !$A.borrow(byte, lt, LOCK_MAX), hash_start: pos_t, hash_end: pos_t): bool = let
+  var want : $B.builder_v = $B.create()
+  val () = put_cand(v, want)
+  val () = put_char_v(want, 10)
+  val () = copy_to_builder_v(t, hash_start, hash_end, LOCK_MAX, want)
+  val () = put_char_v(want, 10)
+  val @(want_arr, want_len) = $B.into_arr(want)
+  val @(fz_w, bv_w) = $A.freeze<byte>(want_arr)
+  val @(pa, pal) = stamp_path(a, k)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = (case+ read_whole_m(bv_p, pal) of
+    | ~whole_ok(ar, piece, m, nbytes) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        var got : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(bv_s, 0, nbytes, m, got)
+        val @(got_arr, got_len) = $B.into_arr(got)
+        val @(fz_g, bv_g) = $A.freeze<byte>(got_arr)
+        val same = (if got_len = want_len then lock_bytes_eq_m(bv_g, 0, got_len, bv_w, 0, want_len, want_len)
+                    else false): bool
+        val () = $A.drop<byte>(fz_g, bv_g)
+        val () = $A.free<byte>($A.thaw<byte>(fz_g))
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+      in same end
+    | ~whole_err(_) => false): bool
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  val () = $A.drop<byte>(fz_w, bv_w)
+  val () = $A.free<byte>($A.thaw<byte>(fz_w))
+in r end
 
 (* "error: bats.lock locks <name> v<v>" *)
 fn put_locked {la:agz}
@@ -3191,9 +3571,13 @@ fn install_locked {lr,lt,la:agz}
     val @(hash_arr, _) = $B.to_arr(hash)
     val @(fz_h, bv_h) = $A.freeze<byte>(hash_arr)
     val same = (if found then lock_range_eq(bv_h, 0, 64, t, hash_start, hash_end) else false): bool
+    (* The digest that was checked is the one fetch records (#321) *)
+    var verified : $B.builder_v = $B.create()
+    val () = (if same then copy_to_builder_v(bv_h, 0, 64, 524288, verified) else ())
     val () = $A.drop<byte>(fz_h, bv_h)
     val () = $A.free<byte>($A.thaw<byte>(fz_h))
-    val () = (if same then refetch(bv_c, alen, a, k, v)
+    val fetched = refetch_if(same, bv_c, alen, a, k, v, verified)
+    val () = (if same then ()
       else let
         var m : $B.builder_v = $B.create()
         val () = put_locked(a, k, v, m)
@@ -3206,7 +3590,7 @@ fn install_locked {lr,lt,la:agz}
       in prerr_builder(m) end)
     val () = $A.drop<byte>(fz_c, bv_c)
     val () = $A.free<byte>($A.thaw<byte>(fz_c))
-  in same end
+  in fetched end
 
 (* "error: <name> is used but bats.lock does not lock it" and the hint *)
 fn not_locked {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): void = let
@@ -3293,7 +3677,7 @@ fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
               val () = names_free(avail2)
             in false end
             else let
-              val installed = (if installed_at(a, k, v) then true
+              val installed = (if installed_locked(a, k, v, t, hash_start, hash_end) then true
                                else install_locked(repo, rl, t, hash_start, hash_end, a, k, v)): bool
               val () = cand_free(v)
             in

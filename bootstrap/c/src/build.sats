@@ -35,13 +35,51 @@ staload "closure.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
 fn preprocess_one
-  {l1:agz}{l2:agz}{l3:agz}
-  (src_bv: !$A.borrow(byte, l1, 524288),
-   sats_bv: !$A.borrow(byte, l2, 524288),
-   dats_bv: !$A.borrow(byte, l3, 524288),
+  {l1,l2,l3:agz}{n1,n2,n3:pos}{m1:nat | m1 <= n1; m1 <= 524288}
+  {m2:nat | m2 <= n2; m2 <= 524288}{m3:nat | m3 <= n3; m3 <= 524288}
+  (src_bv: !$A.borrow(byte, l1, n1), sm: int m1,
+   sats_bv: !$A.borrow(byte, l2, n2), ss: int m2,
+   dats_bv: !$A.borrow(byte, l3, n3), sd: int m3,
    build_target: target, is_unsafe: bool,
    target_changed: bool): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1005,6 +1043,8 @@ fn write_wasm_stubs(): int
 
 
 
+
+
 fn read_unsafe_flag(): bool
 
 
@@ -1060,6 +1100,10 @@ fn read_unsafe_flag(): bool
 
 fn check_wasm_binary {l:agz}
   (path: !$A.borrow(byte, l, 524288)): target
+
+
+
+
 
 
 

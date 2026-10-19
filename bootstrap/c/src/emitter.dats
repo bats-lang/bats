@@ -525,33 +525,33 @@ implement collect_tests (src, src_max, xs, out) =
   collect_spans(src, src_max, xs, NoTestTargets(), out, 0)
 
 (* "  if i = <k> then <name> ()\n  else " for each entry of t[p, e) *)
-fun put_dispatch {l:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (t: !$A.borrow(byte, l, 524288), p: int p, e: int, k: int,
+fun put_dispatch {l:agz}{nt:pos}{m:nat | m <= nt}{p:nat | p <= m} .<m - p>.
+  (t: !$A.borrow(byte, l, nt), m: int m, p: int p, e: int, k: int,
    dats: !$B.rope): void =
   if p >= e then ()
-  else if p >= 524288 then ()
+  else if p >= m then ()
   else let
-    val ne = $S.find_null_bv_at(t, p + 1, 524288)
+    val ne = nul_in(t, p + 1, m)
     val () = rbput(dats, "if i = ")
     val () = rput_int(dats, k)
     val () = rbput(dats, " then ")
     val () = $B.rope_copy(dats, t, p + 1, ne)
     val () = rbput(dats, " ()\n  else ")
   in
-    if ne >= 524288 then ()
-    else put_dispatch(t, ne + 1, e, k + 1, dats)
+    if ne >= m then ()
+    else put_dispatch(t, m, ne + 1, e, k + 1, dats)
   end
 
 (* When there are k > 0 tests t[0, tlen): the declaration of
    __bats_test to sats, its implementation to dats *)
-fn put_dispatch_decl {l:agz}
-  (k: int, t: !$A.borrow(byte, l, 524288), tlen: int,
+fn put_dispatch_decl {l:agz}{nt:pos}{tlen:nat | tlen <= nt}
+  (k: int, t: !$A.borrow(byte, l, nt), tlen: int tlen,
    sats: !$B.rope, dats: !$B.rope): void =
   if k <= 0 then ()
   else let
     val () = rbput(sats, "\nfun __bats_test (i: int): bool\n")
     val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
-    val () = put_dispatch(t, 0, tlen, 0, dats)
+    val () = put_dispatch(t, tlen, 0, tlen, 0, dats)
   in rbput(dats, "false\n") end
 
 (* In check and test mode, a module with tests declares
@@ -563,7 +563,7 @@ fn put_test_dispatch {ls:agz}{ns:pos}{k:nat}
   if ~is_test_mode() then () else let
   var tb : $B.builder_v = $B.create()
   val k = collect_tests(src, src_max, xs, tb)
-  val @(ta, tlen) = $B.to_arr(tb)
+  val @(ta, tlen) = $B.into_arr(tb)
   val @(fz_t, bv_t) = $A.freeze<byte>(ta)
   val () = put_dispatch_decl(k, bv_t, tlen, sats, dats)
   val () = $A.drop<byte>(fz_t, bv_t)

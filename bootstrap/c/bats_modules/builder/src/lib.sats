@@ -13,17 +13,33 @@ staload AR = "arith/src/lib.sats"
 
 
 
+
+
+
 stadef BUILDER_CAP = 524288
 
 
 
 
 
+stadef INITIAL_CAP = 64
 
+
+
+
+
+
+
+
+
+
+datavtype builder_store(int) =
+  | {m:nat}{cap:pos | m <= cap; cap <= BUILDER_CAP}{lb:agz}
+    BuilderStore(m) of ($A.arr(byte, lb, cap), int(cap))
 
 datavtype builder(int) =
-  | {lb:agz}{n:nat | n <= BUILDER_CAP}
-    Builder(n) of ($A.arr(byte, lb, BUILDER_CAP), int(n))
+  | {n:nat | n <= BUILDER_CAP}
+    Builder(n) of (builder_store(n), int(n))
 
 vtypedef builder_v = [n:nat | n <= BUILDER_CAP] builder(n)
 
@@ -34,8 +50,16 @@ vtypedef builder_v = [n:nat | n <= BUILDER_CAP] builder(n)
 fun create
   (): builder(0)
 
+
+
+
 fn to_arr {n:nat | n <= BUILDER_CAP}
   (b: builder(n)): @([l:agz] $A.arr(byte, l, BUILDER_CAP), int n)
+
+
+
+fn into_arr {n:nat | n <= BUILDER_CAP}
+  (b: builder(n)): @([cap:pos | n <= cap; cap <= BUILDER_CAP][l:agz] $A.arr(byte, l, cap), int n)
 
 fun builder_free
   (b: builder_v): void
@@ -96,6 +120,67 @@ fun rope_chunks (r: rope): [k:nat] rope_list(k)
 
 
 fun rope_list_free {k:nat} (cs: rope_list(k)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

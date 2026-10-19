@@ -1,9 +1,9 @@
 #!/bin/sh
 # Freshness is by content, never by time (bats-lang/bats#254): a module's
 # C is made again only when the key beside it (<C>.key: the sizes and
-# sha256 of its .dats and of build/.sats_changed) differs from the one its
-# inputs give, and an object when the key of its C does. This plays the
-# cases a time gets wrong, with a native and a wasm bin, a dependency under
+# sha256 of the files patsopt read for it, and in a build of
+# build/.sats_changed) differs from the one its inputs give, and an object
+# when the key of its C does. This plays the cases a time gets wrong, with a native and a wasm bin, a dependency under
 # a namespace (bats_modules/<namespace>/<name>, as bridge and dom) and a
 # plain one, each of two modules:
 #  * the very next no-change check and build, after a cold one, run no
@@ -13,7 +13,16 @@
 #  * a source whose bytes change with its size kept, and its time put
 #    back, is made again, and only its module (its .sats is the same);
 #  * a changed .sats makes every module made again;
-#  * a key that is missing or garbled makes its output made again.
+#  * a template body changed in a dependency's .dats (its .sats the same)
+#    makes the C and object of a bin that instantiates it again in a build
+#    (bats-lang/bats#323), and a dependency file it does not staload does not;
+#  * a key that is missing or garbled makes its output made again, and a
+#    key whose append of build/.sats_changed failed is not written (#333);
+#  * a build of the other profile (release over debug, and the reverse)
+#    makes a native object again, since the profile is in its key
+#    (bats-lang/bats#320), and its debug info is the profile's;
+#  * a wasm object is kept across release, debug and release builds (its
+#    cc flags are fixed, -O2 and no -g, so its key names no profile).
 # usage: tests/build-content-keys/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -38,8 +47,20 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 KILL_FLAG=$TMP/kill-flag
-printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
+DEPGEN_FLAG=$TMP/depgen-flag
+printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nif [ -f "%s" ]; then case "$*" in *--depgen*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$DEPGEN_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
+# same <a> <b> <message>: the two files are the same bytes; if not, say how
+# they differ (sizes and the first 40 lines of a diff) so a failure carries
+# the data (bats-lang/bats#354)
+same() {
+  cmp -s "$1" "$2" && return 0
+  echo "FAIL: $3"
+  echo "sizes: $1 $(wc -c < "$1") bytes, $2 $(wc -c < "$2") bytes"
+  diff "$1" "$2" | head -40 || true
+  if [ -n "${KEEP_DIR:-}" ]; then cp "$1" "$KEEP_DIR/a.c"; cp "$2" "$KEEP_DIR/b.c"; fi
+  exit 1
+}
 cd "$TMP/app"
 N=0
 run() { # <log> <command...>: bats -v <command>
@@ -149,4 +170,130 @@ run b4.log build --only debug --only native
 cold b4.log "a build with the stamp ahead of the .sats" 3
 run b5.log build --only debug --only native
 quiet b5.log "the build after it"
+# A dependency's .dats is staloaded by its dependents, so a template body
+# changed in it (its .sats the same) is instantiated again in their C
+# (bats-lang/bats#323): the dependent's C and object were kept, with the
+# old body. The bin calls a template of the plain dependency; a build with
+# the template added, then one with its body changed.
+tmpl() { # <body>: plain's lib with the template implemented as <body>
+  printf '#pub fun h (): int\n#pub fun h2 (): int\n#pub fun {a:t@ype} tmpl_id (x: a): a\n\nimplement h () = 4\nimplement h2 () = 6\nimplement {a} tmpl_id (x) = %s\n' "$1" > "$TMP/plain/src/lib.bats"
+}
+tmpl 'let val _ = 1 in x end'
+printf '#target native\n#include "share/atspre_staload.hats"\n#use ns.example/mine as M\n#use plain as PL\n\nimplement main0 () = println! ("got ", $M.f () + $PL.h () + $PL.tmpl_id<int> (3))\n' > "$TMP/app/src/bin/tool.bats"
+run t0.log build --only debug --only native
+cold t0.log "a build with a template added" 3
+run t1.log build --only debug --only native
+quiet t1.log "the build after it"
+cp build/src/bin/tool_dats.c "$TMP/tool.before.c"
+tool_dats=build/src/bin/tool_dats.c
+tool_obj=build/src/bin/tool_dats.o
+# the body only: the dependency's .sats is the same
+tmpl 'x'
+run t2.log build --only debug --only native
+[ "$(ran_on t2.log 'src/bin/tool_dats.c')" = 1 ] || { echo "FAIL: a changed template body in a dependency did not make its dependent's C again"; cat t2.log; exit 1; }
+[ "$(grep -ac -- "+ cc -c -o $tool_obj" t2.log || true)" = 1 ] || { echo "FAIL: a changed template body in a dependency did not make its dependent's object again"; cat t2.log; exit 1; }
+if cmp -s "$TMP/tool.before.c" "$tool_dats"; then echo "FAIL: the dependent's C holds the old template body"; echo "size $(wc -c < "$tool_dats") bytes, the same as before"; exit 1; fi
+# what a cold build of the same sources makes
+cp "$tool_dats" "$TMP/tool.after.c"
+run t3.log build --only debug --only native
+quiet t3.log "the build after a changed template body"
+same "$TMP/tool.after.c" "$tool_dats" "a no-change build changed the dependent's C"
+rm -rf build
+run t4.log build --only debug --only native
+same "$TMP/tool.after.c" "$tool_dats" "the incremental C is not a cold build's"
+# patsopt dates its C to the minute ("** The starting compilation time is:
+# 2026-10-18: 22h:29m"); a cold build and an incremental one that straddled a
+# minute differed in that line alone (bats-lang/bats#354). bats writes the
+# line as one text, in every C (the dependencies', the bin's and the entry's),
+# so whether the minute changed between two builds can no longer matter
+for c in $(find build -name '*_dats.c'); do
+  [ "$(grep -ac 'The starting compilation time is' "$c")" = 1 ] || { echo "FAIL: $c has not one line dating the build"; exit 1; }
+  grep -aqx '[*][*] The starting compilation time is: left out' "$c" || { echo "FAIL: $c holds the time it was made at:"; grep -a 'The starting compilation time is' "$c"; exit 1; }
+done
+# a dependency's file the module does not staload does not make it again:
+# mine's util is not in the bin's closure
+cp "$tool_dats" "$TMP/tool.keep.c"
+printf '#pub fun g (): int\n\nimplement g () = 18\n' > "$TMP/mine/src/util.bats"
+run t5.log build --only debug --only native
+[ "$(ran_on t5.log 'src/bin/tool_dats.c')" = 0 ] || { echo "FAIL: a dependency's module the bin does not staload made the bin's C again"; cat t5.log; exit 1; }
+[ "$(ran_on t5.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: the changed dependency module was not made again"; cat t5.log; exit 1; }
+run t6.log build --only debug --only native
+quiet t6.log "the build after it"
+# a module whose --depgen fails gets no key, which -v says, and is made
+# again at the next build (when in doubt, recompute)
+printf '#pub fun g (): int\n\nimplement g () = 19\n' > "$TMP/mine/src/util.bats"
+: > "$DEPGEN_FLAG"
+run t7.log build --only debug --only native
+rm -f "$DEPGEN_FLAG"
+grep -aq 'no key for build/bats_modules/ns.example/mine/src/util_dats.c' t7.log || { echo "FAIL: a module with no key was not said"; cat t7.log; exit 1; }
+run t8.log build --only debug --only native
+[ "$(ran_on t8.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: a module with no key was not made again"; cat t8.log; exit 1; }
+run t9.log build --only debug --only native
+quiet t9.log "the build after it"
+# a build whose append of build/.sats_changed to a module's key fails
+# (bats#333) writes no key for it, which -v says, so a later change to a
+# .sats cannot leave its C fresh; the shell that appends is a stand-in that
+# fails that one script while a flag file is there, else the real sh
+APPEND_FLAG=$TMP/append-flag
+REAL_SH=$(command -v sh)
+mkdir -p "$TMP/shsim"
+printf '#!%s\nif [ -f "%s" ]; then case "$2" in *">> build/.bats_depgen"*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$REAL_SH" "$APPEND_FLAG" "$REAL_SH" > "$TMP/shsim/sh"
+chmod +x "$TMP/shsim/sh"
+printf '#pub fun g (): int\n\nimplement g () = 20\n' > "$TMP/mine/src/util.bats"
+: > "$APPEND_FLAG"
+PATH="$TMP/shsim:$PATH" run a0.log build --only debug --only native
+rm -f "$APPEND_FLAG"
+grep -aq 'no key for build/bats_modules/ns.example/mine/src/util_dats.c (appending build/.sats_changed failed)' a0.log || { echo "FAIL: a failed append was not said"; cat a0.log; exit 1; }
+[ ! -f build/bats_modules/ns.example/mine/src/util_dats.c.key ] || { echo "FAIL: a key was written after a failed append"; exit 1; }
+run a1.log build --only debug --only native
+[ "$(ran_on a1.log 'mine/src/util_dats.c')" = 1 ] || { echo "FAIL: a module whose key could not be completed was not made again"; cat a1.log; exit 1; }
+run a2.log build --only debug --only native
+quiet a2.log "the build after it"
+# The profile is in a native object's key (bats-lang/bats#320): the two
+# profiles share build/, and the release object was reused by a debug build
+# (and the other way round). Each switch makes the bin's object again, the
+# object has the debug info of its profile, and the same profile again
+# reuses it. A garbled or missing key makes it again.
+obj=build/src/bin/tool_dats.o
+# (verbose prints the output path and the input path with a NUL between
+# them, so the pattern ends at the path's own last byte)
+ccs() { grep -ac -- "+ cc -c -o $obj" "$1" || true; }
+has_debug_info() { grep -aq '\.debug_info' "$obj"; }
+run r0.log build --only release --only native
+[ "$(ccs r0.log)" = 1 ] || { echo "FAIL: a release build after a debug one did not make the bin's object again"; cat r0.log; exit 1; }
+if has_debug_info; then echo "FAIL: the release object has debug info"; exit 1; fi
+run r1.log build --only debug --only native
+[ "$(ccs r1.log)" = 1 ] || { echo "FAIL: a debug build reused the release object"; cat r1.log; exit 1; }
+has_debug_info || { echo "FAIL: the debug object has no debug info"; exit 1; }
+run r2.log build --only debug --only native
+[ "$(ccs r2.log)" = 0 ] || { echo "FAIL: a second debug build made the bin's object again"; cat r2.log; exit 1; }
+run r3.log build --only release --only native
+[ "$(ccs r3.log)" = 1 ] || { echo "FAIL: a release build reused the debug object"; cat r3.log; exit 1; }
+if has_debug_info; then echo "FAIL: the release object has debug info after a release build"; exit 1; fi
+run r4.log build --only release --only native
+[ "$(ccs r4.log)" = 0 ] || { echo "FAIL: a second release build made the bin's object again"; cat r4.log; exit 1; }
+printf 'garbled\n' > "$obj.key"
+run r5.log build --only release --only native
+[ "$(ccs r5.log)" = 1 ] || { echo "FAIL: a garbled object key did not make the object again, once"; cat r5.log; exit 1; }
+rm -f "$obj.key"
+run r6.log build --only release --only native
+[ "$(ccs r6.log)" = 1 ] || { echo "FAIL: a missing object key did not make the object again, once"; cat r6.log; exit 1; }
+run r7.log build --only release --only native
+quiet r7.log "the build after those"
+# A wasm object's key names no profile (its cc flags are fixed: -O2, no -g):
+# it is made once, and a build of the other profile keeps it. The wasm cc is
+# found on the PATH, so a stand-in notes each run that writes a keyed .wasm.o (the
+# runtime's is made at every build, whatever changed, and is not counted).
+CC_LOG=$TMP/wasm-cc-runs
+mkdir -p "$TMP/shim"
+REAL_CLANG=$(command -v clang)
+printf '#!/bin/sh\ncase "$*" in *-o\ build/_bats_wasm_runtime*) ;; *.wasm.o*) echo "$*" >> "%s";; esac\nexec "%s" "$@"\n' "$CC_LOG" "$REAL_CLANG" > "$TMP/shim/clang"
+chmod +x "$TMP/shim/clang"
+: > "$CC_LOG"
+PATH="$TMP/shim:$PATH" run w0.log build --only release --only wasm
+[ "$(wc -l < "$CC_LOG")" -ge 1 ] || { echo "FAIL: a cold wasm build ran no wasm cc"; cat w0.log; exit 1; }
+wasm_runs=$(wc -l < "$CC_LOG")
+PATH="$TMP/shim:$PATH" run w1.log build --only debug --only wasm
+PATH="$TMP/shim:$PATH" run w2.log build --only release --only wasm
+[ "$(wc -l < "$CC_LOG")" = "$wasm_runs" ] || { echo "FAIL: a wasm object was made again by a build of the other profile"; cat "$CC_LOG"; cat w1.log w2.log; exit 1; }
 echo "build-content-keys: ok"
