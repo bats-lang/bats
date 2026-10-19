@@ -147,24 +147,23 @@ fun at_pattern {lc,lp:agz}{m,nq:pos}{q:nat | q <= nq}{pl:nat | pl <= q}{j:nat | 
   else if peek(c, i + j, m) <> peek(pat, j, q) then false
   else at_pattern(c, i, n, m, pat, pl, q, j + 1)
 
-(* c[i, n) written to bw, each <root>/build/ (plain, of length p1) and
+(* c[i, n) written to bw, the first error stopping it, each <root>/build/ (plain, of length p1) and
    <mangled root>build_057_ (of length p2) with the root left out: s1
    and s2 bytes of them, the root's, are skipped and the rest copied *)
 fun put_relative {lc,l1,l2:agz}{m,n1,n2:pos}{q1:nat | q1 <= n1}{q2:nat | q2 <= n2}{p1,p2:pos | p1 <= q1; p2 <= q2}{s1,s2:pos}{i:nat} .<max(m - i, 0)>.
   (c: !$A.borrow(byte, lc, m), i: int i, n: pos_t, m: int m,
    plain: !$A.borrow(byte, l1, n1), p1: int p1, s1: int s1,
    mangled: !$A.borrow(byte, l2, n2), p2: int p2, s2: int s2, q1: int q1, q2: int q2,
-   bw: !$F.buf_writer): void =
-  if i >= n then ()
-  else if i >= m then ()
+   bw: !$F.buf_writer): write_result =
+  if i >= n then Wrote()
+  else if i >= m then Wrote()
   else if at_pattern(c, i, n, m, plain, p1, q1, 0) then
     put_relative(c, i + s1, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)
   else if at_pattern(c, i, n, m, mangled, p2, q2, 0) then
     put_relative(c, i + s2, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)
-  else let
-    val wr = $F.buf_write_byte(bw, byte2int0($A.read<byte>(c, i)))
-    val () = $R.discard<int><$F.io_error>(wr)
-  in put_relative(c, i + 1, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw) end
+  else (case+ $F.buf_write_byte(bw, byte2int0($A.read<byte>(c, i))) of
+    | ~$R.ok(_) => put_relative(c, i + 1, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)
+    | ~$R.err(e) => NotWritten(e))
 
 (* The index just after the k-th line feed of c at or after i, or the index
    where c ends (n, or m) when it has fewer *)
@@ -184,14 +183,14 @@ fun line_end {lc:agz}{m:pos}{i:nat | i <= m} .<m - i>.
   else if peek(c, i, m) = 10 then i
   else line_end(c, i + 1, n, m)
 
-(* t[j, k) written to bw, of the first k bytes of t *)
+(* t[j, k) written to bw, of the first k bytes of t, the first error
+   stopping it *)
 fun put_bytes {lt:agz}{q:pos}{k:nat | k <= q}{j:nat | j <= k} .<k - j>.
-  (t: !$A.borrow(byte, lt, q), j: int j, k: int k, bw: !$F.buf_writer): void =
-  if j >= k then ()
-  else let
-    val wr = $F.buf_write_byte(bw, byte2int0($A.read<byte>(t, j)))
-    val () = $R.discard<int><$F.io_error>(wr)
-  in put_bytes(t, j + 1, k, bw) end
+  (t: !$A.borrow(byte, lt, q), j: int j, k: int k, bw: !$F.buf_writer): write_result =
+  if j >= k then Wrote()
+  else (case+ $F.buf_write_byte(bw, byte2int0($A.read<byte>(t, j))) of
+    | ~$R.ok(_) => put_bytes(t, j + 1, k, bw)
+    | ~$R.err(e) => NotWritten(e))
 
 (* c[0, n) written to bw as put_relative writes it, with one more change:
    patsopt's 4th line, "** The starting compilation time is: 2026-10-18:
@@ -202,12 +201,13 @@ fun put_bytes {lt:agz}{q:pos}{k:nat | k <= q}{j:nat | j <= k} .<k - j>.
    straddled a minute differed in that line alone). It is a function of
    the bytes: a C whose 4th line does not begin with that text (or that
    has no 4th line) is written as put_relative writes it, and the line
-   keeps its line feed, so the lines and their order are the same. *)
+   keeps its line feed, so the lines and their order are the same. The
+   first write that fails ends it, and its error is the result. *)
 fn put_c {lc,l1,l2:agz}{m,n1,n2:pos}{q1:nat | q1 <= n1}{q2:nat | q2 <= n2}{p1,p2:pos | p1 <= q1; p2 <= q2}{s1,s2:pos}
   (c: !$A.borrow(byte, lc, m), n: pos_t, m: int m,
    plain: !$A.borrow(byte, l1, n1), p1: int p1, s1: int s1,
    mangled: !$A.borrow(byte, l2, n2), p2: int p2, s2: int s2, q1: int q1, q2: int q2,
-   bw: !$F.buf_writer): void = let
+   bw: !$F.buf_writer): write_result = let
   var head : $B.builder_v = $B.create()
   val () = bput_v(head, "** The starting compilation time is: ")
   val @(ha, hl) = $B.into_arr(head)
@@ -218,17 +218,25 @@ fn put_c {lc,l1,l2:agz}{m,n1,n2:pos}{q1:nat | q1 <= n1}{q2:nat | q2 <= n2}{p1,p2
   val @(fz_l, bv_l) = $A.freeze<byte>(la)
   (* the 4th line begins after the 3rd line feed *)
   val s = after_lines(c, 0, 3, n, m)
-  val () = (if at_pattern(c, s, n, m, bv_h, hl, hl, 0) then let
-      val () = put_relative(c, 0, s, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)
-      val () = put_bytes(bv_h, 0, hl, bw)
-      val () = put_bytes(bv_l, 0, ll, bw)
-    in put_relative(c, line_end(c, s, n, m), n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw) end
-    else put_relative(c, 0, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw))
+  val r = (if at_pattern(c, s, n, m, bv_h, hl, hl, 0) then
+      (case+ put_relative(c, 0, s, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw) of
+       | ~Wrote() =>
+         (case+ put_bytes(bv_h, 0, hl, bw) of
+          | ~Wrote() =>
+            (case+ put_bytes(bv_l, 0, ll, bw) of
+             | ~Wrote() => put_relative(c, line_end(c, s, n, m), n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)
+             | ~NotWritten(e) => NotWritten(e)
+             | ~WriteTooLarge() => WriteTooLarge())
+          | ~NotWritten(e) => NotWritten(e)
+          | ~WriteTooLarge() => WriteTooLarge())
+       | ~NotWritten(e) => NotWritten(e)
+       | ~WriteTooLarge() => WriteTooLarge())
+    else put_relative(c, 0, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)): write_result
   val () = $A.drop<byte>(fz_h, bv_h)
   val () = $A.free<byte>($A.thaw<byte>(fz_h))
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
-in end
+in r end
 
 (* The NUL-terminated path p[0, len) with ext after it, NUL-terminated *)
 fn path_with_m {lp:agz}{np:pos}{len:nat | len <= np}{sn:nat} (p: !$A.borrow(byte, lp, np), len: int len, ext: string sn): $B.builder_v = let
@@ -245,6 +253,15 @@ fn path_with {lp:agz}{sn:nat} (p: !$A.borrow(byte, lp, 524288), len: int, ext: s
   val () = put_char_v(b, 0)
 in b end
 
+(* Where the C went: into place (the project's directory left out of its
+   paths, or as patsopt wrote it when the directory cannot be had), not
+   into place (the move failed), or not written (the rewritten C could not
+   be: the error is said already, and nothing is left of it) *)
+datatype c_placed =
+  | CPlaced
+  | CNotPlaced
+  | CNotWritten
+
 (* The C at raw (patsopt's, just written) put at out with the project's
    directory left out of its paths. Every file patsopt reads of the
    project is under build/, so only a path followed by build/ (or, in a
@@ -254,10 +271,13 @@ in b end
    written beside out and renamed into place, so a bats stopped at any
    point leaves out as it was or whole, never half written: out older
    than its .dats is built again, where a C left by patsopt with the
-   paths still in it would be taken for fresh. 0 when it is in place. *)
+   paths still in it would be taken for fresh. A write that fails (the
+   disk is full, bats-lang/bats#359) is an error naming the file and the
+   reason, and neither the rewritten C nor patsopt's is put in place:
+   never a C cut short, and never patsopt's as it is in its stead. *)
 fn relative_c {lr,lo:agz}
   (raw_bv: !$A.borrow(byte, lr, 524288), raw_len: int,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int): int = let
+   out_bv: !$A.borrow(byte, lo, 524288), out_len: int): c_placed = let
   var root : $B.builder_v = $B.create()
   val known = project_root(root)
   (* <root>/build/ *)
@@ -274,38 +294,45 @@ fn relative_c {lr,lo:agz}
   val @(fz_m, bv_m) = $A.freeze<byte>(ma)
   val @(na, nl) = $B.into_arr(path_with(out_bv, out_len, ".new"))
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
-  val written = (if ~known then false
-    else if pl <= 8 then false
-    else if ml <= 10 then false
+  val rewrite = (if ~known then CNotPlaced()
+    else if pl <= 8 then CNotPlaced()
+    else if ml <= 10 then CNotPlaced()
     else (case+ read_whole(raw_bv, 524288) of
-      | ~whole_err(_) => false
+      | ~whole_err(_) => CNotPlaced()
       | ~whole_ok(ar, piece, m, n) => let
           val @(fz_c, bv_c) = $A.freeze<byte>(piece)
-          val ok = (case+ file_open_m(bv_n, nl, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+          val written = (case+ file_open_m(bv_n, nl, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
             | ~$R.ok(fd) => let
                 val bw = $F.buf_writer_create(fd)
-                val () = put_c(bv_c, n, m, bv_p, pl, pl - 6, bv_m, ml, ml - 10, pl, ml, bw)
-              in (case+ $F.buf_writer_close(bw) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool end
-            | ~$R.err(_) => false): bool
+                val r = put_c(bv_c, n, m, bv_p, pl, pl - 6, bv_m, ml, ml - 10, pl, ml, bw)
+              in writer_finish(bw, r) end
+            | ~$R.err(e) => NotWritten(e)): write_result
+          val said = write_settle(bv_n, nl, written)
           val () = $A.drop<byte>(fz_c, bv_c)
           val () = whole_free(ar, $A.thaw<byte>(fz_c))
-        in ok end)): bool
-  (* the rewritten C into place, else patsopt's as it is *)
-  val rc = (if written then
-      sh_script("mv -f \"$1\" \"$2\" && rm -f \"$3\"",
+        in (if said = 0 then CPlaced() else CNotWritten()) end)): c_placed
+  (* the rewritten C into place, else patsopt's as it is; after a failed
+     write neither, and what was written is removed *)
+  val placed = (case+ rewrite of
+    | CPlaced() => (if sh_script("mv -f \"$1\" \"$2\" && rm -f \"$3\"",
         $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg(out_bv, out_len),
-        $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_nil()))))
-    else
-      sh_script("rm -f \"$1\"; mv -f \"$2\" \"$3\"",
+        $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_nil())))) = 0 then CPlaced() else CNotPlaced())
+    | CNotPlaced() => (if sh_script("rm -f \"$1\"; mv -f \"$2\" \"$3\"",
         $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg(raw_bv, raw_len),
-        $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_nil()))))): int
+        $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_nil())))) = 0 then CPlaced() else CNotPlaced())
+    | CNotWritten() => let
+        (* a failure of this clean-up is not another error: the file is
+           beside the C and no one reads it *)
+        val _ = sh_script("rm -f \"$1\" \"$2\"",
+          $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_nil())))
+      in CNotWritten() end): c_placed
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
   val () = $A.drop<byte>(fz_m, bv_m)
   val () = $A.free<byte>($A.thaw<byte>(fz_m))
-in rc end
+in placed end
 
 (* ============================================================
    The key: what patsopt reads, by content
@@ -787,7 +814,7 @@ implement closure_key_write(list_bv, out_bv) =
         val hashed = (if named && nl = 64 then list_key_text(bv_na, nl, bv_c, n, m, b) else false): bool
         val fits = ($B.length(b) < 524288): bool
         val bf = b
-        val wrote = (if hashed && fits then (write_file_from_builder(out_bv, 524288, bf) = 0)
+        val wrote = (if hashed && fits then (write_settle(out_bv, 524288, write_file_from_builder(out_bv, 524288, bf)) = 0)
           else let val () = $B.builder_free(bf) in false end): bool
         val () = $A.drop<byte>(fz_na, bv_na)
         val () = $A.free<byte>($A.thaw<byte>(fz_na))
@@ -855,7 +882,9 @@ fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}
               val @(fz_t, bv_t) = $A.freeze<byte>(ta)
               var content : $B.builder_v = $B.create()
               val () = copy_to_builder_v(bv_b, 0, bl, bl, content)
-              val wrote = write_file_from_builder_m(bv_t, tl, content)
+              (* said, and the build fails, if the key cannot be written;
+                 a key cut short is never moved to its place *)
+              val wrote = write_settle(bv_t, tl, write_file_from_builder_m(bv_t, tl, content))
               val @(ka, kl) = $B.into_arr(path_with(out_bv, out_len, ".key"))
               val @(fz_k, bv_k) = $A.freeze<byte>(ka)
               val _ = (if wrote = 0 then sh_script("mv -f \"$1\" \"$2\"",
@@ -946,11 +975,17 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   (* a run that failed leaves no C, as before: the old one goes too *)
   val () = (if ran <> 0 then remove_output(out_bv, out_len) else ())
   val rc = (if hit then 0 else if ran <> 0 then ran
-    else (if relative_c(bv_ra, rl, out_bv, out_len) = 0 then 0
-      else let
-        val () = prerr! ("error: patsopt's output could not be put in place\n")
-        val () = set_build_err()
-      in 1 end)): int
+    else (case+ relative_c(bv_ra, rl, out_bv, out_len) of
+      | CPlaced() => 0
+      | CNotPlaced() => let
+          val () = prerr! ("error: patsopt's output could not be put in place\n")
+          val () = set_build_err()
+        in 1 end
+      (* said by relative_c, with the file and the reason; no C is left,
+         so none is taken for fresh *)
+      | CNotWritten() => let
+          val () = remove_output(out_bv, out_len)
+        in 1 end)): int
   val () = $A.drop<byte>(fz_ra, bv_ra)
   val () = $A.free<byte>($A.thaw<byte>(fz_ra))
   val rc2 = (if rc <> 0 then rc
@@ -967,9 +1002,18 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
       val () = copy_to_builder_v(bv_ea, 0, el, el, e2)
       var s2 : $B.builder_v = $B.create()
       val () = copy_to_builder_v(bv_sa, 0, sl, sl, s2)
-      val _ = sh_script("set -e; d=$(dirname \"$2\"); mkdir -p \"$d\"; t=$(mktemp \"$d/.tmp.XXXXXX\"); cp \"$1\" \"$t\"; mv -f \"$t\" \"$2\"; cd \"$3\"; if [ -z \"$(find .trimmed -mtime -1 2>/dev/null)\" ]; then touch .trimmed; find . -type f -name '*.c' -mtime +7 -exec rm -f {} +; find . -type f -name '.tmp.*' -mtime +1 -exec rm -f {} +; fi",
+      val stored = sh_script("set -e; d=$(dirname \"$2\"); mkdir -p \"$d\"; t=$(mktemp \"$d/.tmp.XXXXXX\"); cp \"$1\" \"$t\"; mv -f \"$t\" \"$2\"; cd \"$3\"; if [ -z \"$(find .trimmed -mtime -1 2>/dev/null)\" ]; then touch .trimmed; find . -type f -name '*.c' -mtime +7 -exec rm -f {} +; find . -type f -name '.tmp.*' -mtime +1 -exec rm -f {} +; fi",
         $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_cons(mk_arg(e2),
         $L.list_vt_cons(mk_arg(s2), $L.list_vt_nil()))))
+      (* the copy is made beside its place and moved whole, so a failed copy
+         leaves no entry a later run could take for the C: said, and the
+         build goes on, since the shared cache is not what is built *)
+      val () = (if stored = 0 then ()
+        else let
+          val () = prerr! ("warning: the C of ")
+          val () = prerr_seg(out_bv, 0, out_len - 1, 524288)
+          val () = prerr! (" could not be kept in BATS_CACHE_DIR\n")
+        in end)
     in end)
   val () = (if rc2 <> 0 then ()
     else if named then memo_record(ph, phlen, stamped, bv_nma, nml, keyed, out_bv, out_len, in_bv, in_len)

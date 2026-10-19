@@ -423,13 +423,12 @@ fn write_page {l:agz}{off,e:nat | off <= e; e <= 524288}
     val () = put_char_v(outp, 0)
     val @(oa, _) = $B.to_arr(outp)
     val @(fz_o, bv_o) = $A.freeze<byte>(oa)
-    val rc = write_file_from_builder(bv_o, 524288, page)
+    val rc = write_settle(bv_o, 524288, write_file_from_builder(bv_o, 524288, page))
     val () = $A.drop<byte>(fz_o, bv_o)
     val () = $A.free<byte>($A.thaw<byte>(fz_o))
   in
-    if rc <> 0 then let
-      val () = prerr! ("error: cannot write docs\n")
-    in ~1 end
+    (* write_settle said which file and why *)
+    if rc <> 0 then ~1
     else 1
   end
 
@@ -485,13 +484,12 @@ fn write_index {l:agz}{n:pos}
     val () = $A.free<byte>($A.thaw<byte>(fz_i))
     val ip = str_to_path_arr("docs/index.md")
     val @(fz_ip, bv_ip) = $A.freeze<byte>(ip)
-    val rc = write_file_from_builder(bv_ip, 524288, ib)
+    val rc = write_settle(bv_ip, 524288, write_file_from_builder(bv_ip, 524288, ib))
     val () = $A.drop<byte>(fz_ip, bv_ip)
     val () = $A.free<byte>($A.thaw<byte>(fz_ip))
   in
-    if rc <> 0 then let
-      val () = prerr! ("error: cannot write docs/index.md\n")
-    in ~1 end
+    (* write_settle said which file and why *)
+    if rc <> 0 then ~1
     else let
       val () = if is_quiet() then () else prerr! ("generated docs (", count, " module(s))\n")
     in 0 end
