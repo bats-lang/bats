@@ -63,7 +63,32 @@ datavtype spawn_pipes(sin:bool, sout:bool, serr:bool) =
     )
 
 
-vtypedef arg_entry = [l:agz] @($A.arr(byte, l, 524288), int)
+stadef ARG_ENTRY_MAX = 524288
+
+
+
+
+
+stadef ARG_TOTAL_MAX = 524287
+
+
+
+
+
+
+vtypedef arg_entry =
+  [l:agz][cap:pos][n:nat | n <= cap; cap <= ARG_ENTRY_MAX]
+  @($A.arr(byte, l, cap), int n)
+
+
+
+
+
+
+
+dataprop NUL_AT($A.cells, int, int) =
+  | {cs:$A.cells}{n:nat}{k:nat | k < n}
+    NUL_mk(cs, n, k) of ($A.CLEN(cs, n), $A.NTH(cs, k, 0))
 
 
 
@@ -86,6 +111,11 @@ fn os_error_text {l:agz}{n:pos}
 
 
 
+
+
+
+
+
 fn spawn
   {sin:bool}{sout:bool}{serr:bool}
   {lp:agz}
@@ -96,6 +126,9 @@ fn spawn
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
 
 
 
@@ -111,6 +144,9 @@ fn spawn_inherit_env_with
   : $R.result(spawn_pipes(sin, sout, serr), int)
 
 
+
+
+
 fn spawn_inherit_env
   {sin:bool}{sout:bool}{serr:bool}
   {lp:agz}
@@ -120,6 +156,150 @@ fn spawn_inherit_env
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+
+fn path_of_string_proved {sn:nat | sn < $B.BUILDER_CAP} (s: string sn)
+  : [l:agz][n:pos][cs:$A.cells][k:nat | k < n]
+    (NUL_AT(cs, n, k) | $A.barr(l, n, cs))
+
+
+
+
+
+
+fn spawn_proved
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
+   argv: $L.listv(arg_entry),
+   envp: $L.listv(arg_entry),
+   stdin_cfg: stream_config(sin),
+   stdout_cfg: stream_config(sout),
+   stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+fn spawn_inherit_env_with_proved
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
+   argv: $L.listv(arg_entry),
+   extra: $L.listv(arg_entry),
+   stdin_cfg: stream_config(sin),
+   stdout_cfg: stream_config(sout),
+   stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+fn spawn_inherit_env_proved
+  {sin:bool}{sout:bool}{serr:bool}
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
+   argv: $L.listv(arg_entry),
+   stdin_cfg: stream_config(sin),
+   stdout_cfg: stream_config(sout),
+   stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
