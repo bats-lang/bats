@@ -204,9 +204,9 @@ fun scan_lines {l:agz}{n:pos}{p,nb:nat | p <= nb; nb <= n}{u,m:nat} .<nb - p>.
   end
 
 (* The staloads of the file at the NUL-terminated path p *)
-fn scan_file {lp:agz}{u:nat}
-  (p: !$A.borrow(byte, lp, CMAX), unseen: deps(u)): scanned(u) =
-  case+ read_whole(p, CMAX) of
+fn scan_file {lp:agz}{n:pos}{pm:nat | pm <= n; pm <= CMAX}{u:nat}
+  (p: !$A.borrow(byte, lp, n), pm: int pm, unseen: deps(u)): scanned(u) =
+  case+ read_whole_m(p, pm) of
   | ~whole_err(_) => Scanned(unseen, deps_nil(), 0)
   | ~whole_ok(ar, piece, m, nb) => let
       val @(fz, bv) = $A.freeze<byte>(piece)
@@ -218,9 +218,9 @@ fn scan_file {lp:agz}{u:nat}
 (* The staloads of the file whose path is b, NUL-terminated *)
 fn scan_path {u:nat} (b: $B.builder_v, unseen: deps(u)): scanned(u) = let
   val () = put_char_v(b, 0)
-  val @(pa, _) = $B.to_arr(b)
+  val @(pa, pl) = $B.into_arr(b)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val r = scan_file(bv, unseen)
+  val r = scan_file(bv, pl, unseen)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
@@ -265,9 +265,9 @@ fn scan_dep {u:nat} (x: !dep, unseen: deps(u)): scanned(u) = let
   val () = put_dep(db, x)
   val () = bput_v(db, "/src")
   val () = put_char_v(db, 0)
-  val @(da, _) = $B.to_arr(db)
+  val @(da, dl) = $B.into_arr(db)
   val @(fz, bv) = $A.freeze<byte>(da)
-  val dr = $F.dir_read(bv, 524288)
+  val dr = dir_read_m(bv, dl)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
@@ -336,7 +336,7 @@ fun scan_modules {l:agz}{off:nat | off <= CMAX}{u,m:nat} .<CMAX - off>.
 
 implement dep_closure {le} (entry) = let
   val un0 = packages()
-  val+ ~Scanned(un1, f1, _) = scan_file(entry, un0)
+  val+ ~Scanned(un1, f1, _) = scan_file(entry, 524288, un0)
   var sd : $B.builder_v = $B.create()
   val () = bput_v(sd, "src")
   val @(fa, flen) = sorted_bats_files(sd)

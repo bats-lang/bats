@@ -32,26 +32,26 @@
 staload "helpers.sats"
 
 (* bv[0, n) as a builder *)
-fn builder_of {l:agz} (bv: !$A.borrow(byte, l, 524288), n: int): $B.builder_v = let
+fn builder_of {l:agz}{nb:pos}{n:nat | n <= nb} (bv: !$A.borrow(byte, l, nb), n: int n): $B.builder_v = let
   var b : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(bv, 0, n, 524288, b)
+  val () = copy_to_builder_v(bv, 0, n, n, b)
 in b end
 
 (* Writes b to the path when the file does not hold exactly its bytes:
    whether it wrote; b is consumed *)
 fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): bool = let
-  val p = str_to_path_arr(path)
+  val @(p, pl) = str_into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val @(ba, bl) = $B.to_arr(b)
+  val @(ba, bl) = $B.into_arr(b)
   val @(fz_b, bv_b) = $A.freeze<byte>(ba)
-  val same = file_has_bytes(bv_p, bv_b, bl)
+  val same = file_has_bytes_m(bv_p, pl, bv_b, bl)
   val again = builder_of(bv_b, bl)
   val () = $A.drop<byte>(fz_b, bv_b)
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
   val wrote = (if same then let
       val () = $B.builder_free(again)
     in false end
-    else write_file_from_builder(bv_p, 524288, again) = 0): bool
+    else write_file_from_builder_m(bv_p, pl, again) = 0): bool
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in wrote end
