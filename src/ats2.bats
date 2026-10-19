@@ -255,15 +255,20 @@ end
    "cannot tell", never a wrong kind. The probe's files are in a temporary
    directory under ~/.bats, removed by the script's exit. Exit 20:
    accepted (the -int build); 21: refused; 22: no answer (the control
-   failed, or the probe ran past the cap); 23: no temporary directory.
+   failed, the probe ran past the cap, or patsopt died without an answer
+   or ended by a signal); 23: no temporary directory.
    An answer of 20 or 21, and 22 when the probe ran past the cap, is kept in
    ~/.bats/ats2.solver, beside the toolchain's cksum (the bytes of bin/patsopt,
-   not its path), so a toolchain is probed once. A control failure is not kept:
-   it may be a broken environment, and is asked again. *)
+   not its path), so a toolchain is probed once. A control failure, a patsopt
+   that dies without an answer (its status never written, 125) and one that
+   ends by a signal or with a status other than 1 are not kept: they may be a
+   broken environment, and are asked again. Every wait is bounded: a patsopt
+   that has not answered at 20 s is sent TERM, and KILL at 25 s, which is
+   "no answer" (124); one whose process is gone for 3 s with no status
+   written (killed with its parent, say) is 125. No file's time is read. *)
 #define PROBE_CONTROL "#include \"share/atspre_staload.hats\"\nprfn bats_probe_true {n:nat | n < 65536} (): [n < 65536] void = ()\n"
 #define PROBE_FALSE "#include \"share/atspre_staload.hats\"\nprfn bats_probe_false {h,l:nat | h < 65536; l < 65536;\n  (h/256 + 256*(l%256))/256 + 256*((l/256 + 256*(h%256))%256) == l} (): [1 == 2] void = ()\n"
-#define PROBE_SOLVE "k=$(cksum < \"$1/ats2/bin/patsopt\" 2>/dev/null) || exit 22\nif [ -f \"$1/ats2.solver\" ]; then\n  case $(cat \"$1/ats2.solver\") in\n    \"$k 20\") exit 20 ;;\n    \"$k 21\") exit 21 ;;\n    \"$k 22\") exit 22 ;;\n  esac\nfi\nd=$(mktemp -d \"$1/ats2-probe.XXXXXX\") || exit 23\ntrap 'rm -rf \"$d\"' EXIT\nprintf '%s\\n' \"$2\" > \"$d/control.dats\"\nprintf '%s\\n' \"$3\" > \"$d/false.dats\"\nexport PATSHOME=\"$1/ats2\"\nP=\"$1/ats2/bin/patsopt\"\ncapped() {\n  rm -f \"$d/rc\" \"$d/pid\" \"$d/late\"\n  ( \"$P\" -tc -d \"$1\" > /dev/null 2>&1 & echo $! > \"$d/pid\"; wait $!; echo $? > \"$d/rc\" ) > /dev/null 2>&1 &\n  n=0\n  while [ ! -f \"$d/rc\" ]; do\n    sleep 1\n    n=$((n + 1))\n    if [ $n -ge 20 ] && [ ! -f \"$d/late\" ] && [ -f \"$d/pid\" ]; then touch \"$d/late\"; kill \"$(cat \"$d/pid\")\" 2>/dev/null; fi\n  done\n  if [ -f \"$d/late\" ]; then return 124; fi\n  return \"$(cat \"$d/rc\")\"\n}\ncapped \"$d/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$d/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then printf '%s\\n' \"$k 20\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 20; fi\nif [ $f -eq 124 ]; then printf '%s\\n' \"$k 22\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 22; fi
-printf '%s\\n' \"$k 21\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"\nexit 21\n"
+#define PROBE_SOLVE "k=$(cksum < \"$1/ats2/bin/patsopt\" 2>/dev/null) || exit 22\nif [ -f \"$1/ats2.solver\" ]; then\n  case $(cat \"$1/ats2.solver\") in\n    \"$k 20\") exit 20 ;;\n    \"$k 21\") exit 21 ;;\n    \"$k 22\") exit 22 ;;\n  esac\nfi\nd=$(mktemp -d \"$1/ats2-probe.XXXXXX\") || exit 23\ntrap 'rm -rf \"$d\"' EXIT\nprintf '%s\\n' \"$2\" > \"$d/control.dats\"\nprintf '%s\\n' \"$3\" > \"$d/false.dats\"\nexport PATSHOME=\"$1/ats2\"\nP=\"$1/ats2/bin/patsopt\"\ncapped() {\n  rm -f \"$d/rc\" \"$d/pid\" \"$d/late\"\n  ( \"$P\" -tc -d \"$1\" > /dev/null 2>&1 & echo $! > \"$d/pid\"; wait $!; echo $? > \"$d/rc\" ) > /dev/null 2>&1 &\n  n=0\n  g=0\n  while [ ! -f \"$d/rc\" ]; do\n    sleep 1\n    n=$((n + 1))\n    if [ -f \"$d/pid\" ] && ! kill -0 \"$(cat \"$d/pid\")\" 2>/dev/null; then g=$((g + 1)); else g=0; fi\n    if [ $g -ge 3 ] && [ ! -f \"$d/rc\" ]; then return 125; fi\n    if [ -f \"$d/late\" ]; then\n      if [ $n -ge 25 ]; then kill -9 \"$(cat \"$d/pid\")\" 2>/dev/null; return 124; fi\n    elif [ $n -ge 20 ]; then touch \"$d/late\"; kill \"$(cat \"$d/pid\")\" 2>/dev/null; fi\n  done\n  if [ -f \"$d/late\" ]; then return 124; fi\n  r=$(cat \"$d/rc\"); return \"${r:-125}\"\n}\ncapped \"$d/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$d/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then printf '%s\\n' \"$k 20\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 20; fi\nif [ $f -eq 124 ]; then printf '%s\\n' \"$k 22\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"; exit 22; fi\nif [ $f -ne 1 ]; then exit 22; fi\nprintf '%s\\n' \"$k 21\" > \"$1/ats2.solver.new\" && mv \"$1/ats2.solver.new\" \"$1/ats2.solver\"\nexit 21\n"
 
 datatype solver_kind = SolverInt | SolverRefusesFalse | SolverNoAnswer
 

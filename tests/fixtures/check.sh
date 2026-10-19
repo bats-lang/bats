@@ -376,6 +376,11 @@ PLOG=$TMP/patsopt-log; FLAG_FAIL=$TMP/flag-fail; FLAG_HANG=$TMP/flag-hang; HANG_
 : > "$PLOG"
 printf '#!/bin/sh\nd=; depgen=0; prev=; for a in "$@"; do [ "$a" = --depgen ] && depgen=1; [ "$prev" = -d ] && d=$a; prev=$a; done\nif [ $depgen = 0 ] && [ -n "$d" ]; then if grep -q "fixture-snippet" "$d" 2>/dev/null; then echo "snippet $d" >> "%s"; else echo "base $d" >> "%s"; fi; fi\nif [ $depgen = 0 ] && [ -f "%s" ]; then echo $$ > "%s"; exec sleep 600; fi\nif [ $depgen = 0 ] && [ -f "%s" ]; then exit 1; fi\nexec "%s" "$@"\n' "$PLOG" "$PLOG" "$FLAG_HANG" "$HANG_PID" "$FLAG_FAIL" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
+# The solver of a stand-in patsopt is known (bats-lang/bats#264): bats probes a
+# toolchain it did not install by running patsopt on two small files, which
+# would be runs this test counts, so the answer is written first (the cksum of
+# patsopt's bytes and 21, as src/ats2.bats keeps it).
+printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
 
 [ -z "${TIMES:-}" ] || echo "$(( $(date +%s) - T_START )) s before the memo" >> "$TMP/times"
 mkproj() { # <dir>: lib (stadefs), other (reads lib's interface), unrelated, helper
@@ -520,6 +525,8 @@ memoed "$TMP/m10t.log" 0 "memo toml"
 
 # ---- a changed toolchain: nothing is served
 printf '# another patsopt\n' >> "$H/.bats/ats2/bin/patsopt"
+# (another toolchain is another answer to ask: written again, as above)
+printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
 # (bats-lang/bats#305: bats trusts the toolchain listing it left in build/
 # whatever patsopt is now, so the stamp does not see an edit in place; the
 # listing is taken away here, as a restored build/ of another install would

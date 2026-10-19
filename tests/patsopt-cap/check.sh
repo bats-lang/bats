@@ -78,6 +78,11 @@ esac
 exec "$REAL/bin/patsopt" "\$@"
 SH
 chmod +x "$H/.bats/ats2/bin/patsopt"
+# The solver of a stand-in patsopt is known (bats-lang/bats#264): bats probes a
+# toolchain it did not install by running patsopt on two small files, which
+# would be runs this test counts, so the answer is written first (the cksum of
+# patsopt's bytes and 21, as src/ats2.bats keeps it).
+printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
 
 project() { # <directory>: a project of one binary, named p
   mkdir -p "$1/src/bin"
