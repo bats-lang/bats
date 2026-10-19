@@ -166,6 +166,70 @@ fun put_relative {lc,l1,l2:agz}{m,n1,n2:pos}{q1:nat | q1 <= n1}{q2:nat | q2 <= n
     val () = $R.discard<int><$F.io_error>(wr)
   in put_relative(c, i + 1, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw) end
 
+(* The index just after the k-th line feed of c at or after i, or the index
+   where c ends (n, or m) when it has fewer *)
+fun after_lines {lc:agz}{m:pos}{i:nat | i <= m} .<m - i>.
+  (c: !$A.borrow(byte, lc, m), i: int i, k: int, n: pos_t, m: int m): [r:nat | r <= m] int r =
+  if k <= 0 then i
+  else if i >= n then i
+  else if i >= m then i
+  else if peek(c, i, m) = 10 then after_lines(c, i + 1, k - 1, n, m)
+  else after_lines(c, i + 1, k, n, m)
+
+(* The index of the first line feed of c at or after i, or where c ends *)
+fun line_end {lc:agz}{m:pos}{i:nat | i <= m} .<m - i>.
+  (c: !$A.borrow(byte, lc, m), i: int i, n: pos_t, m: int m): [r:nat | r <= m] int r =
+  if i >= n then i
+  else if i >= m then i
+  else if peek(c, i, m) = 10 then i
+  else line_end(c, i + 1, n, m)
+
+(* t[j, k) written to bw, of the first k bytes of t *)
+fun put_bytes {lt:agz}{q:pos}{k:nat | k <= q}{j:nat | j <= k} .<k - j>.
+  (t: !$A.borrow(byte, lt, q), j: int j, k: int k, bw: !$F.buf_writer): void =
+  if j >= k then ()
+  else let
+    val wr = $F.buf_write_byte(bw, byte2int0($A.read<byte>(t, j)))
+    val () = $R.discard<int><$F.io_error>(wr)
+  in put_bytes(t, j + 1, k, bw) end
+
+(* c[0, n) written to bw as put_relative writes it, with one more change:
+   patsopt's 4th line, "** The starting compilation time is: 2026-10-18:
+   22h:29m" (the time of the run, to the minute, the only thing in its C
+   that depends on when it ran), has what follows the colon replaced by
+   "left out", so the same sources give the same bytes whenever they are
+   built (bats-lang/bats#354: a cold build and an incremental one that
+   straddled a minute differed in that line alone). It is a function of
+   the bytes: a C whose 4th line does not begin with that text (or that
+   has no 4th line) is written as put_relative writes it, and the line
+   keeps its line feed, so the lines and their order are the same. *)
+fn put_c {lc,l1,l2:agz}{m,n1,n2:pos}{q1:nat | q1 <= n1}{q2:nat | q2 <= n2}{p1,p2:pos | p1 <= q1; p2 <= q2}{s1,s2:pos}
+  (c: !$A.borrow(byte, lc, m), n: pos_t, m: int m,
+   plain: !$A.borrow(byte, l1, n1), p1: int p1, s1: int s1,
+   mangled: !$A.borrow(byte, l2, n2), p2: int p2, s2: int s2, q1: int q1, q2: int q2,
+   bw: !$F.buf_writer): void = let
+  var head : $B.builder_v = $B.create()
+  val () = bput_v(head, "** The starting compilation time is: ")
+  val @(ha, hl) = $B.into_arr(head)
+  val @(fz_h, bv_h) = $A.freeze<byte>(ha)
+  var left : $B.builder_v = $B.create()
+  val () = bput_v(left, "left out")
+  val @(la, ll) = $B.into_arr(left)
+  val @(fz_l, bv_l) = $A.freeze<byte>(la)
+  (* the 4th line begins after the 3rd line feed *)
+  val s = after_lines(c, 0, 3, n, m)
+  val () = (if at_pattern(c, s, n, m, bv_h, hl, hl, 0) then let
+      val () = put_relative(c, 0, s, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw)
+      val () = put_bytes(bv_h, 0, hl, bw)
+      val () = put_bytes(bv_l, 0, ll, bw)
+    in put_relative(c, line_end(c, s, n, m), n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw) end
+    else put_relative(c, 0, n, m, plain, p1, s1, mangled, p2, s2, q1, q2, bw))
+  val () = $A.drop<byte>(fz_h, bv_h)
+  val () = $A.free<byte>($A.thaw<byte>(fz_h))
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+in end
+
 (* The NUL-terminated path p[0, len) with ext after it, NUL-terminated *)
 fn path_with_m {lp:agz}{np:pos}{len:nat | len <= np}{sn:nat} (p: !$A.borrow(byte, lp, np), len: int len, ext: string sn): $B.builder_v = let
   var b : $B.builder_v = $B.create()
@@ -220,7 +284,7 @@ fn relative_c {lr,lo:agz}
           val ok = (case+ file_open_m(bv_n, nl, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
             | ~$R.ok(fd) => let
                 val bw = $F.buf_writer_create(fd)
-                val () = put_relative(bv_c, 0, n, m, bv_p, pl, pl - 6, bv_m, ml, ml - 10, pl, ml, bw)
+                val () = put_c(bv_c, n, m, bv_p, pl, pl - 6, bv_m, ml, ml - 10, pl, ml, bw)
               in (case+ $F.buf_writer_close(bw) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool end
             | ~$R.err(_) => false): bool
           val () = $A.drop<byte>(fz_c, bv_c)
