@@ -10,7 +10,13 @@
 #     every module again (the count of a cold check), and leaves the stash
 #     with the stamp this bats writes, byte for byte as it was;
 #   * the same stash unedited: it is kept, and patsopt does not run.
+#   * a stash with no stamp, and one whose first line is not `bats-stamp 1`:
+#     dropped with "no stamp" and "the stamp format differs", made again.
 # A stash of a stamp this bats would not write is never taken for this build's.
+# Not yet covered (bats-lang/bats#347): a stamp with a line that is not
+# `name value` after its first line. JUDGE (stamp.bats) answers "the stamp
+# differs" for it, not "the stamp format differs", which needs a change to
+# stamp.bats, not to this test.
 # usage: tests/stash-stamp/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -26,7 +32,6 @@ printf '#include "share/atspre_staload.hats"\nstaload "m.sats"\nstaload "n.sats"
 
 check() { # <dir> <log>: bats -v check in <dir>, which must pass
   (cd "$1" && "$BATS" -v check) > "$2" 2>&1 || { echo "FAIL: check in $1"; cat "$2"; exit 1; }
-  sleep 1
 }
 # patsopt ran on a module (not counted as cached)
 ran() { grep -a -- '+ patsopt' "$1" | grep -avc '(cached)' || true; }
@@ -43,9 +48,25 @@ kept() { # <log> <what>: nothing dropped, patsopt did not run, and a module was 
 rebuilt() { # <log> <cold count> <what>: patsopt ran again for every module, once
   [ "$(ran "$1")" = "$2" ] || { echo "FAIL: $3 ran patsopt $(ran "$1") times, a cold check $2"; cat "$1"; exit 1; }
 }
+value() { # <stamp file> <name>: the value of the line `name value` (none: empty)
+  while IFS= read -r l || [ -n "$l" ]; do
+    case $l in "$2 "*) printf '%s\n' "${l#"$2 "}"; return 0 ;; esac
+  done < "$1"
+}
 edit() { # <stamp file> <name> <new value>: the line `name value` rewritten
   grep -q "^$2 " "$1" || { echo "FAIL: no line $2 in $1"; cat "$1"; exit 1; }
-  sed -e "s|^$2 .*|$2 $3|" "$1" > "$1.edit" && mv -f "$1.edit" "$1"
+  { while IFS= read -r l || [ -n "$l" ]; do
+      case $l in "$2 "*) printf '%s %s\n' "$2" "$3" ;; *) printf '%s\n' "$l" ;; esac
+    done < "$1"; } > "$1.edit"
+  mv -f "$1.edit" "$1"
+}
+put_line() { # <stamp file> <n> <text>: line n of the file replaced by text
+  i=0
+  { while IFS= read -r l || [ -n "$l" ]; do
+      i=$((i + 1))
+      if [ "$i" = "$2" ]; then printf '%s\n' "$3"; else printf '%s\n' "$l"; fi
+    done < "$1"; } > "$1.edit"
+  mv -f "$1.edit" "$1"
 }
 
 # A cold check, and the next one, which keeps everything: build/ is mark 3
@@ -57,7 +78,7 @@ COLD=$(ran "$TMP/cold.log")
 check "$P" "$TMP/second.log"
 kept "$TMP/second.log" "a second check"
 S2=build/.stash/2
-[ "$(sed -n 's/^mark //p' "$P/$S2/.bats_stamp")" = 2 ] || { echo "FAIL: the check left no mark 2 stash in $S2"; ls -a "$P/build"; exit 1; }
+[ "$(value "$P/$S2/.bats_stamp" mark)" = 2 ] || { echo "FAIL: the check left no mark 2 stash in $S2"; ls -a "$P/build"; exit 1; }
 SAVE=$TMP/saved
 cp -Rp "$P" "$SAVE"
 D=$TMP/case
@@ -80,6 +101,28 @@ for line in bats patsopt cc flags mark; do
   rebuilt "$TMP/$line.log" "$COLD" "a stash with another $line"
   cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash with another $line was dropped, its stamp is not this build's"; cat "$D/$S2/.bats_stamp"; exit 1; }
   echo "stash-stamp: a stash with another $line: dropped, named, and made again"
+done
+
+# A stash with no stamp, and one whose first line is not `bats-stamp 1`:
+# each is dropped, the drop line names the reason, and the build is made again
+rm -rf "$D"
+cp -Rp "$SAVE" "$D"
+rm -f "$D/$S2/.bats_stamp"
+check "$D" "$TMP/nostamp.log"
+say "$TMP/nostamp.log" "no stamp"
+rebuilt "$TMP/nostamp.log" "$COLD" "a stash with no stamp"
+cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash with no stamp was dropped, its stamp is not this build's"; exit 1; }
+echo "stash-stamp: a stash with no stamp: dropped, named, and made again"
+
+for first in garbage "bats-stamp 2"; do
+  rm -rf "$D"
+  cp -Rp "$SAVE" "$D"
+  put_line "$D/$S2/.bats_stamp" 1 "$first"
+  check "$D" "$TMP/format.log"
+  say "$TMP/format.log" "the stamp format differs"
+  rebuilt "$TMP/format.log" "$COLD" "a stash whose first line is '$first'"
+  cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash whose first line is '$first' was dropped, its stamp is not this build's"; exit 1; }
+  echo "stash-stamp: a stash whose first line is '$first': dropped, named, and made again"
 done
 
 # The same stash, unedited, is kept (the control of the cases above)
