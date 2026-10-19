@@ -20,6 +20,16 @@
 #     and removed again, the next check does too. bats writes no .hats of its
 #     own, so the test writes one into each mark's build/ (build/ and every
 #     build/.stash/<mark>, which a mark's build/ is swapped in from).
+# The steps that follow (bats-lang/bats#348) make a clear of the listing the
+# only one before a key: a wasm bin (web) makes a check run a second pass in the
+# same process, whose cache_swap and prune_orphans clear first; two native bins
+# (app and tool) make the second bin's .dats the write after the first bin's
+# listing and graph. A .hats that the bins include is in their .dats, not their
+# .sats (a bin's .sats keeps a line for each line of its source, and an edit
+# that keeps the line count does not move it, so touch_sats_stamp does not
+# clear): the write of the .dats is then the clear. Without it the second bin's
+# key keeps a closure with no .hats, and a change to the .hats under its name
+# is not seen by the next check (write_file_from_rope, #348).
 # usage: tests/names-graph/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -29,7 +39,7 @@ unset BATS_CACHE_DIR BATS_COLD
 P=$TMP/app
 mkdir -p "$P/src/bin"
 printf '[package]\nname = "app"\nkind = "bin"\n' > "$P/bats.toml"
-ALL="base mid other extra app"
+ALL="base mid other extra app tool web"
 base() {
   printf '#include "share/atspre_staload.hats"\n\n#pub fun base (): int\n\nimplement base () = 1\n' > "$P/src/base.bats"
 }
@@ -54,6 +64,8 @@ base
 mid
 other
 printf '#target native\n#include "share/atspre_staload.hats"\nstaload "mid.sats"\n\nimplement main0 () = println! ("got ", mid ())\n' > "$P/src/bin/app.bats"
+printf '#target wasm binary\n#include "share/atspre_staload.hats"\nstaload "base.sats"\n\nimplement main0 () = let val _ = base () in () end\n' > "$P/src/bin/web.bats"
+printf '#target native\n#include "share/atspre_staload.hats"\nstaload "base.sats"\n\nimplement main0 () = println! ("tool ", base ())\n' > "$P/src/bin/tool.bats"
 cd "$P"
 N=0
 run() { # <log> [bats arguments]: bats -v check, which must pass
@@ -80,8 +92,12 @@ quiet() { # <log> <what>
   grep -aq '(unchanged)' "$1" || { echo "FAIL: $2 did not say a module was unchanged"; cat "$1"; exit 1; }
   echo "names-graph: $2: quiet"
 }
-# --- a cold check, and the very next one
+# --- a cold check, and the very next one. The cold check writes the first
+# bin's key before the second bin's .sats exists, so that key names one .sats
+# fewer: the check after the cold one checks the first bin once more (measured
+# on the seed compiler, #348), and the one after that is quiet
 run c0.log check
+run c0b.log check
 run c1.log check
 quiet c1.log "the check after a cold check"
 # --- a .sats added: a module added
@@ -104,7 +120,7 @@ quiet m4.log "the check after the change to other.sats"
 # --- a .sats removed: the module is taken out of src/
 rm -f "$P/src/extra.bats"
 run r1.log check
-only r1.log "a .sats removed is seen by the next check" base mid other app
+only r1.log "a .sats removed is seen by the next check" base mid other app tool web
 [ -z "$(find build -name 'extra*')" ] || { echo "FAIL: the removed .sats is still in build/"; find build -name 'extra*'; exit 1; }
 run r2.log check
 quiet r2.log "the check after a .sats was removed"
@@ -123,12 +139,42 @@ rmhats() {
 }
 addhats
 run h1.log check
-only h1.log "a .hats added is seen by the next check" base mid other app
+only h1.log "a .hats added is seen by the next check" base mid other app tool web
 run h2.log check
 quiet h2.log "the check after a .hats was added"
 rmhats
 run h3.log check
-only h3.log "a .hats removed is seen by the next check" base mid other app
+only h3.log "a .hats removed is seen by the next check" base mid other app tool web
 run h4.log check
 quiet h4.log "the check after a .hats was removed"
+# --- a .hats that the two native bins include, with no .sats changed. A bin's
+# .sats holds its staloads, so a change to a staload moves the .sats, and the
+# touch clears the listing before the bin's .dats is written. An include is in
+# the .dats only: it takes the line of the bin's blank line, so the .sats (which
+# keeps a line for each line of the source) is not moved, and the write of the
+# .dats is the only clear. It comes after the first bin's listing, whose graph
+# holds the second bin's old .dats. A clear that is dropped leaves the second
+# bin's key without the .hats.
+incl() { # <text>: writes the .hats into build/ and every mark's build/
+  for d in build build/.stash/*; do
+    [ -d "$d" ] && printf '%s\n' "$1" > "$d/names_graph_inc.hats"
+  done
+  return 0
+}
+incl '(* names_graph_inc *)'
+printf '#target native\n#include "share/atspre_staload.hats"\nstaload "mid.sats"\n#include "names_graph_inc.hats"\nimplement main0 () = println! ("got ", mid ())\n' > "$P/src/bin/app.bats"
+printf '#target native\n#include "share/atspre_staload.hats"\nstaload "base.sats"\n#include "names_graph_inc.hats"\nimplement main0 () = println! ("tool ", base ())\n' > "$P/src/bin/tool.bats"
+run t1.log check
+only t1.log "a .hats that app and tool include is seen by the next check" base mid other app tool web
+run t2.log check
+quiet t2.log "the check after app and tool include a .hats"
+# the .hats changes under the same name, so no name changes: the two bins that
+# include it are checked by their closure (which the key holds), and no other
+# module is. A bin whose key lacks the .hats (its closure was listed before the
+# .hats was in it) keeps its key, and a change to the .hats goes unseen.
+incl '(* names_graph_inc: changed *)'
+run t3.log check
+only t3.log "a .hats that app and tool include changed under its name: the two bins are checked" app tool
+run t4.log check
+quiet t4.log "the check after the .hats changed"
 echo "names-graph: ok"

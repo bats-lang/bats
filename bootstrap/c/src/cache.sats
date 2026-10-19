@@ -295,6 +295,69 @@ staload "_bats_inputs.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn toolchain_digest {lph:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int, out: !$B.builder_v >> $B.builder_v): bool
 
@@ -617,7 +680,8 @@ fn toolchain_digest {lph:agz}
 
 
 
-fn closure_key_equal {lk:agz} (key_bv: !$A.borrow(byte, lk, 524288)): bool
+fn closure_key_equal {lk:agz}{nk:pos}{mk:nat | mk <= nk; mk <= 524288}
+  (key_bv: !$A.borrow(byte, lk, nk), mk: int mk): bool
 
 
 
@@ -683,7 +747,6 @@ fn memo_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
-
 fn module_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
@@ -692,8 +755,6 @@ fn module_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 fn memo_fresh_in_check (out_b: $B.builder_v, in_b: $B.builder_v): bool
-
-
 
 
 
@@ -831,6 +892,8 @@ fn run_patsopt {lph:agz}{lo:agz}{li:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
    in_bv: !$A.borrow(byte, li, 524288), in_len: int): int
+
+
 
 
 

@@ -296,8 +296,9 @@ datavtype pkg =
 
 (* pk with the file at the NUL-terminated path p (at fi in the file
    list) *)
-fn add_file {lp:agz} (p: !$A.borrow(byte, lp, RMAX), fi: spos(RMAX), pk: pkg): pkg =
-  case+ read_whole(p, RMAX) of
+fn add_file {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= RMAX}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, fi: spos(RMAX), pk: pkg): pkg =
+  case+ read_whole_m(p, pm) of
   | ~whole_err(_) => pk
   | ~whole_ok(ar, piece, sn, n) => let
       val+ ~Pkg(pf, nm, t, g) = pk
@@ -323,9 +324,9 @@ fun add_files {lf:agz}{off:nat | off <= RMAX} .<RMAX - off>.
     val e = $S.find_null_bv_at(files, off, RMAX)
     var pb : $B.builder_v = $B.create()
     val () = copy_to_builder_v(files, off, e + 1, RMAX, pb)
-    val @(pa, _) = $B.to_arr(pb)
+    val @(pa, pal) = $B.into_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-    val pk2 = add_file(bv_p, off, pk)
+    val pk2 = add_file(bv_p, pal, off, pk)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
   in

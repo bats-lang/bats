@@ -1227,7 +1227,7 @@ fn closure_state {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
     val ia = nul_path(built_path(bv_f, mlen, ".sats"))
     val @(fz_i, bv_i) = $A.freeze<byte>(ia)
     var iline : $B.builder_v = $B.create()
-    val hashed = (if keyed then memo_entry_hash(bv_i, iline) else false): bool
+    val hashed = (if keyed then memo_entry_hash(bv_i, 524288, iline) else false): bool
     val iline2 = iline
     val wrote_iface = (if hashed then path_write(work_text(cfg, w, "memo.iface"), iline2)
       else let val () = $B.builder_free(iline2) in false end): bool
@@ -1319,7 +1319,7 @@ fn lookup {l:agz}{lm:agz}{lk:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings
       val @(fz_a, bv_a) = $A.freeze<byte>(a)
       (* a check ran in a process of its own since any digest kept here *)
       val () = digests_forget()
-      val r = closure_key_equal(bv_a)
+      val r = closure_key_equal(bv_a, 524288)
       val () = $A.drop<byte>(fz_a, bv_a)
       val () = $A.free<byte>($A.thaw<byte>(fz_a))
     in r end else let val () = $B.builder_free(kpath2) in false end): bool
@@ -1460,7 +1460,7 @@ fn iface_same {l:agz}{lx:agz} (cfg: !$A.borrow(byte, l, 524288), w: settings,
   val ia = nul_path(built_path(bv_f, mlen, ".sats"))
   val @(fz_i, bv_i) = $A.freeze<byte>(ia)
   var cur : $B.builder_v = $B.create()
-  val ok = memo_entry_hash(bv_i, cur)
+  val ok = memo_entry_hash(bv_i, 524288, cur)
   val ka = $A.alloc<byte>(524288): [l_ka:agz] $A.arr(byte, l_ka, 524288)
   val kn = path_read(work_text(cfg, w, "memo.iface"), ka)
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)

@@ -172,7 +172,7 @@ in r.0 = 0 end
 
 (* The bytes of a builder, hashed into c; the builder is consumed *)
 fn hash_builder (c: !$SHA.ctx, b: $B.builder_v): void = let
-  val @(ba, bl) = $B.to_arr(b)
+  val @(ba, bl) = $B.into_arr(b)
   val () = $SHA.update(c, ba, bl)
   val () = $A.free<byte>(ba)
 in end
