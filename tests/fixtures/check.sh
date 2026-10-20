@@ -151,15 +151,18 @@ failed() { grep -aqF "FAIL $2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: no F
 SNORM='fn h {n:nat} (x: int n): [m:nat] int m = x - 1'
 # an existential's binder: patsopt's S2Eexi(n(8480); ... is compared as S2Eexi(n(_); ...
 SEXI='fn h (f: char): [n:nat] bool = f'
-EXI_HEAD='the dynamic expression cannot be assigned the type [S2Eexi(NAME(NUM); S2Eapp(S2Ecst(>=); S2Evar(NAME(NUM)), S2Eintinf(0)); S2Ecst(bool_t0ype))].
+EXI_HEAD='the dynamic expression cannot be assigned the type [S2Eexi(EXI_NAME(EXI_NUM); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))].
 mismatch of static terms (tyleq):
 The actual term is: S2Ecst(char_t0ype)
 The needed term is: S2Ecst(bool_t0ype)
 mismatch of static terms (tyleq):
 The actual term is: S2Ecst(char_t0ype)
-The needed term is: S2Eexi(NAME(NUM); S2Eapp(S2Ecst(>=); S2Evar(NAME(NUM)), S2Eintinf(0)); S2Ecst(bool_t0ype))'
+The needed term is: S2Eexi(EXI_NAME(EXI_NUM); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))'
 # exi_expect <name> <number>: the expect for SEXI, with that binder name and number
-exi_expect() { printf 'function h\nline 1\n%s' "$EXI_HEAD" | sed -e "s/NAME/$1/g" -e "s/NUM/$2/g"; }
+# in its S2Eexi tokens only. Its S2Evar tokens stay n(14465), the value patsopt
+# prints, so a near-miss differs from the real error in its S2Eexi token alone:
+# the fixture then fails because of the S2Eexi rule and nothing else.
+exi_expect() { printf 'function h\nline 1\n%s' "$EXI_HEAD" | sed -e "s/EXI_NAME/$1/g" -e "s/EXI_NUM/$2/g"; }
 ENORM='unsolved constraint: C3NSTRprop(C3TKmain(); S2Eapp(S2Ecst(>=); S2EVar(1->S2Eapp(S2Ecst(sub_int_int); S2Evar(n(2)), S2Eintinf(1))), S2Eintinf(0)))'
 
 if [ "$ONLY" != memo ]; then
