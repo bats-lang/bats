@@ -1107,11 +1107,11 @@ end
 implement do_completions(target) =
   case+ target of
   | Bash() =>
-    print_string "# bash completions\ncomplete -W 'build check clean lock run test tree add remove upload init ats2 clone-repository record-commit completions with-env fixtures' bats\n"
+    print_string "# bash completions\ncomplete -W 'build check clean lock run test tree add remove upload init ats2 clone-repository record-commit check-pins completions with-env fixtures' bats\n"
   | Zsh() =>
-    print_string "#compdef bats\n_bats_cmds=(build check clean lock run test tree add remove upload init ats2 clone-repository record-commit completions with-env fixtures)\ncompadd $_bats_cmds\n"
+    print_string "#compdef bats\n_bats_cmds=(build check clean lock run test tree add remove upload init ats2 clone-repository record-commit check-pins completions with-env fixtures)\ncompadd $_bats_cmds\n"
   | Fish() =>
-    print_string "# fish completions\nfor c in build check clean lock run test tree add remove upload init ats2 clone-repository record-commit completions with-env fixtures; complete -c bats -n __fish_use_subcommand -a $c; end\n"
+    print_string "# fish completions\nfor c in build check clean lock run test tree add remove upload init ats2 clone-repository record-commit check-pins completions with-env fixtures; complete -c bats -n __fish_use_subcommand -a $c; end\n"
 
 (* Check if a file exists by trying to open it *)
 
