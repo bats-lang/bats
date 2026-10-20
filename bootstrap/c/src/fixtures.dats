@@ -956,15 +956,11 @@ fn path_remove (b: $B.builder_v): void = let
 in $A.free<byte>($A.thaw<byte>(fz)) end
 
 (* mkdir of the NUL-terminated path in the first k bytes of a, which is consumed; a is the builder's own and larger than the path *)
-fn mkdir_arr {l:agz}{cap:pos}{k:nat | k <= cap; k < 1048576} (a: $A.arr(byte, l, cap), k: int k): void =
-  if k <= 0 then $A.free<byte>(a)
-  else let
-    val @(fz, bv) = $A.freeze<byte>(a)
-    val @(path, rest) = $A.borrow_split<byte>(fz, bv, k)
-    val () = $R.discard<int><$F.io_error>($F.file_mkdir(path, k, 493))
-    val whole = $A.borrow_join<byte>(fz, path, rest)
-    val () = $A.drop<byte>(fz, whole)
-  in $A.free<byte>($A.thaw<byte>(fz)) end
+fn mkdir_arr {l:agz}{cap:pos}{k:nat | k <= cap; k <= 524288} (a: $A.arr(byte, l, cap), k: int k): void = let
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val () = $R.discard<int><$F.io_error>(file_mkdir_m(bv, k, 493))
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
 
 fn path_mkdir (b: $B.builder_v): void = let
   val @(a, n) = path_into(b)
@@ -1087,11 +1083,9 @@ in $A.free<byte>($A.thaw<byte>(fz)) end
 fn chdir_path (b: $B.builder_v): bool = let
   val @(a, k) = path_into(b)
   val @(fz, bv) = $A.freeze<byte>(a)
-  val @(path, rest) = $A.borrow_split<byte>(fz, bv, k)
-  val ok = (if k > 0 then (case+ $F.file_chdir(path, k) of
-    | ~$R.ok(_) => true | ~$R.err(_) => false) else false): bool
-  val whole = $A.borrow_join<byte>(fz, path, rest)
-  val () = $A.drop<byte>(fz, whole)
+  val ok = (case+ file_chdir_m(bv, k) of
+    | ~$R.ok(_) => true | ~$R.err(_) => false): bool
+  val () = $A.drop<byte>(fz, bv)
 in ($A.free<byte>($A.thaw<byte>(fz)); ok) end
 
 (* ---- where the memo is ---- *)

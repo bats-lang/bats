@@ -546,8 +546,8 @@ fn is_directory {l:agz}{n:pos}{k:nat | k <= n; k <= 524288} (bv: !$A.borrow(byte
   | ~$R.err(_) => false
 
 (* Whether the file at the NUL-terminated name path[0, k) has an execute bit *)
-fn is_executable {l:agz}{k:pos | k < 1048576} (path: !$A.borrow(byte, l, k), k: int k): bool =
-  case+ $F.file_mode(path, k) of
+fn is_executable {l:agz}{n:pos}{k:nat | k <= n; k <= 524288} (path: !$A.borrow(byte, l, n), k: int k): bool =
+  case+ file_mode_m(path, k) of
   | ~$R.ok(m) => let
       val m0 = g0ofg1(m)
     in (m0 / 64) % 2 + (m0 / 8) % 2 + m0 % 2 > 0 end
@@ -578,10 +578,8 @@ fn try_candidate {lp:agz}{np:pos}{plen:nat | plen <= np}{lc:agz}{p:nat | p <= pl
   val @(fz_c, bv_c) = $A.freeze<byte>(candidate_a)
   val exists = file_exists_m(bv_c, k)
   val directory = (if exists then is_directory(bv_c, k) else false): bool
-  val @(path, rest) = $A.borrow_split<byte>(fz_c, bv_c, k)
-  val executable = (if k > 0 then (if exists && ~directory then is_executable(path, k) else false) else false): bool
-  val whole = $A.borrow_join<byte>(fz_c, path, rest)
-  val () = $A.drop<byte>(fz_c, whole)
+  val executable = (if exists && ~directory then is_executable(bv_c, k) else false): bool
+  val () = $A.drop<byte>(fz_c, bv_c)
   val () = $A.free<byte>($A.thaw<byte>(fz_c))
 in (if ~exists then 0 else if directory then 1 else if executable then 2 else 1) end
 

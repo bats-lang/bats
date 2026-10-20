@@ -387,15 +387,11 @@ fun prerr_path {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
   in prerr_path(lst, p + 1, e) end
 
 (* mkdir of the NUL-terminated path in the first k bytes of a (consumed), which is the builder's own array *)
-fn mkdir_arr {l:agz}{cap:pos}{k:nat | k <= cap; k < 1048576} (a: $A.arr(byte, l, cap), k: int k): void =
-  if k <= 0 then $A.free<byte>(a)
-  else let
-    val @(fz, bv) = $A.freeze<byte>(a)
-    val @(path, rest) = $A.borrow_split<byte>(fz, bv, k)
-    val () = $R.discard<int><$F.io_error>($F.file_mkdir(path, k, 493))
-    val whole = $A.borrow_join<byte>(fz, path, rest)
-    val () = $A.drop<byte>(fz, whole)
-  in $A.free<byte>($A.thaw<byte>(fz)) end
+fn mkdir_arr {l:agz}{cap:pos}{k:nat | k <= cap; k <= 524288} (a: $A.arr(byte, l, cap), k: int k): void = let
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val () = $R.discard<int><$F.io_error>(file_mkdir_m(bv, k, 493))
+  val () = $A.drop<byte>(fz, bv)
+in $A.free<byte>($A.thaw<byte>(fz)) end
 
 (* Writes page to docs/<module>.md when it has entries (n > 0), the
    module name being files[ns, ne); consumes page. 1 when written, 0

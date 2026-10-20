@@ -194,6 +194,45 @@ implement dir_read_m (p, m) = let
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
 
+(* $F.file_mkdir of the path at its own length, in the first m bytes of an
+   array of n (the length path_short gives is positive by its type) *)
+#pub fn file_mkdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, mode: int): $R.result(int, $F.io_error)
+
+implement file_mkdir_m (p, m, mode) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_mkdir(bv, k, mode)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.file_chdir of the path at its own length, in the first m bytes of an
+   array of n *)
+#pub fn file_chdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result(int, $F.io_error)
+
+implement file_chdir_m (p, m) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_chdir(bv, k)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.file_mode of the path at its own length, in the first m bytes of an
+   array of n *)
+#pub fn file_mode_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result([k:nat | k <= 4095] int k, $F.io_error)
+
+implement file_mode_m (p, m) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_mode(bv, k)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
 (* ============================================================
    Global state using ATS2 refs (replaces C statics)
    ============================================================ *)

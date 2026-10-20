@@ -208,6 +208,45 @@ fn dir_read_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
 
 
 
+fn file_mkdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, mode: int): $R.result(int, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+fn file_chdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result(int, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+fn file_mode_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result([k:nat | k <= 4095] int k, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

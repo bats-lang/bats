@@ -506,10 +506,6 @@ fn sorted_bats_files_m (dir: $B.builder_v)
 
 
 
-
-
-
-
 fn generate_docs {l:agz}{n:pos}
   (name: !$A.borrow(byte, l, n), nlen: int, max: int n): int
 
