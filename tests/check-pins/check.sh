@@ -291,6 +291,12 @@ ok_package pkg-git-commit '{
     "a": "github:owner/repo#0123456789abcdef0123456789abcdef01234567"
   }
 }' package-lock.json
+ok_package pkg-workspace '{
+  "devDependencies": {
+    "a": "workspace:*",
+    "b": "workspace:^1.0.0"
+  }
+}' package-lock.json
 ok_package pkg-peer-range '{
   "peerDependencies": {
     "@capacitor/core": ">=8"
@@ -308,6 +314,11 @@ ok_package pkg-range-in-text '{
     "x": "npm install a@^1"
   }
 }' package-lock.json
+bad_package pkg-workspace-prefix '{
+  "dependencies": {
+    "a": "workspaces:*"
+  }
+}' package-lock.json "is not at an exact version" 3
 bad_package pkg-caret '{
   "devDependencies": {
     "a": "^1.0.0"

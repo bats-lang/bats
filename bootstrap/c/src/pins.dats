@@ -690,10 +690,11 @@ fun find_byte {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
   else if read_byte(bv, p, n) = c then p
   else find_byte(bv, p + 1, e, n, c)
 
-(* Whether a dependency version bv[a, b) is exact, or a git commit *)
+(* Whether a dependency version bv[a, b) is exact, a git commit, or a workspace: package (local source, pinned by the commit) *)
 fn dependency_ok {l:agz}{n:pos}{a,b:nat | a <= b; b <= n}
   (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n): bool =
   if exact_version(bv, a, b, n) then true
+  else if lit_from(bv, a, b, n, "workspace:", 10, 0) then true
   else if lit_from(bv, a, b, n, "github:", 7, 0) then
     (if b - 41 < a then false
     else if read_byte(bv, b - 41, n) <> 35 then false
