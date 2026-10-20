@@ -149,6 +149,17 @@ failed() { grep -aqF "FAIL $2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: no F
 
 # patsopt's own text for the snippet the norm fixture holds
 SNORM='fn h {n:nat} (x: int n): [m:nat] int m = x - 1'
+# an existential's binder: patsopt's S2Eexi(n(8480); ... is compared as S2Eexi(n(_); ...
+SEXI='fn h (f: char): [n:nat] bool = f'
+EXI_HEAD='the dynamic expression cannot be assigned the type [S2Eexi(NAME(NUM); S2Eapp(S2Ecst(>=); S2Evar(NAME(NUM)), S2Eintinf(0)); S2Ecst(bool_t0ype))].
+mismatch of static terms (tyleq):
+The actual term is: S2Ecst(char_t0ype)
+The needed term is: S2Ecst(bool_t0ype)
+mismatch of static terms (tyleq):
+The actual term is: S2Ecst(char_t0ype)
+The needed term is: S2Eexi(NAME(NUM); S2Eapp(S2Ecst(>=); S2Evar(NAME(NUM)), S2Eintinf(0)); S2Ecst(bool_t0ype))'
+# exi_expect <name> <number>: the expect for SEXI, with that binder name and number
+exi_expect() { printf 'function h\nline 1\n%s' "$EXI_HEAD" | sed -e "s/NAME/$1/g" -e "s/NUM/$2/g"; }
 ENORM='unsolved constraint: C3NSTRprop(C3TKmain(); S2Eapp(S2Ecst(>=); S2EVar(1->S2Eapp(S2Ecst(sub_int_int); S2Evar(n(2)), S2Eintinf(1))), S2Eintinf(0)))'
 
 if [ "$ONLY" != memo ]; then
@@ -174,6 +185,8 @@ fixture "$G" reject blank-line 'fn g (x: int): int = x
 #error "first\n\nsecond"' 'function g
 line 2
 [#error] directive is encountered: first'
+# the number of an existential's binder is other than patsopt's
+fixture "$G" reject exi-numbered "$SEXI" "$(exi_expect n 14465)"
 run "$TMP/good.log" "$G" --cold
 [ $rc = 0 ] || { cat "$TMP/good.log"; fail "good fixtures: status $rc"; }
 okline "$TMP/good.log" accept/ok good
@@ -181,7 +194,8 @@ okline "$TMP/good.log" reject/nonexhaustive good
 okline "$TMP/good.log" reject/numbered good
 okline "$TMP/good.log" reject/dollar good
 okline "$TMP/good.log" reject/blank-line good
-said "$TMP/good.log" "fixtures: 5 ok, 0 failed" good
+okline "$TMP/good.log" reject/exi-numbered good
+said "$TMP/good.log" "fixtures: 6 ok, 0 failed" good
 nofail "$TMP/good.log" good
 [ -z "$(ls "$TMP/tmp")" ] || fail "the run left a temporary directory: $(ls "$TMP/tmp")"
 # the project is as it was
@@ -246,6 +260,9 @@ printf '(* not in the module *)\n' > "$B/accept/no-such-line/before"
 fixture "$B" reject number-kept "$SNORM" "function h
 line 1
 $(printf '%s' "$ENORM" | sed -e 's/Eintinf(1)/Eintinf(7)/')"
+# the binder's name is still compared, and so is a number that is not digits
+fixture "$B" reject exi-other-name "$SEXI" "$(exi_expect m 14465)"
+fixture "$B" reject exi-number-not-digits "$SEXI" "$(exi_expect n 14x65)"
 run "$TMP/bad.log" "$B"
 [ $rc = 1 ] || { cat "$TMP/bad.log"; fail "bad fixtures: status $rc, not 1"; }
 L=$TMP/bad.log
@@ -255,6 +272,8 @@ saidpart "$L" "FAIL reject/other-word: rejected, but not as its expect says: its
 saidpart "$L" "FAIL reject/missing-line: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/extra-line: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/number-kept: rejected, but not as its expect says: its error is not the one expected:" bad
+saidpart "$L" "FAIL reject/exi-other-name: rejected, but not as its expect says: its error is not the one expected:" bad
+saidpart "$L" "FAIL reject/exi-number-not-digits: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/other-line: rejected, but not as its expect says: an error is at line 1 of its snippet, not 2: " bad
 saidpart "$L" "FAIL reject/other-function: rejected, but not as its expect says: line 1 of its snippet is not in g" bad
 saidpart "$L" "FAIL reject/no-declaration: rejected, but not as its expect says: line 0 of its snippet is not in h" bad
@@ -266,7 +285,7 @@ saidpart "$L" "FAIL reject/no-patsopt-error: rejected, but not as its expect say
 saidpart "$L" "FAIL reject/other-module: rejected, but not as its expect says: an error is in " bad
 saidpart "$L" "/src/other.bats, not src/lib.bats: unsolved constraint" bad
 saidpart "$L" "FAIL accept/no-such-line: no line \"(* not in the module *)\" in src/lib.bats" bad
-said "$L" "fixtures: 0 ok, 17 failed" bad
+said "$L" "fixtures: 0 ok, 19 failed" bad
 # the raw error is shown for a mismatch, so the reader can fix the expect
 saidpart "$L" "pattern match is nonexhaustive:" bad
 

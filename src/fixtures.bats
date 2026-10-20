@@ -24,7 +24,7 @@
    nothing else may fail. A substring that another error could also hold is
    not enough. Only patsopt's variable numbers, which change with anything
    before the snippet, are compared as "_": the number of S2EVar(N->, of
-   $N( and of S2Evar(name(N)). An expect that is not "function <name>",
+   $N( and of S2Evar(name(N)) and S2Eexi(name(N). An expect that is not "function <name>",
    "line <n>", then the error is an error of the fixture, never a pass.
 
    The project is copied to <work>/app (everything but build, dist, .git,
@@ -348,6 +348,8 @@ fun ident_end {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
      S2EVar(<n>->           a unification variable (kind 1)
      $<n>(                  a dynamic variable: handed$6116(-1) (kind 2)
      S2Evar(<name>(<n>))    a static variable (kind 3)
+     S2Eexi(<name>(<n>)     a static variable an existential binds (kind 4):
+                            S2Eexi(out_cells_after(14465); ; S2Eexi(...
 
    the end of the match, ~1 when there is none *)
 fn variable_end {l:agz}{len:nat | len <= 524288}{p:nat | p <= len}
@@ -364,6 +366,15 @@ fn variable_end {l:agz}{len:nat | len <= 524288}{p:nat | p <= len}
         (if s < len then step_text(bv, len, step_digits(bv, len, step_text(bv, len, ident_end(bv, len, s), "(")), "))") else ~1)
       else ~1
     end
+    else if text_has(bv, len, p, "S2Eexi(") then let
+      val s = p + 7
+      val c = byte_at(bv, len, s)
+      val named = ((c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c = 95): bool
+    in
+      if named then
+        (if s < len then step_text(bv, len, step_digits(bv, len, step_text(bv, len, ident_end(bv, len, s), "(")), ")") else ~1)
+      else ~1
+    end
     else ~1): int
   val r = g1ofg0(raw)
 in
@@ -375,6 +386,7 @@ fn variable_kind {l:agz}{len:nat | len <= 524288}
   (bv: !$A.borrow(byte, l, 524288), len: int len, p: xi): int =
   if text_has(bv, len, p, "S2EVar(") then 1
   else if byte_at(bv, len, p) = 36 then 2
+  else if text_has(bv, len, p, "S2Eexi(") then 4
   else 3
 
 (* What stands for the variable number of the given kind at p *)
@@ -382,6 +394,11 @@ fn put_normal {l:agz}{len:nat | len <= 524288}{p:nat | p <= len}
   (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, kind: int, out: !$B.builder_v >> $B.builder_v): void =
   if kind = 1 then bput_v(out, "S2EVar(_->")
   else if kind = 2 then bput_v(out, "$_(")
+  else if kind = 4 then let
+    val () = bput_v(out, "S2Eexi(")
+    val s = p + 7
+    val () = (if s <= len then put_range(bv, len, s, ident_end(bv, len, s), out) else ())
+  in bput_v(out, "(_)") end
   else let
     val () = bput_v(out, "S2Evar(")
     val s = p + 7
