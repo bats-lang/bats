@@ -419,6 +419,12 @@ primplement nth_functional {cs}{i}{v,w} (p, q) = _nth_functional(p, q)
 
 
 
+(* Cells i to i + 3, the bytes of a big-endian word most significant first, with the proof of each *)
+
+
+
+
+
 (* Cell i set to v: the cells that are left, with the proof that they are *)
 
 
@@ -613,6 +619,14 @@ implement barr_get {l}{n,i}{cs} (a, i) =
   
     $UNSAFE.cast{[v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)}(byte2int0($UNSAFE.ptr0_get<byte>(ptr_add<byte>(a, i))))
   
+
+(* Not trusted: four barr_get, in this module so the C compiler inlines them *)
+implement barr_get_be32 {l}{n,i}{cs} (a, i) = let
+  val (p0 | b0) = barr_get{l}{n,i}{cs}(a, i)
+  val (p1 | b1) = barr_get{l}{n,i+1}{cs}(a, i + 1)
+  val (p2 | b2) = barr_get{l}{n,i+2}{cs}(a, i + 2)
+  val (p3 | b3) = barr_get{l}{n,i+3}{cs}(a, i + 3)
+in (p0, p1, p2, p3 | @(b0, b1, b2, b3)) end
 
 implement barr_set {l}{n,i}{cs}{v} (a, i, v) = let
   val () =  $UNSAFE.ptr0_set<byte>(ptr_add<byte>(a, i), $UNSAFE.cast{byte}(v)) 
