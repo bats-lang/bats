@@ -92,14 +92,15 @@ quiet() { # <log> <what>
   grep -aq '(unchanged)' "$1" || { echo "FAIL: $2 did not say a module was unchanged"; cat "$1"; exit 1; }
   echo "names-graph: $2: quiet"
 }
-# --- a cold check, and the very next one. The cold check writes the first
-# bin's key before the second bin's .sats exists, so that key names one .sats
-# fewer: the check after the cold one checks the first bin once more (measured
-# on the seed compiler, #348), and the one after that is quiet
+# --- a cold check settles in one check (bats#353): the keys of the first bin
+# were once written before the second bin's .sats existed, so they named one
+# .sats fewer than the next listing and the check after the cold one checked
+# the first bin again. All the bins are preprocessed before any is checked.
 run c0.log check
 run c0b.log check
+quiet c0b.log "the check after a cold check"
 run c1.log check
-quiet c1.log "the check after a cold check"
+quiet c1.log "the second check after a cold check"
 # --- a .sats added: a module added
 extra
 run a1.log check
