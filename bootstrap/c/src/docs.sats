@@ -368,16 +368,6 @@ staload "lexer.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
 fn sorted_bats_files (dir: $B.builder_v): @([l:agz] $A.arr(byte, l, 524288), int)
 
 
@@ -386,6 +376,14 @@ fn sorted_bats_files (dir: $B.builder_v): @([l:agz] $A.arr(byte, l, 524288), int
 
 fn sorted_bats_files_m (dir: $B.builder_v)
   : [n:nat | n <= $B.BUILDER_CAP][cap:pos | n <= cap; cap <= $B.BUILDER_CAP][l:agz] @($A.arr(byte, l, cap), int n)
+
+
+
+
+
+
+
+
 
 
 

@@ -161,11 +161,10 @@ fun put_entries {ls:agz}{ns:pos}{k:nat} .<k>.
        in put_entries(src, max, tl, out, count + 1, ut) end
      | _ => put_entries(src, max, tl, out, count, ut))
 
-(* The entries of the .bats file at path, appended to out; the number of
-   them, or ~1 when the file cannot be read. *)
-fn put_file_entries {lp:agz}
-  (path: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): int =
-  case+ read_whole(path, 524288) of
+(* The entries of the .bats file at path[0, pm) appended to out, their number, or ~1 when it cannot be read *)
+fn put_file_entries {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (path: !$A.borrow(byte, lp, np), pm: int pm, out: !$B.builder_v >> $B.builder_v): int =
+  case+ read_whole_m(path, pm) of
   | ~whole_ok(ar, piece, m, nbytes) => let
       val @(fz_src, bv_src) = $A.freeze<byte>(piece)
       val xs = lex_spans(bv_src, nbytes, m)
@@ -179,15 +178,6 @@ fn put_file_entries {lp:agz}
 (* ============================================================
    Finding the src .bats files, in the Rust bats's order
    ============================================================ *)
-
-(* The path at off in a NUL-separated list, as a NUL-terminated array *)
-fn path_at {l:agz} (lst: !$A.borrow(byte, l, 524288), off: pos_t): [lo:agz] $A.arr(byte, lo, 524288) = let
-  var pb : $B.builder_v = $B.create()
-  val e = find_null_bv_from(lst, off, 524288)
-  val () = copy_to_builder_v(lst, off, e, 524288, pb)
-  val () = put_char_v(pb, 0)
-  val @(pa, _) = $B.to_arr(pb)
-in pa end
 
 (* The path in lst[off, len), NUL-terminated, in the builder's own array
    (the array is larger than the path: bats#327) *)
@@ -289,19 +279,19 @@ in
   in walk_levels(next, files, depth - 1) end
 end
 
-(* The paths of a NUL-separated list, each by its range [s, e) *)
-datavtype plist(int) =
-  | plist_nil(0) of ()
-  | {k:nat}{s,e:nat | s <= e; e <= 524288} plist_cons(k + 1) of (int s, int e, plist(k))
+(* The paths of a NUL-separated list of m bytes, each by its range [s, e) inside them *)
+datavtype plist(int, int) =
+  | {m:nat} plist_nil(0, m) of ()
+  | {k:nat}{m:nat}{s,e:nat | s <= e; e <= m} plist_cons(k + 1, m) of (int s, int e, plist(k, m))
 
-fun plist_free {k:nat} .<k>. (xs: plist(k)): void =
+fun plist_free {k,m:nat} .<k>. (xs: plist(k, m)): void =
   case+ xs of
   | ~plist_nil() => ()
   | ~plist_cons(_, _, tl) => plist_free(tl)
 
 (* The paths of lst[off, len), onto acc *)
 fun parse_paths {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{off:nat | off <= m}{k:nat} .<m - off>.
-  (lst: !$A.borrow(byte, l, n), m: int m, off: int off, len: int, acc: plist(k)): [k2:nat] plist(k2) =
+  (lst: !$A.borrow(byte, l, n), m: int m, off: int off, len: int, acc: plist(k, m)): [k2:nat] plist(k2, m) =
   if off >= len then acc
   else let
     val e = nul_in(lst, off, m)
@@ -313,7 +303,7 @@ fun parse_paths {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{off:nat | off <= m}{
 (* Byte i of the path [x, xe), for ordering: ~1 past its end and 0 for
    '/', so that paths order component by component, as Rust's PathBuf
    does *)
-fn path_key {l:agz}{n:pos}{m:nat | m <= n}{x,xe,i:nat | x <= xe; xe <= 524288}
+fn path_key {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{x,xe,i:nat | x <= xe; xe <= m}
   (lst: !$A.borrow(byte, l, n), m: int m, x: int x, xe: int xe, i: int i): int =
   if x + i >= xe then ~1
   else let
@@ -321,7 +311,7 @@ fn path_key {l:agz}{n:pos}{m:nat | m <= n}{x,xe,i:nat | x <= xe; xe <= 524288}
   in if b = 47 then 0 else b end
 
 (* Whether the path [a, ae) orders before the path [b, be) *)
-fun path_less {l:agz}{n:pos}{m:nat | m <= n}{a,ae,b,be,i:nat | a <= ae; ae <= 524288; b <= be; be <= 524288; i <= ae - a} .<ae - a - i>.
+fun path_less {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{a,ae,b,be,i:nat | a <= ae; ae <= m; b <= be; be <= m; i <= ae - a} .<ae - a - i>.
   (lst: !$A.borrow(byte, l, n), m: int m, a: int a, ae: int ae, b: int b, be: int be, i: int i): bool = let
   val ka = path_key(lst, m, a, ae, i)
   val kb = path_key(lst, m, b, be, i)
@@ -333,28 +323,28 @@ in
 end
 
 (* The path [s, e) inserted into the sorted xs *)
-fun path_insert {l:agz}{n:pos}{m:nat | m <= n}{s,e:nat | s <= e; e <= 524288}{k:nat} .<k>.
-  (lst: !$A.borrow(byte, l, n), m: int m, s: int s, e: int e, xs: plist(k)): plist(k + 1) =
+fun path_insert {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{s,e:nat | s <= e; e <= m}{k:nat} .<k>.
+  (lst: !$A.borrow(byte, l, n), m: int m, s: int s, e: int e, xs: plist(k, m)): plist(k + 1, m) =
   case+ xs of
   | ~plist_nil() => plist_cons(s, e, plist_nil())
   | ~plist_cons(s2, e2, tl) =>
     if path_less(lst, m, s, e, s2, e2, 0) then plist_cons(s, e, plist_cons(s2, e2, tl))
     else plist_cons(s2, e2, path_insert(lst, m, s, e, tl))
 
-fun path_sort {l:agz}{n:pos}{m:nat | m <= n}{k,j:nat} .<k>.
-  (lst: !$A.borrow(byte, l, n), m: int m, xs: plist(k), acc: plist(j)): plist(k + j) =
+fun path_sort {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{k,j:nat} .<k>.
+  (lst: !$A.borrow(byte, l, n), m: int m, xs: plist(k, m), acc: plist(j, m)): plist(k + j, m) =
   case+ xs of
   | ~plist_nil() => acc
   | ~plist_cons(s, e, tl) => path_sort(lst, m, tl, path_insert(lst, m, s, e, acc))
 
 (* The paths of files[0, len), sorted *)
 fn sorted_paths {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (files: !$A.borrow(byte, l, n), m: int m, len: int): [k:nat] plist(k) =
+  (files: !$A.borrow(byte, l, n), m: int m, len: int): [k:nat] plist(k, m) =
   path_sort(files, m, parse_paths(files, m, 0, len, plist_nil()), plist_nil())
 
 (* The paths xs of files, each NUL-terminated, appended to out *)
 fun put_paths {l:agz}{n:pos}{m:nat | m <= n}{k:nat} .<k>.
-  (files: !$A.borrow(byte, l, n), m: int m, xs: !plist(k), out: !$B.builder_v >> $B.builder_v): void =
+  (files: !$A.borrow(byte, l, n), m: int m, xs: !plist(k, m), out: !$B.builder_v >> $B.builder_v): void =
   case+ xs of
   | plist_nil() => ()
   | plist_cons(s, e, tl) => let
@@ -396,19 +386,30 @@ in @(a, n) end
    Writing docs/
    ============================================================ *)
 
-fun prerr_path {l:agz}{p,e:nat | p <= e; e <= 524288} .<e - p>.
-  (lst: !$A.borrow(byte, l, 524288), p: int p, e: int e): void =
+fun prerr_path {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (lst: !$A.borrow(byte, l, n), p: int p, e: int e): void =
   if p >= e then ()
   else let
     val () = prerr_char(int2char0(byte2int0($A.read<byte>(lst, p))))
   in prerr_path(lst, p + 1, e) end
 
+(* mkdir of the NUL-terminated path in the first k bytes of a (consumed), which is the builder's own array *)
+fn mkdir_arr {l:agz}{cap:pos}{k:nat | k <= cap; k < 1048576} (a: $A.arr(byte, l, cap), k: int k): void =
+  if k <= 0 then $A.free<byte>(a)
+  else let
+    val @(fz, bv) = $A.freeze<byte>(a)
+    val @(path, rest) = $A.borrow_split<byte>(fz, bv, k)
+    val () = $R.discard<int><$F.io_error>($F.file_mkdir(path, k, 493))
+    val whole = $A.borrow_join<byte>(fz, path, rest)
+    val () = $A.drop<byte>(fz, whole)
+  in $A.free<byte>($A.thaw<byte>(fz)) end
+
 (* Writes page to docs/<module>.md when it has entries (n > 0), the
    module name being files[ns, ne); consumes page. 1 when written, 0
    when there was nothing to write, ~1 on an error (n < 0: the file at
    files[off, e) could not be read). *)
-fn write_page {l:agz}{off,e:nat | off <= e; e <= 524288}
-  (page: $B.builder_v, n: int, files: !$A.borrow(byte, l, 524288),
+fn write_page {l:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{off,e:nat | off <= e; e <= fm}
+  (page: $B.builder_v, n: int, files: !$A.borrow(byte, l, nf), fm: int fm,
    off: int off, e: int e, ns: pos_t, ne: pos_t): int =
   if n < 0 then let
     val () = $B.builder_free(page)
@@ -423,19 +424,16 @@ fn write_page {l:agz}{off,e:nat | off <= e; e <= 524288}
     var mp : $B.builder_v = $B.create()
     val () = bput_v(mp, "docs")
     val () = put_char_v(mp, 0)
-    val @(ma, _) = $B.to_arr(mp)
-    val @(fz_m, bv_m) = $A.freeze<byte>(ma)
-    val () = $R.discard<int><$F.io_error>($F.file_mkdir(bv_m, 524288, 493))
-    val () = $A.drop<byte>(fz_m, bv_m)
-    val () = $A.free<byte>($A.thaw<byte>(fz_m))
+    val @(ma, mk) = $B.into_arr(mp)
+    val () = mkdir_arr(ma, mk)
     var outp : $B.builder_v = $B.create()
     val () = bput_v(outp, "docs/")
-    val () = copy_to_builder_v(files, ns, ne, 524288, outp)
+    val () = copy_to_builder_v(files, ns, ne, fm, outp)
     val () = bput_v(outp, ".md")
     val () = put_char_v(outp, 0)
-    val @(oa, _) = $B.to_arr(outp)
+    val @(oa, ok) = $B.into_arr(outp)
     val @(fz_o, bv_o) = $A.freeze<byte>(oa)
-    val rc = write_settle(bv_o, 524288, write_file_from_builder(bv_o, 524288, page))
+    val rc = write_settle(bv_o, ok, write_file_from_builder_m(bv_o, ok, page))
     val () = $A.drop<byte>(fz_o, bv_o)
     val () = $A.free<byte>($A.thaw<byte>(fz_o))
   in
@@ -447,34 +445,34 @@ fn write_page {l:agz}{off,e:nat | off <= e; e <= 524288}
 (* Writes docs/<module>.md for each file of xs (paths in files), in
    order, adding each written module to idx. Returns count plus the
    modules written, or ~1 on an error. *)
-fun write_modules {l:agz}{k:nat} .<k>.
-  (files: !$A.borrow(byte, l, 524288), xs: !plist(k),
+fun write_modules {l:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{k:nat} .<k>.
+  (files: !$A.borrow(byte, l, nf), fm: int fm, xs: !plist(k, fm),
    idx: !$B.builder_v >> $B.builder_v, count: int): int =
   case+ xs of
   | plist_nil() => count
   | plist_cons(off, e, tl) => let
-      val ns = find_basename_start(files, off, 524288, off - 1)
+      val ns = find_basename_start(files, off, fm, off - 1)
       val ne = e - 5
-      val pa = path_at(files, off)
+      val @(pa, pk) = path_at_m(files, off, fm)
       val @(fz_p, bv_p) = $A.freeze<byte>(pa)
       var page : $B.builder_v = $B.create()
       val () = bput_v(page, "# ")
-      val () = copy_to_builder_v(files, ns, ne, 524288, page)
+      val () = copy_to_builder_v(files, ns, ne, fm, page)
       val () = put_char_v(page, 10)
-      val n = put_file_entries(bv_p, page)
+      val n = put_file_entries(bv_p, pk, page)
       val () = $A.drop<byte>(fz_p, bv_p)
       val () = $A.free<byte>($A.thaw<byte>(fz_p))
-      val r = write_page(page, n, files, off, e, ns, ne)
+      val r = write_page(page, n, files, fm, off, e, ns, ne)
     in
       if r < 0 then ~1
-      else if r = 0 then write_modules(files, tl, idx, count)
+      else if r = 0 then write_modules(files, fm, tl, idx, count)
       else let
         val () = bput_v(idx, "- [")
-        val () = copy_to_builder_v(files, ns, ne, 524288, idx)
+        val () = copy_to_builder_v(files, ns, ne, fm, idx)
         val () = bput_v(idx, "](")
-        val () = copy_to_builder_v(files, ns, ne, 524288, idx)
+        val () = copy_to_builder_v(files, ns, ne, fm, idx)
         val () = bput_v(idx, ".md)\n")
-      in write_modules(files, tl, idx, count + 1) end
+      in write_modules(files, fm, tl, idx, count + 1) end
     end
 
 (* Writes docs/index.md for the modules listed in idx, the package being
@@ -489,14 +487,14 @@ fn write_index {l:agz}{n:pos}
     val () = bput_v(ib, "# ")
     val () = copy_to_builder_v(name, 0, nlen, max, ib)
     val () = bput_v(ib, "\n\n## Modules\n\n")
-    val @(ia, ilen) = $B.to_arr(idx)
+    val @(ia, ilen) = $B.into_arr(idx)
     val @(fz_i, bv_i) = $A.freeze<byte>(ia)
-    val () = copy_to_builder_v(bv_i, 0, ilen, 524288, ib)
+    val () = copy_to_builder_v(bv_i, 0, ilen, ilen, ib)
     val () = $A.drop<byte>(fz_i, bv_i)
     val () = $A.free<byte>($A.thaw<byte>(fz_i))
-    val ip = str_to_path_arr("docs/index.md")
+    val @(ip, ipk) = str_into_arr("docs/index.md")
     val @(fz_ip, bv_ip) = $A.freeze<byte>(ip)
-    val rc = write_settle(bv_ip, 524288, write_file_from_builder(bv_ip, 524288, ib))
+    val rc = write_settle(bv_ip, ipk, write_file_from_builder_m(bv_ip, ipk, ib))
     val () = $A.drop<byte>(fz_ip, bv_ip)
     val () = $A.free<byte>($A.thaw<byte>(fz_ip))
   in
@@ -522,11 +520,11 @@ implement generate_docs(name, nlen, max) = let
   val () = put_char_v(root, 0)
   var files : $B.builder_v = $B.create()
   val () = walk_levels(root, files, 64)
-  val @(fa, flen) = $B.to_arr(files)
+  val @(fa, flen) = $B.into_arr(files)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
   var idx : $B.builder_v = $B.create()
-  val xs = sorted_paths(bv_f, 524288, flen)
-  val count = write_modules(bv_f, xs, idx, 0)
+  val xs = sorted_paths(bv_f, flen, flen)
+  val count = write_modules(bv_f, flen, xs, idx, 0)
   val () = plist_free(xs)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
@@ -551,9 +549,9 @@ fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 
 
 implement generate_lib_docs() = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tpk) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tpk, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
