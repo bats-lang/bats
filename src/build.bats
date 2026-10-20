@@ -483,7 +483,7 @@ end
    uses, for the native bootstrap and for the wasm build. The text is
    written from the use sites in the emitted C and from what each name is
    documented to do, with its own parameter names, bodies and order
-   (CLAUDE.md, "The runtime header": the method, and the residue of
+   (.claude/rules/runtime-header.md, "The runtime header": the method, and the residue of
    one-line macros whose expansion the interface forces, which agree with
    ATS2's headers, GPL-3.0-or-later, bats#283). *)
 fn put_runtime_macros (b: !$B.builder_v >> $B.builder_v): void = let
