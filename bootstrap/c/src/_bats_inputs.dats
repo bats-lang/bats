@@ -4,4 +4,4 @@
 
 staload "./_bats_inputs.sats"
 
-implement bats_inputs_sha256 () = "a2760eb5e1c0f4de42671a79675f95d6c01003b6cd8bb62a2d72fe5ff6bb5f5d"
+implement bats_inputs_sha256 () = "3cb680cfe42f32f5a078048bf500ac9b3010d78c854280072c3786d1d9a127d1"

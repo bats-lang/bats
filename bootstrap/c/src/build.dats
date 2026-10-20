@@ -494,9 +494,7 @@ end
    uses, for the native bootstrap and for the wasm build. The text is
    written from the use sites in the emitted C and from what each name is
    documented to do, with its own parameter names, bodies and order
-   (.claude/rules/runtime-header.md, "The runtime header": the method, and the residue of
-   one-line macros whose expansion the interface forces, which agree with
-   ATS2's headers, GPL-3.0-or-later, bats#283). *)
+   (ATS2's headers are GPL-3.0-or-later and not copied: runtime header, bats#283). *)
 fn put_runtime_macros (b: !$B.builder_v >> $B.builder_v): void = let
   val () = bput_v(b, "/* Types the emitted C names, alphabetically. */\ntypedef void atsvoid_t0ype;\ntypedef void atstype_void;\ntypedef void *atstype_arrptr;\ntypedef int atstype_bool;\ntypedef void *atstype_boxed;\ntypedef unsigned char atstype_byte;\ntypedef char atstype_char;\n")
   val () = bput_v(b, "typedef void *atstype_cloptr;\ntypedef void *atstype_datconptr;\ntypedef void *atstype_datcontyp;\ntypedef void *atstype_funptr;\ntypedef int atstype_int;\ntypedef long atstype_lint;\ntypedef long long atstype_llint;\ntypedef void *atstype_ptr;\n")
