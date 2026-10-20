@@ -331,7 +331,8 @@ fn put_dep (out: !$B.builder_v >> $B.builder_v, d: !dep): void
 
 
 
-fn dep_closure {le:agz} (entry: !$A.borrow(byte, le, 524288)): [r:nat] deps(r)
+fn dep_closure {le:agz}{ne:pos}{em:nat | em <= ne; em <= 524288}
+  (entry: !$A.borrow(byte, le, ne), em: int em): [r:nat] deps(r)
 
 
 

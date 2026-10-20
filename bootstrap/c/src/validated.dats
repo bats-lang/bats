@@ -65,12 +65,12 @@ fn key_of (text: $B.builder_v): [l:agz] $A.arr(byte, l, 64) = let
 in digest end
 
 (* The context of a judgment: bats's inputs and the listing of the .bats
-   files of ./bats_modules (the whole array, 512 KiB: the listing is
-   NUL-separated paths in a zeroed array) *)
+   files of ./bats_modules (its first lm bytes: the NUL-separated paths) *)
 
 
 
-implement valid_context (listing) = let
+
+implement valid_context (listing, lm) = let
   var h : $B.builder_v = $B.create()
   val () = bput_v(h, "bats-valid 1\nbats ")
   val () = bput_v(h, bats_inputs_sha256())
@@ -79,7 +79,7 @@ implement valid_context (listing) = let
   val c = $SHA.init()
   val () = $SHA.update(c, ha, hl)
   val () = $A.free<byte>(ha)
-  val () = $SHA.update(c, listing, 524288)
+  val () = $SHA.update(c, listing, lm)
   val digest = $A.alloc<byte>(64)
   val () = $SHA.finish(c, digest)
 in digest end
@@ -115,9 +115,10 @@ in @(oa, ol) end
 
 
 
-implement valid_slot_of_path (p) = let
+
+implement valid_slot_of_path (p, pm) = let
   var name : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, 524288), 524288, name)
+  val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, pm), pm, name)
 in valid_slot(name) end
 
 (* Whether a[0, k) and b[0, k) hold the same bytes *)
@@ -257,16 +258,16 @@ in $A.free<byte>($A.thaw<byte>(fz_p)) end
 
 
 
-implement valid_file_key (ctx, reuse, p, is_unsafe) =
+implement valid_file_key (ctx, reuse, p, pm, is_unsafe) =
   if ~reuse then @(false, $A.alloc<byte>(64))
   else let
     var t : $B.builder_v = $B.create()
     val () = bput_v(t, "bats-valid 1 file\nctx ")
     val () = copy_to_builder_v(ctx, 0, 64, 64, t)
     val () = (if is_unsafe then bput_v(t, "\nuns 1\n") else bput_v(t, "\nuns 0\n"))
-    val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, 524288), 524288, t)
+    val () = copy_to_builder_v(p, 0, find_null_bv_from(p, 0, pm), pm, t)
     val () = put_char_v(t, 10)
-    val found = put_file_sha256(p, t)
+    val found = put_file_sha256_m(p, pm, t)
     val whole = ($B.length(t) < 524288): bool
   in @(found && whole, key_of(t)) end
 
@@ -277,8 +278,8 @@ implement valid_file_key (ctx, reuse, p, is_unsafe) =
 
 
 
-implement valid_file_pend (ctx, p, is_unsafe, slot, sm, key, pend) = let
-  val @(usable, again) = valid_file_key(ctx, true, p, is_unsafe)
+implement valid_file_pend (ctx, p, pm, is_unsafe, slot, sm, key, pend) = let
+  val @(usable, again) = valid_file_key(ctx, true, p, pm, is_unsafe)
   val @(fz_a, bv_a) = $A.freeze<byte>(again)
   val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, sm, key, pend) else ()) else ())
   val () = $A.drop<byte>(fz_a, bv_a)
@@ -288,24 +289,24 @@ in $A.free<byte>($A.thaw<byte>(fz_a)) end
 
 (* t, with each path of the NUL-separated list files[off, len) and the
    sha256 of its file added, a line each; whether every file was read *)
-fun group_text {lf:agz}{off:nat | off <= 524288} .<524288 - off>.
-  (files: !$A.borrow(byte, lf, 524288), off: int off, len: int, t: !$B.builder_v >> $B.builder_v, ok: bool): bool =
+fun group_text {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{off:nat | off <= fm} .<fm - off>.
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int, t: !$B.builder_v >> $B.builder_v, ok: bool): bool =
   if off >= len then ok
   else let
-    val e = $S.find_null_bv_at(files, off, 524288)
+    val e = nul_in(files, off, fm)
     var pb : $B.builder_v = $B.create()
-    val () = copy_to_builder_v(files, off, e + 1, 524288, pb)
+    val () = copy_to_builder_v(files, off, e + 1, fm, pb)
     val @(pa, pl) = $B.into_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-    val () = copy_to_builder_v(files, off, e, 524288, t)
+    val () = copy_to_builder_v(files, off, e, fm, t)
     val () = put_char_v(t, 10)
     val found = put_file_sha256_m(bv_p, pl, t)
     val () = put_char_v(t, 10)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
   in
-    if e >= 524288 then ok && found
-    else group_text(files, e + 1, len, t, ok && found)
+    if e >= fm then ok && found
+    else group_text(files, fm, e + 1, len, t, ok && found)
   end
 
 (* The key of the files list[off, len) as a package, under ctx; as
@@ -314,14 +315,14 @@ fun group_text {lf:agz}{off:nat | off <= 524288} .<524288 - off>.
 
 
 
-implement valid_group_key (ctx, reuse, files, off, len) =
+implement valid_group_key (ctx, reuse, files, fm, off, len) =
   if ~reuse then @(false, $A.alloc<byte>(64))
   else let
     var t : $B.builder_v = $B.create()
     val () = bput_v(t, "bats-valid 1 cycles\nctx ")
     val () = copy_to_builder_v(ctx, 0, 64, 64, t)
     val () = put_char_v(t, 10)
-    val read = group_text(files, off, len, t, true)
+    val read = group_text(files, fm, off, len, t, true)
     val whole = ($B.length(t) < 524288): bool
   in @(read && whole, key_of(t)) end
 
@@ -332,8 +333,8 @@ implement valid_group_key (ctx, reuse, files, off, len) =
 
 
 
-implement valid_group_pend (ctx, files, off, len, slot, sm, key, pend) = let
-  val @(usable, again) = valid_group_key(ctx, true, files, off, len)
+implement valid_group_pend (ctx, files, fm, off, len, slot, sm, key, pend) = let
+  val @(usable, again) = valid_group_key(ctx, true, files, fm, off, len)
   val @(fz_a, bv_a) = $A.freeze<byte>(again)
   val () = (if usable then (if same_keys(bv_a, key) then pend_add(slot, sm, key, pend) else ()) else ())
   val () = $A.drop<byte>(fz_a, bv_a)

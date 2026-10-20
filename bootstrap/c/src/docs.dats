@@ -300,85 +300,97 @@ fun plist_free {k:nat} .<k>. (xs: plist(k)): void =
   | ~plist_cons(_, _, tl) => plist_free(tl)
 
 (* The paths of lst[off, len), onto acc *)
-fun parse_paths {l:agz}{off:nat | off <= 524288}{k:nat} .<524288 - off>.
-  (lst: !$A.borrow(byte, l, 524288), off: int off, len: int, acc: plist(k)): [k2:nat] plist(k2) =
+fun parse_paths {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}{off:nat | off <= m}{k:nat} .<m - off>.
+  (lst: !$A.borrow(byte, l, n), m: int m, off: int off, len: int, acc: plist(k)): [k2:nat] plist(k2) =
   if off >= len then acc
   else let
-    val e = $S.find_null_bv_at(lst, off, 524288)
+    val e = nul_in(lst, off, m)
   in
-    if e >= 524288 then plist_cons(off, e, acc)
-    else parse_paths(lst, e + 1, len, plist_cons(off, e, acc))
+    if e >= m then plist_cons(off, e, acc)
+    else parse_paths(lst, m, e + 1, len, plist_cons(off, e, acc))
   end
 
 (* Byte i of the path [x, xe), for ordering: ~1 past its end and 0 for
    '/', so that paths order component by component, as Rust's PathBuf
    does *)
-fn path_key {l:agz}{x,xe,i:nat | x <= xe; xe <= 524288}
-  (lst: !$A.borrow(byte, l, 524288), x: int x, xe: int xe, i: int i): int =
+fn path_key {l:agz}{n:pos}{m:nat | m <= n}{x,xe,i:nat | x <= xe; xe <= 524288}
+  (lst: !$A.borrow(byte, l, n), m: int m, x: int x, xe: int xe, i: int i): int =
   if x + i >= xe then ~1
   else let
-    val b = byte2int0($A.read<byte>(lst, x + i))
+    val b = peek(lst, x + i, m)
   in if b = 47 then 0 else b end
 
 (* Whether the path [a, ae) orders before the path [b, be) *)
-fun path_less {l:agz}{a,ae,b,be,i:nat | a <= ae; ae <= 524288; b <= be; be <= 524288; i <= ae - a} .<ae - a - i>.
-  (lst: !$A.borrow(byte, l, 524288), a: int a, ae: int ae, b: int b, be: int be, i: int i): bool = let
-  val ka = path_key(lst, a, ae, i)
-  val kb = path_key(lst, b, be, i)
+fun path_less {l:agz}{n:pos}{m:nat | m <= n}{a,ae,b,be,i:nat | a <= ae; ae <= 524288; b <= be; be <= 524288; i <= ae - a} .<ae - a - i>.
+  (lst: !$A.borrow(byte, l, n), m: int m, a: int a, ae: int ae, b: int b, be: int be, i: int i): bool = let
+  val ka = path_key(lst, m, a, ae, i)
+  val kb = path_key(lst, m, b, be, i)
 in
   if ka < kb then true
   else if ka > kb then false
   else if a + i >= ae then false
-  else path_less(lst, a, ae, b, be, i + 1)
+  else path_less(lst, m, a, ae, b, be, i + 1)
 end
 
 (* The path [s, e) inserted into the sorted xs *)
-fun path_insert {l:agz}{s,e:nat | s <= e; e <= 524288}{k:nat} .<k>.
-  (lst: !$A.borrow(byte, l, 524288), s: int s, e: int e, xs: plist(k)): plist(k + 1) =
+fun path_insert {l:agz}{n:pos}{m:nat | m <= n}{s,e:nat | s <= e; e <= 524288}{k:nat} .<k>.
+  (lst: !$A.borrow(byte, l, n), m: int m, s: int s, e: int e, xs: plist(k)): plist(k + 1) =
   case+ xs of
   | ~plist_nil() => plist_cons(s, e, plist_nil())
   | ~plist_cons(s2, e2, tl) =>
-    if path_less(lst, s, e, s2, e2, 0) then plist_cons(s, e, plist_cons(s2, e2, tl))
-    else plist_cons(s2, e2, path_insert(lst, s, e, tl))
+    if path_less(lst, m, s, e, s2, e2, 0) then plist_cons(s, e, plist_cons(s2, e2, tl))
+    else plist_cons(s2, e2, path_insert(lst, m, s, e, tl))
 
-fun path_sort {l:agz}{k,j:nat} .<k>.
-  (lst: !$A.borrow(byte, l, 524288), xs: plist(k), acc: plist(j)): plist(k + j) =
+fun path_sort {l:agz}{n:pos}{m:nat | m <= n}{k,j:nat} .<k>.
+  (lst: !$A.borrow(byte, l, n), m: int m, xs: plist(k), acc: plist(j)): plist(k + j) =
   case+ xs of
   | ~plist_nil() => acc
-  | ~plist_cons(s, e, tl) => path_sort(lst, tl, path_insert(lst, s, e, acc))
+  | ~plist_cons(s, e, tl) => path_sort(lst, m, tl, path_insert(lst, m, s, e, acc))
 
 (* The paths of files[0, len), sorted *)
-fn sorted_paths {l:agz} (files: !$A.borrow(byte, l, 524288), len: int): [k:nat] plist(k) =
-  path_sort(files, parse_paths(files, 0, len, plist_nil()), plist_nil())
+fn sorted_paths {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (files: !$A.borrow(byte, l, n), m: int m, len: int): [k:nat] plist(k) =
+  path_sort(files, m, parse_paths(files, m, 0, len, plist_nil()), plist_nil())
 
 (* The paths xs of files, each NUL-terminated, appended to out *)
-fun put_paths {l:agz}{k:nat} .<k>.
-  (files: !$A.borrow(byte, l, 524288), xs: !plist(k), out: !$B.builder_v >> $B.builder_v): void =
+fun put_paths {l:agz}{n:pos}{m:nat | m <= n}{k:nat} .<k>.
+  (files: !$A.borrow(byte, l, n), m: int m, xs: !plist(k), out: !$B.builder_v >> $B.builder_v): void =
   case+ xs of
   | plist_nil() => ()
   | plist_cons(s, e, tl) => let
-      val () = copy_to_builder_v(files, s, e, 524288, out)
+      val () = copy_to_builder_v(files, s, e, m, out)
       val () = put_char_v(out, 0)
-    in put_paths(files, tl, out) end
+    in put_paths(files, m, tl, out) end
 
 (* The .bats files under dir, recursively, NUL-separated and sorted as
    Rust's PathBuf sorts them (project::find_bats_files) *)
-
-
-implement sorted_bats_files (dir) = let
+fn sorted_list (dir: $B.builder_v): $B.builder_v = let
   var root = dir
   val () = put_char_v(root, 0)
   var files : $B.builder_v = $B.create()
   val () = walk_levels(root, files, 64)
-  val @(fa, flen) = $B.to_arr(files)
+  val @(fa, flen) = $B.into_arr(files)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
-  val xs = sorted_paths(bv_f, flen)
+  val xs = sorted_paths(bv_f, flen, flen)
   var out : $B.builder_v = $B.create()
-  val () = put_paths(bv_f, xs, out)
+  val () = put_paths(bv_f, flen, xs, out)
   val () = plist_free(xs)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
-in $B.to_arr(out) end
+in out end
+
+
+
+implement sorted_bats_files (dir) = $B.to_arr(sorted_list(dir))
+
+(* ... in an array of exactly the builder's own size, and the bytes the
+   list holds (bats#356) *)
+
+
+
+implement sorted_bats_files_m (dir) = let
+  val @(a, n) = $B.into_arr(sorted_list(dir))
+in @(a, n) end
 
 (* ============================================================
    Writing docs/
@@ -513,7 +525,7 @@ implement generate_docs(name, nlen, max) = let
   val @(fa, flen) = $B.to_arr(files)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
   var idx : $B.builder_v = $B.create()
-  val xs = sorted_paths(bv_f, flen)
+  val xs = sorted_paths(bv_f, 524288, flen)
   val count = write_modules(bv_f, xs, idx, 0)
   val () = plist_free(xs)
   val () = $A.drop<byte>(fz_f, bv_f)

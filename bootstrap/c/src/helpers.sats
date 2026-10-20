@@ -479,8 +479,8 @@ fn prelude_build_of {l:agz}{n:pos}{p,q:int}
 
 datatype package_kind = Library | Binary
 
-fn lit_at {l:agz}{n:pos}{m:pos | m <= 1048576}
-  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int n, lit: &(@[char][m]), m: int m): bool
+fn lit_at {l:agz}{n:pos}{mx:nat | mx <= n}{m:pos | m <= 1048576}
+  (src: !$A.borrow(byte, l, n), pos: pos_t, max: int mx, lit: &(@[char][m]), m: int m): bool
 
 
 
@@ -748,8 +748,8 @@ fn lit_while {l:agz}{n:pos}
 
 
 
-fn prerr_seg {l:agz}{m:pos}
-  (b: !$A.borrow(byte, l, m), i: pos_t, len: int, m: int m): void
+fn prerr_seg {l:agz}{n:pos}{m:nat | m <= n}
+  (b: !$A.borrow(byte, l, n), i: pos_t, len: int, m: int m): void
 
 
 
@@ -851,7 +851,7 @@ fn append_builder (out: !$B.builder_v >> $B.builder_v, b: $B.builder_v): void
 
 
 
-fn find_basename_start {l:agz}{n:pos}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int n,
+fn find_basename_start {l:agz}{n:pos}{mx:nat | mx <= n}  (bv: !$A.borrow(byte, l, n), pos: pos_t, max: int mx,
    last: pos_t): pos_t
 
 
@@ -1309,8 +1309,8 @@ fn wasm_object_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
-fn native_object_record {lo:agz}{li:agz}
-  (rel: profile, out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288)): void
+fn native_object_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
+  (rel: profile, out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
 
 
 
@@ -1995,10 +1995,8 @@ fn run_cmd_capture {le:agz}{lo:agz}
 
 
 
-fn check_emitted_flaws {lo,li:agz}
-  (out_bv: !$A.borrow(byte, lo, 524288), in_bv: !$A.borrow(byte, li, 524288), il: int): int
-
-
+fn check_emitted_flaws {lo,li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (out_bv: !$A.borrow(byte, lo, no), out_len: int om, in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
 
 
 
@@ -2466,8 +2464,8 @@ fn cap_mb_now (): int
 
 
 
-fn cap_stopped {li:agz}
-  (time: bool, in_bv: !$A.borrow(byte, li, 524288), in_len: int): void
+fn cap_stopped {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (time: bool, in_bv: !$A.borrow(byte, li, ni), in_len: int im): void
 
 
 
@@ -2475,10 +2473,10 @@ fn cap_stopped {li:agz}
 
 
 
-fn patsopt_only {lph:agz}{lo:agz}{li:agz}
+fn patsopt_only {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int): int
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
 
 
 
@@ -2632,10 +2630,10 @@ fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): 
 
 
 
-fn run_cc {lph:agz}{lo:agz}{li:agz}
+fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    rel: profile): int
 
 
@@ -2760,7 +2758,6 @@ datavtype machine_slot =
 fn machine_slot_take (heavy: heavy_command): machine_slot
 
 fn machine_slot_release (slot: machine_slot): void
-
 
 
 
@@ -3190,8 +3187,8 @@ fn rput_int(r: !$B.rope, v: int): void
 
 
 
-fn file_has_rope {lp:agz}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): bool
+fn file_has_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !$B.rope_list(k)): bool
 
 
 
@@ -3229,8 +3226,8 @@ fn file_has_rope {lp:agz}{k:nat}
 
 
 
-fn write_file_from_rope {lp:agz}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, 524288), cs: !$B.rope_list(k)): write_result
+fn write_file_from_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !$B.rope_list(k)): write_result
 
 
 
@@ -3457,8 +3454,8 @@ fn sats_stamp_end (saved: whole_file, back: bool): void
 
 
 
-fn sats_moved {lp:agz}
-  (before: whole_file, path: !$A.borrow(byte, lp, 524288)): bool
+fn sats_moved {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (before: whole_file, path: !$A.borrow(byte, lp, np), pm: int pm): bool
 
 
 

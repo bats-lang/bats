@@ -62,12 +62,6 @@ fn path_arg_m {lp:agz}{np:pos}{m:nat | m <= np} (p: !$A.borrow(byte, lp, np), le
   val () = copy_to_builder_v(p, 0, (if stop < len - 1 then stop else len - 1), len, b)
 in mk_arg(b) end
 
-fn path_arg {lp:agz} (p: !$A.borrow(byte, lp, 524288), len: int): $P.arg_entry = let
-  val stop = find_null_bv_from(p, 0, 524288)
-  var b = $B.create()
-  val () = copy_to_builder_v(p, 0, (if stop < len - 1 then stop else len - 1), 524288, b)
-in mk_arg(b) end
-
 (* sh -c script, with args as $1, $2, ...: sh's exit status, -1 when it
    could not be run. What sh wrote to stderr is printed when it fails
    (run_cmd), so a script says nothing on a failure that is expected. *)
@@ -246,13 +240,6 @@ fn path_with_m {lp:agz}{np:pos}{len:nat | len <= np}{sn:nat} (p: !$A.borrow(byte
   val () = put_char_v(b, 0)
 in b end
 
-fn path_with {lp:agz}{sn:nat} (p: !$A.borrow(byte, lp, 524288), len: int, ext: string sn): $B.builder_v = let
-  var b : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(p, 0, len - 1, 524288, b)
-  val () = bput_v(b, ext)
-  val () = put_char_v(b, 0)
-in b end
-
 (* Where the C went: into place (the project's directory left out of its
    paths, or as patsopt wrote it when the directory cannot be had), not
    into place (the move failed), or not written (the rewritten C could not
@@ -275,9 +262,9 @@ datatype c_placed =
    disk is full, bats-lang/bats#359) is an error naming the file and the
    reason, and neither the rewritten C nor patsopt's is put in place:
    never a C cut short, and never patsopt's as it is in its stead. *)
-fn relative_c {lr,lo:agz}
-  (raw_bv: !$A.borrow(byte, lr, 524288), raw_len: int,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int): c_placed = let
+fn relative_c {lr,lo:agz}{nr,no:pos}{rm:nat | rm <= nr; rm <= 524288}{om:nat | om <= no; om <= 524288}
+  (raw_bv: !$A.borrow(byte, lr, nr), raw_len: int rm,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om): c_placed = let
   var root : $B.builder_v = $B.create()
   val known = project_root(root)
   (* <root>/build/ *)
@@ -292,12 +279,12 @@ fn relative_c {lr,lo:agz}
   val () = bput_v(mangled, "build_057_")
   val @(ma, ml) = $B.into_arr(mangled)
   val @(fz_m, bv_m) = $A.freeze<byte>(ma)
-  val @(na, nl) = $B.into_arr(path_with(out_bv, out_len, ".new"))
+  val @(na, nl) = $B.into_arr(path_with_m(out_bv, out_len, ".new"))
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
   val rewrite = (if ~known then CNotPlaced()
     else if pl <= 8 then CNotPlaced()
     else if ml <= 10 then CNotPlaced()
-    else (case+ read_whole(raw_bv, 524288) of
+    else (case+ read_whole_m(raw_bv, raw_len) of
       | ~whole_err(_) => CNotPlaced()
       | ~whole_ok(ar, piece, m, n) => let
           val @(fz_c, bv_c) = $A.freeze<byte>(piece)
@@ -315,16 +302,16 @@ fn relative_c {lr,lo:agz}
      write neither, and what was written is removed *)
   val placed = (case+ rewrite of
     | CPlaced() => (if sh_script("mv -f \"$1\" \"$2\" && rm -f \"$3\"",
-        $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg(out_bv, out_len),
-        $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_nil())))) = 0 then CPlaced() else CNotPlaced())
+        $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg_m(out_bv, out_len),
+        $L.list_vt_cons(path_arg_m(raw_bv, raw_len), $L.list_vt_nil())))) = 0 then CPlaced() else CNotPlaced())
     | CNotPlaced() => (if sh_script("rm -f \"$1\"; mv -f \"$2\" \"$3\"",
-        $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg(raw_bv, raw_len),
-        $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_nil())))) = 0 then CPlaced() else CNotPlaced())
+        $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg_m(raw_bv, raw_len),
+        $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_nil())))) = 0 then CPlaced() else CNotPlaced())
     | CNotWritten() => let
         (* a failure of this clean-up is not another error: the file is
            beside the C and no one reads it *)
         val _ = sh_script("rm -f \"$1\" \"$2\"",
-          $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg(raw_bv, raw_len), $L.list_vt_nil())))
+          $L.list_vt_cons(path_arg_m(bv_n, nl), $L.list_vt_cons(path_arg_m(raw_bv, raw_len), $L.list_vt_nil())))
       in CNotWritten() end): c_placed
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
@@ -459,9 +446,9 @@ fun put_lines {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
    the caps of BATS_PATSOPT_TIMEOUT_S and BATS_PATSOPT_MEM_MB as patsopt_only
    holds a patsopt run to them (the same wrapper, in sh): 0 when it listed,
    124 when the time cap ended it, 125 when the memory cap did, else 1. *)
-fn list_inputs {lph,li:agz}
+fn list_inputs {lph,li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int, graph: bool): int = let
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im, graph: bool): int = let
   var a1 : $B.builder_v = $B.create()
   val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
   val () = bput_v(a1, "/bin/patsopt")
@@ -477,7 +464,7 @@ fn list_inputs {lph,li:agz}
   val () = (if graph then bput_v(a7, "build/.bats_graph") else bput_v(a7, ""))
   val rc = sh_script("P=$1; PATSHOME=$2; export PATSHOME; in=$3; out=$4; mb=$5; secs=$6; g=$7; useg=$7\nt=$(mktemp -d) || exit 1; trap 'rm -rf \"$t\"' EXIT\n[ -n \"$g\" ] || g=\"$t/graph\"\ndg() {\n  if [ \"$mb\" = 0 ] && [ \"$secs\" = 0 ]; then \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" 2>/dev/null; return $?; fi\n  (\n    [ \"$mb\" = 0 ] || ulimit -v $((mb * 1024)) 2>/dev/null\n    if [ \"$secs\" = 0 ]; then \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" 2>/dev/null; exit $?; fi\n    \"$P\" -IATS build -IATS build/src -IATS build/bats_modules --depgen \"$@\" 2>/dev/null &\n    pid=$!\n    ( trap 'kill $sp 2>/dev/null; exit 0' TERM; sleep \"$secs\" & sp=$!; wait $sp; kill -s ALRM $pid 2>/dev/null ) >/dev/null 2>&1 &\n    wd=$!\n    wait $pid; rc=$?\n    kill $wd 2>/dev/null; wait $wd 2>/dev/null\n    [ $rc -eq 142 ] && exit 124\n    [ \"$mb\" != 0 ] && [ $rc -gt 128 ] && exit 125\n    exit $rc\n  )\n}\ndepsof() { sed -e 's/^[^:]*:[ ]*//' -e 's/[ ]*$//'; }\n[ -f \"$g\" ] || : > \"$g\"\nif [ -n \"$useg\" ] && [ ! -s \"$g\" ]; then\n  find build/src build/bats_modules -type f \\( -name '*.dats' -o -name '*.sats' \\) 2>/dev/null | LC_ALL=C sort > \"$t/all\"\n  if [ -s \"$t/all\" ]; then\n    set --; while IFS= read -r f; do case $f in *.sats) set -- \"$@\" -s \"$f\" ;; *) set -- \"$@\" -d \"$f\" ;; esac; done < \"$t/all\"\n    dg \"$@\" > \"$t/dep\"; rc=$?\n    [ $rc -eq 124 ] || [ $rc -eq 125 ] && exit $rc\n    if [ $rc -eq 0 ] && [ \"$(wc -l < \"$t/dep\")\" -eq \"$(wc -l < \"$t/all\")\" ]; then\n      depsof < \"$t/dep\" > \"$t/ds\"; paste -d '\\t' \"$t/all\" \"$t/ds\" >> \"$g\"\n    fi\n  fi\nfi\nprintf '%s\\n' \"$in\" > \"$t/seen\"; cp \"$t/seen\" \"$t/todo\"\nwhile [ -s \"$t/todo\" ]; do\n  awk -F'\\t' 'FILENAME==ARGV[1]{k[$1]=1; next} !($0 in k)' \"$g\" \"$t/todo\" > \"$t/miss\"\n  if [ -s \"$t/miss\" ]; then\n    set --; while IFS= read -r f; do case $f in *.sats) set -- \"$@\" -s \"$f\" ;; *) set -- \"$@\" -d \"$f\" ;; esac; done < \"$t/miss\"\n    dg \"$@\" > \"$t/dep\"; rc=$?; [ $rc -eq 0 ] || exit $rc\n    if [ \"$(wc -l < \"$t/dep\")\" -eq \"$(wc -l < \"$t/miss\")\" ]; then\n      depsof < \"$t/dep\" > \"$t/ds\"; paste -d '\\t' \"$t/miss\" \"$t/ds\" >> \"$g\"\n    else\n      while IFS= read -r f; do\n        case $f in *.sats) dg -s \"$f\" > \"$t/one\" ;; *) dg -d \"$f\" > \"$t/one\" ;; esac; rc=$?; [ $rc -eq 0 ] || exit $rc\n        printf '%s\\t%s\\n' \"$f\" \"$(depsof < \"$t/one\" | tr '\\n' ' ')\" >> \"$g\"\n      done < \"$t/miss\"\n    fi\n  fi\n  awk -F'\\t' 'FILENAME==ARGV[1]{d[$1]=$2; next} {n=split(d[$0],a,\" \"); for(i=1;i<=n;i++) print a[i]}' \"$g\" \"$t/todo\" | LC_ALL=C sort -u > \"$t/found\"\n  LC_ALL=C sort -u \"$t/seen\" > \"$t/known\"; LC_ALL=C comm -23 \"$t/found\" \"$t/known\" > \"$t/todo\"; cat \"$t/todo\" >> \"$t/seen\"\ndone\nLC_ALL=C sort -u \"$t/seen\" > \"$out\"\n",
     $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2),
-    $L.list_vt_cons(path_arg(in_bv, in_len), $L.list_vt_cons(mk_arg(a4),
+    $L.list_vt_cons(path_arg_m(in_bv, in_len), $L.list_vt_cons(mk_arg(a4),
     $L.list_vt_cons(mk_arg(a5), $L.list_vt_cons(mk_arg(a6),
     $L.list_vt_cons(mk_arg(a7), $L.list_vt_nil()))))))))
 in (if rc = 0 then 0 else if rc = 124 then 124 else if rc = 125 then 125 else 1) end
@@ -485,10 +472,10 @@ in (if rc = 0 then 0 else if rc = 124 then 124 else if rc = 125 then 125 else 1)
 (* The key of patsopt's run on in into out, as 64 hex digits appended to
    hex; false when one of its parts cannot be had, and then the run is
    not cached *)
-fn module_key {lph,lo,li:agz}
+fn module_key {lph,lo,li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    hex: !$B.builder_v >> $B.builder_v): bool = let
   var key : $B.builder_v = $B.create()
   val () = bput_v(key, "bats ")
@@ -496,9 +483,9 @@ fn module_key {lph,lo,li:agz}
   val () = put_char_v(key, 10)
   val tool = put_toolchain(ph, phlen, key)
   val () = bput_v(key, "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o ")
-  val () = copy_to_builder_v(out_bv, 0, out_len - 1, 524288, key)
+  val () = copy_to_builder_v(out_bv, 0, out_len - 1, out_len, key)
   val () = bput_v(key, " -d ")
-  val () = copy_to_builder_v(in_bv, 0, in_len - 1, 524288, key)
+  val () = copy_to_builder_v(in_bv, 0, in_len - 1, in_len, key)
   val () = put_char_v(key, 10)
   val lrc = (if tool then list_inputs(ph, phlen, in_bv, in_len, false) else 1): int
   val () = (if lrc = 124 then cap_stopped(true, in_bv, in_len)
@@ -828,11 +815,11 @@ implement closure_key_write(list_bv, out_bv) =
    build/.bats_depgen holds this module's files already (module_key made
    it) or list_inputs is to make it. The key is written beside its place
    and renamed into it. *)
-fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}
+fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int, stamped: bool,
    names: !$A.borrow(byte, ln, nn), nl: int nl, listed: bool,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int): void = let
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im): void = let
   val lrc = (if nl <> 64 then 1
     else if listed then 0
     else list_inputs(ph, phlen, in_bv, in_len, true)): int
@@ -843,7 +830,7 @@ fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}
      -v says, so that it is not silent (bats#323) *)
   val () = (if ~have && is_verbose() then let
       val () = print! ("  ! no key for ")
-      val () = print_borrow(out_bv, 0, out_len - 1, 524288)
+      val () = print_borrow(out_bv, 0, out_len - 1, out_len)
     in println! (" (depgen failed): the module is made again next time") end else ())
   val @(lp, lp_len) = str_into_arr("build/.bats_depgen")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
@@ -861,7 +848,7 @@ fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}
      line would leave the C fresh after a changed .sats *)
   val () = (if have && ~appended && is_verbose() then let
       val () = print! ("  ! no key for ")
-      val () = print_borrow(out_bv, 0, out_len - 1, 524288)
+      val () = print_borrow(out_bv, 0, out_len - 1, out_len)
     in println! (" (appending build/.sats_changed failed): the module is made again next time") end else ())
   val () = (if ~have || ~appended then ()
     else (case+ read_whole_m(bv_lp, lp_len) of
@@ -875,17 +862,17 @@ fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}
           val @(fz_b, bv_b) = $A.freeze<byte>(ba)
           val () = (if hashed && ~fits && is_verbose() then let
               val () = print! ("  ! no key for ")
-              val () = print_borrow(out_bv, 0, out_len - 1, 524288)
+              val () = print_borrow(out_bv, 0, out_len - 1, out_len)
             in println! (": it would reach 524288 bytes, the most bats writes, so the module is checked again next time") end else ())
           val () = (if hashed && fits then let
-              val @(ta, tl) = $B.into_arr(path_with(out_bv, out_len, ".key.new"))
+              val @(ta, tl) = $B.into_arr(path_with_m(out_bv, out_len, ".key.new"))
               val @(fz_t, bv_t) = $A.freeze<byte>(ta)
               var content : $B.builder_v = $B.create()
               val () = copy_to_builder_v(bv_b, 0, bl, bl, content)
               (* said, and the build fails, if the key cannot be written;
                  a key cut short is never moved to its place *)
               val wrote = write_settle(bv_t, tl, write_file_from_builder_m(bv_t, tl, content))
-              val @(ka, kl) = $B.into_arr(path_with(out_bv, out_len, ".key"))
+              val @(ka, kl) = $B.into_arr(path_with_m(out_bv, out_len, ".key"))
               val @(fz_k, bv_k) = $A.freeze<byte>(ka)
               val _ = (if wrote = 0 then sh_script("mv -f \"$1\" \"$2\"",
                   $L.list_vt_cons(path_arg_m(bv_t, tl), $L.list_vt_cons(path_arg_m(bv_k, kl), $L.list_vt_nil())))
@@ -908,14 +895,14 @@ in end
    patsopt, through the cache
    ============================================================ *)
 
-#pub fn run_patsopt {lph:agz}{lo:agz}{li:agz}
+#pub fn run_patsopt {lph:agz}{lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
-   out_bv: !$A.borrow(byte, lo, 524288), out_len: int,
-   in_bv: !$A.borrow(byte, li, 524288), in_len: int): int
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
 
 implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   if has_build_err() then 1 else let
-  val () = key_drop(out_bv, 524288)
+  val () = key_drop(out_bv, out_len)
   (* the names of the files patsopt could read, as they are before it runs
      (see the check memo): in a build too (bats#323), where the key also
      names build/.sats_changed *)
@@ -959,21 +946,20 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
       val () = copy_to_builder_v(bv_ea, 0, el, el, e1)
       (* copied beside the C and renamed into place, as relative_c does *)
       val rc = sh_script("[ -f \"$1\" ] || exit 3; cp \"$1\" \"$2.new\" && mv -f \"$2.new\" \"$2\" && touch \"$1\"",
-        $L.list_vt_cons(mk_arg(e1), $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_nil())))
+        $L.list_vt_cons(mk_arg(e1), $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_nil())))
     in rc = 0 end): bool
   val () = (if hit && is_verbose() then let
       val () = print! ("  + patsopt -o ")
-      val () = print_borrow(out_bv, 0, out_len, 524288)
+      val () = print_borrow(out_bv, 0, out_len, out_len)
       val () = print! (" -d ")
-      val () = print_borrow(in_bv, 0, in_len, 524288)
+      val () = print_borrow(in_bv, 0, in_len, in_len)
     in println! (" (cached)") end else ())
   (* patsopt writes <out>.raw, which relative_c puts at out *)
-  (* ... in an array of 524288: patsopt_only and relative_c take what the process package does *)
-  val @(ra, rl) = $B.to_arr(path_with(out_bv, out_len, ".raw"))
+  val @(ra, rl) = $B.into_arr(path_with_m(out_bv, out_len, ".raw"))
   val @(fz_ra, bv_ra) = $A.freeze<byte>(ra)
   val ran = (if hit then 0 else patsopt_only(ph, phlen, bv_ra, rl, in_bv, in_len)): int
   (* a run that failed leaves no C, as before: the old one goes too *)
-  val () = (if ran <> 0 then remove_output(out_bv, out_len) else ())
+  val () = (if ran <> 0 then remove_output_m(out_bv, out_len, out_len) else ())
   val rc = (if hit then 0 else if ran <> 0 then ran
     else (case+ relative_c(bv_ra, rl, out_bv, out_len) of
       | CPlaced() => 0
@@ -984,14 +970,14 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
       (* said by relative_c, with the file and the reason; no C is left,
          so none is taken for fresh *)
       | CNotWritten() => let
-          val () = remove_output(out_bv, out_len)
+          val () = remove_output_m(out_bv, out_len, out_len)
         in 1 end)): int
   val () = $A.drop<byte>(fz_ra, bv_ra)
   val () = $A.free<byte>($A.thaw<byte>(fz_ra))
   val rc2 = (if rc <> 0 then rc
     else let
-      val flawed = check_emitted_flaws(out_bv, in_bv, in_len - 1)
-      val () = (if flawed <> 0 then remove_output(out_bv, out_len) else ())
+      val flawed = check_emitted_flaws(out_bv, out_len, in_bv, in_len)
+      val () = (if flawed <> 0 then remove_output_m(out_bv, out_len, out_len) else ())
     in flawed end): int
   (* kept only when patsopt passed, and what follows it too *)
   val () = (if rc2 <> 0 then ()
@@ -1003,7 +989,7 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
       var s2 : $B.builder_v = $B.create()
       val () = copy_to_builder_v(bv_sa, 0, sl, sl, s2)
       val stored = sh_script("set -e; d=$(dirname \"$2\"); mkdir -p \"$d\"; t=$(mktemp \"$d/.tmp.XXXXXX\"); cp \"$1\" \"$t\"; mv -f \"$t\" \"$2\"; cd \"$3\"; if [ -z \"$(find .trimmed -mtime -1 2>/dev/null)\" ]; then touch .trimmed; find . -type f -name '*.c' -mtime +7 -exec rm -f {} +; find . -type f -name '.tmp.*' -mtime +1 -exec rm -f {} +; fi",
-        $L.list_vt_cons(path_arg(out_bv, out_len), $L.list_vt_cons(mk_arg(e2),
+        $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_cons(mk_arg(e2),
         $L.list_vt_cons(mk_arg(s2), $L.list_vt_nil()))))
       (* the copy is made beside its place and moved whole, so a failed copy
          leaves no entry a later run could take for the C: said, and the
@@ -1011,7 +997,7 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
       val () = (if stored = 0 then ()
         else let
           val () = prerr! ("warning: the C of ")
-          val () = prerr_seg(out_bv, 0, out_len - 1, 524288)
+          val () = prerr_seg(out_bv, 0, out_len - 1, out_len)
           val () = prerr! (" could not be kept in BATS_CACHE_DIR\n")
         in end)
     in end)
