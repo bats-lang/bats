@@ -895,3 +895,140 @@ fn _shr_stage_16 {n,h,l:nat | n < 32; h < 65536; l < 65536} (n: int n, h: int h,
 
 
 implement shr_fast {n,h,l} (n, h, l) = _shr_stage_16(n, h, l)
+
+
+(* ========== 32-bit words as one machine word (bats-lang/sha256#40) ========== *)
+
+(* word32(h, l) is a C unsigned 32-bit integer whose value is h * 65536 + l.
+   The halves are the index, as everywhere above: the solver of an int
+   build is 32-bit, a constant or coefficient of 2 to the 30 or more in a
+   hypothesis makes its context contradictory, so no type here names
+   2 to the 32. At run time it is one machine word; in the types it is a
+   pair of numbers below 65536, and each operation returns the very
+   relation (ADD32, XOR, AND, OR, NOT32, SHR) that the halves-based
+   operations above return, so a proof built from those goes through with
+   either.
+
+   What is trusted, and what it assumes: that the C operator is the
+   relation its type claims, for any word, the same stance as and_proved
+   and or_proved above (nothing but a stronger type on a name the runtime
+   already has). Each operation is ATS's own prelude operation on unsigned
+   int (atspre_g0uint_*, which the native and the wasm runtime both define
+   as C macros or inline functions, so a call is the operator itself and
+   no C is written here). Assumed of the platform: unsigned int is exactly
+   32 bits (every bats target: LP64 and ILP32 native, wasm32) and a shift
+   is by 0 to 31 (the types allow no other). tests/dynamic/word32 compares
+   every operation with the halves-based ones, which are proved, and with
+   the standard's formulas, on edge words and a pseudo-random sequence, for
+   every amount. *)
+
+
+(* A number below 65536 as a word: 0 in the high half *)
+
+
+(* A word whose high half is 0, as the number its low half is *)
+
+
+(* The sum modulo 2 to the 32 *)
+
+
+
+
+(* Exclusive or, and, or, each half by its own relation *)
+
+
+
+
+
+
+
+
+
+
+
+
+(* Every bit flipped *)
+
+
+
+(* Shifted right by n < 32 bits: SHR, the bit by bit specification *)
+
+
+
+(* ========== Rotation, packing and bytes of a word (bats-lang/sha256#40) ========== *)
+
+(* The three primitives of the one $UNSAFE block of this package (the owner
+   authorized unsafe = true for exactly this block; see CLAUDE.md). ATS's
+   prelude has no rotate, and a word cannot be made from, or taken apart
+   into, bytes by a name it has with a type that states the result, so these
+   are ordinary ATS expressions on unsigned int whose result is given the
+   type of the relation it computes by one cast, as array's cells are.
+
+   WORD_BYTE(i, h, l, b): b is byte i of the word h:l, counting from the
+   most significant (FIPS 180-4, section 3.1: a word is four bytes, big
+   endian). Stated on digits, as the fast rotations are: byte 0 and byte 1
+   are the digits of the high half in base 256, byte 2 and byte 3 those of
+   the low half, so no division appears in a type. *)
+
+
+
+
+
+
+(* The word h:l rotated right by n bits, 0 < n < 32 (a rotation by 0 would
+   shift left by 32, which C leaves undefined; ROTR_zero is the identity
+   anyway): the proof is the very ROTR the single-bit specification and
+   rotr_fast give, so rotr_functional equates them. Trusted: that
+   (x >> n) | (x << (32 - n)) on an unsigned int of exactly 32 bits is that
+   relation. Tested in tests/dynamic/word32_rot_bytes against rotr, the bit
+   by bit specification, for every amount. *)
+
+
+
+(* Four bytes as the word they spell, big endian: the halves are 256a + b
+   and 256c + d, which is also what the type states, so no proof is needed
+   beyond the cast of the value. Trusted: a << 24 | b << 16 | c << 8 | d on
+   unsigned int, with each byte under 256 by its type, is that number. *)
+
+
+
+(* Byte i (0 to 3, from the most significant) of a word, with the proof
+   that it is. Trusted: (x >> (24 - 8 i)) & 255 on unsigned int is that
+   byte. *)
+
+
+
+
+
+implement word32_rotr {n,h,l} (x, n) = let
+  val u = $UNSAFE.cast{uint}(x)
+  val r = (u >> n) lor (u << (32 - n))
+in
+  $UNSAFE.cast{[h2,l2:nat | h2 < 65536; l2 < 65536] (ROTR(n, h, l, h2, l2) | word32(h2, l2))}(r)
+end
+
+implement word32_pack {a,b,c,d} (a, b, c, d) = let
+  val r = (g0int2uint_int_uint(a) << 24) lor (g0int2uint_int_uint(b) << 16)
+    lor (g0int2uint_int_uint(c) << 8) lor g0int2uint_int_uint(d)
+in
+  $UNSAFE.cast{word32(256*a + b, 256*c + d)}(r)
+end
+
+implement word32_byte {i,h,l} (x, i) = let
+  val u = $UNSAFE.cast{uint}(x)
+  val v = g0uint2int_uint_int((u >> (24 - 8 * i)) land g0int2uint_int_uint(255))
+in
+  $UNSAFE.cast{[b:nat | b < 256] (WORD_BYTE(i, h, l, b) | int b)}(v)
+end
+
+
+
+(* A byte of a word is one number *)
+
+
+primplement word_byte_functional {i,h,l,b1,b2} (p, q) =
+  case+ p of
+  | WORD_BYTE_0() => (case+ q of WORD_BYTE_0() => ())
+  | WORD_BYTE_1() => (case+ q of WORD_BYTE_1() => ())
+  | WORD_BYTE_2() => (case+ q of WORD_BYTE_2() => ())
+  | WORD_BYTE_3() => (case+ q of WORD_BYTE_3() => ())

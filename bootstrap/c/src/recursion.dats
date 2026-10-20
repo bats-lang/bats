@@ -323,20 +323,20 @@ fn add_file {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= RMAX}
     in Pkg(pfiles_cons(fi, ar, $A.thaw<byte>(fz), sn, kd, ds, pf), nm2, t2, g2) end
 
 (* pk with each file of the NUL-separated list files[off, len) *)
-fun add_files {lf:agz}{off:nat | off <= RMAX} .<RMAX - off>.
-  (files: !$A.borrow(byte, lf, RMAX), off: int off, len: int, pk: pkg): pkg =
+fun add_files {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= RMAX}{off:nat | off <= fm} .<fm - off>.
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int, pk: pkg): pkg =
   if off >= len then pk
   else let
-    val e = $S.find_null_bv_at(files, off, RMAX)
+    val e = nul_in(files, off, fm)
     var pb : $B.builder_v = $B.create()
-    val () = copy_to_builder_v(files, off, e + 1, RMAX, pb)
+    val () = copy_to_builder_v(files, off, e + 1, fm, pb)
     val @(pa, pal) = $B.into_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
     val pk2 = add_file(bv_p, pal, off, pk)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
   in
-    if e >= RMAX then pk2 else add_files(files, e + 1, len, pk2)
+    if e >= fm then pk2 else add_files(files, fm, e + 1, len, pk2)
   end
 
 (* ============================================================
@@ -640,8 +640,8 @@ in hs end
 
 
 
-implement implement_cycles (files, off, len) = let
-  val pk = add_files(files, off, len, Pkg(pfiles_nil(), dnames_nil(), 0, 0))
+implement implement_cycles (files, fm, off, len) = let
+  val pk = add_files(files, fm, off, len, Pkg(pfiles_nil(), dnames_nil(), 0, 0))
   val+ ~Pkg(pf, nm, t, _) = pk
 in
   if t <= 0 then let

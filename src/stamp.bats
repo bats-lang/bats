@@ -5,10 +5,12 @@
    value" for each thing a build's files depend on that is not in the
    project:
 
-     bats-stamp 1
+     bats-stamp 2
      bats     <the digest of the running bats's own inputs, _bats_inputs>
-     patsopt  <sha256 of the cksum listing of bin/patsopt, prelude, libats,
-               share and ccomp (cache.bats's toolchain_digest)>
+     patsopt  <sha256 of the listing of each file's sha256 (sha256sum, or
+               shasum -a 256 where it is absent) of bin/patsopt, prelude,
+               libats, share and ccomp (cache.bats's toolchain_digest;
+               bats-lang/bats#318: cksum's 32 bits missed a change)>
      cc       <sha256 of clang --version and clang -dumpmachine, of
                wasm-ld --version for a wasm mark, and of the environment
                clang reads: CPATH, LIBRARY_PATH and the others named in
@@ -24,7 +26,7 @@
    the same bats, ATS2 and C compiler, has the same stamp.
 
    Format and content are told apart (bats-lang/bats#364). The format is
-   the first line, `bats-stamp 1`, and every line after it is a name, a
+   the first line, `bats-stamp 2`, and every line after it is a name, a
    space and a value (at least one of each): a line of another shape (a
    `junk` line, a blank one) is a format error, "the stamp format differs".
    A name bats does not know is well formed, so a line `zzz 1` is not a
@@ -274,7 +276,7 @@ in listed && env end
    (no .bats_target and no stamp): the new stamp is put in place. Else
    the first of the format, the lines in order, and the mark that
    differs is named on stdout, and build/ but its stash goes. *)
-#define JUDGE "cd build || exit 1\nif [ ! -f .bats_target ] && [ ! -f .bats_stamp ]; then mv -f .bats_stamp.new .bats_stamp; exit 0; fi\nwhy=\nif [ ! -f .bats_stamp ]; then why='no stamp'\nelif [ \"$(sed -n 1p .bats_stamp)\" != 'bats-stamp 1' ] || sed -n '2,$p' .bats_stamp | grep -q -v -E '^[^ ]+ .+$'; then why='the stamp format differs'\nelse\n  for n in bats patsopt cc flags mark; do\n    a=$(sed -n \"s/^$n //p\" .bats_stamp); b=$(sed -n \"s/^$n //p\" .bats_stamp.new)\n    if [ \"$a\" != \"$b\" ]; then why=\"$n differs\"; break; fi\n  done\nfi\nif [ -z \"$why\" ] && [ \"$(cat .bats_target 2>/dev/null)\" != \"$1\" ]; then why='mark differs'; fi\nif [ -z \"$why\" ] && ! cmp -s .bats_stamp .bats_stamp.new; then why='the stamp differs'; fi\nif [ -n \"$why\" ]; then\n  echo \"bats: dropping build/ (made by another bats: $why)\"\n  find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_stamp.new -exec rm -rf {} +\n  mkdir -p src/bin bats_modules\nfi\nmv -f .bats_stamp.new .bats_stamp\n"
+#define JUDGE "cd build || exit 1\nif [ ! -f .bats_target ] && [ ! -f .bats_stamp ]; then mv -f .bats_stamp.new .bats_stamp; exit 0; fi\nwhy=\nif [ ! -f .bats_stamp ]; then why='no stamp'\nelif [ \"$(sed -n 1p .bats_stamp)\" != 'bats-stamp 2' ] || sed -n '2,$p' .bats_stamp | grep -q -v -E '^[^ ]+ .+$'; then why='the stamp format differs'\nelse\n  for n in bats patsopt cc flags mark; do\n    a=$(sed -n \"s/^$n //p\" .bats_stamp); b=$(sed -n \"s/^$n //p\" .bats_stamp.new)\n    if [ \"$a\" != \"$b\" ]; then why=\"$n differs\"; break; fi\n  done\nfi\nif [ -z \"$why\" ] && [ \"$(cat .bats_target 2>/dev/null)\" != \"$1\" ]; then why='mark differs'; fi\nif [ -z \"$why\" ] && ! cmp -s .bats_stamp .bats_stamp.new; then why='the stamp differs'; fi\nif [ -n \"$why\" ]; then\n  echo \"bats: dropping build/ (made by another bats: $why)\"\n  find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_stamp.new -exec rm -rf {} +\n  mkdir -p src/bin bats_modules\nfi\nmv -f .bats_stamp.new .bats_stamp\n"
 
 (* What became of the stamp this bats would write for the mark, into
    build/.bats_stamp.new: written; a part of it could not be had (said
@@ -287,7 +289,7 @@ datatype stamp_made =
 fn stamp_write {lph:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int, mark: int): stamp_made = let
   var st : $B.builder_v = $B.create()
-  val () = bput_v(st, "bats-stamp 1\nbats ")
+  val () = bput_v(st, "bats-stamp 2\nbats ")
   val () = bput_v(st, bats_inputs_sha256())
   val () = bput_v(st, "\npatsopt ")
   val tool = toolchain_digest(ph, phlen, st)

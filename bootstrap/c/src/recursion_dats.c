@@ -827,7 +827,7 @@ ATSdyncst_mac(atspre_neg_bool0)
 ATSdyncst_extfun(build_057_src_057_helpers_056_sats__read_whole_m, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int)), atstype_boxed) ;
 ATSdyncst_extfun(build_057_src_057_lexer_056_sats__lex_spans, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstype_boxed) ;
 ATSdyncst_extfun(build_057_src_057_lexer_056_sats__spans_free, (atstype_boxed), atsvoid_t0ype) ;
-ATSdyncst_extfun(build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_bv_at, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_int)) ;
+ATSdyncst_extfun(build_057_src_057_helpers_056_sats__nul_in, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_int)) ;
 ATSdyncst_extfun(build_057_bats_modules_057_builder_057_src_057_lib_056_sats__create, (), atstype_boxed) ;
 ATSdyncst_extfun(build_057_src_057_helpers_056_sats__copy_to_builder_v, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atsrefarg0_type(atstype_boxed)), atsvoid_t0ype) ;
 ATSdyncst_extfun(build_057_bats_modules_057_builder_057_src_057_lib_056_sats__into_arr, (atstype_boxed), postiats_tyrec_13) ;
@@ -1299,7 +1299,7 @@ build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__101__1(atstkind
 
 ATSstatic()
 atstype_boxed
-add_files_103(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstype_boxed) ;
+add_files_103(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstype_boxed) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
@@ -1714,7 +1714,7 @@ build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__7(atstkind_t
 #if(0)
 ATSextern()
 atstype_boxed
-build_057_src_057_recursion_056_sats__implement_cycles(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+build_057_src_057_recursion_056_sats__implement_cycles(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 #endif // end of [QUALIFIED]
 
 #if(0)
@@ -2141,8 +2141,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
 tmpsub = None()
 */
 atsvoid_t0ype
@@ -2176,9 +2176,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(byte_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__1(atstkind_type(atstype_ptrk) arg0)
@@ -2460,8 +2460,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7005)
-tmparg = S2Evar(tk(7005))
+imparg = tk(7130)
+tmparg = S2Evar(tk(7130))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -2479,12 +2479,12 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp31, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7005))>)(arg1)) ;
+ATSINSmove(tmp31, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7130))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret30, PMVtmpltcst(g0int_gte<S2Evar(tk(7005))>)(arg0, tmp31)) ;
+ATSINSmove(tmpret30, PMVtmpltcst(g0int_gte<S2Evar(tk(7130))>)(arg0, tmp31)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret30) ;
@@ -2502,9 +2502,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7005)
-tmparg = S2Evar(tk(7005))
-tmpsub = Some(tk(7005) -> S2Eextkind(atstype_int))
+imparg = tk(7130)
+tmparg = S2Evar(tk(7130))
+tmpsub = Some(tk(7130) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__7__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2544,8 +2544,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7003)
-tmparg = S2Evar(tk(7003))
+imparg = tk(7128)
+tmparg = S2Evar(tk(7128))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -2563,12 +2563,12 @@ ATSINSflab(__patsflab_lte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12046(line=621, offs=30) -- 12057(line=621, offs=41)
 */
-ATSINSmove(tmp35, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7003))>)(arg1)) ;
+ATSINSmove(tmp35, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7128))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12028(line=621, offs=12) -- 12059(line=621, offs=43)
 */
-ATSINSmove(tmpret34, PMVtmpltcst(g0int_lte<S2Evar(tk(7003))>)(arg0, tmp35)) ;
+ATSINSmove(tmpret34, PMVtmpltcst(g0int_lte<S2Evar(tk(7128))>)(arg0, tmp35)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret34) ;
@@ -2586,9 +2586,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7003)
-tmparg = S2Evar(tk(7003))
-tmpsub = Some(tk(7003) -> S2Eextkind(atstype_int))
+imparg = tk(7128)
+tmparg = S2Evar(tk(7128))
+tmpsub = Some(tk(7128) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__11__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2627,9 +2627,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7005)
-tmparg = S2Evar(tk(7005))
-tmpsub = Some(tk(7005) -> S2Eextkind(atstype_int))
+imparg = tk(7130)
+tmparg = S2Evar(tk(7130))
+tmpsub = Some(tk(7130) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__7__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2668,9 +2668,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7003)
-tmparg = S2Evar(tk(7003))
-tmpsub = Some(tk(7003) -> S2Eextkind(atstype_int))
+imparg = tk(7128)
+tmparg = S2Evar(tk(7128))
+tmpsub = Some(tk(7128) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__11__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2710,8 +2710,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -2729,12 +2729,12 @@ ATSINSflab(__patsflab_eq_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
 */
-ATSINSmove(tmp44, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7006))>)(arg1)) ;
+ATSINSmove(tmp44, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7131))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
 */
-ATSINSmove(tmpret43, PMVtmpltcst(g0int_eq<S2Evar(tk(7006))>)(arg0, tmp44)) ;
+ATSINSmove(tmpret43, PMVtmpltcst(g0int_eq<S2Evar(tk(7131))>)(arg0, tmp44)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret43) ;
@@ -2752,9 +2752,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2830,8 +2830,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11355)
-tmparg = S2Evar(a(11355))
+imparg = a(11480)
+tmparg = S2Evar(a(11480))
 tmpsub = None()
 */
 atstyvar_type(a)
@@ -2849,12 +2849,12 @@ ATSINSflab(__patsflab_read):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14608(line=697, offs=24) -- 14624(line=697, offs=40)
 */
-ATSINSmove(tmp50, PMVtmpltcst(ptr1_add_gint<S2Evar(a(11355))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
+ATSINSmove(tmp50, PMVtmpltcst(ptr1_add_gint<S2Evar(a(11480))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
 
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14588(line=697, offs=4) -- 14625(line=697, offs=41)
 */
-ATSINSmove(tmpret49, PMVtmpltcst(ptr0_get<S2Evar(a(11355))>)(tmp50)) ;
+ATSINSmove(tmpret49, PMVtmpltcst(ptr0_get<S2Evar(a(11480))>)(tmp50)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret49) ;
@@ -2872,9 +2872,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11355)
-tmparg = S2Evar(a(11355))
-tmpsub = Some(a(11355) -> S2Ecst(byte_t0ype))
+imparg = a(11480)
+tmparg = S2Evar(a(11480))
+tmpsub = Some(a(11480) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__read__20__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2914,8 +2914,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
 tmpsub = None()
 */
 atstkind_type(atstype_ptrk)
@@ -2933,7 +2933,7 @@ ATSINSflab(__patsflab_ptr1_add_gint):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/pointer.dats({$PATSPRE}/DATS/pointer.dats): 2729(line=116, offs=22) -- 2755(line=116, offs=48)
 */
-ATSINSmove(tmp54, PMVtmpltcst(ptr0_add_gint<S2Evar(a(7077))><S2Evar(tk(7078))>)(arg0, arg1)) ;
+ATSINSmove(tmp54, PMVtmpltcst(ptr0_add_gint<S2Evar(a(7202))><S2Evar(tk(7203))>)(arg0, arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/pointer.dats({$PATSPRE}/DATS/pointer.dats): 2699(line=115, offs=1) -- 2756(line=116, offs=49)
@@ -2955,9 +2955,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(byte_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(byte_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__1(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -2996,8 +2996,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
 tmpsub = None()
 */
 atstkind_type(atstype_ptrk)
@@ -3016,7 +3016,7 @@ ATSINSflab(__patsflab_ptr0_add_gint):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/pointer.dats({$PATSPRE}/DATS/pointer.dats): 2125(line=81, offs=18) -- 2137(line=81, offs=30)
 */
-ATSINSmove(tmp59, PMVtmpltcst(g0int2uint<S2Evar(tk(7064)), S2Eextkind(atstype_size)>)(arg1)) ;
+ATSINSmove(tmp59, PMVtmpltcst(g0int2uint<S2Evar(tk(7189)), S2Eextkind(atstype_size)>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/pointer.dats({$PATSPRE}/DATS/pointer.dats): 2125(line=81, offs=18) -- 2150(line=81, offs=43)
@@ -3044,9 +3044,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(byte_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(byte_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__1(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3092,8 +3092,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
 tmpsub = None()
 */
 atstyvar_type(a)
@@ -3144,9 +3144,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(byte_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__1(atstkind_type(atstype_ptrk) arg0)
@@ -3334,8 +3334,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -3353,12 +3353,12 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp68, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7018))>)(arg1)) ;
+ATSINSmove(tmp68, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7143))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret67, PMVtmpltcst(g1int_gte<S2Evar(tk(7018))>)(arg0, tmp68)) ;
+ATSINSmove(tmpret67, PMVtmpltcst(g1int_gte<S2Evar(tk(7143))>)(arg0, tmp68)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret67) ;
@@ -3376,9 +3376,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3417,9 +3417,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3755,9 +3755,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3796,9 +3796,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3837,9 +3837,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3879,8 +3879,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7004)
-tmparg = S2Evar(tk(7004))
+imparg = tk(7129)
+tmparg = S2Evar(tk(7129))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -3898,12 +3898,12 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp95, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7004))>)(arg1)) ;
+ATSINSmove(tmp95, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7129))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret94, PMVtmpltcst(g0int_gt<S2Evar(tk(7004))>)(arg0, tmp95)) ;
+ATSINSmove(tmpret94, PMVtmpltcst(g0int_gt<S2Evar(tk(7129))>)(arg0, tmp95)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret94) ;
@@ -3921,9 +3921,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7004)
-tmparg = S2Evar(tk(7004))
-tmpsub = Some(tk(7004) -> S2Eextkind(atstype_int))
+imparg = tk(7129)
+tmparg = S2Evar(tk(7129))
+tmpsub = Some(tk(7129) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__42__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -3962,9 +3962,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7004)
-tmparg = S2Evar(tk(7004))
-tmpsub = Some(tk(7004) -> S2Eextkind(atstype_int))
+imparg = tk(7129)
+tmparg = S2Evar(tk(7129))
+tmpsub = Some(tk(7129) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__42__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4003,9 +4003,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4044,9 +4044,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4085,9 +4085,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4126,9 +4126,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4222,8 +4222,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7024)
-tmparg = S2Evar(tk(7024))
+imparg = tk(7149)
+tmparg = S2Evar(tk(7149))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -4241,12 +4241,12 @@ ATSINSflab(__patsflab_neq_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12943(line=672, offs=30) -- 12954(line=672, offs=41)
 */
-ATSINSmove(tmp118, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7024))>)(arg1)) ;
+ATSINSmove(tmp118, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7149))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12925(line=672, offs=12) -- 12956(line=672, offs=43)
 */
-ATSINSmove(tmpret117, PMVtmpltcst(g1int_neq<S2Evar(tk(7024))>)(arg0, tmp118)) ;
+ATSINSmove(tmpret117, PMVtmpltcst(g1int_neq<S2Evar(tk(7149))>)(arg0, tmp118)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret117) ;
@@ -4264,9 +4264,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7024)
-tmparg = S2Evar(tk(7024))
-tmpsub = Some(tk(7024) -> S2Eextkind(atstype_int))
+imparg = tk(7149)
+tmparg = S2Evar(tk(7149))
+tmpsub = Some(tk(7149) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__neq_g1int_int__52__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4781,9 +4781,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4822,9 +4822,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4864,8 +4864,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11291)
-tmparg = S2Evar(a(11291))
+imparg = a(11416)
+tmparg = S2Evar(a(11416))
 tmpsub = None()
 */
 atsvoid_t0ype
@@ -4883,12 +4883,12 @@ ATSINSflab(__patsflab_set):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14303(line=677, offs=24) -- 14321(line=677, offs=42)
 */
-ATSINSmove(tmp148, PMVtmpltcst(ptr1_add_gint<S2Evar(a(11291))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
+ATSINSmove(tmp148, PMVtmpltcst(ptr1_add_gint<S2Evar(a(11416))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
 
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14283(line=677, offs=4) -- 14325(line=677, offs=46)
 */
-ATSINSmove_void(tmpret147, PMVtmpltcst(ptr0_set<S2Evar(a(11291))>)(tmp148, arg2)) ;
+ATSINSmove_void(tmpret147, PMVtmpltcst(ptr0_set<S2Evar(a(11416))>)(tmp148, arg2)) ;
 
 ATSfunbody_end()
 ATSreturn_void(tmpret147) ;
@@ -4906,9 +4906,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11291)
-tmparg = S2Evar(a(11291))
-tmpsub = Some(a(11291) -> S2Ecst(byte_t0ype))
+imparg = a(11416)
+tmparg = S2Evar(a(11416))
+tmpsub = Some(a(11416) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_byte) arg2)
@@ -4947,9 +4947,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(byte_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(byte_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__2(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -4987,9 +4987,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(byte_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(byte_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__2(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -5035,8 +5035,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(8098)
-tmparg = S2Evar(a(8098))
+imparg = a(8223)
+tmparg = S2Evar(a(8223))
 tmpsub = None()
 */
 atsvoid_t0ype
@@ -5091,9 +5091,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8098)
-tmparg = S2Evar(a(8098))
-tmpsub = Some(a(8098) -> S2Ecst(byte_t0ype))
+imparg = a(8223)
+tmparg = S2Evar(a(8223))
+tmpsub = Some(a(8223) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__64__1(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_byte) arg1)
@@ -5146,9 +5146,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11355)
-tmparg = S2Evar(a(11355))
-tmpsub = Some(a(11355) -> S2Ecst(byte_t0ype))
+imparg = a(11480)
+tmparg = S2Evar(a(11480))
+tmpsub = Some(a(11480) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__read__20__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -5187,9 +5187,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(byte_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(byte_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__3(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -5227,9 +5227,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(byte_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(byte_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__3(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -5274,9 +5274,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(byte_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__2(atstkind_type(atstype_ptrk) arg0)
@@ -5713,9 +5713,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6194,9 +6194,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(byte_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__2(atstkind_type(atstype_ptrk) arg0)
@@ -6362,9 +6362,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7004)
-tmparg = S2Evar(tk(7004))
-tmpsub = Some(tk(7004) -> S2Eextkind(atstype_int))
+imparg = tk(7129)
+tmparg = S2Evar(tk(7129))
+tmpsub = Some(tk(7129) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__42__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6729,8 +6729,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7021)
-tmparg = S2Evar(tk(7021))
+imparg = tk(7146)
+tmparg = S2Evar(tk(7146))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -6748,12 +6748,12 @@ ATSINSflab(__patsflab_eq_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12864(line=668, offs=29) -- 12875(line=668, offs=40)
 */
-ATSINSmove(tmp255, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7021))>)(arg1)) ;
+ATSINSmove(tmp255, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7146))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12847(line=668, offs=12) -- 12877(line=668, offs=42)
 */
-ATSINSmove(tmpret254, PMVtmpltcst(g1int_eq<S2Evar(tk(7021))>)(arg0, tmp255)) ;
+ATSINSmove(tmpret254, PMVtmpltcst(g1int_eq<S2Evar(tk(7146))>)(arg0, tmp255)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret254) ;
@@ -6771,9 +6771,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7021)
-tmparg = S2Evar(tk(7021))
-tmpsub = Some(tk(7021) -> S2Eextkind(atstype_int))
+imparg = tk(7146)
+tmparg = S2Evar(tk(7146))
+tmpsub = Some(tk(7146) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g1int_int__82__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6812,9 +6812,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -6983,9 +6983,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7021)
-tmparg = S2Evar(tk(7021))
-tmpsub = Some(tk(7021) -> S2Eextkind(atstype_int))
+imparg = tk(7146)
+tmparg = S2Evar(tk(7146))
+tmpsub = Some(tk(7146) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g1int_int__82__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7024,9 +7024,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7065,9 +7065,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__11(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7106,9 +7106,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -7485,9 +7485,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8264,8 +8264,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11305)
-tmparg = S2Evar(a(11305))
+imparg = a(11430)
+tmparg = S2Evar(a(11430))
 tmpsub = None()
 */
 postiats_tyrec_1
@@ -8302,9 +8302,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11305)
-tmparg = S2Evar(a(11305))
-tmpsub = Some(a(11305) -> S2Ecst(byte_t0ype))
+imparg = a(11430)
+tmparg = S2Evar(a(11430))
+tmpsub = Some(a(11430) -> S2Ecst(byte_t0ype))
 */
 postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__96__1(atstkind_type(atstype_ptrk) arg0)
@@ -8340,8 +8340,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11340)
-tmparg = S2Evar(a(11340))
+imparg = a(11465)
+tmparg = S2Evar(a(11465))
 tmpsub = None()
 */
 atsvoid_t0ype
@@ -8375,9 +8375,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11340)
-tmparg = S2Evar(a(11340))
-tmpsub = Some(a(11340) -> S2Ecst(byte_t0ype))
+imparg = a(11465)
+tmparg = S2Evar(a(11465))
+tmpsub = Some(a(11465) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__98__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
@@ -8409,9 +8409,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(byte_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__3(atstkind_type(atstype_ptrk) arg0)
@@ -8444,8 +8444,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11315)
-tmparg = S2Evar(a(11315))
+imparg = a(11440)
+tmparg = S2Evar(a(11440))
 tmpsub = None()
 */
 atstkind_type(atstype_ptrk)
@@ -8479,9 +8479,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11315)
-tmparg = S2Evar(a(11315))
-tmpsub = Some(a(11315) -> S2Ecst(byte_t0ype))
+imparg = a(11440)
+tmparg = S2Evar(a(11440))
+tmpsub = Some(a(11440) -> S2Ecst(byte_t0ype))
 */
 atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__101__1(atstkind_type(atstype_ptrk) arg0)
@@ -8503,7 +8503,7 @@ ATSreturn(tmpret349__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__101__1] */
 
 /*
-build/src/recursion.dats: 13409(line=326, offs=5) -- 14014(line=340, offs=6)
+build/src/recursion.dats: 13409(line=326, offs=5) -- 14045(line=340, offs=6)
 */
 /*
 local: add_file_95$0(level=0), add_files_103$0(level=0)
@@ -8513,13 +8513,14 @@ global:
 */
 ATSstatic()
 atstype_boxed
-add_files_103(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstype_boxed arg3)
+add_files_103(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3, atstype_boxed arg4)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(apy3, atstype_boxed) ;
+ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(apy4, atstype_boxed) ;
 ATStmpdec(tmpret351, atstype_boxed) ;
 ATStmpdec(tmp352, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp355, atstkind_t0ype(atstype_int)) ;
@@ -8541,100 +8542,100 @@ ATStmpdec(tmp376, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13409(line=326, offs=5) -- 14014(line=340, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 13409(line=326, offs=5) -- 14045(line=340, offs=6)
 */
 ATSINSflab(__patsflab_add_files_103):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13549(line=328, offs=6) -- 13559(line=328, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 13594(line=328, offs=6) -- 13604(line=328, offs=16)
 */
-ATSINSmove(tmp352, ATSLIB_056_prelude__gte_g0int_int__7__3(arg1, arg2)) ;
+ATSINSmove(tmp352, ATSLIB_056_prelude__gte_g0int_int__7__3(arg2, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13546(line=328, offs=3) -- 14014(line=340, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 13591(line=328, offs=3) -- 14045(line=340, offs=6)
 */
 ATSif(
 tmp352
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13565(line=328, offs=22) -- 13567(line=328, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 13610(line=328, offs=22) -- 13612(line=328, offs=24)
 */
-ATSINSmove(tmpret351, arg3) ;
+ATSINSmove(tmpret351, arg4) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13575(line=329, offs=8) -- 14014(line=340, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 13620(line=329, offs=8) -- 14045(line=340, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13591(line=330, offs=13) -- 13627(line=330, offs=49)
+emit_instr: loc0 = build/src/recursion.dats: 13636(line=330, offs=13) -- 13658(line=330, offs=35)
 */
-ATSINSmove(tmp355, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_bv_at(ATSPMVrefarg0(arg0), arg1, ATSPMVintrep(524288))) ;
+ATSINSmove(tmp355, build_057_src_057_helpers_056_sats__nul_in(ATSPMVrefarg0(arg0), arg2, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13636(line=331, offs=9) -- 13638(line=331, offs=11)
+emit_instr: loc0 = build/src/recursion.dats: 13667(line=331, offs=9) -- 13669(line=331, offs=11)
 */
 /*
 ATSINStmpdec(tmpref356) ;
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13656(line=331, offs=29) -- 13667(line=331, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 13687(line=331, offs=29) -- 13698(line=331, offs=40)
 */
 ATSINSmove(tmpref356, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__create()) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13711(line=332, offs=44) -- 13716(line=332, offs=49)
+emit_instr: loc0 = build/src/recursion.dats: 13742(line=332, offs=44) -- 13747(line=332, offs=49)
 */
 ATSINSmove(tmp358, atspre_g1int_add_int(tmp355, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13681(line=332, offs=14) -- 13727(line=332, offs=60)
+emit_instr: loc0 = build/src/recursion.dats: 13712(line=332, offs=14) -- 13756(line=332, offs=58)
 */
-ATSINSmove_void(tmp357, build_057_src_057_helpers_056_sats__copy_to_builder_v(ATSPMVrefarg0(arg0), arg1, tmp358, ATSPMVintrep(524288), ATSPMVrefarg0(tmpref356))) ;
+ATSINSmove_void(tmp357, build_057_src_057_helpers_056_sats__copy_to_builder_v(ATSPMVrefarg0(arg0), arg2, tmp358, arg1, ATSPMVrefarg0(tmpref356))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13749(line=333, offs=22) -- 13763(line=333, offs=36)
+emit_instr: loc0 = build/src/recursion.dats: 13778(line=333, offs=22) -- 13792(line=333, offs=36)
 */
 ATSINSmove(tmp359, build_057_bats_modules_057_builder_057_src_057_lib_056_sats__into_arr(tmpref356)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13738(line=333, offs=11) -- 13740(line=333, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 13767(line=333, offs=11) -- 13769(line=333, offs=13)
 */
 ATSINSmove(tmp360, ATSSELfltrec(tmp359, postiats_tyrec_13, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13742(line=333, offs=15) -- 13745(line=333, offs=18)
+emit_instr: loc0 = build/src/recursion.dats: 13771(line=333, offs=15) -- 13774(line=333, offs=18)
 */
 ATSINSmove(tmp361, ATSSELfltrec(tmp359, postiats_tyrec_13, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13789(line=334, offs=25) -- 13807(line=334, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 13818(line=334, offs=25) -- 13836(line=334, offs=43)
 */
 ATSINSmove(tmp362, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__96__2(tmp360)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13775(line=334, offs=11) -- 13779(line=334, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 13804(line=334, offs=11) -- 13808(line=334, offs=15)
 */
 ATSINSmove(tmp364, ATSSELfltrec(tmp362, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13781(line=334, offs=17) -- 13785(line=334, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 13810(line=334, offs=17) -- 13814(line=334, offs=21)
 */
 ATSINSmove(tmp365, ATSSELfltrec(tmp362, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13823(line=335, offs=15) -- 13851(line=335, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 13852(line=335, offs=15) -- 13880(line=335, offs=43)
 */
-ATSINSmove(tmp366, add_file_95(ATSPMVrefarg0(tmp365), tmp361, arg1, arg3)) ;
+ATSINSmove(tmp366, add_file_95(ATSPMVrefarg0(tmp365), tmp361, arg2, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13865(line=336, offs=14) -- 13890(line=336, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 13894(line=336, offs=14) -- 13919(line=336, offs=39)
 */
 ATSINSmove_void(tmp367, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__98__2(ATSPMVrefarg0(tmp364), tmp365)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13918(line=337, offs=28) -- 13936(line=337, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 13947(line=337, offs=28) -- 13965(line=337, offs=46)
 */
 ATSINSmove(tmp371, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__101__2(tmp364)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13904(line=337, offs=14) -- 13938(line=337, offs=48)
+emit_instr: loc0 = build/src/recursion.dats: 13933(line=337, offs=14) -- 13967(line=337, offs=48)
 */
 ATSINSmove_void(tmp369, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__4(tmp371)) ;
 
@@ -8643,44 +8644,46 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13951(line=339, offs=8) -- 13960(line=339, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 13980(line=339, offs=8) -- 13987(line=339, offs=15)
 */
-ATSINSmove(tmp373, ATSLIB_056_prelude__gte_g1int_int__31__7(tmp355, ATSPMVintrep(524288))) ;
+ATSINSmove(tmp373, ATSLIB_056_prelude__gte_g1int_int__31__7(tmp355, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13948(line=339, offs=5) -- 14008(line=339, offs=65)
+emit_instr: loc0 = build/src/recursion.dats: 13977(line=339, offs=5) -- 14039(line=339, offs=67)
 */
 ATSif(
 tmp373
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13966(line=339, offs=23) -- 13969(line=339, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 13993(line=339, offs=21) -- 13996(line=339, offs=24)
 */
 ATSINSmove(tmpret351, tmp366) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13992(line=339, offs=49) -- 13997(line=339, offs=54)
+emit_instr: loc0 = build/src/recursion.dats: 14023(line=339, offs=51) -- 14028(line=339, offs=56)
 */
 ATSINSmove(tmp376, atspre_g1int_add_int(tmp355, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13975(line=339, offs=32) -- 14008(line=339, offs=65)
+emit_instr: loc0 = build/src/recursion.dats: 14002(line=339, offs=30) -- 14039(line=339, offs=67)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp376) ;
-ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp366) ;
+ATSINSmove_tlcal(apy1, arg1) ;
+ATSINSmove_tlcal(apy2, tmp376) ;
+ATSINSmove_tlcal(apy3, arg3) ;
+ATSINSmove_tlcal(apy4, tmp366) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
 ATSINSargmove_tlcal(arg3, apy3) ;
+ATSINSargmove_tlcal(arg4, apy4) ;
 ATSINSfgoto(__patsflab_add_files_103) ;
 ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 13575(line=329, offs=8) -- 14014(line=340, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 13620(line=329, offs=8) -- 14045(line=340, offs=6)
 */
 /*
 INSletpop()
@@ -8701,9 +8704,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7005)
-tmparg = S2Evar(tk(7005))
-tmpsub = Some(tk(7005) -> S2Eextkind(atstype_int))
+imparg = tk(7130)
+tmparg = S2Evar(tk(7130))
+tmpsub = Some(tk(7130) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__7__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8742,9 +8745,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11305)
-tmparg = S2Evar(a(11305))
-tmpsub = Some(a(11305) -> S2Ecst(byte_t0ype))
+imparg = a(11430)
+tmparg = S2Evar(a(11430))
+tmpsub = Some(a(11430) -> S2Ecst(byte_t0ype))
 */
 postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__96__2(atstkind_type(atstype_ptrk) arg0)
@@ -8779,9 +8782,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11340)
-tmparg = S2Evar(a(11340))
-tmpsub = Some(a(11340) -> S2Ecst(byte_t0ype))
+imparg = a(11465)
+tmparg = S2Evar(a(11465))
+tmpsub = Some(a(11465) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__98__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
@@ -8813,9 +8816,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(byte_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(byte_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__4(atstkind_type(atstype_ptrk) arg0)
@@ -8847,9 +8850,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11315)
-tmparg = S2Evar(a(11315))
-tmpsub = Some(a(11315) -> S2Ecst(byte_t0ype))
+imparg = a(11440)
+tmparg = S2Evar(a(11440))
+tmpsub = Some(a(11440) -> S2Ecst(byte_t0ype))
 */
 atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__101__2(atstkind_type(atstype_ptrk) arg0)
@@ -8881,9 +8884,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -8912,7 +8915,7 @@ ATSreturn(tmpret67__7) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__31__7] */
 
 /*
-build/src/recursion.dats: 14362(line=351, offs=5) -- 14497(line=354, offs=41)
+build/src/recursion.dats: 14393(line=351, offs=5) -- 14528(line=354, offs=41)
 */
 /*
 local: elist_free_110$0(level=0)
@@ -8931,11 +8934,11 @@ ATStmpdec(tmp379, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14362(line=351, offs=5) -- 14497(line=354, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 14393(line=351, offs=5) -- 14528(line=354, offs=41)
 */
 ATSINSflab(__patsflab_elist_free_110):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14422(line=352, offs=3) -- 14497(line=354, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 14453(line=352, offs=3) -- 14528(line=354, offs=41)
 */
 ATScaseof_beg()
 /*
@@ -8943,15 +8946,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14438(line=353, offs=5) -- 14450(line=353, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 14469(line=353, offs=5) -- 14481(line=353, offs=17)
 */
 ATSINSlab(__atstmplab60):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14395(line=351, offs=38) -- 14397(line=351, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 14426(line=351, offs=38) -- 14428(line=351, offs=40)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab63) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14450(line=353, offs=17) -- 14450(line=353, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 14481(line=353, offs=17) -- 14481(line=353, offs=17)
 */
 ATSINSlab(__atstmplab61):
 /*
@@ -8961,32 +8964,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14454(line=353, offs=21) -- 14456(line=353, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 14485(line=353, offs=21) -- 14487(line=353, offs=23)
 */
 ATSINSmove_void(tmpret377, ATSPMVempty()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14461(line=354, offs=5) -- 14479(line=354, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 14492(line=354, offs=5) -- 14510(line=354, offs=23)
 */
 ATSINSlab(__atstmplab62):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14395(line=351, offs=38) -- 14397(line=351, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 14426(line=351, offs=38) -- 14428(line=351, offs=40)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14479(line=354, offs=23) -- 14479(line=354, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 14510(line=354, offs=23) -- 14510(line=354, offs=23)
 */
 ATSINSlab(__atstmplab63):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14476(line=354, offs=20) -- 14478(line=354, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 14507(line=354, offs=20) -- 14509(line=354, offs=22)
 */
 ATSINSmove(tmp379, ATSSELcon(arg0, postiats_tysum_14, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14461(line=354, offs=5) -- 14497(line=354, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 14492(line=354, offs=5) -- 14528(line=354, offs=41)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -8996,7 +8999,7 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14483(line=354, offs=27) -- 14496(line=354, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 14514(line=354, offs=27) -- 14527(line=354, offs=40)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp379) ;
@@ -9016,7 +9019,7 @@ ATSreturn_void(tmpret377) ;
 } /* end of [elist_free_110] */
 
 /*
-build/src/recursion.dats: 14799(line=365, offs=5) -- 15012(line=371, offs=26)
+build/src/recursion.dats: 14830(line=365, offs=5) -- 15043(line=371, offs=26)
 */
 /*
 local: elist_free_110$0(level=0), nodes_free_111$0(level=0)
@@ -9038,11 +9041,11 @@ ATStmpdec(tmp383, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14799(line=365, offs=5) -- 15012(line=371, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 14830(line=365, offs=5) -- 15043(line=371, offs=26)
 */
 ATSINSflab(__patsflab_nodes_free_111):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14859(line=366, offs=3) -- 15012(line=371, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 14890(line=366, offs=3) -- 15043(line=371, offs=26)
 */
 ATScaseof_beg()
 /*
@@ -9050,15 +9053,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14875(line=367, offs=5) -- 14887(line=367, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 14906(line=367, offs=5) -- 14918(line=367, offs=17)
 */
 ATSINSlab(__atstmplab64):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14832(line=365, offs=38) -- 14834(line=365, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 14863(line=365, offs=38) -- 14865(line=365, offs=40)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab67) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14887(line=367, offs=17) -- 14887(line=367, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 14918(line=367, offs=17) -- 14918(line=367, offs=17)
 */
 ATSINSlab(__atstmplab65):
 /*
@@ -9068,36 +9071,36 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14891(line=367, offs=21) -- 14893(line=367, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 14922(line=367, offs=21) -- 14924(line=367, offs=23)
 */
 ATSINSmove_void(tmpret380, ATSPMVempty()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14898(line=368, offs=5) -- 14917(line=368, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 14929(line=368, offs=5) -- 14948(line=368, offs=24)
 */
 ATSINSlab(__atstmplab66):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14832(line=365, offs=38) -- 14834(line=365, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 14863(line=365, offs=38) -- 14865(line=365, offs=40)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14917(line=368, offs=24) -- 14917(line=368, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 14948(line=368, offs=24) -- 14948(line=368, offs=24)
 */
 ATSINSlab(__atstmplab67):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14910(line=368, offs=17) -- 14912(line=368, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 14941(line=368, offs=17) -- 14943(line=368, offs=19)
 */
 ATSINSmove(tmp381, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14914(line=368, offs=21) -- 14916(line=368, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 14945(line=368, offs=21) -- 14947(line=368, offs=23)
 */
 ATSINSmove(tmp382, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14898(line=368, offs=5) -- 15012(line=371, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 14929(line=368, offs=5) -- 15043(line=371, offs=26)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -9107,27 +9110,27 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14921(line=368, offs=28) -- 15012(line=371, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 14952(line=368, offs=28) -- 15043(line=371, offs=26)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14936(line=369, offs=12) -- 14951(line=369, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 14967(line=369, offs=12) -- 14982(line=369, offs=27)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14948(line=369, offs=24) -- 14950(line=369, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 14979(line=369, offs=24) -- 14981(line=369, offs=26)
 */
 ATSINSmove(tmp383, ATSSELcon(tmp381, postiats_tysum_15, atslab__2)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14936(line=369, offs=12) -- 14951(line=369, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 14967(line=369, offs=12) -- 14982(line=369, offs=27)
 */
 ATSINSfreecon(tmp381) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14972(line=370, offs=16) -- 14985(line=370, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 15003(line=370, offs=16) -- 15016(line=370, offs=29)
 */
 ATSINSmove_void(tmp384, elist_free_110(tmp383)) ;
 
@@ -9136,7 +9139,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14994(line=371, offs=8) -- 15007(line=371, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 15025(line=371, offs=8) -- 15038(line=371, offs=21)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp382) ;
@@ -9145,7 +9148,7 @@ ATSINSfgoto(__patsflab_nodes_free_111) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 14921(line=368, offs=28) -- 15012(line=371, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 14952(line=368, offs=28) -- 15043(line=371, offs=26)
 */
 /*
 INSletpop()
@@ -9162,7 +9165,7 @@ ATSreturn_void(tmpret380) ;
 } /* end of [nodes_free_111] */
 
 /*
-build/src/recursion.dats: 15078(line=374, offs=5) -- 15430(line=379, offs=13)
+build/src/recursion.dats: 15109(line=374, offs=5) -- 15461(line=379, offs=13)
 */
 /*
 local: same_bytes_112$0(level=0)
@@ -9192,68 +9195,68 @@ ATStmpdec(tmp415, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15078(line=374, offs=5) -- 15430(line=379, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 15109(line=374, offs=5) -- 15461(line=379, offs=13)
 */
 ATSINSflab(__patsflab_same_bytes_112):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15282(line=376, offs=6) -- 15288(line=376, offs=12)
+emit_instr: loc0 = build/src/recursion.dats: 15313(line=376, offs=6) -- 15319(line=376, offs=12)
 */
 ATSINSmove(tmp386, ATSLIB_056_prelude__gte_g1int_int__31__8(arg4, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15279(line=376, offs=3) -- 15430(line=379, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 15310(line=376, offs=3) -- 15461(line=379, offs=13)
 */
 ATSif(
 tmp386
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15294(line=376, offs=18) -- 15298(line=376, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 15325(line=376, offs=18) -- 15329(line=376, offs=22)
 */
 ATSINSmove(tmpret385, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15319(line=377, offs=21) -- 15337(line=377, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 15350(line=377, offs=21) -- 15368(line=377, offs=39)
 */
 ATSINSmove(tmp393, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__1(ATSPMVrefarg0(arg0), arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15309(line=377, offs=11) -- 15338(line=377, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 15340(line=377, offs=11) -- 15369(line=377, offs=40)
 */
 ATSINSmove(tmp392, atspre_byte2int0(tmp393)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15369(line=377, offs=71) -- 15374(line=377, offs=76)
+emit_instr: loc0 = build/src/recursion.dats: 15400(line=377, offs=71) -- 15405(line=377, offs=76)
 */
 ATSINSmove(tmp414, atspre_g1int_add_int(arg3, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15351(line=377, offs=53) -- 15375(line=377, offs=77)
+emit_instr: loc0 = build/src/recursion.dats: 15382(line=377, offs=53) -- 15406(line=377, offs=77)
 */
 ATSINSmove(tmp405, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__2(ATSPMVrefarg0(arg2), tmp414)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15341(line=377, offs=43) -- 15376(line=377, offs=78)
+emit_instr: loc0 = build/src/recursion.dats: 15372(line=377, offs=43) -- 15407(line=377, offs=78)
 */
 ATSINSmove(tmp404, atspre_byte2int0(tmp405)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15309(line=377, offs=11) -- 15376(line=377, offs=78)
+emit_instr: loc0 = build/src/recursion.dats: 15340(line=377, offs=11) -- 15407(line=377, offs=78)
 */
 ATSINSmove(tmp389, ATSLIB_056_prelude__eq_g0int_int__16__13(tmp392, tmp404)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15306(line=377, offs=8) -- 15430(line=379, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 15337(line=377, offs=8) -- 15461(line=379, offs=13)
 */
 ATSif(
 tmp389
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15411(line=378, offs=30) -- 15416(line=378, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 15442(line=378, offs=30) -- 15447(line=378, offs=35)
 */
 ATSINSmove(tmp415, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15386(line=378, offs=5) -- 15417(line=378, offs=36)
+emit_instr: loc0 = build/src/recursion.dats: 15417(line=378, offs=5) -- 15448(line=378, offs=36)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
@@ -9271,7 +9274,7 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15425(line=379, offs=8) -- 15430(line=379, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 15456(line=379, offs=8) -- 15461(line=379, offs=13)
 */
 ATSINSmove(tmpret385, ATSPMVbool_false()) ;
 } /* ATSendif */
@@ -9291,9 +9294,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9332,9 +9335,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9374,8 +9377,8 @@ global:
 */
 ATSextern()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
 tmpsub = None()
 */
 atstyvar_type(a)
@@ -9393,12 +9396,12 @@ ATSINSflab(__patsflab_get):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14217(line=673, offs=24) -- 14235(line=673, offs=42)
 */
-ATSINSmove(tmp395, PMVtmpltcst(ptr1_add_gint<S2Evar(a(11277))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
+ATSINSmove(tmp395, PMVtmpltcst(ptr1_add_gint<S2Evar(a(11402))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
 
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14197(line=673, offs=4) -- 14236(line=673, offs=43)
 */
-ATSINSmove(tmpret394, PMVtmpltcst(ptr0_get<S2Evar(a(11277))>)(tmp395)) ;
+ATSINSmove(tmpret394, PMVtmpltcst(ptr0_get<S2Evar(a(11402))>)(tmp395)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret394) ;
@@ -9416,9 +9419,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(byte_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9457,9 +9460,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(byte_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(byte_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__4(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9497,9 +9500,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(byte_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(byte_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__4(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9544,9 +9547,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(byte_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__3(atstkind_type(atstype_ptrk) arg0)
@@ -9595,9 +9598,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(byte_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9636,9 +9639,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(byte_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(byte_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__5(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9676,9 +9679,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(byte_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(byte_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__5(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -9723,9 +9726,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(byte_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(byte_t0ype))
 */
 atstkind_t0ype(atstype_byte)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__4(atstkind_type(atstype_ptrk) arg0)
@@ -9764,7 +9767,7 @@ ATSreturn(tmpret63__4) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_get__28__4] */
 
 /*
-build/src/recursion.dats: 15536(line=383, offs=4) -- 16041(line=392, offs=9)
+build/src/recursion.dats: 15567(line=383, offs=4) -- 16072(line=392, offs=9)
 */
 /*
 local: same_bytes_112$0(level=0)
@@ -9789,44 +9792,44 @@ ATStmpdec(tmp436, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15536(line=383, offs=4) -- 16041(line=392, offs=9)
+emit_instr: loc0 = build/src/recursion.dats: 15567(line=383, offs=4) -- 16072(line=392, offs=9)
 */
 ATSINSflab(__patsflab_calls_124):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15689(line=384, offs=99) -- 16041(line=392, offs=9)
+emit_instr: loc0 = build/src/recursion.dats: 15720(line=384, offs=99) -- 16072(line=392, offs=9)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15700(line=385, offs=8) -- 15731(line=385, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 15731(line=385, offs=8) -- 15762(line=385, offs=39)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15752(line=386, offs=17) -- 15757(line=386, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 15783(line=386, offs=17) -- 15788(line=386, offs=22)
 */
 ATSINSmove(tmp423, atspre_g1int_sub_int(arg3, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15752(line=386, offs=17) -- 15763(line=386, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 15783(line=386, offs=17) -- 15794(line=386, offs=28)
 */
 ATSINSmove(tmp418, ATSLIB_056_prelude__gt_g1int_int__125__1(tmp423, ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15749(line=386, offs=14) -- 15783(line=386, offs=48)
+emit_instr: loc0 = build/src/recursion.dats: 15780(line=386, offs=14) -- 15814(line=386, offs=48)
 */
 ATSif(
 tmp418
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15769(line=386, offs=34) -- 15772(line=386, offs=37)
+emit_instr: loc0 = build/src/recursion.dats: 15800(line=386, offs=34) -- 15803(line=386, offs=37)
 */
 ATSINSmove(tmp417, ATSPMVi0nt(256)) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15778(line=386, offs=43) -- 15783(line=386, offs=48)
+emit_instr: loc0 = build/src/recursion.dats: 15809(line=386, offs=43) -- 15814(line=386, offs=48)
 */
 ATSINSmove(tmp417, atspre_g1int_sub_int(arg3, arg2)) ;
 
@@ -9836,89 +9839,89 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15837(line=387, offs=15) -- 15857(line=387, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 15868(line=387, offs=15) -- 15888(line=387, offs=35)
 */
 ATSINSmove(tmp425, atspre_neg_bool0(ATSSELcon(arg0, postiats_tysum_6, atslab__2))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15837(line=387, offs=15) -- 15857(line=387, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 15868(line=387, offs=15) -- 15888(line=387, offs=35)
 */
 ATSif(
 tmp425
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15837(line=387, offs=15) -- 15857(line=387, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 15868(line=387, offs=15) -- 15888(line=387, offs=35)
 */
 ATSINSmove(tmp424, ATSLIB_056_prelude__neq_g0int_int__128__1(ATSSELcon(arg0, postiats_tysum_6, atslab__3), arg4)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15837(line=387, offs=15) -- 15857(line=387, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 15868(line=387, offs=15) -- 15888(line=387, offs=35)
 */
 ATSINSmove(tmp424, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15834(line=387, offs=12) -- 16003(line=390, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 15865(line=387, offs=12) -- 16034(line=390, offs=44)
 */
 ATSif(
 tmp424
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15863(line=387, offs=41) -- 15868(line=387, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 15894(line=387, offs=41) -- 15899(line=387, offs=46)
 */
 ATSINSmove(tmpret416, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15888(line=388, offs=20) -- 15909(line=388, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 15919(line=388, offs=20) -- 15940(line=388, offs=41)
 */
 ATSINSmove(tmp431, ATSLIB_056_prelude__gt_g0int_int__42__4(arg5, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15888(line=388, offs=20) -- 15909(line=388, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 15919(line=388, offs=20) -- 15940(line=388, offs=41)
 */
 ATSif(
 tmp431
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15888(line=388, offs=20) -- 15909(line=388, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 15919(line=388, offs=20) -- 15940(line=388, offs=41)
 */
 ATSINSmove(tmp430, ATSLIB_056_prelude__eq_g0int_int__16__14(arg5, ATSSELcon(arg0, postiats_tysum_6, atslab__4))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15888(line=388, offs=20) -- 15909(line=388, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 15919(line=388, offs=20) -- 15940(line=388, offs=41)
 */
 ATSINSmove(tmp430, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15885(line=388, offs=17) -- 16003(line=390, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 15916(line=388, offs=17) -- 16034(line=390, offs=44)
 */
 ATSif(
 tmp430
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15915(line=388, offs=47) -- 15920(line=388, offs=52)
+emit_instr: loc0 = build/src/recursion.dats: 15946(line=388, offs=47) -- 15951(line=388, offs=52)
 */
 ATSINSmove(tmpret416, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15940(line=389, offs=20) -- 15948(line=389, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 15971(line=389, offs=20) -- 15979(line=389, offs=28)
 */
 ATSINSmove(tmp436, ATSLIB_056_prelude__neq_g1int_int__52__2(tmp417, ATSSELcon(arg0, postiats_tysum_6, atslab__1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15937(line=389, offs=17) -- 16003(line=390, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 15968(line=389, offs=17) -- 16034(line=390, offs=44)
 */
 ATSif(
 tmp436
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15954(line=389, offs=34) -- 15959(line=389, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 15985(line=389, offs=34) -- 15990(line=389, offs=39)
 */
 ATSINSmove(tmpret416, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15976(line=390, offs=17) -- 16003(line=390, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 16007(line=390, offs=17) -- 16034(line=390, offs=44)
 */
 ATSINSmove(tmpret416, same_bytes_112(ATSPMVrefarg0(ATSSELcon(arg0, postiats_tysum_6, atslab__0)), ATSSELcon(arg0, postiats_tysum_6, atslab__1), ATSPMVrefarg0(arg1), arg2, ATSPMVi0nt(0))) ;
 
@@ -9926,7 +9929,7 @@ ATSINSmove(tmpret416, same_bytes_112(ATSPMVrefarg0(ATSSELcon(arg0, postiats_tysu
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 15689(line=384, offs=99) -- 16041(line=392, offs=9)
+emit_instr: loc0 = build/src/recursion.dats: 15720(line=384, offs=99) -- 16072(line=392, offs=9)
 */
 /*
 INSletpop()
@@ -9947,8 +9950,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7015)
-tmparg = S2Evar(tk(7015))
+imparg = tk(7140)
+tmparg = S2Evar(tk(7140))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -9966,12 +9969,12 @@ ATSINSflab(__patsflab_gt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12705(line=659, offs=29) -- 12716(line=659, offs=40)
 */
-ATSINSmove(tmp420, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7015))>)(arg1)) ;
+ATSINSmove(tmp420, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7140))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12688(line=659, offs=12) -- 12718(line=659, offs=42)
 */
-ATSINSmove(tmpret419, PMVtmpltcst(g1int_gt<S2Evar(tk(7015))>)(arg0, tmp420)) ;
+ATSINSmove(tmpret419, PMVtmpltcst(g1int_gt<S2Evar(tk(7140))>)(arg0, tmp420)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret419) ;
@@ -9989,9 +9992,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7015)
-tmparg = S2Evar(tk(7015))
-tmpsub = Some(tk(7015) -> S2Eextkind(atstype_int))
+imparg = tk(7140)
+tmparg = S2Evar(tk(7140))
+tmpsub = Some(tk(7140) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__125__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10031,8 +10034,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7007)
-tmparg = S2Evar(tk(7007))
+imparg = tk(7132)
+tmparg = S2Evar(tk(7132))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -10050,12 +10053,12 @@ ATSINSflab(__patsflab_neq_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12364(line=639, offs=30) -- 12375(line=639, offs=41)
 */
-ATSINSmove(tmp427, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7007))>)(arg1)) ;
+ATSINSmove(tmp427, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7132))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12346(line=639, offs=12) -- 12377(line=639, offs=43)
 */
-ATSINSmove(tmpret426, PMVtmpltcst(g0int_neq<S2Evar(tk(7007))>)(arg0, tmp427)) ;
+ATSINSmove(tmpret426, PMVtmpltcst(g0int_neq<S2Evar(tk(7132))>)(arg0, tmp427)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret426) ;
@@ -10073,9 +10076,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7007)
-tmparg = S2Evar(tk(7007))
-tmpsub = Some(tk(7007) -> S2Eextkind(atstype_int))
+imparg = tk(7132)
+tmparg = S2Evar(tk(7132))
+tmpsub = Some(tk(7132) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__neq_g0int_int__128__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10114,9 +10117,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7004)
-tmparg = S2Evar(tk(7004))
-tmpsub = Some(tk(7004) -> S2Eextkind(atstype_int))
+imparg = tk(7129)
+tmparg = S2Evar(tk(7129))
+tmpsub = Some(tk(7129) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__42__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10155,9 +10158,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__14(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10196,9 +10199,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7024)
-tmparg = S2Evar(tk(7024))
-tmpsub = Some(tk(7024) -> S2Eextkind(atstype_int))
+imparg = tk(7149)
+tmparg = S2Evar(tk(7149))
+tmpsub = Some(tk(7149) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__neq_g1int_int__52__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -10227,7 +10230,7 @@ ATSreturn(tmpret117__2) ;
 } /* end of [ATSLIB_056_prelude__neq_g1int_int__52__2] */
 
 /*
-build/src/recursion.dats: 16133(line=396, offs=5) -- 16602(line=403, offs=54)
+build/src/recursion.dats: 16164(line=396, offs=5) -- 16633(line=403, offs=54)
 */
 /*
 local: calls_124$0(level=0), calls_of_134$0(level=0)
@@ -10258,11 +10261,11 @@ ATStmpdec(tmp445, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16133(line=396, offs=5) -- 16602(line=403, offs=54)
+emit_instr: loc0 = build/src/recursion.dats: 16164(line=396, offs=5) -- 16633(line=403, offs=54)
 */
 ATSINSflab(__patsflab_calls_of_134):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16386(line=399, offs=3) -- 16602(line=403, offs=54)
+emit_instr: loc0 = build/src/recursion.dats: 16417(line=399, offs=3) -- 16633(line=403, offs=54)
 */
 ATScaseof_beg()
 /*
@@ -10270,15 +10273,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16402(line=400, offs=5) -- 16414(line=400, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 16433(line=400, offs=5) -- 16445(line=400, offs=17)
 */
 ATSINSlab(__atstmplab68):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16236(line=397, offs=4) -- 16238(line=397, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 16267(line=397, offs=4) -- 16269(line=397, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab71) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16414(line=400, offs=17) -- 16414(line=400, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 16445(line=400, offs=17) -- 16445(line=400, offs=17)
 */
 ATSINSlab(__atstmplab69):
 /*
@@ -10288,32 +10291,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16418(line=400, offs=21) -- 16421(line=400, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 16449(line=400, offs=21) -- 16452(line=400, offs=24)
 */
 ATSINSmove(tmpret439, arg7) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16426(line=401, offs=5) -- 16444(line=401, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 16457(line=401, offs=5) -- 16475(line=401, offs=23)
 */
 ATSINSlab(__atstmplab70):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16236(line=397, offs=4) -- 16238(line=397, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 16267(line=397, offs=4) -- 16269(line=397, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16444(line=401, offs=23) -- 16444(line=401, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 16475(line=401, offs=23) -- 16475(line=401, offs=23)
 */
 ATSINSlab(__atstmplab71):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16438(line=401, offs=17) -- 16439(line=401, offs=18)
+emit_instr: loc0 = build/src/recursion.dats: 16469(line=401, offs=17) -- 16470(line=401, offs=18)
 */
 ATSINSmove(tmp440, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16441(line=401, offs=20) -- 16443(line=401, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 16472(line=401, offs=20) -- 16474(line=401, offs=22)
 */
 ATSINSmove(tmp441, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
@@ -10323,23 +10326,23 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16455(line=402, offs=8) -- 16483(line=402, offs=36)
+emit_instr: loc0 = build/src/recursion.dats: 16486(line=402, offs=8) -- 16514(line=402, offs=36)
 */
 ATSINSmove(tmp442, calls_124(ATSPMVrefarg0(tmp440), ATSPMVrefarg0(arg2), arg3, arg4, arg5, arg6)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16452(line=402, offs=5) -- 16602(line=403, offs=54)
+emit_instr: loc0 = build/src/recursion.dats: 16483(line=402, offs=5) -- 16633(line=403, offs=54)
 */
 ATSif(
 tmp442
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16502(line=402, offs=55) -- 16507(line=402, offs=60)
+emit_instr: loc0 = build/src/recursion.dats: 16533(line=402, offs=55) -- 16538(line=402, offs=60)
 */
 ATSINSmove(tmp443, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16529(line=402, offs=82) -- 16547(line=402, offs=100)
+emit_instr: loc0 = build/src/recursion.dats: 16560(line=402, offs=82) -- 16578(line=402, offs=100)
 */
 
 /*
@@ -10354,7 +10357,7 @@ ATSINSstore_con1_ofs(tmp444, postiats_tysum_14, atslab__0, arg1) ;
 ATSINSstore_con1_ofs(tmp444, postiats_tysum_14, atslab__1, arg7) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16489(line=402, offs=42) -- 16548(line=402, offs=101)
+emit_instr: loc0 = build/src/recursion.dats: 16520(line=402, offs=42) -- 16579(line=402, offs=101)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp441)) ;
@@ -10378,12 +10381,12 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16571(line=403, offs=23) -- 16576(line=403, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 16602(line=403, offs=23) -- 16607(line=403, offs=28)
 */
 ATSINSmove(tmp445, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16558(line=403, offs=10) -- 16602(line=403, offs=54)
+emit_instr: loc0 = build/src/recursion.dats: 16589(line=403, offs=10) -- 16633(line=403, offs=54)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp441)) ;
@@ -10418,7 +10421,7 @@ ATSreturn(tmpret439) ;
 } /* end of [calls_of_134] */
 
 /*
-build/src/recursion.dats: 16676(line=406, offs=5) -- 17016(line=412, offs=79)
+build/src/recursion.dats: 16707(line=406, offs=5) -- 17047(line=412, offs=79)
 */
 /*
 local: calls_of_134$0(level=0), occs_calls_135$0(level=0)
@@ -10445,11 +10448,11 @@ ATStmpdec(tmp450, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16676(line=406, offs=5) -- 17016(line=412, offs=79)
+emit_instr: loc0 = build/src/recursion.dats: 16707(line=406, offs=5) -- 17047(line=412, offs=79)
 */
 ATSINSflab(__patsflab_occs_calls_135):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16877(line=409, offs=3) -- 17016(line=412, offs=79)
+emit_instr: loc0 = build/src/recursion.dats: 16908(line=409, offs=3) -- 17047(line=412, offs=79)
 */
 ATScaseof_beg()
 /*
@@ -10457,15 +10460,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16893(line=410, offs=5) -- 16903(line=410, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 16924(line=410, offs=5) -- 16934(line=410, offs=15)
 */
 ATSINSlab(__atstmplab72):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16740(line=407, offs=4) -- 16742(line=407, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 16771(line=407, offs=4) -- 16773(line=407, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab75) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16903(line=410, offs=15) -- 16903(line=410, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 16934(line=410, offs=15) -- 16934(line=410, offs=15)
 */
 ATSINSlab(__atstmplab73):
 /*
@@ -10475,36 +10478,36 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16907(line=410, offs=19) -- 16910(line=410, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 16938(line=410, offs=19) -- 16941(line=410, offs=22)
 */
 ATSINSmove(tmpret446, arg5) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16915(line=411, offs=5) -- 16934(line=411, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 16946(line=411, offs=5) -- 16965(line=411, offs=24)
 */
 ATSINSlab(__atstmplab74):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16740(line=407, offs=4) -- 16742(line=407, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 16771(line=407, offs=4) -- 16773(line=407, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16934(line=411, offs=24) -- 16934(line=411, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 16965(line=411, offs=24) -- 16965(line=411, offs=24)
 */
 ATSINSlab(__atstmplab75):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16925(line=411, offs=15) -- 16926(line=411, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 16956(line=411, offs=15) -- 16957(line=411, offs=16)
 */
 ATSINSmove(tmp447, ATSSELcon(arg0, postiats_tysum_3, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16928(line=411, offs=18) -- 16929(line=411, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 16959(line=411, offs=18) -- 16960(line=411, offs=19)
 */
 ATSINSmove(tmp448, ATSSELcon(arg0, postiats_tysum_3, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16931(line=411, offs=21) -- 16933(line=411, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 16962(line=411, offs=21) -- 16964(line=411, offs=23)
 */
 ATSINSmove(tmp449, ATSSELcon(arg0, postiats_tysum_3, atslab__2)) ;
 /*
@@ -10514,12 +10517,12 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16975(line=412, offs=38) -- 17015(line=412, offs=78)
+emit_instr: loc0 = build/src/recursion.dats: 17006(line=412, offs=38) -- 17046(line=412, offs=78)
 */
 ATSINSmove(tmp450, calls_of_134(ATSPMVrefarg0(arg1), ATSPMVi0nt(0), ATSPMVrefarg0(arg2), tmp447, tmp448, arg3, arg4, arg5)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 16942(line=412, offs=5) -- 17016(line=412, offs=79)
+emit_instr: loc0 = build/src/recursion.dats: 16973(line=412, offs=5) -- 17047(line=412, offs=79)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp449)) ;
@@ -10549,7 +10552,7 @@ ATSreturn(tmpret446) ;
 } /* end of [occs_calls_135] */
 
 /*
-build/src/recursion.dats: 17108(line=416, offs=5) -- 17614(line=426, offs=66)
+build/src/recursion.dats: 17139(line=416, offs=5) -- 17645(line=426, offs=66)
 */
 /*
 local: occs_calls_135$0(level=0), def_nodes_136$0(level=0)
@@ -10579,11 +10582,11 @@ ATStmpdec(tmp458, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17108(line=416, offs=5) -- 17614(line=426, offs=66)
+emit_instr: loc0 = build/src/recursion.dats: 17139(line=416, offs=5) -- 17645(line=426, offs=66)
 */
 ATSINSflab(__patsflab_def_nodes_136):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17323(line=419, offs=3) -- 17614(line=426, offs=66)
+emit_instr: loc0 = build/src/recursion.dats: 17354(line=419, offs=3) -- 17645(line=426, offs=66)
 */
 ATScaseof_beg()
 /*
@@ -10591,15 +10594,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17339(line=420, offs=5) -- 17349(line=420, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 17370(line=420, offs=5) -- 17380(line=420, offs=15)
 */
 ATSINSlab(__atstmplab76):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17186(line=417, offs=4) -- 17188(line=417, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 17217(line=417, offs=4) -- 17219(line=417, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab79) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17349(line=420, offs=15) -- 17349(line=420, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 17380(line=420, offs=15) -- 17380(line=420, offs=15)
 */
 ATSINSlab(__atstmplab77):
 /*
@@ -10609,32 +10612,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17353(line=420, offs=19) -- 17356(line=420, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 17384(line=420, offs=19) -- 17387(line=420, offs=22)
 */
 ATSINSmove(tmpret451, arg5) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17361(line=421, offs=5) -- 17377(line=421, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 17392(line=421, offs=5) -- 17408(line=421, offs=21)
 */
 ATSINSlab(__atstmplab78):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17186(line=417, offs=4) -- 17188(line=417, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 17217(line=417, offs=4) -- 17219(line=417, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17377(line=421, offs=21) -- 17377(line=421, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 17408(line=421, offs=21) -- 17408(line=421, offs=21)
 */
 ATSINSlab(__atstmplab79):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17371(line=421, offs=15) -- 17372(line=421, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 17402(line=421, offs=15) -- 17403(line=421, offs=16)
 */
 ATSINSmove(tmp452, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17374(line=421, offs=18) -- 17376(line=421, offs=20)
+emit_instr: loc0 = build/src/recursion.dats: 17405(line=421, offs=18) -- 17407(line=421, offs=20)
 */
 ATSINSmove(tmp453, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
@@ -10644,30 +10647,30 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17381(line=421, offs=25) -- 17614(line=426, offs=66)
+emit_instr: loc0 = build/src/recursion.dats: 17412(line=421, offs=25) -- 17645(line=426, offs=66)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17396(line=422, offs=12) -- 17424(line=422, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 17427(line=422, offs=12) -- 17455(line=422, offs=40)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17477(line=423, offs=49) -- 17488(line=423, offs=60)
+emit_instr: loc0 = build/src/recursion.dats: 17508(line=423, offs=49) -- 17519(line=423, offs=60)
 */
 
 ATSINSmove_nil(tmp455) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17444(line=423, offs=16) -- 17489(line=423, offs=61)
+emit_instr: loc0 = build/src/recursion.dats: 17475(line=423, offs=16) -- 17520(line=423, offs=61)
 */
 ATSINSmove(tmp454, occs_calls_135(ATSPMVrefarg0(ATSSELcon(tmp452, postiats_tysum_5, atslab__5)), ATSPMVrefarg0(arg2), ATSPMVrefarg0(arg3), arg4, ATSSELcon(tmp452, postiats_tysum_5, atslab__1), tmp455)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17505(line=424, offs=16) -- 17522(line=424, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 17536(line=424, offs=16) -- 17553(line=424, offs=33)
 */
 
 /*
@@ -10687,12 +10690,12 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17570(line=426, offs=22) -- 17575(line=426, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 17601(line=426, offs=22) -- 17606(line=426, offs=27)
 */
 ATSINSmove(tmp457, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17590(line=426, offs=42) -- 17609(line=426, offs=61)
+emit_instr: loc0 = build/src/recursion.dats: 17621(line=426, offs=42) -- 17640(line=426, offs=61)
 */
 
 /*
@@ -10707,7 +10710,7 @@ ATSINSstore_con1_ofs(tmp458, postiats_tysum_4, atslab__0, tmp456) ;
 ATSINSstore_con1_ofs(tmp458, postiats_tysum_4, atslab__1, arg5) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17556(line=426, offs=8) -- 17610(line=426, offs=62)
+emit_instr: loc0 = build/src/recursion.dats: 17587(line=426, offs=8) -- 17641(line=426, offs=62)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp453)) ;
@@ -10726,7 +10729,7 @@ ATSINSfgoto(__patsflab_def_nodes_136) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17381(line=421, offs=25) -- 17614(line=426, offs=66)
+emit_instr: loc0 = build/src/recursion.dats: 17412(line=421, offs=25) -- 17645(line=426, offs=66)
 */
 /*
 INSletpop()
@@ -10743,7 +10746,7 @@ ATSreturn(tmpret451) ;
 } /* end of [def_nodes_136] */
 
 /*
-build/src/recursion.dats: 17694(line=429, offs=5) -- 18022(line=435, offs=43)
+build/src/recursion.dats: 17725(line=429, offs=5) -- 18053(line=435, offs=43)
 */
 /*
 local: def_nodes_136$0(level=0), file_nodes_137$0(level=0)
@@ -10771,11 +10774,11 @@ ATStmpdec(tmp468, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17694(line=429, offs=5) -- 18022(line=435, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 17725(line=429, offs=5) -- 18053(line=435, offs=43)
 */
 ATSINSflab(__patsflab_file_nodes_137):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17843(line=431, offs=3) -- 18022(line=435, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 17874(line=431, offs=3) -- 18053(line=435, offs=43)
 */
 ATScaseof_beg()
 /*
@@ -10783,15 +10786,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17859(line=432, offs=5) -- 17871(line=432, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 17890(line=432, offs=5) -- 17902(line=432, offs=17)
 */
 ATSINSlab(__atstmplab80):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17753(line=430, offs=4) -- 17755(line=430, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 17784(line=430, offs=4) -- 17786(line=430, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab83) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17871(line=432, offs=17) -- 17871(line=432, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 17902(line=432, offs=17) -- 17902(line=432, offs=17)
 */
 ATSINSlab(__atstmplab81):
 /*
@@ -10801,44 +10804,44 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17875(line=432, offs=21) -- 17878(line=432, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 17906(line=432, offs=21) -- 17909(line=432, offs=24)
 */
 ATSINSmove(tmpret459, arg3) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17883(line=433, offs=5) -- 17920(line=433, offs=42)
+emit_instr: loc0 = build/src/recursion.dats: 17914(line=433, offs=5) -- 17951(line=433, offs=42)
 */
 ATSINSlab(__atstmplab82):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17753(line=430, offs=4) -- 17755(line=430, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 17784(line=430, offs=4) -- 17786(line=430, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17920(line=433, offs=42) -- 17920(line=433, offs=42)
+emit_instr: loc0 = build/src/recursion.dats: 17951(line=433, offs=42) -- 17951(line=433, offs=42)
 */
 ATSINSlab(__atstmplab83):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17895(line=433, offs=17) -- 17897(line=433, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 17926(line=433, offs=17) -- 17928(line=433, offs=19)
 */
 ATSINSmove(tmp460, ATSSELcon(arg0, postiats_tysum_7, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17902(line=433, offs=24) -- 17905(line=433, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 17933(line=433, offs=24) -- 17936(line=433, offs=27)
 */
 ATSINSmove(tmp462, ATSSELcon(arg0, postiats_tysum_7, atslab__2)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17910(line=433, offs=32) -- 17911(line=433, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 17941(line=433, offs=32) -- 17942(line=433, offs=33)
 */
 ATSINSmove(tmp464, ATSSELcon(arg0, postiats_tysum_7, atslab__4)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17913(line=433, offs=35) -- 17915(line=433, offs=37)
+emit_instr: loc0 = build/src/recursion.dats: 17944(line=433, offs=35) -- 17946(line=433, offs=37)
 */
 ATSINSmove(tmp465, ATSSELcon(arg0, postiats_tysum_7, atslab__5)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17917(line=433, offs=39) -- 17919(line=433, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 17948(line=433, offs=39) -- 17950(line=433, offs=41)
 */
 ATSINSmove(tmp466, ATSSELcon(arg0, postiats_tysum_7, atslab__6)) ;
 /*
@@ -10848,13 +10851,13 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17924(line=433, offs=46) -- 18022(line=435, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 17955(line=433, offs=46) -- 18053(line=435, offs=43)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17945(line=434, offs=18) -- 17979(line=434, offs=52)
+emit_instr: loc0 = build/src/recursion.dats: 17976(line=434, offs=18) -- 18010(line=434, offs=52)
 */
 ATSINSmove(tmp467, def_nodes_136(ATSPMVrefarg0(tmp465), arg1, ATSPMVrefarg0(arg2), ATSPMVrefarg0(tmp462), tmp460, arg3)) ;
 
@@ -10863,12 +10866,12 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18002(line=435, offs=23) -- 18007(line=435, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 18033(line=435, offs=23) -- 18038(line=435, offs=28)
 */
 ATSINSmove(tmp468, atspre_g1int_add_int(arg1, tmp464)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17987(line=435, offs=8) -- 18018(line=435, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 18018(line=435, offs=8) -- 18049(line=435, offs=39)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp466)) ;
@@ -10883,7 +10886,7 @@ ATSINSfgoto(__patsflab_file_nodes_137) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 17924(line=433, offs=46) -- 18022(line=435, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 17955(line=433, offs=46) -- 18053(line=435, offs=43)
 */
 /*
 INSletpop()
@@ -10900,7 +10903,7 @@ ATSreturn(tmpret459) ;
 } /* end of [file_nodes_137] */
 
 /*
-build/src/recursion.dats: 18282(line=445, offs=5) -- 18501(line=448, offs=86)
+build/src/recursion.dats: 18313(line=445, offs=5) -- 18532(line=448, offs=86)
 */
 /*
 local: any_marked_138$0(level=0)
@@ -10922,11 +10925,11 @@ ATStmpdec(tmp472, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18282(line=445, offs=5) -- 18501(line=448, offs=86)
+emit_instr: loc0 = build/src/recursion.dats: 18313(line=445, offs=5) -- 18532(line=448, offs=86)
 */
 ATSINSflab(__patsflab_any_marked_138):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18379(line=446, offs=3) -- 18501(line=448, offs=86)
+emit_instr: loc0 = build/src/recursion.dats: 18410(line=446, offs=3) -- 18532(line=448, offs=86)
 */
 ATScaseof_beg()
 /*
@@ -10934,15 +10937,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18395(line=447, offs=5) -- 18406(line=447, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 18426(line=447, offs=5) -- 18437(line=447, offs=16)
 */
 ATSINSlab(__atstmplab84):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18323(line=445, offs=46) -- 18325(line=445, offs=48)
+emit_instr: loc0 = build/src/recursion.dats: 18354(line=445, offs=46) -- 18356(line=445, offs=48)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab87) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18406(line=447, offs=16) -- 18406(line=447, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 18437(line=447, offs=16) -- 18437(line=447, offs=16)
 */
 ATSINSlab(__atstmplab85):
 /*
@@ -10952,32 +10955,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18410(line=447, offs=20) -- 18415(line=447, offs=25)
+emit_instr: loc0 = build/src/recursion.dats: 18441(line=447, offs=20) -- 18446(line=447, offs=25)
 */
 ATSINSmove(tmpret469, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18420(line=448, offs=5) -- 18437(line=448, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 18451(line=448, offs=5) -- 18468(line=448, offs=22)
 */
 ATSINSlab(__atstmplab86):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18323(line=445, offs=46) -- 18325(line=445, offs=48)
+emit_instr: loc0 = build/src/recursion.dats: 18354(line=445, offs=46) -- 18356(line=445, offs=48)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18437(line=448, offs=22) -- 18437(line=448, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 18468(line=448, offs=22) -- 18468(line=448, offs=22)
 */
 ATSINSlab(__atstmplab87):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18431(line=448, offs=16) -- 18432(line=448, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 18462(line=448, offs=16) -- 18463(line=448, offs=17)
 */
 ATSINSmove(tmp470, ATSSELcon(arg0, postiats_tysum_14, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18434(line=448, offs=19) -- 18436(line=448, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 18465(line=448, offs=19) -- 18467(line=448, offs=21)
 */
 ATSINSmove(tmp471, ATSSELcon(arg0, postiats_tysum_14, atslab__1)) ;
 /*
@@ -10987,23 +10990,23 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18444(line=448, offs=29) -- 18465(line=448, offs=50)
+emit_instr: loc0 = build/src/recursion.dats: 18475(line=448, offs=29) -- 18496(line=448, offs=50)
 */
 ATSINSmove(tmp472, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__3(ATSPMVrefarg0(arg1), tmp470)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18441(line=448, offs=26) -- 18501(line=448, offs=86)
+emit_instr: loc0 = build/src/recursion.dats: 18472(line=448, offs=26) -- 18532(line=448, offs=86)
 */
 ATSif(
 tmp472
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18471(line=448, offs=56) -- 18475(line=448, offs=60)
+emit_instr: loc0 = build/src/recursion.dats: 18502(line=448, offs=56) -- 18506(line=448, offs=60)
 */
 ATSINSmove(tmpret469, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18481(line=448, offs=66) -- 18501(line=448, offs=86)
+emit_instr: loc0 = build/src/recursion.dats: 18512(line=448, offs=66) -- 18532(line=448, offs=86)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp471)) ;
@@ -11036,9 +11039,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(bool_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__3(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11077,9 +11080,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__6(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11117,9 +11120,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__6(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11164,9 +11167,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(bool_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__5(atstkind_type(atstype_ptrk) arg0)
@@ -11205,7 +11208,7 @@ ATSreturn(tmpret63__5) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_get__28__5] */
 
 /*
-build/src/recursion.dats: 18555(line=451, offs=5) -- 18823(line=458, offs=33)
+build/src/recursion.dats: 18586(line=451, offs=5) -- 18854(line=458, offs=33)
 */
 /*
 local: calls_into_143$0(level=0)
@@ -11229,11 +11232,11 @@ ATStmpdec(tmp487, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18555(line=451, offs=5) -- 18823(line=458, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 18586(line=451, offs=5) -- 18854(line=458, offs=33)
 */
 ATSINSflab(__patsflab_calls_into_143):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18662(line=453, offs=3) -- 18823(line=458, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 18693(line=453, offs=3) -- 18854(line=458, offs=33)
 */
 ATScaseof_beg()
 /*
@@ -11241,15 +11244,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18678(line=454, offs=5) -- 18689(line=454, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 18709(line=454, offs=5) -- 18720(line=454, offs=16)
 */
 ATSINSlab(__atstmplab88):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18598(line=452, offs=4) -- 18600(line=452, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 18629(line=452, offs=4) -- 18631(line=452, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab91) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18689(line=454, offs=16) -- 18689(line=454, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 18720(line=454, offs=16) -- 18720(line=454, offs=16)
 */
 ATSINSlab(__atstmplab89):
 /*
@@ -11259,32 +11262,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18693(line=454, offs=20) -- 18698(line=454, offs=25)
+emit_instr: loc0 = build/src/recursion.dats: 18724(line=454, offs=20) -- 18729(line=454, offs=25)
 */
 ATSINSmove(tmpret481, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18703(line=455, offs=5) -- 18720(line=455, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 18734(line=455, offs=5) -- 18751(line=455, offs=22)
 */
 ATSINSlab(__atstmplab90):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18598(line=452, offs=4) -- 18600(line=452, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 18629(line=452, offs=4) -- 18631(line=452, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18720(line=455, offs=22) -- 18720(line=455, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 18751(line=455, offs=22) -- 18751(line=455, offs=22)
 */
 ATSINSlab(__atstmplab91):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18714(line=455, offs=16) -- 18715(line=455, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 18745(line=455, offs=16) -- 18746(line=455, offs=17)
 */
 ATSINSmove(tmp482, ATSSELcon(arg0, postiats_tysum_14, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18717(line=455, offs=19) -- 18719(line=455, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 18748(line=455, offs=19) -- 18750(line=455, offs=21)
 */
 ATSINSmove(tmp483, ATSSELcon(arg0, postiats_tysum_14, atslab__1)) ;
 /*
@@ -11294,39 +11297,39 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18731(line=456, offs=8) -- 18736(line=456, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 18762(line=456, offs=8) -- 18767(line=456, offs=13)
 */
 ATSINSmove(tmp484, ATSLIB_056_prelude__eq_g0int_int__16__15(tmp482, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18728(line=456, offs=5) -- 18823(line=458, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 18759(line=456, offs=5) -- 18854(line=458, offs=33)
 */
 ATSif(
 tmp484
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18742(line=456, offs=19) -- 18746(line=456, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 18773(line=456, offs=19) -- 18777(line=456, offs=23)
 */
 ATSINSmove(tmpret481, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18759(line=457, offs=13) -- 18780(line=457, offs=34)
+emit_instr: loc0 = build/src/recursion.dats: 18790(line=457, offs=13) -- 18811(line=457, offs=34)
 */
 ATSINSmove(tmp487, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__4(ATSPMVrefarg0(arg2), tmp482)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18756(line=457, offs=10) -- 18823(line=458, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 18787(line=457, offs=10) -- 18854(line=458, offs=33)
 */
 ATSif(
 tmp487
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18786(line=457, offs=40) -- 18790(line=457, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 18817(line=457, offs=40) -- 18821(line=457, offs=44)
 */
 ATSINSmove(tmpret481, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18800(line=458, offs=10) -- 18823(line=458, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 18831(line=458, offs=10) -- 18854(line=458, offs=33)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp483)) ;
@@ -11362,9 +11365,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7006)
-tmparg = S2Evar(tk(7006))
-tmpsub = Some(tk(7006) -> S2Eextkind(atstype_int))
+imparg = tk(7131)
+tmparg = S2Evar(tk(7131))
+tmpsub = Some(tk(7131) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__16__15(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11403,9 +11406,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(bool_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__4(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11444,9 +11447,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__7(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11484,9 +11487,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__7(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11531,9 +11534,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(bool_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__6(atstkind_type(atstype_ptrk) arg0)
@@ -11572,7 +11575,7 @@ ATSreturn(tmpret63__6) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_get__28__6] */
 
 /*
-build/src/recursion.dats: 18873(line=461, offs=5) -- 19088(line=464, offs=84)
+build/src/recursion.dats: 18904(line=461, offs=5) -- 19119(line=464, offs=84)
 */
 /*
 local: has_live_149$0(level=0)
@@ -11594,11 +11597,11 @@ ATStmpdec(tmp499, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18873(line=461, offs=5) -- 19088(line=464, offs=84)
+emit_instr: loc0 = build/src/recursion.dats: 18904(line=461, offs=5) -- 19119(line=464, offs=84)
 */
 ATSINSflab(__patsflab_has_live_149):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18968(line=462, offs=3) -- 19088(line=464, offs=84)
+emit_instr: loc0 = build/src/recursion.dats: 18999(line=462, offs=3) -- 19119(line=464, offs=84)
 */
 ATScaseof_beg()
 /*
@@ -11606,15 +11609,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18984(line=463, offs=5) -- 18995(line=463, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 19015(line=463, offs=5) -- 19026(line=463, offs=16)
 */
 ATSINSlab(__atstmplab92):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18912(line=461, offs=44) -- 18914(line=461, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 18943(line=461, offs=44) -- 18945(line=461, offs=46)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab95) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18995(line=463, offs=16) -- 18995(line=463, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 19026(line=463, offs=16) -- 19026(line=463, offs=16)
 */
 ATSINSlab(__atstmplab93):
 /*
@@ -11624,32 +11627,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18999(line=463, offs=20) -- 19004(line=463, offs=25)
+emit_instr: loc0 = build/src/recursion.dats: 19030(line=463, offs=20) -- 19035(line=463, offs=25)
 */
 ATSINSmove(tmpret496, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19009(line=464, offs=5) -- 19026(line=464, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 19040(line=464, offs=5) -- 19057(line=464, offs=22)
 */
 ATSINSlab(__atstmplab94):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 18912(line=461, offs=44) -- 18914(line=461, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 18943(line=461, offs=44) -- 18945(line=461, offs=46)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19026(line=464, offs=22) -- 19026(line=464, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 19057(line=464, offs=22) -- 19057(line=464, offs=22)
 */
 ATSINSlab(__atstmplab95):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19020(line=464, offs=16) -- 19021(line=464, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 19051(line=464, offs=16) -- 19052(line=464, offs=17)
 */
 ATSINSmove(tmp497, ATSSELcon(arg0, postiats_tysum_14, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19023(line=464, offs=19) -- 19025(line=464, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 19054(line=464, offs=19) -- 19056(line=464, offs=21)
 */
 ATSINSmove(tmp498, ATSSELcon(arg0, postiats_tysum_14, atslab__1)) ;
 /*
@@ -11659,18 +11662,18 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19033(line=464, offs=29) -- 19054(line=464, offs=50)
+emit_instr: loc0 = build/src/recursion.dats: 19064(line=464, offs=29) -- 19085(line=464, offs=50)
 */
 ATSINSmove(tmp499, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__5(ATSPMVrefarg0(arg1), tmp497)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19030(line=464, offs=26) -- 19088(line=464, offs=84)
+emit_instr: loc0 = build/src/recursion.dats: 19061(line=464, offs=26) -- 19119(line=464, offs=84)
 */
 ATSif(
 tmp499
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19060(line=464, offs=56) -- 19078(line=464, offs=74)
+emit_instr: loc0 = build/src/recursion.dats: 19091(line=464, offs=56) -- 19109(line=464, offs=74)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp498)) ;
@@ -11682,7 +11685,7 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19084(line=464, offs=80) -- 19088(line=464, offs=84)
+emit_instr: loc0 = build/src/recursion.dats: 19115(line=464, offs=80) -- 19119(line=464, offs=84)
 */
 ATSINSmove(tmpret496, ATSPMVbool_true()) ;
 } /* ATSendif */
@@ -11708,9 +11711,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(bool_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__5(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11749,9 +11752,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__8(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11789,9 +11792,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__8(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -11836,9 +11839,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(bool_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__7(atstkind_type(atstype_ptrk) arg0)
@@ -11877,7 +11880,7 @@ ATSreturn(tmpret63__7) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_get__28__7] */
 
 /*
-build/src/recursion.dats: 19231(line=468, offs=5) -- 19856(line=484, offs=8)
+build/src/recursion.dats: 19262(line=468, offs=5) -- 19887(line=484, offs=8)
 */
 /*
 local: elist_free_110$0(level=0), has_live_149$0(level=0), prune_round_154$0(level=0)
@@ -11906,11 +11909,11 @@ ATStmpdec(tmp523, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19231(line=468, offs=5) -- 19856(line=484, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 19262(line=468, offs=5) -- 19887(line=484, offs=8)
 */
 ATSINSflab(__patsflab_prune_round_154):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19407(line=471, offs=3) -- 19856(line=484, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 19438(line=471, offs=3) -- 19887(line=484, offs=8)
 */
 ATScaseof_beg()
 /*
@@ -11918,15 +11921,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19423(line=472, offs=5) -- 19435(line=472, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 19454(line=472, offs=5) -- 19466(line=472, offs=17)
 */
 ATSINSlab(__atstmplab96):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19277(line=469, offs=4) -- 19279(line=469, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 19308(line=469, offs=4) -- 19310(line=469, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab99) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19435(line=472, offs=17) -- 19435(line=472, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 19466(line=472, offs=17) -- 19466(line=472, offs=17)
 */
 ATSINSlab(__atstmplab97):
 /*
@@ -11936,7 +11939,7 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19439(line=472, offs=21) -- 19450(line=472, offs=32)
+emit_instr: loc0 = build/src/recursion.dats: 19470(line=472, offs=21) -- 19481(line=472, offs=32)
 */
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmpret508, postiats_tyrec_0, atslab__0, arg2) ;
@@ -11946,29 +11949,29 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19455(line=473, offs=5) -- 19474(line=473, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 19486(line=473, offs=5) -- 19505(line=473, offs=24)
 */
 ATSINSlab(__atstmplab98):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19277(line=469, offs=4) -- 19279(line=469, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 19308(line=469, offs=4) -- 19310(line=469, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19474(line=473, offs=24) -- 19474(line=473, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 19505(line=473, offs=24) -- 19505(line=473, offs=24)
 */
 ATSINSlab(__atstmplab99):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19467(line=473, offs=17) -- 19469(line=473, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 19498(line=473, offs=17) -- 19500(line=473, offs=19)
 */
 ATSINSmove(tmp509, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19471(line=473, offs=21) -- 19473(line=473, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 19502(line=473, offs=21) -- 19504(line=473, offs=23)
 */
 ATSINSmove(tmp510, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19455(line=473, offs=5) -- 19856(line=484, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 19486(line=473, offs=5) -- 19887(line=484, offs=8)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -11978,35 +11981,35 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19478(line=473, offs=28) -- 19856(line=484, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 19509(line=473, offs=28) -- 19887(line=484, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19493(line=474, offs=12) -- 19508(line=474, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 19524(line=474, offs=12) -- 19539(line=474, offs=27)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19531(line=475, offs=18) -- 19549(line=475, offs=36)
+emit_instr: loc0 = build/src/recursion.dats: 19562(line=475, offs=18) -- 19580(line=475, offs=36)
 */
 ATSINSmove(tmp511, has_live_149(ATSPMVrefarg0(ATSSELcon(tmp509, postiats_tysum_15, atslab__2)), ATSPMVrefarg0(arg1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19566(line=476, offs=17) -- 19614(line=476, offs=65)
+emit_instr: loc0 = build/src/recursion.dats: 19597(line=476, offs=17) -- 19645(line=476, offs=65)
 */
 ATSif(
 tmp511
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19579(line=476, offs=30) -- 19581(line=476, offs=32)
+emit_instr: loc0 = build/src/recursion.dats: 19610(line=476, offs=30) -- 19612(line=476, offs=32)
 */
 ATSINSmove_void(tmp512, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19587(line=476, offs=38) -- 19614(line=476, offs=65)
+emit_instr: loc0 = build/src/recursion.dats: 19618(line=476, offs=38) -- 19645(line=476, offs=65)
 */
 ATSINSmove_void(tmp512, build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__2(ATSPMVrefarg0(arg1), ATSSELcon(tmp509, postiats_tysum_15, atslab__0), ATSPMVbool_true())) ;
 
@@ -12016,13 +12019,13 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19656(line=479, offs=7) -- 19848(line=483, offs=45)
+emit_instr: loc0 = build/src/recursion.dats: 19687(line=479, offs=7) -- 19879(line=483, offs=45)
 */
 ATSif(
 tmp511
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19691(line=479, offs=42) -- 19711(line=479, offs=62)
+emit_instr: loc0 = build/src/recursion.dats: 19722(line=479, offs=42) -- 19742(line=479, offs=62)
 */
 
 /*
@@ -12037,12 +12040,12 @@ ATSINSstore_con1_ofs(tmp521, postiats_tysum_4, atslab__0, tmp509) ;
 ATSINSstore_con1_ofs(tmp521, postiats_tysum_4, atslab__1, arg2) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19713(line=479, offs=64) -- 19719(line=479, offs=70)
+emit_instr: loc0 = build/src/recursion.dats: 19744(line=479, offs=64) -- 19750(line=479, offs=70)
 */
 ATSINSmove(tmp522, atspre_g1int_add_int(arg3, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19669(line=479, offs=20) -- 19720(line=479, offs=71)
+emit_instr: loc0 = build/src/recursion.dats: 19700(line=479, offs=20) -- 19751(line=479, offs=71)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp510) ;
@@ -12058,27 +12061,27 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19732(line=480, offs=12) -- 19848(line=483, offs=45)
+emit_instr: loc0 = build/src/recursion.dats: 19763(line=480, offs=12) -- 19879(line=483, offs=45)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19749(line=481, offs=14) -- 19765(line=481, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 19780(line=481, offs=14) -- 19796(line=481, offs=30)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19761(line=481, offs=26) -- 19764(line=481, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 19792(line=481, offs=26) -- 19795(line=481, offs=29)
 */
 ATSINSmove(tmp523, ATSSELcon(tmp509, postiats_tysum_15, atslab__2)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19749(line=481, offs=14) -- 19765(line=481, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 19780(line=481, offs=14) -- 19796(line=481, offs=30)
 */
 ATSINSfreecon(tmp509) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19788(line=482, offs=18) -- 19802(line=482, offs=32)
+emit_instr: loc0 = build/src/recursion.dats: 19819(line=482, offs=18) -- 19833(line=482, offs=32)
 */
 ATSINSmove_void(tmp524, elist_free_110(tmp523)) ;
 
@@ -12087,7 +12090,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19813(line=483, offs=10) -- 19844(line=483, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 19844(line=483, offs=10) -- 19875(line=483, offs=41)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp510) ;
@@ -12102,14 +12105,14 @@ ATSINSfgoto(__patsflab_prune_round_154) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19732(line=480, offs=12) -- 19848(line=483, offs=45)
+emit_instr: loc0 = build/src/recursion.dats: 19763(line=480, offs=12) -- 19879(line=483, offs=45)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19478(line=473, offs=28) -- 19856(line=484, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 19509(line=473, offs=28) -- 19887(line=484, offs=8)
 */
 /*
 INSletpop()
@@ -12136,9 +12139,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11291)
-tmparg = S2Evar(a(11291))
-tmpsub = Some(a(11291) -> S2Ecst(bool_t0ype))
+imparg = a(11416)
+tmparg = S2Evar(a(11416))
+tmpsub = Some(a(11416) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_bool) arg2)
@@ -12177,9 +12180,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__9(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12217,9 +12220,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__9(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12264,9 +12267,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8098)
-tmparg = S2Evar(a(8098))
-tmpsub = Some(a(8098) -> S2Ecst(bool_t0ype))
+imparg = a(8223)
+tmparg = S2Evar(a(8223))
+tmpsub = Some(a(8223) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__64__2(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_bool) arg1)
@@ -12309,7 +12312,7 @@ ATSreturn_void(tmpret156__2) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_set__64__2] */
 
 /*
-build/src/recursion.dats: 19984(line=488, offs=5) -- 20217(line=493, offs=4)
+build/src/recursion.dats: 20015(line=488, offs=5) -- 20248(line=493, offs=4)
 */
 /*
 local: prune_round_154$0(level=0), prune_159$0(level=0)
@@ -12334,32 +12337,32 @@ ATStmpdec(tmp530, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 19984(line=488, offs=5) -- 20217(line=493, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 20015(line=488, offs=5) -- 20248(line=493, offs=4)
 */
 ATSINSflab(__patsflab_prune_159):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20091(line=489, offs=73) -- 20217(line=493, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 20122(line=489, offs=73) -- 20248(line=493, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20136(line=490, offs=42) -- 20147(line=490, offs=53)
+emit_instr: loc0 = build/src/recursion.dats: 20167(line=490, offs=42) -- 20178(line=490, offs=53)
 */
 
 ATSINSmove_nil(tmp527) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20114(line=490, offs=20) -- 20151(line=490, offs=57)
+emit_instr: loc0 = build/src/recursion.dats: 20145(line=490, offs=20) -- 20182(line=490, offs=57)
 */
 ATSINSmove(tmp526, prune_round_154(arg0, ATSPMVrefarg0(arg2), tmp527, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20103(line=490, offs=9) -- 20107(line=490, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 20134(line=490, offs=9) -- 20138(line=490, offs=13)
 */
 ATSINSmove(tmp528, ATSSELfltrec(tmp526, postiats_tyrec_0, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20109(line=490, offs=15) -- 20110(line=490, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 20140(line=490, offs=15) -- 20141(line=490, offs=16)
 */
 ATSINSmove(tmp529, ATSSELfltrec(tmp526, postiats_tyrec_0, atslab__1)) ;
 /*
@@ -12367,18 +12370,18 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20160(line=492, offs=6) -- 20166(line=492, offs=12)
+emit_instr: loc0 = build/src/recursion.dats: 20191(line=492, offs=6) -- 20197(line=492, offs=12)
 */
 ATSINSmove(tmp530, ATSLIB_056_prelude__gte_g1int_int__31__9(tmp529, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20157(line=492, offs=3) -- 20213(line=492, offs=59)
+emit_instr: loc0 = build/src/recursion.dats: 20188(line=492, offs=3) -- 20244(line=492, offs=59)
 */
 ATSif(
 tmp530
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20172(line=492, offs=18) -- 20187(line=492, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 20203(line=492, offs=18) -- 20218(line=492, offs=33)
 */
 
 /*
@@ -12394,7 +12397,7 @@ ATSINSstore_con1_ofs(tmpret525, postiats_tysum_16, atslab__1, tmp529) ;
 ATSINSmove_con1_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20193(line=492, offs=39) -- 20213(line=492, offs=59)
+emit_instr: loc0 = build/src/recursion.dats: 20224(line=492, offs=39) -- 20244(line=492, offs=59)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp528) ;
@@ -12408,7 +12411,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20091(line=489, offs=73) -- 20217(line=493, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 20122(line=489, offs=73) -- 20248(line=493, offs=4)
 */
 /*
 INSletpop()
@@ -12428,9 +12431,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12459,7 +12462,7 @@ ATSreturn(tmpret67__9) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__31__9] */
 
 /*
-build/src/recursion.dats: 20352(line=497, offs=5) -- 20983(line=511, offs=8)
+build/src/recursion.dats: 20383(line=497, offs=5) -- 21014(line=511, offs=8)
 */
 /*
 local: calls_into_143$0(level=0), reach_round_161$0(level=0)
@@ -12489,11 +12492,11 @@ ATStmpdec(tmp548, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20352(line=497, offs=5) -- 20983(line=511, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 20383(line=497, offs=5) -- 21014(line=511, offs=8)
 */
 ATSINSflab(__patsflab_reach_round_161):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20577(line=501, offs=3) -- 20983(line=511, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 20608(line=501, offs=3) -- 21014(line=511, offs=8)
 */
 ATScaseof_beg()
 /*
@@ -12501,15 +12504,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20593(line=502, offs=5) -- 20605(line=502, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 20624(line=502, offs=5) -- 20636(line=502, offs=17)
 */
 ATSINSlab(__atstmplab100):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20400(line=498, offs=4) -- 20402(line=498, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 20431(line=498, offs=4) -- 20433(line=498, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab103) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20605(line=502, offs=17) -- 20605(line=502, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 20636(line=502, offs=17) -- 20636(line=502, offs=17)
 */
 ATSINSlab(__atstmplab101):
 /*
@@ -12519,7 +12522,7 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20609(line=502, offs=21) -- 20626(line=502, offs=38)
+emit_instr: loc0 = build/src/recursion.dats: 20640(line=502, offs=21) -- 20657(line=502, offs=38)
 */
 ATSINSmove_fltrec_beg()
 ATSINSstore_fltrec_ofs(tmpret533, postiats_tyrec_2, atslab__0, arg3) ;
@@ -12530,29 +12533,29 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20631(line=503, offs=5) -- 20650(line=503, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 20662(line=503, offs=5) -- 20681(line=503, offs=24)
 */
 ATSINSlab(__atstmplab102):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20400(line=498, offs=4) -- 20402(line=498, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 20431(line=498, offs=4) -- 20433(line=498, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20650(line=503, offs=24) -- 20650(line=503, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 20681(line=503, offs=24) -- 20681(line=503, offs=24)
 */
 ATSINSlab(__atstmplab103):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20643(line=503, offs=17) -- 20645(line=503, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 20674(line=503, offs=17) -- 20676(line=503, offs=19)
 */
 ATSINSmove(tmp534, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20647(line=503, offs=21) -- 20649(line=503, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 20678(line=503, offs=21) -- 20680(line=503, offs=23)
 */
 ATSINSmove(tmp535, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20631(line=503, offs=5) -- 20983(line=511, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 20662(line=503, offs=5) -- 21014(line=511, offs=8)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -12562,36 +12565,36 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20654(line=503, offs=28) -- 20983(line=511, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 20685(line=503, offs=28) -- 21014(line=511, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20669(line=504, offs=12) -- 20684(line=504, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 20700(line=504, offs=12) -- 20715(line=504, offs=27)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20706(line=505, offs=17) -- 20729(line=505, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 20737(line=505, offs=17) -- 20760(line=505, offs=40)
 */
 ATSINSmove(tmp536, calls_into_143(ATSPMVrefarg0(ATSSELcon(tmp534, postiats_tysum_15, atslab__2)), arg1, ATSPMVrefarg0(arg2))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20746(line=506, offs=17) -- 20793(line=506, offs=64)
+emit_instr: loc0 = build/src/recursion.dats: 20777(line=506, offs=17) -- 20824(line=506, offs=64)
 */
 ATSif(
 tmp536
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20758(line=506, offs=29) -- 20785(line=506, offs=56)
+emit_instr: loc0 = build/src/recursion.dats: 20789(line=506, offs=29) -- 20816(line=506, offs=56)
 */
 ATSINSmove_void(tmp537, build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__3(ATSPMVrefarg0(arg2), ATSSELcon(tmp534, postiats_tysum_15, atslab__0), ATSPMVbool_true())) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20791(line=506, offs=62) -- 20793(line=506, offs=64)
+emit_instr: loc0 = build/src/recursion.dats: 20822(line=506, offs=62) -- 20824(line=506, offs=64)
 */
 ATSINSmove_void(tmp537, ATSPMVempty()) ;
 } /* ATSendif */
@@ -12600,13 +12603,13 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20835(line=509, offs=7) -- 20975(line=510, offs=72)
+emit_instr: loc0 = build/src/recursion.dats: 20866(line=509, offs=7) -- 21006(line=510, offs=72)
 */
 ATSif(
 tmp536
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20882(line=509, offs=54) -- 20902(line=509, offs=74)
+emit_instr: loc0 = build/src/recursion.dats: 20913(line=509, offs=54) -- 20933(line=509, offs=74)
 */
 
 /*
@@ -12621,7 +12624,7 @@ ATSINSstore_con1_ofs(tmp546, postiats_tysum_4, atslab__0, tmp534) ;
 ATSINSstore_con1_ofs(tmp546, postiats_tysum_4, atslab__1, arg5) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20847(line=509, offs=19) -- 20903(line=509, offs=75)
+emit_instr: loc0 = build/src/recursion.dats: 20878(line=509, offs=19) -- 20934(line=509, offs=75)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp535) ;
@@ -12641,7 +12644,7 @@ ATStailcal_end()
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20940(line=510, offs=37) -- 20960(line=510, offs=57)
+emit_instr: loc0 = build/src/recursion.dats: 20971(line=510, offs=37) -- 20991(line=510, offs=57)
 */
 
 /*
@@ -12656,12 +12659,12 @@ ATSINSstore_con1_ofs(tmp547, postiats_tysum_4, atslab__0, tmp534) ;
 ATSINSstore_con1_ofs(tmp547, postiats_tysum_4, atslab__1, arg3) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20962(line=510, offs=59) -- 20968(line=510, offs=65)
+emit_instr: loc0 = build/src/recursion.dats: 20993(line=510, offs=59) -- 20999(line=510, offs=65)
 */
 ATSINSmove(tmp548, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20915(line=510, offs=12) -- 20975(line=510, offs=72)
+emit_instr: loc0 = build/src/recursion.dats: 20946(line=510, offs=12) -- 21006(line=510, offs=72)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp535) ;
@@ -12681,7 +12684,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20654(line=503, offs=28) -- 20983(line=511, offs=8)
+emit_instr: loc0 = build/src/recursion.dats: 20685(line=503, offs=28) -- 21014(line=511, offs=8)
 */
 /*
 INSletpop()
@@ -12708,9 +12711,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11291)
-tmparg = S2Evar(a(11291))
-tmpsub = Some(a(11291) -> S2Ecst(bool_t0ype))
+imparg = a(11416)
+tmparg = S2Evar(a(11416))
+tmpsub = Some(a(11416) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__3(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_bool) arg2)
@@ -12749,9 +12752,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__10(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12789,9 +12792,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__10(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -12836,9 +12839,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8098)
-tmparg = S2Evar(a(8098))
-tmpsub = Some(a(8098) -> S2Ecst(bool_t0ype))
+imparg = a(8223)
+tmparg = S2Evar(a(8223))
+tmpsub = Some(a(8223) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__64__3(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_bool) arg1)
@@ -12881,7 +12884,7 @@ ATSreturn_void(tmpret156__3) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_set__64__3] */
 
 /*
-build/src/recursion.dats: 20989(line=513, offs=5) -- 21151(line=516, offs=46)
+build/src/recursion.dats: 21020(line=513, offs=5) -- 21182(line=516, offs=46)
 */
 /*
 local: nodes_len_166$0(level=0)
@@ -12902,11 +12905,11 @@ ATStmpdec(tmp552, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 20989(line=513, offs=5) -- 21151(line=516, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 21020(line=513, offs=5) -- 21182(line=516, offs=46)
 */
 ATSINSflab(__patsflab_nodes_len_166):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21073(line=514, offs=3) -- 21151(line=516, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 21104(line=514, offs=3) -- 21182(line=516, offs=46)
 */
 ATScaseof_beg()
 /*
@@ -12914,15 +12917,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21089(line=515, offs=5) -- 21100(line=515, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 21120(line=515, offs=5) -- 21131(line=515, offs=16)
 */
 ATSINSlab(__atstmplab104):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21028(line=513, offs=44) -- 21030(line=513, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 21059(line=513, offs=44) -- 21061(line=513, offs=46)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab107) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21100(line=515, offs=16) -- 21100(line=515, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 21131(line=515, offs=16) -- 21131(line=515, offs=16)
 */
 ATSINSlab(__atstmplab105):
 /*
@@ -12932,28 +12935,28 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21104(line=515, offs=20) -- 21105(line=515, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 21135(line=515, offs=20) -- 21136(line=515, offs=21)
 */
 ATSINSmove(tmpret549, arg1) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21110(line=516, offs=5) -- 21127(line=516, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 21141(line=516, offs=5) -- 21158(line=516, offs=22)
 */
 ATSINSlab(__atstmplab106):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21028(line=513, offs=44) -- 21030(line=513, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 21059(line=513, offs=44) -- 21061(line=513, offs=46)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21127(line=516, offs=22) -- 21127(line=516, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 21158(line=516, offs=22) -- 21158(line=516, offs=22)
 */
 ATSINSlab(__atstmplab107):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21124(line=516, offs=19) -- 21126(line=516, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 21155(line=516, offs=19) -- 21157(line=516, offs=21)
 */
 ATSINSmove(tmp551, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
@@ -12963,12 +12966,12 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21145(line=516, offs=40) -- 21150(line=516, offs=45)
+emit_instr: loc0 = build/src/recursion.dats: 21176(line=516, offs=40) -- 21181(line=516, offs=45)
 */
 ATSINSmove(tmp552, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21131(line=516, offs=26) -- 21151(line=516, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 21162(line=516, offs=26) -- 21182(line=516, offs=46)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp551)) ;
@@ -12990,7 +12993,7 @@ ATSreturn(tmpret549) ;
 } /* end of [nodes_len_166] */
 
 /*
-build/src/recursion.dats: 21157(line=518, offs=5) -- 21347(line=521, offs=64)
+build/src/recursion.dats: 21188(line=518, offs=5) -- 21378(line=521, offs=64)
 */
 /*
 local: nodes_append_167$0(level=0)
@@ -13010,11 +13013,11 @@ ATStmpdec(tmp556, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21157(line=518, offs=5) -- 21347(line=521, offs=64)
+emit_instr: loc0 = build/src/recursion.dats: 21188(line=518, offs=5) -- 21378(line=521, offs=64)
 */
 ATSINSflab(__patsflab_nodes_append_167):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21249(line=519, offs=3) -- 21347(line=521, offs=64)
+emit_instr: loc0 = build/src/recursion.dats: 21280(line=519, offs=3) -- 21378(line=521, offs=64)
 */
 ATScaseof_beg()
 /*
@@ -13022,15 +13025,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21265(line=520, offs=5) -- 21277(line=520, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 21296(line=520, offs=5) -- 21308(line=520, offs=17)
 */
 ATSINSlab(__atstmplab108):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21194(line=518, offs=42) -- 21196(line=518, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 21225(line=518, offs=42) -- 21227(line=518, offs=44)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab111) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21277(line=520, offs=17) -- 21277(line=520, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 21308(line=520, offs=17) -- 21308(line=520, offs=17)
 */
 ATSINSlab(__atstmplab109):
 /*
@@ -13040,36 +13043,36 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21281(line=520, offs=21) -- 21283(line=520, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 21312(line=520, offs=21) -- 21314(line=520, offs=23)
 */
 ATSINSmove(tmpret553, arg1) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21288(line=521, offs=5) -- 21307(line=521, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 21319(line=521, offs=5) -- 21338(line=521, offs=24)
 */
 ATSINSlab(__atstmplab110):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21194(line=518, offs=42) -- 21196(line=518, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 21225(line=518, offs=42) -- 21227(line=518, offs=44)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21307(line=521, offs=24) -- 21307(line=521, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 21338(line=521, offs=24) -- 21338(line=521, offs=24)
 */
 ATSINSlab(__atstmplab111):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21300(line=521, offs=17) -- 21302(line=521, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 21331(line=521, offs=17) -- 21333(line=521, offs=19)
 */
 ATSINSmove(tmp554, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21304(line=521, offs=21) -- 21306(line=521, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 21335(line=521, offs=21) -- 21337(line=521, offs=23)
 */
 ATSINSmove(tmp555, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21288(line=521, offs=5) -- 21347(line=521, offs=64)
+emit_instr: loc0 = build/src/recursion.dats: 21319(line=521, offs=5) -- 21378(line=521, offs=64)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -13079,12 +13082,12 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21326(line=521, offs=43) -- 21346(line=521, offs=63)
+emit_instr: loc0 = build/src/recursion.dats: 21357(line=521, offs=43) -- 21377(line=521, offs=63)
 */
 ATSINSmove(tmp556, nodes_append_167(tmp555, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21311(line=521, offs=28) -- 21347(line=521, offs=64)
+emit_instr: loc0 = build/src/recursion.dats: 21342(line=521, offs=28) -- 21378(line=521, offs=64)
 */
 
 /*
@@ -13110,7 +13113,7 @@ ATSreturn(tmpret553) ;
 } /* end of [nodes_append_167] */
 
 /*
-build/src/recursion.dats: 21462(line=525, offs=5) -- 21834(line=534, offs=4)
+build/src/recursion.dats: 21493(line=525, offs=5) -- 21865(line=534, offs=4)
 */
 /*
 local: reach_round_161$0(level=0), nodes_len_166$0(level=0), nodes_append_167$0(level=0), reach_168$0(level=0)
@@ -13140,36 +13143,36 @@ ATStmpdec(tmp567, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21462(line=525, offs=5) -- 21834(line=534, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 21493(line=525, offs=5) -- 21865(line=534, offs=4)
 */
 ATSINSflab(__patsflab_reach_168):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21598(line=526, offs=100) -- 21834(line=534, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 21629(line=526, offs=100) -- 21865(line=534, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21653(line=527, offs=52) -- 21664(line=527, offs=63)
+emit_instr: loc0 = build/src/recursion.dats: 21684(line=527, offs=52) -- 21695(line=527, offs=63)
 */
 
 ATSINSmove_nil(tmp559) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21628(line=527, offs=27) -- 21674(line=527, offs=73)
+emit_instr: loc0 = build/src/recursion.dats: 21659(line=527, offs=27) -- 21705(line=527, offs=73)
 */
 ATSINSmove(tmp558, reach_round_161(arg0, arg2, ATSPMVrefarg0(arg3), tmp559, ATSPMVi0nt(0), arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21610(line=527, offs=9) -- 21614(line=527, offs=13)
+emit_instr: loc0 = build/src/recursion.dats: 21641(line=527, offs=9) -- 21645(line=527, offs=13)
 */
 ATSINSmove(tmp560, ATSSELfltrec(tmp558, postiats_tyrec_2, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21616(line=527, offs=15) -- 21617(line=527, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 21647(line=527, offs=15) -- 21648(line=527, offs=16)
 */
 ATSINSmove(tmp561, ATSSELfltrec(tmp558, postiats_tyrec_2, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21619(line=527, offs=18) -- 21624(line=527, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 21650(line=527, offs=18) -- 21655(line=527, offs=23)
 */
 ATSINSmove(tmp562, ATSSELfltrec(tmp558, postiats_tyrec_2, atslab__2)) ;
 /*
@@ -13177,29 +13180,29 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21683(line=529, offs=6) -- 21689(line=529, offs=12)
+emit_instr: loc0 = build/src/recursion.dats: 21714(line=529, offs=6) -- 21720(line=529, offs=12)
 */
 ATSINSmove(tmp563, ATSLIB_056_prelude__gte_g1int_int__31__10(tmp561, arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21680(line=529, offs=3) -- 21830(line=533, offs=38)
+emit_instr: loc0 = build/src/recursion.dats: 21711(line=529, offs=3) -- 21861(line=533, offs=38)
 */
 ATSif(
 tmp563
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21695(line=529, offs=18) -- 21792(line=532, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 21726(line=529, offs=18) -- 21823(line=532, offs=24)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21713(line=530, offs=15) -- 21738(line=530, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 21744(line=530, offs=15) -- 21769(line=530, offs=40)
 */
 ATSINSmove(tmp566, nodes_append_167(tmp560, tmp562)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21751(line=531, offs=13) -- 21768(line=531, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 21782(line=531, offs=13) -- 21799(line=531, offs=30)
 */
 ATSINSmove(tmp567, nodes_len_166(ATSPMVrefarg0(tmp566), ATSPMVi0nt(0))) ;
 
@@ -13208,7 +13211,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21774(line=532, offs=6) -- 21788(line=532, offs=20)
+emit_instr: loc0 = build/src/recursion.dats: 21805(line=532, offs=6) -- 21819(line=532, offs=20)
 */
 
 /*
@@ -13223,14 +13226,14 @@ ATSINSstore_con1_ofs(tmpret557, postiats_tysum_16, atslab__0, tmp566) ;
 ATSINSstore_con1_ofs(tmpret557, postiats_tysum_16, atslab__1, tmp567) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21695(line=529, offs=18) -- 21792(line=532, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 21726(line=529, offs=18) -- 21823(line=532, offs=24)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21800(line=533, offs=8) -- 21830(line=533, offs=38)
+emit_instr: loc0 = build/src/recursion.dats: 21831(line=533, offs=8) -- 21861(line=533, offs=38)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp560) ;
@@ -13248,7 +13251,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21598(line=526, offs=100) -- 21834(line=534, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 21629(line=526, offs=100) -- 21865(line=534, offs=4)
 */
 /*
 INSletpop()
@@ -13268,9 +13271,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7018)
-tmparg = S2Evar(tk(7018))
-tmpsub = Some(tk(7018) -> S2Eextkind(atstype_int))
+imparg = tk(7143)
+tmparg = S2Evar(tk(7143))
+tmpsub = Some(tk(7143) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__31__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -13299,7 +13302,7 @@ ATSreturn(tmpret67__10) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__31__10] */
 
 /*
-build/src/recursion.dats: 21879(line=537, offs=5) -- 22175(line=544, offs=33)
+build/src/recursion.dats: 21910(line=537, offs=5) -- 22206(line=544, offs=33)
 */
 /*
 local: clear_marks_170$0(level=0)
@@ -13321,11 +13324,11 @@ ATStmpdec(tmp570, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21879(line=537, offs=5) -- 22175(line=544, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 21910(line=537, offs=5) -- 22206(line=544, offs=33)
 */
 ATSINSflab(__patsflab_clear_marks_170):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21977(line=538, offs=3) -- 22175(line=544, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 22008(line=538, offs=3) -- 22206(line=544, offs=33)
 */
 ATScaseof_beg()
 /*
@@ -13333,15 +13336,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21993(line=539, offs=5) -- 22004(line=539, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 22024(line=539, offs=5) -- 22035(line=539, offs=16)
 */
 ATSINSlab(__atstmplab112):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21921(line=537, offs=47) -- 21923(line=537, offs=49)
+emit_instr: loc0 = build/src/recursion.dats: 21952(line=537, offs=47) -- 21954(line=537, offs=49)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab115) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22004(line=539, offs=16) -- 22004(line=539, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 22035(line=539, offs=16) -- 22035(line=539, offs=16)
 */
 ATSINSlab(__atstmplab113):
 /*
@@ -13351,32 +13354,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22008(line=539, offs=20) -- 22010(line=539, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 22039(line=539, offs=20) -- 22041(line=539, offs=22)
 */
 ATSINSmove_void(tmpret568, ATSPMVempty()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22015(line=540, offs=5) -- 22033(line=540, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 22046(line=540, offs=5) -- 22064(line=540, offs=23)
 */
 ATSINSlab(__atstmplab114):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 21921(line=537, offs=47) -- 21923(line=537, offs=49)
+emit_instr: loc0 = build/src/recursion.dats: 21952(line=537, offs=47) -- 21954(line=537, offs=49)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22033(line=540, offs=23) -- 22033(line=540, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 22064(line=540, offs=23) -- 22064(line=540, offs=23)
 */
 ATSINSlab(__atstmplab115):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22026(line=540, offs=16) -- 22028(line=540, offs=18)
+emit_instr: loc0 = build/src/recursion.dats: 22057(line=540, offs=16) -- 22059(line=540, offs=18)
 */
 ATSINSmove(tmp569, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22030(line=540, offs=20) -- 22032(line=540, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 22061(line=540, offs=20) -- 22063(line=540, offs=22)
 */
 ATSINSmove(tmp570, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
@@ -13386,19 +13389,19 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22037(line=540, offs=27) -- 22175(line=544, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 22068(line=540, offs=27) -- 22206(line=544, offs=33)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22052(line=541, offs=12) -- 22066(line=541, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 22083(line=541, offs=12) -- 22097(line=541, offs=26)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22087(line=542, offs=16) -- 22115(line=542, offs=44)
+emit_instr: loc0 = build/src/recursion.dats: 22118(line=542, offs=16) -- 22146(line=542, offs=44)
 */
 ATSINSmove_void(tmp571, build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__4(ATSPMVrefarg0(arg1), ATSSELcon(tmp569, postiats_tysum_15, atslab__0), ATSPMVbool_false())) ;
 
@@ -13407,7 +13410,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22150(line=544, offs=8) -- 22171(line=544, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 22181(line=544, offs=8) -- 22202(line=544, offs=29)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp570)) ;
@@ -13418,7 +13421,7 @@ ATSINSfgoto(__patsflab_clear_marks_170) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22037(line=540, offs=27) -- 22175(line=544, offs=33)
+emit_instr: loc0 = build/src/recursion.dats: 22068(line=540, offs=27) -- 22206(line=544, offs=33)
 */
 /*
 INSletpop()
@@ -13445,9 +13448,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11291)
-tmparg = S2Evar(a(11291))
-tmpsub = Some(a(11291) -> S2Ecst(bool_t0ype))
+imparg = a(11416)
+tmparg = S2Evar(a(11416))
+tmpsub = Some(a(11416) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__4(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_bool) arg2)
@@ -13486,9 +13489,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__11(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -13526,9 +13529,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__11(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -13573,9 +13576,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8098)
-tmparg = S2Evar(a(8098))
-tmpsub = Some(a(8098) -> S2Ecst(bool_t0ype))
+imparg = a(8223)
+tmparg = S2Evar(a(8223))
+tmpsub = Some(a(8223) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__64__4(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_bool) arg1)
@@ -13618,7 +13621,7 @@ ATSreturn_void(tmpret156__4) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_set__64__4] */
 
 /*
-build/src/recursion.dats: 22340(line=551, offs=5) -- 22666(line=558, offs=30)
+build/src/recursion.dats: 22371(line=551, offs=5) -- 22697(line=558, offs=30)
 */
 /*
 local: impl_ids_175$0(level=0)
@@ -13640,11 +13643,11 @@ ATStmpdec(tmp583, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22340(line=551, offs=5) -- 22666(line=558, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 22371(line=551, offs=5) -- 22697(line=558, offs=30)
 */
 ATSINSflab(__patsflab_impl_ids_175):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22432(line=552, offs=3) -- 22666(line=558, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 22463(line=552, offs=3) -- 22697(line=558, offs=30)
 */
 ATScaseof_beg()
 /*
@@ -13652,15 +13655,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22448(line=553, offs=5) -- 22459(line=553, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 22479(line=553, offs=5) -- 22490(line=553, offs=16)
 */
 ATSINSlab(__atstmplab116):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22373(line=551, offs=38) -- 22375(line=551, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 22404(line=551, offs=38) -- 22406(line=551, offs=40)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab119) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22459(line=553, offs=16) -- 22459(line=553, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 22490(line=553, offs=16) -- 22490(line=553, offs=16)
 */
 ATSINSlab(__atstmplab117):
 /*
@@ -13670,32 +13673,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22463(line=553, offs=20) -- 22466(line=553, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 22494(line=553, offs=20) -- 22497(line=553, offs=23)
 */
 ATSINSmove(tmpret580, arg1) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22471(line=554, offs=5) -- 22489(line=554, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 22502(line=554, offs=5) -- 22520(line=554, offs=23)
 */
 ATSINSlab(__atstmplab118):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22373(line=551, offs=38) -- 22375(line=551, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 22404(line=551, offs=38) -- 22406(line=551, offs=40)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22489(line=554, offs=23) -- 22489(line=554, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 22520(line=554, offs=23) -- 22520(line=554, offs=23)
 */
 ATSINSlab(__atstmplab119):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22482(line=554, offs=16) -- 22484(line=554, offs=18)
+emit_instr: loc0 = build/src/recursion.dats: 22513(line=554, offs=16) -- 22515(line=554, offs=18)
 */
 ATSINSmove(tmp581, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22486(line=554, offs=20) -- 22488(line=554, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 22517(line=554, offs=20) -- 22519(line=554, offs=22)
 */
 ATSINSmove(tmp582, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
@@ -13705,25 +13708,25 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22493(line=554, offs=27) -- 22666(line=558, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 22524(line=554, offs=27) -- 22697(line=558, offs=30)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22508(line=555, offs=12) -- 22525(line=555, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 22539(line=555, offs=12) -- 22556(line=555, offs=29)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22549(line=556, offs=19) -- 22587(line=556, offs=57)
+emit_instr: loc0 = build/src/recursion.dats: 22580(line=556, offs=19) -- 22618(line=556, offs=57)
 */
 ATSif(
 ATSSELcon(tmp581, postiats_tysum_15, atslab__1)
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22562(line=556, offs=32) -- 22578(line=556, offs=48)
+emit_instr: loc0 = build/src/recursion.dats: 22593(line=556, offs=32) -- 22609(line=556, offs=48)
 */
 
 /*
@@ -13739,7 +13742,7 @@ ATSINSstore_con1_ofs(tmp583, postiats_tysum_14, atslab__1, arg1) ;
 ATSINSmove_con1_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22584(line=556, offs=54) -- 22587(line=556, offs=57)
+emit_instr: loc0 = build/src/recursion.dats: 22615(line=556, offs=54) -- 22618(line=556, offs=57)
 */
 ATSINSmove(tmp583, arg1) ;
 } /* ATSendif */
@@ -13748,7 +13751,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22644(line=558, offs=8) -- 22662(line=558, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 22675(line=558, offs=8) -- 22693(line=558, offs=26)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp582)) ;
@@ -13759,7 +13762,7 @@ ATSINSfgoto(__patsflab_impl_ids_175) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22493(line=554, offs=27) -- 22666(line=558, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 22524(line=554, offs=27) -- 22697(line=558, offs=30)
 */
 /*
 INSletpop()
@@ -13776,7 +13779,7 @@ ATSreturn(tmpret580) ;
 } /* end of [impl_ids_175] */
 
 /*
-build/src/recursion.dats: 22746(line=561, offs=5) -- 23259(line=572, offs=43)
+build/src/recursion.dats: 22777(line=561, offs=5) -- 23290(line=572, offs=43)
 */
 /*
 local: reach_168$0(level=0), clear_marks_170$0(level=0), mark_cycles_176$0(level=0)
@@ -13806,11 +13809,11 @@ ATStmpdec(tmp592, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22746(line=561, offs=5) -- 23259(line=572, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 22777(line=561, offs=5) -- 23290(line=572, offs=43)
 */
 ATSINSflab(__patsflab_mark_cycles_176):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22895(line=563, offs=3) -- 23259(line=572, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 22926(line=563, offs=3) -- 23290(line=572, offs=43)
 */
 ATScaseof_beg()
 /*
@@ -13818,15 +13821,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22911(line=564, offs=5) -- 22921(line=564, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 22942(line=564, offs=5) -- 22952(line=564, offs=15)
 */
 ATSINSlab(__atstmplab120):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22793(line=562, offs=4) -- 22795(line=562, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 22824(line=562, offs=4) -- 22826(line=562, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab123) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22921(line=564, offs=15) -- 22921(line=564, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 22952(line=564, offs=15) -- 22952(line=564, offs=15)
 */
 ATSINSlab(__atstmplab121):
 /*
@@ -13836,36 +13839,36 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22925(line=564, offs=19) -- 22927(line=564, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 22956(line=564, offs=19) -- 22958(line=564, offs=21)
 */
 ATSINSmove(tmpret584, arg1) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22932(line=565, offs=5) -- 22948(line=565, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 22963(line=565, offs=5) -- 22979(line=565, offs=21)
 */
 ATSINSlab(__atstmplab122):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22793(line=562, offs=4) -- 22795(line=562, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 22824(line=562, offs=4) -- 22826(line=562, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22948(line=565, offs=21) -- 22948(line=565, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 22979(line=565, offs=21) -- 22979(line=565, offs=21)
 */
 ATSINSlab(__atstmplab123):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22942(line=565, offs=15) -- 22943(line=565, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 22973(line=565, offs=15) -- 22974(line=565, offs=16)
 */
 ATSINSmove(tmp585, ATSSELcon(arg0, postiats_tysum_14, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22945(line=565, offs=18) -- 22947(line=565, offs=20)
+emit_instr: loc0 = build/src/recursion.dats: 22976(line=565, offs=18) -- 22978(line=565, offs=20)
 */
 ATSINSmove(tmp586, ATSSELcon(arg0, postiats_tysum_14, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22932(line=565, offs=5) -- 23259(line=572, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 22963(line=565, offs=5) -- 23290(line=572, offs=43)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -13875,70 +13878,70 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22952(line=565, offs=25) -- 23259(line=572, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 22983(line=565, offs=25) -- 23290(line=572, offs=43)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22967(line=566, offs=12) -- 22981(line=566, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 22998(line=566, offs=12) -- 23012(line=566, offs=26)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22975(line=566, offs=20) -- 22977(line=566, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 23006(line=566, offs=20) -- 23008(line=566, offs=22)
 */
 ATSINSmove(tmp587, ATSSELcon(arg1, postiats_tysum_16, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22979(line=566, offs=24) -- 22980(line=566, offs=25)
+emit_instr: loc0 = build/src/recursion.dats: 23010(line=566, offs=24) -- 23011(line=566, offs=25)
 */
 ATSINSmove(tmp588, ATSSELcon(arg1, postiats_tysum_16, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22967(line=566, offs=12) -- 22981(line=566, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 22998(line=566, offs=12) -- 23012(line=566, offs=26)
 */
 ATSINSfreecon(arg1) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23025(line=567, offs=39) -- 23036(line=567, offs=50)
+emit_instr: loc0 = build/src/recursion.dats: 23056(line=567, offs=39) -- 23067(line=567, offs=50)
 */
 
 ATSINSmove_nil(tmp590) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23003(line=567, offs=17) -- 23037(line=567, offs=51)
+emit_instr: loc0 = build/src/recursion.dats: 23034(line=567, offs=17) -- 23068(line=567, offs=51)
 */
 ATSINSmove(tmp589, reach_168(tmp587, tmp588, tmp585, ATSPMVrefarg0(arg2), tmp590)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23057(line=568, offs=20) -- 23078(line=568, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 23088(line=568, offs=20) -- 23109(line=568, offs=41)
 */
 ATSINSmove(tmp592, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__6(ATSPMVrefarg0(arg2), tmp585)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23054(line=568, offs=17) -- 23118(line=568, offs=81)
+emit_instr: loc0 = build/src/recursion.dats: 23085(line=568, offs=17) -- 23149(line=568, offs=81)
 */
 ATSif(
 tmp592
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23084(line=568, offs=47) -- 23110(line=568, offs=73)
+emit_instr: loc0 = build/src/recursion.dats: 23115(line=568, offs=47) -- 23141(line=568, offs=73)
 */
 ATSINSmove_void(tmp591, build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__5(ATSPMVrefarg0(arg3), tmp585, ATSPMVbool_true())) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23116(line=568, offs=79) -- 23118(line=568, offs=81)
+emit_instr: loc0 = build/src/recursion.dats: 23147(line=568, offs=79) -- 23149(line=568, offs=81)
 */
 ATSINSmove_void(tmp591, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23131(line=569, offs=12) -- 23145(line=569, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 23162(line=569, offs=12) -- 23176(line=569, offs=26)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23167(line=570, offs=16) -- 23188(line=570, offs=37)
+emit_instr: loc0 = build/src/recursion.dats: 23198(line=570, offs=16) -- 23219(line=570, offs=37)
 */
 ATSINSmove_void(tmp609, clear_marks_170(ATSPMVrefarg0(ATSSELcon(tmp589, postiats_tysum_16, atslab__0)), ATSPMVrefarg0(arg2))) ;
 
@@ -13947,7 +13950,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23224(line=572, offs=8) -- 23255(line=572, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 23255(line=572, offs=8) -- 23286(line=572, offs=39)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp586) ;
@@ -13962,7 +13965,7 @@ ATSINSfgoto(__patsflab_mark_cycles_176) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 22952(line=565, offs=25) -- 23259(line=572, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 22983(line=565, offs=25) -- 23290(line=572, offs=43)
 */
 /*
 INSletpop()
@@ -13989,9 +13992,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(bool_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__6(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14030,9 +14033,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__12(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14070,9 +14073,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__12(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14117,9 +14120,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(bool_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__8(atstkind_type(atstype_ptrk) arg0)
@@ -14168,9 +14171,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11291)
-tmparg = S2Evar(a(11291))
-tmpsub = Some(a(11291) -> S2Ecst(bool_t0ype))
+imparg = a(11416)
+tmparg = S2Evar(a(11416))
+tmpsub = Some(a(11416) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__60__5(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_bool) arg2)
@@ -14209,9 +14212,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__13(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14249,9 +14252,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__13(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14296,9 +14299,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8098)
-tmparg = S2Evar(a(8098))
-tmpsub = Some(a(8098) -> S2Ecst(bool_t0ype))
+imparg = a(8223)
+tmparg = S2Evar(a(8223))
+tmpsub = Some(a(8223) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__64__5(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_bool) arg1)
@@ -14341,7 +14344,7 @@ ATSreturn_void(tmpret156__5) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_set__64__5] */
 
 /*
-build/src/recursion.dats: 23565(line=586, offs=31) -- 23741(line=591, offs=16)
+build/src/recursion.dats: 23596(line=586, offs=31) -- 23772(line=591, offs=16)
 */
 /*
 local: 
@@ -14358,11 +14361,11 @@ build_057_src_057_recursion_056_sats__cycle_hits_free(atstype_boxed arg0)
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23545(line=586, offs=11) -- 23741(line=591, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 23576(line=586, offs=11) -- 23772(line=591, offs=16)
 */
 ATSINSflab(__patsflab_cycle_hits_free):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23572(line=586, offs=38) -- 23741(line=591, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 23603(line=586, offs=38) -- 23772(line=591, offs=16)
 */
 /*
 letpush(beg)
@@ -14372,12 +14375,12 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23729(line=591, offs=4) -- 23736(line=591, offs=11)
+emit_instr: loc0 = build/src/recursion.dats: 23760(line=591, offs=4) -- 23767(line=591, offs=11)
 */
 ATSINSmove_void(tmpret610, loop_186(arg0)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23572(line=586, offs=38) -- 23741(line=591, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 23603(line=586, offs=38) -- 23772(line=591, offs=16)
 */
 /*
 INSletpop()
@@ -14387,7 +14390,7 @@ ATSreturn_void(tmpret610) ;
 } /* end of [build_057_src_057_recursion_056_sats__cycle_hits_free] */
 
 /*
-build/src/recursion.dats: 23582(line=587, offs=7) -- 23725(line=590, offs=51)
+build/src/recursion.dats: 23613(line=587, offs=7) -- 23756(line=590, offs=51)
 */
 /*
 local: loop_186$0(level=1)
@@ -14406,11 +14409,11 @@ ATStmpdec(tmp616, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23582(line=587, offs=7) -- 23725(line=590, offs=51)
+emit_instr: loc0 = build/src/recursion.dats: 23613(line=587, offs=7) -- 23756(line=590, offs=51)
 */
 ATSINSflab(__patsflab_loop_186):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23633(line=588, offs=5) -- 23725(line=590, offs=51)
+emit_instr: loc0 = build/src/recursion.dats: 23664(line=588, offs=5) -- 23756(line=590, offs=51)
 */
 ATScaseof_beg()
 /*
@@ -14418,15 +14421,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23651(line=589, offs=7) -- 23668(line=589, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 23682(line=589, offs=7) -- 23699(line=589, offs=24)
 */
 ATSINSlab(__atstmplab124):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23602(line=587, offs=27) -- 23604(line=587, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 23633(line=587, offs=27) -- 23635(line=587, offs=29)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab127) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23668(line=589, offs=24) -- 23668(line=589, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 23699(line=589, offs=24) -- 23699(line=589, offs=24)
 */
 ATSINSlab(__atstmplab125):
 /*
@@ -14436,32 +14439,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23672(line=589, offs=28) -- 23674(line=589, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 23703(line=589, offs=28) -- 23705(line=589, offs=30)
 */
 ATSINSmove_void(tmpret611, ATSPMVempty()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23681(line=590, offs=7) -- 23713(line=590, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 23712(line=590, offs=7) -- 23744(line=590, offs=39)
 */
 ATSINSlab(__atstmplab126):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23602(line=587, offs=27) -- 23604(line=587, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 23633(line=587, offs=27) -- 23635(line=587, offs=29)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23713(line=590, offs=39) -- 23713(line=590, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 23744(line=590, offs=39) -- 23744(line=590, offs=39)
 */
 ATSINSlab(__atstmplab127):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23710(line=590, offs=36) -- 23712(line=590, offs=38)
+emit_instr: loc0 = build/src/recursion.dats: 23741(line=590, offs=36) -- 23743(line=590, offs=38)
 */
 ATSINSmove(tmp616, ATSSELcon(arg0, postiats_tysum_17, atslab__4)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23681(line=590, offs=7) -- 23725(line=590, offs=51)
+emit_instr: loc0 = build/src/recursion.dats: 23712(line=590, offs=7) -- 23756(line=590, offs=51)
 */
 ATSINSfreecon(arg0) ;
 /*
@@ -14471,7 +14474,7 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23717(line=590, offs=43) -- 23724(line=590, offs=50)
+emit_instr: loc0 = build/src/recursion.dats: 23748(line=590, offs=43) -- 23755(line=590, offs=50)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, tmp616) ;
@@ -14491,7 +14494,7 @@ ATSreturn_void(tmpret611) ;
 } /* end of [loop_186] */
 
 /*
-build/src/recursion.dats: 23818(line=594, offs=5) -- 24312(line=604, offs=46)
+build/src/recursion.dats: 23849(line=594, offs=5) -- 24343(line=604, offs=46)
 */
 /*
 local: def_hits_187$0(level=0)
@@ -14518,11 +14521,11 @@ ATStmpdec(tmp630, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23818(line=594, offs=5) -- 24312(line=604, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 23849(line=594, offs=5) -- 24343(line=604, offs=46)
 */
 ATSINSflab(__patsflab_def_hits_187):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24010(line=597, offs=3) -- 24312(line=604, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 24041(line=597, offs=3) -- 24343(line=604, offs=46)
 */
 ATScaseof_beg()
 /*
@@ -14530,15 +14533,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24026(line=598, offs=5) -- 24036(line=598, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 24057(line=598, offs=5) -- 24067(line=598, offs=15)
 */
 ATSINSlab(__atstmplab128):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23888(line=595, offs=4) -- 23890(line=595, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 23919(line=595, offs=4) -- 23921(line=595, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab131) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24036(line=598, offs=15) -- 24036(line=598, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 24067(line=598, offs=15) -- 24067(line=598, offs=15)
 */
 ATSINSlab(__atstmplab129):
 /*
@@ -14548,32 +14551,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24040(line=598, offs=19) -- 24043(line=598, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 24071(line=598, offs=19) -- 24074(line=598, offs=22)
 */
 ATSINSmove(tmpret617, arg4) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24048(line=599, offs=5) -- 24064(line=599, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 24079(line=599, offs=5) -- 24095(line=599, offs=21)
 */
 ATSINSlab(__atstmplab130):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 23888(line=595, offs=4) -- 23890(line=595, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 23919(line=595, offs=4) -- 23921(line=595, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24064(line=599, offs=21) -- 24064(line=599, offs=21)
+emit_instr: loc0 = build/src/recursion.dats: 24095(line=599, offs=21) -- 24095(line=599, offs=21)
 */
 ATSINSlab(__atstmplab131):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24058(line=599, offs=15) -- 24059(line=599, offs=16)
+emit_instr: loc0 = build/src/recursion.dats: 24089(line=599, offs=15) -- 24090(line=599, offs=16)
 */
 ATSINSmove(tmp618, ATSSELcon(arg0, postiats_tysum_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24061(line=599, offs=18) -- 24063(line=599, offs=20)
+emit_instr: loc0 = build/src/recursion.dats: 24092(line=599, offs=18) -- 24094(line=599, offs=20)
 */
 ATSINSmove(tmp619, ATSSELcon(arg0, postiats_tysum_4, atslab__1)) ;
 /*
@@ -14583,30 +14586,30 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24068(line=599, offs=25) -- 24312(line=604, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 24099(line=599, offs=25) -- 24343(line=604, offs=46)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24083(line=600, offs=12) -- 24108(line=600, offs=37)
+emit_instr: loc0 = build/src/recursion.dats: 24114(line=600, offs=12) -- 24139(line=600, offs=37)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24134(line=601, offs=22) -- 24154(line=601, offs=42)
+emit_instr: loc0 = build/src/recursion.dats: 24165(line=601, offs=22) -- 24185(line=601, offs=42)
 */
 ATSINSmove(tmp621, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__7(ATSPMVrefarg0(arg3), arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24131(line=601, offs=19) -- 24205(line=601, offs=93)
+emit_instr: loc0 = build/src/recursion.dats: 24162(line=601, offs=19) -- 24236(line=601, offs=93)
 */
 ATSif(
 tmp621
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24160(line=601, offs=48) -- 24196(line=601, offs=84)
+emit_instr: loc0 = build/src/recursion.dats: 24191(line=601, offs=48) -- 24227(line=601, offs=84)
 */
 
 /*
@@ -14625,7 +14628,7 @@ ATSINSstore_con1_ofs(tmp620, postiats_tysum_17, atslab__4, arg4) ;
 ATSINSmove_con1_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24202(line=601, offs=90) -- 24205(line=601, offs=93)
+emit_instr: loc0 = build/src/recursion.dats: 24233(line=601, offs=90) -- 24236(line=601, offs=93)
 */
 ATSINSmove(tmp620, arg4) ;
 } /* ATSendif */
@@ -14634,12 +14637,12 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24287(line=604, offs=21) -- 24292(line=604, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 24318(line=604, offs=21) -- 24323(line=604, offs=26)
 */
 ATSINSmove(tmp630, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24274(line=604, offs=8) -- 24308(line=604, offs=42)
+emit_instr: loc0 = build/src/recursion.dats: 24305(line=604, offs=8) -- 24339(line=604, offs=42)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp619)) ;
@@ -14656,7 +14659,7 @@ ATSINSfgoto(__patsflab_def_hits_187) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24068(line=599, offs=25) -- 24312(line=604, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 24099(line=599, offs=25) -- 24343(line=604, offs=46)
 */
 /*
 INSletpop()
@@ -14683,9 +14686,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11277)
-tmparg = S2Evar(a(11277))
-tmpsub = Some(a(11277) -> S2Ecst(bool_t0ype))
+imparg = a(11402)
+tmparg = S2Evar(a(11402))
+tmpsub = Some(a(11402) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__115__7(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14724,9 +14727,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7077), tk(7078)
-tmparg = S2Evar(a(7077)); S2Evar(tk(7078))
-tmpsub = Some(a(7077) -> S2Ecst(bool_t0ype); tk(7078) -> S2Eextkind(atstype_int))
+imparg = a(7202), tk(7203)
+tmparg = S2Evar(a(7202)); S2Evar(tk(7203))
+tmpsub = Some(a(7202) -> S2Ecst(bool_t0ype); tk(7203) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr1_add_gint__22__14(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14764,9 +14767,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(7063), tk(7064)
-tmparg = S2Evar(a(7063)); S2Evar(tk(7064))
-tmpsub = Some(a(7063) -> S2Ecst(bool_t0ype); tk(7064) -> S2Eextkind(atstype_int))
+imparg = a(7188), tk(7189)
+tmparg = S2Evar(a(7188)); S2Evar(tk(7189))
+tmpsub = Some(a(7188) -> S2Ecst(bool_t0ype); tk(7189) -> S2Eextkind(atstype_int))
 */
 atstkind_type(atstype_ptrk)
 ATSLIB_056_prelude__ptr0_add_gint__24__14(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -14811,9 +14814,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(8095)
-tmparg = S2Evar(a(8095))
-tmpsub = Some(a(8095) -> S2Ecst(bool_t0ype))
+imparg = a(8220)
+tmparg = S2Evar(a(8220))
+tmpsub = Some(a(8220) -> S2Ecst(bool_t0ype))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude_056_unsafe__ptr0_get__28__9(atstkind_type(atstype_ptrk) arg0)
@@ -14852,7 +14855,7 @@ ATSreturn(tmpret63__9) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_get__28__9] */
 
 /*
-build/src/recursion.dats: 24318(line=606, offs=5) -- 24624(line=610, offs=100)
+build/src/recursion.dats: 24349(line=606, offs=5) -- 24655(line=610, offs=100)
 */
 /*
 local: def_hits_187$0(level=0), file_hits_192$0(level=0)
@@ -14879,11 +14882,11 @@ ATStmpdec(tmp640, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24318(line=606, offs=5) -- 24624(line=610, offs=100)
+emit_instr: loc0 = build/src/recursion.dats: 24349(line=606, offs=5) -- 24655(line=610, offs=100)
 */
 ATSINSflab(__patsflab_file_hits_192):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24489(line=608, offs=3) -- 24624(line=610, offs=100)
+emit_instr: loc0 = build/src/recursion.dats: 24520(line=608, offs=3) -- 24655(line=610, offs=100)
 */
 ATScaseof_beg()
 /*
@@ -14891,15 +14894,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24505(line=609, offs=5) -- 24517(line=609, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 24536(line=609, offs=5) -- 24548(line=609, offs=17)
 */
 ATSINSlab(__atstmplab132):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24384(line=607, offs=4) -- 24386(line=607, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 24415(line=607, offs=4) -- 24417(line=607, offs=6)
 */
 ATSifthen(ATSCKptriscons(arg0)) { ATSINSgoto(__atstmplab135) ; } ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24517(line=609, offs=17) -- 24517(line=609, offs=17)
+emit_instr: loc0 = build/src/recursion.dats: 24548(line=609, offs=17) -- 24548(line=609, offs=17)
 */
 ATSINSlab(__atstmplab133):
 /*
@@ -14909,40 +14912,40 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24521(line=609, offs=21) -- 24524(line=609, offs=24)
+emit_instr: loc0 = build/src/recursion.dats: 24552(line=609, offs=21) -- 24555(line=609, offs=24)
 */
 ATSINSmove(tmpret631, arg3) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24529(line=610, offs=5) -- 24564(line=610, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 24560(line=610, offs=5) -- 24595(line=610, offs=40)
 */
 ATSINSlab(__atstmplab134):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24384(line=607, offs=4) -- 24386(line=607, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 24415(line=607, offs=4) -- 24417(line=607, offs=6)
 */
 #if(0)
 ATSifthen(ATSCKptrisnull(arg0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24564(line=610, offs=40) -- 24564(line=610, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 24595(line=610, offs=40) -- 24595(line=610, offs=40)
 */
 ATSINSlab(__atstmplab135):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24541(line=610, offs=17) -- 24543(line=610, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 24572(line=610, offs=17) -- 24574(line=610, offs=19)
 */
 ATSINSmove(tmp632, ATSSELcon(arg0, postiats_tysum_7, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24554(line=610, offs=30) -- 24555(line=610, offs=31)
+emit_instr: loc0 = build/src/recursion.dats: 24585(line=610, offs=30) -- 24586(line=610, offs=31)
 */
 ATSINSmove(tmp636, ATSSELcon(arg0, postiats_tysum_7, atslab__4)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24557(line=610, offs=33) -- 24559(line=610, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 24588(line=610, offs=33) -- 24590(line=610, offs=35)
 */
 ATSINSmove(tmp637, ATSSELcon(arg0, postiats_tysum_7, atslab__5)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24561(line=610, offs=37) -- 24563(line=610, offs=39)
+emit_instr: loc0 = build/src/recursion.dats: 24592(line=610, offs=37) -- 24594(line=610, offs=39)
 */
 ATSINSmove(tmp638, ATSSELcon(arg0, postiats_tysum_7, atslab__6)) ;
 /*
@@ -14952,17 +14955,17 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24582(line=610, offs=58) -- 24587(line=610, offs=63)
+emit_instr: loc0 = build/src/recursion.dats: 24613(line=610, offs=58) -- 24618(line=610, offs=63)
 */
 ATSINSmove(tmp639, atspre_g1int_add_int(arg1, tmp636)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24594(line=610, offs=70) -- 24623(line=610, offs=99)
+emit_instr: loc0 = build/src/recursion.dats: 24625(line=610, offs=70) -- 24654(line=610, offs=99)
 */
 ATSINSmove(tmp640, def_hits_187(ATSPMVrefarg0(tmp637), arg1, tmp632, ATSPMVrefarg0(arg2), arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24568(line=610, offs=44) -- 24624(line=610, offs=100)
+emit_instr: loc0 = build/src/recursion.dats: 24599(line=610, offs=44) -- 24655(line=610, offs=100)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(tmp638)) ;
@@ -14988,7 +14991,7 @@ ATSreturn(tmpret631) ;
 } /* end of [file_hits_192] */
 
 /*
-build/src/recursion.dats: 24691(line=613, offs=4) -- 25342(line=631, offs=10)
+build/src/recursion.dats: 24722(line=613, offs=4) -- 25373(line=631, offs=10)
 */
 /*
 local: nodes_free_111$0(level=0), file_nodes_137$0(level=0), prune_159$0(level=0), nodes_len_166$0(level=0), impl_ids_175$0(level=0), mark_cycles_176$0(level=0), file_hits_192$0(level=0)
@@ -15022,115 +15025,115 @@ ATStmpdec(tmp666, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24691(line=613, offs=4) -- 25342(line=631, offs=10)
+emit_instr: loc0 = build/src/recursion.dats: 24722(line=613, offs=4) -- 25373(line=631, offs=10)
 */
 ATSINSflab(__patsflab_graph_hits_193):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24805(line=614, offs=74) -- 25342(line=631, offs=10)
+emit_instr: loc0 = build/src/recursion.dats: 24836(line=614, offs=74) -- 25373(line=631, offs=10)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24842(line=615, offs=34) -- 24853(line=615, offs=45)
+emit_instr: loc0 = build/src/recursion.dats: 24873(line=615, offs=34) -- 24884(line=615, offs=45)
 */
 
 ATSINSmove_nil(tmp643) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24820(line=615, offs=12) -- 24854(line=615, offs=46)
+emit_instr: loc0 = build/src/recursion.dats: 24851(line=615, offs=12) -- 24885(line=615, offs=46)
 */
 ATSINSmove(tmp642, file_nodes_137(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), ATSPMVrefarg0(arg1), tmp643)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24868(line=616, offs=14) -- 24884(line=616, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 24899(line=616, offs=14) -- 24915(line=616, offs=30)
 */
 ATSINSmove(tmp644, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__194__1(arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24896(line=617, offs=11) -- 24912(line=617, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 24927(line=617, offs=11) -- 24943(line=617, offs=27)
 */
 ATSINSmove(tmp648, nodes_len_166(ATSPMVrefarg0(tmp642), ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24924(line=618, offs=12) -- 24942(line=618, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 24955(line=618, offs=12) -- 24973(line=618, offs=30)
 */
 ATSINSmove(tmp649, prune_159(tmp642, tmp648, ATSPMVrefarg0(tmp644))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24954(line=619, offs=12) -- 24972(line=619, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 24985(line=619, offs=12) -- 25003(line=619, offs=30)
 */
 ATSINSmove_void(tmp650, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__5(tmp644)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24981(line=620, offs=8) -- 24996(line=620, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 25012(line=620, offs=8) -- 25027(line=620, offs=23)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25027(line=621, offs=26) -- 25036(line=621, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 25058(line=621, offs=26) -- 25067(line=621, offs=35)
 */
 
 ATSINSmove_nil(tmp653) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25013(line=621, offs=12) -- 25037(line=621, offs=36)
+emit_instr: loc0 = build/src/recursion.dats: 25044(line=621, offs=12) -- 25068(line=621, offs=36)
 */
 ATSINSmove(tmp652, impl_ids_175(ATSPMVrefarg0(ATSSELcon(tmp649, postiats_tysum_16, atslab__0)), tmp653)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25074(line=623, offs=14) -- 25090(line=623, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 25105(line=623, offs=14) -- 25121(line=623, offs=30)
 */
 ATSINSmove(tmp654, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__194__2(arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25104(line=624, offs=13) -- 25120(line=624, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 25135(line=624, offs=13) -- 25151(line=624, offs=29)
 */
 ATSINSmove(tmp657, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__194__3(arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25134(line=625, offs=13) -- 25164(line=625, offs=43)
+emit_instr: loc0 = build/src/recursion.dats: 25165(line=625, offs=13) -- 25195(line=625, offs=43)
 */
 ATSINSmove(tmp660, mark_cycles_176(tmp652, tmp649, ATSPMVrefarg0(tmp654), ATSPMVrefarg0(tmp657))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25172(line=626, offs=8) -- 25187(line=626, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 25203(line=626, offs=8) -- 25218(line=626, offs=23)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25180(line=626, offs=16) -- 25183(line=626, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 25211(line=626, offs=16) -- 25214(line=626, offs=19)
 */
 ATSINSmove(tmp661, ATSSELcon(tmp660, postiats_tysum_16, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25172(line=626, offs=8) -- 25187(line=626, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 25203(line=626, offs=8) -- 25218(line=626, offs=23)
 */
 ATSINSfreecon(tmp660) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25205(line=627, offs=12) -- 25219(line=627, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 25236(line=627, offs=12) -- 25250(line=627, offs=26)
 */
 ATSINSmove_void(tmp662, nodes_free_111(tmp661)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25232(line=628, offs=12) -- 25250(line=628, offs=30)
+emit_instr: loc0 = build/src/recursion.dats: 25263(line=628, offs=12) -- 25281(line=628, offs=30)
 */
 ATSINSmove_void(tmp663, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__6(tmp654)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25285(line=629, offs=34) -- 25301(line=629, offs=50)
+emit_instr: loc0 = build/src/recursion.dats: 25316(line=629, offs=34) -- 25332(line=629, offs=50)
 */
 
 ATSINSmove_nil(tmp666) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25263(line=629, offs=12) -- 25302(line=629, offs=51)
+emit_instr: loc0 = build/src/recursion.dats: 25294(line=629, offs=12) -- 25333(line=629, offs=51)
 */
 ATSINSmove(tmp665, file_hits_192(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), ATSPMVrefarg0(tmp657), tmp666)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25314(line=630, offs=12) -- 25331(line=630, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 25345(line=630, offs=12) -- 25362(line=630, offs=29)
 */
 ATSINSmove_void(tmp667, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__7(tmp657)) ;
 
@@ -15139,11 +15142,11 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25336(line=631, offs=4) -- 25338(line=631, offs=6)
+emit_instr: loc0 = build/src/recursion.dats: 25367(line=631, offs=4) -- 25369(line=631, offs=6)
 */
 ATSINSmove(tmpret641, tmp665) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 24805(line=614, offs=74) -- 25342(line=631, offs=10)
+emit_instr: loc0 = build/src/recursion.dats: 24836(line=614, offs=74) -- 25373(line=631, offs=10)
 */
 /*
 INSletpop()
@@ -15265,9 +15268,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(bool_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__5(atstkind_type(atstype_ptrk) arg0)
@@ -15429,9 +15432,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(bool_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__6(atstkind_type(atstype_ptrk) arg0)
@@ -15463,9 +15466,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = a(11062)
-tmparg = S2Evar(a(11062))
-tmpsub = Some(a(11062) -> S2Ecst(bool_t0ype))
+imparg = a(11187)
+tmparg = S2Evar(a(11187))
+tmpsub = Some(a(11187) -> S2Ecst(bool_t0ype))
 */
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__7(atstkind_type(atstype_ptrk) arg0)
@@ -15487,7 +15490,7 @@ ATSreturn_void(tmpret14__7) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__3__7] */
 
 /*
-build/src/recursion.dats: 25614(line=643, offs=28) -- 26132(line=660, offs=4)
+build/src/recursion.dats: 25645(line=643, offs=28) -- 26171(line=660, offs=4)
 */
 /*
 local: dnames_free_2$0(level=0), pfiles_free_5$0(level=0), add_files_103$0(level=0), graph_hits_193$0(level=0)
@@ -15497,7 +15500,7 @@ global:
 */
 ATSextern()
 atstype_boxed
-build_057_src_057_recursion_056_sats__implement_cycles(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2)
+build_057_src_057_recursion_056_sats__implement_cycles(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_int) arg2, atstkind_t0ype(atstype_int) arg3)
 {
 /* tmpvardeclst(beg) */
 ATStmpdec(tmpret669, atstype_boxed) ;
@@ -15522,29 +15525,29 @@ ATStmpdec(tmp691, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25597(line=643, offs=11) -- 26132(line=660, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 25628(line=643, offs=11) -- 26171(line=660, offs=4)
 */
 ATSINSflab(__patsflab_implement_cycles):
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25634(line=643, offs=48) -- 26132(line=660, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 25669(line=643, offs=52) -- 26171(line=660, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25680(line=644, offs=43) -- 25692(line=644, offs=55)
+emit_instr: loc0 = build/src/recursion.dats: 25719(line=644, offs=47) -- 25731(line=644, offs=59)
 */
 
 ATSINSmove_nil(tmp672) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25694(line=644, offs=57) -- 25706(line=644, offs=69)
+emit_instr: loc0 = build/src/recursion.dats: 25733(line=644, offs=61) -- 25745(line=644, offs=73)
 */
 
 ATSINSmove_nil(tmp673) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25676(line=644, offs=39) -- 25713(line=644, offs=76)
+emit_instr: loc0 = build/src/recursion.dats: 25715(line=644, offs=43) -- 25752(line=644, offs=80)
 */
 
 /*
@@ -15561,30 +15564,30 @@ ATSINSstore_con1_ofs(tmp671, postiats_tysum_12, atslab__2, ATSPMVi0nt(0)) ;
 ATSINSstore_con1_ofs(tmp671, postiats_tysum_12, atslab__3, ATSPMVi0nt(0)) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25649(line=644, offs=12) -- 25714(line=644, offs=77)
+emit_instr: loc0 = build/src/recursion.dats: 25684(line=644, offs=12) -- 25753(line=644, offs=81)
 */
-ATSINSmove(tmp670, add_files_103(ATSPMVrefarg0(arg0), arg1, arg2, tmp671)) ;
+ATSINSmove(tmp670, add_files_103(ATSPMVrefarg0(arg0), arg1, arg2, arg3, tmp671)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25722(line=645, offs=8) -- 25740(line=645, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 25761(line=645, offs=8) -- 25779(line=645, offs=26)
 */
 #if(0)
 
 #endif
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25727(line=645, offs=13) -- 25729(line=645, offs=15)
+emit_instr: loc0 = build/src/recursion.dats: 25766(line=645, offs=13) -- 25768(line=645, offs=15)
 */
 ATSINSmove(tmp674, ATSSELcon(tmp670, postiats_tysum_12, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25731(line=645, offs=17) -- 25733(line=645, offs=19)
+emit_instr: loc0 = build/src/recursion.dats: 25770(line=645, offs=17) -- 25772(line=645, offs=19)
 */
 ATSINSmove(tmp675, ATSSELcon(tmp670, postiats_tysum_12, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25735(line=645, offs=21) -- 25736(line=645, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 25774(line=645, offs=21) -- 25775(line=645, offs=22)
 */
 ATSINSmove(tmp676, ATSSELcon(tmp670, postiats_tysum_12, atslab__2)) ;
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25722(line=645, offs=8) -- 25740(line=645, offs=26)
+emit_instr: loc0 = build/src/recursion.dats: 25761(line=645, offs=8) -- 25779(line=645, offs=26)
 */
 ATSINSfreecon(tmp670) ;
 /*
@@ -15592,29 +15595,29 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25754(line=647, offs=6) -- 25760(line=647, offs=12)
+emit_instr: loc0 = build/src/recursion.dats: 25793(line=647, offs=6) -- 25799(line=647, offs=12)
 */
 ATSINSmove(tmp677, ATSLIB_056_prelude__lte_g1int_int__205__1(tmp676, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25751(line=647, offs=3) -- 26128(line=659, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 25790(line=647, offs=3) -- 26167(line=659, offs=27)
 */
 ATSif(
 tmp677
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25766(line=647, offs=18) -- 25868(line=650, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 25805(line=647, offs=18) -- 25907(line=650, offs=41)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25783(line=648, offs=14) -- 25797(line=648, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 25822(line=648, offs=14) -- 25836(line=648, offs=28)
 */
 ATSINSmove_void(tmp682, pfiles_free_5(tmp674)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25812(line=649, offs=14) -- 25826(line=649, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 25851(line=649, offs=14) -- 25865(line=649, offs=28)
 */
 ATSINSmove_void(tmp683, dnames_free_2(tmp675)) ;
 
@@ -15623,13 +15626,13 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25840(line=650, offs=13) -- 25856(line=650, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 25879(line=650, offs=13) -- 25895(line=650, offs=29)
 */
 
 ATSINSmove_nil(tmp684) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25833(line=650, offs=6) -- 25864(line=650, offs=37)
+emit_instr: loc0 = build/src/recursion.dats: 25872(line=650, offs=6) -- 25903(line=650, offs=37)
 */
 
 /*
@@ -15644,36 +15647,36 @@ ATSINSstore_con1_ofs(tmpret669, postiats_tysum_18, atslab__0, tmp684) ;
 ATSINSstore_con1_ofs(tmpret669, postiats_tysum_18, atslab__1, ATSPMVbool_false()) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25766(line=647, offs=18) -- 25868(line=650, offs=41)
+emit_instr: loc0 = build/src/recursion.dats: 25805(line=647, offs=18) -- 25907(line=650, offs=41)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25879(line=651, offs=11) -- 25890(line=651, offs=22)
+emit_instr: loc0 = build/src/recursion.dats: 25918(line=651, offs=11) -- 25929(line=651, offs=22)
 */
 ATSINSmove(tmp685, ATSLIB_056_prelude__gt_g1int_int__125__2(tmp676, ATSPMVi0nt(1048576))) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25876(line=651, offs=8) -- 26128(line=659, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 25915(line=651, offs=8) -- 26167(line=659, offs=27)
 */
 ATSif(
 tmp685
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25896(line=651, offs=28) -- 25997(line=654, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 25935(line=651, offs=28) -- 26036(line=654, offs=40)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25913(line=652, offs=14) -- 25927(line=652, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 25952(line=652, offs=14) -- 25966(line=652, offs=28)
 */
 ATSINSmove_void(tmp688, pfiles_free_5(tmp674)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25942(line=653, offs=14) -- 25956(line=653, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 25981(line=653, offs=14) -- 25995(line=653, offs=28)
 */
 ATSINSmove_void(tmp689, dnames_free_2(tmp675)) ;
 
@@ -15682,13 +15685,13 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25970(line=654, offs=13) -- 25986(line=654, offs=29)
+emit_instr: loc0 = build/src/recursion.dats: 26009(line=654, offs=13) -- 26025(line=654, offs=29)
 */
 
 ATSINSmove_nil(tmp690) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25963(line=654, offs=6) -- 25993(line=654, offs=36)
+emit_instr: loc0 = build/src/recursion.dats: 26002(line=654, offs=6) -- 26032(line=654, offs=36)
 */
 
 /*
@@ -15703,30 +15706,30 @@ ATSINSstore_con1_ofs(tmpret669, postiats_tysum_18, atslab__0, tmp690) ;
 ATSINSstore_con1_ofs(tmpret669, postiats_tysum_18, atslab__1, ATSPMVbool_true()) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25896(line=651, offs=28) -- 25997(line=654, offs=40)
+emit_instr: loc0 = build/src/recursion.dats: 25935(line=651, offs=28) -- 26036(line=654, offs=40)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/recursion.dats: 26005(line=655, offs=8) -- 26128(line=659, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 26044(line=655, offs=8) -- 26167(line=659, offs=27)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 26022(line=656, offs=14) -- 26043(line=656, offs=35)
+emit_instr: loc0 = build/src/recursion.dats: 26061(line=656, offs=14) -- 26082(line=656, offs=35)
 */
 ATSINSmove(tmp691, graph_hits_193(ATSPMVrefarg0(tmp674), ATSPMVrefarg0(tmp675), tmp676)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 26057(line=657, offs=14) -- 26071(line=657, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 26096(line=657, offs=14) -- 26110(line=657, offs=28)
 */
 ATSINSmove_void(tmp692, pfiles_free_5(tmp674)) ;
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 26086(line=658, offs=14) -- 26100(line=658, offs=28)
+emit_instr: loc0 = build/src/recursion.dats: 26125(line=658, offs=14) -- 26139(line=658, offs=28)
 */
 ATSINSmove_void(tmp693, dnames_free_2(tmp675)) ;
 
@@ -15735,7 +15738,7 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/recursion.dats: 26107(line=659, offs=6) -- 26124(line=659, offs=23)
+emit_instr: loc0 = build/src/recursion.dats: 26146(line=659, offs=6) -- 26163(line=659, offs=23)
 */
 
 /*
@@ -15750,7 +15753,7 @@ ATSINSstore_con1_ofs(tmpret669, postiats_tysum_18, atslab__0, tmp691) ;
 ATSINSstore_con1_ofs(tmpret669, postiats_tysum_18, atslab__1, ATSPMVbool_false()) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/recursion.dats: 26005(line=655, offs=8) -- 26128(line=659, offs=27)
+emit_instr: loc0 = build/src/recursion.dats: 26044(line=655, offs=8) -- 26167(line=659, offs=27)
 */
 /*
 INSletpop()
@@ -15758,7 +15761,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/recursion.dats: 25634(line=643, offs=48) -- 26132(line=660, offs=4)
+emit_instr: loc0 = build/src/recursion.dats: 25669(line=643, offs=52) -- 26171(line=660, offs=4)
 */
 /*
 INSletpop()
@@ -15779,8 +15782,8 @@ global:
 */
 ATSextern()
 /*
-imparg = tk(7012)
-tmparg = S2Evar(tk(7012))
+imparg = tk(7137)
+tmparg = S2Evar(tk(7137))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
@@ -15798,12 +15801,12 @@ ATSINSflab(__patsflab_lte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12625(line=654, offs=30) -- 12636(line=654, offs=41)
 */
-ATSINSmove(tmp679, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7012))>)(arg1)) ;
+ATSINSmove(tmp679, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7137))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12607(line=654, offs=12) -- 12638(line=654, offs=43)
 */
-ATSINSmove(tmpret678, PMVtmpltcst(g1int_lte<S2Evar(tk(7012))>)(arg0, tmp679)) ;
+ATSINSmove(tmpret678, PMVtmpltcst(g1int_lte<S2Evar(tk(7137))>)(arg0, tmp679)) ;
 
 ATSfunbody_end()
 ATSreturn(tmpret678) ;
@@ -15821,9 +15824,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7012)
-tmparg = S2Evar(tk(7012))
-tmpsub = Some(tk(7012) -> S2Eextkind(atstype_int))
+imparg = tk(7137)
+tmparg = S2Evar(tk(7137))
+tmpsub = Some(tk(7137) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g1int_int__205__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
@@ -15862,9 +15865,9 @@ global:
 */
 ATSstatic()
 /*
-imparg = tk(7015)
-tmparg = S2Evar(tk(7015))
-tmpsub = Some(tk(7015) -> S2Eextkind(atstype_int))
+imparg = tk(7140)
+tmparg = S2Evar(tk(7140))
+tmpsub = Some(tk(7140) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__125__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)

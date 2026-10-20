@@ -856,8 +856,8 @@ in $A.free<byte>($A.thaw<byte>(fz)) end
 
 
 implement find_basename_start(bv, pos, max, last) = let
-  fun loop {l:agz}{n:pos}{j:nat | j <= n} .<n - j>.
-    (bv: !$A.borrow(byte, l, n), j: int j, max: int n, last: pos_t): pos_t =
+  fun loop {l:agz}{n:pos}{mx:nat | mx <= n}{j:nat | j <= mx} .<mx - j>.
+    (bv: !$A.borrow(byte, l, n), j: int j, max: int mx, last: pos_t): pos_t =
     if j >= max then last + 1
     else let
       val b = byte2int0($A.read<byte>(bv, j))
@@ -1313,7 +1313,7 @@ implement wasm_object_fresh(out_b, in_b) = key_fresh(KeyOfWasmObject(), out_b, i
 
 
 
-implement native_object_record(rel, out_bv, in_bv) = key_record(object_key(rel), out_bv, 524288, in_bv, 524288)
+implement native_object_record(rel, out_bv, om, in_bv, im) = key_record(object_key(rel), out_bv, om, in_bv, im)
 
 (* ... of the paths in the first om bytes of out_bv and im of in_bv *)
 
@@ -1715,9 +1715,9 @@ fun digits_val {lb:agz}{i,k:nat | i <= k; k <= 16} .<k - i>.
     else digits_val(b, i + 1, k, v * 10 + (c - 48))
   end
 
-fn read_prelude {li:agz} (in_bv: !$A.borrow(byte, li, 524288), il: int): int = let
+fn read_prelude {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288} (in_bv: !$A.borrow(byte, li, ni), in_len: int im): int = let
   var pb : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(in_bv, 0, il, 524288, pb)
+  val () = copy_to_builder_v(in_bv, 0, in_len - 1, in_len, pb)
   val () = bput_v(pb, ".pre")
   val () = put_char_v(pb, 0)
   val @(pa, pal) = $B.into_arr(pb)
@@ -1847,9 +1847,9 @@ fun remap_errors {le:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
 
 (* A failed patsopt of in[0, il): its stderr as Rust prints it,
    "error: patsopt error:" and the lines remapped to the .bats *)
-fn report_patsopt {li:agz}
-  (in_bv: !$A.borrow(byte, li, 524288), il: int, err: $B.builder_v): void = let
-  val off = read_prelude(in_bv, il)
+fn report_patsopt {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (in_bv: !$A.borrow(byte, li, ni), in_len: int im, err: $B.builder_v): void = let
+  val off = read_prelude(in_bv, in_len)
   val @(ea, en) = $B.to_arr(err)
   val @(fz_e, bv_e) = $A.freeze<byte>(ea)
   var out : $B.builder_v = $B.create()
@@ -1999,14 +1999,14 @@ in prerr_builder(out) end
 
 
 
-implement check_emitted_flaws {lo,li} (out_bv, in_bv, il) =
-  case+ read_whole(out_bv, 524288) of
+implement check_emitted_flaws {lo,li}{no}{om}{ni}{im} (out_bv, out_len, in_bv, in_len) =
+  case+ read_whole_m(out_bv, out_len) of
   | ~whole_err(_) => 0
   | ~whole_ok(ar, piece, size, n) => let
       val @(fz_c, bv_c) = $A.freeze<byte>(piece)
       val @(at, flaw, seen, location) = find_flaw(bv_c, 0, n, size, false, 0)
       val rc = (if at >= n then 0 else let
-          val off = read_prelude(in_bv, il)
+          val off = read_prelude(in_bv, in_len)
           val () = (case+ flaw of
             | UnresolvedTemplate() => report_unresolved(bv_c, at, n, size, seen, location, off)
             | CapturingFunction() => report_capturing(bv_c, n, size, seen, location, off)): void
@@ -2059,12 +2059,11 @@ implement check_emitted_flaws {lo,li} (out_bv, in_bv, il) =
 fn env_count {sn:nat | sn < $B.BUILDER_CAP} (name: string sn): int = let
   var b : $B.builder_v = $B.create()
   val set = env_value(name, b)
-  val @(a, k) = $B.to_arr(b)
+  val @(a, k) = $B.into_arr(b)
   val @(fz, bv) = $A.freeze<byte>(a)
-  fun digits {l:agz}{i:nat | i <= 524288} .<524288 - i>.
-    (bv: !$A.borrow(byte, l, 524288), i: int i, k: int, acc: int): int =
-    if i >= 524288 then acc
-    else if i >= k then acc
+  fun digits {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+    (bv: !$A.borrow(byte, l, n), i: int i, k: int k, acc: int): int =
+    if i >= k then acc
     else let
       val c = byte2int0($A.read<byte>(bv, i))
     in
@@ -2122,14 +2121,14 @@ fn caps_read (): void =
   in end
 
 (* Whether e[i] starts what ATS's allocator says when memory runs out *)
-fn is_ats_malloc_at {l:agz}{n:pos}
-  (e: !$A.borrow(byte, l, n), i: pos_t, max: int n): bool = let
+fn is_ats_malloc_at {l:agz}{n:pos}{mx:nat | mx <= n}
+  (e: !$A.borrow(byte, l, n), i: pos_t, max: int mx): bool = let
   var mark = @[char][13]('a', 't', 's', '_', 'm', 'a', 'l', 'l', 'o', 'c', '_', 'g', 'c')
 in lit_at(e, i, max, mark, 13) end
 
 (* Whether e[i] starts what GMP says when memory runs out *)
-fn is_gmp_alloc_at {l:agz}{n:pos}
-  (e: !$A.borrow(byte, l, n), i: pos_t, max: int n): bool = let
+fn is_gmp_alloc_at {l:agz}{n:pos}{mx:nat | mx <= n}
+  (e: !$A.borrow(byte, l, n), i: pos_t, max: int mx): bool = let
   var mark = @[char][22]('C', 'a', 'n', 'n', 'o', 't', ' ', 'a', 'l', 'l', 'o', 'c', 'a', 't', 'e', ' ', 'm', 'e', 'm', 'o', 'r', 'y')
 in lit_at(e, i, max, mark, 22) end
 
@@ -2137,42 +2136,41 @@ in lit_at(e, i, max, mark, 22) end
    looked for when wanted), and the same stderr again *)
 fn memory_said (wanted: bool, err: $B.builder_v): @(bool, $B.builder_v) =
   if ~wanted then @(false, err) else let
-  val @(ea, en) = $B.to_arr(err)
+  val @(ea, en) = $B.into_arr(err)
   val @(fz, bv) = $A.freeze<byte>(ea)
-  fun scan {l:agz}{i:nat | i <= 524288} .<524288 - i>.
-    (bv: !$A.borrow(byte, l, 524288), i: int i, n: int): bool =
-    if i >= 524288 then false
-    else if i >= n then false
-    else if is_ats_malloc_at(bv, i, 524288) then true
-    else if is_gmp_alloc_at(bv, i, 524288) then true
+  fun scan {l:agz}{sn:pos}{n:nat | n <= sn}{i:nat | i <= n} .<n - i>.
+    (bv: !$A.borrow(byte, l, sn), i: int i, n: int n): bool =
+    if i >= n then false
+    else if is_ats_malloc_at(bv, i, n) then true
+    else if is_gmp_alloc_at(bv, i, n) then true
     else scan(bv, i + 1, n)
   val said = scan(bv, 0, en)
   var again : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(bv, 0, en, 524288, again)
+  val () = copy_to_builder_v(bv, 0, en, en, again)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in @(said, again) end
 
 (* The module whose .dats is in[0, in_len - 1) (build/src/m.dats) as its
    source is named, src/m.bats, appended to out *)
-fn module_put {li:agz}
-  (in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+fn module_put {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out: !$B.builder_v >> $B.builder_v): void = let
   val stop = g1ofg0(in_len - 1)
-  val built = (peek(in_bv, 0, 524288) = 98 && peek(in_bv, 1, 524288) = 117
-    && peek(in_bv, 2, 524288) = 105 && peek(in_bv, 3, 524288) = 108
-    && peek(in_bv, 4, 524288) = 100 && peek(in_bv, 5, 524288) = 47): bool
+  val built = (peek(in_bv, 0, in_len) = 98 && peek(in_bv, 1, in_len) = 117
+    && peek(in_bv, 2, in_len) = 105 && peek(in_bv, 3, in_len) = 108
+    && peek(in_bv, 4, in_len) = 100 && peek(in_bv, 5, in_len) = 47): bool
   val start = g1ofg0((if built then 6 else 0): int)
-  val dats = (stop >= start + 5 && peek(in_bv, stop - 5, 524288) = 46
-    && peek(in_bv, stop - 4, 524288) = 100 && peek(in_bv, stop - 3, 524288) = 97
-    && peek(in_bv, stop - 2, 524288) = 116 && peek(in_bv, stop - 1, 524288) = 115): bool
-  val () = copy_to_builder_v(in_bv, start, (if dats then stop - 5 else stop), 524288, out)
+  val dats = (stop >= start + 5 && peek(in_bv, stop - 5, in_len) = 46
+    && peek(in_bv, stop - 4, in_len) = 100 && peek(in_bv, stop - 3, in_len) = 97
+    && peek(in_bv, stop - 2, in_len) = 116 && peek(in_bv, stop - 1, in_len) = 115): bool
+  val () = copy_to_builder_v(in_bv, start, (if dats then stop - 5 else stop), in_len, out)
 in (if dats then bput_v(out, ".bats") else ()) end
 
 (* A run the cap ended, reported (the time cap's when time is true, else
    the memory cap's), and the build failed with the cap's own status *)
-fn cap_report {li:agz}
-  (time: bool, in_bv: !$A.borrow(byte, li, 524288), in_len: int): void = let
+fn cap_report {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (time: bool, in_bv: !$A.borrow(byte, li, ni), in_len: int im): void = let
   var m : $B.builder_v = $B.create()
   val () = bput_v(m, "error: patsopt on ")
   val () = module_put(in_bv, in_len, m)
@@ -2398,8 +2396,8 @@ implement write_settle (path_bv, m, r) =
 (* A patsopt run that failed and printed nothing on stderr: the module,
    the status, the free space of build/ when df said it, and stdout
    (consumes out) *)
-fn report_silent {li:agz}
-  (ec: int, in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+fn report_silent {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (ec: int, in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out: $B.builder_v, out_cut: bool): void = let
   val free_kib = disk_free_kib()
   var m : $B.builder_v = $B.create()
@@ -2433,8 +2431,8 @@ in prerr_builder(m) end
    err is consumed, and out (its stdout, with whether it was cut) too.
    A failure that printed nothing is said as such, never as a patsopt
    error with no text *)
-fn finish_patsopt {li:agz}
-  (ec: int, in_bv: !$A.borrow(byte, li, 524288), in_len: int,
+fn finish_patsopt {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
+  (ec: int, in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    err: $B.builder_v, out: $B.builder_v, out_cut: bool): int =
   if ec <> 0 then let
     val silent = ($B.length(err) = 0): bool
@@ -2446,7 +2444,7 @@ fn finish_patsopt {li:agz}
     in ec end
     else let
       val () = $B.builder_free(out)
-      val () = report_patsopt(in_bv, in_len - 1, err)
+      val () = report_patsopt(in_bv, in_len, err)
       val () = set_build_err()
     in ec end
   end
@@ -2540,12 +2538,12 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
   val () = bput_v(b8, "-o")
   var b9 = $B.create()
   val out_clen = out_len - 1
-  val () = copy_to_builder_v(out_bv, 0, out_clen, 524288, b9)
+  val () = copy_to_builder_v(out_bv, 0, out_clen, out_len, b9)
   var b10 = $B.create()
   val () = bput_v(b10, "-d")
   var b11 = $B.create()
   val in_clen = in_len - 1
-  val () = copy_to_builder_v(in_bv, 0, in_clen, 524288, b11)
+  val () = copy_to_builder_v(in_bv, 0, in_clen, in_len, b11)
   val rest = $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3),
     $L.list_vt_cons(mk_arg(b4), $L.list_vt_cons(mk_arg(b5),
     $L.list_vt_cons(mk_arg(b6), $L.list_vt_cons(mk_arg(b7),
@@ -2584,9 +2582,9 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
     val () = print! ("  + patsopt -o ")
-    val () = print_borrow(out_bv, 0, out_len, 524288)
+    val () = print_borrow(out_bv, 0, out_len, out_len)
     val () = print! (" -d ")
-    val () = print_borrow(in_bv, 0, in_len, 524288)
+    val () = print_borrow(in_bv, 0, in_len, in_len)
   in print_newline() end else ())
   val @(out_ok, out_cfg) = stdout_config()
   val sr = spawn_child_with(bv_exec, argv, envp,
@@ -2628,7 +2626,7 @@ in
           val () = cap_report(false, in_bv, in_len)
         in 1 end
         else finish_patsopt(ec, in_bv, in_len, eb2, ob, out_cut)): int
-      val () = (if rc <> 0 then remove_output(out_bv, out_len) else ())
+      val () = (if rc <> 0 then remove_output_m(out_bv, out_len, out_len) else ())
     in rc end
   | ~$R.err(_) => ~1
 end
@@ -2650,10 +2648,10 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val () = bput_v(b3, "-o")
   var b4 = $B.create()
   val cc_out_clen = out_len - 1
-  val () = copy_to_builder_v(out_bv, 0, cc_out_clen, 524288, b4)
+  val () = copy_to_builder_v(out_bv, 0, cc_out_clen, out_len, b4)
   var b5 = $B.create()
   val cc_in_clen = in_len - 1
-  val () = copy_to_builder_v(in_bv, 0, cc_in_clen, 524288, b5)
+  val () = copy_to_builder_v(in_bv, 0, cc_in_clen, in_len, b5)
   val opt_args: $L.listv($P.arg_entry) = (if is_release(rel) then let
       var bo = $B.create()
       val () = bput_v(bo, "-O2")
@@ -2684,13 +2682,13 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(b5), append_vt(opt_args, tail))))))
-  val () = key_drop(out_bv, 524288)
+  val () = key_drop(out_bv, out_len)
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
     val () = print! ("  + cc -c -o ")
-    val () = print_borrow(out_bv, 0, out_len, 524288)
+    val () = print_borrow(out_bv, 0, out_len, out_len)
     val () = print! (" ")
-    val () = print_borrow(in_bv, 0, in_len, 524288)
+    val () = print_borrow(in_bv, 0, in_len, in_len)
   in print_newline() end else ())
   val sr = spawn_child(bv_exec, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
@@ -2723,7 +2721,7 @@ in
       in ec end
       else let
         val () = $A.free<byte>(eb)
-        val () = native_object_record(rel, out_bv, in_bv)
+        val () = native_object_record(rel, out_bv, out_len, in_bv, in_len)
       in 0 end
     end
   | ~$R.err(_) => ~1
@@ -2767,12 +2765,11 @@ end
 fn slots_wanted (): int = let
   var b : $B.builder_v = $B.create()
   val set = env_value("BATS_SLOTS", b)
-  val @(a, k) = $B.to_arr(b)
+  val @(a, k) = $B.into_arr(b)
   val @(fz, bv) = $A.freeze<byte>(a)
-  fun digits {l:agz}{i:nat | i <= 524288} .<524288 - i>.
-    (bv: !$A.borrow(byte, l, 524288), i: int i, k: int, acc: int): int =
-    if i >= 524288 then acc
-    else if i >= k then acc
+  fun digits {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+    (bv: !$A.borrow(byte, l, n), i: int i, k: int k, acc: int): int =
+    if i >= k then acc
     else let
       val c = byte2int0($A.read<byte>(bv, i))
     in
@@ -2794,9 +2791,9 @@ end
 fn open_built (b: $B.builder_v, acc: $F.access, how: $F.opening): $R.result($F.fd, $F.io_error) = let
   var p = b
   val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pal) = $B.into_arr(p)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = file_open_path(bv_p, acc, how, 420)
+  val r = file_open_m(bv_p, pal, acc, how, 420)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
@@ -3194,8 +3191,8 @@ fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
 
 
 
-implement file_has_rope (path_bv, cs) =
-  case+ file_open_path(path_bv, $F.ReadOnly(), $F.OpenExisting(), 0) of
+implement file_has_rope (path_bv, pm, cs) =
+  case+ file_open_m(path_bv, pm, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let
       val same = fd_has_chunks(fd, cs)
       (* and nothing after them *)
@@ -3233,12 +3230,12 @@ fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): write_resu
 
 
 
-implement write_file_from_rope (path_bv, cs) = let
+implement write_file_from_rope (path_bv, pm, cs) = let
   (* a .sats or .dats is written: what is kept of the names and digests of
      the files of build/ is no longer the files' *)
   val () = names_set_fresh(false)
 in
-  case+ file_open_path(path_bv, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+  case+ file_open_m(path_bv, pm, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
   | ~$R.ok(fd) => let
       val w = fd_write_chunks(fd, cs)
       val c = $F.file_close(fd)
@@ -3461,11 +3458,11 @@ fun newlines_between_tokens {l:agz}{m:pos}{n:nat | n < m}{i:nat | i <= n} .<n - 
 
 
 
-implement sats_moved (before, path) =
+implement sats_moved (before, path, pm) =
   case+ before of
   | ~whole_err(_) => false
   | ~whole_ok(ar0, p0, m0, n0) =>
-    (case+ read_whole(path, 524288) of
+    (case+ read_whole_m(path, pm) of
     | ~whole_err(_) => let
         val () = whole_free(ar0, p0)
       in false end
