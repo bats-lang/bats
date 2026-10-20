@@ -33,6 +33,7 @@ staload "ats2.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
+staload "lock.sats"
 
 (* Preprocess one .bats file: read -> lex -> emit -> write .sats + .dats
    All three path borrows must be null-terminated builder arrays, in their
@@ -1037,58 +1038,6 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
         in cnt + 1 end else cnt): int
       val cnt3 = dep_dir_extras(d, WasmObjects(), lb, cnt2)
     in put_dep_wasm_objects(tl, lb, cnt3) end
-
-(* Whether bats.toml says unsafe = true *)
-
-
-implement read_unsafe_flag() = let
-  val bt = str_to_path_arr("bats.toml")
-  val @(fz_bt, bv_bt) = $A.freeze<byte>(bt)
-  val r = file_open_path(bv_bt, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz_bt, bv_bt)
-  val () = $A.free<byte>($A.thaw<byte>(fz_bt))
-in case+ r of
-  | ~$R.ok(fd) => let
-      val buf = $A.alloc<byte>(4096)
-      val rr = $F.file_read(fd, buf, 4096)
-      val bl = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
-      val cr = $F.file_close(fd)
-      val () = $R.discard<int><$F.io_error>(cr)
-      val @(fz_b, bv_b) = $A.freeze<byte>(buf)
-      val pr = $T.parse(bv_b, bl)
-      val () = $A.drop<byte>(fz_b, bv_b)
-      val () = $A.free<byte>($A.thaw<byte>(fz_b))
-    in case+ pr of
-      | ~$R.ok(doc) => let
-          var sk_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
-          val sk = $S.from_char_array(sk_c, 7)
-          val skl = 7
-          val @(fz_sk, bv_sk) = $A.freeze<byte>(sk)
-          var uk_c = @[char][6]('u', 'n', 's', 'a', 'f', 'e')
-          val uk = $S.from_char_array(uk_c, 6)
-          val ukl = 6
-          val @(fz_uk, bv_uk) = $A.freeze<byte>(uk)
-          val ubuf = $A.alloc<byte>(32)
-          val ur = $T.get(doc, bv_sk, skl, bv_uk, ukl, ubuf, 32)
-          val () = $A.drop<byte>(fz_uk, bv_uk)
-          val () = $A.free<byte>($A.thaw<byte>(fz_uk))
-          val () = $A.drop<byte>(fz_sk, bv_sk)
-          val () = $A.free<byte>($A.thaw<byte>(fz_sk))
-          val result = (case+ ur of
-            | ~$R.some(len) => let
-                (* Check if value starts with 't' for "true" *)
-                val b0 = byte2int0($A.get<byte>(ubuf, 0))
-                val () = $A.free<byte>(ubuf)
-              in $AR.eq_int_int(b0, 116) end
-            | ~$R.none() => let
-                val () = $A.free<byte>(ubuf)
-              in false end): bool
-          val () = $T.toml_free(doc)
-        in result end
-      | ~$R.err(_) => false
-    end
-  | ~$R.err(_) => false
-end
 
 (* The target of the binary entry at path: wasm when a #target line
    names wasm (Rust: lex_target), else native *)

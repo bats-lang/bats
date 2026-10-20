@@ -29,6 +29,7 @@ staload "build.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "docs.sats"
+staload "lock.sats"
 
 (* ============================================================
    do_test: build and run tests

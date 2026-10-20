@@ -32,6 +32,7 @@ staload "ats2.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "closure.sats"
+staload "lock.sats"
 
 
 
@@ -987,58 +988,6 @@ fn write_wasm_stubs(): int
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fn read_unsafe_flag(): bool
 
 
 

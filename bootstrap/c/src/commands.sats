@@ -28,6 +28,7 @@ staload "build.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "docs.sats"
+staload "lock.sats"
 
 
 

@@ -3138,6 +3138,13 @@ fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp
       val () = $T.toml_free(doc)
     in yes end
 
+(* The unsafe flag of the whole bats.toml: one reader for emission and validation, so a large manifest cannot split them (manifest) *)
+
+
+implement read_unsafe_flag() = let
+  val @(toml_path, toml_path_len) = str_into_arr("bats.toml")
+in toml_unsafe(toml_path, toml_path_len) end
+
 (* The package root of the dependency file p[0, pl) =
    ./bats_modules/<pkg>/src/...: the end of ./bats_modules/<pkg> *)
 fun dep_root_end {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp:agz}{i,pl:int} .<max(pl - i, 0)>. (p: !$A.borrow(byte, lp, pn), pm: int pm, i: int i, pl: int pl): pos_t =
@@ -3383,8 +3390,7 @@ fn record_passed (passed: bool, pend: $B.builder_v): void =
    dependencies, src/lib.bats and its binaries, in that order, collected
    into errs; how many. What passed is recorded when nothing failed *)
 fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
-  val @(own_toml, own_toml_len) = str_into_arr("./bats.toml")
-  val own_unsafe = toml_unsafe(own_toml, own_toml_len)
+  val own_unsafe = read_unsafe_flag()
   (* The listings of ./src and ./bats_modules, once each: the checks of
      the files and of the call cycles read the same ones, and the context
      of the records holds the dependencies' (validated.bats) *)
