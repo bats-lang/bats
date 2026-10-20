@@ -363,8 +363,8 @@ fn put_path_sha256 (b: $B.builder_v, out: !$B.builder_v >> $B.builder_v): bool =
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in ok end
 
-(* The toolchain, appended to out as the sha256 of a cksum listing of
-   patsopt and of every file of the prelude and libraries it reads
+(* The toolchain, appended to out as the sha256 of a listing of the sha256
+   of each file of patsopt and of the prelude and libraries it reads
    (which --depgen does not name), made once per process into
    build/.bats_toolchain. By content, not by mtime: a patsopt rebuilt or
    a prelude edited in place is another toolchain. Symbolic links are
@@ -386,7 +386,7 @@ implement toolchain_digest (ph, phlen, out) = let
       val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
       var a2 : $B.builder_v = $B.create()
       val () = bput_v(a2, "build/.bats_toolchain")
-      val rc = sh_script("l=\"$(pwd -P)/$2\"; t=\"$l.raw\"; cd \"$1\" || exit 1; for r in bin/patsopt prelude libats share ccomp; do [ -e \"$r\" ] || { echo \"error: the toolchain at $1 has no $r, so the stamp cannot be made from it: ATS2 is not whole\" >&2; exit 1; }; done; find -L bin/patsopt prelude libats share ccomp -type f -exec cksum {} + > \"$t\" || { rm -f \"$t\"; echo \"error: the toolchain at $1 cannot be listed, so the stamp cannot be made from it\" >&2; exit 1; }; LC_ALL=C sort \"$t\" > \"$l\" || { rm -f \"$t\" \"$l\"; exit 1; }; rm -f \"$t\"",
+      val rc = sh_script("l=\"$(pwd -P)/$2\"; t=\"$l.raw\"; cd \"$1\" || exit 1; for r in bin/patsopt prelude libats share ccomp; do [ -e \"$r\" ] || { echo \"error: the toolchain at $1 has no $r, so the stamp cannot be made from it: ATS2 is not whole\" >&2; exit 1; }; done; if command -v sha256sum >/dev/null 2>&1; then digest_cmd=sha256sum; else digest_cmd='shasum -a 256'; fi; find -L bin/patsopt prelude libats share ccomp -type f -exec $digest_cmd {} + > \"$t\" || { rm -f \"$t\"; echo \"error: the toolchain at $1 cannot be listed, so the stamp cannot be made from it\" >&2; exit 1; }; LC_ALL=C sort \"$t\" > \"$l\" || { rm -f \"$t\" \"$l\"; exit 1; }; rm -f \"$t\"",
         $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil())))
       val () = (if rc = 0 then !g_toolchain_listed := true else ())
     in rc = 0 end): bool
