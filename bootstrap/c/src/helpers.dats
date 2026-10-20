@@ -2035,8 +2035,8 @@ implement check_emitted_flaws {lo,li}{no}{om}{ni}{im} (out_bv, out_len, in_bv, i
    BATS_SLOTS; anything else is said and ignored.
 
    This is a resource cap on an external process, not a runtime check of
-   the program's safety (CLAUDE.md): the types prove nothing about how
-   long or how large patsopt's solver gets, so bats bounds the process.
+   the program's safety: the types prove nothing about how long or how
+   large patsopt's solver gets, so bats bounds the process (patsopt caps).
 
    How, with what is portable (sh and kill, which POSIX has; there is no
    timeout(1) on macOS, and the process package has no setrlimit or kill):
