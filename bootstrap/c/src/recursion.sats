@@ -636,8 +636,8 @@ datavtype cycles =
 
 
 
-fn implement_cycles {lf:agz}{off:nat | off <= 524288}
-  (files: !$A.borrow(byte, lf, 524288), off: int off, len: int): cycles
+fn implement_cycles {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{off:nat | off <= fm}
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int): cycles
 
 
 
