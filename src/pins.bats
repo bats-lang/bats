@@ -862,7 +862,7 @@ fn lock_beside {lc:agz}{sn:nat}
   val () = copy_to_builder_v(cmd, file_at, file_to - 12, 4096, path)
   val () = bput_v(path, name)
   val () = put_char_v(path, 0)
-  val @(path_a, path_len) = $B.to_arr(path)
+  val @(path_a, path_len) = $B.into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
   val exists = file_exists_m(bv_p, path_len)
   val () = $A.drop<byte>(fz_p, bv_p)
@@ -905,7 +905,7 @@ fn check_file {lc:agz}
   var path : $B.builder_v = $B.create()
   val () = copy_to_builder_v(cmd, file_at, file_to, 4096, path)
   val () = put_char_v(path, 0)
-  val @(path_a, path_len) = $B.to_arr(path)
+  val @(path_a, path_len) = $B.into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
   val status = (case+ read_whole_m(bv_p, path_len) of
     | ~whole_err(_) => let
