@@ -42,19 +42,22 @@ for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; don
 printf '#!/bin/sh\nulimit -S -f unlimited\nexec "%s" "$@"\n' "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 
-# a project of 400 functions, each declared with a long type, so that its
-# .sats, .dats and C are of three different sizes (some 30 KB, 40 KB and 2.4
-# MB), all over the 22 KB of the toolchain's listing, which a child of bats
-# writes and which is the biggest other file of build/
+# a project of 800 functions, each declared with a long type, so that its
+# .sats, .dats and C are of three different sizes (some 59 KB, 77 KB and 4.4
+# MB), all over the 47 KB of the toolchain's listing (.bats_toolchain: one
+# sha256 line per file of patsopt, prelude, libats, share and ccomp since
+# bats#318; it was a cksum line per file, 22 KB), which a child of bats
+# writes and which is the biggest other file of build/. The order the limits
+# need is checked below, so a listing that grows again fails there, named.
 mkdir -p "$TMP/project/src"
 printf '[package]\nname = "app"\nkind = "lib"\n' > "$TMP/project/bats.toml"
 {
   printf '#include "share/atspre_staload.hats"\n\n'
-  i=0; while [ $i -lt 400 ]; do
+  i=0; while [ $i -lt 800 ]; do
     printf '#pub fun f%d {a,b,c:int | a >= 0; b >= 0; c >= 0} (x: int a, y: int b): int\n\n' $i
     i=$((i + 1))
   done
-  i=0; while [ $i -lt 400 ]; do
+  i=0; while [ $i -lt 800 ]; do
     printf 'implement f%d (x, y) = if x > y then (x + y) * (x - y) else (if x = y then x * y else y - x)\n' $i
     i=$((i + 1))
   done

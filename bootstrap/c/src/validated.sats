@@ -65,8 +65,8 @@ staload "_bats_inputs.sats"
 
 
 
-
-fn valid_context {l:agz} (listing: !$A.arr(byte, l, 524288))
+fn valid_context {l:agz}{n:pos}{lm:nat | lm <= n; lm <= 524288}
+  (listing: !$A.arr(byte, l, n), lm: int lm)
   : [lk:agz] $A.arr(byte, lk, 64)
 
 
@@ -111,7 +111,8 @@ fn valid_slot (name: $B.builder_v)
 
 
 
-fn valid_slot_of_path {lp:agz} (p: !$A.borrow(byte, lp, 524288))
+fn valid_slot_of_path {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (p: !$A.borrow(byte, lp, np), pm: int pm)
   : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
 
 
@@ -252,8 +253,8 @@ fn valid_flush (pend: $B.builder_v): void
 
 
 
-fn valid_file_key {lx,lp:agz}
-  (ctx: !$A.borrow(byte, lx, 64), reuse: bool, p: !$A.borrow(byte, lp, 524288), is_unsafe: bool)
+fn valid_file_key {lx,lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool, p: !$A.borrow(byte, lp, np), pm: int pm, is_unsafe: bool)
   : @(bool, [lk:agz] $A.arr(byte, lk, 64))
 
 
@@ -271,8 +272,8 @@ fn valid_file_key {lx,lp:agz}
 
 
 
-fn valid_file_pend {lx,lp,ls,lk:agz}{ns:pos}{sm:nat | sm <= ns}
-  (ctx: !$A.borrow(byte, lx, 64), p: !$A.borrow(byte, lp, 524288), is_unsafe: bool,
+fn valid_file_pend {lx,lp,ls,lk:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{ns:pos}{sm:nat | sm <= ns}
+  (ctx: !$A.borrow(byte, lx, 64), p: !$A.borrow(byte, lp, np), pm: int pm, is_unsafe: bool,
    slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64),
    pend: !$B.builder_v >> $B.builder_v): void
 
@@ -309,8 +310,8 @@ fn valid_file_pend {lx,lp,ls,lk:agz}{ns:pos}{sm:nat | sm <= ns}
 
 
 
-fn valid_group_key {lx,lf:agz}{off:nat | off <= 524288}
-  (ctx: !$A.borrow(byte, lx, 64), reuse: bool, files: !$A.borrow(byte, lf, 524288), off: int off, len: int)
+fn valid_group_key {lx,lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{off:nat | off <= fm}
+  (ctx: !$A.borrow(byte, lx, 64), reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int)
   : @(bool, [lk:agz] $A.arr(byte, lk, 64))
 
 
@@ -326,8 +327,8 @@ fn valid_group_key {lx,lf:agz}{off:nat | off <= 524288}
 
 
 
-fn valid_group_pend {lx,lf,ls,lk:agz}{off:nat | off <= 524288}{ns:pos}{sm:nat | sm <= ns}
-  (ctx: !$A.borrow(byte, lx, 64), files: !$A.borrow(byte, lf, 524288), off: int off, len: int,
+fn valid_group_pend {lx,lf,ls,lk:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{off:nat | off <= fm}{ns:pos}{sm:nat | sm <= ns}
+  (ctx: !$A.borrow(byte, lx, 64), files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int,
    slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64),
    pend: !$B.builder_v >> $B.builder_v): void
 

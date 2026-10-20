@@ -90,34 +90,34 @@ fun name_is {l,la:agz}{n:pos}{k:nat | k <= 256}{s,e:nat | s <= e; e <= n}{i:nat 
 
 (* The package of the path lst[s, e) when it is
    bats_modules/<name>/src/lib.bats, onto acc *)
-fn add_package {l:agz}{s,e:nat | s <= e; e <= CMAX}{m:nat}
-  (lst: !$A.borrow(byte, l, CMAX), s: int s, e: int e, acc: deps(m)): [m2:nat] deps(m2) = let
+fn add_package {l:agz}{n:pos}{fm:nat | fm <= n}{s,e:nat | s <= e; e <= fm}{m:nat}
+  (lst: !$A.borrow(byte, l, n), fm: int fm, s: int s, e: int e, acc: deps(m)): [m2:nat] deps(m2) = let
   var lib_c = @[char][13]('/', 's', 'r', 'c', '/', 'l', 'i', 'b', '.', 'b', 'a', 't', 's')
 in
   (* bats_modules/<name>/src/lib.bats: "bats_modules/" is 13 bytes *)
   if e - s < 27 then acc
-  else if ~lit_at(lst, e - 13, CMAX, lib_c, 13) then acc
+  else if ~lit_at(lst, e - 13, fm, lib_c, 13) then acc
   else let
     val a = $A.alloc<byte>(256)
     val k = copy_name(lst, s + 13, e - 13, a, 0)
   in deps_cons(Dep(a, k), acc) end
 end
 
-fun packages_of {l:agz}{off:nat | off <= CMAX}{m:nat} .<CMAX - off>.
-  (lst: !$A.borrow(byte, l, CMAX), off: int off, len: int, acc: deps(m)): [m2:nat] deps(m2) =
+fun packages_of {l:agz}{n:pos}{fm:nat | fm <= n}{off:nat | off <= fm}{m:nat} .<fm - off>.
+  (lst: !$A.borrow(byte, l, n), fm: int fm, off: int off, len: int, acc: deps(m)): [m2:nat] deps(m2) =
   if off >= len then acc
   else let
-    val e = $S.find_null_bv_at(lst, off, CMAX)
-    val acc2 = add_package(lst, off, e, acc)
-  in if e >= CMAX then acc2 else packages_of(lst, e + 1, len, acc2) end
+    val e = nul_in(lst, off, fm)
+    val acc2 = add_package(lst, fm, off, e, acc)
+  in if e >= fm then acc2 else packages_of(lst, fm, e + 1, len, acc2) end
 
 (* The packages under bats_modules/ *)
 fn packages (): [u:nat] deps(u) = let
   var d : $B.builder_v = $B.create()
   val () = bput_v(d, "bats_modules")
-  val @(fa, flen) = sorted_bats_files(d)
+  val @(fa, flen) = sorted_bats_files_m(d)
   val @(fz, bv) = $A.freeze<byte>(fa)
-  val xs = packages_of(bv, 0, flen, deps_nil())
+  val xs = packages_of(bv, flen, 0, flen, deps_nil())
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in xs end
@@ -294,48 +294,49 @@ fun close {u,q:nat}{d:nat} .<u, q>.
     end
 
 (* Whether fl[p, e) holds a '/' *)
-fun has_slash {l:agz}{p,e:nat | p <= e; e <= CMAX} .<e - p>.
-  (fl: !$A.borrow(byte, l, CMAX), p: int p, e: int e): bool =
+fun has_slash {l:agz}{n:pos}{p,e:nat | p <= e; e <= n} .<e - p>.
+  (fl: !$A.borrow(byte, l, n), p: int p, e: int e): bool =
   if p >= e then false
   else if byte2int0($A.read<byte>(fl, p)) = 47 then true
   else has_slash(fl, p + 1, e)
 
 (* The staloads of each build/src/<module>.dats in the NUL-separated
    list fl[off, len) of .bats modules, in order *)
-fun scan_modules {l:agz}{off:nat | off <= CMAX}{u,m:nat} .<CMAX - off>.
-  (fl: !$A.borrow(byte, l, CMAX), off: int off, len: int, unseen: deps(u), found: deps(m), fm: int m)
+fun scan_modules {l:agz}{n:pos}{lm:nat | lm <= n; lm <= CMAX}{off:nat | off <= lm}{u,m:nat} .<lm - off>.
+  (fl: !$A.borrow(byte, l, n), lm: int lm, off: int off, len: int, unseen: deps(u), found: deps(m), fm: int m)
   : scanned(u + m) =
   if off >= len then Scanned(unseen, found, fm)
   else let
-    val e = $S.find_null_bv_at(fl, off, CMAX)
+    val e = nul_in(fl, off, lm)
   in
     (* src/<name>.bats, a shared module; src/bin/ and deeper are not *)
-    if e - off < 9 then (if e >= CMAX then Scanned(unseen, found, fm) else scan_modules(fl, e + 1, len, unseen, found, fm))
-    else if has_slash(fl, off + 4, e) then (if e >= CMAX then Scanned(unseen, found, fm) else scan_modules(fl, e + 1, len, unseen, found, fm))
+    if e - off < 9 then (if e >= lm then Scanned(unseen, found, fm) else scan_modules(fl, lm, e + 1, len, unseen, found, fm))
+    else if has_slash(fl, off + 4, e) then (if e >= lm then Scanned(unseen, found, fm) else scan_modules(fl, lm, e + 1, len, unseen, found, fm))
     else let
       var pb : $B.builder_v = $B.create()
       val () = bput_v(pb, "build/")
-      val () = copy_to_builder_v(fl, off, e - 5, CMAX, pb)
+      val () = copy_to_builder_v(fl, off, e - 5, lm, pb)
       val () = bput_v(pb, ".dats")
       val+ ~Scanned(un2, f2, m2) = scan_path(pb, unseen)
       val+ ~Scanned(un3, f3, m3) = Scanned(un2, deps_append(f2, found), m2 + fm)
-    in if e >= CMAX then Scanned(un3, f3, m3) else scan_modules(fl, e + 1, len, un3, f3, m3) end
+    in if e >= lm then Scanned(un3, f3, m3) else scan_modules(fl, lm, e + 1, len, un3, f3, m3) end
   end
 
 (* The dependencies of the binary whose entry .dats is at the
    NUL-terminated path entry, in the order found: what it staloads, then
    what the package's shared modules (src/, not src/bin/) staload, then
    what those staload, and so on *)
-#pub fn dep_closure {le:agz} (entry: !$A.borrow(byte, le, 524288)): [r:nat] deps(r)
+#pub fn dep_closure {le:agz}{ne:pos}{em:nat | em <= ne; em <= 524288}
+  (entry: !$A.borrow(byte, le, ne), em: int em): [r:nat] deps(r)
 
-implement dep_closure {le} (entry) = let
+implement dep_closure {le}{ne}{em} (entry, em) = let
   val un0 = packages()
-  val+ ~Scanned(un1, f1, _) = scan_file(entry, 524288, un0)
+  val+ ~Scanned(un1, f1, _) = scan_file(entry, em, un0)
   var sd : $B.builder_v = $B.create()
   val () = bput_v(sd, "src")
-  val @(fa, flen) = sorted_bats_files(sd)
+  val @(fa, flen) = sorted_bats_files_m(sd)
   val @(fz, bv) = $A.freeze<byte>(fa)
-  val+ ~Scanned(un2, f2, _) = scan_modules(bv, 0, flen, un1, deps_nil(), 0)
+  val+ ~Scanned(un2, f2, _) = scan_modules(bv, flen, 0, flen, un1, deps_nil(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
   (* f1 and f2 are reversed; the entry's first *)

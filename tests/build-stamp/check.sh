@@ -79,7 +79,7 @@ COLD=$(ran "$TMP/cold.log")
 settle "$P"
 S=$P/build/.bats_stamp
 [ -f "$S" ] || { echo "FAIL: no build/.bats_stamp"; exit 1; }
-[ "$(sed -n 1p "$S")" = "bats-stamp 1" ] || { echo "FAIL: the stamp's first line"; cat "$S"; exit 1; }
+[ "$(sed -n 1p "$S")" = "bats-stamp 2" ] || { echo "FAIL: the stamp's first line"; cat "$S"; exit 1; }
 for n in bats patsopt cc flags mark; do
   [ "$(grep -c "^$n " "$S")" = 1 ] || { echo "FAIL: the stamp has not one line $n"; cat "$S"; exit 1; }
 done
@@ -122,7 +122,7 @@ say "$TMP/mark.log" "mark differs"
 rebuilt "$TMP/mark.log" "$COLD" "a build with another mark"
 
 # The format's line and an unknown line count too
-printf 'bats-stamp 2\n' > "$TMP/f"; sed -n '2,$p' "$S" >> "$TMP/f"; cp "$TMP/f" "$S"
+printf 'bats-stamp 1\n' > "$TMP/f"; sed -n '2,$p' "$S" >> "$TMP/f"; cp "$TMP/f" "$S"
 build "$P" "$TMP/format.log"
 say "$TMP/format.log" "the stamp format differs"
 rebuilt "$TMP/format.log" "$COLD" "a build with another format"
@@ -336,6 +336,31 @@ rebuilt "$TMP/tool.prelude.log" "$COLD3" "a build with a prelude file changed in
 settle "$P3" HOME="$T3"
 build "$P3" "$TMP/tool.prelude.again.log" HOME="$T3"
 kept "$TMP/tool.prelude.again.log" "the build after the prelude file changed"
+# A same-size change that cksum cannot see (bats-lang/bats#318): the two
+# probe files below have the same size and the same cksum, and differ in
+# five bytes. A change confined to 32 bits is always caught by a CRC-32; the
+# XOR of 01 04 C1 1D B7 is the CRC-32 generator (0x104C11DB7, 33 bits), a
+# change of 40 bits that leaves the CRC as it was. The stamp must see it: the
+# second file replaces the first in prelude, the build is dropped with the
+# patsopt line named, and the one after it is kept.
+CK_A=$TMP/ck-a; CK_B=$TMP/ck-b
+{ printf 'crc probe\n'; head -c 5 /dev/zero; printf 'end\n'; } > "$CK_A"
+{ printf 'crc probe\n'; printf '\001\004\301\035\267'; printf 'end\n'; } > "$CK_B"
+[ "$(wc -c < "$CK_A")" = "$(wc -c < "$CK_B")" ] || { echo "FAIL: the probe files differ in size"; exit 1; }
+cmp -s "$CK_A" "$CK_B" && { echo "FAIL: the probe files are the same"; exit 1; } || true
+[ "$(cksum < "$CK_A")" = "$(cksum < "$CK_B")" ] || { echo "FAIL: the probe files do not share a cksum, so the case proves nothing"; exit 1; }
+cp "$CK_A" "$T3/.bats/ats2/prelude/zz_crc_318.sats"
+build "$P3" "$TMP/crc.a.log" HOME="$T3"
+say "$TMP/crc.a.log" "patsopt differs"
+settle "$P3" HOME="$T3"
+cp "$CK_B" "$T3/.bats/ats2/prelude/zz_crc_318.sats"
+build "$P3" "$TMP/crc.b.log" HOME="$T3"
+say "$TMP/crc.b.log" "patsopt differs"
+rebuilt "$TMP/crc.b.log" "$COLD3" "a build with a prelude file of the same size and cksum, changed"
+settle "$P3" HOME="$T3"
+build "$P3" "$TMP/crc.again.log" HOME="$T3"
+kept "$TMP/crc.again.log" "the build after the probe file of the same cksum changed"
+
 # A toolchain with a part missing is not stamped from what is left of it
 # (bats-lang/bats#316): the listing that makes the stamp names each root
 # (bin/patsopt, prelude, libats, share, ccomp) and a check fails at once with
