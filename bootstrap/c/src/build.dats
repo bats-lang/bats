@@ -1837,6 +1837,69 @@ in
       val () = $A.free<byte>($A.thaw<byte>(fz_sb))
       val () = (case+ sbdir_r of
         | ~$R.ok(d2) => let
+            (* Every bin of this target is emitted before any is checked
+               (bats#353): the check memo's key of a module names the .sats of
+               build/ as they are when patsopt runs, so a second bin's .sats
+               written after the first bin was checked would make that key
+               one name short, and the next check would run again. *)
+            fun emit_bins {n,i:nat | i <= n} .<n - i>.
+              (d: !$F.entries(n), i: int i, n: int n): void =
+              if i >= n then ()
+              else let
+                val ent = $A.alloc<byte>(1024)
+                val elen = $F.entries_name(d, i, ent, 1024)
+                val dd = is_dot_or_dotdot(ent, elen, 1024)
+                val bb = has_bats_ext(ent, elen, 1024)
+              in
+                if dd then let
+                  val () = $A.free<byte>(ent)
+                in emit_bins(d, i + 1, n) end
+                else if ~bb then let
+                  val () = $A.free<byte>(ent)
+                in emit_bins(d, i + 1, n) end
+                else let
+                  val @(fz_e, bv_e) = $A.freeze<byte>(ent)
+                  val stem_len = elen - 5
+                  var sp : $B.builder_v = $B.create()
+                  val () = bput_v(sp, "src/bin/")
+                  val () = copy_to_builder_v(bv_e, 0, elen, 1024, sp)
+                  val () = put_char_v(sp, 0)
+                  val @(sa, len_bv_sp) = $B.to_arr(sp)
+                  val @(fz_sp, bv_sp) = $A.freeze<byte>(sa)
+                  val binary_target = check_wasm_binary(bv_sp)
+                  val skip_bin = ~same_target(binary_target, build_target)
+                  var ss : $B.builder_v = $B.create()
+                  val () = bput_v(ss, "build/src/bin/")
+                  val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ss)
+                  val () = bput_v(ss, ".sats")
+                  val () = put_char_v(ss, 0)
+                  val @(ssa, len_bv_ss) = $B.into_arr(ss)
+                  val @(fz_ss, bv_ss) = $A.freeze<byte>(ssa)
+                  var sd : $B.builder_v = $B.create()
+                  val () = bput_v(sd, "build/src/bin/")
+                  val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, sd)
+                  val () = bput_v(sd, ".dats")
+                  val () = put_char_v(sd, 0)
+                  val @(sda, len_bv_sd) = $B.to_arr(sd)
+                  val @(fz_sd, bv_sd) = $A.freeze<byte>(sda)
+                  val pr = (if skip_bin then 0
+                    else preprocess_one(bv_sp, len_bv_sp, bv_ss, len_bv_ss, bv_sd, len_bv_sd, binary_target, is_unsafe, target_changed)): int
+                  val () = (if pr <> 0 then let
+                    val () = set_build_err()
+                    val () = print! ("error: preprocess failed for ")
+                    val () = print_borrow(bv_e, 0, elen, 1024)
+                  in print_newline() end
+                  else ())
+                  val () = $A.drop<byte>(fz_sd, bv_sd)
+                  val () = $A.free<byte>($A.thaw<byte>(fz_sd))
+                  val () = $A.drop<byte>(fz_ss, bv_ss)
+                  val () = $A.free<byte>($A.thaw<byte>(fz_ss))
+                  val () = $A.drop<byte>(fz_sp, bv_sp)
+                  val () = $A.free<byte>($A.thaw<byte>(fz_sp))
+                  val () = $A.drop<byte>(fz_e, bv_e)
+                  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+                in emit_bins(d, i + 1, n) end
+              end
             fun scan_bins {n,i:nat | i <= n}{lph:agz} .<n - i>.
               (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512),
                phlen: int, rel: profile): void =
@@ -1889,13 +1952,7 @@ in
                     val () = put_char_v(sd, 0)
                     val @(sda, len_bv_sd) = $B.to_arr(sd)
                     val @(fz_sd, bv_sd) = $A.freeze<byte>(sda)
-                    val pr = preprocess_one(bv_sp, len_bv_sp, bv_ss, len_bv_ss, bv_sd, len_bv_sd, binary_target, is_unsafe, target_changed)
-                    val () = (if pr <> 0 then let
-                      val () = set_build_err()
-                      val () = print! ("error: preprocess failed for ")
-                      val () = print_borrow(bv_e, 0, elen, 1024)
-                    in print_newline() end
-                    else ())
+                    (* already emitted, with the other bins (emit_bins) *)
                     (* Step 5: Generate synthetic entry *)
                     var entry : $B.builder_v = $B.create()
                     (* A wasm module has no C main to run the dynloads, which
@@ -3042,6 +3099,7 @@ in
                 end
               end
               end
+            val () = emit_bins(d2, 0, $F.entries_count(d2))
             val () = scan_bins(d2, 0, $F.entries_count(d2), bv_patshome, phlen, release)
             val () = $F.entries_free(d2)
           in end
