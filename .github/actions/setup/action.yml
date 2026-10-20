@@ -5,7 +5,7 @@ description: >-
   needs no ATS2), then, by bats itself, the GMP build of ATS2 (bats ats2
   install), the package repository at its pinned commit (bats
   clone-repository), the patsopt caps, and BATS_COMMIT (bats record-commit),
-  so the version a build is stamped with is the commit's. Linux runners with apt (ubuntu-latest). Called by commit:
+  so the version a build is stamped with is the commit's. Linux runners with apt, the pinned image ubuntu-24.04 (not ubuntu-latest, a label that moves; bridge#154). Called by commit:
   bats-lang/bats/.github/actions/setup@<40 hex digits>. The step installs;
   it keys no cache (a build/ is kept or dropped by bats itself, bats#267).
 
