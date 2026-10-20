@@ -12,11 +12,11 @@
 #   * the same stash unedited: it is kept, and patsopt does not run.
 #   * a stash with no stamp, and one whose first line is not `bats-stamp 1`:
 #     dropped with "no stamp" and "the stamp format differs", made again.
+#   * a stash with a line after its first that is not `name value` (`junk`):
+#     dropped with "the stamp format differs"; a line `zzz 1` is `name value`
+#     (an unknown name), so it is dropped with "the stamp differs"
+#     (bats-lang/bats#364, the grammar in stamp.bats).
 # A stash of a stamp this bats would not write is never taken for this build's.
-# Not yet covered (bats-lang/bats#347): a stamp with a line that is not
-# `name value` after its first line. JUDGE (stamp.bats) answers "the stamp
-# differs" for it, not "the stamp format differs", which needs a change to
-# stamp.bats, not to this test.
 # usage: tests/stash-stamp/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -123,6 +123,23 @@ for first in garbage "bats-stamp 2"; do
   rebuilt "$TMP/format.log" "$COLD" "a stash whose first line is '$first'"
   cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash whose first line is '$first' was dropped, its stamp is not this build's"; exit 1; }
   echo "stash-stamp: a stash whose first line is '$first': dropped, named, and made again"
+done
+
+# A stash with a line after its first that is not `name value`: a format
+# error. `zzz 1` is `name value` (an unknown name), so it is a difference.
+for extra in junk "zzz 1"; do
+  rm -rf "$D"
+  cp -Rp "$SAVE" "$D"
+  printf '%s\n' "$extra" >> "$D/$S2/.bats_stamp"
+  check "$D" "$TMP/extra.log"
+  case $extra in
+    junk) want="the stamp format differs" ;;
+    *) want="the stamp differs" ;;
+  esac
+  say "$TMP/extra.log" "$want"
+  rebuilt "$TMP/extra.log" "$COLD" "a stash with the line '$extra' appended"
+  cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash with the line '$extra' was dropped, its stamp is not this build's"; exit 1; }
+  echo "stash-stamp: a stash with the line '$extra' appended: dropped, named, and made again"
 done
 
 # The same stash, unedited, is kept (the control of the cases above)
