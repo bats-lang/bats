@@ -126,6 +126,7 @@ fn find_null_bv_from {l:agz}{n:pos}{m:nat | m <= n}{p:int}
 
 
 
+
 fn file_open_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, l, n), m: int m, access: $F.access, opening: $F.opening, mode: int)
   : $R.result($F.fd, $F.io_error)
@@ -148,30 +149,8 @@ fn file_open_n {l:agz}{n:pos | n < 1048576}
 
 
 
-fn file_open_path {l:agz}
-  (p: !$A.borrow(byte, l, 524288), access: $F.access, opening: $F.opening, mode: int)
-  : $R.result($F.fd, $F.io_error)
-
-
-
-
 fn file_exists_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, l, n), m: int m): bool
-
-
-
-
-
-
-
-
-
-fn file_exists_path {l:agz} (p: !$A.borrow(byte, l, 524288)): bool
-
-
-
-
-fn dir_open_path {l:agz} (p: !$A.borrow(byte, l, 524288)): $R.result($F.dir, $F.io_error)
 
 
 
@@ -236,6 +215,19 @@ fn file_chdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
 
 fn file_mode_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, l, n), m: int m): $R.result([k:nat | k <= 4095] int k, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+fn file_chmod_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, mode: int): $R.result(int, $F.io_error)
 
 
 
@@ -982,8 +974,8 @@ datavtype write_result =
 
 
 
-fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
-   i: pos_t, lim: int): write_result
+fn wbw_loop {l:agz}{n:pos}{m:nat | m <= n}
+  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, n), i: pos_t, lim: int, m: int m): write_result
 
 
 
@@ -1104,18 +1096,11 @@ fn touch_sats_stamp (): int
 
 
 
-fn file_has_bytes {lp:agz}{lb:agz}{len:nat | len <= 524288}
-  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int len): bool
-
-
 
 
 
 fn file_has_bytes_m {lp:agz}{lb:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{nb:pos}{len:nat | len <= nb; len <= 524288}
   (path_bv: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, lb, nb), len: int len): bool
-
-
-
 
 
 
@@ -1467,12 +1452,11 @@ fn rev_arg_list
 
 
 
+
+
+
 fn path_of_builder (b: $B.builder_v)
-  : [l:agz][n:pos | n <= $B.BUILDER_CAP][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int k)
-
-
-
-
+  : [l:agz][n:pos | n <= $B.BUILDER_CAP + 1][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int k)
 
 
 
@@ -2578,11 +2562,6 @@ fn patsopt_only {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 52428
 
 fn remove_output_m {lo:agz}{n:pos}{m:nat | m <= n}
   (out_bv: !$A.borrow(byte, lo, n), out_len: int, m: int m): void
-
-
-fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void
-
-
 
 
 
@@ -4155,14 +4134,9 @@ fn ap_string_pos {tp:nat}{ac:nat | ac < 64}{nn,nh:pos | tp + nn + nh <= 8192; nn
 
 
 
-fn put_file_sha256 {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
-
 
 fn put_file_sha256_m {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
-
-
 
 
 
@@ -4274,8 +4248,8 @@ fn put_dev1 (out: !$B.builder_v >> $B.builder_v, dev: bool): void
 
 
 
-fn parse_version_parts {l:agz}{n:pos}
-  (b: !$A.borrow(byte, l, n), i: pos_t, be: pos_t, n: int n,
+fn parse_version_parts {l:agz}{nb:pos}{n:nat | n <= nb}
+  (b: !$A.borrow(byte, l, nb), i: pos_t, be: pos_t, n: int n,
    out: !$B.builder_v >> $B.builder_v): @(pos_t, pos_t)
 
 

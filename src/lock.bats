@@ -403,8 +403,8 @@ fun copy_text {ls,ld:agz}{cap:pos}{m:nat | m <= cap}{i:nat | i <= 256} .<256 - i
 (* The version in e[vs, ve), parsed and rendered as Rust's
    Version::parse and Display do: @(it, ~1, ~1), or @(none, the invalid
    part's [start, end)) when it does not parse *)
-fn parse_cand {le:agz}{n:pos}
-  (e: !$A.borrow(byte, le, n), n: int n, vs: pos_t, ve: pos_t)
+fn parse_cand {le:agz}{nb:pos}{n:nat | n <= nb}
+  (e: !$A.borrow(byte, le, nb), n: int n, vs: pos_t, ve: pos_t)
   : @($R.option(cand), pos_t, pos_t) = let
   var d_c = @[char][4]('d', 'e', 'v', '1')
   val dev = (if ve - vs >= 4 then lit_at(e, ve - 4, n, d_c, 4) else false): bool
@@ -537,24 +537,24 @@ fn is_space (c: int): bool =
   if c = 32 then true else if c < 9 then false else c <= 13
 
 (* The first position in v[i, e) that is not whitespace, or e *)
-fun skip_space {lv:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
-  (v: !$A.borrow(byte, lv, n), n: int n, i: int i, e: int e)
+fun skip_space {lv:agz}{nt:pos}{n:nat | n <= nt}{i,e:int} .<max(e - i, 0)>.
+  (v: !$A.borrow(byte, lv, nt), n: int n, i: int i, e: int e)
   : [r:int | min(i, e) <= r; r <= max(i, e)] int r =
   if i >= e then e
   else if is_space(peek(v, i, n)) then skip_space(v, n, i + 1, e)
   else i
 
 (* e without the whitespace that ends v[s, e) *)
-fun trim_end {lv:agz}{n:pos}{s,e:int} .<max(e - s, 0)>.
-  (v: !$A.borrow(byte, lv, n), n: int n, s: int s, e: int e)
+fun trim_end {lv:agz}{nt:pos}{n:nat | n <= nt}{s,e:int} .<max(e - s, 0)>.
+  (v: !$A.borrow(byte, lv, nt), n: int n, s: int s, e: int e)
   : [r:int | min(s, e) <= r; r <= max(s, e)] int r =
   if e <= s then s
   else if is_space(peek(v, e - 1, n)) then trim_end(v, n, s, e - 1)
   else e
 
 (* The first byte c in v[i, e), or e *)
-fun find_byte {lv:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
-  (v: !$A.borrow(byte, lv, n), n: int n, i: int i, e: int e, c: int)
+fun find_byte {lv:agz}{nt:pos}{n:nat | n <= nt}{i,e:int} .<max(e - i, 0)>.
+  (v: !$A.borrow(byte, lv, nt), n: int n, i: int i, e: int e, c: int)
   : [r:int | min(i, e) <= r; r <= max(i, e)] int r =
   if i >= e then e
   else if peek(v, i, n) = c then i
@@ -1374,20 +1374,18 @@ fun push_new {t,s,m:nat} .<t>.
       val @(stack2, all2) = push_new(rest, stack, names_cons(b, k, all))
     in @(names_cons(a, k, stack2), all2) end
 
-(* The archive of version v of a[0, k): repo/<name>/<prefix><v>.bats,
-   NUL-terminated, and its length without the NUL *)
+(* The archive of version v of a[0, k): repo/<name>/<prefix><v>.bats, and
+   its length (the path has no NUL: the path functions take the length) *)
 fn archive_path {lr,la:agz}
   (repo: !$A.borrow(byte, lr, 4096), rl: int, a: !$A.arr(byte, la, 256), k: nlen,
-   v: !cand): @([lo:agz] $A.arr(byte, lo, 524288), int) = let
+   v: !cand): [cap:pos | cap <= 524288][m:nat | m <= cap][lo:agz] @($A.arr(byte, lo, cap), int m) = let
   var p : $B.builder_v = $B.create()
   val () = put_pkg_dir(repo, rl, a, k, p)
   val () = put_char_v(p, 47)
   val () = put_prefix(a, 0, k, p)
   val () = put_cand(v, p)
   val () = bput_v(p, ".bats")
-  val plen = $B.length(p)
-  val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, plen) = $B.into_arr(p)
 in @(pa, plen) end
 
 (* Whether bats_modules/<name>/src/lib.bats exists *)
@@ -1533,11 +1531,11 @@ in prerr_builder(m) end
    directory is removed, so no stamp ever stands over a copy that is not
    the archive's, the failure is said as an error and false is answered.
    Consumes hash *)
-fn fetch {lc,la:agz}
-  (arc: !$A.borrow(byte, lc, 524288), alen: int,
+fn fetch {lc,la:agz}{nc:pos}{ac:nat | ac <= nc; ac <= 524288}
+  (arc: !$A.borrow(byte, lc, nc), alen: int ac,
    a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool = let
   var hashed : $B.builder_v = hash
-  val () = (if $B.length(hashed) = 0 then let val _ = put_file_sha256(arc, hashed) in () end else ())
+  val () = (if $B.length(hashed) = 0 then let val _ = put_file_sha256_m(arc, alen, hashed) in () end else ())
   var md : $B.builder_v = $B.create()
   val () = bput_v(md, "bats_modules/")
   val () = put_name(a, k, md)
@@ -1551,7 +1549,7 @@ fn fetch {lc,la:agz}
   var u3 = $B.create()
   val () = bput_v(u3, "-q")
   var u4 = $B.create()
-  val () = copy_to_builder_v(arc, 0, alen, 524288, u4)
+  val () = copy_to_builder_v(arc, 0, alen, alen, u4)
   var u5 = $B.create()
   val () = bput_v(u5, "-d")
   var u6 = $B.create()
@@ -1601,8 +1599,8 @@ in
 end
 
 (* fetch, into an emptied bats_modules/<name> *)
-fn refetch {lc,la:agz}
-  (arc: !$A.borrow(byte, lc, 524288), alen: int,
+fn refetch {lc,la:agz}{nc:pos}{ac:nat | ac <= nc; ac <= 524288}
+  (arc: !$A.borrow(byte, lc, nc), alen: int ac,
    a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool = let
   var dir : $B.builder_v = $B.create()
   val () = bput_v(dir, "bats_modules/")
@@ -1611,8 +1609,8 @@ fn refetch {lc,la:agz}
 in fetch(arc, alen, a, k, v, hash) end
 
 (* refetch when go, else false; consumes hash *)
-fn refetch_if {lc,la:agz}
-  (go: bool, arc: !$A.borrow(byte, lc, 524288), alen: int,
+fn refetch_if {lc,la:agz}{nc:pos}{ac:nat | ac <= nc; ac <= 524288}
+  (go: bool, arc: !$A.borrow(byte, lc, nc), alen: int ac,
    a: !$A.arr(byte, la, 256), k: nlen, v: !cand, hash: $B.builder_v): bool =
   if go then refetch(arc, alen, a, k, v, hash)
   else let val () = $B.builder_free(hash) in false end
@@ -1637,24 +1635,24 @@ fn not_found {lr,la:agz}
 in prerr_builder(m) end
 
 (* Rust's "cannot read '<archive>'" *)
-fn cannot_read {lc:agz} (arc: !$A.borrow(byte, lc, 524288), alen: int): void = let
+fn cannot_read {lc:agz}{nc:pos}{ac:nat | ac <= nc; ac <= 524288} (arc: !$A.borrow(byte, lc, nc), alen: int ac): void = let
   var m : $B.builder_v = $B.create()
   val () = bput_v(m, "error: cannot read '")
-  val () = copy_to_builder_v(arc, 0, alen, 524288, m)
+  val () = copy_to_builder_v(arc, 0, alen, alen, m)
   val () = bput_v(m, "'\n")
 in prerr_builder(m) end
 
 (* The lock line of the package a[0, k) at version v, whose archive is
    arc: "<name> <version> <sha256>\n"; false when the archive cannot be
    read *)
-fn put_lock_line {lc,la:agz}
-  (arc: !$A.borrow(byte, lc, 524288), a: !$A.arr(byte, la, 256), k: nlen, v: !cand,
+fn put_lock_line {lc,la:agz}{nc:pos}{ac:nat | ac <= nc; ac <= 524288}
+  (arc: !$A.borrow(byte, lc, nc), alen: int ac, a: !$A.arr(byte, la, 256), k: nlen, v: !cand,
    lock: !$B.builder_v >> $B.builder_v): bool = let
   val () = put_name(a, k, lock)
   val () = put_char_v(lock, 32)
   val () = put_cand(v, lock)
   val () = put_char_v(lock, 32)
-  val ok = put_file_sha256(arc, lock)
+  val ok = put_file_sha256_m(arc, alen, lock)
   val () = put_char_v(lock, 10)
 in ok end
 
@@ -1780,7 +1778,7 @@ fun resolve_all {s,m,nc,np,u:nat}{lr:agz} .<u, s>.
                            else refetch(bv_c, alen, a, k, v, $B.create())): bool
             val cs2 = cons_append(cs, dep_cons(a, k))
             val ts = dep_uses(a, k)
-            val line_ok = put_lock_line(bv_c, a, k, v, lock)
+            val line_ok = put_lock_line(bv_c, alen, a, k, v, lock)
             val () = (if fetched then (if line_ok then () else cannot_read(bv_c, alen)) else ())
             val ok = (fetched && line_ok): bool
             val () = $A.drop<byte>(fz_c, bv_c)
@@ -1802,26 +1800,28 @@ fun resolve_all {s,m,nc,np,u:nat}{lr:agz} .<u, s>.
    bats lock --dry-run (Rust: read_lockfile, print_diff)
    ============================================================ *)
 
-(* Lock text: bats.lock's bytes or the lines resolve_all wrote *)
-#define LOCK_MAX 524288
+(* Lock text: bats.lock's bytes or the lines resolve_all wrote. A text of
+   tl bytes is in an array of its own size (bats#368), and every search of
+   it is bounded by tl, where the array holds only 0 (what peek gives) *)
 
 (* The next line of t after i: @(its trimmed [start, end), where it
    ends) (Rust: lines() and trim()) *)
-fn lock_line {lt:agz}{tl,i:int}
-  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i)
+fn lock_line {lt:agz}{nt:pos}{tl:nat | tl <= nt}{i:int}
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, i: int i)
   : [le:int | min(i, tl) <= le; le <= max(i, tl)] @(pos_t, pos_t, int le) = let
-  val le = find_byte(t, LOCK_MAX, i, tl, 10)
-  val ts = skip_space(t, LOCK_MAX, i, le)
-  val te = trim_end(t, LOCK_MAX, ts, le)
+  val le = find_byte(t, tl, i, tl, 10)
+  val ts = skip_space(t, tl, i, le)
+  val te = trim_end(t, tl, ts, le)
 in @(ts, te, le) end
 
-(* The ends of the package and of the version of the lock line t[s, e):
-   the package ends at the first space, the version at the next one or
-   at e (Rust: splitn(3, ' ')); a line without a space has no version *)
-fn lock_fields {lt:agz}
-  (t: !$A.borrow(byte, lt, LOCK_MAX), s: pos_t, e: pos_t): @(pos_t, pos_t) = let
-  val pe = find_byte(t, LOCK_MAX, s, e, 32)
-  val ve = (if pe < e then find_byte(t, LOCK_MAX, pe + 1, e, 32) else e): pos_t
+(* The ends of the package and of the version of the lock line t[s, e),
+   of the text t[0, tl): the package ends at the first space, the version
+   at the next one or at e (Rust: splitn(3, ' ')); a line without a space
+   has no version *)
+fn lock_fields {lt:agz}{nt:pos}{tl:nat | tl <= nt}
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, s: pos_t, e: pos_t): @(pos_t, pos_t) = let
+  val pe = find_byte(t, tl, s, e, 32)
+  val ve = (if pe < e then find_byte(t, tl, pe + 1, e, 32) else e): pos_t
 in @(pe, ve) end
 
 (* Whether a[i, i + k) = b[j, j + k), of the first ma bytes of an array of
@@ -1835,9 +1835,10 @@ fun lock_bytes_eq_m {la,lb:agz}{na,nb:pos}{ma:nat | ma <= na}{mb:nat | mb <= nb}
   else lock_bytes_eq_m(a, i + 1, ma, b, j + 1, mb, k - 1)
 
 (* Whether a[i, i + k) = b[j, j + k) *)
-fn lock_bytes_eq {la,lb:agz}{k:int}
-  (a: !$A.borrow(byte, la, LOCK_MAX), i: pos_t, b: !$A.borrow(byte, lb, LOCK_MAX), j: pos_t,
-   k: int k): bool = lock_bytes_eq_m(a, i, LOCK_MAX, b, j, LOCK_MAX, k)
+fn lock_bytes_eq {la,lb:agz}{na,nb:pos}{ma:nat | ma <= na}{mb:nat | mb <= nb}{k:int}
+  (a: !$A.borrow(byte, la, na), ma: int ma, i: pos_t,
+   b: !$A.borrow(byte, lb, nb), mb: int mb, j: pos_t, k: int k): bool =
+  lock_bytes_eq_m(a, i, ma, b, j, mb, k)
 
 (* Whether a[a0, a1) = b[b0, b1), of the first ma bytes of an array of na
    and the first mb of an array of nb *)
@@ -1848,15 +1849,15 @@ fn lock_range_eq_m {la,lb:agz}{na,nb:pos}{ma:nat | ma <= na}{mb:nat | mb <= nb}
   else lock_bytes_eq_m(a, a0, ma, b, b0, mb, a1 - a0)
 
 (* Whether a[a0, a1) = b[b0, b1) *)
-fn lock_range_eq {la,lb:agz}
-  (a: !$A.borrow(byte, la, LOCK_MAX), a0: pos_t, a1: pos_t,
-   b: !$A.borrow(byte, lb, LOCK_MAX), b0: pos_t, b1: pos_t): bool =
-  lock_range_eq_m(a, LOCK_MAX, a0, a1, b, LOCK_MAX, b0, b1)
+fn lock_range_eq {la,lb:agz}{na,nb:pos}{ma:nat | ma <= na}{mb:nat | mb <= nb}
+  (a: !$A.borrow(byte, la, na), ma: int ma, a0: pos_t, a1: pos_t,
+   b: !$A.borrow(byte, lb, nb), mb: int mb, b0: pos_t, b1: pos_t): bool =
+  lock_range_eq_m(a, ma, a0, a1, b, mb, b0, b1)
 
 (* The version of the first line of t[i, tl) whose package is
    u[xs, xe), or @(~1, ~1) *)
-fun lock_find_m {lt,lu:agz}{nu:pos}{mu:nat | mu <= nu}{tl,i:int} .<max(tl - i, 0)>.
-  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i,
+fun lock_find_m {lt,lu:agz}{nt:pos}{tl:nat | tl <= nt}{nu:pos}{mu:nat | mu <= nu}{i:int} .<max(tl - i, 0)>.
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, i: int i,
    u: !$A.borrow(byte, lu, nu), mu: int mu, xs: pos_t, xe: pos_t): @(pos_t, pos_t) =
   if i >= tl then @(~1, ~1)
   else let
@@ -1864,31 +1865,31 @@ fun lock_find_m {lt,lu:agz}{nu:pos}{mu:nat | mu <= nu}{tl,i:int} .<max(tl - i, 0
   in
     if ts >= te then lock_find_m(t, tl, le + 1, u, mu, xs, xe)
     else let
-      val @(pe, ve) = lock_fields(t, ts, te)
+      val @(pe, ve) = lock_fields(t, tl, ts, te)
     in
       if pe < te then
-        (if lock_range_eq_m(t, LOCK_MAX, ts, pe, u, mu, xs, xe) then @(pe + 1, ve)
+        (if lock_range_eq_m(t, tl, ts, pe, u, mu, xs, xe) then @(pe + 1, ve)
          else lock_find_m(t, tl, le + 1, u, mu, xs, xe))
       else lock_find_m(t, tl, le + 1, u, mu, xs, xe)
     end
   end
 
-fn lock_find {lt,lu:agz}{tl,i:int}
-  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i,
-   u: !$A.borrow(byte, lu, LOCK_MAX), xs: pos_t, xe: pos_t): @(pos_t, pos_t) =
-  lock_find_m(t, tl, i, u, LOCK_MAX, xs, xe)
+fn lock_find {lt,lu:agz}{nt:pos}{tl:nat | tl <= nt}{nu:pos}{mu:nat | mu <= nu}{i:int}
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, i: int i,
+   u: !$A.borrow(byte, lu, nu), mu: int mu, xs: pos_t, xe: pos_t): @(pos_t, pos_t) =
+  lock_find_m(t, tl, i, u, mu, xs, xe)
 
 (* The first line of t[i, tl) without a space, trimmed, or @(~1, ~1)
    (Rust: read_lockfile's "malformed lockfile line") *)
-fun lock_malformed {lt:agz}{tl,i:int} .<max(tl - i, 0)>.
-  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i): @(pos_t, pos_t) =
+fun lock_malformed {lt:agz}{nt:pos}{tl:nat | tl <= nt}{i:int} .<max(tl - i, 0)>.
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, i: int i): @(pos_t, pos_t) =
   if i >= tl then @(~1, ~1)
   else let
     val @(ts, te, le) = lock_line(t, tl, i)
   in
     if ts >= te then lock_malformed(t, tl, le + 1)
     else let
-      val @(pe, _) = lock_fields(t, ts, te)
+      val @(pe, _) = lock_fields(t, tl, ts, te)
     in
       if pe >= te then @(ts, te)
       else lock_malformed(t, tl, le + 1)
@@ -1897,95 +1898,117 @@ fun lock_malformed {lt:agz}{tl,i:int} .<max(tl - i, 0)>.
 
 (* "  + <pkg> v<new>" or "  ~ <pkg> v<old> -> v<new>" for the new lock
    line u[s, e) against old[0, ol); whether it wrote one *)
-fn note_new {lu,lo:agz}
-  (u: !$A.borrow(byte, lu, LOCK_MAX), s: pos_t, e: pos_t,
-   old: !$A.borrow(byte, lo, LOCK_MAX), ol: pos_t,
+fn note_new {lu,lo:agz}{nu:pos}{ul:nat | ul <= nu}{no:pos}{ol:nat | ol <= no}
+  (u: !$A.borrow(byte, lu, nu), ul: int ul, s: pos_t, e: pos_t,
+   old: !$A.borrow(byte, lo, no), ol: int ol,
    out: !$B.builder_v >> $B.builder_v): bool = let
-  val @(pe, ve) = lock_fields(u, s, e)
-  val @(os, oe) = lock_find(old, ol, 0, u, s, pe)
+  val @(pe, ve) = lock_fields(u, ul, s, e)
+  val @(os, oe) = lock_find(old, ol, 0, u, ul, s, pe)
 in
   if os < 0 then let
     val () = bput_v(out, "  + ")
-    val () = copy_to_builder_v(u, s, pe, LOCK_MAX, out)
+    val () = copy_to_builder_v(u, s, pe, ul, out)
     val () = bput_v(out, " v")
-    val () = copy_to_builder_v(u, pe + 1, ve, LOCK_MAX, out)
+    val () = copy_to_builder_v(u, pe + 1, ve, ul, out)
     val () = put_char_v(out, 10)
   in true end
-  else if lock_range_eq(old, os, oe, u, pe + 1, ve) then let
+  else if lock_range_eq(old, ol, os, oe, u, ul, pe + 1, ve) then let
     val () = bput_v(out, "")
   in false end
   else let
     val () = bput_v(out, "  ~ ")
-    val () = copy_to_builder_v(u, s, pe, LOCK_MAX, out)
+    val () = copy_to_builder_v(u, s, pe, ul, out)
     val () = bput_v(out, " v")
-    val () = copy_to_builder_v(old, os, oe, LOCK_MAX, out)
+    val () = copy_to_builder_v(old, os, oe, ol, out)
     val () = bput_v(out, " -> v")
-    val () = copy_to_builder_v(u, pe + 1, ve, LOCK_MAX, out)
+    val () = copy_to_builder_v(u, pe + 1, ve, ul, out)
     val () = put_char_v(out, 10)
   in true end
 end
 
 (* "  - <pkg> v<old>" for the old lock line o[s, e) when new[0, nl) has
    no line for its package; whether it wrote one *)
-fn note_old {lo,ln:agz}
-  (o: !$A.borrow(byte, lo, LOCK_MAX), s: pos_t, e: pos_t,
-   nw: !$A.borrow(byte, ln, LOCK_MAX), nl: pos_t,
+fn note_old {lo,ln:agz}{no:pos}{ol:nat | ol <= no}{nn:pos}{nl:nat | nl <= nn}
+  (o: !$A.borrow(byte, lo, no), ol: int ol, s: pos_t, e: pos_t,
+   nw: !$A.borrow(byte, ln, nn), nl: int nl,
    out: !$B.builder_v >> $B.builder_v): bool = let
-  val @(pe, ve) = lock_fields(o, s, e)
-  val @(ns, _) = lock_find(nw, nl, 0, o, s, pe)
+  val @(pe, ve) = lock_fields(o, ol, s, e)
+  val @(ns, _) = lock_find(nw, nl, 0, o, ol, s, pe)
 in
   if ns >= 0 then let
     val () = bput_v(out, "")
   in false end
   else let
     val () = bput_v(out, "  - ")
-    val () = copy_to_builder_v(o, s, pe, LOCK_MAX, out)
+    val () = copy_to_builder_v(o, s, pe, ol, out)
     val () = bput_v(out, " v")
-    val () = copy_to_builder_v(o, pe + 1, ve, LOCK_MAX, out)
+    val () = copy_to_builder_v(o, pe + 1, ve, ol, out)
     val () = put_char_v(out, 10)
   in true end
 end
 
 (* note_new or note_old for the trimmed line a[s, e), when not empty *)
-fn note_line {la,lb:agz}
-  (a: !$A.borrow(byte, la, LOCK_MAX), s: pos_t, e: pos_t,
-   b: !$A.borrow(byte, lb, LOCK_MAX), bl: pos_t, fresh: bool,
+fn note_line {la,lb:agz}{na:pos}{al:nat | al <= na}{nb:pos}{bl:nat | bl <= nb}
+  (a: !$A.borrow(byte, la, na), al: int al, s: pos_t, e: pos_t,
+   b: !$A.borrow(byte, lb, nb), bl: int bl, fresh: bool,
    out: !$B.builder_v >> $B.builder_v): bool =
   if s >= e then let
     val () = bput_v(out, "")
   in false end
-  else if fresh then note_new(a, s, e, b, bl, out)
-  else note_old(a, s, e, b, bl, out)
+  else if fresh then note_new(a, al, s, e, b, bl, out)
+  else note_old(a, al, s, e, b, bl, out)
 
 (* Notes each line of a[i, al) against b[0, bl): the new lines with
    note_new when fresh, the old ones with note_old; whether any note
    was written *)
-fun lock_notes {la,lb:agz}{al,i:int} .<max(al - i, 0)>.
-  (a: !$A.borrow(byte, la, LOCK_MAX), al: int al, i: int i,
-   b: !$A.borrow(byte, lb, LOCK_MAX), bl: pos_t, fresh: bool, changed: bool,
+fun lock_notes {la,lb:agz}{na:pos}{nb:pos}{bl:nat | bl <= nb}{al:nat | al <= na}{i:int} .<max(al - i, 0)>.
+  (a: !$A.borrow(byte, la, na), al: int al, i: int i,
+   b: !$A.borrow(byte, lb, nb), bl: int bl, fresh: bool, changed: bool,
    out: !$B.builder_v >> $B.builder_v): bool =
   if i >= al then changed
   else let
     val @(ts, te, le) = lock_line(a, al, i)
-    val c = note_line(a, ts, te, b, bl, fresh, out)
+    val c = note_line(a, al, ts, te, b, bl, fresh, out)
   in lock_notes(a, al, le + 1, b, bl, fresh, (if c then true else changed): bool, out) end
 
-(* bats.lock's bytes and their count; none when there is no bats.lock *)
-fn read_old_lock (): @([l:agz] $A.arr(byte, l, LOCK_MAX), pos_t) = let
+(* A lock text: an array of k + 1 bytes whose first k are the text *)
+vtypedef lock_text = [cap:pos][k:nat | k < cap][lo:agz] @($A.arr(byte, lo, cap), int k)
+
+(* The first k bytes of bv, copied to dst[0, k) *)
+fun lock_copy_loop {l:agz}{m:pos}{k:nat | k <= m}{dl:agz}{dn:pos | k < dn}{j:nat | j <= k} .<k - j>.
+  (bv: !$A.borrow(byte, l, m), k: int k, dst: !$A.arr(byte, dl, dn), j: int j): void =
+  if j >= k then ()
+  else let
+    val () = $A.set<byte>(dst, j, $A.read<byte>(bv, j))
+  in lock_copy_loop(bv, k, dst, j + 1) end
+
+(* The first k bytes of bv, in an array of k + 1 bytes (the last is 0) *)
+fn lock_copy {l:agz}{m:pos}{k:nat | k <= m; k <= 524288}
+  (bv: !$A.borrow(byte, l, m), k: int k): lock_text = let
+  val dst = $A.alloc<byte>(k + 1)
+  val () = lock_copy_loop(bv, k, dst, 0)
+in @(dst, k) end
+
+(* bats.lock's bytes and their count; none when there is no bats.lock.
+   The array is the text's size (bats#368); a file over 512 KiB is read
+   as its first 512 KiB, as the old reader did *)
+fn read_old_lock (): lock_text = let
   val @(lp, lp_len) = str_into_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val fr = file_open_m(bv_lp, lp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val lw = read_whole_m(bv_lp, lp_len)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
-  val buf = $A.alloc<byte>(LOCK_MAX)
 in
-  case+ fr of
-  | ~$R.err(_) => @(buf, 0)
-  | ~$R.ok(fd) => let
-      val n = (case+ $F.file_read(fd, buf, LOCK_MAX) of
-        | ~$R.ok(k) => k | ~$R.err(_) => 0): pos_t
-      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
-    in @(buf, n) end
+  case+ lw of
+  | ~whole_err(_) => let
+      val none = $A.alloc<byte>(1)
+    in @(none, 0) end
+  | ~whole_ok(ar, piece, m, n) => let
+      val @(fz_p, bv_p) = $A.freeze<byte>(piece)
+      val text = (if n <= 524288 then lock_copy(bv_p, n) else lock_copy(bv_p, 524288)): lock_text
+      val () = $A.drop<byte>(fz_p, bv_p)
+      val () = whole_free(ar, $A.thaw<byte>(fz_p))
+    in text end
 end
 
 (* Prints out: an error when bad (a malformed bats.lock), otherwise the
@@ -2009,7 +2032,7 @@ fn report_dry (bad: bool, stale: bool, out: $B.builder_v): void =
 fn dry_run_lock (lock: $B.builder_v): void = let
   var nb : $B.builder_v = lock
   val nl = $B.length(nb)
-  val @(na, _) = $B.to_arr(nb)
+  val @(na, _) = $B.into_arr(nb)
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
   val @(oa, ol) = read_old_lock()
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
@@ -2017,7 +2040,7 @@ fn dry_run_lock (lock: $B.builder_v): void = let
   var out : $B.builder_v = $B.create()
   val stale = (if ms >= 0 then let
       val () = bput_v(out, "error: malformed lockfile line: ")
-      val () = copy_to_builder_v(bv_o, ms, me, LOCK_MAX, out)
+      val () = copy_to_builder_v(bv_o, ms, me, ol, out)
       val () = put_char_v(out, 10)
     in true end
     else let
@@ -2377,37 +2400,37 @@ in kind end
    Path dependencies at build time (Rust: build::copy_path_dep)
    ============================================================ *)
 
-(* A NUL-terminated path: a[0, n) + "/" + b[0, bl), and its length *)
-fn child_path {la,lb:agz}
-  (a: !$A.borrow(byte, la, 524288), n: int, b: !$A.borrow(byte, lb, 1024), bl: int)
-  : @([l:agz] $A.arr(byte, l, 524288), int) = let
+(* The path a[0, n) + "/" + b[0, bl), of its length pl (no NUL: the path
+   functions take the length, as the builder's text has it) *)
+fn child_path {la,lb:agz}{na:pos}{n:nat | n <= na}
+  (a: !$A.borrow(byte, la, na), n: int n, b: !$A.borrow(byte, lb, 1024), bl: int)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k) = let
   var p : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(a, 0, n, 524288, p)
+  val () = copy_to_builder_v(a, 0, n, n, p)
   val () = put_char_v(p, 47)
   val () = copy_to_builder_v(b, 0, bl, 1024, p)
-  val pl = $B.length(p)
-  val () = put_char_v(p, 0)
-  val @(pa, _) = $B.to_arr(p)
+  val @(pa, pl) = $B.into_arr(p)
 in @(pa, pl) end
 
-(* Copies the file at the NUL-terminated path s to d (Rust: fs::copy);
-   false on an error *)
-(* Gives d the permission bits of s, as Rust's fs::copy does *)
-fn copy_mode {ls,ld:agz}
-  (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
-  case+ $F.file_mode(s, 524288) of
+(* Gives d the permission bits of s, as Rust's fs::copy does: the paths
+   s[0, sm) and d[0, dm) *)
+fn copy_mode {ls,ld:agz}{ns:pos}{nd:pos}{sm:nat | sm <= ns; sm <= 524288}{dm:nat | dm <= nd; dm <= 524288}
+  (s: !$A.borrow(byte, ls, ns), sm: int sm, d: !$A.borrow(byte, ld, nd), dm: int dm): bool =
+  case+ file_mode_m(s, sm) of
   | ~$R.err(_) => false
   | ~$R.ok(m) =>
-    (case+ $F.file_chmod(d, 524288, m) of
+    (case+ file_chmod_m(d, dm, m) of
      | ~$R.ok(_) => true
      | ~$R.err(_) => false)
 
-fn copy_file {ls,ld:agz}
-  (s: !$A.borrow(byte, ls, 524288), d: !$A.borrow(byte, ld, 524288)): bool =
-  case+ file_open_path(s, $F.ReadOnly(), $F.OpenExisting(), 0) of
+(* Copies the file at the path s[0, sm) to d[0, dm) (Rust: fs::copy);
+   false on an error *)
+fn copy_file {ls,ld:agz}{ns:pos}{nd:pos}{sm:nat | sm <= ns; sm <= 524288}{dm:nat | dm <= nd; dm <= 524288}
+  (s: !$A.borrow(byte, ls, ns), sm: int sm, d: !$A.borrow(byte, ld, nd), dm: int dm): bool =
+  case+ file_open_m(s, sm, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.err(_) => false
   | ~$R.ok(sf) =>
-    (case+ file_open_path(d, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
+    (case+ file_open_m(d, dm, $F.WriteOnly(), $F.CreateOrTruncate(), 420) of
      | ~$R.err(_) => let
          val () = $R.discard<int><$F.io_error>($F.file_close(sf))
        in false end
@@ -2416,7 +2439,7 @@ fn copy_file {ls,ld:agz}
          val () = $R.discard<int><$F.io_error>($F.file_close(sf))
          (* the copy's close is where a write that was cached can fail *)
          val closed = (case+ $F.file_close(df) of | ~$R.ok(_) => true | ~$R.err(_) => false): bool
-       in if ok && closed then copy_mode(s, d) else false end)
+       in if ok && closed then copy_mode(s, sm, d, dm) else false end)
 
 (* Whether e[0, el) is ".", "..", or a directory Rust's copy skips:
    build, dist, docs or bats_modules *)
@@ -2436,8 +2459,8 @@ in
 end
 
 (* Whether the NUL-terminated path p is a directory *)
-fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
-  case+ dir_open_path(p) of
+fn is_directory {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm): bool =
+  case+ dir_open_m(p, pm) of
   | ~$R.ok(d) => let
       val () = $R.discard<int><$F.io_error>($F.dir_close(d))
     in true end
@@ -2446,9 +2469,9 @@ fn is_directory {lp:agz} (p: !$A.borrow(byte, lp, 524288)): bool =
 (* Copies entries i.. of the directory at s[0, sl) into d[0, dl)
    (Rust: copy_dir_recursive); false on an error. f bounds the depth
    still allowed, far past what a path can reach *)
-fun copy_entries {n,i:nat | i <= n}{ls,ld:agz}{f:nat} .<f, 0, n - i>.
-  (dir: !$F.entries(n), i: int i, n: int n, s: !$A.borrow(byte, ls, 524288), sl: int,
-   d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool =
+fun copy_entries {n,i:nat | i <= n}{ls,ld:agz}{ns:pos}{sl:nat | sl <= ns; sl <= 524288}{nd:pos}{dl:nat | dl <= nd; dl <= 524288}{f:nat} .<f, 0, n - i>.
+  (dir: !$F.entries(n), i: int i, n: int n, s: !$A.borrow(byte, ls, ns), sl: int sl,
+   d: !$A.borrow(byte, ld, nd), dl: int dl, f: int f): bool =
   if i >= n then true
   else let
     val e = $A.alloc<byte>(1024)
@@ -2460,10 +2483,10 @@ fun copy_entries {n,i:nat | i <= n}{ls,ld:agz}{f:nat} .<f, 0, n - i>.
       val @(da, dl2) = child_path(d, dl, bv_e, el)
       val @(fz_c, bv_c) = $A.freeze<byte>(ca)
       val @(fz_d, bv_d) = $A.freeze<byte>(da)
-      val is_dir = is_directory(bv_c)
+      val is_dir = is_directory(bv_c, cl)
       val ok = (if skipped_name(bv_e, el, is_dir) then true
                 else if is_dir then (if f > 0 then copy_tree(bv_c, cl, bv_d, dl2, f - 1) else false)
-                else copy_file(bv_c, bv_d)): bool
+                else copy_file(bv_c, cl, bv_d, dl2)): bool
       val () = $A.drop<byte>(fz_d, bv_d)
       val () = $A.free<byte>($A.thaw<byte>(fz_d))
       val () = $A.drop<byte>(fz_c, bv_c)
@@ -2477,14 +2500,14 @@ fun copy_entries {n,i:nat | i <= n}{ls,ld:agz}{f:nat} .<f, 0, n - i>.
 
 (* Copies the directory s[0, sl) (NUL-terminated) to d[0, dl), creating
    it, without its build, dist, docs and bats_modules directories *)
-and copy_tree {ls,ld:agz}{f:nat} .<f, 1, 0>.
-  (s: !$A.borrow(byte, ls, 524288), sl: int,
-   d: !$A.borrow(byte, ld, 524288), dl: int, f: int f): bool = let
+and copy_tree {ls,ld:agz}{ns:pos}{sl:nat | sl <= ns; sl <= 524288}{nd:pos}{dl:nat | dl <= nd; dl <= 524288}{f:nat} .<f, 1, 0>.
+  (s: !$A.borrow(byte, ls, ns), sl: int sl,
+   d: !$A.borrow(byte, ld, nd), dl: int dl, f: int f): bool = let
   var mk : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(d, 0, dl, 524288, mk)
+  val () = copy_to_builder_v(d, 0, dl, dl, mk)
   val _ = run_mkdir(mk)
 in
-  case+ $F.dir_read(s, 524288) of
+  case+ dir_read_m(s, sl) of
   | ~$R.err(_) => false
   | ~$R.ok(dir) => let
       val ok = copy_entries(dir, 0, $F.entries_count(dir), s, sl, d, dl, f)
@@ -2517,8 +2540,7 @@ fn copy_path_dep {la,lp:agz}
   var sb : $B.builder_v = $B.create()
   val () = put_name(p, pl, sb)
   val sl = $B.length(sb)
-  val () = put_char_v(sb, 0)
-  val @(sa, _) = $B.to_arr(sb)
+  val @(sa, _) = $B.into_arr(sb)
   val @(fz_s, bv_s) = $A.freeze<byte>(sa)
   var lb : $B.builder_v = $B.create()
   val () = put_name(p, pl, lb)
@@ -2526,7 +2548,7 @@ fn copy_path_dep {la,lp:agz}
   val () = put_char_v(lb, 0)
   val @(la2, la2len) = $B.into_arr(lb)
   val @(fz_l, bv_l) = $A.freeze<byte>(la2)
-  val has_dir = file_exists_path(bv_s)
+  val has_dir = file_exists_m(bv_s, sl)
   val has_lib = file_exists_m(bv_l, la2len)
   val () = $A.drop<byte>(fz_l, bv_l)
   val () = $A.free<byte>($A.thaw<byte>(fz_l))
@@ -2534,8 +2556,7 @@ fn copy_path_dep {la,lp:agz}
   val () = bput_v(db, "bats_modules/")
   val () = put_name(a, k, db)
   val dl = $B.length(db)
-  val () = put_char_v(db, 0)
-  val @(da, _) = $B.to_arr(db)
+  val @(da, _) = $B.into_arr(db)
   val @(fz_d, bv_d) = $A.freeze<byte>(da)
   val ok = (if ~has_dir then let
       val () = path_dep_error(a, k, "directory", p, pl, " does not exist")
@@ -2545,7 +2566,7 @@ fn copy_path_dep {la,lp:agz}
     in false end
     else let
       var rb : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(bv_d, 0, dl, 524288, rb)
+      val () = copy_to_builder_v(bv_d, 0, dl, dl, rb)
       val () = remove_tree(rb)
     in copy_tree(bv_s, sl, bv_d, dl, 65536) end): bool
   val () = $A.drop<byte>(fz_d, bv_d)
@@ -3449,17 +3470,17 @@ fn lock_exists (): bool = let
 in r end
 
 (* acc, with the package of each lock line of t[i, tl) added once *)
-fun lock_names {lt:agz}{tl,i:int}{m:nat} .<max(tl - i, 0)>.
-  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, i: int i, acc: names(m)): [m2:nat] names(m2) =
+fun lock_names {lt:agz}{nt:pos}{tl:nat | tl <= nt}{i:int}{m:nat} .<max(tl - i, 0)>.
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, i: int i, acc: names(m)): [m2:nat] names(m2) =
   if i >= tl then acc
   else let
     val @(ts, te, le) = lock_line(t, tl, i)
   in
     if ts >= te then lock_names(t, tl, le + 1, acc)
     else let
-      val @(pe, _) = lock_fields(t, ts, te)
+      val @(pe, _) = lock_fields(t, tl, ts, te)
       val a = $A.alloc<byte>(256)
-      val k = copy_name(t, ts, pe, LOCK_MAX, a, 0)
+      val k = copy_name(t, ts, pe, tl, a, 0)
     in
       if k <= 0 then let
         val () = $A.free<byte>(a)
@@ -3473,8 +3494,8 @@ fun lock_names {lt:agz}{tl,i:int}{m:nat} .<max(tl - i, 0)>.
 
 (* The [start, end) of the version and of the sha256 on the first lock
    line of t[0, tl) whose package is a[0, k), or ~1s when none is *)
-fn lock_entry {lt,la:agz}{tl:int}
-  (t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl, a: !$A.arr(byte, la, 256), k: nlen)
+fn lock_entry {lt,la:agz}{nt:pos}{tl:nat | tl <= nt}
+  (t: !$A.borrow(byte, lt, nt), tl: int tl, a: !$A.arr(byte, la, 256), k: nlen)
   : @(pos_t, pos_t, pos_t, pos_t) = let
   var name : $B.builder_v = $B.create()
   val () = put_name(a, k, name)
@@ -3486,8 +3507,8 @@ fn lock_entry {lt,la:agz}{tl:int}
 in
   if vs < 0 then @(~1, ~1, ~1, ~1)
   else let
-    val line_end = find_byte(t, LOCK_MAX, ve, tl, 10)
-    val hash_end = trim_end(t, LOCK_MAX, ve, line_end)
+    val line_end = find_byte(t, tl, ve, tl, 10)
+    val hash_end = trim_end(t, tl, ve, line_end)
     val hash_start = (if ve < hash_end then ve + 1 else hash_end): pos_t
   in @(vs, ve, hash_start, hash_end) end
 end
@@ -3507,13 +3528,13 @@ end
    download, files rehashed only by `go mod verify`; npm checks the
    tarball's integrity at install. Hashing every installed file at every
    run is not done *)
-fn installed_locked {lt,la:agz}
+fn installed_locked {lt,la:agz}{nt:pos}{tl:nat | tl <= nt}
   (a: !$A.arr(byte, la, 256), k: nlen, v: !cand,
-   t: !$A.borrow(byte, lt, LOCK_MAX), hash_start: pos_t, hash_end: pos_t): bool = let
+   t: !$A.borrow(byte, lt, nt), tl: int tl, hash_start: pos_t, hash_end: pos_t): bool = let
   var want : $B.builder_v = $B.create()
   val () = put_cand(v, want)
   val () = put_char_v(want, 10)
-  val () = copy_to_builder_v(t, hash_start, hash_end, LOCK_MAX, want)
+  val () = copy_to_builder_v(t, hash_start, hash_end, tl, want)
   val () = put_char_v(want, 10)
   val @(want_arr, want_len) = $B.into_arr(want)
   val @(fz_w, bv_w) = $A.freeze<byte>(want_arr)
@@ -3556,9 +3577,9 @@ fn put_relock (out: !$B.builder_v >> $B.builder_v): void =
    bats.lock gives as t[hash_start, hash_end), from the repository
    repo[0, rl) into bats_modules; false after saying why it cannot: no
    repository, no such archive in it, or an archive of another sha256 *)
-fn install_locked {lr,lt,la:agz}
+fn install_locked {lr,lt,la:agz}{nt:pos}{tl:nat | tl <= nt}
   (repo: !$A.borrow(byte, lr, 4096), rl: int,
-   t: !$A.borrow(byte, lt, LOCK_MAX), hash_start: pos_t, hash_end: pos_t,
+   t: !$A.borrow(byte, lt, nt), tl: int tl, hash_start: pos_t, hash_end: pos_t,
    a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool =
   if rl <= 0 then let
     var m : $B.builder_v = $B.create()
@@ -3570,13 +3591,13 @@ fn install_locked {lr,lt,la:agz}
     val @(arc, alen) = archive_path(repo, rl, a, k, v)
     val @(fz_c, bv_c) = $A.freeze<byte>(arc)
     var hash : $B.builder_v = $B.create()
-    val found = put_file_sha256(bv_c, hash)
-    val @(hash_arr, _) = $B.to_arr(hash)
+    val found = put_file_sha256_m(bv_c, alen, hash)
+    val @(hash_arr, hash_len) = $B.into_arr(hash)
     val @(fz_h, bv_h) = $A.freeze<byte>(hash_arr)
-    val same = (if found then lock_range_eq(bv_h, 0, 64, t, hash_start, hash_end) else false): bool
+    val same = (if found then lock_range_eq(bv_h, hash_len, 0, 64, t, tl, hash_start, hash_end) else false): bool
     (* The digest that was checked is the one fetch records (#321) *)
     var verified : $B.builder_v = $B.create()
-    val () = (if same then copy_to_builder_v(bv_h, 0, 64, 524288, verified) else ())
+    val () = (if same then copy_to_builder_v(bv_h, 0, 64, hash_len, verified) else ())
     val () = $A.drop<byte>(fz_h, bv_h)
     val () = $A.free<byte>($A.thaw<byte>(fz_h))
     val fetched = refetch_if(same, bv_c, alen, a, k, v, verified)
@@ -3586,7 +3607,7 @@ fn install_locked {lr,lt,la:agz}
         val () = put_locked(a, k, v, m)
         val () = (if found then bput_v(m, ", but its archive '")
                   else bput_v(m, ", which is not in repository '"))
-        val () = (if found then copy_to_builder_v(bv_c, 0, alen, 524288, m)
+        val () = (if found then copy_to_builder_v(bv_c, 0, alen, alen, m)
                   else copy_to_builder_v(repo, 0, rl, 4096, m))
         val () = (if found then bput_v(m, "' does not have the sha256 bats.lock gives\n")
                   else bput_v(m, "'\n"))
@@ -3627,9 +3648,9 @@ fun report_unused {n:nat} .<n>. (xs: names(n), none: bool): bool =
    which nothing uses when the walk ends. Whether every package was
    locked, allowed and installed (ok so far), and nothing locked was
    unused *)
-fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
+fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{nt:pos}{tl:nat | tl <= nt} .<u, s>.
   (stack: names(s), all: names(m), cs: cons(nc), pn: !names(np), avail: names(u),
-   t: !$A.borrow(byte, lt, LOCK_MAX), tl: int tl,
+   t: !$A.borrow(byte, lt, nt), tl: int tl,
    repo: !$A.borrow(byte, lr, 4096), rl: int, ok: bool): bool =
   case+ stack of
   | ~names_nil() => let
@@ -3649,7 +3670,7 @@ fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
         in walk_locked(rest, all, cs, pn, avail2, t, tl, repo, rl, false) end
       | ~NTaken(avail2) => let
           val @(vs, ve, hash_start, hash_end) = lock_entry(t, tl, a, k)
-          val @(parsed, _, _) = parse_cand(t, LOCK_MAX, vs, ve)
+          val @(parsed, _, _) = parse_cand(t, tl, vs, ve)
         in
           case+ parsed of
           | ~$R.none() => let
@@ -3680,8 +3701,8 @@ fun walk_locked {s,m,nc,np,u:nat}{lr,lt:agz}{tl:int} .<u, s>.
               val () = names_free(avail2)
             in false end
             else let
-              val installed = (if installed_locked(a, k, v, t, hash_start, hash_end) then true
-                               else install_locked(repo, rl, t, hash_start, hash_end, a, k, v)): bool
+              val installed = (if installed_locked(a, k, v, t, tl, hash_start, hash_end) then true
+                               else install_locked(repo, rl, t, tl, hash_start, hash_end, a, k, v)): bool
               val () = cand_free(v)
             in
               if ~installed then let
@@ -3720,7 +3741,7 @@ fn locked_with {n,nc:nat}{lr:agz}
     val ok = (if ms >= 0 then let
         var m : $B.builder_v = $B.create()
         val () = bput_v(m, "error: malformed lockfile line: ")
-        val () = copy_to_builder_v(bv_o, ms, me, LOCK_MAX, m)
+        val () = copy_to_builder_v(bv_o, ms, me, lock_len, m)
         val () = put_char_v(m, 10)
         val () = prerr_builder(m)
         val () = cons_free(cs)

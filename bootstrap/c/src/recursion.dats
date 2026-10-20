@@ -435,21 +435,19 @@ fun hash_source {l:agz}{o:addr}{n:int}{k:nat | k <= 256}{s:nat | s + k <= n}{i:n
   if i >= k then h
   else hash_source(src, s, k, i + 1, nmod(h * 31 + $AR.low_byte(byte2int0($A.get<byte>(src, s + i))), BUCKETS))
 
-(* d added to the bucket h of bs, with its id j *)
-fun buckets_add {N:int}{b:nat}{j:nat | j < N} .<b>.
-  (bs: buckets(N, b), h: int, j: int j, d: dname): buckets(N, b) =
+(* d added to the bucket h of bs, with its id j. h < b, so the buckets
+   run out only after h of them are passed: there is no empty bucket
+   list to drop d in *)
+fun buckets_add {N:int}{b:pos}{j:nat | j < N}{h:nat | h < b} .<b>.
+  (bs: buckets(N, b), h: int h, j: int j, d: dname): buckets(N, b) =
   case+ bs of
-  | ~buckets_nil() => let
-      val+ ~DName(a, _, _, _, _) = d
-      val () = $A.free<byte>(a)
-    in buckets_nil() end
   | ~buckets_cons(bn, tl) =>
     if h <= 0 then buckets_cons(bnames_cons(j, d, bn), tl)
     else buckets_cons(bn, buckets_add(tl, h - 1, j, d))
 
 (* The names nm (ids i, i + 1, ...) in the buckets bs *)
-fun buckets_fill {N:int}{b:nat}{m,i:nat | i + m == N} .<m>.
-  (nm: dnames(m), i: int i, bs: buckets(N, b)): buckets(N, b) =
+fun buckets_fill {N:int}{m,i:nat | i + m == N} .<m>.
+  (nm: dnames(m), i: int i, bs: buckets(N, BUCKETS)): buckets(N, BUCKETS) =
   case+ nm of
   | ~dnames_nil() => bs
   | ~dnames_cons(d, tl) => let
@@ -469,25 +467,24 @@ fun bucket_calls {N:int}{m:nat}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{
     else bucket_calls(tl, src, s, e, fi, grp, acc)
 
 (* The definitions of the bucket h of bs that src[s, e) calls, added to acc *)
-fun bucket_of {N:int}{b:nat}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat} .<b>.
-  (bs: !buckets(N, b), h: int, src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
+fun bucket_of {N:int}{b:pos}{h:nat | h < b}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat} .<b>.
+  (bs: !buckets(N, b), h: int h, src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
    fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) =
   case+ bs of
-  | buckets_nil() => acc
   | buckets_cons(bn, tl) =>
     if h <= 0 then bucket_calls(bn, src, s, e, fi, grp, acc)
     else bucket_of(tl, h - 1, src, s, e, fi, grp, acc)
 
 (* The definitions of bs that src[s, e) calls, added to acc *)
-fn calls_of {N:int}{b:nat}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat}
-  (bs: !buckets(N, b), src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
+fn calls_of {N:int}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat}
+  (bs: !buckets(N, BUCKETS), src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
    fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) = let
   val len = (if e - s > 256 then 256 else e - s): [k:nat | k <= 256; k <= e - s] int k
 in bucket_of(bs, hash_source(src, s, len, 0, 0), src, s, e, fi, grp, acc) end
 
 (* What the identifiers oc of a body in file fi, group grp, call *)
-fun occs_calls {N:nat}{b:nat}{l:agz}{o:addr}{n:int}{j:nat}{c:nat} .<j>.
-  (oc: !occs(n, j), bs: !buckets(N, b), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), grp: int, acc: elist(N, c))
+fun occs_calls {N:nat}{l:agz}{o:addr}{n:int}{j:nat}{c:nat} .<j>.
+  (oc: !occs(n, j), bs: !buckets(N, BUCKETS), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), grp: int, acc: elist(N, c))
   : [c2:nat] elist(N, c2) =
   case+ oc of
   | occs_nil() => acc
@@ -496,8 +493,8 @@ fun occs_calls {N:nat}{b:nat}{l:agz}{o:addr}{n:int}{j:nat}{c:nat} .<j>.
 
 (* The nodes of the definitions ds of file fi (ids i, i + 1, ...),
    added to acc *)
-fun def_nodes {N:nat}{b:nat}{k,i:nat | i + k <= N}{l:agz}{o:addr}{n:int}{c:nat} .<k>.
-  (ds: !defs(n, k), i: int i, bs: !buckets(N, b), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), acc: nodes(N, c))
+fun def_nodes {N:nat}{k,i:nat | i + k <= N}{l:agz}{o:addr}{n:int}{c:nat} .<k>.
+  (ds: !defs(n, k), i: int i, bs: !buckets(N, BUCKETS), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), acc: nodes(N, c))
   : [c2:nat] nodes(N, c2) =
   case+ ds of
   | defs_nil() => acc
@@ -509,8 +506,8 @@ fun def_nodes {N:nat}{b:nat}{k,i:nat | i + k <= N}{l:agz}{o:addr}{n:int}{c:nat} 
     in def_nodes(tl, i + 1, bs, src, fi, nodes_cons(nd, acc)) end
 
 (* The nodes of the files pf, whose definitions have ids i, i + 1, ... *)
-fun file_nodes {N:nat}{b:nat}{t,f,i:nat | i + t == N}{c:nat} .<f>.
-  (pf: !pfiles(t, f), i: int i, bs: !buckets(N, b), acc: nodes(N, c)): [c2:nat] nodes(N, c2) =
+fun file_nodes {N:nat}{t,f,i:nat | i + t == N}{c:nat} .<f>.
+  (pf: !pfiles(t, f), i: int i, bs: !buckets(N, BUCKETS), acc: nodes(N, c)): [c2:nat] nodes(N, c2) =
   case+ pf of
   | pfiles_nil() => acc
   | pfiles_cons(fi, _, src, _, k, ds, tl) => let
