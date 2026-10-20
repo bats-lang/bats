@@ -3173,6 +3173,8 @@ in
                 val _ = write_native_runtime_h(to_c, tclen)
                 val () = bput_v(mf, "CC ?= cc\n")
                 val () = bput_v(mf, "ATSFLAGS := -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include _bats_native_runtime.h -I_bats_native_stubs\n\n")
+                (* the dependencies are -O1 in a debug build, the own modules -O0 (bats#328) *)
+                val () = bput_v(mf, "./bats_modules/%_debug.o: ./bats_modules/%.c\n\t$(CC) -c -o $@ $< -g -O1 $(ATSFLAGS)\n\n")
                 val () = bput_v(mf, "%_debug.o: %.c\n\t$(CC) -c -o $@ $< -g -O0 $(ATSFLAGS)\n\n")
                 val () = bput_v(mf, "%_release.o: %.c\n\t$(CC) -c -o $@ $< -O2 $(ATSFLAGS)\n\n")
                 val () = bput_v(mf, "SRCS := $(shell find . -name '*_dats.c') _bats_native_runtime.c\n")
