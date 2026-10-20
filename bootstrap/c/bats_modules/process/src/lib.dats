@@ -322,7 +322,32 @@ static int _proc_try_wait(int pid) {
 
 
 
-(* An argv/envp entry: owned array + content length. Consumed by spawn. *)
+(* The most bytes one argv/envp entry's array may hold. *)
+
+
+(* The most bytes all the entries of one list may take together, each
+   with the NUL spawn writes after it (a list that takes more is E2BIG).
+   One less than ARG_ENTRY_MAX, so the array spawn builds from a list
+   always ends in a zero byte past the last NUL. *)
+
+
+(* An argv/envp entry: an owned array of cap bytes (cap is the entry's
+   own, 1 to ARG_ENTRY_MAX: an argument needs no more than it takes) and
+   the content length n <= cap, which is the first n bytes of the array.
+   Consumed by spawn. An array of ARG_ENTRY_MAX bytes with its length
+   (a builder's to_arr) is an entry, as is a builder's into_arr. *)
+
+
+
+
+(* The NUL of a path: byte k of the n bytes whose cells are cs is zero, so
+   the C string spawn reads from the path ends at k, inside the array. Made
+   only by path_of_string_proved, from the array package's own proofs of the cells
+   (CLEN: n cells; NTH: cell k is 0). spawn_proved borrows the path with the same
+   cells (cborrow), so the bytes it reads are the ones the proof names. A
+   dataprop is not linear, so one proof serves every spawn of the path. *)
+
+
 
 
 (* ============================================================
@@ -342,7 +367,12 @@ static int _proc_try_wait(int pid) {
 
 
 
-(* path: an executable's path, or a command name without '/', looked up
+(* The unproved form, kept for compatibility (#64): path is an array of
+   524288 bytes whose NUL the types do not place, so a caller must know it
+   holds one. A dependent moves to spawn_proved in a pull request of its
+   own; this stays until every dependent has.
+
+   path: an executable's path, or a command name without '/', looked up
    on this process's PATH as execvp does. Fails with the errno (> 0) of
    what went wrong, including an exec that could not run (ENOENT for a
    command found nowhere), as Rust's Command::spawn does. *)
@@ -357,7 +387,10 @@ static int _proc_try_wait(int pid) {
 
 
 
-(* As spawn, with the parent's environment plus the NAME=VALUE entries
+(* The unproved form, kept for compatibility (#64), as spawn is; the
+   proved one is spawn_inherit_env_with_proved.
+
+   As spawn, with the parent's environment plus the NAME=VALUE entries
    of extra, each added or replacing that variable. *)
 
 
@@ -370,7 +403,57 @@ static int _proc_try_wait(int pid) {
 
 
 
-(* As spawn, with the parent's environment instead of an envp list. *)
+(* The unproved form, kept for compatibility (#64), as spawn is; the
+   proved one is spawn_inherit_env_proved.
+
+   As spawn, with the parent's environment instead of an envp list. *)
+
+
+
+
+
+
+
+
+
+
+(* A path for spawn: the bytes of s, then a zero, in an array of the
+   builder's own (at least sn + 1 bytes, not a copy of a fixed size). The
+   zero is the last byte written, at index sn, and its proof is NUL_AT. *)
+
+
+
+
+(* path: an executable's path, or a command name without '/', looked up
+   on this process's PATH as execvp does, with its NUL (nul) proved in
+   the path's own cells. Fails with the errno (> 0) of what went wrong,
+   including an exec that could not run (ENOENT for a command found
+   nowhere), as Rust's Command::spawn does. *)
+
+
+
+
+
+
+
+
+
+
+
+(* As spawn_proved, with the parent's environment plus the NAME=VALUE entries
+   of extra, each added or replacing that variable. *)
+
+
+
+
+
+
+
+
+
+
+
+(* As spawn_proved, with the parent's environment instead of an envp list. *)
 
 
 
@@ -420,32 +503,35 @@ fn _consume_cfg {b:bool} (cfg: stream_config(b)): void =
   | ~dev_null() => ()
   | ~inherit() => ()
 
+(* A builder holding at most ARG_TOTAL_MAX bytes: the entries of a list
+   and their NULs, as far as they fit *)
+vtypedef _fitted = [n:nat | n <= ARG_TOTAL_MAX] $B.builder(n)
+
 (* The entries of xs, each NUL-terminated, in one builder, and their
-   count; false when they do not all fit (the builder holds 524288
-   bytes, and an entry's array 524288), which spawn reports as E2BIG
-   rather than run the program on a cut-short list *)
-fn _build_from_list(xs: $L.listv(arg_entry)): @($B.builder_v, int, bool) = let
+   count; false when they do not all fit (ARG_TOTAL_MAX bytes of entries
+   and NULs, the builder's type), which spawn reports as E2BIG rather
+   than run the program on a cut-short list. Each byte read is proved
+   inside its entry's array: i < n <= cap. *)
+fn _build_from_list(xs: $L.listv(arg_entry)): @(_fitted, int, bool) = let
   fun loop {n:nat} .<n>.
     (xs: $L.list_vt(arg_entry, n),
-     b: !$B.builder_v >> $B.builder_v, count: int, fits: bool): @(int, bool) =
+     b: !_fitted >> _fitted, count: int, fits: bool): @(int, bool) =
     case+ xs of
     | ~$L.list_vt_nil() => @(count, fits)
     | ~$L.list_vt_cons(@(arr, len), tl) => let
         val @(fz, bv) = $A.freeze<byte>(arr)
-        (* bv[i, len) into b, whether it all fit; i < 524288 proves
-           each read *)
-        fun copy {lb:agz}{i:nat | i <= 524288} .<524288 - i>.
-          (bv: !$A.borrow(byte, lb, 524288),
-           b: !$B.builder_v >> $B.builder_v,
-           i: int i, len: int): bool =
+        (* bv[i, len) into b, whether it all fit *)
+        fun copy {lb:agz}{cap:pos}{k:nat | k <= cap}{i:nat | i <= k} .<k - i>.
+          (bv: !$A.borrow(byte, lb, cap),
+           b: !_fitted >> _fitted,
+           i: int i, len: int k): bool =
           if i >= len then true
-          else if i >= 524288 then false
-          else if $B.length(b) >= 524288 - 1 then false
+          else if $B.length(b) >= 524287 then false
           else let
             val () = $B.put_char(b, $AR.low_byte(byte2int0($A.read<byte>(bv, i))))
           in copy(bv, b, i + 1, len) end
         val all = copy(bv, b, 0, len)
-        val room = $B.length(b) < 524288 - 1
+        val room = $B.length(b) < 524287
         val () = (if room then $B.put_char(b, 0) else ())
         val () = $A.drop<byte>(fz, bv)
         val () = $A.free<byte>($A.thaw<byte>(fz))
@@ -561,10 +647,10 @@ in $R.err(E2BIG) end
 implement spawn {sin}{sout}{serr}{lp}
   (path, argv, envp, stdin_cfg, stdout_cfg, stderr_cfg) = let
   val @(argv_b, argc, argv_fits) = _build_from_list(argv)
-  val @(argv_arr, _) = $B.to_arr(argv_b)
+  val @(argv_arr, _) = $B.into_arr(argv_b)
   val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
   val @(envp_b, envp_c, envp_fits) = _build_from_list(envp)
-  val @(envp_arr, _) = $B.to_arr(envp_b)
+  val @(envp_arr, _) = $B.into_arr(envp_b)
   val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
   val r = (if argv_fits && envp_fits then
     _spawn_raw(path, bv_a, argc, bv_e, envp_c, stdin_cfg, stdout_cfg, stderr_cfg)
@@ -582,13 +668,111 @@ implement spawn_inherit_env {sin}{sout}{serr}{lp}
 implement spawn_inherit_env_with {sin}{sout}{serr}{lp}
   (path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
   val @(argv_b, argc, argv_fits) = _build_from_list(argv)
-  val @(argv_arr, _) = $B.to_arr(argv_b)
+  val @(argv_arr, _) = $B.into_arr(argv_b)
   val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
   val @(envp_b, extra_c, extra_fits) = _build_from_list(extra)
-  val @(envp_arr, _) = $B.to_arr(envp_b)
+  val @(envp_arr, _) = $B.into_arr(envp_b)
   val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
   val r = (if argv_fits && extra_fits then
     _spawn_raw(path, bv_a, argc, bv_e, ~(extra_c + 1), stdin_cfg, stdout_cfg, stderr_cfg)
+    else _too_big(stdin_cfg, stdout_cfg, stderr_cfg)): $R.result(spawn_pipes(sin, sout, serr), int)
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+  val () = $A.drop<byte>(fz_e, bv_e)
+  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+in r end
+
+(* ============================================================
+   The proved spawns (#61, kept beside the unproved ones by #64)
+   ============================================================ *)
+
+fn _spawn_raw_proved
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  {la:agz}{na:pos}
+  {le:agz}{ne:pos}
+  {sin:bool}{sout:bool}{serr:bool}
+  (nul: NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
+   argv: !$A.borrow(byte, la, na), argv_count: int,
+   envp: !$A.borrow(byte, le, ne), envp_count: int,
+   stdin_cfg: stream_config(sin),
+   stdout_cfg: stream_config(sout),
+   stderr_cfg: stream_config(serr))
+  : $R.result(spawn_pipes(sin, sout, serr), int) = let
+  val sin_mode = _cfg_mode(stdin_cfg)
+  val sin_fd = _cfg_fd(stdin_cfg)
+  val sout_mode = _cfg_mode(stdout_cfg)
+  val sout_fd = _cfg_fd(stdout_cfg)
+  val serr_mode = _cfg_mode(stderr_cfg)
+  val serr_fd = _cfg_fd(stderr_cfg)
+  val pid =  $extfcall(int, "_proc_spawn",
+    $UNSAFE.castvwtp1{ptr}(path),
+    $UNSAFE.castvwtp1{ptr}(argv), argv_count,
+    $UNSAFE.castvwtp1{ptr}(envp), envp_count,
+    sin_mode, sin_fd, sout_mode, sout_fd, serr_mode, serr_fd) 
+in
+  if pid >= 0 then let
+    val stdin_pfd =  $extfcall(int, "_spawn_get_stdin_fd") 
+    val stdout_pfd =  $extfcall(int, "_spawn_get_stdout_fd") 
+    val stderr_pfd =  $extfcall(int, "_spawn_get_stderr_fd") 
+    val sin_end = _build_pipe_end(sin_mode, stdin_pfd, stdin_cfg)
+    val sout_end = _build_pipe_end(sout_mode, stdout_pfd, stdout_cfg)
+    val serr_end = _build_pipe_end(serr_mode, stderr_pfd, stderr_cfg)
+    val () = _consume_cfg(stdin_cfg)
+    val () = _consume_cfg(stdout_cfg)
+    val () = _consume_cfg(stderr_cfg)
+  in
+    $R.ok(spawn_pipes_mk(child_mk(pid), sin_end, sout_end, serr_end))
+  end
+  else let
+    val () = _consume_cfg(stdin_cfg)
+    val () = _consume_cfg(stdout_cfg)
+    val () = _consume_cfg(stderr_cfg)
+  in $R.err(0 - pid) end
+end
+
+implement path_of_string_proved {sn} (s) = let
+  var b = $B.create()
+  val () = $B.bput(b, s)
+  val () = $B.put_char(b, 0)
+  val @(arr, len) = $B.into_arr(b)
+  val (cells | a) = $A.barr_of_arr(arr)
+  val (set | a) = $A.barr_set(a, len - 1, 0)
+  prval len_ok = $A.setc_len(set, cells)
+  prval nul_ok = $A.setc_nth_same(set)
+  prval nul = NUL_mk(len_ok, nul_ok)
+in (nul | a) end
+
+implement spawn_proved {sin}{sout}{serr}{lp}{np}{cs}{k}
+  (nul | path, argv, envp, stdin_cfg, stdout_cfg, stderr_cfg) = let
+  val @(argv_b, argc, argv_fits) = _build_from_list(argv)
+  val @(argv_arr, _) = $B.into_arr(argv_b)
+  val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
+  val @(envp_b, envp_c, envp_fits) = _build_from_list(envp)
+  val @(envp_arr, _) = $B.into_arr(envp_b)
+  val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
+  val r = (if argv_fits && envp_fits then
+    _spawn_raw_proved(nul | path, bv_a, argc, bv_e, envp_c, stdin_cfg, stdout_cfg, stderr_cfg)
+    else _too_big(stdin_cfg, stdout_cfg, stderr_cfg)): $R.result(spawn_pipes(sin, sout, serr), int)
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+  val () = $A.drop<byte>(fz_e, bv_e)
+  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+in r end
+
+implement spawn_inherit_env_proved {sin}{sout}{serr}{lp}{np}{cs}{k}
+  (nul | path, argv, stdin_cfg, stdout_cfg, stderr_cfg) =
+  spawn_inherit_env_with_proved(nul | path, argv, $L.list_vt_nil(), stdin_cfg, stdout_cfg, stderr_cfg)
+
+implement spawn_inherit_env_with_proved {sin}{sout}{serr}{lp}{np}{cs}{k}
+  (nul | path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
+  val @(argv_b, argc, argv_fits) = _build_from_list(argv)
+  val @(argv_arr, _) = $B.into_arr(argv_b)
+  val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
+  val @(envp_b, extra_c, extra_fits) = _build_from_list(extra)
+  val @(envp_arr, _) = $B.into_arr(envp_b)
+  val @(fz_e, bv_e) = $A.freeze<byte>(envp_arr)
+  val r = (if argv_fits && extra_fits then
+    _spawn_raw_proved(nul | path, bv_a, argc, bv_e, ~(extra_c + 1), stdin_cfg, stdout_cfg, stderr_cfg)
     else _too_big(stdin_cfg, stdout_cfg, stderr_cfg)): $R.result(spawn_pipes(sin, sout, serr), int)
   val () = $A.drop<byte>(fz_a, bv_a)
   val () = $A.free<byte>($A.thaw<byte>(fz_a))

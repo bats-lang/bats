@@ -894,3 +894,117 @@ fun shr_fast {n,h,l:nat | n < 32; h < 65536; l < 65536} (n: int n, h: int h, l: 
   : [h2,l2:nat | h2 < 65536; l2 < 65536] (SHR(n, h, l, h2, l2) | @(int h2, int l2))
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+abst@ype word32(h:int, l:int) = uint
+
+
+fun word32_of_half {l:nat | l < 65536} (l: int l): word32(0, l) = "mac#atspre_g0int2uint_int_uint"
+
+
+fun word32_to_int {l:nat | l < 65536} (x: word32(0, l)): int(l) = "mac#atspre_g0uint2int_uint_int"
+
+
+fun word32_add {h1,l1,h2,l2:nat | h1 < 65536; l1 < 65536; h2 < 65536; l2 < 65536}
+  (x: word32(h1, l1), y: word32(h2, l2))
+  : [h3,l3:nat | h3 < 65536; l3 < 65536] (ADD32(h1, l1, h2, l2, h3, l3) | word32(h3, l3)) = "mac#atspre_g0uint_add_uint"
+
+
+fun word32_xor {h1,l1,h2,l2:nat | h1 < 65536; l1 < 65536; h2 < 65536; l2 < 65536}
+  (x: word32(h1, l1), y: word32(h2, l2))
+  : [h3,l3:nat | h3 < 65536; l3 < 65536] (XOR(h1, h2, h3), XOR(l1, l2, l3) | word32(h3, l3)) = "mac#atspre_g0uint_lxor_uint"
+
+fun word32_and {h1,l1,h2,l2:nat | h1 < 65536; l1 < 65536; h2 < 65536; l2 < 65536}
+  (x: word32(h1, l1), y: word32(h2, l2))
+  : [h3,l3:nat | h3 < 65536; l3 < 65536] (AND(h1, h2, h3), AND(l1, l2, l3) | word32(h3, l3)) = "mac#atspre_g0uint_land_uint"
+
+fun word32_or {h1,l1,h2,l2:nat | h1 < 65536; l1 < 65536; h2 < 65536; l2 < 65536}
+  (x: word32(h1, l1), y: word32(h2, l2))
+  : [h3,l3:nat | h3 < 65536; l3 < 65536] (OR(h1, h2, h3), OR(l1, l2, l3) | word32(h3, l3)) = "mac#atspre_g0uint_lor_uint"
+
+
+fun word32_not {h,l:nat | h < 65536; l < 65536} (x: word32(h, l))
+  : (NOT32(h, l, 65535 - h, 65535 - l) | word32(65535 - h, 65535 - l)) = "mac#atspre_g0uint_lnot_uint"
+
+
+fun word32_shr {n,h,l:nat | n < 32; h < 65536; l < 65536} (x: word32(h, l), n: int n)
+  : [h2,l2:nat | h2 < 65536; l2 < 65536] (SHR(n, h, l, h2, l2) | word32(h2, l2)) = "mac#atspre_g0uint_lsr_uint"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dataprop WORD_BYTE(int, int, int, int) =
+  | {b,r,l:nat | b < 256; r < 256; l < 65536} WORD_BYTE_0(0, 256*b + r, l, b)
+  | {q,b,l:nat | q < 256; b < 256; l < 65536} WORD_BYTE_1(1, 256*q + b, l, b)
+  | {h,b,r:nat | h < 65536; b < 256; r < 256} WORD_BYTE_2(2, h, 256*b + r, b)
+  | {h,q,b:nat | h < 65536; q < 256; b < 256} WORD_BYTE_3(3, h, 256*q + b, b)
+
+
+
+
+
+
+
+
+fun word32_rotr {n,h,l:nat | 0 < n; n < 32; h < 65536; l < 65536} (x: word32(h, l), n: int n)
+  : [h2,l2:nat | h2 < 65536; l2 < 65536] (ROTR(n, h, l, h2, l2) | word32(h2, l2))
+
+
+
+
+
+fun word32_pack {a,b,c,d:nat | a < 256; b < 256; c < 256; d < 256}
+  (a: int a, b: int b, c: int c, d: int d): word32(256*a + b, 256*c + d)
+
+
+
+
+fun word32_byte {i,h,l:nat | i < 4; h < 65536; l < 65536} (x: word32(h, l), i: int i)
+  : [b:nat | b < 256] (WORD_BYTE(i, h, l, b) | int b)
+
+
+
+
+prfun word_byte_functional {i,h,l,b1,b2:nat} (WORD_BYTE(i, h, l, b1), WORD_BYTE(i, h, l, b2)): [b1 == b2] void
+
+
+
+
+
+
+
