@@ -14,6 +14,7 @@
 
 #include "share/atspre_staload.hats"
 
+#use arith as AR
 #use array as A
 #use builder as B
 #use file as F
@@ -385,48 +386,129 @@ fn calls {l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}
   prval () = fold@(d)
 in r end
 
-(* The definitions of nm (ids i, i + 1, ...) that src[s, e) calls,
-   added to acc *)
-fun calls_of {N:int}{m,i:nat | i + m == N}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat} .<m>.
-  (nm: !dnames(m), i: int i, src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
-   fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) =
+(* The definitions in BUCKETS lists by the hash of their name (its first 256 bytes), each with its id j < N, so that an identifier is compared with the definitions that hash as it does (bats#368) *)
+#define BUCKETS 64
+
+datavtype bnames(N:int, int) =
+  | bnames_nil(N, 0) of ()
+  | {m:nat}{j:nat | j < N} bnames_cons(N, m + 1) of (int j, dname, bnames(N, m))
+
+datavtype buckets(N:int, int) =
+  | buckets_nil(N, 0) of ()
+  | {b,m:nat} buckets_cons(N, b + 1) of (bnames(N, m), buckets(N, b))
+
+fun bnames_free {N:int}{m:nat} .<m>. (xs: bnames(N, m)): void =
+  case+ xs of
+  | ~bnames_nil() => ()
+  | ~bnames_cons(_, d, tl) => let
+      val+ ~DName(a, _, _, _, _) = d
+      val () = $A.free<byte>(a)
+    in bnames_free(tl) end
+
+fun buckets_free {N:int}{b:nat} .<b>. (bs: buckets(N, b)): void =
+  case+ bs of
+  | ~buckets_nil() => ()
+  | ~buckets_cons(bn, tl) => let
+      val () = bnames_free(bn)
+    in buckets_free(tl) end
+
+fun buckets_make {N:int}{b:nat} .<b>. (b: int b): buckets(N, b) =
+  if b <= 0 then buckets_nil()
+  else buckets_cons(bnames_nil(), buckets_make(b - 1))
+
+(* The hash of a[0, k), below BUCKETS *)
+fun hash_name {la:agz}{k:nat | k <= 256}{i:nat | i <= k}{h:nat | h < BUCKETS} .<k - i>.
+  (a: !$A.arr(byte, la, 256), k: int k, i: int i, h: int h): [r:nat | r < BUCKETS] int r =
+  if i >= k then h
+  else hash_name(a, k, i + 1, nmod(h * 31 + $AR.low_byte(byte2int0($A.get<byte>(a, i))), BUCKETS))
+
+(* The hash of src[s, s + k), the same bytes the same *)
+fun hash_source {l:agz}{o:addr}{n:int}{k:nat | k <= 256}{s:nat | s + k <= n}{i:nat | i <= k}{h:nat | h < BUCKETS} .<k - i>.
+  (src: !$A.arrx(byte, l, n, o), s: int s, k: int k, i: int i, h: int h): [r:nat | r < BUCKETS] int r =
+  if i >= k then h
+  else hash_source(src, s, k, i + 1, nmod(h * 31 + $AR.low_byte(byte2int0($A.get<byte>(src, s + i))), BUCKETS))
+
+(* d added to the bucket h of bs, with its id j *)
+fun buckets_add {N:int}{b:nat}{j:nat | j < N} .<b>.
+  (bs: buckets(N, b), h: int, j: int j, d: dname): buckets(N, b) =
+  case+ bs of
+  | ~buckets_nil() => let
+      val+ ~DName(a, _, _, _, _) = d
+      val () = $A.free<byte>(a)
+    in buckets_nil() end
+  | ~buckets_cons(bn, tl) =>
+    if h <= 0 then buckets_cons(bnames_cons(j, d, bn), tl)
+    else buckets_cons(bn, buckets_add(tl, h - 1, j, d))
+
+(* The names nm (ids i, i + 1, ...) in the buckets bs *)
+fun buckets_fill {N:int}{b:nat}{m,i:nat | i + m == N} .<m>.
+  (nm: dnames(m), i: int i, bs: buckets(N, b)): buckets(N, b) =
   case+ nm of
-  | dnames_nil() => acc
-  | dnames_cons(d, tl) =>
-    if calls(d, src, s, e, fi, grp) then calls_of(tl, i + 1, src, s, e, fi, grp, elist_cons(i, acc))
-    else calls_of(tl, i + 1, src, s, e, fi, grp, acc)
+  | ~dnames_nil() => bs
+  | ~dnames_cons(d, tl) => let
+      val+ @DName(a, k, _, _, _) = d
+      val h = hash_name(a, k, 0, 0)
+      prval () = fold@(d)
+    in buckets_fill(tl, i + 1, buckets_add(bs, h, i, d)) end
+
+(* The definitions of bn that src[s, e) calls, added to acc *)
+fun bucket_calls {N:int}{m:nat}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat} .<m>.
+  (bn: !bnames(N, m), src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
+   fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) =
+  case+ bn of
+  | bnames_nil() => acc
+  | bnames_cons(j, d, tl) =>
+    if calls(d, src, s, e, fi, grp) then bucket_calls(tl, src, s, e, fi, grp, elist_cons(j, acc))
+    else bucket_calls(tl, src, s, e, fi, grp, acc)
+
+(* The definitions of the bucket h of bs that src[s, e) calls, added to acc *)
+fun bucket_of {N:int}{b:nat}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat} .<b>.
+  (bs: !buckets(N, b), h: int, src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
+   fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) =
+  case+ bs of
+  | buckets_nil() => acc
+  | buckets_cons(bn, tl) =>
+    if h <= 0 then bucket_calls(bn, src, s, e, fi, grp, acc)
+    else bucket_of(tl, h - 1, src, s, e, fi, grp, acc)
+
+(* The definitions of bs that src[s, e) calls, added to acc *)
+fn calls_of {N:int}{b:nat}{l:agz}{o:addr}{n:int}{s,e:nat | s <= e; e <= n}{c:nat}
+  (bs: !buckets(N, b), src: !$A.arrx(byte, l, n, o), s: int s, e: int e,
+   fi: spos(RMAX), grp: int, acc: elist(N, c)): [c2:nat] elist(N, c2) = let
+  val len = (if e - s > 256 then 256 else e - s): [k:nat | k <= 256; k <= e - s] int k
+in bucket_of(bs, hash_source(src, s, len, 0, 0), src, s, e, fi, grp, acc) end
 
 (* What the identifiers oc of a body in file fi, group grp, call *)
-fun occs_calls {N:nat}{l:agz}{o:addr}{n:int}{j:nat}{c:nat} .<j>.
-  (oc: !occs(n, j), nm: !dnames(N), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), grp: int, acc: elist(N, c))
+fun occs_calls {N:nat}{b:nat}{l:agz}{o:addr}{n:int}{j:nat}{c:nat} .<j>.
+  (oc: !occs(n, j), bs: !buckets(N, b), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), grp: int, acc: elist(N, c))
   : [c2:nat] elist(N, c2) =
   case+ oc of
   | occs_nil() => acc
   | occs_cons(s, e, tl) =>
-    occs_calls(tl, nm, src, fi, grp, calls_of(nm, 0, src, s, e, fi, grp, acc))
+    occs_calls(tl, bs, src, fi, grp, calls_of(bs, src, s, e, fi, grp, acc))
 
 (* The nodes of the definitions ds of file fi (ids i, i + 1, ...),
    added to acc *)
-fun def_nodes {N:nat}{k,i:nat | i + k <= N}{l:agz}{o:addr}{n:int}{c:nat} .<k>.
-  (ds: !defs(n, k), i: int i, nm: !dnames(N), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), acc: nodes(N, c))
+fun def_nodes {N:nat}{b:nat}{k,i:nat | i + k <= N}{l:agz}{o:addr}{n:int}{c:nat} .<k>.
+  (ds: !defs(n, k), i: int i, bs: !buckets(N, b), src: !$A.arrx(byte, l, n, o), fi: spos(RMAX), acc: nodes(N, c))
   : [c2:nat] nodes(N, c2) =
   case+ ds of
   | defs_nil() => acc
   | defs_cons(d, tl) => let
       val+ @Def(impl, grp, _, _, _, oc) = d
-      val es = occs_calls(oc, nm, src, fi, grp, elist_nil())
+      val es = occs_calls(oc, bs, src, fi, grp, elist_nil())
       val nd = Node(i, impl, es)
       prval () = fold@(d)
-    in def_nodes(tl, i + 1, nm, src, fi, nodes_cons(nd, acc)) end
+    in def_nodes(tl, i + 1, bs, src, fi, nodes_cons(nd, acc)) end
 
 (* The nodes of the files pf, whose definitions have ids i, i + 1, ... *)
-fun file_nodes {N:nat}{t,f,i:nat | i + t == N}{c:nat} .<f>.
-  (pf: !pfiles(t, f), i: int i, nm: !dnames(N), acc: nodes(N, c)): [c2:nat] nodes(N, c2) =
+fun file_nodes {N:nat}{b:nat}{t,f,i:nat | i + t == N}{c:nat} .<f>.
+  (pf: !pfiles(t, f), i: int i, bs: !buckets(N, b), acc: nodes(N, c)): [c2:nat] nodes(N, c2) =
   case+ pf of
   | pfiles_nil() => acc
   | pfiles_cons(fi, _, src, _, k, ds, tl) => let
-      val acc2 = def_nodes(ds, i, nm, src, fi, acc)
-    in file_nodes(tl, i + k, nm, acc2) end
+      val acc2 = def_nodes(ds, i, bs, src, fi, acc)
+    in file_nodes(tl, i + k, bs, acc2) end
 
 (* ============================================================
    Cycles
@@ -603,10 +685,12 @@ fun file_hits {N:nat}{t,f,i:nat | i + t == N}{lc:agz}{h:nat} .<f>.
   | pfiles_nil() => acc
   | pfiles_cons(fi, _, _, _, k, ds, tl) => file_hits(tl, i + k, cyc, def_hits(ds, i, fi, cyc, acc))
 
-(* The hits of the N definitions of pf, whose names are nm *)
+(* The hits of the N definitions of pf, whose names are nm (taken) *)
 fn graph_hits {N:pos | N <= 1048576}{f:nat}
-  (pf: !pfiles(N, f), nm: !dnames(N), n: int N): [h:nat] cycle_hits(h) = let
-  val ns = file_nodes(pf, 0, nm, nodes_nil())
+  (pf: !pfiles(N, f), nm: dnames(N), n: int N): [h:nat] cycle_hits(h) = let
+  val bs = buckets_fill(nm, 0, buckets_make(BUCKETS))
+  val ns = file_nodes(pf, 0, bs, nodes_nil())
+  val () = buckets_free(bs)
   val dead = $A.alloc<bool>(n)
   val c = nodes_len(ns, 0)
   val rs = prune(ns, c, dead)
@@ -649,6 +733,5 @@ in
   else let
     val hs = graph_hits(pf, nm, t)
     val () = pfiles_free(pf)
-    val () = dnames_free(nm)
   in Cycles(hs, false) end
 end

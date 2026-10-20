@@ -498,75 +498,72 @@ fn error_about {l:agz}{at:nat | at <= 4096}
   val () = prerr_newline()
 in set_exit_code(status) end
 
-(* How the command is found *)
-datatype resolution =
-  | CommandFound
+(* How the command is found: one that is found carries its name, with its NUL's proof *)
+datavtype resolution =
+  | {l:agz}{n:pos}{cs:$A.cells}{k:nat | k < n}
+    CommandFound of ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs))
   | CommandNotFound
   | CommandNotAllowed
   | PathTooLong
 
-(* Whether the NUL-terminated name in bv is a directory *)
-fn is_directory {l:agz} (bv: !$A.borrow(byte, l, 524288)): bool =
-  case+ dir_open_path(bv) of
+(* Whether the NUL-terminated name in bv[0, m) is a directory *)
+fn is_directory {l:agz}{n:pos}{m:nat | m <= n; m <= 524288} (bv: !$A.borrow(byte, l, n), m: int m): bool =
+  case+ dir_open_m(bv, m) of
   | ~$R.ok(d) => let val () = $R.discard<int><$F.io_error>($F.dir_close(d)) in true end
   | ~$R.err(_) => false
 
-(* Whether the NUL-terminated name in bv has an execute bit *)
-fn is_executable {l:agz} (bv: !$A.borrow(byte, l, 524288)): bool =
-  case+ $F.file_mode(bv, 524288) of
+(* Whether the NUL-terminated name in bv[0, m) has an execute bit *)
+fn is_executable {l:agz}{n:pos}{m:nat | m <= n; m <= 524288} (bv: !$A.borrow(byte, l, n), m: int m): bool =
+  case+ file_mode_m(bv, m) of
   | ~$R.ok(m) => let
       val m0 = g0ofg1(m)
     in (m0 / 64) % 2 + (m0 / 8) % 2 + m0 % 2 > 0 end
   | ~$R.err(_) => false
 
-(* A resolution that names no file, with the name of one not used *)
-fn without_file (r: resolution): [l:agz] @(resolution, $A.arr(byte, l, 524288)) = let
-  val unused = $A.alloc<byte>(524288)
-in @(r, unused) end
-
 (* The command bv[command_at, command_to) in the directory bv_path[p, q)
    ("." when empty), as a NUL-terminated name, and 0 when there is no such
    file, 1 when there is one that cannot be run (a directory, no execute
-   bit), 2 when there is one that can *)
+   bit), 2 when there is one that can; with the name and its NUL's proof *)
 fn try_candidate {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096}
   (bv_path: !$A.borrow(byte, lp, 524288), p: int p, q: int,
    bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int)
-  : [l:agz] @(int, $A.arr(byte, l, 524288)) = let
+  : [l:agz][n:pos][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int) = let
   var candidate : $B.builder_v = $B.create()
   val () = (if q > p then put_range(bv_path, p, q, 524288, candidate)
     else put_char_v(candidate, 46))
   val () = put_char_v(candidate, 47)
   val () = put_range(bv, command_at, command_to, 4096, candidate)
-  val () = put_char_v(candidate, 0)
-  val @(candidate_a, _) = $B.to_arr(candidate)
-  val @(fz_c, bv_c) = $A.freeze<byte>(candidate_a)
-  val state = (if ~(file_exists_path(bv_c)) then 0
-    else if is_directory(bv_c) then 1
-    else if is_executable(bv_c) then 2
+  val (nul_c | candidate_a, text_len) = path_of_builder(candidate)
+  val @(fz_c, bv_c) = $A.barr_freeze(candidate_a)
+  val view_c = $A.cborrow_view(fz_c, bv_c)
+  val state = (if ~(file_exists_m(view_c, text_len + 1)) then 0
+    else if is_directory(view_c, text_len + 1) then 1
+    else if is_executable(view_c, text_len + 1) then 2
     else 1): int
-  val () = $A.drop<byte>(fz_c, bv_c)
-in @(state, $A.thaw<byte>(fz_c)) end
+  val () = $A.cborrow_view_drop(fz_c, view_c)
+  val () = $A.cborrow_drop(fz_c, bv_c)
+in (nul_c | $A.barr_thaw(fz_c), state) end
 
 (* The first directory of the PATH text bv_path[p, plen), a segment of the
    colon separated list, that holds the command as a file that can be run,
-   as execvp looks: the resolution and the NUL-terminated name. denied says
-   that an earlier directory held a file that could not be run *)
+   as execvp looks. denied says that an earlier directory held a file that
+   could not be run *)
 fun search_path {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096} .<524288 - p>.
   (bv_path: !$A.borrow(byte, lp, 524288), p: int p, plen: int,
    bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int, denied: bool)
-  : [l:agz] @(resolution, $A.arr(byte, l, 524288)) =
-  if p > plen then without_file(if denied then CommandNotAllowed() else CommandNotFound())
+  : resolution =
+  if p > plen then (if denied then CommandNotAllowed() else CommandNotFound())
   else let
     val q = find_byte(bv_path, p, 524288, plen, 58)
-    val @(state, found_a) = try_candidate(bv_path, p, q, bv, command_at, command_to)
+    val (nul_f | found_a, state) = try_candidate(bv_path, p, q, bv, command_at, command_to)
   in
-    if state = 2 then @(CommandFound(), found_a)
+    if state = 2 then CommandFound(nul_f | found_a)
     else let
-      val () = $A.free<byte>(found_a)
+      val () = $A.barr_free(found_a)
       val denied2 = (denied || state = 1): bool
     in
-      if q >= 524288 then without_file(if denied2 then CommandNotAllowed() else CommandNotFound())
-      else if q >= plen then without_file(if denied2 then CommandNotAllowed() else CommandNotFound())
+      if q >= 524288 then (if denied2 then CommandNotAllowed() else CommandNotFound())
+      else if q >= plen then (if denied2 then CommandNotAllowed() else CommandNotFound())
       else search_path(bv_path, q + 1, plen, bv, command_at, command_to, denied2)
     end
   end
@@ -594,21 +591,20 @@ fn has_slash {l:agz}{at:nat | at <= 4096} (bv: !$A.borrow(byte, l, 4096), at: in
 fn resolve_command {l:agz}{lp:agz}{ca:nat | ca <= 4096}
   (bv: !$A.borrow(byte, l, 4096), command_at: int ca, command_to: int,
    known: bool, path_a: $A.arr(byte, lp, 524288), plen: int)
-  : [lr:agz] @(resolution, $A.arr(byte, lr, 524288)) =
+  : resolution =
   if command_to <= command_at then let
     val () = $A.free<byte>(path_a)
-  in without_file(CommandNotFound()) end
+  in CommandNotFound() end
   else if has_slash(bv, command_at, command_to) then let
     val () = $A.free<byte>(path_a)
     var direct : $B.builder_v = $B.create()
     val () = put_range(bv, command_at, command_to, 4096, direct)
-    val () = put_char_v(direct, 0)
-    val @(direct_a, _) = $B.to_arr(direct)
-  in @(CommandFound(), direct_a) end
+    val (nul_d | direct_a, _) = path_of_builder(direct)
+  in CommandFound(nul_d | direct_a) end
   else let
     val @(fz_t, bv_t) = $A.freeze<byte>(path_a)
     val found = (if known then search_path(bv_t, 0, plen, bv, command_at, command_to, false)
-      else without_file(PathTooLong())): [lr:agz] @(resolution, $A.arr(byte, lr, 524288))
+      else PathTooLong()): resolution
     val () = $A.drop<byte>(fz_t, bv_t)
     val () = $A.free<byte>($A.thaw<byte>(fz_t))
   in found end
@@ -633,16 +629,16 @@ in set_exit_code(126) end
 fn run_command {l:agz}{ls:agz}{ca:nat | ca <= 4096}{ct:nat | ct <= 4096}
   (bv: !$A.borrow(byte, l, 4096), command_at: int ca, command_to: int ct, total: int,
    extras: $L.listv($P.arg_entry), known: bool, search_a: $A.arr(byte, ls, 524288), search_len: int): void = let
-  val @(resolved, path_a) = resolve_command(bv, command_at, command_to, known, search_a, search_len)
+  val resolved = resolve_command(bv, command_at, command_to, known, search_a, search_len)
   val () = (case+ resolved of
-    | CommandFound() => let
-        val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
+    | ~CommandFound(nul_p | path_a) => let
+        val @(fz_p, bv_p) = $A.barr_freeze(path_a)
         var first : $B.builder_v = $B.create()
         val () = put_range(bv, command_at, command_to, 4096, first)
         val rest = (if command_to + 1 > 4096 then $L.list_vt_nil()
           else arguments(bv, command_to + 1, total, $L.list_vt_nil())): $L.listv($P.arg_entry)
         val argv = $L.list_vt_cons(mk_arg(first), rev_arg_list(rest, $L.list_vt_nil()))
-        val spawned = spawn_child_with(bv_p, argv, extras, $P.inherit(), $P.inherit(), $P.inherit())
+        val spawned = spawn_child_with(nul_p | bv_p, argv, extras, $P.inherit(), $P.inherit(), $P.inherit())
         val () = (case+ spawned of
           | ~$R.ok(sp) => let
               val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
@@ -656,19 +652,16 @@ fn run_command {l:agz}{ls:agz}{ca:nat | ca <= 4096}{ct:nat | ct <= 4096}
               if code = 2 then
                 error_about(bv, command_at, command_to, "bats with-env: ", ": command not found", 127)
               else cannot_run(bv, command_at, command_to, code)): void
-        val () = $A.drop<byte>(fz_p, bv_p)
-      in $A.free<byte>($A.thaw<byte>(fz_p)) end
-    | CommandNotFound() => let
+        val () = $A.cborrow_drop(fz_p, bv_p)
+      in $A.barr_free($A.barr_thaw(fz_p)) end
+    | ~CommandNotFound() => let
         val () = arguments_free(extras)
-        val () = $A.free<byte>(path_a)
       in error_about(bv, command_at, command_to, "bats with-env: ", ": command not found", 127) end
-    | CommandNotAllowed() => let
+    | ~CommandNotAllowed() => let
         val () = arguments_free(extras)
-        val () = $A.free<byte>(path_a)
       in cannot_run(bv, command_at, command_to, 13) end
-    | PathTooLong() => let
+    | ~PathTooLong() => let
         val () = arguments_free(extras)
-        val () = $A.free<byte>(path_a)
       in error_about(bv, 0, 0, "bats with-env: PATH is over 64 KiB, so a command cannot be looked for in it", "", 2) end): void
 in () end
 

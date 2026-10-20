@@ -1,3 +1,4 @@
+staload AR = "arith/src/lib.sats"
 staload A = "array/src/lib.sats"
 staload B = "builder/src/lib.sats"
 staload F = "file/src/lib.sats"
@@ -25,8 +26,90 @@ staload S = "str/src/lib.sats"
 
 
 
+
 staload "helpers.sats"
 staload "lexer.sats"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -631,6 +714,8 @@ fun cycle_hits_free {k:nat} (xs: cycle_hits(k)): void
 
 
 
+
+
 datavtype cycles =
   | {h:nat} Cycles of (cycle_hits(h), bool)
 
@@ -638,7 +723,6 @@ datavtype cycles =
 
 fn implement_cycles {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= 524288}{off:nat | off <= fm}
   (files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int): cycles
-
 
 
 

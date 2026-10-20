@@ -1406,16 +1406,16 @@ in r end
 
 (* rm -rf the path in b; consumes b (Rust: remove_dir_all) *)
 fn remove_tree (b: $B.builder_v): void = let
-  val exec = str_to_path_arr("rm")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("rm")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "rm")
   var b2 = $B.create()
   val () = bput_v(b2, "-rf")
-  val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val _ = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b), $L.list_vt_nil()))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-in $A.free<byte>($A.thaw<byte>(fz_x)) end
+  val () = $A.cborrow_drop(fz_x, bv_x)
+in $A.barr_free($A.barr_thaw(fz_x)) end
 
 (* bats_modules/<a[0, k)>/.bats-version, NUL-terminated, and its length
    without the NUL: the version fetch unpacked there *)
@@ -1542,8 +1542,8 @@ fn fetch {lc,la:agz}
   val () = bput_v(md, "bats_modules/")
   val () = put_name(a, k, md)
   val made = run_mkdir(md)
-  val uz = str_to_path_arr("unzip")
-  val @(fz_uz, bv_uz) = $A.freeze<byte>(uz)
+  val (nul_uz | uz) = $P.path_of_string_proved("unzip")
+  val @(fz_uz, bv_uz) = $A.barr_freeze(uz)
   var u1 = $B.create()
   val () = bput_v(u1, "unzip")
   var u2 = $B.create()
@@ -1557,11 +1557,11 @@ fn fetch {lc,la:agz}
   var u6 = $B.create()
   val () = bput_v(u6, "bats_modules/")
   val () = put_name(a, k, u6)
-  val unzipped = run_cmd(bv_uz, $L.list_vt_cons(mk_arg(u1), $L.list_vt_cons(mk_arg(u2),
+  val unzipped = run_cmd(nul_uz | bv_uz, $L.list_vt_cons(mk_arg(u1), $L.list_vt_cons(mk_arg(u2),
     $L.list_vt_cons(mk_arg(u3), $L.list_vt_cons(mk_arg(u4), $L.list_vt_cons(mk_arg(u5),
     $L.list_vt_cons(mk_arg(u6), $L.list_vt_nil())))))))
-  val () = $A.drop<byte>(fz_uz, bv_uz)
-  val () = $A.free<byte>($A.thaw<byte>(fz_uz))
+  val () = $A.cborrow_drop(fz_uz, bv_uz)
+  val () = $A.barr_free($A.barr_thaw(fz_uz))
   (* The stamp: "<version>\n<sha256>\n"; an archive that could not be
      read leaves no second line, which no lock matches *)
   var stamp : $B.builder_v = $B.create()
@@ -1972,9 +1972,9 @@ fun lock_notes {la,lb:agz}{al,i:int} .<max(al - i, 0)>.
 
 (* bats.lock's bytes and their count; none when there is no bats.lock *)
 fn read_old_lock (): @([l:agz] $A.arr(byte, l, LOCK_MAX), pos_t) = let
-  val lp = str_to_path_arr("bats.lock")
+  val @(lp, lp_len) = str_into_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val fr = file_open_path(bv_lp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fr = file_open_m(bv_lp, lp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
   val buf = $A.alloc<byte>(LOCK_MAX)
@@ -2042,10 +2042,10 @@ fn finish_lock (st: int, n: int, lock: $B.builder_v, dry: bool): void =
   in set_build_err() end
   else if dry then dry_run_lock(lock)
   else let
-    val lp = str_to_path_arr("bats.lock")
+    val @(lp, lp_len) = str_into_arr("bats.lock")
     val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
     (* said, and the build failed, if bats.lock cannot be written *)
-    val written = write_settle(bv_lp, 524288, write_file_from_builder(bv_lp, 524288, lock))
+    val written = write_settle(bv_lp, lp_len, write_file_from_builder_m(bv_lp, lp_len, lock))
     val () = $A.drop<byte>(fz_lp, bv_lp)
     val () = $A.free<byte>($A.thaw<byte>(fz_lp))
   in
@@ -3441,9 +3441,9 @@ in c <= 0 end
 
 (* Whether ./bats.lock exists *)
 fn lock_exists (): bool = let
-  val lp = str_to_path_arr("bats.lock")
+  val @(lp, lp_len) = str_into_arr("bats.lock")
   val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-  val r = file_exists_path(bv_lp)
+  val r = file_exists_m(bv_lp, lp_len)
   val () = $A.drop<byte>(fz_lp, bv_lp)
   val () = $A.free<byte>($A.thaw<byte>(fz_lp))
 in r end

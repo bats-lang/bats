@@ -56,8 +56,8 @@ staload "helpers.sats"
    Its stdout is dropped and its stderr shown when it fails (run_cmd). *)
 fn sh_exec {sn:nat}
   (script: string sn, a1: $B.builder_v, a2: $B.builder_v, a3: $B.builder_v): int = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -66,12 +66,12 @@ fn sh_exec {sn:nat}
   val () = bput_v(b3, script)
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
-  val rc = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val rc = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2),
     $L.list_vt_cons(mk_arg(a3), $L.list_vt_nil()))))))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in rc end
 
 fn empty_arg (): $B.builder_v = $B.create()
@@ -195,9 +195,8 @@ fn install_now (): bool = let
   val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
   val () = println! ("ATS2 not found, installing ", ATS2_NAME, " into ~/.bats/ats2 ...")
   val out = $A.alloc<byte>(4096)
-  val @(fexec, fbv) = let
-    val e = str_to_path_arr("sh")
-  in $A.freeze<byte>(e) end
+  val (nul_fetch | fetch_exec) = $P.path_of_string_proved("sh")
+  val @(fexec, fbv) = $A.barr_freeze(fetch_exec)
   var s1 = $B.create()
   val () = bput_v(s1, "sh")
   var s2 = $B.create()
@@ -206,11 +205,11 @@ fn install_now (): bool = let
   val () = bput_v(s3, FETCH)
   var s4 = $B.create()
   val () = bput_v(s4, "sh")
-  val @(rc, k) = run_cmd_capture(fbv, $L.list_vt_cons(mk_arg(s1), $L.list_vt_cons(mk_arg(s2),
+  val @(rc, k) = run_cmd_capture(nul_fetch | fbv, $L.list_vt_cons(mk_arg(s1), $L.list_vt_cons(mk_arg(s2),
     $L.list_vt_cons(mk_arg(s3), $L.list_vt_cons(mk_arg(s4),
     $L.list_vt_cons(mk_arg(base_arg()), $L.list_vt_cons(mk_arg(text_arg(ATS2_URL)), $L.list_vt_nil())))))), out)
-  val () = $A.drop<byte>(fexec, fbv)
-  val () = $A.free<byte>($A.thaw<byte>(fexec))
+  val () = $A.cborrow_drop(fexec, fbv)
+  val () = $A.barr_free($A.barr_thaw(fexec))
   val @(fz_o, bv_o) = $A.freeze<byte>(out)
 in
   if rc <> 0 then let
@@ -291,8 +290,8 @@ datatype solver_kind = SolverInt | SolverRefusesFalse | SolverNoAnswer
 (* sh -c with two arguments, its stdout kept in out (at most 4096 bytes) *)
 fn sh_capture {sn:nat}{lo:agz}
   (script: string sn, a1: $B.builder_v, a2: $B.builder_v, out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -301,11 +300,11 @@ fn sh_capture {sn:nat}{lo:agz}
   val () = bput_v(b3, script)
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
-  val r = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val r = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2), $L.list_vt_nil())))))), out)
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in r end
 
 (* The status of a script, and what it printed (at most 4096 bytes) *)

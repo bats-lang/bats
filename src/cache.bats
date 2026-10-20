@@ -66,8 +66,8 @@ in mk_arg(b) end
    could not be run. What sh wrote to stderr is printed when it fails
    (run_cmd), so a script says nothing on a failure that is expected. *)
 fn sh_script {sn:nat} (script: string sn, args: $L.listv($P.arg_entry)): int = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -76,10 +76,10 @@ fn sh_script {sn:nat} (script: string sn, args: $L.listv($P.arg_entry)): int = l
   val () = bput_v(b3, script)
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
-  val rc = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val rc = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4), args)))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in rc end
 
 (* ============================================================
@@ -90,8 +90,8 @@ in rc end
    makes a relative path absolute, appended to root; false when it
    cannot be had *)
 fn project_root (root: !$B.builder_v >> $B.builder_v): bool = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -99,10 +99,10 @@ fn project_root (root: !$B.builder_v >> $B.builder_v): bool = let
   var b3 = $B.create()
   val () = bput_v(b3, "pwd -P")
   val cwd = $A.alloc<byte>(4096)
-  val @(rc, k) = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1),
+  val @(rc, k) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), cwd)
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
   (* without its newline *)
   val @(fz_o, bv_o) = $A.freeze<byte>(cwd)
   val e = (if k > 0 then (if peek(bv_o, k - 1, 4096) = 10 then k - 1 else k) else 0): int
@@ -785,11 +785,11 @@ in (if sized then memo_hashes_text(c, 0, n, m, b) else false) end
    be read, the key would not fit, or it cannot be written. It is a key of
    the closure of a fixture's check, kept in the fixtures' memo (bats#267),
    and read by closure_key_equal. *)
-#pub fn closure_key_write {ll,lo:agz}
-  (list_bv: !$A.borrow(byte, ll, 524288), out_bv: !$A.borrow(byte, lo, 524288)): bool
+#pub fn closure_key_write {ll,lo:agz}{nl,no:pos}{lm:nat | lm <= nl; lm <= 524288}{om:nat | om <= no; om <= 524288}
+  (list_bv: !$A.borrow(byte, ll, nl), list_len: int lm, out_bv: !$A.borrow(byte, lo, no), out_len: int om): bool
 
-implement closure_key_write(list_bv, out_bv) =
-  (case+ read_whole(list_bv, 524288) of
+implement closure_key_write(list_bv, list_len, out_bv, out_len) =
+  (case+ read_whole_m(list_bv, list_len) of
     | ~whole_err(_) => false
     | ~whole_ok(ar, piece, m, n) => let
         val @(fz_c, bv_c) = $A.freeze<byte>(piece)
@@ -801,7 +801,7 @@ implement closure_key_write(list_bv, out_bv) =
         val hashed = (if named && nl = 64 then list_key_text(bv_na, nl, bv_c, n, m, b) else false): bool
         val fits = ($B.length(b) < 524288): bool
         val bf = b
-        val wrote = (if hashed && fits then (write_settle(out_bv, 524288, write_file_from_builder(out_bv, 524288, bf)) = 0)
+        val wrote = (if hashed && fits then (write_settle(out_bv, out_len, write_file_from_builder_m(out_bv, out_len, bf)) = 0)
           else let val () = $B.builder_free(bf) in false end): bool
         val () = $A.drop<byte>(fz_na, bv_na)
         val () = $A.free<byte>($A.thaw<byte>(fz_na))

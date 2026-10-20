@@ -208,6 +208,45 @@ fn dir_read_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
 
 
 
+fn file_mkdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, mode: int): $R.result(int, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+fn file_chdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result(int, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+fn file_mode_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result([k:nat | k <= 4095] int k, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -452,6 +491,38 @@ datatype prelude_build = NoPreludeBuild | BuildsList | BuildsOption | BuildsStre
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn prelude_build_is (build: prelude_build, kind: prelude_build): bool
 
 
@@ -464,6 +535,10 @@ fn prelude_build_is (build: prelude_build, kind: prelude_build): bool
 
 fn prelude_build_of {l:agz}{n:pos}{p,q:int}
   (src: !$A.borrow(byte, l, n), s: int p, e: int q, max: int n): prelude_build
+
+
+
+
 
 
 
@@ -1392,6 +1467,29 @@ fn rev_arg_list
 
 
 
+fn path_of_builder (b: $B.builder_v)
+  : [l:agz][n:pos | n <= $B.BUILDER_CAP][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn split_null_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
 
 
@@ -1473,6 +1571,8 @@ fn run_mkdir
 
 
 
+fn str_to_exact_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, sn + 1)
+
 
 
 
@@ -1530,8 +1630,8 @@ fn slot_path (i: int, out: !$B.builder_v >> $B.builder_v): void
 
 fn spawn_child_with
   {sin:bool}{sout:bool}{serr:bool}
-  {lp:agz}
-  (path: !$A.borrow(byte, lp, 524288),
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: $P.NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
    argv: $L.listv($P.arg_entry),
    extra: $L.listv($P.arg_entry),
    stdin_cfg: $P.stream_config(sin),
@@ -1556,8 +1656,8 @@ fn spawn_child_with
 
 fn spawn_child
   {sin:bool}{sout:bool}{serr:bool}
-  {lp:agz}
-  (path: !$A.borrow(byte, lp, 524288),
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: $P.NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
    argv: $L.listv($P.arg_entry),
    stdin_cfg: $P.stream_config(sin),
    stdout_cfg: $P.stream_config(sout),
@@ -1573,8 +1673,8 @@ datavtype program_run = Exited of int | NotStarted
 
 
 
-fn run_program {le:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): program_run
+fn run_program {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs), argv: $L.listv($P.arg_entry)): program_run
 
 
 
@@ -1591,8 +1691,8 @@ fn run_program {le:agz}
 
 
 
-fn run_cmd {le:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288),
+fn run_cmd {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs),
    argv: $L.listv($P.arg_entry)): int
 
 
@@ -1671,8 +1771,8 @@ fn timestamp_to_calver(ts: int): @(int, int, int, int)
 
 
 
-fn run_cmd_capture {le:agz}{lo:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288),
+fn run_cmd_capture {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs),
    argv: $L.listv($P.arg_entry),
    outbuf: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k)
 
@@ -2450,10 +2550,6 @@ fn check_emitted_flaws {lo,li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:p
 
 
 
-
-
-
-
 fn cap_secs_now (): int
 
 
@@ -2485,7 +2581,6 @@ fn remove_output_m {lo:agz}{n:pos}{m:nat | m <= n}
 
 
 fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void
-
 
 
 
@@ -3906,20 +4001,8 @@ fn is_cold (): bool
 
 
 
-
-
-
 fn str_into_arr {sn:nat} (s: string sn)
   : [n:nat | n <= $B.BUILDER_CAP][cap:pos | n <= cap; cap <= $B.BUILDER_CAP][l:agz] @($A.arr(byte, l, cap), int n)
-
-
-
-
-
-
-
-
-fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
 
 
 

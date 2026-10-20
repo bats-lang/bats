@@ -170,32 +170,32 @@ fun scan_modules {lf,lt:agz}{p:nat | p <= 524288} .<524288 - p>.
 
 (* Runs sh -c cmd; its exit status *)
 fn run_sh {sn:nat | sn < 524288} (cmd: string sn): int = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_e, bv_e) = $A.freeze<byte>(exec)
+  val (nul_e | exec) = $P.path_of_string_proved("sh")
+  val @(fz_e, bv_e) = $A.barr_freeze(exec)
   var b1 = $B.create() val () = bput_v(b1, "sh")
   var b2 = $B.create() val () = bput_v(b2, "-c")
   var b3 = $B.create() val () = bput_v(b3, cmd)
   val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
-  val r = run_cmd(bv_e, argv)
-  val () = $A.drop<byte>(fz_e, bv_e)
-  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+  val r = run_cmd(nul_e | bv_e, argv)
+  val () = $A.cborrow_drop(fz_e, bv_e)
+  val () = $A.barr_free($A.barr_thaw(fz_e))
 in r end
 
 (* Writes b to the path s *)
 fn write_to {sn:nat | sn < 524288} (s: string sn, b: $B.builder_v): int = let
-  val pa = str_to_path_arr(s)
+  val @(pa, pa_len) = str_into_arr(s)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
+  val r = write_settle(bv_p, pa_len, write_file_from_builder_m(bv_p, pa_len, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
 
 (* Changes to the directory s; whether it could *)
 fn chdir_to {sn:nat | sn < 524288} (s: string sn): bool = let
-  val pa = str_to_path_arr(s)
+  val @(pa, pa_len) = str_into_arr(s)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val ok = (case+ $F.file_chdir(bv_p, 524288) of
+  val ok = (case+ file_chdir_m(bv_p, pa_len) of
     | ~$R.ok(_) => true | ~$R.err(_) => false): bool
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
@@ -204,12 +204,12 @@ in ok end
 (* Runs the built native runner; whether its tests passed *)
 fn run_native_runner (n: int): bool = let
   val () = (if ~is_quiet() then prerr! ("running ", n, " native test(s)\n") else ())
-  val ex = str_to_path_arr("build/_bats_test/dist/debug/_bats_test")
-  val @(fz_x, bv_x) = $A.freeze<byte>(ex)
+  val (nul_x | ex) = $P.path_of_string_proved("build/_bats_test/dist/debug/_bats_test")
+  val @(fz_x, bv_x) = $A.barr_freeze(ex)
   var a0 = $B.create() val () = bput_v(a0, "_bats_test")
-  val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val st = run_program(nul_x | bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
   val passed = (case+ st of ~Exited(status) => status = 0 | ~NotStarted() => false): bool
 in
   if passed then true
@@ -222,13 +222,13 @@ end
    tests passed *)
 fn run_wasm_runner (n: int): bool = let
   val () = (if ~is_quiet() then prerr! ("running ", n, " wasm test(s)\n") else ())
-  val ex = str_to_path_arr("node")
-  val @(fz_x, bv_x) = $A.freeze<byte>(ex)
+  val (nul_x | ex) = $P.path_of_string_proved("node")
+  val @(fz_x, bv_x) = $A.barr_freeze(ex)
   var a0 = $B.create() val () = bput_v(a0, "node")
   var a1 = $B.create() val () = bput_v(a1, "build/_bats_test_wasm/_bats_test_harness.mjs")
-  val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil())))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val st = run_program(nul_x | bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil())))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in
   case+ st of
   | ~Exited(0) => true
@@ -548,9 +548,9 @@ fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
    to build/upload/bats.toml; 0 on success *)
 fn write_with_version {lv:agz}{nv:pos}
   (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -569,9 +569,9 @@ in
       var dir: $B.builder_v = $B.create()
       val () = bput_v(dir, "build/upload")
       val _ = run_mkdir(dir)
-      val upath = str_to_path_arr("build/upload/bats.toml")
+      val @(upath, upath_len) = str_into_arr("build/upload/bats.toml")
       val @(fz_op, bv_op) = $A.freeze<byte>(upath)
-      val rc = write_settle(bv_op, 524288, write_file_from_builder(bv_op, 524288, out))
+      val rc = write_settle(bv_op, upath_len, write_file_from_builder_m(bv_op, upath_len, out))
       val () = $A.drop<byte>(fz_op, bv_op)
       val () = $A.free<byte>($A.thaw<byte>(fz_op))
     in rc end
@@ -583,8 +583,8 @@ end
 (* git rev-parse --git-dir's exit code: 0 in a repository, > 0 outside
    one, -errno when git could not be run (Rust: resolve_version) *)
 fn git_dir_rc (): int = let
-  val git_exec = str_to_path_arr("git")
-  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  val (nul_ge | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_ge, bv_ge) = $A.barr_freeze(git_exec)
   var b1 = $B.create()
   val () = bput_v(b1, "git")
   var b2 = $B.create()
@@ -594,16 +594,16 @@ fn git_dir_rc (): int = let
   val argv = $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
-  val @(rc, _) = run_cmd_capture(bv_ge, argv, out)
+  val @(rc, _) = run_cmd_capture(nul_ge | bv_ge, argv, out)
   val () = $A.free<byte>(out)
-  val () = $A.drop<byte>(fz_ge, bv_ge)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  val () = $A.cborrow_drop(fz_ge, bv_ge)
+  val () = $A.barr_free($A.barr_thaw(fz_ge))
 in rc end
 
 (* Whether git status --porcelain lists anything (Rust: resolve_version) *)
 fn git_tree_dirty (): bool = let
-  val git_exec = str_to_path_arr("git")
-  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  val (nul_ge | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_ge, bv_ge) = $A.barr_freeze(git_exec)
   var b1 = $B.create()
   val () = bput_v(b1, "git")
   var b2 = $B.create()
@@ -613,10 +613,10 @@ fn git_tree_dirty (): bool = let
   val argv = $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
-  val @(_, olen) = run_cmd_capture(bv_ge, argv, out)
+  val @(_, olen) = run_cmd_capture(nul_ge | bv_ge, argv, out)
   val () = $A.free<byte>(out)
-  val () = $A.drop<byte>(fz_ge, bv_ge)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  val () = $A.cborrow_drop(fz_ge, bv_ge)
+  val () = $A.barr_free($A.barr_thaw(fz_ge))
 in olen > 0 end
 
 (* Whether a[0, t) and b[0, t) hold the same bytes *)
@@ -640,9 +640,9 @@ in @(a, 4, 4) end
    (Rust: config::load) *)
 fn package_value {lk:agz}{nk:pos}
   (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -719,8 +719,8 @@ vtypedef version_arr = [l:agz][n:pos] @($A.arr(byte, l, n), int n, int, bool)
    midnight, with dev1 off the trunk (Rust: resolve_version) *)
 fn git_version (): version_arr = let
   (* Get version from git commit timestamp *)
-  val git_exec = str_to_path_arr("git")
-  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  val (nul_ge | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_ge, bv_ge) = $A.barr_freeze(git_exec)
   (* Get commit timestamp *)
   var ts_b1 = $B.create()
   val () = bput_v(ts_b1, "git")
@@ -734,7 +734,7 @@ fn git_version (): version_arr = let
     $L.list_vt_cons(mk_arg(ts_b2), $L.list_vt_cons(mk_arg(ts_b3),
     $L.list_vt_cons(mk_arg(ts_b4), $L.list_vt_nil()))))
   val ts_out = $A.alloc<byte>(4096)
-  val @(ts_rc, ts_len) = run_cmd_capture(bv_ge, ts_argv, ts_out)
+  val @(ts_rc, ts_len) = run_cmd_capture(nul_ge | bv_ge, ts_argv, ts_out)
   val ts = parse_decimal(ts_out, ts_len, 4096)
   val () = $A.free<byte>(ts_out)
   val @(yr, mo, dy, secs) = timestamp_to_calver(ts)
@@ -751,13 +751,13 @@ fn git_version (): version_arr = let
     $L.list_vt_cons(mk_arg(br_b2), $L.list_vt_cons(mk_arg(br_b3),
     $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
   val br_out = $A.alloc<byte>(4096)
-  val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
+  val @(br_rc, br_len) = run_cmd_capture(nul_ge | bv_ge, br_argv, br_out)
   val @(trunk, _, tlen) = read_trunk()
   val is_main = on_trunk(br_out, br_len, trunk, tlen)
   val () = $A.free<byte>(trunk)
   val () = $A.free<byte>(br_out)
-  val () = $A.drop<byte>(fz_ge, bv_ge)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  val () = $A.cborrow_drop(fz_ge, bv_ge)
+  val () = $A.barr_free($A.barr_thaw(fz_ge))
   (* Build version string *)
   var vb_b: $B.builder_v = $B.create()
   val () = put_int_v(vb_b, yr)
@@ -854,9 +854,9 @@ fn version_error (failure: version_failure): void =
 
 implement do_upload {lr} (repo, rplen) = let
   (* Read bats.toml for package name and verify kind = "lib" *)
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -968,8 +968,8 @@ in
                 val () = bput_v(mkd, "/")
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, mkd)
                 val _ = run_mkdir(mkd)
-                val zip_exec = str_to_path_arr("zip")
-                val @(fz_ze, bv_ze) = $A.freeze<byte>(zip_exec)
+                val (nul_ze | zip_exec) = $P.path_of_string_proved("zip")
+                val @(fz_ze, bv_ze) = $A.barr_freeze(zip_exec)
                 var za1 = $B.create()
                 val () = bput_v(za1, "zip")
                 var za2 = $B.create()
@@ -992,9 +992,9 @@ in
                 val () = $A.free<byte>($A.thaw<byte>(fz_nb))
                 val () = $A.drop<byte>(fz_px, bv_px)
                 val () = $A.free<byte>($A.thaw<byte>(fz_px))
-                val dp = str_to_path_arr("docs")
+                val @(dp, dp_len) = str_into_arr("docs")
                 val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
-                val has_docs = file_exists_path(bv_dp)
+                val has_docs = file_exists_m(bv_dp, dp_len)
                 val () = $A.drop<byte>(fz_dp, bv_dp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_dp))
                 val zip_docs = (if has_docs then let
@@ -1018,7 +1018,7 @@ in
                       val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, zj3)
                       var zj4 = $B.create()
                       val () = bput_v(zj4, "build/upload/bats.toml")
-                    in run_cmd(bv_ze, $L.list_vt_cons(mk_arg(zj1),
+                    in run_cmd(nul_ze | bv_ze, $L.list_vt_cons(mk_arg(zj1),
                          $L.list_vt_cons(mk_arg(zj2), $L.list_vt_cons(mk_arg(zj3),
                          $L.list_vt_cons(mk_arg(zj4), $L.list_vt_nil()))))) end
                   end): int
@@ -1033,9 +1033,9 @@ in
                 val rc = (if toml_rc <> 0 then let
                     val () = free_args(zip_argv)
                   in toml_rc end
-                  else run_cmd(bv_ze, zip_argv)): int
-                val () = $A.drop<byte>(fz_ze, bv_ze)
-                val () = $A.free<byte>($A.thaw<byte>(fz_ze))
+                  else run_cmd(nul_ze | bv_ze, zip_argv)): int
+                val () = $A.cborrow_drop(fz_ze, bv_ze)
+                val () = $A.barr_free($A.barr_thaw(fz_ze))
               in
                 if rc <> 0 then let
                   val () = $A.drop<byte>(fz_zp, bv_zp)
@@ -1107,9 +1107,9 @@ implement do_completions(target) =
 #pub fn file_exists {sn:nat | sn < $B.BUILDER_CAP} (path: string sn): bool
 
 implement file_exists(path) = let
-  val pa = str_to_path_arr(path)
+  val @(pa, pa_len) = str_into_arr(path)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fex_or = file_open_path(bv, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fex_or = file_open_m(bv, pa_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in case+ fex_or of
@@ -1160,9 +1160,9 @@ implement write_claude_rules() = let
   val () = $B.bput(rb, "- Pattern matching: `case+ x of | 0 => ... | n => ...`\n")
   val () = $B.bput(rb, "- Types: `int`, `string`, `bool`, `void`\n")
   val () = $B.bput(rb, "- No semicolons at end of expressions\n")
-  val rp = str_to_path_arr(".claude/rules/bats.md")
+  val @(rp, rp_len) = str_into_arr(".claude/rules/bats.md")
   val @(fz_rp, bv_rp) = $A.freeze<byte>(rp)
-  val _ = write_settle(bv_rp, 524288, write_file_from_builder(bv_rp, 524288, rb))
+  val _ = write_settle(bv_rp, rp_len, write_file_from_builder_m(bv_rp, rp_len, rb))
   val () = $A.drop<byte>(fz_rp, bv_rp)
   val () = $A.free<byte>($A.thaw<byte>(fz_rp))
 in end
@@ -1195,8 +1195,8 @@ in
 end
 
 (* Whether the NUL-terminated path in p exists. *)
-fn path_exists {l:agz} (p: !$A.borrow(byte, l, 524288)): bool =
-  case+ file_open_path(p, $F.ReadOnly(), $F.OpenExisting(), 0) of
+fn path_exists {l:agz}{n:pos}{m:nat | m <= n; m <= 524288} (p: !$A.borrow(byte, l, n), m: int m): bool =
+  case+ file_open_m(p, m, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
   | ~$R.err(_) => false
 
@@ -1213,21 +1213,21 @@ fn add_project_name (b: !$B.builder_v >> $B.builder_v): void = let
 in $A.free<byte>($A.thaw<byte>(fz_c)) end
 
 (* The NUL-terminated path "src/bin/<name>.bats" or "src/lib.bats". *)
-fn init_source_path {ln:agz}
-  (kind: package_kind, name: !$A.borrow(byte, ln, 524288), nlen: int): $B.builder_v = let
+fn init_source_path {ln:agz}{nn:pos}{nm:nat | nm <= nn}
+  (kind: package_kind, name: !$A.borrow(byte, ln, nn), nlen: int nm): $B.builder_v = let
   var p: $B.builder_v = $B.create()
   val () = (case+ kind of
     | Binary() => let
         val () = bput_v(p, "src/bin/")
-        val () = copy_to_builder_v(name, 0, nlen, 524288, p)
+        val () = copy_to_builder_v(name, 0, nlen, nlen, p)
       in bput_v(p, ".bats") end
     | Library() => bput_v(p, "src/lib.bats")): void
   val () = put_char_v(p, 0)
 in p end
 
 (* Writes b to the NUL-terminated path in p; 0 on success. *)
-fn write_to {lp:agz} (p: !$A.borrow(byte, lp, 524288), b: $B.builder_v): int =
-  write_settle(p, 524288, write_file_from_builder(p, 524288, b))
+fn write_to {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (p: !$A.borrow(byte, lp, n), m: int m, b: $B.builder_v): int =
+  write_settle(p, m, write_file_from_builder_m(p, m, b))
 
 (* bats init <kind>: as the Rust bats's cmd_init. arg: the kind argument
    in arg[0, alen). *)
@@ -1244,36 +1244,36 @@ implement do_init {la} (arg, alen, claude) =
   | ~$R.some(kind) => let
     var nb: $B.builder_v = $B.create()
     val () = add_project_name(nb)
-    val @(na, nlen) = $B.to_arr(nb)
+    val @(na, nlen) = $B.into_arr(nb)
     val @(fz_n, bv_n) = $A.freeze<byte>(na)
     val sp = init_source_path(kind, bv_n, nlen)
-    val @(spa, splen) = $B.to_arr(sp)
+    val @(spa, splen) = $B.into_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
-    val tp = str_to_path_arr("bats.toml")
+    val @(tp, tp_len) = str_into_arr("bats.toml")
     val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-    val gp = str_to_path_arr(".gitignore")
+    val @(gp, gp_len) = str_into_arr(".gitignore")
     val @(fz_gp, bv_gp) = $A.freeze<byte>(gp)
-    val c_toml = path_exists(bv_tp)
-    val c_src = path_exists(bv_sp)
-    val c_gi = path_exists(bv_gp)
+    val c_toml = path_exists(bv_tp, tp_len)
+    val c_src = path_exists(bv_sp, splen)
+    val c_gi = path_exists(bv_gp, gp_len)
     val () = (if c_toml || c_src || c_gi then let
         val () = prerr! ("error: refusing to overwrite existing files:")
         val () = prerr_newline()
         val () = (if c_toml then let val () = prerr! ("  bats.toml") in prerr_newline() end else ())
         val () = (if c_src then let
             val () = prerr! ("  ")
-            val () = prerr_seg(bv_sp, 0, splen - 1, 524288)
+            val () = prerr_seg(bv_sp, 0, splen - 1, splen)
           in prerr_newline() end else ())
         val () = (if c_gi then let val () = prerr! ("  .gitignore") in prerr_newline() end else ())
       in set_build_err() end
       else let
         var toml: $B.builder_v = $B.create()
         val () = bput_v(toml, "[package]\nname = \"")
-        val () = copy_to_builder_v(bv_n, 0, nlen, 524288, toml)
+        val () = copy_to_builder_v(bv_n, 0, nlen, nlen, toml)
         val () = (case+ kind of
           | Binary() => bput_v(toml, "\"\nkind = \"bin\"\n")
           | Library() => bput_v(toml, "\"\nkind = \"lib\"\n")): void
-        val r1 = write_to(bv_tp, toml)
+        val r1 = write_to(bv_tp, tp_len, toml)
         var dir: $B.builder_v = $B.create()
         val () = (case+ kind of Binary() => bput_v(dir, "src/bin") | Library() => bput_v(dir, "src")): void
         val _ = run_mkdir(dir)
@@ -1284,10 +1284,10 @@ implement do_init {la} (arg, alen, claude) =
               val () = bput_v(src, "implement ")
             in bput_v(src, "main0 () = println! (\"hello, world!\")\n") end
           | Library() => bput_v(src, "#pub fun hello(): void\n\nimplement hello () = println! (\"hello from library\")\n")): void
-        val r2 = write_to(bv_sp, src)
+        val r2 = write_to(bv_sp, splen, src)
         var gi: $B.builder_v = $B.create()
         val () = bput_v(gi, "build/\ndist/\ndocs/\nbats_modules/\n")
-        val r3 = write_to(bv_gp, gi)
+        val r3 = write_to(bv_gp, gp_len, gi)
       in
         if r1 <> 0 then let
           val () = prerr! ("error: cannot write bats.toml")
@@ -1295,7 +1295,7 @@ implement do_init {la} (arg, alen, claude) =
         in set_build_err() end
         else if r2 <> 0 then let
           val () = prerr! ("error: cannot write ")
-          val () = prerr_seg(bv_sp, 0, splen - 1, 524288)
+          val () = prerr_seg(bv_sp, 0, splen - 1, splen)
           val () = prerr_newline()
         in set_build_err() end
         else if r3 <> 0 then let
@@ -1310,7 +1310,7 @@ implement do_init {la} (arg, alen, claude) =
             val () = prerr! ("created ")
             val () = prerr_seg(arg, 0, alen, 4096)
             val () = prerr! (" project '")
-            val () = prerr_seg(bv_n, 0, nlen, 524288)
+            val () = prerr_seg(bv_n, 0, nlen, nlen)
             val () = prerr! ("'")
           in prerr_newline() end
         end
@@ -1331,9 +1331,9 @@ implement do_init {la} (arg, alen, claude) =
 #pub fn do_tree(): void
 
 implement do_tree() = let
-  val la = str_to_path_arr("bats.lock")
+  val @(la, la_len) = str_into_arr("bats.lock")
   val @(fz_la, bv_la) = $A.freeze<byte>(la)
-  val lock_or = file_open_path(bv_la, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val lock_or = file_open_m(bv_la, la_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_la, bv_la)
   val () = $A.free<byte>($A.thaw<byte>(fz_la))
 in
@@ -1369,9 +1369,9 @@ end
 
 implement do_add(bv, pkg_start, pkg_len, max) = let
   (* Read bats.toml *)
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1390,9 +1390,9 @@ in
       val () = bput_v(out_b, "\"")
       val () = copy_to_builder_v(bv, pkg_start, pkg_start + pkg_len, max, out_b)
       val () = bput_v(out_b, "\" = \"\"\n")
-      val tp3 = str_to_path_arr("bats.toml")
+      val @(tp3, tp3_len) = str_into_arr("bats.toml")
       val @(fz_tp3, bv_tp3) = $A.freeze<byte>(tp3)
-      val rc = write_settle(bv_tp3, 524288, write_file_from_builder(bv_tp3, 524288, out_b))
+      val rc = write_settle(bv_tp3, tp3_len, write_file_from_builder_m(bv_tp3, tp3_len, out_b))
       val () = $A.drop<byte>(fz_tp3, bv_tp3)
       val () = $A.free<byte>($A.thaw<byte>(fz_tp3))
     in
@@ -1415,9 +1415,9 @@ end
    max: int n): void
 
 implement do_remove(bv, pkg_start, pkg_len, max) = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1429,8 +1429,8 @@ in
       val tcr = $F.file_close(tfd)
       val () = $R.discard<int><$F.io_error>(tcr)
       val () = $A.free<byte>(tbuf)
-      val sed_exec = str_to_path_arr("sed")
-      val @(fz_se, bv_se) = $A.freeze<byte>(sed_exec)
+      val (nul_se | sed_exec) = $P.path_of_string_proved("sed")
+      val @(fz_se, bv_se) = $A.barr_freeze(sed_exec)
       var sb1 = $B.create()
       val () = bput_v(sb1, "sed")
       var sb2 = $B.create()
@@ -1445,9 +1445,9 @@ in
       val sed_argv = $L.list_vt_cons(mk_arg(sb1), $L.list_vt_cons(mk_arg(sb2),
         $L.list_vt_cons(mk_arg(pat_b), $L.list_vt_cons(mk_arg(sb4),
         $L.list_vt_nil()))))
-      val rc = run_cmd(bv_se, sed_argv)
-      val () = $A.drop<byte>(fz_se, bv_se)
-      val () = $A.free<byte>($A.thaw<byte>(fz_se))
+      val rc = run_cmd(nul_se | bv_se, sed_argv)
+      val () = $A.cborrow_drop(fz_se, bv_se)
+      val () = $A.barr_free($A.barr_thaw(fz_se))
     in
       if rc = 0 then let
           val () = print! ("removed '")
@@ -1468,18 +1468,18 @@ end
 #pub fn run_process_demo(): void
 
 implement run_process_demo() = let
-  val exec = str_to_path_arr("echo")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("echo")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var ba1 = $B.create()
   val () = bput_v(ba1, "echo")
   var ba2 = $B.create()
   val () = bput_v(ba2, "check passed")
   val argv = $L.list_vt_cons(mk_arg(ba1),
     $L.list_vt_cons(mk_arg(ba2), $L.list_vt_nil()))
-  val spawn_r = spawn_child(bv_exec, argv,
+  val spawn_r = spawn_child(nul_exec | bv_exec, argv,
     $P.dev_null(), $P.pipe_new(), $P.dev_null())
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in
   case+ spawn_r of
   | ~$R.ok(sp) => let
@@ -1571,9 +1571,9 @@ fun collect_built_from {n,i:nat | i <= n} .<n - i>.
   end
 
 fn collect_built (names: !$B.builder_v >> $B.builder_v, release: profile): int = let
-  val sb = str_to_path_arr("src/bin")
+  val @(sb, sb_len) = str_into_arr("src/bin")
   val @(fz_sb, bv_sb) = $A.freeze<byte>(sb)
-  val count = (case+ $F.dir_read(bv_sb, 524288) of
+  val count = (case+ dir_read_m(bv_sb, sb_len) of
     | ~$R.ok(es) => let
         val c = collect_built_from(es, 0, $F.entries_count(es), names, release, 0)
         val () = $F.entries_free(es)
@@ -1670,29 +1670,30 @@ implement do_run {lb,le} (release, bin, blen, extra, elen, lk) = let
   val chosen = (case+ choice of NoBinary() => false | _ => true): bool
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
-  val () = put_char_v(cmd, 0)
-  val @(exec_a, exec_len) = $B.to_arr(cmd)
-  val @(fz_ea, bv_ea) = $A.freeze<byte>(exec_a)
+  val (nul_ea | exec_a, exec_len) = path_of_builder(cmd)
+  val @(fz_ea, bv_ea) = $A.barr_freeze(exec_a)
 in
   if ~chosen then let
-    val () = $A.drop<byte>(fz_ea, bv_ea)
-    val () = $A.free<byte>($A.thaw<byte>(fz_ea))
+    val () = $A.cborrow_drop(fz_ea, bv_ea)
+    val () = $A.barr_free($A.barr_thaw(fz_ea))
   in set_exit_code(1) end
   else let
+    val view_ea = $A.cborrow_view(fz_ea, bv_ea)
     var run_b1 = $B.create()
-    val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
+    val () = copy_to_builder_v(view_ea, 0, exec_len, exec_len, run_b1)
     val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil()), $L.list_vt_nil())
     val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
-    val () = (case+ run_program(bv_ea, run_argv) of
+    val () = (case+ run_program(nul_ea | bv_ea, run_argv) of
     | ~NotStarted() => let
       val () = prerr! ("error: cannot run '")
-      val () = prerr_seg(bv_ea, 0, exec_len - 1, 524288)
+      val () = prerr_seg(view_ea, 0, exec_len, exec_len)
       val () = prerr! ("'")
       val () = prerr_newline()
     in set_exit_code(1) end
     | ~Exited(status) => set_exit_code(status)): void
-    val () = $A.drop<byte>(fz_ea, bv_ea)
-  in $A.free<byte>($A.thaw<byte>(fz_ea)) end
+    val () = $A.cborrow_view_drop(fz_ea, view_ea)
+    val () = $A.cborrow_drop(fz_ea, bv_ea)
+  in $A.barr_free($A.barr_thaw(fz_ea)) end
 end
 
 (* ============================================================

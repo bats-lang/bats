@@ -67,18 +67,18 @@ fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: 
 
 (* sh -c script, its stdout into out: its exit status and the length *)
 fn sh_capture {sn:nat}{lo:agz} (script: string sn, out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
   val () = bput_v(b2, "-c")
   var b3 = $B.create()
   val () = bput_v(b3, script)
-  val r = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val r = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in r end
 
 (* Whether a module of src/ staloads the facts: a staload, aliased or
@@ -120,8 +120,8 @@ fun line_end {l:agz}{n:pos}{i,k:nat} .<max(n - i, 0)>.
 
 implement write_facts () =
   if ~facts_named() then let
-    val exec = str_to_path_arr("rm")
-    val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+    val (nul_x | exec) = $P.path_of_string_proved("rm")
+    val @(fz_x, bv_x) = $A.barr_freeze(exec)
     var b1 = $B.create()
     val () = bput_v(b1, "rm")
     var b2 = $B.create()
@@ -130,10 +130,10 @@ implement write_facts () =
     val () = bput_v(b3, "build/src/_bats_facts.sats")
     var b4 = $B.create()
     val () = bput_v(b4, "build/src/_bats_facts.dats")
-    val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+    val _ = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
       $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4), $L.list_vt_nil())))))
-    val () = $A.drop<byte>(fz_x, bv_x)
-  in $A.free<byte>($A.thaw<byte>(fz_x)) end
+    val () = $A.cborrow_drop(fz_x, bv_x)
+  in $A.barr_free($A.barr_thaw(fz_x)) end
   else let
     (* the committer time, then the full SHA, of the commit *)
     val out = $A.alloc<byte>(4096)

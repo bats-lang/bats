@@ -67,8 +67,8 @@ fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: 
 
 (* sh -c script with the arguments: its exit status *)
 fn sh_run {sn:nat} (script: string sn, args: $L.listv($P.arg_entry)): int = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -77,10 +77,10 @@ fn sh_run {sn:nat} (script: string sn, args: $L.listv($P.arg_entry)): int = let
   val () = bput_v(b3, script)
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
-  val rc = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val rc = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4), args)))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in rc end
 
 (* Whether a module of src/ staloads the inputs: a staload, aliased or
@@ -152,9 +152,9 @@ fn inputs_digest (): @(bool, $B.builder_v) = let
   val () = bput_v(key, "bats-inputs 1\n")
   val read = (if rc <> 0 then false
     else let
-      val lp = str_to_path_arr("build/.bats_inputs")
+      val @(lp, lp_len) = str_into_arr("build/.bats_inputs")
       val @(fz_lp, bv_lp) = $A.freeze<byte>(lp)
-      val r = (case+ read_whole(bv_lp, 524288) of
+      val r = (case+ read_whole_m(bv_lp, lp_len) of
         | ~whole_err(_) => false
         | ~whole_ok(ar, piece, m, n) => let
             val @(fz_c, bv_c) = $A.freeze<byte>(piece)

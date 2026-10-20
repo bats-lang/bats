@@ -487,9 +487,9 @@ fn write_index {l:agz}{n:pos}
     val () = copy_to_builder_v(bv_i, 0, ilen, 524288, ib)
     val () = $A.drop<byte>(fz_i, bv_i)
     val () = $A.free<byte>($A.thaw<byte>(fz_i))
-    val ip = str_to_path_arr("docs/index.md")
+    val @(ip, ip_len) = str_into_arr("docs/index.md")
     val @(fz_ip, bv_ip) = $A.freeze<byte>(ip)
-    val rc = write_settle(bv_ip, 524288, write_file_from_builder(bv_ip, 524288, ib))
+    val rc = write_settle(bv_ip, ip_len, write_file_from_builder_m(bv_ip, ip_len, ib))
     val () = $A.drop<byte>(fz_ip, bv_ip)
     val () = $A.free<byte>($A.thaw<byte>(fz_ip))
   in
@@ -544,9 +544,9 @@ fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 #pub fn generate_lib_docs(): docs
 
 implement generate_lib_docs() = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tp_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
