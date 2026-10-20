@@ -35,7 +35,7 @@ CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result 
 ## Architecture
 
 Entry point: `src/bin/bats.bats`
-Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`
+Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`, `src/pins.bats`
 
 Dependencies: argparse, array, arith, builder, env, file, path, process, result, sha256, str, toml
 
@@ -108,6 +108,8 @@ a workflow pin that would move instead of moving it.
 
 The notes are in `.claude/rules/`, each with `paths:` frontmatter, so a note loads only when a file it covers is touched. Each keeps its decisions, the research behind them, and what is proved apart from what is only tested.
 
+A comment states its reason in one line and names the area by keyword; the detail lives in `.claude/rules/*.md`: search them for the keyword before changing the code.
+
 | File | Area |
 |---|---|
 | `.claude/rules/cli.md` | Command line and repository |
@@ -133,3 +135,4 @@ The notes are in `.claude/rules/`, each with `paths:` frontmatter, so a note loa
 | `.claude/rules/fixtures-memo.md` | The fixtures' memo |
 | `.claude/rules/with-env.md` | bats with-env |
 | `.claude/rules/setup-action.md` | The setup step other bats repositories call (#274) |
+| `.claude/rules/check-pins.md` | bats check-pins: floating CI inputs (#390) |

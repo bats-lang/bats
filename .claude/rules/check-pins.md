@@ -1,0 +1,28 @@
+---
+paths:
+  - src/pins.bats
+  - tests/check-pins/**
+---
+
+# bats check-pins (bats#390, repository-prototype#353)
+
+`bats check-pins <file>...` fails on the inputs of CI that move under a passing commit. It replaces `scripts/check-pins.sh`, which read `uses:` lines alone (repository-prototype#352 found eight floating inputs it could not see). It is a subcommand written in bats (`src/pins.bats`, run before bats's own arguments are read, as `with-env` is), per quire#646: we write bats, not shell. The shell expands the files (`.github/workflows/*.yml .github/actions/*/action.yml`), so bats lists no directory. Each failure is `file:line: ...` on stderr, the status is 1 for a failure, 2 for no file or an unreadable one; a clean run prints nothing.
+
+Name, by research: `check-pins` follows the script it replaces and the repository's verb-noun subcommands (`clone-repository`, `record-commit`); `bats check` is the type-check. Comparable tools: pinact (`run --check`), ratchet (`check`) and zizmor's unpinned-uses audit name the thing checked and read `uses:` only.
+
+## The rules (a workflow or action, by file name anything else than `package.json` and `ats2.bats`)
+
+* `uses:` is `./...` or `owner/repo[/path]@<40 lowercase hex>` followed by a comment that has text (the version).
+* `runs-on`, `os` (a matrix's) and the items of their lists: no label ending in `-latest` (a longer name such as `ubuntu-latest-x` is not one).
+* `node-version`, `java-version`, `python-version`: three numbers and then nothing or a `-` or `+` suffix (`22.23.3`, `21.0.12+8.0.LTS`, `1.2.3-rc.1`), quoted or not; a `${{ ... }}` expression is accepted (its source is checked where the literal is); a `*-version-file` is another key, accepted. A key with no value on its line (an action input) is checked at the `default:` under it.
+* A command (in the position of one: first word after `- `, `run:`, `&&`, `||`, `|`, `;`, `(`, `sudo`, `then`, `do`, `else`, `exec`), so `echo "npm install"`, a comment and a `name:` are not commands: `npm install` or `npm i` (use `npm ci`); `pnpm install` or `pnpm i` with no `--frozen-lockfile` on the line; `npx` whose first non-flag word is not `name@<exact version>`; `curl` or `wget` when no line of the step (the list item that holds the line, to the next line indented as little) holds `sha256sum`, `shasum`, `sha512sum`, `sha384sum` or `b2sum`. `apt-get install` is allowed (the runner image is pinned).
+* A `package.json` (by its name): each entry of `dependencies`, `devDependencies` and `optionalDependencies` is `"name": "version"` on a line of its own with an exact version `github:owner/repo#<40 hex>` or `workspace:...` (a pnpm workspace package: local source, pinned by the commit itself, not fetched from a registry); a lock (`package-lock.json`, `npm-shrinkwrap.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock`) is beside it when it has any entry. `peerDependencies` are the package's API, not an install, and are not read. It is read by lines, not parsed (the json package would add a dependency to the compiler): a section whose entries are not one to a line is refused, never passed.
+* `src/ats2.bats`, named among the files: `#define ATS2_SHA256 "<64 lowercase hex>"` and `#define ATS2_URL "https://...tgz"` are there, and then no workflow or action named beside it holds `ATS2-Postiats` or a run of 64 hex digits outside a `uses:` line (the script's rule: the ATS2 pin is in `src/ats2.bats` alone, bats#283).
+
+## Exceptions
+
+`# unpinned: <reason>` on the line of an input, or above it (on a comment line, with only comment lines between), is accepted and listed on stdout (`file:line: unpinned: <reason>`), so each is a decision somebody wrote. An exception with no reason, or one that exempts nothing (a stale decision: a blank line, a code line that is clean, or the end of the file after it), is a failure, as linters that report unused suppressions do (ESLint's `--report-unused-disable-directives`). A `package.json` has no comments, so it has no exceptions.
+
+## What is proved, tested and limited
+
+Every read of the file's bytes is proved in range by the types (`src/pins.bats` is the style of `with_env.bats`: `read_byte` with `p < n`, spans indexed, every loop with a metric); no position is moved into range: `byte_in` answers 0 at and past a span's end, a value for a read beyond the span, never a read. Tested (`tests/check-pins/check.sh`): accept and reject fixtures for every rule, the near misses (a label inside a longer name, an exact version that looks like a range, a command word inside `echo`, a command in a comment or a `name:`), the exceptions, many lines, a last line with no newline, and this repository's own files. Limits, said exactly: the command line is read into 4096 bytes, so a run whose arguments total 4095 bytes or more is refused with status 2 (the shell expands the files, so a very long list reaches it); a line is a line (a value that continues on the next is not joined); `pnpm install` takes its flag from the same line; a command after `$(` or a backtick is not in command position; a step is found by indentation (a list item), so a `curl` outside any list item takes the whole file as its step; a version key that is a list on following lines is not read.

@@ -210,7 +210,7 @@ implement write_inputs () =
       (* the stamp of a changed .sats, and the .dats only once the .sats is in
          place: a stamp that cannot be written is said by touch_sats_stamp
          (write_settle, which fails the build), and nothing after a failed
-         write is written (write-errors.md) *)
+         write is written (a failed write is reported, never ignored: write errors) *)
       val sats_ok = (case+ sats_new of
         | FileWritten() => touch_sats_stamp() = 0
         | FileSame() => true

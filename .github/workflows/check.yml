@@ -15,13 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      # Every uses: is a commit, never a name that moves
-      # (bats-lang/repository-prototype#269)
-      - name: Every uses is pinned
-        run: |
-          tests/setup-action/pins-check.sh
-          scripts/check-pins.sh
-
       - name: Install libgmp-dev and wasm-ld (wasm fixtures)
         run: sudo apt-get install -y -q libgmp-dev lld
 
@@ -33,6 +26,11 @@ jobs:
           make -j$(nproc) -C ~/seed debug/bats
           mkdir -p ~/bats-bin
           cp ~/seed/debug/bats ~/bats-bin/bats
+
+      # Every input of CI is pinned, never a name that moves
+      # (bats-lang/repository-prototype#269, bats-lang/bats#390)
+      - name: Every CI input is pinned
+        run: ~/bats-bin/bats check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats
 
       # The GMP build of ATS2: its constraint solver does infinite-precision
       # arithmetic (the -int build computes in C int and accepts false
