@@ -113,7 +113,7 @@ fn print_usage(): void = let
   val () = println! ("  clone-repository <commit> --repository <dir>")
   val () = println! ("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>")
   val () = println! ("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>")
-  val () = println! ("  check-pins <file>...         Fail the CI inputs that move: uses:, -latest images, versions, npm, curl (see .claude/rules/check-pins.md)")
+  val () = println! ("  check-pins <file>...         Fail the CI inputs that move: uses:, -latest images, versions, npm, curl (a moving input turns a passing commit red later; keyword: inputs of CI that move)")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
   val () = println! ("  fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]")
   val () = println! ("                               Run the accept and reject fixtures of <dir> against a copy of the project")
