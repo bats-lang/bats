@@ -33,7 +33,7 @@ cleanup() {
   rm -rf "$TMP"
 }
 trap cleanup EXIT
-unset BATS_CACHE_DIR BATS_COLD
+unset BATS_CACHE_DIR BATS_COLD BATS_COMMIT
 # the real ATS2 of this machine, behind a patsopt that lifts the limit
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -42,19 +42,22 @@ for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; don
 printf '#!/bin/sh\nulimit -S -f unlimited\nexec "%s" "$@"\n' "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 
-# a project of 400 functions, each declared with a long type, so that its
-# .sats, .dats and C are of three different sizes (some 30 KB, 40 KB and 2.4
-# MB), all over the 22 KB of the toolchain's listing, which a child of bats
-# writes and which is the biggest other file of build/
+# a project of 800 functions, each declared with a long type, so that its
+# .sats, .dats and C are of three different sizes (some 59 KB, 77 KB and 4.4
+# MB), all over the 47 KB of the toolchain's listing (.bats_toolchain: one
+# sha256 line per file of patsopt, prelude, libats, share and ccomp since
+# bats#318; it was a cksum line per file, 22 KB), which a child of bats
+# writes and which is the biggest other file of build/. The order the limits
+# need is checked below, so a listing that grows again fails there, named.
 mkdir -p "$TMP/project/src"
 printf '[package]\nname = "app"\nkind = "lib"\n' > "$TMP/project/bats.toml"
 {
   printf '#include "share/atspre_staload.hats"\n\n'
-  i=0; while [ $i -lt 400 ]; do
+  i=0; while [ $i -lt 800 ]; do
     printf '#pub fun f%d {a,b,c:int | a >= 0; b >= 0; c >= 0} (x: int a, y: int b): int\n\n' $i
     i=$((i + 1))
   done
-  i=0; while [ $i -lt 400 ]; do
+  i=0; while [ $i -lt 800 ]; do
     printf 'implement f%d (x, y) = if x > y then (x + y) * (x - y) else (if x = y then x * y else y - x)\n' $i
     i=$((i + 1))
   done
@@ -155,6 +158,49 @@ try "a .sats and everything bigger that do not fit" "$sats_up" "lib.sats"
 # (every small file fails, each independent writer says so, and the tools bats
 # starts fail too: only the first error and the recovery are asked)
 try "no file with a byte in it fits" 0 - many
+
+# A write that fails at the stamp (bats-lang/bats#335): build/.sats_changed is
+# a directory, so the stamp cannot be written (EISDIR). No size limit singles
+# it out, since it is smaller than any .sats. A project that staloads
+# _bats_inputs.sats or _bats_facts.sats writes that .sats, then the stamp, then
+# its .dats: the check must fail (status 1), its first error naming the stamp,
+# and write no .dats after it; the next check, with the directory gone, is the
+# clean build's, file for file.
+stamp_case() { # <name> <the staloaded file> <its module> <expression>
+  d="$TMP/stamp-$1"
+  mkdir -p "$d/src" "$d/build/.sats_changed"
+  printf '[package]\nname = "stamp"\nkind = "bin"\n' > "$d/bats.toml"
+  printf 'build/\ndist/\n' > "$d/.gitignore"
+  printf '#include "share/atspre_staload.hats"\nstaload X = "%s"\nimplement main0 () = println! (%s)\n' "$2" "$4" > "$d/src/stamp.bats"
+  (cd "$d" && git init -q -b main . && git add -A && git -c user.name=t -c user.email=t@t commit -q -m first)
+  status=0
+  run "$d" "$TMP/stamp-$1.log" - || status=$?
+  if [ "$status" != 1 ]; then
+    echo "FAIL: $1: a stamp that cannot be written: the check ended with status $status, not 1"
+    cat "$TMP/stamp-$1.log"; exit 1
+  fi
+  line=$(grep -a '^error: ' "$TMP/stamp-$1.log" | head -1)
+  case "$line" in
+    "error: cannot write 'build/.sats_changed': "*"(os error "*")") ;;
+    *) echo "FAIL: $1: the first error does not name the stamp:"; cat "$TMP/stamp-$1.log"; exit 1;;
+  esac
+  if [ -e "$d/build/src/$3.dats" ]; then
+    echo "FAIL: $1: the $3.dats was written after the stamp failed"; cat "$TMP/stamp-$1.log"; exit 1
+  fi
+  rmdir "$d/build/.sats_changed"
+  run "$d" "$TMP/stamp-$1.next.log" - || { echo "FAIL: $1: the check after it failed"; cat "$TMP/stamp-$1.next.log"; exit 1; }
+  ref="$TMP/stamp-$1-ref"
+  # the same commit (the facts name it), with no build/
+  rm -rf "$ref"; cp -R "$d" "$ref"; rm -rf "$ref/build"
+  run "$ref" "$TMP/stamp-$1-ref.log" - || { echo "FAIL: $1: the clean check failed"; exit 1; }
+  if ! diff -r -x .bats_valid -x .sats_changed -x .stash "$ref/build" "$d/build" > "$TMP/stamp-$1.diff" 2>&1; then
+    echo "FAIL: $1: the build/ after the next check is not the clean build's:"
+    head -20 "$TMP/stamp-$1.diff"; exit 1
+  fi
+  echo "ok   a stamp that cannot be written: $1"
+}
+stamp_case inputs _bats_inputs.sats _bats_inputs '$X.bats_inputs_sha256 ()'
+stamp_case facts _bats_facts.sats _bats_facts '$X.bats_commit_short ()'
 
 # A file system that really is full, where one can be mounted (root, or sudo
 # with no password: CI's runners have it; a small tmpfs, never the disk the

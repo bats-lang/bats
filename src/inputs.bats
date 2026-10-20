@@ -57,6 +57,14 @@ fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in wrote end
 
+(* The .dats of the .sats just written: written when that .sats is in place
+   (sats_ok), else b is given back, so nothing follows a failed write *)
+fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: $B.builder_v): void =
+  if sats_ok then let
+    val _ = write_changed(path, b)
+  in end
+  else $B.builder_free(b)
+
 (* sh -c script with the arguments: its exit status *)
 fn sh_run {sn:nat} (script: string sn, args: $L.listv($P.arg_entry)): int = let
   val exec = str_to_path_arr("sh")
@@ -199,14 +207,15 @@ implement write_inputs () =
       val () = bput_v(sats, "(* the sha256 of bats.toml, bats.lock and every src/**.bats, 64 hex digits *)\n")
       val () = bput_v(sats, "fun bats_inputs_sha256 (): string 64\n")
       val sats_new = write_changed("build/src/_bats_inputs.sats", sats)
-      val () = (case+ sats_new of
-        | FileWritten() => let
-            (* said, and the build failed, if the stamp cannot be written *)
-            val _ = touch_sats_stamp()
-          in end
-        | FileSame() => ()
+      (* the stamp of a changed .sats, and the .dats only once the .sats is in
+         place: a stamp that cannot be written is said by touch_sats_stamp
+         (write_settle, which fails the build), and nothing after a failed
+         write is written (write-errors.md) *)
+      val sats_ok = (case+ sats_new of
+        | FileWritten() => touch_sats_stamp() = 0
+        | FileSame() => true
         (* said by write_changed *)
-        | FileNotWritten() => ())
+        | FileNotWritten() => false): bool
       var dats : $B.builder_v = $B.create()
       val () = bput_v(dats, "(* _bats_inputs -- written by bats from the inputs it names *)\n\n")
       val () = bput_v(dats, "#include \"share/atspre_staload.hats\"\n\n")
@@ -214,6 +223,6 @@ implement write_inputs () =
       val () = bput_v(dats, "implement bats_inputs_sha256 () = \"")
       val () = append_builder(dats, hex)
       val () = bput_v(dats, "\"\n")
-      val _ = write_changed("build/src/_bats_inputs.dats", dats)
+      val () = dats_when(sats_ok, "build/src/_bats_inputs.dats", dats)
     in () end
   end
