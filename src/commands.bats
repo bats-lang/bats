@@ -387,10 +387,15 @@ in finish_test(nn, nw, bins, stl, calls, wcalls) end
    upload: package library for repository
    ============================================================ *)
 
+(* An argument in the builder's own array, as mk_arg makes it in 524288 bytes (bats#357) *)
+fn arg_of (b: $B.builder_v): $P.arg_entry = let
+  val @(a, n) = $B.into_arr(b)
+in @(a, n) end
+
 (* The sidecar line in sc (the hash so far) completed and written to
    zp + ".sha256", or the error when the archive could not be hashed *)
-fn finish_sidecar {lz:agz}
-  (ok: bool, sc: $B.builder_v, zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
+fn finish_sidecar {lz:agz}{nz:pos}{zm:nat | zm <= nz; zm <= 524288}
+  (ok: bool, sc: $B.builder_v, zp: !$A.borrow(byte, lz, nz), zlen: int zm): void =
   if ~ok then let
     val () = $B.builder_free(sc)
     val () = set_build_err()
@@ -398,26 +403,27 @@ fn finish_sidecar {lz:agz}
   else let
     var line = sc
     val () = bput_v(line, "  ")
-    val base = find_basename_start(zp, 0, 524288, ~1)
-    val () = copy_to_builder_v(zp, base, zlen, 524288, line)
+    val base = find_basename_start(zp, 0, zlen, ~1)
+    val () = copy_to_builder_v(zp, base, zlen - 1, zlen, line)
     val () = bput_v(line, "\n")
     var sp: $B.builder_v = $B.create()
-    val () = copy_to_builder_v(zp, 0, zlen, 524288, sp)
+    val () = copy_to_builder_v(zp, 0, zlen - 1, zlen, sp)
     val () = bput_v(sp, ".sha256")
     val () = put_char_v(sp, 0)
-    val @(spa, _) = $B.to_arr(sp)
+    val @(spa, spk) = $B.into_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
     (* said, and the build failed, if the sidecar cannot be written *)
-    val _ = write_settle(bv_sp, 524288, write_file_from_builder(bv_sp, 524288, line))
+    val _ = write_settle(bv_sp, spk, write_file_from_builder_m(bv_sp, spk, line))
     val () = $A.drop<byte>(fz_sp, bv_sp)
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
   in end
 
 (* Writes "<sha256 of the archive>  <archive filename>\n" to the sidecar
-   of the archive at zp[0, zlen) (NUL-terminated), as the Rust bats did *)
-fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void = let
+   of the archive whose NUL-terminated path is zp[0, zlen), as the Rust bats did *)
+fn write_sidecar {lz:agz}{nz:pos}{zm:nat | zm <= nz; zm <= 524288}
+  (zp: !$A.borrow(byte, lz, nz), zlen: int zm): void = let
   var sc: $B.builder_v = $B.create()
-  val ok = put_file_sha256(zp, sc)
+  val ok = put_file_sha256_m(zp, zlen, sc)
 in finish_sidecar(ok, sc, zp, zlen) end
 
 (* The end of the line starting at i: the next '\n', or len *)
@@ -488,26 +494,26 @@ fun any_version_line {l:agz}{n:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
   end
 
 (* version = "<v>" and a newline *)
-fn put_version_line {lv:agz}{nv:pos}
+fn put_version_line {lv:agz}{nv:pos}{vm:nat | vm <= nv}
   (out: !$B.builder_v >> $B.builder_v,
-   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): void = let
+   v: !$A.borrow(byte, lv, nv), vm: int vm): void = let
   val () = bput_v(out, "version = \"")
-  val () = copy_to_builder_v(v, 0, vlen, nv, out)
+  val () = copy_to_builder_v(v, 0, vm, vm, out)
 in bput_v(out, "\"\n") end
 
 (* One line b[i, ce) of inject_lines *)
-fn inject_line {l:agz}{n:pos}{lv:agz}{nv:pos}
+fn inject_line {l:agz}{n:pos}{lv:agz}{nv:pos}{vm:nat | vm <= nv}
   (b: !$A.borrow(byte, l, n), i: pos_t, ce: pos_t, n: int n,
    replace: bool, ver_line: bool, pkg_line: bool,
-   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
+   v: !$A.borrow(byte, lv, nv), vm: int vm,
    out: !$B.builder_v >> $B.builder_v): void =
-  if replace && ver_line then put_version_line(out, v, vlen, nv)
+  if replace && ver_line then put_version_line(out, v, vm)
   else let
     val () = copy_to_builder_v(b, i, ce, n, out)
     val () = put_char_v(out, 10)
   in
     if replace then ()
-    else if pkg_line then put_version_line(out, v, vlen, nv)
+    else if pkg_line then put_version_line(out, v, vm)
     else ()
   end
 
@@ -522,9 +528,9 @@ fn chop_cr {l:agz}{n:pos}{i,e:nat | i <= e; e <= n}
    line present (replace), each one becomes the new version line;
    otherwise the version line goes after "[package]". Every line ends
    with '\n' and loses a trailing '\r', as str::lines does. *)
-fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
+fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{vm:nat | vm <= nv}{i,len:nat | i <= len; len <= n} .<len - i>.
   (b: !$A.borrow(byte, l, n), i: int i, len: int len, n: int n, replace: bool,
-   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
+   v: !$A.borrow(byte, lv, nv), vm: int vm,
    out: !$B.builder_v >> $B.builder_v): void =
   if i >= len then ()
   else let
@@ -532,8 +538,8 @@ fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{i,len:nat | i <= len; len <= n} 
     val ce = chop_cr(b, i, e)
     val ver_line = is_version_line(b, i, ce, n)
     val pkg_line = is_package_line(b, i, ce, n)
-    val () = inject_line(b, i, ce, n, replace, ver_line, pkg_line, v, vlen, nv, out)
-  in if e >= len then () else inject_lines(b, e + 1, len, n, replace, v, vlen, nv, out) end
+    val () = inject_line(b, i, ce, n, replace, ver_line, pkg_line, v, vm, out)
+  in if e >= len then () else inject_lines(b, e + 1, len, n, replace, v, vm, out) end
 
 (* Frees an argument list that will not be run *)
 fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
@@ -546,11 +552,11 @@ fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
 
 (* Writes bats.toml with the version injected (Rust: write_with_version)
    to build/upload/bats.toml; 0 on success *)
-fn write_with_version {lv:agz}{nv:pos}
-  (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
-  val tp = str_to_path_arr("bats.toml")
+fn write_with_version {lv:agz}{nv:pos}{vm:nat | vm <= nv}
+  (v: !$A.borrow(byte, lv, nv), vm: int vm): int = let
+  val @(tp, tpk) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tpk, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -563,15 +569,15 @@ in
       val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
       val replace = any_version_line(bv_tb, 0, tlen, 8192)
       var out: $B.builder_v = $B.create()
-      val () = inject_lines(bv_tb, 0, tlen, 8192, replace, v, vlen, nv, out)
+      val () = inject_lines(bv_tb, 0, tlen, 8192, replace, v, vm, out)
       val () = $A.drop<byte>(fz_tb, bv_tb)
       val () = $A.free<byte>($A.thaw<byte>(fz_tb))
       var dir: $B.builder_v = $B.create()
       val () = bput_v(dir, "build/upload")
       val _ = run_mkdir(dir)
-      val upath = str_to_path_arr("build/upload/bats.toml")
+      val @(upath, upk) = str_into_arr("build/upload/bats.toml")
       val @(fz_op, bv_op) = $A.freeze<byte>(upath)
-      val rc = write_settle(bv_op, 524288, write_file_from_builder(bv_op, 524288, out))
+      val rc = write_settle(bv_op, upk, write_file_from_builder_m(bv_op, upk, out))
       val () = $A.drop<byte>(fz_op, bv_op)
       val () = $A.free<byte>($A.thaw<byte>(fz_op))
     in rc end
@@ -591,8 +597,8 @@ fn git_dir_rc (): int = let
   val () = bput_v(b2, "rev-parse")
   var b3 = $B.create()
   val () = bput_v(b3, "--git-dir")
-  val argv = $L.list_vt_cons(mk_arg(b1),
-    $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
+  val argv = $L.list_vt_cons(arg_of(b1),
+    $L.list_vt_cons(arg_of(b2), $L.list_vt_cons(arg_of(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
   val @(rc, _) = run_cmd_capture(bv_ge, argv, out)
   val () = $A.free<byte>(out)
@@ -610,8 +616,8 @@ fn git_tree_dirty (): bool = let
   val () = bput_v(b2, "status")
   var b3 = $B.create()
   val () = bput_v(b3, "--porcelain")
-  val argv = $L.list_vt_cons(mk_arg(b1),
-    $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
+  val argv = $L.list_vt_cons(arg_of(b1),
+    $L.list_vt_cons(arg_of(b2), $L.list_vt_cons(arg_of(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
   val @(_, olen) = run_cmd_capture(bv_ge, argv, out)
   val () = $A.free<byte>(out)
@@ -640,9 +646,9 @@ in @(a, 4, 4) end
    (Rust: config::load) *)
 fn package_value {lk:agz}{nk:pos}
   (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tpk) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tpk, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -711,9 +717,8 @@ in
   else false
 end
 
-(* A version: bytes with the array's size, the length, and whether it
-   came from [package] version (true) or from git (false) *)
-vtypedef version_arr = [l:agz][n:pos] @($A.arr(byte, l, n), int n, int, bool)
+(* A version in an array of the builder's own size, its length, and whether it is [package] version (true) or git's (false) *)
+vtypedef version_arr = [l:agz][n:pos][t:nat | t <= n] @($A.arr(byte, l, n), int t, bool)
 
 (* The version from git: the last commit's date and seconds since
    midnight, with dev1 off the trunk (Rust: resolve_version) *)
@@ -730,9 +735,9 @@ fn git_version (): version_arr = let
   val () = bput_v(ts_b3, "-1")
   var ts_b4 = $B.create()
   val () = bput_v(ts_b4, "--format=%ct")
-  val ts_argv = $L.list_vt_cons(mk_arg(ts_b1),
-    $L.list_vt_cons(mk_arg(ts_b2), $L.list_vt_cons(mk_arg(ts_b3),
-    $L.list_vt_cons(mk_arg(ts_b4), $L.list_vt_nil()))))
+  val ts_argv = $L.list_vt_cons(arg_of(ts_b1),
+    $L.list_vt_cons(arg_of(ts_b2), $L.list_vt_cons(arg_of(ts_b3),
+    $L.list_vt_cons(arg_of(ts_b4), $L.list_vt_nil()))))
   val ts_out = $A.alloc<byte>(4096)
   val @(ts_rc, ts_len) = run_cmd_capture(bv_ge, ts_argv, ts_out)
   val ts = parse_decimal(ts_out, ts_len, 4096)
@@ -747,9 +752,9 @@ fn git_version (): version_arr = let
   val () = bput_v(br_b3, "--abbrev-ref")
   var br_b4 = $B.create()
   val () = bput_v(br_b4, "HEAD")
-  val br_argv = $L.list_vt_cons(mk_arg(br_b1),
-    $L.list_vt_cons(mk_arg(br_b2), $L.list_vt_cons(mk_arg(br_b3),
-    $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
+  val br_argv = $L.list_vt_cons(arg_of(br_b1),
+    $L.list_vt_cons(arg_of(br_b2), $L.list_vt_cons(arg_of(br_b3),
+    $L.list_vt_cons(arg_of(br_b4), $L.list_vt_nil()))))
   val br_out = $A.alloc<byte>(4096)
   val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
   val @(trunk, _, tlen) = read_trunk()
@@ -768,8 +773,8 @@ fn git_version (): version_arr = let
   val () = put_char_v(vb_b, 46)
   val () = put_int_v(vb_b, secs)
   val () = (if ~is_main then bput_v(vb_b, "dev1") else bput_v(vb_b, ""))
-  val @(va, vl) = $B.to_arr(vb_b)
-in @(va, 524288, vl, false) end
+  val @(va, vl) = $B.into_arr(vb_b)
+in @(va, vl, false) end
 
 (* Prints Rust's "invalid version part '<part>' in '<version>'" *)
 fn invalid_version_part {l:agz}{n:pos}
@@ -809,7 +814,7 @@ in
       var out: $B.builder_v = $B.create()
       val @(bad_s, bad_e) = parse_version_parts(bv_a, 0, be, n, out)
       val () = put_dev1(out, dev)
-      val @(va, vl) = $B.to_arr(out)
+      val @(va, vl) = $B.into_arr(out)
       val () = (if bad_s >= 0 then invalid_version_part(bv_a, bad_s, bad_e, t, n) else ())
       val () = $A.drop<byte>(fz_a, bv_a)
       val () = $A.free<byte>($A.thaw<byte>(fz_a))
@@ -817,7 +822,7 @@ in
       if bad_s >= 0 then let
         val () = $A.free<byte>(va)
       in $R.err(InvalidVersion()) end
-      else $R.ok(@(va, 524288, vl, true))
+      else $R.ok(@(va, vl, true))
     end
   | ~$R.none() =>
     let
@@ -854,9 +859,9 @@ fn version_error (failure: version_failure): void =
 
 implement do_upload {lr} (repo, rplen) = let
   (* Read bats.toml for package name and verify kind = "lib" *)
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tpk) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val tor = file_open_m(bv_tp, tpk, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -933,7 +938,7 @@ in
                     val () = set_build_err()
                   in version_error(failure) end
                 | ~$R.ok(ver) => let
-                val @(verbuf, vmax, verlen, explicit) = ver
+                val @(verbuf, verlen, explicit) = ver
                 val @(fz_vb, bv_vb) = $A.freeze<byte>(verbuf)
                 (* Build output zip path: repo/pkg/prefix_ver.bats *)
                 var zip_path: $B.builder_v = $B.create()
@@ -953,14 +958,14 @@ in
                     val () = put_char_v(b, (if $AR.eq_int_int(byte_val, 47) then 95 else byte_val): int)
                   in copy_replace_slash(bv, i + 1, len, b) end
                 val () = copy_replace_slash(bv_nb, 0, nlen, pfx)
-                val @(pfx_arr, pfx_len) = $B.to_arr(pfx)
+                val @(pfx_arr, pfx_len) = $B.into_arr(pfx)
                 val @(fz_px, bv_px) = $A.freeze<byte>(pfx_arr)
-                val () = copy_to_builder_v(bv_px, 0, pfx_len, 524288, zip_path)
+                val () = copy_to_builder_v(bv_px, 0, pfx_len, pfx_len, zip_path)
                 val () = bput_v(zip_path, "_")
-                val () = copy_to_builder_v(bv_vb, 0, verlen, vmax, zip_path)
+                val () = copy_to_builder_v(bv_vb, 0, verlen, verlen, zip_path)
                 val () = bput_v(zip_path, ".bats")
                 val () = put_char_v(zip_path, 0)
-                val @(zpa, zpa_len) = $B.to_arr(zip_path)
+                val @(zpa, zpa_len) = $B.into_arr(zip_path)
                 val @(fz_zp, bv_zp) = $A.freeze<byte>(zpa)
                 (* mkdir + zip *)
                 var mkd: $B.builder_v = $B.create()
@@ -975,7 +980,7 @@ in
                 var za2 = $B.create()
                 val () = bput_v(za2, "-r")
                 var za3 = $B.create()
-                val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, za3)
+                val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, zpa_len, za3)
                 var za5 = $B.create()
                 val () = bput_v(za5, "src/")
                 (* Rust: "uploaded <name> v<version> to <repository>" *)
@@ -983,31 +988,31 @@ in
                 val () = bput_v(um, "uploaded ")
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, um)
                 val () = bput_v(um, " v")
-                val () = copy_to_builder_v(bv_vb, 0, verlen, vmax, um)
+                val () = copy_to_builder_v(bv_vb, 0, verlen, verlen, um)
                 val () = bput_v(um, " to ")
                 val () = copy_to_builder_v(repo, 0, rplen, 4096, um)
-                val @(uma, umlen) = $B.to_arr(um)
+                val @(uma, umlen) = $B.into_arr(um)
                 val @(fz_um, bv_um) = $A.freeze<byte>(uma)
                 val () = $A.drop<byte>(fz_nb, bv_nb)
                 val () = $A.free<byte>($A.thaw<byte>(fz_nb))
                 val () = $A.drop<byte>(fz_px, bv_px)
                 val () = $A.free<byte>($A.thaw<byte>(fz_px))
-                val dp = str_to_path_arr("docs")
+                val @(dp, dpk) = str_into_arr("docs")
                 val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
-                val has_docs = file_exists_path(bv_dp)
+                val has_docs = file_exists_m(bv_dp, dpk)
                 val () = $A.drop<byte>(fz_dp, bv_dp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_dp))
                 val zip_docs = (if has_docs then let
                     var za6 = $B.create()
                     val () = bput_v(za6, "docs/")
-                  in $L.list_vt_cons(mk_arg(za6), $L.list_vt_nil()) end
+                  in $L.list_vt_cons(arg_of(za6), $L.list_vt_nil()) end
                   else $L.list_vt_nil()): $L.listv($P.arg_entry)
-                val src_docs = $L.list_vt_cons(mk_arg(za5), zip_docs)
+                val src_docs = $L.list_vt_cons(arg_of(za5), zip_docs)
                 (* An explicit version packages bats.toml as it is; one from
                    git goes into a copy with the version injected, added
                    first under the name bats.toml (Rust: build::upload) *)
                 val toml_rc = (if explicit then 0 else let
-                    val wrc = write_with_version(bv_vb, verlen, vmax)
+                    val wrc = write_with_version(bv_vb, verlen)
                   in
                     if wrc <> 0 then wrc else let
                       var zj1 = $B.create()
@@ -1015,20 +1020,20 @@ in
                       var zj2 = $B.create()
                       val () = bput_v(zj2, "-j")
                       var zj3 = $B.create()
-                      val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, zj3)
+                      val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, zpa_len, zj3)
                       var zj4 = $B.create()
                       val () = bput_v(zj4, "build/upload/bats.toml")
-                    in run_cmd(bv_ze, $L.list_vt_cons(mk_arg(zj1),
-                         $L.list_vt_cons(mk_arg(zj2), $L.list_vt_cons(mk_arg(zj3),
-                         $L.list_vt_cons(mk_arg(zj4), $L.list_vt_nil()))))) end
+                    in run_cmd(bv_ze, $L.list_vt_cons(arg_of(zj1),
+                         $L.list_vt_cons(arg_of(zj2), $L.list_vt_cons(arg_of(zj3),
+                         $L.list_vt_cons(arg_of(zj4), $L.list_vt_nil()))))) end
                   end): int
                 val zip_files = (if explicit then let
                     var za4 = $B.create()
                     val () = bput_v(za4, "bats.toml")
-                  in $L.list_vt_cons(mk_arg(za4), src_docs) end
+                  in $L.list_vt_cons(arg_of(za4), src_docs) end
                   else src_docs): $L.listv($P.arg_entry)
-                val zip_argv = $L.list_vt_cons(mk_arg(za1),
-                  $L.list_vt_cons(mk_arg(za2), $L.list_vt_cons(mk_arg(za3),
+                val zip_argv = $L.list_vt_cons(arg_of(za1),
+                  $L.list_vt_cons(arg_of(za2), $L.list_vt_cons(arg_of(za3),
                   zip_files)))
                 val rc = (if toml_rc <> 0 then let
                     val () = free_args(zip_argv)
@@ -1048,13 +1053,13 @@ in
                 in prerr! ("error: upload failed\n") end
                 else let
                   (* The sidecar zip_path + ".sha256" *)
-                  val () = write_sidecar(bv_zp, zpa_len - 1)
+                  val () = write_sidecar(bv_zp, zpa_len)
                   val () = $A.drop<byte>(fz_zp, bv_zp)
                   val () = $A.free<byte>($A.thaw<byte>(fz_zp))
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
                   val () = (if is_quiet() then () else let
-                      val () = prerr_seg(bv_um, 0, umlen, 524288)
+                      val () = prerr_seg(bv_um, 0, umlen, umlen)
                     in prerr_newline() end)
                   val () = $A.drop<byte>(fz_um, bv_um)
                   val () = $A.free<byte>($A.thaw<byte>(fz_um))

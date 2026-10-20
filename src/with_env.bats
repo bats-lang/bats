@@ -70,15 +70,24 @@ fn write_byte {l:agz}{n:pos}{p:nat | p < n}
   (name: !$A.arr(byte, l, n), p: int p, n: int n, v: int): void =
   $A.set<byte>(name, p, $A.int2byte($AR.low_byte(v)))
 
-(* The first position at or after p of bv[0, n) that holds byte c, or the
-   first one at or after lim, or n *)
-fun find_byte {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
-  (bv: !$A.borrow(byte, l, n), p: int p, n: int n, lim: int, c: int)
-  : [r:nat | p <= r; r <= n] int r =
-  if p >= n then p
+(* The byte at p of bv[0, m), in an array of n, p being proved below m *)
+fn read_byte_m {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p < m}
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m): int =
+  byte2int0($A.read<byte>(bv, p))
+
+(* The first position at or after p of bv[0, m) that holds byte c, or lim, or m; the array holds n >= m *)
+fun find_byte_m {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m, lim: int, c: int)
+  : [r:nat | p <= r; r <= m] int r =
+  if p >= m then p
   else if p >= lim then p
-  else if read_byte(bv, p, n) = c then p
-  else find_byte(bv, p + 1, n, lim, c)
+  else if read_byte_m(bv, p, m) = c then p
+  else find_byte_m(bv, p + 1, m, lim, c)
+
+(* ... in an array of exactly n *)
+fn find_byte {l:agz}{n:pos}{p:nat | p <= n}
+  (bv: !$A.borrow(byte, l, n), p: int p, n: int n, lim: int, c: int)
+  : [r:nat | p <= r; r <= n] int r = find_byte_m(bv, p, n, lim, c)
 
 (* The first position at or after p, below lim, that holds no space or tab *)
 fun skip_blank {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
@@ -133,21 +142,32 @@ fun same_span {l:agz}{n:pos}{a,ae,b,be:nat | a <= ae; ae <= n; b <= be; be <= n}
   else if read_byte(bv, a + j, n) <> read_byte(bv, b + j, n) then false
   else same_span(bv, a, ae, b, be, j + 1, n)
 
-(* bv[a, b) appended to out *)
-fun put_span {l:agz}{n:pos}{p:nat | p <= n} .<n - p>.
-  (bv: !$A.borrow(byte, l, n), p: int p, b: int, n: int n,
+(* bv[p, b) of bv[0, m) appended to out; the array holds n >= m bytes *)
+fun put_span_m {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, b: int, m: int m,
    out: !$B.builder_v >> $B.builder_v): void =
-  if p >= n then ()
+  if p >= m then ()
   else if p >= b then ()
   else let
-    val () = put_char_v(out, read_byte(bv, p, n))
-  in put_span(bv, p + 1, b, n, out) end
+    val () = put_char_v(out, read_byte_m(bv, p, m))
+  in put_span_m(bv, p + 1, b, m, out) end
 
-(* bv[a, b) appended to out *)
+(* bv[a, b) of bv[0, m) appended to out *)
+fn put_range_m {l:agz}{n:pos}{m:nat | m <= n}{a:nat | a <= m}
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int, m: int m,
+   out: !$B.builder_v >> $B.builder_v): void =
+  put_span_m(bv, a, b, m, out)
+
+(* ... in an array of exactly n *)
+fn put_span {l:agz}{n:pos}{p:nat | p <= n}
+  (bv: !$A.borrow(byte, l, n), p: int p, b: int, n: int n,
+   out: !$B.builder_v >> $B.builder_v): void =
+  put_span_m(bv, p, b, n, out)
+
 fn put_range {l:agz}{n:pos}{a:nat | a <= n}
   (bv: !$A.borrow(byte, l, n), a: int a, b: int, n: int n,
    out: !$B.builder_v >> $B.builder_v): void =
-  put_span(bv, a, b, n, out)
+  put_span_m(bv, a, b, n, out)
 
 (* bv[a, b) copied into name[j, 255), at most *)
 fun copy_name {l:agz}{ln:agz}{n:pos}{a,b:nat | a <= b; b <= n}{j:nat | j <= 255} .<255 - j>.
@@ -161,6 +181,11 @@ fun copy_name {l:agz}{ln:agz}{n:pos}{a,b:nat | a <= b; b <= n}{j:nat | j <= 255}
 
 (* The bytes out holds *)
 fn builder_size (out: !$B.builder_v >> $B.builder_v): int = $B.length(out)
+
+(* An argument in the builder's own array, as mk_arg makes it in 524288 bytes (bats#357) *)
+fn arg_of (b: $B.builder_v): $P.arg_entry = let
+  val @(a, n) = $B.into_arr(b)
+in @(a, n) end
 
 (* The value of the variable whose NUL-terminated name is in name appended
    to out (nothing when it is unset); false when the value is over 64 KiB
@@ -446,7 +471,7 @@ fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024} .<k>.
     val made = put_value(bv, value_at, line_end, n, entry)
     val size = builder_size(entry)
     val fits = (size <= 131071 && size + 1 <= budget): bool
-    val made_entry = mk_arg(entry)
+    val made_entry = arg_of(entry)
   in
     if made && fits then let
       val is_path = is_path_name(bv, name_at, name_to, n)
@@ -479,7 +504,7 @@ fun arguments {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     val z = find_byte(bv, p, 4096, 4096, 0)
     var entry : $B.builder_v = $B.create()
     val () = put_span(bv, p, (if z < total then z else total), 4096, entry)
-    val acc2 = $L.list_vt_cons(mk_arg(entry), acc)
+    val acc2 = $L.list_vt_cons(arg_of(entry), acc)
   in
     if z + 1 > 4096 then acc2
     else arguments(bv, z + 1, total, acc2)
@@ -498,78 +523,77 @@ fn error_about {l:agz}{at:nat | at <= 4096}
   val () = prerr_newline()
 in set_exit_code(status) end
 
-(* How the command is found *)
-datatype resolution =
-  | CommandFound
+(* How the command is found; the file's NUL-terminated name, in 524288 bytes as spawn_child_with takes it, when it is *)
+datavtype resolution =
+  | {l:agz} CommandFound of $A.arr(byte, l, 524288)
   | CommandNotFound
   | CommandNotAllowed
   | PathTooLong
 
-(* Whether the NUL-terminated name in bv is a directory *)
-fn is_directory {l:agz} (bv: !$A.borrow(byte, l, 524288)): bool =
-  case+ dir_open_path(bv) of
+(* Whether the NUL-terminated name in the first k bytes of bv is a directory *)
+fn is_directory {l:agz}{n:pos}{k:nat | k <= n; k <= 524288} (bv: !$A.borrow(byte, l, n), k: int k): bool =
+  case+ dir_open_m(bv, k) of
   | ~$R.ok(d) => let val () = $R.discard<int><$F.io_error>($F.dir_close(d)) in true end
   | ~$R.err(_) => false
 
-(* Whether the NUL-terminated name in bv has an execute bit *)
-fn is_executable {l:agz} (bv: !$A.borrow(byte, l, 524288)): bool =
-  case+ $F.file_mode(bv, 524288) of
+(* Whether the file at the NUL-terminated name path[0, k) has an execute bit *)
+fn is_executable {l:agz}{k:pos | k < 1048576} (path: !$A.borrow(byte, l, k), k: int k): bool =
+  case+ $F.file_mode(path, k) of
   | ~$R.ok(m) => let
       val m0 = g0ofg1(m)
     in (m0 / 64) % 2 + (m0 / 8) % 2 + m0 % 2 > 0 end
   | ~$R.err(_) => false
 
-(* A resolution that names no file, with the name of one not used *)
-fn without_file (r: resolution): [l:agz] @(resolution, $A.arr(byte, l, 524288)) = let
-  val unused = $A.alloc<byte>(524288)
-in @(r, unused) end
-
-(* The command bv[command_at, command_to) in the directory bv_path[p, q)
-   ("." when empty), as a NUL-terminated name, and 0 when there is no such
-   file, 1 when there is one that cannot be run (a directory, no execute
-   bit), 2 when there is one that can *)
-fn try_candidate {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096}
-  (bv_path: !$A.borrow(byte, lp, 524288), p: int p, q: int,
-   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int)
-  : [l:agz] @(int, $A.arr(byte, l, 524288)) = let
+(* The command bv[command_at, command_to) in the directory bv_path[p, q) ("." when empty), NUL-terminated *)
+fn candidate_builder {lp:agz}{np:pos}{plen:nat | plen <= np}{lc:agz}{p:nat | p <= plen}{ca:nat | ca <= 4096}
+  (bv_path: !$A.borrow(byte, lp, np), plen: int plen, p: int p, q: int,
+   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int): $B.builder_v = let
   var candidate : $B.builder_v = $B.create()
-  val () = (if q > p then put_range(bv_path, p, q, 524288, candidate)
+  val () = (if q > p then put_range_m(bv_path, p, q, plen, candidate)
     else put_char_v(candidate, 46))
   val () = put_char_v(candidate, 47)
   val () = put_range(bv, command_at, command_to, 4096, candidate)
   val () = put_char_v(candidate, 0)
-  val @(candidate_a, _) = $B.to_arr(candidate)
+in candidate end
+
+(* The builder's text as an array of 524288, the one spawn_child_with takes as a path *)
+fn path_array (b: $B.builder_v): [l:agz] $A.arr(byte, l, 524288) = let
+  val @(a, _) = $B.to_arr(b)
+in a end
+
+(* 0 when no such file, 1 when one that cannot be run (a directory, no execute bit), 2 when one that can, probed in the builder's own array *)
+fn try_candidate {lp:agz}{np:pos}{plen:nat | plen <= np}{lc:agz}{p:nat | p <= plen}{ca:nat | ca <= 4096}
+  (bv_path: !$A.borrow(byte, lp, np), plen: int plen, p: int p, q: int,
+   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int): int = let
+  val @(candidate_a, k) = $B.into_arr(candidate_builder(bv_path, plen, p, q, bv, command_at, command_to))
   val @(fz_c, bv_c) = $A.freeze<byte>(candidate_a)
-  val state = (if ~(file_exists_path(bv_c)) then 0
-    else if is_directory(bv_c) then 1
-    else if is_executable(bv_c) then 2
-    else 1): int
-  val () = $A.drop<byte>(fz_c, bv_c)
-in @(state, $A.thaw<byte>(fz_c)) end
+  val exists = file_exists_m(bv_c, k)
+  val directory = (if exists then is_directory(bv_c, k) else false): bool
+  val @(path, rest) = $A.borrow_split<byte>(fz_c, bv_c, k)
+  val executable = (if k > 0 then (if exists && ~directory then is_executable(path, k) else false) else false): bool
+  val whole = $A.borrow_join<byte>(fz_c, path, rest)
+  val () = $A.drop<byte>(fz_c, whole)
+  val () = $A.free<byte>($A.thaw<byte>(fz_c))
+in (if ~exists then 0 else if directory then 1 else if executable then 2 else 1) end
 
 (* The first directory of the PATH text bv_path[p, plen), a segment of the
    colon separated list, that holds the command as a file that can be run,
    as execvp looks: the resolution and the NUL-terminated name. denied says
    that an earlier directory held a file that could not be run *)
-fun search_path {lp:agz}{lc:agz}{p:nat | p <= 524288}{ca:nat | ca <= 4096} .<524288 - p>.
-  (bv_path: !$A.borrow(byte, lp, 524288), p: int p, plen: int,
-   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int, denied: bool)
-  : [l:agz] @(resolution, $A.arr(byte, l, 524288)) =
-  if p > plen then without_file(if denied then CommandNotAllowed() else CommandNotFound())
+fun search_path {lp:agz}{np:pos}{plen:nat | plen <= np}{lc:agz}{p:nat | p <= plen}{ca:nat | ca <= 4096} .<plen - p>.
+  (bv_path: !$A.borrow(byte, lp, np), p: int p, plen: int plen,
+   bv: !$A.borrow(byte, lc, 4096), command_at: int ca, command_to: int, denied: bool): resolution = let
+  val q = find_byte_m(bv_path, p, plen, plen, 58)
+  val state = try_candidate(bv_path, plen, p, q, bv, command_at, command_to)
+in
+  if state = 2 then CommandFound(path_array(candidate_builder(bv_path, plen, p, q, bv, command_at, command_to)))
   else let
-    val q = find_byte(bv_path, p, 524288, plen, 58)
-    val @(state, found_a) = try_candidate(bv_path, p, q, bv, command_at, command_to)
+    val denied2 = (denied || state = 1): bool
   in
-    if state = 2 then @(CommandFound(), found_a)
-    else let
-      val () = $A.free<byte>(found_a)
-      val denied2 = (denied || state = 1): bool
-    in
-      if q >= 524288 then without_file(if denied2 then CommandNotAllowed() else CommandNotFound())
-      else if q >= plen then without_file(if denied2 then CommandNotAllowed() else CommandNotFound())
-      else search_path(bv_path, q + 1, plen, bv, command_at, command_to, denied2)
-    end
+    if q >= plen then (if denied2 then CommandNotAllowed() else CommandNotFound())
+    else search_path(bv_path, q + 1, plen, bv, command_at, command_to, denied2)
   end
+end
 
 (* The PATH of the environment appended to out; false when it is over 64 KiB *)
 fn put_environment_path (out: !$B.builder_v >> $B.builder_v): bool = let
@@ -591,24 +615,22 @@ fn has_slash {l:agz}{at:nat | at <= 4096} (bv: !$A.borrow(byte, l, 4096), at: in
    path_a[0, plen) (the file's PATH when it sets one, else this process's;
    known says it could be had; empty, the directories execvp uses). The name
    is NUL-terminated. *)
-fn resolve_command {l:agz}{lp:agz}{ca:nat | ca <= 4096}
+fn resolve_command {l:agz}{lp:agz}{np:pos}{plen:nat | plen <= np}{ca:nat | ca <= 4096}
   (bv: !$A.borrow(byte, l, 4096), command_at: int ca, command_to: int,
-   known: bool, path_a: $A.arr(byte, lp, 524288), plen: int)
-  : [lr:agz] @(resolution, $A.arr(byte, lr, 524288)) =
+   known: bool, path_a: $A.arr(byte, lp, np), plen: int plen): resolution =
   if command_to <= command_at then let
     val () = $A.free<byte>(path_a)
-  in without_file(CommandNotFound()) end
+  in CommandNotFound() end
   else if has_slash(bv, command_at, command_to) then let
     val () = $A.free<byte>(path_a)
     var direct : $B.builder_v = $B.create()
     val () = put_range(bv, command_at, command_to, 4096, direct)
     val () = put_char_v(direct, 0)
-    val @(direct_a, _) = $B.to_arr(direct)
-  in @(CommandFound(), direct_a) end
+  in CommandFound(path_array(direct)) end
   else let
     val @(fz_t, bv_t) = $A.freeze<byte>(path_a)
     val found = (if known then search_path(bv_t, 0, plen, bv, command_at, command_to, false)
-      else without_file(PathTooLong())): [lr:agz] @(resolution, $A.arr(byte, lr, 524288))
+      else PathTooLong()): resolution
     val () = $A.drop<byte>(fz_t, bv_t)
     val () = $A.free<byte>($A.thaw<byte>(fz_t))
   in found end
@@ -630,18 +652,18 @@ in set_exit_code(126) end
 
 (* Runs the command bv[command_at, ...) with the entries of the environment
    file; search_a[0, search_len) is the PATH the command runs with *)
-fn run_command {l:agz}{ls:agz}{ca:nat | ca <= 4096}{ct:nat | ct <= 4096}
+fn run_command {l:agz}{ls:agz}{ns:pos}{sl:nat | sl <= ns}{ca:nat | ca <= 4096}{ct:nat | ct <= 4096}
   (bv: !$A.borrow(byte, l, 4096), command_at: int ca, command_to: int ct, total: int,
-   extras: $L.listv($P.arg_entry), known: bool, search_a: $A.arr(byte, ls, 524288), search_len: int): void = let
-  val @(resolved, path_a) = resolve_command(bv, command_at, command_to, known, search_a, search_len)
+   extras: $L.listv($P.arg_entry), known: bool, search_a: $A.arr(byte, ls, ns), search_len: int sl): void = let
+  val resolved = resolve_command(bv, command_at, command_to, known, search_a, search_len)
   val () = (case+ resolved of
-    | CommandFound() => let
+    | ~CommandFound(path_a) => let
         val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
         var first : $B.builder_v = $B.create()
         val () = put_range(bv, command_at, command_to, 4096, first)
         val rest = (if command_to + 1 > 4096 then $L.list_vt_nil()
           else arguments(bv, command_to + 1, total, $L.list_vt_nil())): $L.listv($P.arg_entry)
-        val argv = $L.list_vt_cons(mk_arg(first), rev_arg_list(rest, $L.list_vt_nil()))
+        val argv = $L.list_vt_cons(arg_of(first), rev_arg_list(rest, $L.list_vt_nil()))
         val spawned = spawn_child_with(bv_p, argv, extras, $P.inherit(), $P.inherit(), $P.inherit())
         val () = (case+ spawned of
           | ~$R.ok(sp) => let
@@ -658,17 +680,14 @@ fn run_command {l:agz}{ls:agz}{ca:nat | ca <= 4096}{ct:nat | ct <= 4096}
               else cannot_run(bv, command_at, command_to, code)): void
         val () = $A.drop<byte>(fz_p, bv_p)
       in $A.free<byte>($A.thaw<byte>(fz_p)) end
-    | CommandNotFound() => let
+    | ~CommandNotFound() => let
         val () = arguments_free(extras)
-        val () = $A.free<byte>(path_a)
       in error_about(bv, command_at, command_to, "bats with-env: ", ": command not found", 127) end
-    | CommandNotAllowed() => let
+    | ~CommandNotAllowed() => let
         val () = arguments_free(extras)
-        val () = $A.free<byte>(path_a)
       in cannot_run(bv, command_at, command_to, 13) end
-    | PathTooLong() => let
+    | ~PathTooLong() => let
         val () = arguments_free(extras)
-        val () = $A.free<byte>(path_a)
       in error_about(bv, 0, 0, "bats with-env: PATH is over 64 KiB, so a command cannot be looked for in it", "", 2) end): void
 in () end
 
@@ -680,9 +699,9 @@ fn read_env_file {l:agz}{lf:agz}{at:nat | at <= 4096}
   var path : $B.builder_v = $B.create()
   val () = put_range(bv, at, to, 4096, path)
   val () = put_char_v(path, 0)
-  val @(path_a, path_len) = $B.to_arr(path)
+  val @(path_a, path_len) = $B.into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
-  val size = (case+ file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val size = (case+ file_open_m(bv_p, path_len, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.ok(fd) => let
         val k = (case+ $F.file_read(fd, content, 65537) of
           | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
@@ -716,12 +735,12 @@ fn bad_name_put {l:agz}{lt:agz}{bad:int | bad < 1024}
 
 (* Says that the value of the variable name, set in the file at
    bv[file_at, file_to), cannot be made *)
-fn expansion_failed {l:agz}{ln:agz}{file_at:nat | file_at <= 4096}
+fn expansion_failed {l:agz}{ln:agz}{nn:pos}{nl:nat | nl <= nn}{file_at:nat | file_at <= 4096}
   (bv: !$A.borrow(byte, l, 4096), file_at: int file_at, file_to: int,
-   name_a: $A.arr(byte, ln, 524288), name_len: int): void = let
+   name_a: $A.arr(byte, ln, nn), name_len: int nl): void = let
   val @(fz_n, bv_n) = $A.freeze<byte>(name_a)
   val () = prerr! ("error: bats with-env: the value of ")
-  val () = prerr_seg(bv_n, 0, name_len, 524288)
+  val () = prerr_seg(bv_n, 0, name_len, name_len)
   val () = prerr! (" in ")
   val () = prerr_seg(bv, file_at, file_to, 4096)
   val () = prerr! (" cannot be made: it names a variable whose name is over 255 bytes or whose value is over 64 KiB, or it is over 131071 bytes itself, or the variables of the file together are over 524287 bytes (a NUL counted after each; they are counted from the last variable of the file, and this is the one that crossed)")
@@ -765,10 +784,10 @@ in
           val @(bad, has_path, extras) = entries_made(bv_c, 65537, tab, count, false, path_text)
           val known = (if has_path then true else put_environment_path(path_text)): bool
           val () = (if builder_size(path_text) = 0 then bput_v(path_text, "/usr/bin:/bin") else ())
-          val @(search_a, search_len) = $B.to_arr(path_text)
+          val @(search_a, search_len) = $B.into_arr(path_text)
           var bad_name : $B.builder_v = $B.create()
           val () = bad_name_put(bv_c, tab, bad, bad_name)
-          val @(bad_a, bad_len) = $B.to_arr(bad_name)
+          val @(bad_a, bad_len) = $B.into_arr(bad_name)
           val () = $A.drop<byte>(fz_c, bv_c)
           val () = $A.free<byte>($A.thaw<byte>(fz_c))
           val () = $A.free<int>(tab)
