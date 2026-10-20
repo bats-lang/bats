@@ -10,7 +10,7 @@
 #     every module again (the count of a cold check), and leaves the stash
 #     with the stamp this bats writes, byte for byte as it was;
 #   * the same stash unedited: it is kept, and patsopt does not run.
-#   * a stash with no stamp, and one whose first line is not `bats-stamp 1`:
+#   * a stash with no stamp, and one whose first line is not `bats-stamp 2`:
 #     dropped with "no stamp" and "the stamp format differs", made again.
 #   * a stash with a line after its first that is not `name value` (`junk`):
 #     dropped with "the stamp format differs"; a line `zzz 1` is `name value`
@@ -103,7 +103,7 @@ for line in bats patsopt cc flags mark; do
   echo "stash-stamp: a stash with another $line: dropped, named, and made again"
 done
 
-# A stash with no stamp, and one whose first line is not `bats-stamp 1`:
+# A stash with no stamp, and one whose first line is not `bats-stamp 2`:
 # each is dropped, the drop line names the reason, and the build is made again
 rm -rf "$D"
 cp -Rp "$SAVE" "$D"
@@ -114,7 +114,7 @@ rebuilt "$TMP/nostamp.log" "$COLD" "a stash with no stamp"
 cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash with no stamp was dropped, its stamp is not this build's"; exit 1; }
 echo "stash-stamp: a stash with no stamp: dropped, named, and made again"
 
-for first in garbage "bats-stamp 2"; do
+for first in garbage "bats-stamp 1"; do
   rm -rf "$D"
   cp -Rp "$SAVE" "$D"
   put_line "$D/$S2/.bats_stamp" 1 "$first"
