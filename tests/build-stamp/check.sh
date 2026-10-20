@@ -28,6 +28,13 @@ printf '#include "share/atspre_staload.hats"\n\n#pub fn f (): int\n\nimplement f
 printf '#include "share/atspre_staload.hats"\n\n#pub fn g (): int\n\nimplement g () = 2\n' > "$P/src/n.bats"
 printf '#include "share/atspre_staload.hats"\nstaload "m.sats"\nstaload "n.sats"\nimplement main0 () = println! (f () + g ())\n' > "$P/src/bin/bs.bats"
 
+# bats probes a toolchain it did not install with a false statement
+# (bats-lang/bats#264), which the GMP build takes 20 s to not answer; the
+# toolchains made below are known (the cksum of patsopt's bytes and 21, as
+# src/ats2.bats keeps it), so they are not probed, and a toolchain changed is
+# written again
+known() { printf '%s 21\n' "$(cksum < "$1/.bats/ats2/bin/patsopt")" > "$1/.bats/ats2.solver"; }
+
 # Freshness is by whole-second mtimes: each run ends a second on, so the
 # next finds what this one made older than now
 build() { # <dir> <log> [env assignment...]: bats -v build in <dir>
@@ -139,6 +146,7 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2"
 for d in bin prelude libats share ccomp; do cp -R "$HOME/.bats/ats2/$d" "$H/.bats/ats2/"; done
 printf '\n(* another toolchain *)\n' >> "$H/.bats/ats2/prelude/basics_pre.sats"
+known "$H"
 build "$P" "$TMP/home.log" HOME="$H"
 say "$TMP/home.log" "patsopt differs"
 rebuilt "$TMP/home.log" "$COLD" "a build with another ATS2"
@@ -270,6 +278,7 @@ mkdir -p "$T3/.bats/ats2"
 for d in bin prelude libats share ccomp; do cp -R "$HOME/.bats/ats2/$d" "$T3/.bats/ats2/"; done
 R3=$TMP/real-patsopt
 cp "$T3/.bats/ats2/bin/patsopt" "$R3"
+known "$T3"
 SZ=$(wc -c < "$R3")
 standin() { # <file> <pad>: a stand-in of patsopt's size that runs the real one, padded with <pad>
   printf '#!/bin/sh\nexec %s "$@"\n' "$R3" > "$1"
@@ -289,6 +298,7 @@ build "$P3" "$TMP/tool.same.log" HOME="$T3"
 kept "$TMP/tool.same.log" "a build with the same toolchain"
 
 standin "$T3/.bats/ats2/bin/patsopt" '#'
+known "$T3"
 build "$P3" "$TMP/tool.inplace.log" HOME="$T3"
 say "$TMP/tool.inplace.log" "patsopt differs"
 rebuilt "$TMP/tool.inplace.log" "$COLD3" "a build with patsopt replaced in place"
@@ -299,6 +309,7 @@ kept "$TMP/tool.inplace.again.log" "the build after patsopt was replaced in plac
 standin "$TMP/linked" '%'
 rm -f "$T3/.bats/ats2/bin/patsopt"
 ln -s "$TMP/linked" "$T3/.bats/ats2/bin/patsopt"
+known "$T3"
 build "$P3" "$TMP/tool.link.log" HOME="$T3"
 say "$TMP/tool.link.log" "patsopt differs"
 rebuilt "$TMP/tool.link.log" "$COLD3" "a build with patsopt made a link"
@@ -306,6 +317,7 @@ settle "$P3" HOME="$T3"
 build "$P3" "$TMP/tool.link.again.log" HOME="$T3"
 kept "$TMP/tool.link.again.log" "the build after patsopt was made a link"
 standin "$TMP/linked" '@'
+known "$T3"
 build "$P3" "$TMP/tool.target.log" HOME="$T3"
 say "$TMP/tool.target.log" "patsopt differs"
 rebuilt "$TMP/tool.target.log" "$COLD3" "a build with the file its link reaches changed in place"
