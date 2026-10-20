@@ -57,6 +57,14 @@ fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in wrote end
 
+(* The .dats of the .sats just written: written when that .sats is in place
+   (sats_ok), else b is given back, so nothing follows a failed write *)
+fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: $B.builder_v): void =
+  if sats_ok then let
+    val _ = write_changed(path, b)
+  in end
+  else $B.builder_free(b)
+
 (* sh -c script, its stdout into out: its exit status and the length *)
 fn sh_capture {sn:nat}{lo:agz} (script: string sn, out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) = let
   val exec = str_to_path_arr("sh")
@@ -156,14 +164,15 @@ implement write_facts () =
       val () = bput_v(sats, "(* the commit's SHA, 40 hex digits *)\n")
       val () = bput_v(sats, "fun bats_commit_sha (): string 40\n")
       val sats_new = write_changed("build/src/_bats_facts.sats", sats)
-      val () = (case+ sats_new of
-        | FileWritten() => let
-            (* said, and the build failed, if the stamp cannot be written *)
-            val _ = touch_sats_stamp()
-          in end
-        | FileSame() => ()
+      (* the stamp of a changed .sats, and the .dats only once the .sats is in
+         place: a stamp that cannot be written is said by touch_sats_stamp
+         (write_settle, which fails the build), and nothing after a failed
+         write is written (write-errors.md) *)
+      val sats_ok = (case+ sats_new of
+        | FileWritten() => touch_sats_stamp() = 0
+        | FileSame() => true
         (* said by write_changed *)
-        | FileNotWritten() => ())
+        | FileNotWritten() => false): bool
       var dats : $B.builder_v = $B.create()
       val () = bput_v(dats, "(* _bats_facts -- written by bats from the commit it names *)\n\n")
       val () = bput_v(dats, "#include \"share/atspre_staload.hats\"\n\n")
@@ -183,7 +192,7 @@ implement write_facts () =
       val () = bput_v(dats, "\"\nimplement bats_commit_sha () = \"")
       val () = copy_to_builder_v(bv_o, s0, e2, 4096, dats)
       val () = bput_v(dats, "\"\n")
-      val _ = write_changed("build/src/_bats_facts.dats", dats)
+      val () = dats_when(sats_ok, "build/src/_bats_facts.dats", dats)
       val () = $A.drop<byte>(fz_o, bv_o)
     in $A.free<byte>($A.thaw<byte>(fz_o)) end
   end
