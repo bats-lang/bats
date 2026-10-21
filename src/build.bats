@@ -1113,7 +1113,10 @@ implement check_wasm_binary(path, pm) =
    twice, every time. Each stash is a whole build/ that only ever saw its
    own mark, which the freshness rules already handle. build/.bats_valid
    (validated.bats) is no mark's: it stays, and a stash that holds one is
-   not put back over it. *)
+   not put back over it. So does build/.bats_toolchain (cache.bats's
+   toolchain_digest, stamp keyword): it is the toolchain's listing, made once
+   per process, and one swapped in from a stash is another bats's, which would
+   be hashed for this run's stamp (bats#434). *)
 fn cache_swap (mark: int): void = let
   val () = names_set_fresh(false)
   val tgt_path = str_to_path_arr("build/.bats_target")
@@ -1147,15 +1150,17 @@ in
     val () = put_int_v(b3, held)
     val () = bput_v(b3, " && mkdir -p .stash/")
     val () = put_int_v(b3, held)
-    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid -exec mv {} .stash/")
+    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_toolchain -exec mv {} .stash/")
     val () = put_int_v(b3, held)
     val () = bput_v(b3, "/ \\; && if [ -d .stash/")
     val () = put_int_v(b3, mark)
     val () = bput_v(b3, " ]; then find .stash/")
     val () = put_int_v(b3, mark)
-    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 ! -name .bats_valid -exec mv {} . \\; && rm -rf .stash/")
+    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 ! -name .bats_valid ! -name .bats_toolchain -exec mv {} . \\; && rm -rf .stash/")
     val () = put_int_v(b3, mark)
-    val () = bput_v(b3, "/.bats_valid && rmdir .stash/")
+    val () = bput_v(b3, "/.bats_valid .stash/")
+    val () = put_int_v(b3, mark)
+    val () = bput_v(b3, "/.bats_toolchain && rmdir .stash/")
     val () = put_int_v(b3, mark)
     val () = bput_v(b3, "; fi")
     val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
