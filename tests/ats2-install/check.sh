@@ -13,7 +13,10 @@
 #  * a toolchain bats did not make is used as it is, never replaced
 #  * a marker of another pin is replaced; what a killed run left is cleared
 #  * a marker that cannot be written fails the install, with bats's write line,
-#    and leaves no toolchain (the marker is written by bats after the move)
+#    and leaves no toolchain (the marker is written by bats after the move),
+#    whether the write fails before it made a file (a directory at its place)
+#    or after it did (a file-size limit on bats's own writes): the message
+#    says the removal only when the toolchain is gone
 #  * a link to another pin's toolchain is refused before any download or build
 #  * a marker with no patsopt (half made) is replaced
 #  * no HOME is an error
@@ -194,6 +197,32 @@ grep -qxF "error: cannot write '$H/.bats/ats2/.bats-ats2': Is a directory (os er
 [ ! -e "$H/.bats/ats2" ] && leftovers || { cat "$TMP/out"; fail "an install whose marker failed left a toolchain or files"; }
 echo ok > "$TMP/make-mode"
 ok "a marker that cannot be written fails the install with the write's line and leaves no toolchain"
+
+# a marker write that leaves a FILE behind (bats#372): a file-size limit of 0
+# on bats's own writes (SIGXFSZ ignored, so a write past it fails with EFBIG
+# and the file it opened is left, empty). The programs bats starts lift the
+# limit for themselves (curl, make, tar and cp write the download and the
+# toolchain, and are wrappers here), so the first write that fails is the
+# marker's. The install must fail with the write's line, remove the toolchain
+# it moved, and say it did; the message and the disk must agree.
+WRAP=$TMP/limit-bin
+mkdir -p "$WRAP"
+for t in curl make; do
+  printf '#!/bin/sh\nulimit -S -f unlimited\nexec "%s" "$@"\n' "$FAKE/$t" > "$WRAP/$t"
+done
+for t in tar cp; do
+  printf '#!/bin/sh\nulimit -S -f unlimited\nexec "%s" "$@"\n' "$(command -v $t)" > "$WRAP/$t"
+done
+chmod +x "$WRAP"/*
+echo real > "$TMP/curl-mode"; echo ok > "$TMP/make-mode"
+newhome markerfile
+( trap '' XFSZ; ulimit -S -f 0; st=0; HOME="$H" PATH="$WRAP:$FAKE:$PATH" "$BATS" ats2 install 2>&1 || st=$?; echo "rc=$st" ) | cat > "$TMP/out"
+grep -qxF "rc=1" "$TMP/out" || { cat "$TMP/out"; fail "an install whose marker write failed did not end with status 1"; }
+grep -qxF "error: cannot write '$H/.bats/ats2/.bats-ats2': File too large (os error 27)" "$TMP/out" || { cat "$TMP/out"; fail "the marker's write is not said as a write is"; }
+grep -qF "was removed again" "$TMP/out" || { cat "$TMP/out"; fail "the removal of the toolchain is not said"; }
+[ ! -e "$H/.bats/ats2" ] || { cat "$TMP/out"; fail "the message says the toolchain was removed, and it is still there"; }
+leftovers || fail "a marker write that left a file left other files"
+ok "a marker write that leaves a file: the toolchain is removed, and the message says so"
 
 newhome extra
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install extra > "$TMP/out" 2>&1 && fail "an extra argument was accepted"

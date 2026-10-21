@@ -130,10 +130,12 @@ in has end
 #define CLEAR "rm -rf \"$1/ats2.new\" \"$1/ats2.tgz.part\" \"$1\"/ats2-download.*\n"
 #define CLEAR_ONE "rm -rf \"$1/ats2.new\" \"$2\"\n"
 
-(* $1 the base: the toolchain this run moved into place, removed when its
-   marker could not be written (bats#372). Only a toolchain with no marker
-   file is removed, so a marked one is never touched. *)
-#define UNMARKED_CLEAR "if [ ! -f \"$1/ats2/.bats-ats2\" ]; then rm -rf \"$1/ats2\"; fi\n"
+(* $1 the base: the toolchain this run moved into place, removed whatever its
+   marker holds when the marker's write failed (bats#372, MOVED_CLEAR): a
+   failed write can leave the whole pin in the marker (a flush that fails
+   after its bytes), so no marker file may stay. The move put this run's own
+   directory there, so nothing else is removed. *)
+#define MOVED_CLEAR "rm -rf \"$1/ats2\"\n"
 
 (* The lock that makes two installs one: $HOME/.bats/ats2.lock, held with
    the file package's flock while ats2 is installed (what is installed is
@@ -264,12 +266,11 @@ in
         val marked = write_marker()
       in
         if marked <> 0 then let
-          (* the toolchain just moved has no marker: it is removed, so the
-             next install starts again instead of using it as a foreign one *)
-          val cleared = sh_exec(UNMARKED_CLEAR, base_arg(), empty_arg(), empty_arg())
+          (* write_marker failed: MOVED_CLEAR removes the moved toolchain, and the message follows its status (bats#372) *)
+          val cleared = sh_exec(MOVED_CLEAR, base_arg(), empty_arg(), empty_arg())
           val () = (if cleared = 0
             then prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 was removed again, so the next bats ats2 install starts from nothing\n")
-            else prerr! ("error: the ATS2 toolchain in ~/.bats/ats2 has no marker, and could not be removed: move it away before the next bats ats2 install\n"))
+            else prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 could not be removed: it is still there, with no complete marker, so move it away before the next bats ats2 install\n"))
         in false end
         else let
           val () = println! ("ATS2 installed successfully")
