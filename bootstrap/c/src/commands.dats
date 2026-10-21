@@ -1397,8 +1397,7 @@ fn copy_line_kept {lt:agz}{nt:pos}{s,e,len:nat | s <= e; e <= len; len <= nt}
     if e < len then put_char_v(out, 10) else ()
   end
 
-(* Copies every line of b[i, len) except those naming the package into out;
-   the number of lines left out (manifest) *)
+(* Copies the lines of b[i, len) not naming the package into out, counting those left out (manifest) *)
 fun copy_without_package {lt:agz}{nt:pos}{lp:agz}{np:pos}{ps:int}{i,len,r:nat | i <= len; len <= nt} .<len - i>.
   (text: !$A.borrow(byte, lt, nt), text_size: int nt, i: int i, len: int len,
    pkg: !$A.borrow(byte, lp, np), pkg_start: int ps, pkg_len: int, np: int np,

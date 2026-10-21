@@ -32,7 +32,7 @@ A `build/` is restored by content, so what matters of `bats.toml` is whether a f
 
 | reader | where | serves | bytes read | does | fields judged |
 |---|---|---|---|---|---|
-| `read_toml`, `read_manifest` | `src/helpers.bats` 3331 to 3362 | every parsing reader below | whole (`read_whole_m`); over 65536 is `FileTooLarge` | reads only | all |
+| `read_toml`, `read_manifest` | `src/helpers.bats` 3324 to 3357 | every parsing reader below | whole (`read_whole_m`); over 65536 is `FileTooLarge` | reads only | all |
 | `package_value` | `src/commands.bats` 641 | `upload` (via `read_trunk`, 663, and the version, 773) | whole | reads only | `version`, `trunk` |
 | `do_upload` | `src/commands.bats` 834 | `upload` | whole | reads only | `name`, `kind` |
 | `write_with_version` | `src/commands.bats` 554 | `upload` | whole (`read_whole`) | reads; writes the manifest with the version injected to `build/upload/bats.toml`, whole (the archive's copy) | `version` (rewritten) |
@@ -46,7 +46,7 @@ A `build/` is restored by content, so what matters of `bats.toml` is whether a f
 | `toml_version_is` | `src/lock.bats` 1416 | `lock`, `fetch` | whole | reads only | `[package] version` |
 | `toml_unsafe` via `read_unsafe_flag` and `dep_unsafe` | `src/lock.bats` 3068, 3094, 3116 | emission, validation (`build.bats` 1148, `lock.bats` 3151, 3342), the test runner (`commands.bats` 286) | whole | reads only | `unsafe` |
 | `do_add` (`bats add`) | `src/commands.bats` 1329 | `add` | none: opens bats.toml for appending (`append_file_from_builder`, `src/helpers.bats`) | appends one line; the rest of the file is neither read nor written | none |
-| `do_remove` (`bats remove`) | `src/commands.bats` 1357 | `remove` | none: opens the file to see it is there; `sed -i` (pre-existing, an external tool) reads and rewrites it whole | rewrites whole | none |
+| `do_remove` (`bats remove`) | `src/commands.bats` 1406 | `remove` | whole (`read_whole`) | rewrites whole through `write_settle`, only when a line names the package; no external tool | none |
 | `put_file_sha256_m` | `src/helpers.bats` 1221 (the project's input digest, `inputs_digest` of `src/inputs.bats`), `src/fixtures.bats` 1132 (`path_sha`) | the inputs digest, the fixtures' memo | whole, in 64 KiB chunks | reads only | none: the file's content |
 | `project_lock_take` | `src/helpers.bats` 3037 | `check`, `build`, `test`, `run`, `lock`, ... | none: `flock` on the file opened read-only | reads nothing | none |
 | `init`, the existence checks of `build.bats` (1316, 1360, 1970, 2376) | `src/commands.bats` 1211 | `init`, `fetch`, the closure walk | none: whether the file exists | reads nothing | none |

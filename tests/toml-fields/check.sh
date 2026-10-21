@@ -1,33 +1,5 @@
 #!/bin/sh
-# Every field of bats.toml that bats reads, and whether a changed one makes a
-# restored build/ stale (bats-lang/bats#381): `unsafe` is the one field that
-# reaches the emitted modules (a $UNSAFE block is kept in an unsafe package and
-# an error in a safe one), and one reader gives it to emission and to
-# validation, whole (a manifest over 4096 bytes made emission read a package
-# with `unsafe = true` as safe). Each field the build does not read leaves a
-# restored build/ as it is: no module is made again and build/ is the cold
-# build's. A dependency's constraint and a path dependency reach build/ only
-# through the sources in bats_modules, which are keyed by content.
-# A manifest longer than 8192 bytes is read whole by upload (the name, the
-# kind, the version and trunk, and the copy zipped into the archive) and by
-# the docs, as it is by emission and validation; each of these read a prefix
-# once, and the name past it was not found. `bats add` appends its line to
-# bats.toml and writes nothing else (it read 4096 bytes and wrote them back,
-# so a longer manifest lost everything past them). The toml package parses
-# 65536 bytes and no more, so a longer manifest is refused and never parsed
-# cut; one of exactly 65536 bytes is read to its last byte.
-#
-# Why shell: this runs the compiler binary it is given (argument 1) several
-# times over project directories and compares their build/ trees and logs, as
-# every tests/*/check.sh of bats does (check.yml runs them in a loop). A test
-# in bats is possible and is not made here: bats has no tests/static (that is
-# quire's runner, which became `bats fixtures`, one snippet in one copy of one
-# project against an error text, with no second manifest and no build/ to
-# compare), `bats test` is a step of no workflow here and none of the
-# compiler's modules has a $UNITTEST block, the runner it builds is given no
-# path to the compiler (the process package could spawn one named by an
-# environment variable, but its spawn has no working directory: the test
-# would chdir the runner), and the trees compared would be walked in bats.
+# manifest: which bats.toml fields reach build/, and add/remove on whole manifests; shell is a stopgap that bats#446 moves to bats
 # usage: tests/toml-fields/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -253,4 +225,24 @@ cmp -s "$TMP/remove_expected.toml" "$TMP/remove_project/bats.toml" || { echo "FA
 (cd "$TMP/remove_project" && "$BATS" remove absent) > "$TMP/remove_absent.log" 2>&1 || true
 grep -aq "^error: package 'absent' not found in \[dependencies\]$" "$TMP/remove_absent.log" || { echo "FAIL: bats remove of an absent package said"; cat "$TMP/remove_absent.log"; exit 1; }
 cmp -s "$TMP/remove_expected.toml" "$TMP/remove_project/bats.toml" || { echo "FAIL: bats remove of an absent package changed the manifest"; exit 1; }
+# bats remove, each case compared with cmp against the expected bytes: no final newline, a second table, an empty file, over 65536 bytes
+remove_case() { # <name> <package> <before file> <expected file>
+  module "$TMP/remove_$1" "$base"
+  cp "$3" "$TMP/remove_$1/bats.toml"
+  (cd "$TMP/remove_$1" && "$BATS" remove "$2") > "$TMP/remove_$1.log" 2>&1 || true
+  cmp -s "$4" "$TMP/remove_$1/bats.toml" || { echo "FAIL: bats remove ($1): $(wc -c < "$TMP/remove_$1/bats.toml") bytes, $(wc -c < "$4") expected"; cat "$TMP/remove_$1.log"; exit 1; }
+}
+printf '[dependencies]\n"other" = ""\n"added" = ""' > "$TMP/nonl_before.toml"
+printf '[dependencies]\n"other" = ""\n' > "$TMP/nonl_expected.toml"
+remove_case no_newline added "$TMP/nonl_before.toml" "$TMP/nonl_expected.toml"
+printf '[dependencies]\n"other" = ""\n\n[dev-dependencies]\n"added" = ""\n"last" = ""\n' > "$TMP/table_before.toml"
+printf '[dependencies]\n"other" = ""\n\n[dev-dependencies]\n"last" = ""\n' > "$TMP/table_expected.toml"
+remove_case second_table added "$TMP/table_before.toml" "$TMP/table_expected.toml"
+: > "$TMP/empty_before.toml"
+remove_case empty added "$TMP/empty_before.toml" "$TMP/empty_before.toml"
+grep -aq "^error: package 'added' not found in \[dependencies\]$" "$TMP/remove_empty.log" || { echo "FAIL: bats remove on an empty file said"; cat "$TMP/remove_empty.log"; exit 1; }
+{ filler 70000; printf '"other" = ""\n"added" = ""\n'; } > "$TMP/big_before.toml"
+{ filler 70000; printf '"other" = ""\n'; } > "$TMP/big_expected.toml"
+remove_case over_limit added "$TMP/big_before.toml" "$TMP/big_expected.toml"
+grep -aq "^removed 'added' from \[dependencies\]$" "$TMP/remove_over_limit.log" || { echo "FAIL: bats remove over 65536 bytes said"; cat "$TMP/remove_over_limit.log"; exit 1; }
 echo "toml-fields: ok"
