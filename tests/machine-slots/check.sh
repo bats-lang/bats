@@ -164,7 +164,8 @@ rm -rf "$H/.cache"
 (cd "$TMP/p4" && HOME="$H" "$BATS" check > "$TMP/unset.log" 2>&1) || { echo "FAIL: check with BATS_SLOTS unset"; cat "$TMP/unset.log"; exit 1; }
 (cd "$TMP/p5" && BATS_SLOTS= HOME="$H" "$BATS" check > "$TMP/empty.log" 2>&1) || { echo "FAIL: check with BATS_SLOTS empty"; cat "$TMP/empty.log"; exit 1; }
 [ ! -e "$H/.cache" ] || { echo "FAIL: BATS_SLOTS unset, but bats made $H/.cache"; ls -R "$H/.cache"; exit 1; }
-sed 's/p5/p4/g' "$TMP/empty.log" | cmp -s - "$TMP/unset.log" || { echo "FAIL: BATS_SLOTS empty said something unset does not"; diff "$TMP/unset.log" "$TMP/empty.log"; exit 1; }
+# machine-slots: anchor the rename to the built line (a global s/p5/p4/ hits the random mktemp path, bats#439)
+sed 's/^built \.\/dist\/debug\/p5 (debug)$/built .\/dist\/debug\/p4 (debug)/' "$TMP/empty.log" | cmp -s - "$TMP/unset.log" || { echo "FAIL: BATS_SLOTS empty said something unset does not"; diff "$TMP/unset.log" "$TMP/empty.log"; exit 1; }
 if grep -qi "slot" "$TMP/unset.log"; then echo "FAIL: BATS_SLOTS unset, but bats spoke of slots"; cat "$TMP/unset.log"; exit 1; fi
 # a value that is not a slot count is said, and the command runs
 (cd "$TMP/p4" && BATS_SLOTS=two HOME="$H" "$BATS" check > "$TMP/bad.log" 2>&1) || { echo "FAIL: check with BATS_SLOTS=two"; cat "$TMP/bad.log"; exit 1; }
