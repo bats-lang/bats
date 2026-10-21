@@ -5,6 +5,8 @@
 #use array as A
 #use builder as B
 #use env as E
+#use list as L
+#use process as P
 #use result as R
 
 staload "helpers.sats"
@@ -953,9 +955,66 @@ in
 end
 
 fn usage_error (): void = let
-  val () = prerr! ("usage: bats check-pins <file>...")
+  val () = prerr! ("usage: bats check-pins <file>... | --discover")
   val () = prerr_newline()
 in set_exit_code(2) end
+
+(* An argument for the process package, made of a literal *)
+fn literal_arg {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $P.arg_entry = let
+  var b = $B.create()
+  val () = bput_v(b, s)
+in mk_arg(b) end
+
+(* Whether the only argument, cmd[first, total), is --discover *)
+fn sole_discover {lc:agz}{first:nat | first <= 4096}
+  (cmd: !$A.borrow(byte, lc, 4096), first: int first, total: int): bool = let
+  val z = find_nul(cmd, first)
+in
+  if z - first <> 10 then false
+  else if z + 1 <> total then false
+  else named_file(cmd, first, z, "--discover", 10)
+end
+
+(* bats check-pins --discover: the files of CI inputs of the repository of the
+   current directory (git ls-files, tracked or untracked and not ignored: a
+   planted file is read, bats_modules/ and build/ are not), checked as if named.
+   Its list is read into the buffer the arguments are (4096 bytes), so a list
+   that fills it is refused, never cut. The status as check-pins: 0, 1, or 2 for
+   no file, a git that fails or a list too long *)
+fn discover (): int = let
+  val git_exec = str_to_path_arr("git")
+  val @(fz_git, bv_git) = $A.freeze<byte>(git_exec)
+  val argv = $L.list_vt_cons(literal_arg("git"), $L.list_vt_cons(literal_arg("ls-files"),
+    $L.list_vt_cons(literal_arg("-z"), $L.list_vt_cons(literal_arg("--cached"),
+    $L.list_vt_cons(literal_arg("--others"), $L.list_vt_cons(literal_arg("--exclude-standard"),
+    $L.list_vt_cons(literal_arg("--"),
+    $L.list_vt_cons(literal_arg(":(glob).github/workflows/*.yml"),
+    $L.list_vt_cons(literal_arg(":(glob).github/workflows/*.yaml"),
+    $L.list_vt_cons(literal_arg(":(glob).github/actions/*/action.yml"),
+    $L.list_vt_cons(literal_arg(":(glob).github/actions/*/action.yaml"),
+    $L.list_vt_cons(literal_arg(":(glob)**/package.json"),
+    $L.list_vt_cons(literal_arg(":(glob)**/ats2.bats"), $L.list_vt_nil())))))))))))))
+  val out = $A.alloc<byte>(4096)
+  val @(rc, listed) = run_cmd_capture(bv_git, argv, out)
+  val @(fz_out, bv_out) = $A.freeze<byte>(out)
+  val status = (if rc <> 0 then let
+      val () = prerr! ("error: bats check-pins --discover: git ls-files failed: is the current directory in a git repository?")
+      val () = prerr_newline()
+    in 2 end
+    else if listed >= 4096 then let
+      val () = prerr! ("error: bats check-pins --discover: the files are listed in 4095 bytes or more")
+      val () = prerr_newline()
+    in 2 end
+    else if listed = 0 then let
+      val () = prerr! ("error: bats check-pins --discover: the repository has no workflow, action, package.json or ats2.bats to check")
+      val () = prerr_newline()
+    in 2 end
+    else check_files(bv_out, 0, listed, ats2_among(bv_out, 0, listed), 0)): int
+  val () = $A.drop<byte>(fz_out, bv_out)
+  val () = $A.free<byte>($A.thaw<byte>(fz_out))
+  val () = $A.drop<byte>(fz_git, bv_git)
+  val () = $A.free<byte>($A.thaw<byte>(fz_git))
+in status end
 
 (* Runs bats check-pins when that is the command given and answers true; false for any other command *)
 #pub fn pins_main (): bool
@@ -976,6 +1035,7 @@ implement pins_main () = let
               val () = prerr_newline()
             in set_exit_code(2) end
             else if first >= total then usage_error()
+            else if sole_discover(cmd, first, total) then set_exit_code(discover())
             else set_exit_code(check_files(cmd, first, total, ats2_among(cmd, first, total), 0)))
         in true end
       end): bool

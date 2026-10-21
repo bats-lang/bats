@@ -142,23 +142,13 @@ jobs:
           test "${{ steps.absent-commit.outcome }}" = failure
 
       # A floating input in the calling repository fails the action's pin
-      # check (bats#390), before anything is installed. The workflow is planted
-      # untracked in this checkout (the check reads the untracked files that
-      # are not ignored) and removed before the clean run below, which must
-      # pass on this repository's own files. The key is built from a variable
-      # so that this file holds no floating input of its own.
+      # check (bats#391). The fixture is copied in untracked (the check reads
+      # the untracked files that are not ignored) and removed before the clean
+      # run below, which must pass on this repository's own files. It is
+      # tracked outside .github, where no check reads it. Shell: see "Shell
+      # that remains" in .claude/rules/setup-action.md.
       - name: Plant a workflow with a floating input
-        run: |
-          key=uses
-          {
-            echo 'name: planted'
-            echo 'on: workflow_dispatch'
-            echo 'jobs:'
-            echo '  check:'
-            echo '    runs-on: ubuntu-24.04'
-            echo '    steps:'
-            printf '      - %s: actions/checkout@v4\n' "$key"
-          } > .github/workflows/planted-floating.yml
+        run: cp tests/setup-action/planted/floating.yml .github/workflows/planted-floating.yml
 
       - name: A floating input in the calling repository fails the action
         id: floating
