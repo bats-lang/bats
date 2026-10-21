@@ -549,24 +549,21 @@ fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
    to build/upload/bats.toml; 0 on success *)
 fn write_with_version {lv:agz}{nv:pos}
   (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
-  val tp = str_to_path_arr("bats.toml")
-  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+  val manifest_path = str_to_path_arr("bats.toml")
+  val @(fz_path, bv_path) = $A.freeze<byte>(manifest_path)
+  val whole = read_whole(bv_path, 524288)
+  val () = $A.drop<byte>(fz_path, bv_path)
+  val () = $A.free<byte>($A.thaw<byte>(fz_path))
 in
-  case+ tor of
-  | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(8192)
-      val trr = $F.file_read(tfd, tbuf, 8192)
-      val tlen = (case+ trr of | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
-      val () = $R.discard<int><$F.io_error>($F.file_close(tfd))
-      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val replace = any_version_line(bv_tb, 0, tlen, 8192)
+  case+ whole of
+  | ~whole_ok(ar, piece, size, length) => let
+      (* the manifest whole, not a prefix: it is zipped into the archive (manifest) *)
+      val @(fz_text, bv_text) = $A.freeze<byte>(piece)
+      val replace = any_version_line(bv_text, 0, length, size)
       var out: $B.builder_v = $B.create()
-      val () = inject_lines(bv_tb, 0, tlen, 8192, replace, v, vlen, nv, out)
-      val () = $A.drop<byte>(fz_tb, bv_tb)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
+      val () = inject_lines(bv_text, 0, length, size, replace, v, vlen, nv, out)
+      val () = $A.drop<byte>(fz_text, bv_text)
+      val () = whole_free(ar, $A.thaw<byte>(fz_text))
       var dir: $B.builder_v = $B.create()
       val () = bput_v(dir, "build/upload")
       val _ = run_mkdir(dir)
@@ -576,7 +573,7 @@ in
       val () = $A.drop<byte>(fz_op, bv_op)
       val () = $A.free<byte>($A.thaw<byte>(fz_op))
     in rc end
-  | ~$R.err(_) => 1
+  | ~whole_err(_) => 1
 end
 
 (* repo: the --repository path in repo[0, rplen); rplen is 0 when it
@@ -640,45 +637,24 @@ in @(a, 4, 4) end
 (* The [package] value of key in bats.toml with its length, when set
    (Rust: config::load) *)
 fn package_value {lk:agz}{nk:pos}
-  (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) = let
-  val tp = str_to_path_arr("bats.toml")
-  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
-in
-  (case+ tor of
-  | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(8192)
-      val trr = $F.file_read(tfd, tbuf, 8192)
-      val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><$F.io_error>(tcr)
-      val tn = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
-      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, tn)
-      val () = $A.drop<byte>(fz_tb, bv_tb)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
+  (key: !$A.borrow(byte, lk, nk), klen: int nk): $R.option(filled_arr) =
+  (case+ read_manifest() of
+  | ~$R.ok(doc) => let
+      var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
+      val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
+      val vbuf = $A.alloc<byte>(256)
+      val vr = $T.get(doc, bv_s, 7, key, klen, vbuf, 256)
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = $T.toml_free(doc)
     in
-      (case+ pr of
-      | ~$R.ok(doc) => let
-          var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
-          val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
-          val vbuf = $A.alloc<byte>(256)
-          val vr = $T.get(doc, bv_s, 7, key, klen, vbuf, 256)
-          val () = $A.drop<byte>(fz_s, bv_s)
-          val () = $A.free<byte>($A.thaw<byte>(fz_s))
-          val () = $T.toml_free(doc)
-        in
-          (case+ vr of
-          | ~$R.some(k) => $R.some(@(vbuf, 256, k))
-          | ~$R.none() => let
-              val () = $A.free<byte>(vbuf)
-            in $R.none() end): $R.option(filled_arr)
-        end
-      | ~$R.err(_) => $R.none()): $R.option(filled_arr)
+      (case+ vr of
+      | ~$R.some(k) => $R.some(@(vbuf, 256, k))
+      | ~$R.none() => let
+          val () = $A.free<byte>(vbuf)
+        in $R.none() end): $R.option(filled_arr)
     end
   | ~$R.err(_) => $R.none()): $R.option(filled_arr)
-end
 
 (* [package] trunk from bats.toml with its length *)
 fn read_trunk (): filled_arr = let
@@ -853,27 +829,9 @@ fn version_error (failure: version_failure): void =
 
 #pub fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
-implement do_upload {lr} (repo, rplen) = let
-  (* Read bats.toml for package name and verify kind = "lib" *)
-  val tp = str_to_path_arr("bats.toml")
-  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
-in
-  case+ tor of
-  | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(8192)
-      val trr = $F.file_read(tfd, tbuf, 8192)
-      val tlen = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
-      val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><$F.io_error>(tcr)
-      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, tlen)
-      val () = $A.drop<byte>(fz_tb, bv_tb)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
-    in
-      case+ pr of
+(* Read bats.toml for package name and verify kind = "lib" *)
+implement do_upload {lr} (repo, rplen) =
+  case+ read_manifest() of
       | ~$R.ok(doc) => let
           val sec = $A.alloc<byte>(7)
           val () = make_package(sec)
@@ -1076,14 +1034,14 @@ in
               val () = set_build_err()
             in prerr! ("error: package.name not found in bats.toml\n") end
         end
-      | ~$R.err(_) => let
+      | ~$R.err(failure) => let
           val () = set_build_err()
-        in prerr! ("error: parse error in './bats.toml'\n") end
-    end
-  | ~$R.err(_) => let
-      val () = set_build_err()
-    in prerr! ("error: cannot read './bats.toml'\n") end
-end
+        in
+          (* a read that parsed to nothing is the read's InvalidInput (read_toml) *)
+          case+ failure of
+          | $F.InvalidInput() => prerr! ("error: parse error in './bats.toml'\n")
+          | _ => prerr! ("error: cannot read './bats.toml'\n")
+        end
 
 (* ============================================================
    completions: generate shell completion scripts

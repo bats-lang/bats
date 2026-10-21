@@ -10,6 +10,8 @@ staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload SHA = "sha256/src/lib.sats"
+staload T = "toml/src/lib.sats"
+
 
 
 
@@ -3296,6 +3298,13 @@ fn read_whole {lp:agz}{np:pos | np < 1048576}
 
 
 
+
+
+
+
+
+
+
 fn read_whole_m {lp:agz}{np:pos}{m:nat | m <= np; m <= 524288}
   (path: !$A.borrow(byte, lp, np), m: int m): whole_file
 
@@ -3305,6 +3314,41 @@ fn read_whole_m {lp:agz}{np:pos}{m:nat | m <= np; m <= 524288}
 
 fn whole_free {la,l:agz}{m:pos}
   (ar: $A.arena(byte, la, m, m, 1), p: $A.arrx(byte, l, m, la)): void
+
+
+
+
+
+
+
+
+fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
+  : $R.result($T.toml_doc, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn read_manifest (): $R.result($T.toml_doc, $F.io_error)
 
 
 

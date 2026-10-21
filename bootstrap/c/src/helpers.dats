@@ -11,6 +11,7 @@ staload "process/src/lib.dats"
 staload "result/src/lib.dats"
 staload "str/src/lib.dats"
 staload "sha256/src/lib.dats"
+staload "toml/src/lib.dats"
 (* helpers -- shared utilities for the bats compiler *)
 
 #include "share/atspre_staload.hats"
@@ -27,6 +28,7 @@ staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload SHA = "sha256/src/lib.sats"
+staload T = "toml/src/lib.sats"
 
 (* ============================================================
    Proven byte reads
@@ -3283,15 +3285,22 @@ fn whole_of_open (opened: $R.result($F.fd, $F.io_error)): whole_file =
         in whole_err($F.OutOfMemory()) end
       | ~$A.arena_some(ar) => let
           val p = $A.arena_alloc<byte>(ar, z + 1)
-          val k = (case+ $F.file_read(fd, p, z + 1) of
-            | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
+          val read_result = $F.file_read(fd, p, z + 1)
           val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         in
-          if k = z then whole_ok(ar, p, z + 1, z)
-          else let
-            val () = $A.arena_return<byte>(ar, p)
-            val () = $A.arena_destroy<byte>(ar)
-          in whole_err($F.DeviceError()) end
+          (* a read that failed is its own error (a directory is EISDIR), a
+             short one a file that changed size *)
+          case+ read_result of
+          | ~$R.ok(k) =>
+            if k = z then whole_ok(ar, p, z + 1, z)
+            else let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err($F.DeviceError()) end
+          | ~$R.err(e) => let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err(e) end
         end))
 
 implement read_whole (path, plen) =
@@ -3310,6 +3319,41 @@ implement read_whole_m (path, m) =
 implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
+
+(* The TOML file at the NUL-terminated path in the first m bytes of pa,
+   read whole (no ceiling but a file too large for an arena) and parsed, or
+   why not (manifest) *)
+
+
+
+implement read_toml (pa, m) = let
+  val @(fz_path, bv_path) = $A.freeze<byte>(pa)
+  val whole = read_whole_m(bv_path, m)
+  val () = $A.drop<byte>(fz_path, bv_path)
+  val () = $A.free<byte>($A.thaw<byte>(fz_path))
+in
+  case+ whole of
+  | ~whole_err(e) => $R.err(e)
+  | ~whole_ok(ar, piece, size, length) => let
+      val @(fz_text, bv_text) = $A.freeze<byte>(piece)
+      val parsed = $T.parse(bv_text, length)
+      val () = $A.drop<byte>(fz_text, bv_text)
+      val () = whole_free(ar, $A.thaw<byte>(fz_text))
+    in
+      case+ parsed of
+      | ~$R.ok(doc) => $R.ok(doc)
+      (* a file that does not parse was read: the error is the read's
+         (none), an invalid input *)
+      | ~$R.err(_) => $R.err($F.InvalidInput())
+    end
+end
+
+(* The ./bats.toml, read whole and parsed (manifest) *)
+
+
+implement read_manifest () = let
+  val @(manifest_path, manifest_path_len) = str_into_arr("bats.toml")
+in read_toml(manifest_path, manifest_path_len) end
 
 (* build/.sats_changed is touched BEFORE a .sats is written, so a bats
    killed between the two leaves the stamp ahead (every C is made again),

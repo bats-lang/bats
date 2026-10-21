@@ -8,6 +8,19 @@
 # restored build/ as it is: no module is made again and build/ is the cold
 # build's. A dependency's constraint and a path dependency reach build/ only
 # through the sources in bats_modules, which are keyed by content.
+# A manifest longer than 8192 bytes is read whole by upload (the name, the
+# kind, the version and trunk, and the copy zipped into the archive) and by
+# the docs, as it is by emission and validation; each of these read a prefix
+# once, and the name past it was not found.
+#
+# Why shell: this runs the compiler binary it is given (argument 1) several
+# times over project directories and compares their build/ trees and logs.
+# `bats test` runs a package's `$UNITTEST` functions in one runner linked from
+# that package's modules, and gets no compiler binary to run on a second
+# project; `bats fixtures` checks one snippet in one copy of one project
+# against an error text, with no second manifest, no second build and no
+# build/ left to compare. Every tests/*/check.sh of bats is shell for this
+# reason (check.yml runs them in a loop).
 # usage: tests/toml-fields/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -18,18 +31,17 @@ unset BATS_CACHE_DIR
 # patsopt runs, not counting the entry's generated module, which every build
 # makes again
 ran() { grep -a -- '+ patsopt' "$1" | grep -av '_bats_entry_' | grep -avc '(cached)' || true; }
-build() { # <dir> <log> [bats arguments]: -v build in <dir>, which must succeed
-  d=$1; l=$2; shift 2
-  (cd "$d" && "$BATS" -v build --only debug --only native "$@") > "$l" 2>&1 || { echo "FAIL: build in $d"; cat "$l"; exit 1; }
-  sleep 1
+build() { # <directory> <log file> [bats arguments]: -v build in <directory>, which must succeed
+  directory=$1; log_file=$2; shift 2
+  (cd "$directory" && "$BATS" -v build --only debug --only native "$@") > "$log_file" 2>&1 || { echo "FAIL: build in $directory"; cat "$log_file"; exit 1; }
 }
 program() { (cd "$1" && ./dist/debug/tf); }
 # the files of build/ and their digests, without what is not the build's (the
 # records of what passed, the stash of another mark, the graph of one run, and
 # the objects, whose debug info names the directory they were made in)
-tree() { (cd "$1/build" && find . -type f ! -path './.bats_valid/*' ! -path './.stash/*' ! -name .bats_graph ! -name '*.o' | LC_ALL=C sort | while read -r f; do printf '%s %s\n' "$(cksum < "$f")" "$f"; done); }
+tree() { (cd "$1/build" && find . -type f ! -path './.bats_valid/*' ! -path './.stash/*' ! -name .bats_graph ! -name '*.o' | LC_ALL=C sort | while read -r file_name; do printf '%s %s\n' "$(cksum < "$file_name")" "$file_name"; done); }
 
-module() { # <dir> <bats.toml text>: a binary of two modules
+module() { # <directory> <bats.toml text>: a binary of two modules
   rm -rf "$1"; mkdir -p "$1/src/bin"
   printf '%s' "$2" > "$1/bats.toml"
   printf '#include "share/atspre_staload.hats"\n\n#pub fn f (): int\n\nimplement f () = 1\n' > "$1/src/m.bats"
@@ -43,19 +55,19 @@ base='[package]
 name = "tf"
 kind = "bin"
 '
-unchanged() { # <name> <second manifest>
-  module "$TMP/a" "$base"
-  build "$TMP/a" "$TMP/a.log"
-  module "$TMP/b" "$2"
-  cp -R "$TMP/a/build" "$TMP/b/build"
-  build "$TMP/b" "$TMP/b.log"
-  [ "$(ran "$TMP/b.log")" = 0 ] || { echo "FAIL: $1: a restored build/ made $(ran "$TMP/b.log") modules again"; cat "$TMP/b.log"; exit 1; }
-  if grep -aq '^bats: dropping build/' "$TMP/b.log"; then echo "FAIL: $1: build/ was dropped"; cat "$TMP/b.log"; exit 1; fi
-  module "$TMP/c" "$2"
-  build "$TMP/c" "$TMP/c.log"
-  tree "$TMP/b" > "$TMP/b.tree"; tree "$TMP/c" > "$TMP/c.tree"
-  cmp -s "$TMP/b.tree" "$TMP/c.tree" || { echo "FAIL: $1: the restored build/ is not the cold build's"; diff "$TMP/b.tree" "$TMP/c.tree"; exit 1; }
-  [ "$(program "$TMP/b")" = 1 ] || { echo "FAIL: $1: the program"; exit 1; }
+unchanged() { # <case name> <second manifest>
+  module "$TMP/first" "$base"
+  build "$TMP/first" "$TMP/first.log"
+  module "$TMP/restored" "$2"
+  cp -R "$TMP/first/build" "$TMP/restored/build"
+  build "$TMP/restored" "$TMP/restored.log"
+  [ "$(ran "$TMP/restored.log")" = 0 ] || { echo "FAIL: $1: a restored build/ made $(ran "$TMP/restored.log") modules again"; cat "$TMP/restored.log"; exit 1; }
+  if grep -aq '^bats: dropping build/' "$TMP/restored.log"; then echo "FAIL: $1: build/ was dropped"; cat "$TMP/restored.log"; exit 1; fi
+  module "$TMP/cold" "$2"
+  build "$TMP/cold" "$TMP/cold.log"
+  tree "$TMP/restored" > "$TMP/restored.tree"; tree "$TMP/cold" > "$TMP/cold.tree"
+  cmp -s "$TMP/restored.tree" "$TMP/cold.tree" || { echo "FAIL: $1: the restored build/ is not the cold build's"; diff "$TMP/restored.tree" "$TMP/cold.tree"; exit 1; }
+  [ "$(program "$TMP/restored")" = 1 ] || { echo "FAIL: $1: the program"; exit 1; }
 }
 unchanged "name" '[package]
 name = "another"
@@ -86,14 +98,14 @@ unsafe = true
 
 # kind: bats build refuses a library whatever build/ holds, and a bin again
 # builds from the same build/ with nothing made again
-module "$TMP/k" "$base"
-build "$TMP/k" "$TMP/k1.log"
-printf '[package]\nname = "tf"\nkind = "lib"\n' > "$TMP/k/bats.toml"
-rc=0; (cd "$TMP/k" && "$BATS" build --only debug --only native) > "$TMP/k2.out" 2> "$TMP/k2.err" || rc=$?
-[ "$rc" = 1 ] && [ "$(cat "$TMP/k2.err")" = "error: 'bats build' is only for binary packages (kind = \"bin\")" ] || { echo "FAIL: kind = lib built (rc $rc)"; cat "$TMP/k2.err"; exit 1; }
-printf '%s' "$base" > "$TMP/k/bats.toml"
-build "$TMP/k" "$TMP/k3.log"
-[ "$(ran "$TMP/k3.log")" = 0 ] || { echo "FAIL: kind back to bin made modules again"; cat "$TMP/k3.log"; exit 1; }
+module "$TMP/kind_project" "$base"
+build "$TMP/kind_project" "$TMP/kind_first.log"
+printf '[package]\nname = "tf"\nkind = "lib"\n' > "$TMP/kind_project/bats.toml"
+exit_code=0; (cd "$TMP/kind_project" && "$BATS" build --only debug --only native) > "$TMP/kind_lib.out" 2> "$TMP/kind_lib.err" || exit_code=$?
+[ "$exit_code" = 1 ] && [ "$(cat "$TMP/kind_lib.err")" = "error: 'bats build' is only for binary packages (kind = \"bin\")" ] || { echo "FAIL: kind = lib built (exit code $exit_code)"; cat "$TMP/kind_lib.err"; exit 1; }
+printf '%s' "$base" > "$TMP/kind_project/bats.toml"
+build "$TMP/kind_project" "$TMP/kind_again.log"
+[ "$(ran "$TMP/kind_again.log")" = 0 ] || { echo "FAIL: kind back to bin made modules again"; cat "$TMP/kind_again.log"; exit 1; }
 
 # unsafe, the field the emitted modules depend on: a $UNSAFE block is kept
 # under unsafe = true; the flag false over a restored build/ is an error and
@@ -107,35 +119,54 @@ name = "tf"
 kind = "bin"
 unsafe = true
 '
-unsafe_module "$TMP/u" "$yes_unsafe"
-build "$TMP/u" "$TMP/u1.log"
-printf '[package]\nname = "tf"\nkind = "bin"\nunsafe = false\n' > "$TMP/u/bats.toml"
-rm -f "$TMP/u/dist/debug/tf"
-rc=0; (cd "$TMP/u" && "$BATS" build --only debug --only native) > "$TMP/u2.out" 2> "$TMP/u2.err" || rc=$?
-[ "$rc" = 1 ] && grep -aq '^error: error: .UNSAFE requires .unsafe = true. in bats.toml' "$TMP/u2.err" && [ ! -e "$TMP/u/dist/debug/tf" ] || { echo "FAIL: unsafe = false over a restored build/ (rc $rc)"; cat "$TMP/u2.err"; exit 1; }
-printf '%s' "$yes_unsafe" > "$TMP/u/bats.toml"
-build "$TMP/u" "$TMP/u3.log"
-[ "$(program "$TMP/u")" = 1 ] || { echo "FAIL: unsafe again: the program"; exit 1; }
+unsafe_module "$TMP/unsafe_project" "$yes_unsafe"
+build "$TMP/unsafe_project" "$TMP/unsafe_first.log"
+printf '[package]\nname = "tf"\nkind = "bin"\nunsafe = false\n' > "$TMP/unsafe_project/bats.toml"
+rm -f "$TMP/unsafe_project/dist/debug/tf"
+exit_code=0; (cd "$TMP/unsafe_project" && "$BATS" build --only debug --only native) > "$TMP/unsafe_false.out" 2> "$TMP/unsafe_false.err" || exit_code=$?
+[ "$exit_code" = 1 ] && grep -aq '^error: error: .UNSAFE requires .unsafe = true. in bats.toml' "$TMP/unsafe_false.err" && [ ! -e "$TMP/unsafe_project/dist/debug/tf" ] || { echo "FAIL: unsafe = false over a restored build/ (exit code $exit_code)"; cat "$TMP/unsafe_false.err"; exit 1; }
+printf '%s' "$yes_unsafe" > "$TMP/unsafe_project/bats.toml"
+build "$TMP/unsafe_project" "$TMP/unsafe_again.log"
+[ "$(program "$TMP/unsafe_project")" = 1 ] || { echo "FAIL: unsafe again: the program"; exit 1; }
 
 # a manifest over 4096 bytes: emission reads `unsafe = true` as validation does
-{ for i in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '%s' "$yes_unsafe"; } > "$TMP/big.toml"
-[ "$(wc -c < "$TMP/big.toml")" -gt 8192 ] || { echo "FAIL: the manifest is not large"; exit 1; }
-unsafe_module "$TMP/g" "$(cat "$TMP/big.toml")"
-build "$TMP/g" "$TMP/g1.log"
-[ "$(program "$TMP/g")" = 1 ] || { echo "FAIL: large manifest: the program"; exit 1; }
+{ for line_number in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '%s' "$yes_unsafe"; } > "$TMP/large_manifest.toml"
+[ "$(wc -c < "$TMP/large_manifest.toml")" -gt 8192 ] || { echo "FAIL: the manifest is not large"; exit 1; }
+unsafe_module "$TMP/large_project" "$(cat "$TMP/large_manifest.toml")"
+build "$TMP/large_project" "$TMP/large_manifest.log"
+[ "$(program "$TMP/large_project")" = 1 ] || { echo "FAIL: large manifest: the program"; exit 1; }
+
+# a library manifest over 8192 bytes whose [package] comes after the padding:
+# upload finds the name, the kind and the version, zips the manifest whole
+# with the version injected, and the docs carry the name
+mkdir -p "$TMP/large_library/src" "$TMP/large_repository"
+{ for line_number in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '[package]\nname = "tflarge"\nkind = "lib"\n'; } > "$TMP/large_library/bats.toml"
+[ "$(wc -c < "$TMP/large_library/bats.toml")" -gt 8192 ] || { echo "FAIL: the library manifest is not large"; exit 1; }
+printf '#pub fun f (): int\n\nimplement f () = 1\n' > "$TMP/large_library/src/lib.bats"
+printf 'build/\ndist/\ndocs/\nbats_modules/\nbats.lock\n' > "$TMP/large_library/.gitignore"
+(cd "$TMP/large_library" && git init -q -b main . && git add -A &&
+ git -c user.name=t -c user.email=t@t commit -q -m large &&
+ "$BATS" upload --repository "$TMP/large_repository" > "$TMP/large_upload.log" 2>&1) || { echo "FAIL: upload of a large manifest"; cat "$TMP/large_upload.log"; exit 1; }
+archive=$(ls "$TMP"/large_repository/tflarge/tflarge_*.bats)
+unzip -p "$archive" bats.toml > "$TMP/archived.toml"
+grep -aq '^name = "tflarge"$' "$TMP/archived.toml" && grep -aq '^version = "' "$TMP/archived.toml" || { echo "FAIL: the archived manifest lacks the name or the version"; exit 1; }
+[ "$(wc -c < "$TMP/archived.toml")" -gt "$(wc -c < "$TMP/large_library/bats.toml")" ] || { echo "FAIL: the archived manifest is cut"; exit 1; }
+grep -aq '^# a line of padding' "$TMP/archived.toml" || { echo "FAIL: the archived manifest lost its first lines"; exit 1; }
+(cd "$TMP/large_library" && "$BATS" check --repository "$TMP/large_repository" > "$TMP/large_check.log" 2>&1) || { echo "FAIL: check of a large library manifest"; cat "$TMP/large_check.log"; exit 1; }
+grep -aq '^# tflarge$' "$TMP/large_library/docs/index.md" || { echo "FAIL: the docs lack the package name"; exit 1; }
 
 # [dependencies]: a constraint reaches build/ through the version it picks
 # (sources in bats_modules, keyed by content), a path dependency through the
 # directory it names
 mkdir -p "$TMP/repo"
 publish() { # <name> <commit date> <value>: a library whose f is value
-  rm -rf "$TMP/p"; mkdir -p "$TMP/p/src"
-  printf '[package]\nname = "%s"\nkind = "lib"\n' "$1" > "$TMP/p/bats.toml"
-  printf '#pub fun f (): int\n\nimplement f () = %s\n' "$3" > "$TMP/p/src/lib.bats"
-  printf 'build/\ndist/\ndocs/\nbats_modules/\nbats.lock\n' > "$TMP/p/.gitignore"
-  (cd "$TMP/p" && git init -q -b main . && git add -A &&
+  rm -rf "$TMP/published"; mkdir -p "$TMP/published/src"
+  printf '[package]\nname = "%s"\nkind = "lib"\n' "$1" > "$TMP/published/bats.toml"
+  printf '#pub fun f (): int\n\nimplement f () = %s\n' "$3" > "$TMP/published/src/lib.bats"
+  printf 'build/\ndist/\ndocs/\nbats_modules/\nbats.lock\n' > "$TMP/published/.gitignore"
+  (cd "$TMP/published" && git init -q -b main . && git add -A &&
    GIT_COMMITTER_DATE="$2" git -c user.name=t -c user.email=t@t commit -q -m "$2" &&
-   "$BATS" upload --repository "$TMP/repo" > "$TMP/up.log" 2>&1) || { echo "FAIL: upload $1"; cat "$TMP/up.log"; exit 1; }
+   "$BATS" upload --repository "$TMP/repo" > "$TMP/upload.log" 2>&1) || { echo "FAIL: upload $1"; cat "$TMP/upload.log"; exit 1; }
 }
 publish tfdep "2026-01-03T00:00:03Z" 1
 publish tfdep "2026-01-04T00:00:04Z" 2
@@ -149,31 +180,31 @@ dependent() { # <dir> <[dependencies] value>
 # the relock the other version's sources replace the old ones, so build/ is
 # made again from them; without a lock an installed package is kept, as the
 # Rust bats did
-mkdir -p "$TMP/d"
-dependent "$TMP/d" '""'
-(cd "$TMP/d" && "$BATS" lock --repository "$TMP/repo") > "$TMP/d0.log" 2>&1 || { echo "FAIL: lock"; cat "$TMP/d0.log"; exit 1; }
-build "$TMP/d" "$TMP/d1.log" --repository "$TMP/repo"
-[ "$(program "$TMP/d")" = 2 ] || { echo "FAIL: constraint none: the newest"; exit 1; }
-printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = "!= 2026.1.4.4"\n' > "$TMP/d/bats.toml"
-rc=0; (cd "$TMP/d" && "$BATS" build --only debug --only native --repository "$TMP/repo") > "$TMP/d2.out" 2> "$TMP/d2.err" || rc=$?
-[ "$rc" = 1 ] && grep -aq 'which does not meet' "$TMP/d2.err" || { echo "FAIL: a constraint that rules out the locked version (rc $rc)"; cat "$TMP/d2.err"; exit 1; }
-(cd "$TMP/d" && "$BATS" lock --repository "$TMP/repo") > "$TMP/d3.log" 2>&1 || { echo "FAIL: relock"; cat "$TMP/d3.log"; exit 1; }
-build "$TMP/d" "$TMP/d4.log" --repository "$TMP/repo"
-[ "$(program "$TMP/d")" = 1 ] || { echo "FAIL: constraint != the newest: the program"; cat "$TMP/d4.log"; exit 1; }
-printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = ""\n' > "$TMP/d/bats.toml"
-(cd "$TMP/d" && "$BATS" lock --repository "$TMP/repo") > "$TMP/d5.log" 2>&1 || { echo "FAIL: relock again"; cat "$TMP/d5.log"; exit 1; }
-build "$TMP/d" "$TMP/d6.log" --repository "$TMP/repo"
-[ "$(program "$TMP/d")" = 2 ] || { echo "FAIL: constraint dropped: the program"; cat "$TMP/d6.log"; exit 1; }
+mkdir -p "$TMP/dependent"
+dependent "$TMP/dependent" '""'
+(cd "$TMP/dependent" && "$BATS" lock --repository "$TMP/repo") > "$TMP/dependent_lock.log" 2>&1 || { echo "FAIL: lock"; cat "$TMP/dependent_lock.log"; exit 1; }
+build "$TMP/dependent" "$TMP/dependent_first.log" --repository "$TMP/repo"
+[ "$(program "$TMP/dependent")" = 2 ] || { echo "FAIL: constraint none: the newest"; exit 1; }
+printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = "!= 2026.1.4.4"\n' > "$TMP/dependent/bats.toml"
+exit_code=0; (cd "$TMP/dependent" && "$BATS" build --only debug --only native --repository "$TMP/repo") > "$TMP/dependent_ruled_out.out" 2> "$TMP/dependent_ruled_out.err" || exit_code=$?
+[ "$exit_code" = 1 ] && grep -aq 'which does not meet' "$TMP/dependent_ruled_out.err" || { echo "FAIL: a constraint that rules out the locked version (exit code $exit_code)"; cat "$TMP/dependent_ruled_out.err"; exit 1; }
+(cd "$TMP/dependent" && "$BATS" lock --repository "$TMP/repo") > "$TMP/dependent_relock.log" 2>&1 || { echo "FAIL: relock"; cat "$TMP/dependent_relock.log"; exit 1; }
+build "$TMP/dependent" "$TMP/dependent_not_newest.log" --repository "$TMP/repo"
+[ "$(program "$TMP/dependent")" = 1 ] || { echo "FAIL: constraint != the newest: the program"; cat "$TMP/dependent_not_newest.log"; exit 1; }
+printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = ""\n' > "$TMP/dependent/bats.toml"
+(cd "$TMP/dependent" && "$BATS" lock --repository "$TMP/repo") > "$TMP/dependent_relock_again.log" 2>&1 || { echo "FAIL: relock again"; cat "$TMP/dependent_relock_again.log"; exit 1; }
+build "$TMP/dependent" "$TMP/dependent_dropped.log" --repository "$TMP/repo"
+[ "$(program "$TMP/dependent")" = 2 ] || { echo "FAIL: constraint dropped: the program"; cat "$TMP/dependent_dropped.log"; exit 1; }
 
-mkdir -p "$TMP/pd/one/src" "$TMP/pd/two/src" "$TMP/pd/app/src/bin"
-for n in one two; do printf '[package]\nname = "tfdep"\nkind = "lib"\n' > "$TMP/pd/$n/bats.toml"; done
-printf '#pub fun f (): int\n\nimplement f () = 7\n' > "$TMP/pd/one/src/lib.bats"
-printf '#pub fun f (): int\n\nimplement f () = 8\n' > "$TMP/pd/two/src/lib.bats"
-printf '#use tfdep as D\n\nimplement main0 () = println! ($D.f ())\n' > "$TMP/pd/app/src/bin/tf.bats"
-printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../one" }\n' > "$TMP/pd/app/bats.toml"
-build "$TMP/pd/app" "$TMP/pd1.log"
-[ "$(program "$TMP/pd/app")" = 7 ] || { echo "FAIL: path dependency one"; exit 1; }
-printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../two" }\n' > "$TMP/pd/app/bats.toml"
-build "$TMP/pd/app" "$TMP/pd2.log"
-[ "$(program "$TMP/pd/app")" = 8 ] || { echo "FAIL: path dependency two: the program"; cat "$TMP/pd2.log"; exit 1; }
+mkdir -p "$TMP/path_dependency/one/src" "$TMP/path_dependency/two/src" "$TMP/path_dependency/app/src/bin"
+for library in one two; do printf '[package]\nname = "tfdep"\nkind = "lib"\n' > "$TMP/path_dependency/$library/bats.toml"; done
+printf '#pub fun f (): int\n\nimplement f () = 7\n' > "$TMP/path_dependency/one/src/lib.bats"
+printf '#pub fun f (): int\n\nimplement f () = 8\n' > "$TMP/path_dependency/two/src/lib.bats"
+printf '#use tfdep as D\n\nimplement main0 () = println! ($D.f ())\n' > "$TMP/path_dependency/app/src/bin/tf.bats"
+printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../one" }\n' > "$TMP/path_dependency/app/bats.toml"
+build "$TMP/path_dependency/app" "$TMP/path_dependencyependent_first.log"
+[ "$(program "$TMP/path_dependency/app")" = 7 ] || { echo "FAIL: path dependency one"; exit 1; }
+printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../two" }\n' > "$TMP/path_dependency/app/bats.toml"
+build "$TMP/path_dependency/app" "$TMP/path_dependency2.log"
+[ "$(program "$TMP/path_dependency/app")" = 8 ] || { echo "FAIL: path dependency two: the program"; cat "$TMP/path_dependency2.log"; exit 1; }
 echo "toml-fields: ok"
