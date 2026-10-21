@@ -978,9 +978,12 @@ end
 (* bats check-pins --discover: the files of CI inputs of the repository of the
    current directory (git ls-files, tracked or untracked and not ignored: a
    planted file is read, bats_modules/ and build/ are not), checked as if named.
-   Its list is read into the buffer the arguments are (4096 bytes), so a list
-   that fills it is refused, never cut. The status as check-pins: 0, 1, or 2 for
-   no file, a git that fails or a list too long *)
+   Its list is read into the buffer the arguments are (4096 bytes; the file
+   package's read goes on to the buffer's end or the pipe's), so a list that fills
+   it is refused, never cut, and that is said before git's status is read: git,
+   its pipe closed with the list unread, ends on SIGPIPE, which is no failure of
+   git. The status as check-pins: 0, 1, or 2 for no file, a git that fails or a
+   list too long *)
 fn discover (): int = let
   val git_exec = str_to_path_arr("git")
   val @(fz_git, bv_git) = $A.freeze<byte>(git_exec)
@@ -997,12 +1000,12 @@ fn discover (): int = let
   val out = $A.alloc<byte>(4096)
   val @(rc, listed) = run_cmd_capture(bv_git, argv, out)
   val @(fz_out, bv_out) = $A.freeze<byte>(out)
-  val status = (if rc <> 0 then let
-      val () = prerr! ("error: bats check-pins --discover: git ls-files failed: is the current directory in a git repository?")
+  val status = (if listed >= 4096 then let
+      val () = prerr! ("error: bats check-pins --discover: the files are listed in 4095 bytes or more")
       val () = prerr_newline()
     in 2 end
-    else if listed >= 4096 then let
-      val () = prerr! ("error: bats check-pins --discover: the files are listed in 4095 bytes or more")
+    else if rc <> 0 then let
+      val () = prerr! ("error: bats check-pins --discover: git ls-files failed: is the current directory in a git repository?")
       val () = prerr_newline()
     in 2 end
     else if listed = 0 then let

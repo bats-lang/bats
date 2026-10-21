@@ -504,6 +504,22 @@ discover; [ $? -eq 2 ] || fail "a list over 4095 bytes is not 2"
 grep -q "4095 bytes" "$TMP/out" || fail "a long list does not say so"
 rm -rf "$G"/directory-with-a-long-name-*
 echo "ok   discover (no file, no repository, too long)"
+# a list git writes in pieces is read to its end (the floating file named in the second
+# piece is checked), and a list too long for the buffer, whose writer ends on SIGPIPE
+# when the pipe is closed unread, is the "too long" 2 and not a failure of git (git is a
+# stub on the path)
+mkdir -p "$TMP/stub"
+printf '%s\n' "$(steps "      - uses: a/b@v1")" > "$G/late.yml"
+printf '%s\n' "$(steps "      - uses: ./local")" > "$G/early.yml"
+printf '#!/bin/sh\nprintf "early.yml\\0"\nsleep 1\nprintf "late.yml\\0"\n' > "$TMP/stub/git"
+chmod +x "$TMP/stub/git"
+(cd "$G" && PATH="$TMP/stub:$PATH" "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 1 ] || fail "a list written in two pieces was cut after the first"
+grep -q "^late.yml:4: " "$TMP/out" || fail "the file of the second piece is not named"
+printf '#!/bin/sh\ni=0\nwhile [ $i -lt 8 ]; do head -c 600 /dev/zero | tr "\\0" "a"; printf "\\0"; sleep 0.2; i=$((i+1)); done\n' > "$TMP/stub/git"
+(cd "$G" && PATH="$TMP/stub:$PATH" "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "a long list written in pieces is not 2"
+grep -q "4095 bytes" "$TMP/out" || fail "a long list written in pieces does not say so"
+rm -f "$G/late.yml" "$G/early.yml"
+echo "ok   discover (a list written in pieces)"
 # --discover beside a file, or twice, is a file name and unreadable: 2
 "$BATS" check-pins --discover "$TMP/clean.yml" > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "--discover beside a file is not 2"
 grep -q "cannot read --discover" "$TMP/out" || fail "--discover beside a file is not named"
