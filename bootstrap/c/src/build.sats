@@ -542,8 +542,6 @@ fn do_clean(): void
 
 
 
-
-
 fn write_native_runtime_h {l:agz}
   (dir: !$A.borrow(byte, l, 4096), dlen: int): int
 
@@ -1186,11 +1184,18 @@ fn check_wasm_binary {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
 
 
 
+
+
+
+
+
 fn do_build {lt:agz}
   (release: profile, build_target: target, to_c: !$A.borrow(byte, lt, 4096), tclen: int): void
 
 
 fn do_build_plain(release: profile, build_target: target): void
+
+
 
 
 
