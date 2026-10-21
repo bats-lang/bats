@@ -71,13 +71,13 @@
 #  3. loads-kept: `~snippet_loads(cfg, w, mv, a, e)` -> `true`
 #     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
 #  3b. load-as-text: `find_word_from(bv, sn, 0, "load")` -> `find_text_from(bv, sn, 0, "load")`
-#     killed by: "a snippet with load or include inside a name was not kept"
+#     killed by: "Download is no loading word"
 #  3c. leading-boundary-removed: `&& ~is_word_byte(byte_at(bv, len, p - 1))` -> `&& true`
 #     killed by: "Download is no loading word"
 #  3d. trailing-boundary-removed: `&& ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))` -> `&& true`
 #     killed by: "included is no loading word"
-#  3e. apostrophe-omitted: `fn is_word_byte(b: int): bool = is_ident_byte(b) || b = 39` -> `fn is_word_byte(b: int): bool = is_ident_byte(b)`
-#     killed by: "load' is no loading word"
+#  3e. apostrophe-counted: `fn is_word_byte(b: int): bool = is_ident_byte(b)` -> `fn is_word_byte(b: int): bool = is_ident_byte(b) || b = 39`
+#     killed by: "load' is a loading word"
 #  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
 #     killed by: "memo cold audit lie"
 #  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
@@ -674,7 +674,7 @@ saidpart "$TMP/l1.log" "FAIL reject/moves-limit: rejected, but not as its expect
 
 # ---- the word rule, one case each (bats#432): a snippet is kept when no loading word (staload,
 # dynload, load, include) is a word of it and #use and #require are not in it. Each case is one
-# fixture in a memo of its own and prints one line, `ok   word/<case>: <what>`, or
+# fixture in a memo of its own, must check (status 0, its own accept line) and prints one line, `ok   word/<case>: <what> [<its accept line>]`, or
 # `FAIL word/<case>: <what>: the snippet was kept` (or `not kept`); the section fails when one did not hold.
 # It runs before the memo's own in-a-name case below, which stops the run when it fails.
 wordfail=0
@@ -685,7 +685,7 @@ wordcase() { # <case> <kept|not> <what> <snippet>: the fixture alone; kept means
   kept=$(nfiles "$wm")
   if [ "$rc" = 0 ] && grep -aqE "^ok   accept/$1 \([0-9]+ s\)\$" "$wl"; then
     if { [ "$2" = kept ] && [ "$kept" = 2 ]; } || { [ "$2" = not ] && [ "$kept" = 0 ]; }; then
-      echo "ok   word/$1: $3"
+      echo "ok   word/$1: $3 [$(grep -aE "^ok   accept/$1 \([0-9]+ s\)\$" "$wl")]"
     else
       echo "FAIL word/$1: $3: the snippet was $([ "$kept" = 0 ] && echo 'not kept' || echo 'kept')"
       wordfail=1
@@ -695,24 +695,21 @@ wordcase() { # <case> <kept|not> <what> <snippet>: the fixture alone; kept means
     wordfail=1
   fi
 }
-# a snippet that is the bare word, with no header and nothing else: it does not check, so only "not kept" is judged
-wordbare() { # <case> <word> <what>
-  mfix "$TMP/word" accept "$1" src/lib.bats '(* end *)' 'x'
-  printf '%s' "$2" > "$TMP/word/accept/$1/snippet.bats"
-  wm=$TMP/word-memo-$1; wl=$TMP/word-$1.log
-  mrunx "$MP" "$TMP/word" "$MW" "$wm" "$wl" --only "accept/$1"
-  if [ "$(nfiles "$wm")" = 0 ]; then echo "ok   word/$1: $3"; else echo "FAIL word/$1: $3: the snippet was kept"; wordfail=1; fi
-}
 wordcase download kept 'Download is no loading word (a longer name, bats#432)' 'fn Download (x: int): int = x'
 wordcase included kept 'included is no loading word (include, then an identifier byte)' 'fn included (x: int): int = x'
 wordcase loaded kept 'loaded is no loading word (load, then an identifier byte)' 'fn loaded (x: int): int = x'
-wordcase apostrophe kept "load' is no loading word (the apostrophe is an identifier byte)" "fn load' (x: int): int = x"
+wordcase apostrophe not "load' is a loading word (the apostrophe is not an identifier byte, so load is the word)" "fn load' (x: int): int = x"
+wordcase comment not 'load in a comment is a loading word (a comment counts: the scan is conservative)' '(* load *)
+
+fn g (x: int): int = x'
 wordcase end-included kept 'a longer name at the end of the snippet is no loading word' 'fn g (): int = 1
 // included'
 wordcase staload not 'staload is a loading word' 'staload "helper.sats"
 
 fn g (): int = help ()'
-wordcase dynload not 'dynload is a loading word' 'dynload "helper.dats"'
+wordcase dynload not 'dynload is a loading word' 'dynload "helper.dats"
+
+fn g (): int = 1'
 wordcase hash-include not '#include is a loading word' '#include "share/atspre_staload.hats"
 
 fn g (x: int): int = x'
@@ -726,8 +723,6 @@ fn g (x: int): int = x'
 wordcase require not '#require is a loading word, anywhere in the snippet' '(* #require *)
 
 fn g (x: int): int = x'
-wordbare bare-load load 'a snippet that is just load is not kept'
-wordbare bare-include include 'a snippet that is just include is not kept'
 [ "$wordfail" = 0 ] || fail "word cases: one or more did not hold (the FAIL lines above)"
 
 # ---- load and include inside a longer name load nothing (bats#432): the result is kept, and the
