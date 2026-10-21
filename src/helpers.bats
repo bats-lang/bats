@@ -1439,10 +1439,12 @@ fun _rev_arg_list {n:nat} .<n>.
 
 implement rev_arg_list (xs, acc) = _rev_arg_list(xs, acc)
 
-(* A path for spawn: b's text of k bytes and a NUL in b's own array, with the NUL's proof (a full builder has no room: its path is empty) *)
 (* The builder's text as a NUL-terminated path: its bytes copied into an
    array one longer (the NUL is its last byte, at index len, so the array
-   always has room for it whatever the builder's capacity is) *)
+   always has room for it whatever the builder's capacity is). The copy is
+   exact: len + 1 bytes. into_arr returns the builder's own buffer, which is
+   its capacity (grown from 64 bytes up to BUILDER_CAP), so the copy is what
+   makes the path's size exact; the buffer is not given to spawn. *)
 #pub fn path_of_builder (b: $B.builder_v)
   : [l:agz][n:pos | n <= $B.BUILDER_CAP + 1][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int k)
 

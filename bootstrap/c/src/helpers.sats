@@ -1455,6 +1455,8 @@ fn rev_arg_list
 
 
 
+
+
 fn path_of_builder (b: $B.builder_v)
   : [l:agz][n:pos | n <= $B.BUILDER_CAP + 1][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int k)
 
