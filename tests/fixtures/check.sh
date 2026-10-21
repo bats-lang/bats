@@ -78,6 +78,8 @@
 #     killed by: "included is no loading word"
 #  3e. apostrophe-counted: `fn is_word_byte(b: int): bool = is_ident_byte(b)` -> `fn is_word_byte(b: int): bool = is_ident_byte(b) || b = 39`
 #     killed by: "load' is a loading word"
+#  3f. end-of-file-not-a-boundary: `&& ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))` -> `&& p + g1u2i(string1_length(s)) < len && ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))`
+#     killed by: "load ending the file (no newline after it) is a loading word"
 #  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
 #     killed by: "memo cold audit lie"
 #  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
@@ -680,6 +682,8 @@ saidpart "$TMP/l1.log" "FAIL reject/moves-limit: rejected, but not as its expect
 wordfail=0
 wordcase() { # <case> <kept|not> <what> <snippet>: the fixture alone; kept means it checks and is kept
   mfix "$TMP/word" accept "$1" src/lib.bats '(* end *)' "$4"
+  # WORD_AT_EOF=1: the snippet ends with its last byte, mfix's newline taken away (the end of the file is the boundary)
+  [ -z "${WORD_AT_EOF:-}" ] || printf '(* fixture-snippet *)\n%s' "$4" > "$TMP/word/accept/$1/snippet.bats"
   wm=$TMP/word-memo-$1; wl=$TMP/word-$1.log
   mrunx "$MP" "$TMP/word" "$MW" "$wm" "$wl" --only "accept/$1"
   kept=$(nfiles "$wm")
@@ -694,6 +698,7 @@ wordcase() { # <case> <kept|not> <what> <snippet>: the fixture alone; kept means
     echo "FAIL word/$1: $3: the snippet does not check (status $rc): $(grep -a '^FAIL' "$wl" | head -1)"
     wordfail=1
   fi
+  WORD_AT_EOF=
 }
 wordcase download kept 'Download is no loading word (a longer name, bats#432)' 'fn Download (x: int): int = x'
 wordcase included kept 'included is no loading word (include, then an identifier byte)' 'fn included (x: int): int = x'
@@ -702,8 +707,12 @@ wordcase apostrophe not "load' is a loading word (the apostrophe is not an ident
 wordcase comment not 'load in a comment is a loading word (a comment counts: the scan is conservative)' '(* load *)
 
 fn g (x: int): int = x'
-wordcase end-included kept 'a longer name at the end of the snippet is no loading word' 'fn g (): int = 1
+wordcase end-included kept 'a longer name on the last line (a newline follows it) is no loading word' 'fn g (): int = 1
 // included'
+WORD_AT_EOF=1 wordcase eof-included kept 'a longer name ending the file (no newline after it) is no loading word' 'fn g (): int = 1
+// included'
+WORD_AT_EOF=1 wordcase eof-load not 'load ending the file (no newline after it) is a loading word' 'fn g (): int = 1
+// load'
 wordcase staload not 'staload is a loading word' 'staload "helper.sats"
 
 fn g (): int = help ()'
@@ -715,7 +724,7 @@ wordcase hash-include not '#include is a loading word' '#include "share/atspre_s
 fn g (x: int): int = x'
 wordcase load-word not 'load as a word is a loading word' 'fn load (x: int): int = x'
 wordcase include-word not 'include as a word is a loading word' 'fn include (x: int): int = x'
-wordcase end-of-file-load not 'load at the end of the snippet is a loading word' 'fn g (): int = 1
+wordcase last-line-load not 'load on the last line (a newline follows it) is a loading word' 'fn g (): int = 1
 // load'
 wordcase use not '#use is a loading word, anywhere in the snippet' '(* #use *)
 
