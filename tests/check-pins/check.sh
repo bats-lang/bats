@@ -440,7 +440,7 @@ ok clean "$(steps "      - uses: actions/checkout@$sha # v4")"
 
 # usage and unreadable files are 2
 "$BATS" check-pins > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "no file is not 2"
-grep -q "usage: bats check-pins" "$TMP/out" || fail "no file does not say the usage"
+grep -q "usage: bats check-pins <file>... | --discover" "$TMP/out" || fail "no file does not say the usage"
 "$BATS" check-pins "$TMP/absent.yml" > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "an absent file is not 2"
 grep -q "cannot read .*absent.yml" "$TMP/out" || fail "an absent file is not named"
 "$BATS" check-pins "$TMP/absent.yml" "$TMP/tag.yml" > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "an absent file then a refused one is not 2"
@@ -455,6 +455,77 @@ for i in $(seq 1 3000); do echo "      - run: echo curl $i"; done > "$TMP/long-s
 printf '      - run: curl x\n' >> "$TMP/long-steps.yml"
 "$BATS" check-pins "$TMP/long-steps.yml" > "$TMP/out" 2>&1; [ $? -eq 1 ] || fail "a curl after many steps was not refused"
 
+# --discover: the files git lists of the repository of the current directory
+# (tracked, or untracked and not ignored), the one argument
+G="$TMP/repo"
+mkdir -p "$G/.github/workflows" "$G/.github/actions/x" "$G/build" "$G/sub"
+(cd "$G" && git init -q . && git config user.email t@t && git config user.name t)
+printf '%s\n' "$(steps "      - uses: actions/checkout@$sha # v4")" > "$G/.github/workflows/check.yml"
+printf '%s\n' "$(steps "      - uses: ./local")" > "$G/.github/actions/x/action.yml"
+printf '{\n  "name": "x"\n}\n' > "$G/sub/package.json"
+printf '%s\n' "$(steps "      - uses: a/b@v1")" > "$G/build/ignored.yml"
+printf 'build/\n' > "$G/.gitignore"
+(cd "$G" && git add -A && git commit -q -m x)
+discover() { (cd "$G" && "$BATS" check-pins --discover) > "$TMP/out" 2>&1; }
+discover || fail "a clean repository was refused by --discover"
+[ ! -s "$TMP/out" ] || fail "a clean repository passed --discover with output"
+echo "ok   discover (clean)"
+printf '%s\n' "$(steps "      - uses: actions/checkout@v4")" > "$G/.github/workflows/planted.yml"
+discover; [ $? -eq 1 ] || fail "an untracked floating workflow passed --discover"
+grep -q "^.github/workflows/planted.yml:4: uses 'actions/checkout@v4' is not pinned" "$TMP/out" || fail "the planted workflow is not named"
+echo "ok   discover (untracked file refused)"
+printf '.github/workflows/planted.yml\n' >> "$G/.gitignore"
+discover || fail "an ignored workflow was read by --discover"
+rm -f "$G/.github/workflows/planted.yml"
+printf '%s\n' "$(steps "      - uses: a/b@v1")" > "$G/.github/actions/x/action.yaml"
+discover; [ $? -eq 1 ] || fail "a floating action.yaml passed --discover"
+grep -q "^.github/actions/x/action.yaml:4: " "$TMP/out" || fail "the action.yaml is not named"
+rm -f "$G/.github/actions/x/action.yaml"
+printf '{\n  "dependencies": {\n    "left-pad": "^1.0.0"\n  }\n}\n' > "$G/sub/package.json"
+discover; [ $? -eq 1 ] || fail "a package.json with a range passed --discover"
+grep -q "^sub/package.json:3: " "$TMP/out" || fail "the package.json is not named"
+printf '{\n  "name": "x"\n}\n' > "$G/sub/package.json"
+printf '#define ATS2_SHA256 "%s"\n' "$digest" > "$G/ats2.bats"
+discover; [ $? -eq 1 ] || fail "an ats2.bats with no URL passed --discover"
+grep -q "^ats2.bats:" "$TMP/out" || fail "the ats2.bats is not named"
+rm -f "$G/ats2.bats"
+echo "ok   discover (untracked, ignored, action.yaml, package.json, ats2.bats)"
+# nothing to check, not a repository, a list too long: 2, never a pass
+rm -f "$G/.github/workflows/check.yml" "$G/.github/actions/x/action.yml" "$G/sub/package.json"
+(cd "$G" && git add -A) && discover; [ $? -eq 2 ] || fail "a repository with no pin file is not 2"
+grep -q "has no workflow" "$TMP/out" || fail "an empty list does not say so"
+mkdir "$TMP/not-a-repo"
+(cd "$TMP/not-a-repo" && GIT_CEILING_DIRECTORIES="$TMP" "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "outside a repository is not 2"
+grep -q "git repository" "$TMP/out" || fail "outside a repository does not say so"
+for i in $(seq 1 200); do
+  d="$G/directory-with-a-long-name-$i"; mkdir -p "$d"; printf '{\n  "name": "x"\n}\n' > "$d/package.json"
+done
+discover; [ $? -eq 2 ] || fail "a list over 4095 bytes is not 2"
+grep -q "4095 bytes" "$TMP/out" || fail "a long list does not say so"
+rm -rf "$G"/directory-with-a-long-name-*
+echo "ok   discover (no file, no repository, too long)"
+# a list git writes in pieces is read to its end (the floating file named in the second
+# piece is checked), and a list too long for the buffer, whose writer ends on SIGPIPE
+# when the pipe is closed unread, is the "too long" 2 and not a failure of git (git is a
+# stub on the path)
+mkdir -p "$TMP/stub"
+printf '%s\n' "$(steps "      - uses: a/b@v1")" > "$G/late.yml"
+printf '%s\n' "$(steps "      - uses: ./local")" > "$G/early.yml"
+printf '#!/bin/sh\nprintf "early.yml\\0"\nsleep 1\nprintf "late.yml\\0"\n' > "$TMP/stub/git"
+chmod +x "$TMP/stub/git"
+(cd "$G" && PATH="$TMP/stub:$PATH" "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 1 ] || fail "a list written in two pieces was cut after the first"
+grep -q "^late.yml:4: " "$TMP/out" || fail "the file of the second piece is not named"
+printf '#!/bin/sh\ni=0\nwhile [ $i -lt 8 ]; do head -c 600 /dev/zero | tr "\\0" "a"; printf "\\0"; sleep 0.2; i=$((i+1)); done\n' > "$TMP/stub/git"
+(cd "$G" && PATH="$TMP/stub:$PATH" "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "a long list written in pieces is not 2"
+grep -q "4095 bytes" "$TMP/out" || fail "a long list written in pieces does not say so"
+rm -f "$G/late.yml" "$G/early.yml"
+echo "ok   discover (a list written in pieces)"
+# --discover beside a file, or twice, is a file name and unreadable: 2
+"$BATS" check-pins --discover "$TMP/clean.yml" > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "--discover beside a file is not 2"
+grep -q "cannot read --discover" "$TMP/out" || fail "--discover beside a file is not named"
+echo "ok   discover (with a file)"
+
 # this repository's own workflows and actions are clean
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats > "$TMP/out" 2>&1) || fail "this repository's workflows are refused"
+(cd "$(dirname "$0")/../.." && "$BATS" check-pins --discover > "$TMP/out" 2>&1) || fail "this repository is refused by --discover"
 echo "check-pins: all passed"
