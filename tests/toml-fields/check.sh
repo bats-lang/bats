@@ -242,4 +242,15 @@ cp "$TMP/add_before.toml" "$TMP/add_project/bats.toml"
 grep -aq "^added 'added' to \[dependencies\]$" "$TMP/add.log" || { echo "FAIL: bats add said"; cat "$TMP/add.log"; exit 1; }
 { cat "$TMP/add_before.toml"; printf '"added" = ""\n'; } > "$TMP/add_expected.toml"
 cmp -s "$TMP/add_expected.toml" "$TMP/add_project/bats.toml" || { echo "FAIL: bats add changed more than the one line ($(wc -c < "$TMP/add_project/bats.toml") bytes, $(wc -c < "$TMP/add_expected.toml") expected)"; exit 1; }
+# bats remove: the manifest is kept whole, only the lines naming the package go
+module "$TMP/remove_project" "$base"
+{ cat "$TMP/add_before.toml"; printf '"added" = ""\n"added-too" = ""\n'; } > "$TMP/remove_before.toml"
+cp "$TMP/remove_before.toml" "$TMP/remove_project/bats.toml"
+(cd "$TMP/remove_project" && "$BATS" remove added) > "$TMP/remove.log" 2>&1 || { echo "FAIL: bats remove"; cat "$TMP/remove.log"; exit 1; }
+grep -aq "^removed 'added' from \[dependencies\]$" "$TMP/remove.log" || { echo "FAIL: bats remove said"; cat "$TMP/remove.log"; exit 1; }
+{ cat "$TMP/add_before.toml"; printf '"added-too" = ""\n'; } > "$TMP/remove_expected.toml"
+cmp -s "$TMP/remove_expected.toml" "$TMP/remove_project/bats.toml" || { echo "FAIL: bats remove changed more than the one line"; exit 1; }
+(cd "$TMP/remove_project" && "$BATS" remove absent) > "$TMP/remove_absent.log" 2>&1 || true
+grep -aq "^error: package 'absent' not found in \[dependencies\]$" "$TMP/remove_absent.log" || { echo "FAIL: bats remove of an absent package said"; cat "$TMP/remove_absent.log"; exit 1; }
+cmp -s "$TMP/remove_expected.toml" "$TMP/remove_project/bats.toml" || { echo "FAIL: bats remove of an absent package changed the manifest"; exit 1; }
 echo "toml-fields: ok"

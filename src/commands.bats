@@ -1037,7 +1037,7 @@ implement do_upload {lr} (repo, rplen) =
       | ~$R.err(failure) => let
           val () = set_build_err()
         in
-          (* a read that parsed to nothing is the read's InvalidInput (read_toml) *)
+          (* unparsable text is InvalidInput (manifest) *)
           case+ failure of
           | $F.InvalidInput() => prerr! ("error: parse error in './bats.toml'\n")
           | _ => prerr! ("error: cannot read './bats.toml'\n")
@@ -1327,7 +1327,7 @@ end
    max: int n): void
 
 implement do_add(bv, pkg_start, pkg_len, max) = let
-  (* the line is appended, bats.toml is never read or written whole, so nothing of it is lost (manifest) *)
+  (* the line is appended and the file never rewritten (manifest) *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
   var dependency_line: $B.builder_v = $B.create()
@@ -1354,48 +1354,94 @@ end
   (bv: !$A.borrow(byte, l, n), pkg_start: pos_t, pkg_len: int,
    max: int n): void
 
+(* Whether b[s, e) starts with the quoted package name "<pkg>" (manifest) *)
+fun line_names_package {lt:agz}{nt:pos}{lp:agz}{np:pos}{s,e:nat | s <= e; e <= nt}{ps:int}{k:nat | k <= np + 2} .<np + 2 - k>.
+  (text: !$A.borrow(byte, lt, nt), s: int s, e: int e,
+   pkg: !$A.borrow(byte, lp, np), pkg_start: int ps, np: int np,
+   k: int k, total: int): bool =
+  if k >= total then true
+  else if k >= np + 2 then false
+  else if s + k >= e then false
+  else let
+    val index = pkg_start + k - 1
+    val want = (if k = 0 then 34
+      else if k = total - 1 then 34
+      else if index < 0 then 0 - 1
+      else if index >= np then 0 - 1
+      else byte2int0($A.read<byte>(pkg, index))): int
+  in
+    if byte2int0($A.read<byte>(text, s + k)) = want
+    then line_names_package(text, s, e, pkg, pkg_start, np, k + 1, total)
+    else false
+  end
+
+(* One kept line, and its newline when more follow (manifest) *)
+fn copy_line_kept {lt:agz}{nt:pos}{s,e,len:nat | s <= e; e <= len; len <= nt}
+  (named: bool, text: !$A.borrow(byte, lt, nt), text_size: int nt, s: int s, e: int e, len: int len,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if named then ()
+  else let
+    val () = copy_to_builder_v(text, s, e, text_size, out)
+  in
+    if e < len then put_char_v(out, 10) else ()
+  end
+
+(* Copies every line of b[i, len) except those naming the package into out;
+   the number of lines left out (manifest) *)
+fun copy_without_package {lt:agz}{nt:pos}{lp:agz}{np:pos}{ps:int}{i,len,r:nat | i <= len; len <= nt} .<len - i>.
+  (text: !$A.borrow(byte, lt, nt), text_size: int nt, i: int i, len: int len,
+   pkg: !$A.borrow(byte, lp, np), pkg_start: int ps, pkg_len: int, np: int np,
+   out: !$B.builder_v >> $B.builder_v, removed: int r): [q:nat] int q =
+  if i >= len then removed
+  else let
+    val e = line_end(text, i, len)
+    val named = line_names_package(text, i, e, pkg, pkg_start, np, 0, pkg_len + 2)
+    val () = copy_line_kept(named, text, text_size, i, e, len, out)
+    val removed2 = (if named then removed + 1 else removed): [q:nat] int q
+    val next = (if e >= len then len else e + 1): [n:nat | i < n; n <= len] int n
+  in
+    copy_without_package(text, text_size, next, len, pkg, pkg_start, pkg_len, np, out, removed2)
+  end
+
 implement do_remove(bv, pkg_start, pkg_len, max) = let
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+  val whole = read_whole(bv_tp, 524288)
 in
-  case+ tor of
-  | ~$R.ok(tfd) => let
-      (* opened only to know the file is there: sed reads and rewrites it whole (manifest) *)
-      val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><$F.io_error>(tcr)
-      val sed_exec = str_to_path_arr("sed")
-      val @(fz_se, bv_se) = $A.freeze<byte>(sed_exec)
-      var sb1 = $B.create()
-      val () = bput_v(sb1, "sed")
-      var sb2 = $B.create()
-      val () = bput_v(sb2, "-i")
-      (* Build pattern: /^"<pkg>"/d *)
-      var pat_b: $B.builder_v = $B.create()
-      val () = bput_v(pat_b, "/^\"")
-      val () = copy_to_builder_v(bv, pkg_start, pkg_start + pkg_len, max, pat_b)
-      val () = bput_v(pat_b, "\"/d")
-      var sb4 = $B.create()
-      val () = bput_v(sb4, "bats.toml")
-      val sed_argv = $L.list_vt_cons(mk_arg(sb1), $L.list_vt_cons(mk_arg(sb2),
-        $L.list_vt_cons(mk_arg(pat_b), $L.list_vt_cons(mk_arg(sb4),
-        $L.list_vt_nil()))))
-      val rc = run_cmd(bv_se, sed_argv)
-      val () = $A.drop<byte>(fz_se, bv_se)
-      val () = $A.free<byte>($A.thaw<byte>(fz_se))
+  case+ whole of
+  | ~whole_ok(ar, piece, size, length) => let
+      (* the manifest is read whole and written whole, with no tool between (manifest) *)
+      val @(fz_text, bv_text) = $A.freeze<byte>(piece)
+      var out: $B.builder_v = $B.create()
+      val removed = copy_without_package(bv_text, size, 0, length, bv, pkg_start, pkg_len, max, out, 0)
+      val () = $A.drop<byte>(fz_text, bv_text)
+      val () = whole_free(ar, $A.thaw<byte>(fz_text))
+      val built = out
     in
-      if rc = 0 then let
-          val () = print! ("removed '")
-          val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
-        in println! ("' from [dependencies]") end
+      if removed > 0 then let
+        val rc = write_settle(bv_tp, 524288, write_file_from_builder(bv_tp, 524288, built))
+        val () = $A.drop<byte>(fz_tp, bv_tp)
+        val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+      in
+        if rc = 0 then let
+            val () = print! ("removed '")
+            val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
+          in println! ("' from [dependencies]") end
+        (* write_settle said which file and why *)
+        else ()
+      end
       else let
+        val () = $A.drop<byte>(fz_tp, bv_tp)
+        val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+        val () = $B.builder_free(built)
         val () = print! ("error: package '")
         val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
       in println! ("' not found in [dependencies]") end
     end
-  | ~$R.err(_) => println! ("error: cannot open bats.toml")
+  | ~whole_err(_) => let
+      val () = $A.drop<byte>(fz_tp, bv_tp)
+      val () = $A.free<byte>($A.thaw<byte>(fz_tp))
+    in println! ("error: cannot open bats.toml") end
 end
 
 (* ============================================================

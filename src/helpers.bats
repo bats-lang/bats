@@ -3123,8 +3123,7 @@ in
                     content_arr, content_len)
 end
 
-(* The content appended to the file at the NUL-terminated path, which must
-   exist: what is there is never read or written again (manifest) *)
+(* Appends to an existing file and never reads it back (manifest) *)
 #pub fn append_file_from_builder {lp:agz}{np:pos | np < 1048576}
   (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
    content_b: $B.builder_v): write_result
@@ -3290,8 +3289,7 @@ fn whole_of_open (opened: $R.result($F.fd, $F.io_error)): whole_file =
           val read_result = $F.file_read(fd, p, z + 1)
           val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         in
-          (* a read that failed is its own error (a directory is EISDIR), a
-             short one a file that changed size *)
+          (* a failed read and a short read are distinct errors (manifest) *)
           case+ read_result of
           | ~$R.ok(k) =>
             if k = z then whole_ok(ar, p, z + 1, z)
@@ -3322,9 +3320,7 @@ implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
 
-(* The TOML file at the NUL-terminated path in the first m bytes of pa,
-   read whole and parsed, or why not; a file over the parser's 65536 bytes is
-   FileTooLarge, never parsed cut (manifest) *)
+(* Reads a TOML file whole, FileTooLarge over the parser's limit, never cut (manifest) *)
 #pub fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
   : $R.result($T.toml_doc, $F.io_error)
 
@@ -3348,8 +3344,7 @@ in
     in
       case+ parsed of
       | ~$R.ok(doc) => $R.ok(doc)
-      (* a file that does not parse was read: the error is the read's
-         (none), an invalid input *)
+      (* unparsable text is InvalidInput (manifest) *)
       | ~$R.err(_) => $R.err($F.InvalidInput())
     end
 end
