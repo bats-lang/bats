@@ -1,7 +1,6 @@
 ---
 paths:
   - .github/actions/setup/action.yml
-  - scripts/check-pins.sh
   - tests/setup-action/**
 ---
 
@@ -33,8 +32,5 @@ the action on `tests/setup-action/project` with the compiler built from the
 commit under test, and `tests/setup-action/verify.sh` (GMP patsopt linked to
 libgmp, lld, the caps, the repository at its pin, `BATS_COMMIT` the head and
 not the merge, and a build of the project whose facts name that commit).
-`scripts/check-pins.sh` (tested by `tests/setup-action/pins-check.sh`, both
-the first step of the `check` job) fails any `uses:` of a workflow or action
-that is not a local path or a repository at a full commit SHA followed by a
-comment naming the version. A change to the action is called by its new
+`bats check-pins` (`.claude/rules/check-pins.md`, tested by `tests/check-pins`, a step of the `check` job on the seed compiler) fails any `uses:` of a workflow or action that is not a local path or a repository at a full commit SHA followed by a comment naming the version, and the other inputs of CI that move. A change to the action is called by its new
 commit only after this repository's CI has passed on it.

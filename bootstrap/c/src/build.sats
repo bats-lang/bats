@@ -542,8 +542,6 @@ fn do_clean(): void
 
 
 
-
-
 fn write_native_runtime_h {l:agz}
   (dir: !$A.borrow(byte, l, 4096), dlen: int): int
 
@@ -1093,6 +1091,11 @@ fn read_unsafe_flag(): bool
 
 fn check_wasm_binary {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (path: !$A.borrow(byte, l, n), m: int m): target
+
+
+
+
+
 
 
 
