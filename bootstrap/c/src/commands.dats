@@ -1338,42 +1338,23 @@ end
 
 
 implement do_add(bv, pkg_start, pkg_len, max) = let
-  (* Read bats.toml *)
+  (* the line is appended, bats.toml is never read or written whole, so nothing of it is lost (manifest) *)
   val tp = str_to_path_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
+  var dependency_line: $B.builder_v = $B.create()
+  val () = bput_v(dependency_line, "\"")
+  val () = copy_to_builder_v(bv, pkg_start, pkg_start + pkg_len, max, dependency_line)
+  val () = bput_v(dependency_line, "\" = \"\"\n")
+  val rc = write_settle(bv_tp, 524288, append_file_from_builder(bv_tp, 524288, dependency_line))
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
-  case+ tor of
-  | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(4096)
-      val trr = $F.file_read(tfd, tbuf, 4096)
-      val tlen = (case+ trr of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): int
-      val tcr = $F.file_close(tfd)
-      val () = $R.discard<int><$F.io_error>(tcr)
-      val @(fz_tb2, bv_tb2) = $A.freeze<byte>(tbuf)
-      var out_b: $B.builder_v = $B.create()
-      val () = copy_to_builder_v(bv_tb2, 0, tlen, 4096, out_b)
-      val () = $A.drop<byte>(fz_tb2, bv_tb2)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tb2))
-      val () = bput_v(out_b, "\"")
-      val () = copy_to_builder_v(bv, pkg_start, pkg_start + pkg_len, max, out_b)
-      val () = bput_v(out_b, "\" = \"\"\n")
-      val tp3 = str_to_path_arr("bats.toml")
-      val @(fz_tp3, bv_tp3) = $A.freeze<byte>(tp3)
-      val rc = write_settle(bv_tp3, 524288, write_file_from_builder(bv_tp3, 524288, out_b))
-      val () = $A.drop<byte>(fz_tp3, bv_tp3)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tp3))
-    in
-      if rc = 0 then let
-          val () = print! ("added '")
-          val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
-        in println! ("' to [dependencies]") end
-      (* write_settle said which file and why *)
-      else ()
-    end
-  | ~$R.err(_) => println! ("error: cannot open bats.toml")
+  if rc = 0 then let
+      val () = print! ("added '")
+      val () = print_borrow(bv, pkg_start, pkg_start + pkg_len, max)
+    in println! ("' to [dependencies]") end
+  (* write_settle said which file and why *)
+  else ()
 end
 
 (* ============================================================
@@ -1393,12 +1374,9 @@ implement do_remove(bv, pkg_start, pkg_len, max) = let
 in
   case+ tor of
   | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(4096)
-      val trr = $F.file_read(tfd, tbuf, 4096)
-      val tlen = (case+ trr of | ~$R.ok(nn) => nn | ~$R.err(_) => 0): int
+      (* opened only to know the file is there: sed reads and rewrites it whole (manifest) *)
       val tcr = $F.file_close(tfd)
       val () = $R.discard<int><$F.io_error>(tcr)
-      val () = $A.free<byte>(tbuf)
       val sed_exec = str_to_path_arr("sed")
       val @(fz_se, bv_se) = $A.freeze<byte>(sed_exec)
       var sb1 = $B.create()

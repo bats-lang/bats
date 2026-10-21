@@ -3123,6 +3123,22 @@ in
                     content_arr, content_len)
 end
 
+(* The content appended to the file at the NUL-terminated path, which must
+   exist: what is there is never read or written again (manifest) *)
+#pub fn append_file_from_builder {lp:agz}{np:pos | np < 1048576}
+  (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
+   content_b: $B.builder_v): write_result
+
+implement append_file_from_builder(path_bv, path_len, content_b) = let
+  val @(content_arr, content_len) = $B.into_arr(content_b)
+in
+  if content_len >= 524288 then let
+    val () = $A.free<byte>(content_arr)
+  in WriteTooLarge() end
+  else write_opened(file_open_n(path_bv, path_len, $F.WriteOnly(), $F.AppendExisting(), 420),
+                    content_arr, content_len)
+end
+
 (* ============================================================
    Ropes: text of any length (a module's .sats and .dats)
    ============================================================ *)
@@ -3307,8 +3323,8 @@ implement whole_free (ar, p) = let
 in $A.arena_destroy<byte>(ar) end
 
 (* The TOML file at the NUL-terminated path in the first m bytes of pa,
-   read whole (no ceiling but a file too large for an arena) and parsed, or
-   why not (manifest) *)
+   read whole and parsed, or why not; a file over the parser's 65536 bytes is
+   FileTooLarge, never parsed cut (manifest) *)
 #pub fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
   : $R.result($T.toml_doc, $F.io_error)
 
@@ -3320,7 +3336,11 @@ implement read_toml (pa, m) = let
 in
   case+ whole of
   | ~whole_err(e) => $R.err(e)
-  | ~whole_ok(ar, piece, size, length) => let
+  | ~whole_ok(ar, piece, size, length) =>
+    if length > 65536 then let
+      val () = whole_free(ar, piece)
+    in $R.err($F.FileTooLarge()) end
+    else let
       val @(fz_text, bv_text) = $A.freeze<byte>(piece)
       val parsed = $T.parse(bv_text, length)
       val () = $A.drop<byte>(fz_text, bv_text)

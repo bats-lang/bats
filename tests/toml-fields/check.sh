@@ -11,16 +11,23 @@
 # A manifest longer than 8192 bytes is read whole by upload (the name, the
 # kind, the version and trunk, and the copy zipped into the archive) and by
 # the docs, as it is by emission and validation; each of these read a prefix
-# once, and the name past it was not found.
+# once, and the name past it was not found. `bats add` appends its line to
+# bats.toml and writes nothing else (it read 4096 bytes and wrote them back,
+# so a longer manifest lost everything past them). The toml package parses
+# 65536 bytes and no more, so a longer manifest is refused and never parsed
+# cut; one of exactly 65536 bytes is read to its last byte.
 #
 # Why shell: this runs the compiler binary it is given (argument 1) several
-# times over project directories and compares their build/ trees and logs.
-# `bats test` runs a package's `$UNITTEST` functions in one runner linked from
-# that package's modules, and gets no compiler binary to run on a second
-# project; `bats fixtures` checks one snippet in one copy of one project
-# against an error text, with no second manifest, no second build and no
-# build/ left to compare. Every tests/*/check.sh of bats is shell for this
-# reason (check.yml runs them in a loop).
+# times over project directories and compares their build/ trees and logs, as
+# every tests/*/check.sh of bats does (check.yml runs them in a loop). A test
+# in bats is possible and is not made here: bats has no tests/static (that is
+# quire's runner, which became `bats fixtures`, one snippet in one copy of one
+# project against an error text, with no second manifest and no build/ to
+# compare), `bats test` is a step of no workflow here and none of the
+# compiler's modules has a $UNITTEST block, the runner it builds is given no
+# path to the compiler (the process package could spawn one named by an
+# environment variable, but its spawn has no working directory: the test
+# would chdir the runner), and the trees compared would be walked in bats.
 # usage: tests/toml-fields/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -129,7 +136,7 @@ printf '%s' "$yes_unsafe" > "$TMP/unsafe_project/bats.toml"
 build "$TMP/unsafe_project" "$TMP/unsafe_again.log"
 [ "$(program "$TMP/unsafe_project")" = 1 ] || { echo "FAIL: unsafe again: the program"; exit 1; }
 
-# a manifest over 4096 bytes: emission reads `unsafe = true` as validation does
+# a manifest over 8192 bytes: emission reads `unsafe = true` as validation does
 { for line_number in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '%s' "$yes_unsafe"; } > "$TMP/large_manifest.toml"
 [ "$(wc -c < "$TMP/large_manifest.toml")" -gt 8192 ] || { echo "FAIL: the manifest is not large"; exit 1; }
 unsafe_module "$TMP/large_project" "$(cat "$TMP/large_manifest.toml")"
@@ -202,9 +209,37 @@ printf '#pub fun f (): int\n\nimplement f () = 7\n' > "$TMP/path_dependency/one/
 printf '#pub fun f (): int\n\nimplement f () = 8\n' > "$TMP/path_dependency/two/src/lib.bats"
 printf '#use tfdep as D\n\nimplement main0 () = println! ($D.f ())\n' > "$TMP/path_dependency/app/src/bin/tf.bats"
 printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../one" }\n' > "$TMP/path_dependency/app/bats.toml"
-build "$TMP/path_dependency/app" "$TMP/path_dependencyependent_first.log"
+build "$TMP/path_dependency/app" "$TMP/path_dependency_first.log"
 [ "$(program "$TMP/path_dependency/app")" = 7 ] || { echo "FAIL: path dependency one"; exit 1; }
 printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../two" }\n' > "$TMP/path_dependency/app/bats.toml"
 build "$TMP/path_dependency/app" "$TMP/path_dependency2.log"
 [ "$(program "$TMP/path_dependency/app")" = 8 ] || { echo "FAIL: path dependency two: the program"; cat "$TMP/path_dependency2.log"; exit 1; }
+# the toml package parses 65536 bytes: a manifest of exactly that many, with
+# `unsafe = true` as its last lines, is read to its end (the block is kept),
+# and one byte more is refused, never parsed cut (read as a safe package)
+filler() { yes '#' | head -c "$1"; }
+filler_manifest() { # <bytes in all>: comment lines, then yes_unsafe, then blank lines to fill
+  tail_length=$(printf '%s' "$yes_unsafe" | wc -c)
+  { filler $(( ($1 - tail_length) / 2 * 2 )); printf '%s' "$yes_unsafe"; [ $(( ($1 - tail_length) % 2 )) = 0 ] || printf '\n'; }
+}
+unsafe_module "$TMP/limit_project" "$yes_unsafe"
+filler_manifest 65536 > "$TMP/limit_project/bats.toml"
+[ "$(wc -c < "$TMP/limit_project/bats.toml")" = 65536 ] || { echo "FAIL: the manifest at the limit is not 65536 bytes"; exit 1; }
+build "$TMP/limit_project" "$TMP/limit.log"
+[ "$(program "$TMP/limit_project")" = 1 ] || { echo "FAIL: manifest of 65536 bytes: the program"; exit 1; }
+filler_manifest 65537 > "$TMP/limit_project/bats.toml"
+[ "$(wc -c < "$TMP/limit_project/bats.toml")" = 65537 ] || { echo "FAIL: the manifest over the limit is not 65537 bytes"; exit 1; }
+rm -rf "$TMP/limit_project/build" "$TMP/limit_project/dist"
+exit_code=0; (cd "$TMP/limit_project" && "$BATS" build --only debug --only native) > "$TMP/limit_over.out" 2> "$TMP/limit_over.err" || exit_code=$?
+[ "$exit_code" = 1 ] && grep -aq "bats.toml" "$TMP/limit_over.err" && [ ! -e "$TMP/limit_project/dist/debug/tf" ] || { echo "FAIL: a manifest of 65537 bytes (exit code $exit_code)"; cat "$TMP/limit_over.err"; exit 1; }
+
+# bats add: the manifest is kept whole (more than 4096 bytes before the line)
+{ for line_number in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '%s' "$base"; printf '\n[dependencies]\n"existing" = ""\n'; } > "$TMP/add_before.toml"
+[ "$(wc -c < "$TMP/add_before.toml")" -gt 8192 ] || { echo "FAIL: the manifest of bats add is not large"; exit 1; }
+module "$TMP/add_project" "$base"
+cp "$TMP/add_before.toml" "$TMP/add_project/bats.toml"
+(cd "$TMP/add_project" && "$BATS" add added) > "$TMP/add.log" 2>&1 || { echo "FAIL: bats add"; cat "$TMP/add.log"; exit 1; }
+grep -aq "^added 'added' to \[dependencies\]$" "$TMP/add.log" || { echo "FAIL: bats add said"; cat "$TMP/add.log"; exit 1; }
+{ cat "$TMP/add_before.toml"; printf '"added" = ""\n'; } > "$TMP/add_expected.toml"
+cmp -s "$TMP/add_expected.toml" "$TMP/add_project/bats.toml" || { echo "FAIL: bats add changed more than the one line ($(wc -c < "$TMP/add_project/bats.toml") bytes, $(wc -c < "$TMP/add_expected.toml") expected)"; exit 1; }
 echo "toml-fields: ok"

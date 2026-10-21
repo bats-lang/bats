@@ -3138,6 +3138,22 @@ fn write_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
 
 
 
+fn append_file_from_builder {lp:agz}{np:pos | np < 1048576}
+  (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
+   content_b: $B.builder_v): write_result
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 fn rput(r: !$B.rope, v: int): void
@@ -3324,6 +3340,10 @@ fn whole_free {la,l:agz}{m:pos}
 
 fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
   : $R.result($T.toml_doc, $F.io_error)
+
+
+
+
 
 
 
