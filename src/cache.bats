@@ -362,7 +362,9 @@ in ok end
    a link to another place is judged by what the link reaches, which a
    plain -type f walk would not see at all (bats#305). This is the stamp's
    `patsopt` line and the cache key's toolchain. false when the listing
-   cannot be made. *)
+   cannot be made. The file stays in build/ when the mark's cache is swapped
+   (cache_swap), else a stale one comes back from a stash and is hashed
+   (bats#434; stamp keyword). *)
 #pub fn toolchain_digest {lph:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int, out: !$B.builder_v >> $B.builder_v): bool
 
