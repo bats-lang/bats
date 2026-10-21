@@ -958,7 +958,7 @@ implement shr_fast {n,h,l} (n, h, l) = _shr_stage_16(n, h, l)
 (* ========== Rotation, packing and bytes of a word (bats-lang/sha256#40) ========== *)
 
 (* The three primitives of the one $UNSAFE block of this package (the owner
-   authorized unsafe = true for exactly this block; see CLAUDE.md). ATS's
+   authorized unsafe = true for exactly this block and no other: one unsafe block). ATS's
    prelude has no rotate, and a word cannot be made from, or taken apart
    into, bytes by a name it has with a type that states the result, so these
    are ordinary ATS expressions on unsigned int whose result is given the
@@ -998,28 +998,50 @@ implement shr_fast {n,h,l} (n, h, l) = _shr_stage_16(n, h, l)
 
 
 
+(* The same three primitives as templates with no template arguments
+   (bats-lang/sha256#59): a dependent instantiates a template in its own
+   translation unit, so the C compiler inlines the rotation, the packing and
+   the byte into the dependent's loop, which a call to the functions above
+   (external symbols compiled alone) cannot be. Same types, same bodies:
+   word32_rotr, word32_pack and word32_byte are these. Use as
+   word32_rotr_inline(x, n). *)
 
 
-implement word32_rotr {n,h,l} (x, n) = let
+
+
+
+
+
+
+
+
+
+implement{} word32_rotr_inline {n,h,l} (x, n) = let
   val u = $UNSAFE.cast{uint}(x)
   val r = (u >> n) lor (u << (32 - n))
 in
   $UNSAFE.cast{[h2,l2:nat | h2 < 65536; l2 < 65536] (ROTR(n, h, l, h2, l2) | word32(h2, l2))}(r)
 end
 
-implement word32_pack {a,b,c,d} (a, b, c, d) = let
+implement{} word32_pack_inline {a,b,c,d} (a, b, c, d) = let
   val r = (g0int2uint_int_uint(a) << 24) lor (g0int2uint_int_uint(b) << 16)
     lor (g0int2uint_int_uint(c) << 8) lor g0int2uint_int_uint(d)
 in
   $UNSAFE.cast{word32(256*a + b, 256*c + d)}(r)
 end
 
-implement word32_byte {i,h,l} (x, i) = let
+implement{} word32_byte_inline {i,h,l} (x, i) = let
   val u = $UNSAFE.cast{uint}(x)
   val v = g0uint2int_uint_int((u >> (24 - 8 * i)) land g0int2uint_int_uint(255))
 in
   $UNSAFE.cast{[b:nat | b < 256] (WORD_BYTE(i, h, l, b) | int b)}(v)
 end
+
+implement word32_rotr {n,h,l} (x, n) = word32_rotr_inline(x, n)
+
+implement word32_pack {a,b,c,d} (a, b, c, d) = word32_pack_inline(a, b, c, d)
+
+implement word32_byte {i,h,l} (x, i) = word32_byte_inline(x, i)
 
 
 
