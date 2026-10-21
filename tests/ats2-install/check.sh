@@ -12,6 +12,8 @@
 #  * the second run does nothing (no curl, the marker untouched)
 #  * a toolchain bats did not make is used as it is, never replaced
 #  * a marker of another pin is replaced; what a killed run left is cleared
+#  * a marker that cannot be written fails the install, with bats's write line,
+#    and leaves no toolchain (the marker is written by bats after the move)
 #  * a link to another pin's toolchain is refused before any download or build
 #  * a marker with no patsopt (half made) is replaced
 #  * no HOME is an error
@@ -52,6 +54,7 @@ echo "make \$*" >> "$TMP/calls"
 if [ "\$(cat "$TMP/make-mode")" = fail ]; then echo "gmp.h: No such file or directory" >&2; exit 2; fi
 dir=
 for a in "\$@"; do case \$a in -C) ;; *) [ -d "\$a" ] && dir=\$a ;; esac; done
+if [ "\$(cat "$TMP/make-mode")" = marker-dir ]; then mkdir -p "\$dir/../../.bats-ats2"; fi
 printf '#!/bin/sh\n' > "\$dir/patsopt"; chmod +x "\$dir/patsopt"
 SH
 chmod +x "$FAKE/curl" "$FAKE/make"
@@ -180,6 +183,17 @@ mkdir -p "$H/.bats/ats2"; echo "ATS2-Postiats-gmp-0.0.1 0000" > "$H/.bats/ats2/.
 run || { cat "$TMP/out"; fail "a marker with no patsopt was not replaced"; }
 [ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$name $sha" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] || fail "the install over a marker with no patsopt is wrong"
 ok "a marker with no patsopt is replaced"
+
+# the marker is bats's write, after the move (bats-lang/bats#372): a directory at
+# its place (the move brings it in) fails the install with the write's own line,
+# and leaves no toolchain that could pass for a foreign one
+echo real > "$TMP/curl-mode"; echo marker-dir > "$TMP/make-mode"
+newhome markerdir
+run && fail "an install whose marker could not be written succeeded"
+grep -qxF "error: cannot write '$H/.bats/ats2/.bats-ats2': Is a directory (os error 21)" "$TMP/out" || { cat "$TMP/out"; fail "the marker's write is not said as a write is"; }
+[ ! -e "$H/.bats/ats2" ] && leftovers || { cat "$TMP/out"; fail "an install whose marker failed left a toolchain or files"; }
+echo ok > "$TMP/make-mode"
+ok "a marker that cannot be written fails the install with the write's line and leaves no toolchain"
 
 newhome extra
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install extra > "$TMP/out" 2>&1 && fail "an extra argument was accepted"
