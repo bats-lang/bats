@@ -141,6 +141,41 @@ jobs:
           test "${{ steps.branch-pin.outcome }}" = failure
           test "${{ steps.absent-commit.outcome }}" = failure
 
+      # A floating input in the calling repository fails the action's pin
+      # check (bats#390), before anything is installed. The workflow is planted
+      # untracked in this checkout (the check reads the untracked files that
+      # are not ignored) and removed before the clean run below, which must
+      # pass on this repository's own files. The key is built from a variable
+      # so that this file holds no floating input of its own.
+      - name: Plant a workflow with a floating input
+        run: |
+          key=uses
+          {
+            echo 'name: planted'
+            echo 'on: workflow_dispatch'
+            echo 'jobs:'
+            echo '  check:'
+            echo '    runs-on: ubuntu-24.04'
+            echo '    steps:'
+            printf '      - %s: actions/checkout@v4\n' "$key"
+          } > .github/workflows/planted-floating.yml
+
+      - name: A floating input in the calling repository fails the action
+        id: floating
+        continue-on-error: true
+        uses: ./.github/actions/setup
+        with:
+          working-directory: tests/setup-action/project
+          require-lock: 'false'
+          bats-version: ${{ steps.pins.outputs.head }}
+          repository-version: ${{ steps.pins.outputs.repository }}
+
+      - name: Remove the planted workflow, and the floating input was refused
+        if: always()
+        run: |
+          rm -f .github/workflows/planted-floating.yml
+          test "${{ steps.floating.outcome }}" = failure
+
       # the compiler built here is the commit under test: its bootstrap C
       - name: Set up bats
         uses: ./.github/actions/setup

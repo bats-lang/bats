@@ -5,7 +5,10 @@ description: >-
   needs no ATS2), then, by bats itself, the GMP build of ATS2 (bats ats2
   install), the package repository at its pinned commit (bats
   clone-repository), the patsopt caps, and BATS_COMMIT (bats record-commit),
-  so the version a build is stamped with is the commit's. Linux runners with apt, on the pinned image ubuntu-24.04, a label that does not move (bridge#154). Called by commit:
+  so the version a build is stamped with is the commit's, and the pins of the
+  calling repository are checked (bats check-pins, bats#390: a floating input
+  fails the step). Linux runners with apt, on the pinned image ubuntu-24.04, a
+  label that does not move (bridge#154). Called by commit:
   bats-lang/bats/.github/actions/setup@<40 hex digits>. The step installs;
   it keys no cache (a build/ is kept or dropped by bats itself, bats#267).
 
@@ -171,6 +174,36 @@ runs:
         rm -rf "$src"
         sudo cp ~/bats-bin/bats /bin/bats
         echo "$HOME/bats-bin" >> "$GITHUB_PATH"
+
+    # The pin check (bats#390, repository-prototype#353), with the compiler
+    # just built, before anything else is installed. It reads the calling
+    # repository's workflows and actions, its package.json files and its
+    # src/ats2.bats: the tracked files and the untracked ones that are not
+    # ignored (so a file planted for the test is checked, and bats_modules/
+    # and build/ are not). A compiler that predates the checker has no
+    # check-pins: its bats prints the usage of bats and exits 0 for an
+    # unknown command, so the probe requires the checker's own usage and
+    # status 2 for a run with no file. Its findings and listed exceptions go
+    # to the job log; no input turns the check off.
+    - name: Check the pins of the calling repository
+      shell: bash
+      env:
+        BATS_COMMIT_BUILT: ${{ steps.pins.outputs.bats }}
+        WORKSPACE: ${{ github.workspace }}
+      run: |
+        set -eu
+        cd "$WORKSPACE"
+        probe=0
+        bats check-pins > /dev/null 2> "$RUNNER_TEMP/pins-probe.err" || probe=$?
+        grep -q '^usage: bats check-pins <file>\.\.\.$' "$RUNNER_TEMP/pins-probe.err" && [ "$probe" -eq 2 ] \
+          || { echo "::error::setup-bats: bats-version $BATS_COMMIT_BUILT predates bats#390: its bats has no check-pins. Pin a commit of bats-lang/bats that has it"; exit 1; }
+        git ls-files -z --cached --others --exclude-standard -- \
+          ':(glob).github/workflows/*.yml' ':(glob).github/workflows/*.yaml' \
+          ':(glob).github/actions/*/action.yml' ':(glob).github/actions/*/action.yaml' \
+          ':(glob)**/package.json' ':(glob)**/ats2.bats' > "$RUNNER_TEMP/pin-files.list"
+        mapfile -d '' -t files < "$RUNNER_TEMP/pin-files.list"
+        [ "${#files[@]}" -gt 0 ] || { echo "::error::setup-bats: the calling repository has no workflow or action to check: a repository that sets up bats has one"; exit 1; }
+        bats check-pins "${files[@]}"
 
     # Then bats does the rest: it installs the ATS2 it pins (checked against
     # its SHA-256, in ~/.bats/ats2), clones the package repository at the
