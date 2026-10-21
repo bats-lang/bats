@@ -70,6 +70,8 @@
 #     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
 #  3. loads-kept: `~snippet_loads(cfg, w, mv, a, e)` -> `true`
 #     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
+#  3b. load-as-text: `find_word_from(bv, sn, 0, "load")` -> `find_text_from(bv, sn, 0, "load")`
+#     killed by: "a snippet with load or include inside a name was not kept"
 #  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
 #     killed by: "memo cold audit lie"
 #  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
@@ -663,6 +665,20 @@ okline "$TMP/l1.log" accept/loads "memo load"
 okline "$TMP/l1.log" accept/loads-sats "memo load .sats"
 saidpart "$TMP/l1.log" "FAIL reject/moves-limit: rejected, but not as its expect says: an error is in " "memo interface changed"
 [ "$(nfiles "$M4")" = 0 ] || fail "memo: a snippet that loads a file, or one that changes the interface, was kept"
+
+# ---- load and include inside a longer name load nothing (bats#432): the result is kept, and the
+# second run serves it
+MF4W=$TMP/mfix4w
+mfix "$MF4W" accept in-a-name src/lib.bats '(* end *)' 'fn Download (x: int): int = x
+fn unloaded_include_loader (x: int): int = Download (x)'
+M4W=$TMP/memo4w
+: > "$PLOG"; mrunx "$MP" "$MF4W" "$MW" "$M4W" "$TMP/w1.log"
+[ $rc = 0 ] || { cat "$TMP/w1.log"; fail "memo word in a name: status $rc, not 0"; }
+okline "$TMP/w1.log" accept/in-a-name "memo word in a name"
+[ "$(nfiles "$M4W")" = 2 ] || fail "memo: a snippet with load or include inside a name was not kept"
+: > "$PLOG"; mrunx "$MP" "$MF4W" "$MW" "$M4W" "$TMP/w2.log"
+[ $rc = 0 ] || { cat "$TMP/w2.log"; fail "memo word in a name again: status $rc, not 0"; }
+saidpart "$TMP/w2.log" "ok   accept/in-a-name (0 s) [memo]" "memo word in a name again"
 
 # ---- a run killed while it checks leaves no file
 M6=$TMP/memo6

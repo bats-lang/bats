@@ -966,6 +966,17 @@ fun find_text_from {l:agz}{sl:nat}{len:nat | len <= 524288}{p:nat | p <= len} .<
   else if text_has(bv, len, p, s) then true
   else find_text_from(bv, len, p + 1, s)
 
+(* Whether bv[0, len) holds the text s at or after p as a whole word: the
+   bytes around it are not part of an identifier (keyword: fixtures memo,
+   a snippet that loads) *)
+fun find_word_from {l:agz}{sl:nat}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, s: string sl): bool =
+  if p >= len then false
+  else if text_has(bv, len, p, s)
+    && ~is_ident_byte(byte_at(bv, len, p - 1))
+    && ~is_ident_byte(byte_at(bv, len, p + g1u2i(string1_length(s)))) then true
+  else find_word_from(bv, len, p + 1, s)
+
 (* Whether the log bv[0, len) has a line that is a patsopt error's first *)
 fun has_error_from {l:agz}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
   (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p): bool = let
@@ -1440,16 +1451,18 @@ in r end
 
 (* ---- the store ---- *)
 
-(* Whether the snippet names a file to load (load, include, #use or
-   #require anywhere in it): it reads a file the closure of the base
-   module does not name *)
+(* Whether the snippet names a file to load (staload, dynload, load or
+   include as a word, #use or #require anywhere in it): it reads a file the
+   closure of the base module does not name. A word inside a longer name
+   (Download, unloaded) loads nothing (bats#432) *)
 fn snippet_loads {l:agz}{lm:agz}{a,e:nat | a <= e; e <= 524288}
   (cfg: !$A.borrow(byte, l, 524288), w: settings, mv: !$A.borrow(byte, lm, 524288), a: int a, e: int e): bool = let
   val sa = $A.alloc<byte>(524288): [l_sa:agz] $A.arr(byte, l_sa, 524288)
   val sn0 = read_file_text(fixture_path(cfg, w, mv, a, e, "snippet.bats"), sa)
   val sn = text_len(sn0)
   val @(fz, bv) = $A.freeze<byte>(sa)
-  val loads = (sn0 < 0 || find_text_from(bv, sn, 0, "load") || find_text_from(bv, sn, 0, "include")
+  val loads = (sn0 < 0 || find_word_from(bv, sn, 0, "staload") || find_word_from(bv, sn, 0, "dynload")
+    || find_word_from(bv, sn, 0, "load") || find_word_from(bv, sn, 0, "include")
     || find_text_from(bv, sn, 0, "#use") || find_text_from(bv, sn, 0, "#require")): bool
   val () = $A.drop<byte>(fz, bv)
 in ($A.free<byte>($A.thaw<byte>(fz)); loads) end
