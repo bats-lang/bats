@@ -976,15 +976,20 @@ fun find_text_from {l:agz}{sl:nat}{len:nat | len <= 524288}{p:nat | p <= len} .<
   else if text_has(bv, len, p, s) then true
   else find_text_from(bv, len, p + 1, s)
 
+(* A byte of a word of a snippet: an identifier byte of the lexer, and the
+   apostrophe, which the identifier scan of recursion.bats counts too (bats#432).
+   is_ident_byte is the lexer's own and is not changed for this *)
+fn is_word_byte(b: int): bool = is_ident_byte(b) || b = 39
+
 (* Whether bv[0, len) holds the text s at or after p as a whole word: the
-   bytes around it are not part of an identifier (keyword: fixtures memo,
-   a snippet that loads) *)
+   bytes around it are not word bytes (keyword: fixtures memo, a snippet
+   that loads) *)
 fun find_word_from {l:agz}{sl:nat}{len:nat | len <= 524288}{p:nat | p <= len} .<len - p>.
   (bv: !$A.borrow(byte, l, 524288), len: int len, p: int p, s: string sl): bool =
   if p >= len then false
   else if text_has(bv, len, p, s)
-    && ~is_ident_byte(byte_at(bv, len, p - 1))
-    && ~is_ident_byte(byte_at(bv, len, p + g1u2i(string1_length(s)))) then true
+    && ~is_word_byte(byte_at(bv, len, p - 1))
+    && ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s)))) then true
   else find_word_from(bv, len, p + 1, s)
 
 (* Whether the log bv[0, len) has a line that is a patsopt error's first *)

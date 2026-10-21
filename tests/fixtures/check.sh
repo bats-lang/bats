@@ -72,6 +72,12 @@
 #     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
 #  3b. load-as-text: `find_word_from(bv, sn, 0, "load")` -> `find_text_from(bv, sn, 0, "load")`
 #     killed by: "a snippet with load or include inside a name was not kept"
+#  3c. leading-boundary-removed: `&& ~is_word_byte(byte_at(bv, len, p - 1))` -> `&& true`
+#     killed by: "Download is no loading word"
+#  3d. trailing-boundary-removed: `&& ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))` -> `&& true`
+#     killed by: "included is no loading word"
+#  3e. apostrophe-omitted: `fn is_word_byte(b: int): bool = is_ident_byte(b) || b = 39` -> `fn is_word_byte(b: int): bool = is_ident_byte(b)`
+#     killed by: "load' is no loading word"
 #  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
 #     killed by: "memo cold audit lie"
 #  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
@@ -666,6 +672,64 @@ okline "$TMP/l1.log" accept/loads-sats "memo load .sats"
 saidpart "$TMP/l1.log" "FAIL reject/moves-limit: rejected, but not as its expect says: an error is in " "memo interface changed"
 [ "$(nfiles "$M4")" = 0 ] || fail "memo: a snippet that loads a file, or one that changes the interface, was kept"
 
+# ---- the word rule, one case each (bats#432): a snippet is kept when no loading word (staload,
+# dynload, load, include) is a word of it and #use and #require are not in it. Each case is one
+# fixture in a memo of its own and prints one line, `ok   word/<case>: <what>`, or
+# `FAIL word/<case>: <what>: the snippet was kept` (or `not kept`); the section fails when one did not hold.
+# It runs before the memo's own in-a-name case below, which stops the run when it fails.
+wordfail=0
+wordcase() { # <case> <kept|not> <what> <snippet>: the fixture alone; kept means it checks and is kept
+  mfix "$TMP/word" accept "$1" src/lib.bats '(* end *)' "$4"
+  wm=$TMP/word-memo-$1; wl=$TMP/word-$1.log
+  mrunx "$MP" "$TMP/word" "$MW" "$wm" "$wl" --only "accept/$1"
+  kept=$(nfiles "$wm")
+  if [ "$rc" = 0 ] && grep -aqE "^ok   accept/$1 \([0-9]+ s\)\$" "$wl"; then
+    if { [ "$2" = kept ] && [ "$kept" = 2 ]; } || { [ "$2" = not ] && [ "$kept" = 0 ]; }; then
+      echo "ok   word/$1: $3"
+    else
+      echo "FAIL word/$1: $3: the snippet was $([ "$kept" = 0 ] && echo 'not kept' || echo 'kept')"
+      wordfail=1
+    fi
+  else
+    echo "FAIL word/$1: $3: the snippet does not check (status $rc): $(grep -a '^FAIL' "$wl" | head -1)"
+    wordfail=1
+  fi
+}
+# a snippet that is the bare word, with no header and nothing else: it does not check, so only "not kept" is judged
+wordbare() { # <case> <word> <what>
+  mfix "$TMP/word" accept "$1" src/lib.bats '(* end *)' 'x'
+  printf '%s' "$2" > "$TMP/word/accept/$1/snippet.bats"
+  wm=$TMP/word-memo-$1; wl=$TMP/word-$1.log
+  mrunx "$MP" "$TMP/word" "$MW" "$wm" "$wl" --only "accept/$1"
+  if [ "$(nfiles "$wm")" = 0 ]; then echo "ok   word/$1: $3"; else echo "FAIL word/$1: $3: the snippet was kept"; wordfail=1; fi
+}
+wordcase download kept 'Download is no loading word (a longer name, bats#432)' 'fn Download (x: int): int = x'
+wordcase included kept 'included is no loading word (include, then an identifier byte)' 'fn included (x: int): int = x'
+wordcase loaded kept 'loaded is no loading word (load, then an identifier byte)' 'fn loaded (x: int): int = x'
+wordcase apostrophe kept "load' is no loading word (the apostrophe is an identifier byte)" "fn load' (x: int): int = x"
+wordcase end-included kept 'a longer name at the end of the snippet is no loading word' 'fn g (): int = 1
+// included'
+wordcase staload not 'staload is a loading word' 'staload "helper.sats"
+
+fn g (): int = help ()'
+wordcase dynload not 'dynload is a loading word' 'dynload "helper.dats"'
+wordcase hash-include not '#include is a loading word' '#include "share/atspre_staload.hats"
+
+fn g (x: int): int = x'
+wordcase load-word not 'load as a word is a loading word' 'fn load (x: int): int = x'
+wordcase include-word not 'include as a word is a loading word' 'fn include (x: int): int = x'
+wordcase end-of-file-load not 'load at the end of the snippet is a loading word' 'fn g (): int = 1
+// load'
+wordcase use not '#use is a loading word, anywhere in the snippet' '(* #use *)
+
+fn g (x: int): int = x'
+wordcase require not '#require is a loading word, anywhere in the snippet' '(* #require *)
+
+fn g (x: int): int = x'
+wordbare bare-load load 'a snippet that is just load is not kept'
+wordbare bare-include include 'a snippet that is just include is not kept'
+[ "$wordfail" = 0 ] || fail "word cases: one or more did not hold (the FAIL lines above)"
+
 # ---- load and include inside a longer name load nothing (bats#432): the result is kept, and the
 # second run serves it
 MF4W=$TMP/mfix4w
@@ -679,6 +743,7 @@ okline "$TMP/w1.log" accept/in-a-name "memo word in a name"
 : > "$PLOG"; mrunx "$MP" "$MF4W" "$MW" "$M4W" "$TMP/w2.log"
 [ $rc = 0 ] || { cat "$TMP/w2.log"; fail "memo word in a name again: status $rc, not 0"; }
 saidpart "$TMP/w2.log" "ok   accept/in-a-name (0 s) [memo]" "memo word in a name again"
+
 
 # ---- a run killed while it checks leaves no file
 M6=$TMP/memo6
