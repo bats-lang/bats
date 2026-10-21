@@ -17,6 +17,9 @@
 #    whether the write fails before it made a file (a directory at its place)
 #    or after it did (a file-size limit on bats's own writes): the message
 #    says the removal only when the toolchain is gone
+#  * the removal after a failed marker write is two steps (marker, then tree)
+#    with a status each; a stand-in rm fails each, and the unmarked toolchain a
+#    failed tree removal or a bats killed after the move leaves is used as it is
 #  * a link to another pin's toolchain is refused before any download or build
 #  * a marker with no patsopt (half made) is replaced
 #  * no HOME is an error
@@ -223,6 +226,71 @@ grep -qF "was removed again" "$TMP/out" || { cat "$TMP/out"; fail "the removal o
 [ ! -e "$H/.bats/ats2" ] || { cat "$TMP/out"; fail "the message says the toolchain was removed, and it is still there"; }
 leftovers || fail "a marker write that left a file left other files"
 ok "a marker write that leaves a file: the toolchain is removed, and the message says so"
+
+# the removal after a failed marker write has two steps with a status each
+# (MOVED_CLEAR, bats#372): the marker first, then the tree. A stand-in rm on the
+# PATH (kept in $RMFAIL: marker, tree) fails the step asked, without removing
+# anything, so it works as root and on macOS; a real rm that fails part way
+# through a tree is not played. The write fails as in the case above.
+RMBIN=$TMP/rm-bin
+mkdir -p "$RMBIN"
+cat > "$RMBIN/rm" <<SH
+#!/bin/sh
+last=
+for a in "\$@"; do last=\$a; done
+case \$(cat "$TMP/rm-fail" 2>/dev/null) in
+  marker) case \$last in */ats2/.bats-ats2) echo "rm: cannot remove '\$last': stand-in" >&2; exit 1 ;; esac ;;
+  tree) case \$last in */.bats/ats2) echo "rm: cannot remove '\$last': stand-in" >&2; exit 1 ;; esac ;;
+esac
+exec "$(command -v rm)" "\$@"
+SH
+chmod +x "$RMBIN/rm"
+failed_write() { ( trap '' XFSZ; ulimit -S -f 0; st=0; HOME="$H" PATH="$RMBIN:$WRAP:$FAKE:$PATH" "$BATS" ats2 install 2>&1 || st=$?; echo "rc=$st" ) | cat > "$TMP/out"; }
+echo real > "$TMP/curl-mode"; echo ok > "$TMP/make-mode"
+
+echo marker > "$TMP/rm-fail"
+newhome rmmarker
+failed_write
+grep -qxF "rc=1" "$TMP/out" || { cat "$TMP/out"; fail "an install whose marker and its removal failed did not end with status 1"; }
+grep -qF "may still be there and claim a complete install" "$TMP/out" || { cat "$TMP/out"; fail "a marker that could not be removed is not said to be possibly there"; }
+grep -qF "was removed" "$TMP/out" && fail "the marker's removal failed and the toolchain is said removed"
+[ -x "$H/.bats/ats2/bin/patsopt" ] && [ -e "$H/.bats/ats2/.bats-ats2" ] || fail "the tree was removed although the marker's removal failed"
+ok "a marker that cannot be removed: the message says it may still be there, and the tree is not touched"
+
+echo tree > "$TMP/rm-fail"
+newhome rmtree
+failed_write
+grep -qxF "rc=1" "$TMP/out" || { cat "$TMP/out"; fail "an install whose tree could not be removed did not end with status 1"; }
+grep -qF "it is still there with no marker" "$TMP/out" || { cat "$TMP/out"; fail "a tree that could not be removed is not said to be there"; }
+[ -x "$H/.bats/ats2/bin/patsopt" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "the marker stayed, or the tree went, although the tree's removal failed"
+# what it leaves is a toolchain bats did not make: used as it is, never replaced
+: > "$TMP/rm-fail"; : > "$TMP/calls"
+run || { cat "$TMP/out"; fail "the run after a tree that could not be removed failed"; }
+grep -q "was not installed by bats" "$TMP/out" || { cat "$TMP/out"; fail "the unmarked toolchain is not used as it is"; }
+[ ! -s "$TMP/calls" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "the unmarked toolchain was downloaded over or marked"
+ok "a tree that cannot be removed: the marker is gone, and the next run uses the unmarked toolchain as it is"
+
+# the accepted window: bats killed between the move and the marker's write. A
+# stand-in mv does the move, then kills bats (the parent of the shell running it).
+MVBIN=$TMP/mv-bin
+mkdir -p "$MVBIN"
+cat > "$MVBIN/mv" <<SH
+#!/bin/sh
+"$(command -v mv)" "\$@" || exit \$?
+last=
+for a in "\$@"; do last=\$a; done
+case \$last in */.bats/ats2) kill -KILL "\$(ps -o ppid= -p \$PPID | tr -d ' ')" ;; esac
+SH
+chmod +x "$MVBIN/mv"
+: > "$TMP/rm-fail"
+newhome killed
+HOME="$H" PATH="$MVBIN:$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1 && fail "a bats killed after the move succeeded"
+[ -x "$H/.bats/ats2/bin/patsopt" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || { cat "$TMP/out"; fail "the kill did not happen between the move and the marker"; }
+: > "$TMP/calls"
+run || { cat "$TMP/out"; fail "the run after a killed install failed"; }
+grep -q "was not installed by bats" "$TMP/out" || { cat "$TMP/out"; fail "the toolchain a killed run left is not used as it is"; }
+[ ! -s "$TMP/calls" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "the toolchain a killed run left was replaced or marked"
+ok "a bats killed between the move and the marker leaves an unmarked toolchain that is used as it is"
 
 newhome extra
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install extra > "$TMP/out" 2>&1 && fail "an extra argument was accepted"

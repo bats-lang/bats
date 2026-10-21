@@ -137,12 +137,8 @@ in has end
 #define CLEAR "rm -rf \"$1/ats2.new\" \"$1/ats2.tgz.part\" \"$1\"/ats2-download.*\n"
 #define CLEAR_ONE "rm -rf \"$1/ats2.new\" \"$2\"\n"
 
-(* $1 the base: the toolchain this run moved into place, removed whatever its
-   marker holds when the marker's write failed (bats#372, MOVED_CLEAR): a
-   failed write can leave the whole pin in the marker (a flush that fails
-   after its bytes), so no marker file may stay. The move put this run's own
-   directory there, so nothing else is removed. *)
-#define MOVED_CLEAR "rm -rf \"$1/ats2\"\n"
+(* MOVED_CLEAR: a failed marker write removes the moved toolchain, marker first, status 2/3 say which step failed (bats#372, ats2-install.md) *)
+#define MOVED_CLEAR "rm -rf \"$1/ats2/.bats-ats2\" || exit 2\nrm -rf \"$1/ats2\" || exit 3\n"
 
 (* The lock that makes two installs one: $HOME/.bats/ats2.lock, held with
    the file package's flock while ats2 is installed (what is installed is
@@ -206,21 +202,18 @@ fn dir_arg {l:agz} (out: !$A.borrow(byte, l, 4096), n: int): $B.builder_v = let
   val () = copy_to_builder_v(out, 0, n, 4096, b)
 in b end
 
-(* ~/.bats/ats2/.bats-ats2: the pin's name and SHA-256 on a line, written by
-   bats through write_settle after the toolchain is moved into place. The
-   write's result is the install's: 0 when written, ~1 when it failed (said
-   by write_settle, with the reason; bats-lang/bats#372, #367) *)
+(* write_marker: the marker, written by bats through write_settle after the move (bats#372, ats2-install.md) *)
 fn write_marker (): int = let
-  var c : $B.builder_v = marker_arg()
-  val () = put_char_v(c, 10)
-  var p : $B.builder_v = base_arg()
-  val () = bput_v(p, "/ats2/.bats-ats2")
-  val @(pa, pal) = $B.into_arr(p)
-  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val rc = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, c))
-  val () = $A.drop<byte>(fz_p, bv_p)
-  val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in rc end
+  var marker_text : $B.builder_v = marker_arg()
+  val () = put_char_v(marker_text, 10)
+  var marker_path : $B.builder_v = base_arg()
+  val () = bput_v(marker_path, "/ats2/.bats-ats2")
+  val @(marker_array, marker_length) = $B.into_arr(marker_path)
+  val @(marker_frozen, marker_view) = $A.freeze<byte>(marker_array)
+  val marker_status = write_settle(marker_view, marker_length, write_file_from_builder_m(marker_view, marker_length, marker_text))
+  val () = $A.drop<byte>(marker_frozen, marker_view)
+  val () = $A.free<byte>($A.thaw<byte>(marker_frozen))
+in marker_status end
 
 (* The install itself, under the lock: false (said) when it fails *)
 fn install_now (): bool = let
@@ -277,7 +270,9 @@ in
           val cleared = sh_exec(MOVED_CLEAR, base_arg(), empty_arg(), empty_arg())
           val () = (if cleared = 0
             then prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 was removed again, so the next bats ats2 install starts from nothing\n")
-            else prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 could not be removed: it is still there, with no complete marker, so move it away before the next bats ats2 install\n"))
+            else if cleared = 2
+            then prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 could not be removed, and its marker .bats-ats2 may still be there and claim a complete install: remove ~/.bats/ats2 by hand before the next bats ats2 install\n")
+            else prerr! ("error: the marker of the ATS2 toolchain bats moved into ~/.bats/ats2 was removed, but the rest of the toolchain could not be: it is still there with no marker, so the next bats ats2 install would use it as it is; move it away before then\n"))
         in false end
         else let
           val () = println! ("ATS2 installed successfully")
