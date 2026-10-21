@@ -108,6 +108,8 @@ a workflow pin that would move instead of moving it.
 
 The notes are in `.claude/rules/`, each with `paths:` frontmatter, so a note loads only when a file it covers is touched. Each keeps its decisions, the research behind them, and what is proved apart from what is only tested.
 
+A comment states its reason in one line and names the area by keyword; the detail lives in `.claude/rules/*.md`: search them for the keyword before changing the code.
+
 | File | Area |
 |---|---|
 | `.claude/rules/cli.md` | Command line and repository |

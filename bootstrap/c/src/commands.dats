@@ -1133,7 +1133,7 @@ in case+ fex_or of
 end
 
 (* ============================================================
-   write_claude_rules: create .claude/rules/bats.md
+   write_claude_rules: create the bats rules file of the project
    ============================================================ *)
 
 

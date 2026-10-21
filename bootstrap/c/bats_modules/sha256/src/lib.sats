@@ -22,6 +22,9 @@ staload AR = "arith/src/lib.sats"
 
 
 
+
+
+
 fn hash
   {l:agz}{n:pos}{lo:agz}
   (data: !$A.arr(byte, l, n), data_len: int n,
@@ -48,6 +51,7 @@ fn update
 
 
 fn finish {lo:agz} (c: ctx, out: !$A.arr(byte, lo, 64)): void
+
 
 
 
@@ -151,9 +155,34 @@ dataprop SMALL_SIGMA_1(int, int, int, int) =
       $AR.XOR(ah, bh, sh), $AR.XOR(al, bl, sl),
       $AR.XOR(sh, ch, rh), $AR.XOR(sl, cl, rl))
 
+fun word_ch_w32 {xh,xl,yh,yl,zh,zl:nat | xh < 65536; xl < 65536; yh < 65536; yl < 65536; zh < 65536; zl < 65536}
+  (x: $AR.word32(xh, xl), y: $AR.word32(yh, yl), z: $AR.word32(zh, zl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (CH(xh, xl, yh, yl, zh, zl, rh, rl) | $AR.word32(rh, rl))
+
+
+
+
+
+
+
+
+
 fun word_ch {xh,xl,yh,yl,zh,zl:nat | xh < 65536; xl < 65536; yh < 65536; yl < 65536; zh < 65536; zl < 65536}
   (xh: int xh, xl: int xl, yh: int yh, yl: int yl, zh: int zh, zl: int zl)
   : [rh,rl:nat | rh < 65536; rl < 65536] (CH(xh, xl, yh, yl, zh, zl, rh, rl) | @(int rh, int rl))
+
+
+
+
+
+
+
+
+fun word_maj_w32 {xh,xl,yh,yl,zh,zl:nat | xh < 65536; xl < 65536; yh < 65536; yl < 65536; zh < 65536; zl < 65536}
+  (x: $AR.word32(xh, xl), y: $AR.word32(yh, yl), z: $AR.word32(zh, zl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (MAJ(xh, xl, yh, yl, zh, zl, rh, rl) | $AR.word32(rh, rl))
+
+
 
 
 
@@ -174,8 +203,32 @@ fun word_maj {xh,xl,yh,yl,zh,zl:nat | xh < 65536; xl < 65536; yh < 65536; yl < 6
 
 
 
+fun big_sigma_0_w32 {xh,xl:nat | xh < 65536; xl < 65536} (x: $AR.word32(xh, xl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (BIG_SIGMA_0(xh, xl, rh, rl) | $AR.word32(rh, rl))
+
+
+
+
+
+
+
+
+
+
 fun big_sigma_0 {xh,xl:nat | xh < 65536; xl < 65536} (xh: int xh, xl: int xl)
   : [rh,rl:nat | rh < 65536; rl < 65536] (BIG_SIGMA_0(xh, xl, rh, rl) | @(int rh, int rl))
+
+
+
+
+
+
+
+
+
+fun big_sigma_1_w32 {xh,xl:nat | xh < 65536; xl < 65536} (x: $AR.word32(xh, xl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (BIG_SIGMA_1(xh, xl, rh, rl) | $AR.word32(rh, rl))
+
 
 
 
@@ -196,8 +249,32 @@ fun big_sigma_1 {xh,xl:nat | xh < 65536; xl < 65536} (xh: int xh, xl: int xl)
 
 
 
+fun small_sigma_0_w32 {xh,xl:nat | xh < 65536; xl < 65536} (x: $AR.word32(xh, xl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (SMALL_SIGMA_0(xh, xl, rh, rl) | $AR.word32(rh, rl))
+
+
+
+
+
+
+
+
+
+
 fun small_sigma_0 {xh,xl:nat | xh < 65536; xl < 65536} (xh: int xh, xl: int xl)
   : [rh,rl:nat | rh < 65536; rl < 65536] (SMALL_SIGMA_0(xh, xl, rh, rl) | @(int rh, int rl))
+
+
+
+
+
+
+
+
+
+fun small_sigma_1_w32 {xh,xl:nat | xh < 65536; xl < 65536} (x: $AR.word32(xh, xl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (SMALL_SIGMA_1(xh, xl, rh, rl) | $AR.word32(rh, rl))
+
 
 
 
@@ -248,9 +325,39 @@ dataprop WORD_SET($A.cells, int, int, int, $A.cells) =
       $A.SETC(cs2, at + 2, b2, cs3), $A.SETC(cs3, at + 3, b3, cs4))
 
 
+fun word_get_w32 {l:agz}{n,at:nat | at + 3 < n}{cs:$A.cells}
+  (cells: !$A.barr(l, n, cs), at: int at)
+  : [high,low:nat | high < 65536; low < 65536] (WORD_AT(cs, at, high, low) | $AR.word32(high, low))
+
+
+
+
+
+
+
 fun word_get {l:agz}{n,at:nat | at + 3 < n}{cs:$A.cells}
   (cells: !$A.barr(l, n, cs), at: int at)
   : [high,low:nat | high < 65536; low < 65536] (WORD_AT(cs, at, high, low) | @(int high, int low))
+
+
+
+
+
+
+
+
+
+fun word_set_w32 {l:agz}{n,at:nat | at + 3 < n}{cs:$A.cells}{high,low:nat | high < 65536; low < 65536}
+  (cells: $A.barr(l, n, cs), at: int at, word_value: $AR.word32(high, low))
+  : [cs2:$A.cells] (WORD_SET(cs, at, high, low, cs2) | $A.barr(l, n, cs2))
+
+
+
+
+
+
+
+
 
 
 
@@ -530,11 +637,61 @@ dataprop FIVE_AT($A.cells, int, five_words) =
 
 
 
+fun eight_get_w32 {lc:agz}{n,at:nat | at + 31 < n}{cs:$A.cells}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h3_high,h3_low,h4_high,h4_low,h5_high,h5_low,h6_high,h6_low,h7_high,h7_low:nat | h0_high < 65536; h0_low < 65536; h1_high < 65536; h1_low < 65536; h2_high < 65536; h2_low < 65536; h3_high < 65536; h3_low < 65536; h4_high < 65536; h4_low < 65536; h5_high < 65536; h5_low < 65536; h6_high < 65536; h6_low < 65536; h7_high < 65536; h7_low < 65536}
+  (cells: !$A.barr(lc, n, cs), at: int at,
+   have: EIGHT_AT(cs, at, eight(w32(h0_high, h0_low), w32(h1_high, h1_low), w32(h2_high, h2_low), w32(h3_high, h3_low), w32(h4_high, h4_low), w32(h5_high, h5_low), w32(h6_high, h6_low), w32(h7_high, h7_low))))
+  : @($AR.word32(h0_high, h0_low), $AR.word32(h1_high, h1_low), $AR.word32(h2_high, h2_low), $AR.word32(h3_high, h3_low), $AR.word32(h4_high, h4_low), $AR.word32(h5_high, h5_low), $AR.word32(h6_high, h6_low), $AR.word32(h7_high, h7_low))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fun eight_get {lc:agz}{n,at:nat | at + 31 < n}{cs:$A.cells}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h3_high,h3_low,h4_high,h4_low,h5_high,h5_low,h6_high,h6_low,h7_high,h7_low:nat | h0_high < 65536; h0_low < 65536; h1_high < 65536; h1_low < 65536; h2_high < 65536; h2_low < 65536; h3_high < 65536; h3_low < 65536; h4_high < 65536; h4_low < 65536; h5_high < 65536; h5_low < 65536; h6_high < 65536; h6_low < 65536; h7_high < 65536; h7_low < 65536}
   (cells: !$A.barr(lc, n, cs), at: int at,
    have: EIGHT_AT(cs, at, eight(w32(h0_high, h0_low), w32(h1_high, h1_low), w32(h2_high, h2_low), w32(h3_high, h3_low), w32(h4_high, h4_low), w32(h5_high, h5_low), w32(h6_high, h6_low), w32(h7_high, h7_low))))
   : @(int h0_high, int h0_low, int h1_high, int h1_low, int h2_high, int h2_low, int h3_high, int h3_low, int h4_high, int h4_low, int h5_high, int h5_low, int h6_high, int h6_low, int h7_high, int h7_low)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fun eight_set_w32 {lc:agz}{n,at:nat | at + 31 < n}{cs:$A.cells}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h3_high,h3_low,h4_high,h4_low,h5_high,h5_low,h6_high,h6_low,h7_high,h7_low:nat | h0_high < 65536; h0_low < 65536; h1_high < 65536; h1_low < 65536; h2_high < 65536; h2_low < 65536; h3_high < 65536; h3_low < 65536; h4_high < 65536; h4_low < 65536; h5_high < 65536; h5_low < 65536; h6_high < 65536; h6_low < 65536; h7_high < 65536; h7_low < 65536}
+  (cells: $A.barr(lc, n, cs), at: int at, h0_word: $AR.word32(h0_high, h0_low), h1_word: $AR.word32(h1_high, h1_low), h2_word: $AR.word32(h2_high, h2_low), h3_word: $AR.word32(h3_high, h3_low), h4_word: $AR.word32(h4_high, h4_low), h5_word: $AR.word32(h5_high, h5_low), h6_word: $AR.word32(h6_high, h6_low), h7_word: $AR.word32(h7_high, h7_low))
+  : [cs2:$A.cells] (EIGHT_AT(cs2, at, eight(w32(h0_high, h0_low), w32(h1_high, h1_low), w32(h2_high, h2_low), w32(h3_high, h3_low), w32(h4_high, h4_low), w32(h5_high, h5_low), w32(h6_high, h6_low), w32(h7_high, h7_low))) | $A.barr(lc, n, cs2))
 
 
 
@@ -581,11 +738,49 @@ fun eight_set {lc:agz}{n,at:nat | at + 31 < n}{cs:$A.cells}{h0_high,h0_low,h1_hi
 
 
 
+fun five_get_w32 {lc:agz}{n,at:nat | at + 19 < n}{cs:$A.cells}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h3_high,h3_low,h4_high,h4_low:nat | h0_high < 65536; h0_low < 65536; h1_high < 65536; h1_low < 65536; h2_high < 65536; h2_low < 65536; h3_high < 65536; h3_low < 65536; h4_high < 65536; h4_low < 65536}
+  (cells: !$A.barr(lc, n, cs), at: int at,
+   have: FIVE_AT(cs, at, five(w32(h0_high, h0_low), w32(h1_high, h1_low), w32(h2_high, h2_low), w32(h3_high, h3_low), w32(h4_high, h4_low))))
+  : @($AR.word32(h0_high, h0_low), $AR.word32(h1_high, h1_low), $AR.word32(h2_high, h2_low), $AR.word32(h3_high, h3_low), $AR.word32(h4_high, h4_low))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fun five_get {lc:agz}{n,at:nat | at + 19 < n}{cs:$A.cells}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h3_high,h3_low,h4_high,h4_low:nat | h0_high < 65536; h0_low < 65536; h1_high < 65536; h1_low < 65536; h2_high < 65536; h2_low < 65536; h3_high < 65536; h3_low < 65536; h4_high < 65536; h4_low < 65536}
   (cells: !$A.barr(lc, n, cs), at: int at,
    have: FIVE_AT(cs, at, five(w32(h0_high, h0_low), w32(h1_high, h1_low), w32(h2_high, h2_low), w32(h3_high, h3_low), w32(h4_high, h4_low))))
   : @(int h0_high, int h0_low, int h1_high, int h1_low, int h2_high, int h2_low, int h3_high, int h3_low, int h4_high, int h4_low)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fun five_set_w32 {lc:agz}{n,at:nat | at + 19 < n}{cs:$A.cells}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h3_high,h3_low,h4_high,h4_low:nat | h0_high < 65536; h0_low < 65536; h1_high < 65536; h1_low < 65536; h2_high < 65536; h2_low < 65536; h3_high < 65536; h3_low < 65536; h4_high < 65536; h4_low < 65536}
+  (cells: $A.barr(lc, n, cs), at: int at, h0_word: $AR.word32(h0_high, h0_low), h1_word: $AR.word32(h1_high, h1_low), h2_word: $AR.word32(h2_high, h2_low), h3_word: $AR.word32(h3_high, h3_low), h4_word: $AR.word32(h4_high, h4_low))
+  : [cs2:$A.cells] (FIVE_AT(cs2, at, five(w32(h0_high, h0_low), w32(h1_high, h1_low), w32(h2_high, h2_low), w32(h3_high, h3_low), w32(h4_high, h4_low))) | $A.barr(lc, n, cs2))
 
 
 
@@ -693,6 +888,202 @@ dataprop SHA256_K(int, int, int) =
   | SHA256_K_61(61, 0xa450, 0x6ceb)
   | SHA256_K_62(62, 0xbef9, 0xa3f7)
   | SHA256_K_63(63, 0xc671, 0x78f2)
+
+
+fun sha256_k_w32 {t:nat | t < 64} (t: int t)
+  : [high,low:nat | high < 65536; low < 65536] (SHA256_K(t, high, low) | $AR.word32(high, low))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 fun sha256_k {t:nat | t < 64} (t: int t)
@@ -914,6 +1305,27 @@ dataprop SHA256_ROUND(word, word, word, word, word, word, word, word, word, word
       $AR.ADD32(d_high, d_low, t1_high, t1_low, new_e_high, new_e_low))
 
 
+fun sha256_round_w32 {a_high,a_low,b_high,b_low,c_high,c_low,d_high,d_low,e_high,e_low,f_high,f_low,g_high,g_low,h_high,h_low,k_high,k_low,w_high,w_low:nat | a_high < 65536; a_low < 65536; b_high < 65536; b_low < 65536; c_high < 65536; c_low < 65536; d_high < 65536; d_low < 65536; e_high < 65536; e_low < 65536; f_high < 65536; f_low < 65536; g_high < 65536; g_low < 65536; h_high < 65536; h_low < 65536; k_high < 65536; k_low < 65536; w_high < 65536; w_low < 65536}
+  (a_word: $AR.word32(a_high, a_low), b_word: $AR.word32(b_high, b_low), c_word: $AR.word32(c_high, c_low), d_word: $AR.word32(d_high, d_low), e_word: $AR.word32(e_high, e_low), f_word: $AR.word32(f_high, f_low), g_word: $AR.word32(g_high, g_low), h_word: $AR.word32(h_high, h_low), k_word: $AR.word32(k_high, k_low), w_word: $AR.word32(w_high, w_low))
+  : [new_a_high,new_a_low,new_e_high,new_e_low:nat | new_a_high < 65536; new_a_low < 65536; new_e_high < 65536; new_e_low < 65536]
+    (SHA256_ROUND(w32(a_high, a_low), w32(b_high, b_low), w32(c_high, c_low), w32(d_high, d_low), w32(e_high, e_low), w32(f_high, f_low), w32(g_high, g_low), w32(h_high, h_low), w32(k_high, k_low), w32(w_high, w_low), w32(new_a_high, new_a_low), w32(new_e_high, new_e_low)) | @($AR.word32(new_a_high, new_a_low), $AR.word32(new_e_high, new_e_low)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fun sha256_round {a_high,a_low,b_high,b_low,c_high,c_low,d_high,d_low,e_high,e_low,f_high,f_low,g_high,g_low,h_high,h_low,k_high,k_low,w_high,w_low:nat | a_high < 65536; a_low < 65536; b_high < 65536; b_low < 65536; c_high < 65536; c_low < 65536; d_high < 65536; d_low < 65536; e_high < 65536; e_low < 65536; f_high < 65536; f_low < 65536; g_high < 65536; g_low < 65536; h_high < 65536; h_low < 65536; k_high < 65536; k_low < 65536; w_high < 65536; w_low < 65536}
   (a_high: int a_high, a_low: int a_low, b_high: int b_high, b_low: int b_low, c_high: int c_high, c_low: int c_low, d_high: int d_high, d_low: int d_low, e_high: int e_high, e_low: int e_low, f_high: int f_high, f_low: int f_low, g_high: int g_high, g_low: int g_low, h_high: int h_high, h_low: int h_low, k_high: int k_high, k_low: int k_low, w_high: int w_high, w_low: int w_low)
   : [new_a_high,new_a_low,new_e_high,new_e_low:nat | new_a_high < 65536; new_a_low < 65536; new_e_high < 65536; new_e_low < 65536]
@@ -1046,9 +1458,38 @@ dataprop SHA1_F(int, int, int, int, int, int, int, int, int) =
     SHA1_F_parity_second(t, bh, bl, ch, cl, dh, dl, fh, fl) of PARITY(bh, bl, ch, cl, dh, dl, fh, fl)
 
 
+fun word_parity_w32 {xh,xl,yh,yl,zh,zl:nat | xh < 65536; xl < 65536; yh < 65536; yl < 65536; zh < 65536; zl < 65536}
+  (x: $AR.word32(xh, xl), y: $AR.word32(yh, yl), z: $AR.word32(zh, zl))
+  : [rh,rl:nat | rh < 65536; rl < 65536] (PARITY(xh, xl, yh, yl, zh, zl, rh, rl) | $AR.word32(rh, rl))
+
+
+
+
+
+
+
 fun word_parity {xh,xl,yh,yl,zh,zl:nat | xh < 65536; xl < 65536; yh < 65536; yl < 65536; zh < 65536; zl < 65536}
   (xh: int xh, xl: int xl, yh: int yh, yl: int yl, zh: int zh, zl: int zl)
   : [rh,rl:nat | rh < 65536; rl < 65536] (PARITY(xh, xl, yh, yl, zh, zl, rh, rl) | @(int rh, int rl))
+
+
+
+
+
+
+
+fun sha1_f_w32 {t:nat | t < 80}{bh,bl,ch,cl,dh,dl:nat | bh < 65536; bl < 65536; ch < 65536; cl < 65536; dh < 65536; dl < 65536}
+  (t: int t, b: $AR.word32(bh, bl), c: $AR.word32(ch, cl), d: $AR.word32(dh, dl))
+  : [fh,fl:nat | fh < 65536; fl < 65536] (SHA1_F(t, bh, bl, ch, cl, dh, dl, fh, fl) | $AR.word32(fh, fl))
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1089,6 +1530,16 @@ dataprop SHA1_K(int, int, int) =
   | {t:nat | 60 <= t; t <= 79} SHA1_K_60_to_79(t, 0xca62, 0xc1d6)
 
 
+fun sha1_k_w32 {t:nat | t < 80} (t: int t)
+  : [high,low:nat | high < 65536; low < 65536] (SHA1_K(t, high, low) | $AR.word32(high, low))
+
+
+
+
+
+
+
+
 fun sha1_k {t:nat | t < 80} (t: int t)
   : [high,low:nat | high < 65536; low < 65536] (SHA1_K(t, high, low) | @(int high, int low))
 
@@ -1117,6 +1568,23 @@ dataprop SHA1_ROUND(int, word, word, word, word, word, word, word, word, word) =
       $AR.ADD32(sum2_high, sum2_low, k_high, k_low, sum3_high, sum3_low),
       $AR.ADD32(sum3_high, sum3_low, w_high, w_low, new_a_high, new_a_low),
       $AR.ROTR(2, b_high, b_low, new_c_high, new_c_low))
+
+
+fun sha1_round_w32 {t:nat | t < 80}{a_high,a_low,b_high,b_low,c_high,c_low,d_high,d_low,e_high,e_low,k_high,k_low,w_high,w_low:nat | a_high < 65536; a_low < 65536; b_high < 65536; b_low < 65536; c_high < 65536; c_low < 65536; d_high < 65536; d_low < 65536; e_high < 65536; e_low < 65536; k_high < 65536; k_low < 65536; w_high < 65536; w_low < 65536}
+  (t: int t, a_word: $AR.word32(a_high, a_low), b_word: $AR.word32(b_high, b_low), c_word: $AR.word32(c_high, c_low), d_word: $AR.word32(d_high, d_low), e_word: $AR.word32(e_high, e_low), k_word: $AR.word32(k_high, k_low), w_word: $AR.word32(w_high, w_low))
+  : [new_a_high,new_a_low,new_c_high,new_c_low:nat | new_a_high < 65536; new_a_low < 65536; new_c_high < 65536; new_c_low < 65536]
+    (SHA1_ROUND(t, w32(a_high, a_low), w32(b_high, b_low), w32(c_high, c_low), w32(d_high, d_low), w32(e_high, e_low), w32(k_high, k_low), w32(w_high, w_low), w32(new_a_high, new_a_low), w32(new_c_high, new_c_low)) | @($AR.word32(new_a_high, new_a_low), $AR.word32(new_c_high, new_c_low)))
+
+
+
+
+
+
+
+
+
+
+
 
 
 fun sha1_round {t:nat | t < 80}{a_high,a_low,b_high,b_low,c_high,c_low,d_high,d_low,e_high,e_low,k_high,k_low,w_high,w_low:nat | a_high < 65536; a_low < 65536; b_high < 65536; b_low < 65536; c_high < 65536; c_low < 65536; d_high < 65536; d_low < 65536; e_high < 65536; e_low < 65536; k_high < 65536; k_low < 65536; w_high < 65536; w_low < 65536}
@@ -1519,11 +1987,26 @@ dataprop SHA1_IV(five_words) =
 
 
 
+fun sha256_iv_w32 ()
+  : (SHA256_IV(eight(w32(0x6a09, 0xe667), w32(0xbb67, 0xae85), w32(0x3c6e, 0xf372), w32(0xa54f, 0xf53a),
+                     w32(0x510e, 0x527f), w32(0x9b05, 0x688c), w32(0x1f83, 0xd9ab), w32(0x5be0, 0xcd19)))  |
+     @($AR.word32(0x6a09, 0xe667), $AR.word32(0xbb67, 0xae85), $AR.word32(0x3c6e, 0xf372), $AR.word32(0xa54f, 0xf53a), $AR.word32(0x510e, 0x527f), $AR.word32(0x9b05, 0x688c), $AR.word32(0x1f83, 0xd9ab), $AR.word32(0x5be0, 0xcd19)))
+
+
+
+
 fun sha256_iv ()
   : (SHA256_IV(eight(w32(0x6a09, 0xe667), w32(0xbb67, 0xae85), w32(0x3c6e, 0xf372), w32(0xa54f, 0xf53a),
                      w32(0x510e, 0x527f), w32(0x9b05, 0x688c), w32(0x1f83, 0xd9ab), w32(0x5be0, 0xcd19))) |
      @(int(0x6a09), int(0xe667), int(0xbb67), int(0xae85), int(0x3c6e), int(0xf372), int(0xa54f), int(0xf53a),
        int(0x510e), int(0x527f), int(0x9b05), int(0x688c), int(0x1f83), int(0xd9ab), int(0x5be0), int(0xcd19)))
+
+
+
+
+fun sha1_iv_w32 ()
+  : (SHA1_IV(five(w32(0x6745, 0x2301), w32(0xefcd, 0xab89), w32(0x98ba, 0xdcfe), w32(0x1032, 0x5476), w32(0xc3d2, 0xe1f0)))  |
+     @($AR.word32(0x6745, 0x2301), $AR.word32(0xefcd, 0xab89), $AR.word32(0x98ba, 0xdcfe), $AR.word32(0x1032, 0x5476), $AR.word32(0xc3d2, 0xe1f0)))
 
 
 

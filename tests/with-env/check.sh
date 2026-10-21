@@ -17,7 +17,7 @@
 #  * a command with no / is looked for in the PATH the file gives it;
 #  * 126 says why; stdin and the empty argument pass through; a command a
 #    signal ends is status 1 and a signal to bats does not reach the command
-#    (both are limits of the process package, said in CLAUDE.md).
+#    (both are limits of the process package: no exec, no signal status; with-env).
 # usage: tests/with-env/check.sh <bats-binary> <repository-dir>
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -221,8 +221,8 @@ got=$(with_env "$TMP/env" sh -c 'echo "$#"' sh '' '' x)
 
 # a command a signal ended has status 1 (the process package's child_wait
 # does not say which signal), and a signal to bats does not reach it (bats
-# does not replace itself with the command): both are said in CLAUDE.md and
-# are to change with bats-lang/process
+# does not replace itself with the command): both are limits of the process
+# package, to change with bats-lang/process (with-env)
 with_env "$TMP/env" sh -c 'kill -KILL $$'; [ $? -eq 1 ] || fail "a command killed by a signal has a status other than 1"
 rm -f "$TMP/child.pid"
 "$BATS" with-env "$TMP/env" sh -c 'echo $$ > "$1"; exec sleep 60' sh "$TMP/child.pid" &
@@ -234,6 +234,6 @@ wait "$waiting" 2>/dev/null
 if kill -0 "$(cat "$TMP/child.pid")" 2>/dev/null; then
   kill -KILL "$(cat "$TMP/child.pid")"
 else
-  fail "the signal reached the command: bats now replaces itself, so say it in CLAUDE.md and make this test expect it"
+  fail "the signal reached the command: bats now replaces itself, which ends the with-env limit on signals (with-env): make this test expect it"
 fi
 echo "with-env: ok"
