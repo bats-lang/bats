@@ -1705,6 +1705,87 @@ in
   | ~$R.err(e) => @(0 - e, 0)
 end
 
+(* How a captured run went (capture area: bats#444). The child's stdout is
+   read to its end, so bats never closes the pipe under a writer (no
+   SIGPIPE, no race on the exit status); the first 4096 bytes are kept.
+   CaptureFits: exit 0, the output fits (its length). CaptureFailed: a
+   non-zero status, the output fits. CaptureLonger: more than the buffer,
+   the child's own status and the bytes it wrote (at least that many past
+   1 GiB, where reading stops). CaptureReadFailed: a read failed, with
+   what was kept. CaptureNotRun: the errno of the failure to run it.
+   Linear: a caller matches every constructor. *)
+
+
+
+
+
+
+
+(* Where a read of the child's output ended (capture area) *)
+datavtype capture_end =
+  | CaptureEnded of ()
+  | CaptureEndFailed of ($F.io_error)
+
+(* chunk[i, m) put at out[filled + i] (capture area) *)
+fun capture_put {lo:agz}{lc:agz}{f:nat}{m:nat | m <= 4096; f + m <= 4096}{i:nat | i <= m} .<m - i>.
+  (out: !$A.arr(byte, lo, 4096), filled: int f,
+   chunk: !$A.arr(byte, lc, 4096), m: int m, i: int i): int(f + m) =
+  if i >= m then filled + m
+  else let
+    val () = $A.set<byte>(out, filled + i, $A.get<byte>(chunk, i))
+  in capture_put(out, filled, chunk, m, i + 1) end
+
+(* Reads fd to its end, keeping the first 4096 bytes in out; stops at
+   1 GiB (capture area) *)
+fun capture_read {lo:agz}{lc:agz}{f:nat | f <= 4096}{t:nat | t <= 1073741824}
+  .<1073741824 - t>.
+  (fd: !$F.fd, out: !$A.arr(byte, lo, 4096), chunk: !$A.arr(byte, lc, 4096),
+   filled: int f, total: int t)
+  : @([g:nat | g <= 4096] int g, [u:nat] int u, capture_end) =
+  case+ $F.file_read(fd, chunk, 4096) of
+  | ~$R.err(e) => @(filled, total, CaptureEndFailed(e))
+  | ~$R.ok(k) =>
+    if k <= 0 then @(filled, total, CaptureEnded())
+    else if total + k > 1073741824 then @(filled, 1073741824, CaptureEnded())
+    else let
+      val kept = (if filled + k <= 4096 then capture_put(out, filled, chunk, k, 0)
+                  else capture_put(out, filled, chunk, 4096 - filled, 0)): [g:nat | g <= 4096] int g
+    in capture_read(fd, out, chunk, kept, total + k) end
+
+(* As run_cmd_capture, with the outcome a type: stdout is read to its end,
+   stderr goes to /dev/null, and a longer output is its own constructor *)
+
+
+
+
+
+implement run_cmd_capture_outcome (exec_bv, argv, outbuf) = let
+  val sr = spawn_child(exec_bv, argv,
+    $P.dev_null(), $P.pipe_new(), $P.dev_null())
+in
+  case+ sr of
+  | ~$R.err(e) => CaptureNotRun(e)
+  | ~$R.ok(sp) => let
+      val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
+      val () = $P.pipe_end_close(sin_p)
+      val () = $P.pipe_end_close(serr_p)
+      val+ ~$P.pipe_fd(out_fd) = sout_p
+      val chunk = $A.alloc<byte>(4096)
+      val @(kept, total, ended) = capture_read(out_fd, outbuf, chunk, 0, 0)
+      val () = $A.free<byte>(chunk)
+      val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
+      val status = (case+ $P.child_wait(child) of
+        | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+    in
+      case+ ended of
+      | ~CaptureEndFailed(e) => CaptureReadFailed(status, kept, e)
+      | ~CaptureEnded() =>
+        if total > 4096 then CaptureLonger(status, total)
+        else if status = 0 then CaptureFits(kept)
+        else CaptureFailed(status, kept)
+    end
+end
+
 (* The prelude line count in <in>.pre, written next to the .dats
    in[0, il) by preprocess_one; 0 when there is none *)
 fun digits_val {lb:agz}{i,k:nat | i <= k; k <= 16} .<k - i>.
