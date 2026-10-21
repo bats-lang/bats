@@ -3214,6 +3214,37 @@ fn write_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
 
 
 
+
+datavtype text_list(int) =
+  | text_nil(0)
+  | {k:nat}{lb:agz}{cap:pos}{n:nat | n <= cap; cap <= 524288}
+    text_cons(k + 1) of ($A.arr(byte, lb, cap), int n, text_list(k))
+
+
+fn rope_text(r: $B.rope): [k:nat] text_list(k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn text_list_free {k:nat} (cs: text_list(k)): void
+
+
+
+
+
+
+
+
 fn rput(r: !$B.rope, v: int): void
 
 
@@ -3264,7 +3295,7 @@ fn rput_int(r: !$B.rope, v: int): void
 
 
 fn file_has_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !$B.rope_list(k)): bool
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !text_list(k)): bool
 
 
 
@@ -3303,7 +3334,7 @@ fn file_has_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
 
 
 fn write_file_from_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !$B.rope_list(k)): write_result
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !text_list(k)): write_result
 
 
 

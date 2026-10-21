@@ -47,7 +47,8 @@ staload "sha256/src/lib.dats"
    is kept. Different or missing: everything in build/ but .stash goes, one
    line on stderr names the first line that differs, and the build starts
    from nothing. A stash carries the stamp of whoever made it (cache_swap
-   moves every file of build/), so it is judged when it is swapped in. A
+   moves every file of build/ but .bats_valid and .bats_toolchain, the
+   toolchain's listing, bats#434), so it is judged when it is swapped in. A
    build/ that holds no build (no .bats_target and no stamp) is not
    dropped, and says nothing. build/.bats_valid/ (validated.bats) is kept
    through a drop, as through a change of mark (build.bats's cache_swap): its

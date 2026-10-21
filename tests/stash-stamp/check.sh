@@ -16,6 +16,9 @@
 #     dropped with "the stamp format differs"; a line `zzz 1` is `name value`
 #     (an unknown name), so it is dropped with "the stamp differs"
 #     (bats-lang/bats#364, the grammar in stamp.bats).
+#   * a toolchain listing (build/.bats_toolchain) left by another bats in
+#     build/ and in the stash: not carried by the swap, so the stamp's patsopt
+#     line is this toolchain's and the next check keeps everything (bats#434).
 # A stash of a stamp this bats would not write is never taken for this build's.
 # usage: tests/stash-stamp/check.sh <bats-binary> <repository-dir>
 set -eu
@@ -141,6 +144,24 @@ for extra in junk "zzz 1"; do
   cmp "$D/$S2/.bats_stamp" "$SAVE/$S2/.bats_stamp" || { echo "FAIL: after a stash with the line '$extra' was dropped, its stamp is not this build's"; exit 1; }
   echo "stash-stamp: a stash with the line '$extra' appended: dropped, named, and made again"
 done
+
+# A toolchain listing left by another bats, in build/ and in the stash
+# (bats#434): cache_swap does not carry build/.bats_toolchain, so the
+# stamp's patsopt line is the digest of this toolchain's own listing, in
+# build/ and in the stash, and the check after it keeps everything
+rm -rf "$D"
+cp -Rp "$SAVE" "$D"
+printf '123 456 bin/patsopt\n' > "$D/build/.bats_toolchain"
+printf '123 456 bin/patsopt\n' > "$D/$S2/.bats_toolchain"
+put_line "$D/build/.bats_stamp" 1 "bats-stamp 1"
+check "$D" "$TMP/listing.log"
+[ -n "$(value "$SAVE/build/.bats_stamp" patsopt)" ] || { echo "FAIL: the saved stamp has no patsopt line"; exit 1; }
+[ "$(value "$D/build/.bats_stamp" patsopt)" = "$(value "$SAVE/build/.bats_stamp" patsopt)" ] || { echo "FAIL: after a stale toolchain listing in build/, the stamp's patsopt line is not this toolchain's"; cat "$D/build/.bats_stamp"; exit 1; }
+[ "$(value "$D/$S2/.bats_stamp" patsopt)" = "$(value "$SAVE/$S2/.bats_stamp" patsopt)" ] || { echo "FAIL: after a stale toolchain listing in the stash, its stamp's patsopt line is not this toolchain's"; cat "$D/$S2/.bats_stamp"; exit 1; }
+[ ! -e "$D/$S2/.bats_toolchain" ] || { echo "FAIL: the stash still holds a toolchain listing"; exit 1; }
+check "$D" "$TMP/listing2.log"
+kept "$TMP/listing2.log" "the check after a stale toolchain listing"
+echo "stash-stamp: a stale toolchain listing: not carried by the swap, the next check keeps everything"
 
 # The same stash, unedited, is kept (the control of the cases above)
 rm -rf "$D"

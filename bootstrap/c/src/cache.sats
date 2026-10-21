@@ -372,6 +372,8 @@ staload "_bats_inputs.sats"
 
 
 
+
+
 fn toolchain_digest {lph:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int, out: !$B.builder_v >> $B.builder_v): bool
 

@@ -89,7 +89,7 @@ in
          only moved (sats_moved): a private declaration added or changed
          before its #pub ones, as a static test's snippet is, changes no
          module that staloads it, so only this module is checked again. *)
-      val [ks:int] sc = $B.rope_chunks(sats)
+      val [ks:int] sc = rope_text(sats)
       val r1 = (if file_has_rope(sats_bv, ss, sc) then 0
         else let
           val before = (if is_test_mode() then read_whole_m(sats_bv, ss)
@@ -109,12 +109,12 @@ in
             in false end): bool
           val () = sats_stamp_end(saved, moved)
         in r end): int
-      val () = $B.rope_list_free(sc)
-      val [kd:int] dc = $B.rope_chunks(dats)
+      val () = text_list_free(sc)
+      val [kd:int] dc = rope_text(dats)
       (* a write that failed stops the module: nothing more of it is written *)
       val r2 = (if r1 = 0 then write_settle(dats_bv, sd, write_file_from_rope(dats_bv, sd, dc))
         else ~1): int
-      val () = $B.rope_list_free(dc)
+      val () = text_list_free(dc)
       (* <dats>.pre: its prelude line count, for mapping patsopt's line
          numbers back to the .bats (Rust: DatsFile.prelude_offset) *)
       var pb : $B.builder_v = $B.create()
@@ -1189,7 +1189,10 @@ end
    twice, every time. Each stash is a whole build/ that only ever saw its
    own mark, which the freshness rules already handle. build/.bats_valid
    (validated.bats) is no mark's: it stays, and a stash that holds one is
-   not put back over it. *)
+   not put back over it. So does build/.bats_toolchain (cache.bats's
+   toolchain_digest, stamp keyword): it is the toolchain's listing, made once
+   per process, and one swapped in from a stash is another bats's, which would
+   be hashed for this run's stamp (bats#434). *)
 fn cache_swap (mark: int): void = let
   val () = names_set_fresh(false)
   val @(tgt_path, tgt_path_len) = str_into_arr("build/.bats_target")
@@ -1223,15 +1226,17 @@ in
     val () = put_int_v(b3, held)
     val () = bput_v(b3, " && mkdir -p .stash/")
     val () = put_int_v(b3, held)
-    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid -exec mv {} .stash/")
+    val () = bput_v(b3, " && find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_toolchain -exec mv {} .stash/")
     val () = put_int_v(b3, held)
     val () = bput_v(b3, "/ \\; && if [ -d .stash/")
     val () = put_int_v(b3, mark)
     val () = bput_v(b3, " ]; then find .stash/")
     val () = put_int_v(b3, mark)
-    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 ! -name .bats_valid -exec mv {} . \\; && rm -rf .stash/")
+    val () = bput_v(b3, " -mindepth 1 -maxdepth 1 ! -name .bats_valid ! -name .bats_toolchain -exec mv {} . \\; && rm -rf .stash/")
     val () = put_int_v(b3, mark)
-    val () = bput_v(b3, "/.bats_valid && rmdir .stash/")
+    val () = bput_v(b3, "/.bats_valid .stash/")
+    val () = put_int_v(b3, mark)
+    val () = bput_v(b3, "/.bats_toolchain && rmdir .stash/")
     val () = put_int_v(b3, mark)
     val () = bput_v(b3, "; fi")
     val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),

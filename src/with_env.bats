@@ -348,8 +348,10 @@ fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
   else hash_span(bv, p + 1, b, n, nmod(h * 31 + $AR.low_byte(read_byte(bv, p, n)), 1024))
 
 (* The entry (counted from 1) from entry k on along its chain whose name is
-   bv[a, b), or 0; at most fuel entries are looked at *)
-fun chain_find {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024}{a,b:nat | a <= b; b <= n}{f:nat} .<f>.
+   bv[a, b), or 0; at most fuel entries are looked at. The fuel is at most
+   1024, the table's entries (table_put passes the count it holds): a link
+   is always to an earlier entry, so a chain has no more entries than that. *)
+fun chain_find {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024}{a,b:nat | a <= b; b <= n}{f:nat | f <= 1024} .<f>.
   (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
    a: int a, b: int b, fuel: int f): [r:nat | r <= 1024] int r =
   if k <= 0 then 0
@@ -372,7 +374,7 @@ fn table_put {l:agz}{n:pos}{lt:agz}{e:nat | e <= n}{c:nat | c <= 1024}
   val bucket = hash_span(bv, x.name_at, x.name_to, n, 0)
   val slot = 5120 + bucket
   val head = table_read(tab, slot, 0, 1024)
-  val found = chain_find(bv, n, tab, head, x.name_at, x.name_to, 1100)
+  val found = chain_find(bv, n, tab, head, x.name_at, x.name_to, count)
 in
   if found > 0 then let
     val base = 5 * (found - 1)

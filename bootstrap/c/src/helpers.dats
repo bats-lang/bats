@@ -3215,6 +3215,37 @@ end
    Ropes: text of any length (a module's .sats and .dats)
    ============================================================ *)
 
+(* text-chunks (bats#368): a rope's text in arrays of the size it needs, not the builder's 524288 *)
+
+
+
+
+
+(* The chunks of r, oldest first: the last is the builder's own array *)
+
+
+implement rope_text(r) = let
+  fun rev {a,b:nat} .<a>. (cs: $B.rope_list(a), acc: text_list(b)): text_list(a + b) =
+    case+ cs of
+    | ~$B.rope_nil() => acc
+    | ~$B.rope_cons(x, n, tl) => rev(tl, text_cons(x, n, acc))
+in
+  case+ r of
+  | ~$B.Rope(cs, b) => let
+      val @(last, last_len) = $B.into_arr(b)
+    in rev(cs, text_cons(last, last_len, text_nil())) end
+end
+
+(* Frees the chunks *)
+
+
+implement text_list_free(cs) = let
+  fun loop {k:nat} .<k>. (cs: text_list(k)): void =
+    case+ cs of
+    | ~text_nil() => ()
+    | ~text_cons(x, _, tl) => let val () = $A.free<byte>(x) in loop(tl) end
+in loop(cs) end
+
 
 
 implement rput(r, v) = $B.rope_put(r, $AR.low_byte(v))
@@ -3240,10 +3271,10 @@ fun same_bytes {la,lb:agz}{na,nb:pos}{m:nat | m <= na; m <= nb}{j:nat | j <= m} 
   else false
 
 (* Whether the next bytes of fd are the texts of cs, in order *)
-fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
+fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !text_list(k)): bool =
   case+ cs of
-  | $B.rope_nil() => true
-  | @$B.rope_cons(a, n, tl) =>
+  | text_nil() => true
+  | @text_cons(a, n, tl) =>
     if n <= 0 then let
       val r = fd_has_chunks(fd, tl)
       prval () = fold@(cs)
@@ -3281,10 +3312,10 @@ implement file_has_rope (path_bv, pm, cs) =
   | ~$R.err(_) => false
 
 (* The texts of cs to fd, in order, the first error stopping it *)
-fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): write_result =
+fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !text_list(k)): write_result =
   case+ cs of
-  | $B.rope_nil() => Wrote()
-  | @$B.rope_cons(a, n, tl) => let
+  | text_nil() => Wrote()
+  | @text_cons(a, n, tl) => let
       val w = (if n <= 0 then Wrote() else let
           val @(fz, bv) = $A.freeze<byte>(a)
           val @(left, right) = $A.borrow_split<byte>(fz, bv, n)
