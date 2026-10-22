@@ -2735,18 +2735,18 @@ end
 #pub datatype heavy_command =
   | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
 
-(* A machine slot: held (its file, open and locked, and its number), the
-   parent's (a bats that holds one started this one, BATS_SLOT_HELD), or
-   none (BATS_SLOTS unset, or the slot could not be taken, which is
-   said) *)
+(* machine-slots: held, the parent's, none (unset or not a number) or refused (set, not takeable: nothing is run, bats#464) *)
 #pub datavtype machine_slot =
   | SlotHeld of ($F.fd, int)
   | SlotOfParent
   | SlotNone
+  | SlotRefused
 
 #pub fn machine_slot_take (heavy: heavy_command): machine_slot
 
 #pub fn machine_slot_release (slot: machine_slot): void
+
+#pub fn machine_slot_refused (slot: !machine_slot): bool
 
 (* BATS_SLOTS: 0 when it is not set or empty, -1 when it is not a number
    from 1 up, else the number, at most 64 *)
@@ -2926,17 +2926,30 @@ end
 
 fn slot_warn {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): void = let
   var m : $B.builder_v = $B.create()
-  val () = bput_v(m, "warning: ")
+  val () = bput_v(m, "error: ")
   val () = bput_v(m, what)
   val () = (if i >= 0 then slot_path(i, m) else slot_dir(m))
   val () = bput_v(m, why)
-  val () = bput_v(m, ", so this bats runs without a machine slot (BATS_SLOTS)\n")
+  val () = bput_v(m, ", so bats refuses to run without a machine slot (BATS_SLOTS): nothing is run\n")
 in prerr_builder(m) end
+
+(* machine-slots: a slot that cannot be taken is SlotRefused, never SlotNone, which runs without the cap (bats#464) *)
+fn slot_refuse {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): machine_slot = let
+  val () = slot_warn(what, i, why)
+in SlotRefused() end
 
 fn slot_held (fd: $F.fd, i: int, heavy: heavy_command): machine_slot = let
   val () = note_holder(i, heavy)
   val () = !g_slot_held := i + 1
 in SlotHeld(fd, i) end
+
+(* machine-slots: what trying a slot found becomes a slot; a busy slot after the wait, an unopenable or an unlockable one is refused (bats#464) *)
+fn slot_of_found (found: slot_found, i: int, heavy: heavy_command): machine_slot =
+  case+ found of
+  | ~SlotTaken(fd) => slot_held(fd, i, heavy)
+  | ~SlotBusy() => slot_refuse("cannot take ", i, " (its lock was not granted)")
+  | ~SlotUnopenable() => slot_refuse("cannot open ", i, "")
+  | ~SlotUnlockable() => slot_refuse("cannot lock ", i, " (its file system has no locks)")
 
 implement machine_slot_take (heavy) = let
   val n0 = (case+ heavy of NotHeavy() => 0 | _ => slots_wanted()): int
@@ -2952,21 +2965,15 @@ in
     val made = run_mkdir(d)
     val n = g1ofg0(n0)
   in
-    if made <> 0 then let
-      val () = slot_warn("cannot make the slots' directory ", ~1, "")
-    in SlotNone() end
+    if made <> 0 then slot_refuse("cannot make the slots' directory ", ~1, "")
     else if n < 1 then SlotNone()
     else let
       val @(found, i) = slot_free(0, n)
     in
       case+ found of
-      | ~SlotTaken(fd) => slot_held(fd, i, heavy)
-      | ~SlotUnopenable() => let
-          val () = slot_warn("cannot open ", i, "")
-        in SlotNone() end
-      | ~SlotUnlockable() => let
-          val () = slot_warn("cannot lock ", i, " (its file system has no locks)")
-        in SlotNone() end
+      | ~SlotTaken(fd) => slot_of_found(SlotTaken(fd), i, heavy)
+      | ~SlotUnopenable() => slot_of_found(SlotUnopenable(), i, heavy)
+      | ~SlotUnlockable() => slot_of_found(SlotUnlockable(), i, heavy)
       | ~SlotBusy() => let
           (* With more than one slot, a bats that waits waits for slot
              0, though another may be freed first, as gen-pwa test does *)
@@ -2987,15 +2994,7 @@ in
               val () = bput_v(m, ")\n")
             in prerr_builder(m) end)
         in
-          case+ slot_try(0, $F.LockWaits()) of
-          | ~SlotTaken(fd) => slot_held(fd, 0, heavy)
-          | ~SlotBusy() => SlotNone()
-          | ~SlotUnopenable() => let
-              val () = slot_warn("cannot open ", 0, "")
-            in SlotNone() end
-          | ~SlotUnlockable() => let
-              val () = slot_warn("cannot lock ", 0, " (its file system has no locks)")
-            in SlotNone() end
+          slot_of_found(slot_try(0, $F.LockWaits()), 0, heavy)
         end
     end
   end
@@ -3009,6 +3008,14 @@ implement machine_slot_release (slot) =
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~SlotOfParent() => ()
   | ~SlotNone() => ()
+  | ~SlotRefused() => ()
+
+implement machine_slot_refused (slot) =
+  case+ slot of
+  | SlotRefused() => true
+  | SlotHeld(_, _) => false
+  | SlotOfParent() => false
+  | SlotNone() => false
 
 (* ============================================================
    The project's lock (bats-lang/bats#250)
@@ -3076,6 +3083,31 @@ implement project_lock_release (lk) =
       val () = machine_slot_release(slot)
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~ProjectUnlocked(slot) => machine_slot_release(slot)
+
+(* machine-slots: whether lk's slot was refused; the command is not run and bats exits 1 (bats#464) *)
+#pub fn project_lock_refused (lk: !project_lock): bool
+
+implement project_lock_refused (lk) =
+  case+ lk of
+  | ProjectLocked(_, slot) => machine_slot_refused(slot)
+  | ProjectUnlocked(slot) => machine_slot_refused(slot)
+
+(* machine-slots: each way a slot is not taken is refused through slot_of_found, the mapping bats#464 tests *)
+$UNITTEST.run begin
+fn slot_found_is_refused (found: slot_found): bool = let
+  val slot = slot_of_found(found, 0, HeavyCheck())
+  val refused = machine_slot_refused(slot)
+  val () = machine_slot_release(slot)
+in refused end
+fn test_unlockable_slot_is_refused (): bool = slot_found_is_refused(SlotUnlockable())
+fn test_unopenable_slot_is_refused (): bool = slot_found_is_refused(SlotUnopenable())
+fn test_busy_slot_after_the_wait_is_refused (): bool = slot_found_is_refused(SlotBusy())
+fn test_no_slot_is_not_refused (): bool = let
+  val slot = SlotNone()
+  val refused = machine_slot_refused(slot)
+  val () = machine_slot_release(slot)
+in (if refused then false else true) end
+end
 
 (* ============================================================
    File I/O

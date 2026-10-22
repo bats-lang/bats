@@ -2749,17 +2749,24 @@ datatype heavy_command =
   | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
 
 
-
-
-
 datavtype machine_slot =
   | SlotHeld of ($F.fd, int)
   | SlotOfParent
   | SlotNone
+  | SlotRefused
 
 fn machine_slot_take (heavy: heavy_command): machine_slot
 
 fn machine_slot_release (slot: machine_slot): void
+
+fn machine_slot_refused (slot: !machine_slot): bool
+
+
+
+
+
+
+
 
 
 
@@ -3067,6 +3074,31 @@ fn project_lock_release (lk: project_lock): void
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn project_lock_refused (lk: !project_lock): bool
 
 
 
