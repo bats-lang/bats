@@ -286,12 +286,56 @@ fun write_content_text
 
 
 
+
+
 absvtype arena(a:t@ype, l:addr, max:int, used:int, k:int)
 
 
 datavtype arena_made(a:t@ype, max:int) =
   | {l:agz} arena_some(a, max) of arena(a, l, max, 0, 0)
   | arena_none(a, max) of ()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dataprop ARENA_CLASS(int) =
+  | Arena64KiB(65536)
+  | Arena256KiB(262144)
+  | Arena1MiB(1048576)
+  | Arena4MiB(4194304)
+  | Arena16MiB(16777216)
+
+
+stadef ARENA_MOST = 16777216
+
+
+
+datavtype arena_fit(n:int) =
+  | {max:int | n <= max} arena_fits(n) of (ARENA_CLASS(max) | int max)
+  | arena_too_large(n) of ()
+
+fn arena_class_of {n:pos} (n: int n): arena_fit(n)
+
+
+fun{a:t@ype}
+arena_create_class
+  {max:int}
+  (class: ARENA_CLASS(max) | max: int max)
+  : arena_made(a, max)
+
+
 
 fun{a:t@ype}
 arena_create
@@ -513,6 +557,38 @@ fun cborrow_view_drop {l:agz}{n:nat}{cs:cells}{k:pos}
 
 fun cborrow_get {l:agz}{n,i:nat | i < n}{cs:cells} (b: !cborrow(l, n, cs), i: int i)
   : [v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

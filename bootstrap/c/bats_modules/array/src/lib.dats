@@ -285,8 +285,10 @@ staload "./lib.sats"
    and writes like any array, free does not take it, and only
    arena_return gives it back. An arena is destroyed when no piece is
    outstanding. Pieces are never reused, so every piece is zero bytes;
-   as with alloc, arena_create has instances only for element types
-   where zero bytes are a valid value. *)
+   as with alloc, arena_create and arena_create_class have instances only
+   for element types where zero bytes are a valid value. An arena's size
+   is one of the classes (ARENA_CLASS) when made by arena_create_class
+   (arena class). *)
 
 
 (* The region could not be had: arena_none, never a null arena. *)
@@ -294,6 +296,48 @@ staload "./lib.sats"
 
 
 
+(* The sizes an arena made by arena_create_class may have (the deprecated
+   arena_create takes any size and has none of this), counted in elements of
+   its type (not bytes): five constants fixed at compile time, so a freed
+   region is the size of the next one asked for, where regions of any size
+   would pile up unused (the allocator's free list, bats-lang/bats#241, does
+   not use these classes yet). Each constructor is indexed by a literal:
+   a size computed at run time, or a constant that is not one of these,
+   has no proof, and arena_create_class does not take it. Powers of 4, from
+   65536 to 16777216 elements: a piece above the smallest class fills
+   more than a quarter of its arena. For byte arenas that is 64 KiB to
+   16 MiB; quire's page arena is PAGE_BYTES, 4 MiB (src/pages.bats), and
+   its sync file, the largest it holds whole, is SYNC_MAX_BYTES, 16 MiB
+   (src/sync.bats). For another element type the class bounds the count
+   only, and the byte size is the class times the element size, so the
+   byte figures do not hold there. *)
+
+
+
+
+
+
+
+(* The largest class *)
+
+
+(* The smallest class that holds n elements, or none: n is over
+   ARENA_MOST *)
+
+
+
+
+
+
+(* A region of max elements, max one of the classes (arena class) *)
+
+
+
+
+
+
+(* Deprecated, kept beside arena_create_class so no dependent breaks
+   (arena class, array#67 removes it): a region of any max up to 268435456 *)
 
 
 
@@ -545,8 +589,11 @@ _arr_copy_at(void *dst, int off, void *src, int len) {
 }
 /* An arena: a zeroed region of max elements of size sz, of which used
    are handed out. Pieces are taken in order and never reused. int
-   arithmetic (the wasm runtime has no size_t): max <= 2^28 and sz <= 4
-   keep max * sz within int. */
+   arithmetic (the wasm runtime has no size_t): max <= 2^28 (what the
+   deprecated arena_create passes; arena_create_class passes at most
+   ARENA_MOST = 2^24) and sz <= 4 (byte, char, bool, int, uint, Int) keep
+   max * sz and used * sz within int (2^28 * 4 = 2^30). Nothing here relies on
+   the class bound. */
 typedef struct { char *base; int used; int sz; } _arr_arena_t;
 
 static inline void *
@@ -839,6 +886,24 @@ extern fun _arena_destroy_impl
   (arena: ptr): void = "mac#_arr_arena_destroy"
 
 
+(* Every class is positive and at most ARENA_MOST; private, used only by
+   arena_create_class below (proof, no run-time content). *)
+prfn _arena_class_bounds {max:int} (class: ARENA_CLASS(max)): [0 < max; max <= ARENA_MOST] void =
+  case+ class of
+  | Arena64KiB() => ()
+  | Arena256KiB() => ()
+  | Arena1MiB() => ()
+  | Arena4MiB() => ()
+  | Arena16MiB() => ()
+
+implement arena_class_of (n) =
+  if n <= 65536 then arena_fits(Arena64KiB() | 65536)
+  else if n <= 262144 then arena_fits(Arena256KiB() | 262144)
+  else if n <= 1048576 then arena_fits(Arena1MiB() | 1048576)
+  else if n <= 4194304 then arena_fits(Arena4MiB() | 4194304)
+  else if n <= 16777216 then arena_fits(Arena16MiB() | 16777216)
+  else arena_too_large()
+
 fn{a:t@ype} _arena_create_zeroed {max:pos} (max: int max): arena_made(a, max) = let
   val p = _arena_create_impl(max, sz2i(sizeof<a>))
 in
@@ -846,6 +911,20 @@ in
   else arena_none()
 end
 
+implement arena_create_class<byte>(class | max) = let
+  prval () = _arena_class_bounds(class) in _arena_create_zeroed<byte>(max) end
+implement arena_create_class<char>(class | max) = let
+  prval () = _arena_class_bounds(class) in _arena_create_zeroed<char>(max) end
+implement arena_create_class<bool>(class | max) = let
+  prval () = _arena_class_bounds(class) in _arena_create_zeroed<bool>(max) end
+implement arena_create_class<int>(class | max) = let
+  prval () = _arena_class_bounds(class) in _arena_create_zeroed<int>(max) end
+implement arena_create_class<uint>(class | max) = let
+  prval () = _arena_class_bounds(class) in _arena_create_zeroed<uint>(max) end
+implement arena_create_class<Int>(class | max) = let
+  prval () = _arena_class_bounds(class) in _arena_create_zeroed<Int>(max) end
+
+(* Deprecated form (arena class, array#67) *)
 implement arena_create<byte>(max) = _arena_create_zeroed<byte>(max)
 implement arena_create<char>(max) = _arena_create_zeroed<char>(max)
 implement arena_create<bool>(max) = _arena_create_zeroed<bool>(max)

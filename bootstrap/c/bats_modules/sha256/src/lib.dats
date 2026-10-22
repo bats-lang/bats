@@ -208,9 +208,9 @@ in (MAJ_mk(pah, pal, pbh, pbl, pch, pcl, psh, psl, prh, prl) | @(rh, rl)) end
 
 
 implement big_sigma_0_w32 (x) = let
-  val (pa | a) = $AR.word32_rotr(x, 2)
-  val (pb | b) = $AR.word32_rotr(x, 13)
-  val (pc | c) = $AR.word32_rotr(x, 22)
+  val (pa | a) = $AR.word32_rotr_inline(x, 2)
+  val (pb | b) = $AR.word32_rotr_inline(x, 13)
+  val (pc | c) = $AR.word32_rotr_inline(x, 22)
   val (psh, psl | s) = $AR.word32_xor(a, b)
   val (prh, prl | r) = $AR.word32_xor(s, c)
 in (BIG_SIGMA_0_mk(pa, pb, pc, psh, psl, prh, prl) | r) end
@@ -231,9 +231,9 @@ in (BIG_SIGMA_0_mk(pa, pb, pc, psh, psl, prh, prl) | @(rh, rl)) end
 
 
 implement big_sigma_1_w32 (x) = let
-  val (pa | a) = $AR.word32_rotr(x, 6)
-  val (pb | b) = $AR.word32_rotr(x, 11)
-  val (pc | c) = $AR.word32_rotr(x, 25)
+  val (pa | a) = $AR.word32_rotr_inline(x, 6)
+  val (pb | b) = $AR.word32_rotr_inline(x, 11)
+  val (pc | c) = $AR.word32_rotr_inline(x, 25)
   val (psh, psl | s) = $AR.word32_xor(a, b)
   val (prh, prl | r) = $AR.word32_xor(s, c)
 in (BIG_SIGMA_1_mk(pa, pb, pc, psh, psl, prh, prl) | r) end
@@ -254,8 +254,8 @@ in (BIG_SIGMA_1_mk(pa, pb, pc, psh, psl, prh, prl) | @(rh, rl)) end
 
 
 implement small_sigma_0_w32 (x) = let
-  val (pa | a) = $AR.word32_rotr(x, 7)
-  val (pb | b) = $AR.word32_rotr(x, 18)
+  val (pa | a) = $AR.word32_rotr_inline(x, 7)
+  val (pb | b) = $AR.word32_rotr_inline(x, 18)
   val (pc | c) = $AR.word32_shr(x, 3)
   val (psh, psl | s) = $AR.word32_xor(a, b)
   val (prh, prl | r) = $AR.word32_xor(s, c)
@@ -277,8 +277,8 @@ in (SMALL_SIGMA_0_mk(pa, pb, pc, psh, psl, prh, prl) | @(rh, rl)) end
 
 
 implement small_sigma_1_w32 (x) = let
-  val (pa | a) = $AR.word32_rotr(x, 17)
-  val (pb | b) = $AR.word32_rotr(x, 19)
+  val (pa | a) = $AR.word32_rotr_inline(x, 17)
+  val (pb | b) = $AR.word32_rotr_inline(x, 19)
   val (pc | c) = $AR.word32_shr(x, 10)
   val (psh, psl | s) = $AR.word32_xor(a, b)
   val (prh, prl | r) = $AR.word32_xor(s, c)
@@ -331,8 +331,8 @@ in (SMALL_SIGMA_1_mk(pa, pb, pc, psh, psl, prh, prl) | @(rh, rl)) end
 
 
 implement word_get_w32 {l}{n,at}{cs} (cells, at) = let
-  val (first, second, third, fourth | @(b0, b1, b2, b3)) = $A.barr_get_be32(cells, at)
-  val word_value = $AR.word32_pack(b0, b1, b2, b3)
+  val (first, second, third, fourth | @(b0, b1, b2, b3)) = $A.barr_get_be32_inline(cells, at)
+  val word_value = $AR.word32_pack_inline(b0, b1, b2, b3)
 in (WORD_AT_mk(first, second, third, fourth) | word_value) end
 
 (* Deprecated (sha256#48): word_get is kept as published, with the two 16-bit halves as ints; use word_get_w32. It is removed in a later version, after one published version with both. *)
@@ -341,10 +341,10 @@ in (WORD_AT_mk(first, second, third, fourth) | word_value) end
 
 
 implement word_get {l}{n,at}{cs} (cells, at) = let
-  val (first | b0) = $A.barr_get(cells, at)
-  val (second | b1) = $A.barr_get(cells, at + 1)
-  val (third | b2) = $A.barr_get(cells, at + 2)
-  val (fourth | b3) = $A.barr_get(cells, at + 3)
+  val (first | b0) = $A.barr_get_inline(cells, at)
+  val (second | b1) = $A.barr_get_inline(cells, at + 1)
+  val (third | b2) = $A.barr_get_inline(cells, at + 2)
+  val (fourth | b3) = $A.barr_get_inline(cells, at + 3)
 in (WORD_AT_mk(first, second, third, fourth) | @(256 * b0 + b1, 256 * b2 + b3)) end
 
 (* The four cells from `at` set to the word, with the proof that they are *)
@@ -353,18 +353,18 @@ in (WORD_AT_mk(first, second, third, fourth) | @(256 * b0 + b1, 256 * b2 + b3)) 
 
 
 implement word_set_w32 {l}{n,at}{cs}{high,low} (cells, at, word_value) = let
-  val (byte0 | b0) = $AR.word32_byte(word_value, 0)
-  val (byte1 | b1) = $AR.word32_byte(word_value, 1)
-  val (byte2 | b2) = $AR.word32_byte(word_value, 2)
-  val (byte3 | b3) = $AR.word32_byte(word_value, 3)
+  val (byte0 | b0) = $AR.word32_byte_inline(word_value, 0)
+  val (byte1 | b1) = $AR.word32_byte_inline(word_value, 1)
+  val (byte2 | b2) = $AR.word32_byte_inline(word_value, 2)
+  val (byte3 | b3) = $AR.word32_byte_inline(word_value, 3)
   prval $AR.WORD_BYTE_0() = byte0
   prval $AR.WORD_BYTE_1() = byte1
   prval $AR.WORD_BYTE_2() = byte2
   prval $AR.WORD_BYTE_3() = byte3
-  val (first | cells) = $A.barr_set(cells, at, b0)
-  val (second | cells) = $A.barr_set(cells, at + 1, b1)
-  val (third | cells) = $A.barr_set(cells, at + 2, b2)
-  val (fourth | cells) = $A.barr_set(cells, at + 3, b3)
+  val (first | cells) = $A.barr_set_inline(cells, at, b0)
+  val (second | cells) = $A.barr_set_inline(cells, at + 1, b1)
+  val (third | cells) = $A.barr_set_inline(cells, at + 2, b2)
+  val (fourth | cells) = $A.barr_set_inline(cells, at + 3, b3)
 in (WORD_SET_mk(first, second, third, fourth) | cells) end
 
 (* Deprecated (sha256#48): word_set is kept as published, with the two 16-bit halves as ints; use word_set_w32. It is removed in a later version, after one published version with both. *)
@@ -377,10 +377,10 @@ implement word_set {l}{n,at}{cs}{high,low} (cells, at, high, low) = let
   val b1 = high - 256 * b0
   val b2 = low / 256
   val b3 = low - 256 * b2
-  val (first | cells) = $A.barr_set(cells, at, b0)
-  val (second | cells) = $A.barr_set(cells, at + 1, b1)
-  val (third | cells) = $A.barr_set(cells, at + 2, b2)
-  val (fourth | cells) = $A.barr_set(cells, at + 3, b3)
+  val (first | cells) = $A.barr_set_inline(cells, at, b0)
+  val (second | cells) = $A.barr_set_inline(cells, at + 1, b1)
+  val (third | cells) = $A.barr_set_inline(cells, at + 2, b2)
+  val (fourth | cells) = $A.barr_set_inline(cells, at + 3, b3)
 in (WORD_SET_mk(first, second, third, fourth) | cells) end
 
 (* What was set is the word that is read there afterwards *)
@@ -564,7 +564,7 @@ fun _schedule_sha1_expand {lw:agz}{words:$A.cells}{msg:$A.cells}{at:nat}{t:nat |
     val (xor1_high, xor1_low | x1_word) = $AR.word32_xor(back3_word, back8_word)
     val (xor2_high, xor2_low | x2_word) = $AR.word32_xor(x1_word, back14_word)
     val (xor3_high, xor3_low | x3_word) = $AR.word32_xor(x2_word, back16_word)
-    val (turned | word_value) = $AR.word32_rotr(x3_word, 31)
+    val (turned | word_value) = $AR.word32_rotr_inline(x3_word, 31)
     val (set | array) = word_set_w32(array, 4 * t, word_value)
     prval kept = schedule_array_frame(set, listed)
     prval specified = SCHEDULE_sha1(back3, back8, back14, back16, xor1_high, xor1_low, xor2_high, xor2_low, xor3_high, xor3_low, turned)
@@ -895,196 +895,196 @@ in (FIVE_AT_mk(stored0, stored1, stored2, stored3, stored4) | cells) end
 
 
 implement sha256_k_w32 {t} (t) =
-  if $AR.lt_g1(t, 32) then
-    if $AR.lt_g1(t, 16) then
-      if $AR.lt_g1(t, 8) then
-        if $AR.lt_g1(t, 4) then
-          if $AR.lt_g1(t, 2) then
-            if $AR.lt_g1(t, 1) then
-              (SHA256_K_0() | $AR.word32_pack(0x42, 0x8a, 0x2f, 0x98))
-            else
-              (SHA256_K_1() | $AR.word32_pack(0x71, 0x37, 0x44, 0x91))
-          else
-            if $AR.lt_g1(t, 3) then
-              (SHA256_K_2() | $AR.word32_pack(0xb5, 0xc0, 0xfb, 0xcf))
-            else
-              (SHA256_K_3() | $AR.word32_pack(0xe9, 0xb5, 0xdb, 0xa5))
-        else
-          if $AR.lt_g1(t, 6) then
-            if $AR.lt_g1(t, 5) then
-              (SHA256_K_4() | $AR.word32_pack(0x39, 0x56, 0xc2, 0x5b))
-            else
-              (SHA256_K_5() | $AR.word32_pack(0x59, 0xf1, 0x11, 0xf1))
-          else
-            if $AR.lt_g1(t, 7) then
-              (SHA256_K_6() | $AR.word32_pack(0x92, 0x3f, 0x82, 0xa4))
-            else
-              (SHA256_K_7() | $AR.word32_pack(0xab, 0x1c, 0x5e, 0xd5))
-      else
-        if $AR.lt_g1(t, 12) then
-          if $AR.lt_g1(t, 10) then
-            if $AR.lt_g1(t, 9) then
-              (SHA256_K_8() | $AR.word32_pack(0xd8, 0x07, 0xaa, 0x98))
-            else
-              (SHA256_K_9() | $AR.word32_pack(0x12, 0x83, 0x5b, 0x01))
-          else
-            if $AR.lt_g1(t, 11) then
-              (SHA256_K_10() | $AR.word32_pack(0x24, 0x31, 0x85, 0xbe))
-            else
-              (SHA256_K_11() | $AR.word32_pack(0x55, 0x0c, 0x7d, 0xc3))
-        else
-          if $AR.lt_g1(t, 14) then
-            if $AR.lt_g1(t, 13) then
-              (SHA256_K_12() | $AR.word32_pack(0x72, 0xbe, 0x5d, 0x74))
-            else
-              (SHA256_K_13() | $AR.word32_pack(0x80, 0xde, 0xb1, 0xfe))
-          else
-            if $AR.lt_g1(t, 15) then
-              (SHA256_K_14() | $AR.word32_pack(0x9b, 0xdc, 0x06, 0xa7))
-            else
-              (SHA256_K_15() | $AR.word32_pack(0xc1, 0x9b, 0xf1, 0x74))
-    else
-      if $AR.lt_g1(t, 24) then
-        if $AR.lt_g1(t, 20) then
-          if $AR.lt_g1(t, 18) then
-            if $AR.lt_g1(t, 17) then
-              (SHA256_K_16() | $AR.word32_pack(0xe4, 0x9b, 0x69, 0xc1))
-            else
-              (SHA256_K_17() | $AR.word32_pack(0xef, 0xbe, 0x47, 0x86))
-          else
-            if $AR.lt_g1(t, 19) then
-              (SHA256_K_18() | $AR.word32_pack(0x0f, 0xc1, 0x9d, 0xc6))
-            else
-              (SHA256_K_19() | $AR.word32_pack(0x24, 0x0c, 0xa1, 0xcc))
-        else
-          if $AR.lt_g1(t, 22) then
-            if $AR.lt_g1(t, 21) then
-              (SHA256_K_20() | $AR.word32_pack(0x2d, 0xe9, 0x2c, 0x6f))
-            else
-              (SHA256_K_21() | $AR.word32_pack(0x4a, 0x74, 0x84, 0xaa))
-          else
-            if $AR.lt_g1(t, 23) then
-              (SHA256_K_22() | $AR.word32_pack(0x5c, 0xb0, 0xa9, 0xdc))
-            else
-              (SHA256_K_23() | $AR.word32_pack(0x76, 0xf9, 0x88, 0xda))
-      else
-        if $AR.lt_g1(t, 28) then
-          if $AR.lt_g1(t, 26) then
-            if $AR.lt_g1(t, 25) then
-              (SHA256_K_24() | $AR.word32_pack(0x98, 0x3e, 0x51, 0x52))
-            else
-              (SHA256_K_25() | $AR.word32_pack(0xa8, 0x31, 0xc6, 0x6d))
-          else
-            if $AR.lt_g1(t, 27) then
-              (SHA256_K_26() | $AR.word32_pack(0xb0, 0x03, 0x27, 0xc8))
-            else
-              (SHA256_K_27() | $AR.word32_pack(0xbf, 0x59, 0x7f, 0xc7))
-        else
-          if $AR.lt_g1(t, 30) then
-            if $AR.lt_g1(t, 29) then
-              (SHA256_K_28() | $AR.word32_pack(0xc6, 0xe0, 0x0b, 0xf3))
-            else
-              (SHA256_K_29() | $AR.word32_pack(0xd5, 0xa7, 0x91, 0x47))
-          else
-            if $AR.lt_g1(t, 31) then
-              (SHA256_K_30() | $AR.word32_pack(0x06, 0xca, 0x63, 0x51))
-            else
-              (SHA256_K_31() | $AR.word32_pack(0x14, 0x29, 0x29, 0x67))
+  if $AR.eq_g1(t, 0) then
+    (SHA256_K_0() | $AR.word32_pack_inline(0x42, 0x8a, 0x2f, 0x98))
   else
-    if $AR.lt_g1(t, 48) then
-      if $AR.lt_g1(t, 40) then
-        if $AR.lt_g1(t, 36) then
-          if $AR.lt_g1(t, 34) then
-            if $AR.lt_g1(t, 33) then
-              (SHA256_K_32() | $AR.word32_pack(0x27, 0xb7, 0x0a, 0x85))
-            else
-              (SHA256_K_33() | $AR.word32_pack(0x2e, 0x1b, 0x21, 0x38))
-          else
-            if $AR.lt_g1(t, 35) then
-              (SHA256_K_34() | $AR.word32_pack(0x4d, 0x2c, 0x6d, 0xfc))
-            else
-              (SHA256_K_35() | $AR.word32_pack(0x53, 0x38, 0x0d, 0x13))
-        else
-          if $AR.lt_g1(t, 38) then
-            if $AR.lt_g1(t, 37) then
-              (SHA256_K_36() | $AR.word32_pack(0x65, 0x0a, 0x73, 0x54))
-            else
-              (SHA256_K_37() | $AR.word32_pack(0x76, 0x6a, 0x0a, 0xbb))
-          else
-            if $AR.lt_g1(t, 39) then
-              (SHA256_K_38() | $AR.word32_pack(0x81, 0xc2, 0xc9, 0x2e))
-            else
-              (SHA256_K_39() | $AR.word32_pack(0x92, 0x72, 0x2c, 0x85))
-      else
-        if $AR.lt_g1(t, 44) then
-          if $AR.lt_g1(t, 42) then
-            if $AR.lt_g1(t, 41) then
-              (SHA256_K_40() | $AR.word32_pack(0xa2, 0xbf, 0xe8, 0xa1))
-            else
-              (SHA256_K_41() | $AR.word32_pack(0xa8, 0x1a, 0x66, 0x4b))
-          else
-            if $AR.lt_g1(t, 43) then
-              (SHA256_K_42() | $AR.word32_pack(0xc2, 0x4b, 0x8b, 0x70))
-            else
-              (SHA256_K_43() | $AR.word32_pack(0xc7, 0x6c, 0x51, 0xa3))
-        else
-          if $AR.lt_g1(t, 46) then
-            if $AR.lt_g1(t, 45) then
-              (SHA256_K_44() | $AR.word32_pack(0xd1, 0x92, 0xe8, 0x19))
-            else
-              (SHA256_K_45() | $AR.word32_pack(0xd6, 0x99, 0x06, 0x24))
-          else
-            if $AR.lt_g1(t, 47) then
-              (SHA256_K_46() | $AR.word32_pack(0xf4, 0x0e, 0x35, 0x85))
-            else
-              (SHA256_K_47() | $AR.word32_pack(0x10, 0x6a, 0xa0, 0x70))
-    else
-      if $AR.lt_g1(t, 56) then
-        if $AR.lt_g1(t, 52) then
-          if $AR.lt_g1(t, 50) then
-            if $AR.lt_g1(t, 49) then
-              (SHA256_K_48() | $AR.word32_pack(0x19, 0xa4, 0xc1, 0x16))
-            else
-              (SHA256_K_49() | $AR.word32_pack(0x1e, 0x37, 0x6c, 0x08))
-          else
-            if $AR.lt_g1(t, 51) then
-              (SHA256_K_50() | $AR.word32_pack(0x27, 0x48, 0x77, 0x4c))
-            else
-              (SHA256_K_51() | $AR.word32_pack(0x34, 0xb0, 0xbc, 0xb5))
-        else
-          if $AR.lt_g1(t, 54) then
-            if $AR.lt_g1(t, 53) then
-              (SHA256_K_52() | $AR.word32_pack(0x39, 0x1c, 0x0c, 0xb3))
-            else
-              (SHA256_K_53() | $AR.word32_pack(0x4e, 0xd8, 0xaa, 0x4a))
-          else
-            if $AR.lt_g1(t, 55) then
-              (SHA256_K_54() | $AR.word32_pack(0x5b, 0x9c, 0xca, 0x4f))
-            else
-              (SHA256_K_55() | $AR.word32_pack(0x68, 0x2e, 0x6f, 0xf3))
-      else
-        if $AR.lt_g1(t, 60) then
-          if $AR.lt_g1(t, 58) then
-            if $AR.lt_g1(t, 57) then
-              (SHA256_K_56() | $AR.word32_pack(0x74, 0x8f, 0x82, 0xee))
-            else
-              (SHA256_K_57() | $AR.word32_pack(0x78, 0xa5, 0x63, 0x6f))
-          else
-            if $AR.lt_g1(t, 59) then
-              (SHA256_K_58() | $AR.word32_pack(0x84, 0xc8, 0x78, 0x14))
-            else
-              (SHA256_K_59() | $AR.word32_pack(0x8c, 0xc7, 0x02, 0x08))
-        else
-          if $AR.lt_g1(t, 62) then
-            if $AR.lt_g1(t, 61) then
-              (SHA256_K_60() | $AR.word32_pack(0x90, 0xbe, 0xff, 0xfa))
-            else
-              (SHA256_K_61() | $AR.word32_pack(0xa4, 0x50, 0x6c, 0xeb))
-          else
-            if $AR.lt_g1(t, 63) then
-              (SHA256_K_62() | $AR.word32_pack(0xbe, 0xf9, 0xa3, 0xf7))
-            else
-              (SHA256_K_63() | $AR.word32_pack(0xc6, 0x71, 0x78, 0xf2))
+  if $AR.eq_g1(t, 1) then
+    (SHA256_K_1() | $AR.word32_pack_inline(0x71, 0x37, 0x44, 0x91))
+  else
+  if $AR.eq_g1(t, 2) then
+    (SHA256_K_2() | $AR.word32_pack_inline(0xb5, 0xc0, 0xfb, 0xcf))
+  else
+  if $AR.eq_g1(t, 3) then
+    (SHA256_K_3() | $AR.word32_pack_inline(0xe9, 0xb5, 0xdb, 0xa5))
+  else
+  if $AR.eq_g1(t, 4) then
+    (SHA256_K_4() | $AR.word32_pack_inline(0x39, 0x56, 0xc2, 0x5b))
+  else
+  if $AR.eq_g1(t, 5) then
+    (SHA256_K_5() | $AR.word32_pack_inline(0x59, 0xf1, 0x11, 0xf1))
+  else
+  if $AR.eq_g1(t, 6) then
+    (SHA256_K_6() | $AR.word32_pack_inline(0x92, 0x3f, 0x82, 0xa4))
+  else
+  if $AR.eq_g1(t, 7) then
+    (SHA256_K_7() | $AR.word32_pack_inline(0xab, 0x1c, 0x5e, 0xd5))
+  else
+  if $AR.eq_g1(t, 8) then
+    (SHA256_K_8() | $AR.word32_pack_inline(0xd8, 0x07, 0xaa, 0x98))
+  else
+  if $AR.eq_g1(t, 9) then
+    (SHA256_K_9() | $AR.word32_pack_inline(0x12, 0x83, 0x5b, 0x01))
+  else
+  if $AR.eq_g1(t, 10) then
+    (SHA256_K_10() | $AR.word32_pack_inline(0x24, 0x31, 0x85, 0xbe))
+  else
+  if $AR.eq_g1(t, 11) then
+    (SHA256_K_11() | $AR.word32_pack_inline(0x55, 0x0c, 0x7d, 0xc3))
+  else
+  if $AR.eq_g1(t, 12) then
+    (SHA256_K_12() | $AR.word32_pack_inline(0x72, 0xbe, 0x5d, 0x74))
+  else
+  if $AR.eq_g1(t, 13) then
+    (SHA256_K_13() | $AR.word32_pack_inline(0x80, 0xde, 0xb1, 0xfe))
+  else
+  if $AR.eq_g1(t, 14) then
+    (SHA256_K_14() | $AR.word32_pack_inline(0x9b, 0xdc, 0x06, 0xa7))
+  else
+  if $AR.eq_g1(t, 15) then
+    (SHA256_K_15() | $AR.word32_pack_inline(0xc1, 0x9b, 0xf1, 0x74))
+  else
+  if $AR.eq_g1(t, 16) then
+    (SHA256_K_16() | $AR.word32_pack_inline(0xe4, 0x9b, 0x69, 0xc1))
+  else
+  if $AR.eq_g1(t, 17) then
+    (SHA256_K_17() | $AR.word32_pack_inline(0xef, 0xbe, 0x47, 0x86))
+  else
+  if $AR.eq_g1(t, 18) then
+    (SHA256_K_18() | $AR.word32_pack_inline(0x0f, 0xc1, 0x9d, 0xc6))
+  else
+  if $AR.eq_g1(t, 19) then
+    (SHA256_K_19() | $AR.word32_pack_inline(0x24, 0x0c, 0xa1, 0xcc))
+  else
+  if $AR.eq_g1(t, 20) then
+    (SHA256_K_20() | $AR.word32_pack_inline(0x2d, 0xe9, 0x2c, 0x6f))
+  else
+  if $AR.eq_g1(t, 21) then
+    (SHA256_K_21() | $AR.word32_pack_inline(0x4a, 0x74, 0x84, 0xaa))
+  else
+  if $AR.eq_g1(t, 22) then
+    (SHA256_K_22() | $AR.word32_pack_inline(0x5c, 0xb0, 0xa9, 0xdc))
+  else
+  if $AR.eq_g1(t, 23) then
+    (SHA256_K_23() | $AR.word32_pack_inline(0x76, 0xf9, 0x88, 0xda))
+  else
+  if $AR.eq_g1(t, 24) then
+    (SHA256_K_24() | $AR.word32_pack_inline(0x98, 0x3e, 0x51, 0x52))
+  else
+  if $AR.eq_g1(t, 25) then
+    (SHA256_K_25() | $AR.word32_pack_inline(0xa8, 0x31, 0xc6, 0x6d))
+  else
+  if $AR.eq_g1(t, 26) then
+    (SHA256_K_26() | $AR.word32_pack_inline(0xb0, 0x03, 0x27, 0xc8))
+  else
+  if $AR.eq_g1(t, 27) then
+    (SHA256_K_27() | $AR.word32_pack_inline(0xbf, 0x59, 0x7f, 0xc7))
+  else
+  if $AR.eq_g1(t, 28) then
+    (SHA256_K_28() | $AR.word32_pack_inline(0xc6, 0xe0, 0x0b, 0xf3))
+  else
+  if $AR.eq_g1(t, 29) then
+    (SHA256_K_29() | $AR.word32_pack_inline(0xd5, 0xa7, 0x91, 0x47))
+  else
+  if $AR.eq_g1(t, 30) then
+    (SHA256_K_30() | $AR.word32_pack_inline(0x06, 0xca, 0x63, 0x51))
+  else
+  if $AR.eq_g1(t, 31) then
+    (SHA256_K_31() | $AR.word32_pack_inline(0x14, 0x29, 0x29, 0x67))
+  else
+  if $AR.eq_g1(t, 32) then
+    (SHA256_K_32() | $AR.word32_pack_inline(0x27, 0xb7, 0x0a, 0x85))
+  else
+  if $AR.eq_g1(t, 33) then
+    (SHA256_K_33() | $AR.word32_pack_inline(0x2e, 0x1b, 0x21, 0x38))
+  else
+  if $AR.eq_g1(t, 34) then
+    (SHA256_K_34() | $AR.word32_pack_inline(0x4d, 0x2c, 0x6d, 0xfc))
+  else
+  if $AR.eq_g1(t, 35) then
+    (SHA256_K_35() | $AR.word32_pack_inline(0x53, 0x38, 0x0d, 0x13))
+  else
+  if $AR.eq_g1(t, 36) then
+    (SHA256_K_36() | $AR.word32_pack_inline(0x65, 0x0a, 0x73, 0x54))
+  else
+  if $AR.eq_g1(t, 37) then
+    (SHA256_K_37() | $AR.word32_pack_inline(0x76, 0x6a, 0x0a, 0xbb))
+  else
+  if $AR.eq_g1(t, 38) then
+    (SHA256_K_38() | $AR.word32_pack_inline(0x81, 0xc2, 0xc9, 0x2e))
+  else
+  if $AR.eq_g1(t, 39) then
+    (SHA256_K_39() | $AR.word32_pack_inline(0x92, 0x72, 0x2c, 0x85))
+  else
+  if $AR.eq_g1(t, 40) then
+    (SHA256_K_40() | $AR.word32_pack_inline(0xa2, 0xbf, 0xe8, 0xa1))
+  else
+  if $AR.eq_g1(t, 41) then
+    (SHA256_K_41() | $AR.word32_pack_inline(0xa8, 0x1a, 0x66, 0x4b))
+  else
+  if $AR.eq_g1(t, 42) then
+    (SHA256_K_42() | $AR.word32_pack_inline(0xc2, 0x4b, 0x8b, 0x70))
+  else
+  if $AR.eq_g1(t, 43) then
+    (SHA256_K_43() | $AR.word32_pack_inline(0xc7, 0x6c, 0x51, 0xa3))
+  else
+  if $AR.eq_g1(t, 44) then
+    (SHA256_K_44() | $AR.word32_pack_inline(0xd1, 0x92, 0xe8, 0x19))
+  else
+  if $AR.eq_g1(t, 45) then
+    (SHA256_K_45() | $AR.word32_pack_inline(0xd6, 0x99, 0x06, 0x24))
+  else
+  if $AR.eq_g1(t, 46) then
+    (SHA256_K_46() | $AR.word32_pack_inline(0xf4, 0x0e, 0x35, 0x85))
+  else
+  if $AR.eq_g1(t, 47) then
+    (SHA256_K_47() | $AR.word32_pack_inline(0x10, 0x6a, 0xa0, 0x70))
+  else
+  if $AR.eq_g1(t, 48) then
+    (SHA256_K_48() | $AR.word32_pack_inline(0x19, 0xa4, 0xc1, 0x16))
+  else
+  if $AR.eq_g1(t, 49) then
+    (SHA256_K_49() | $AR.word32_pack_inline(0x1e, 0x37, 0x6c, 0x08))
+  else
+  if $AR.eq_g1(t, 50) then
+    (SHA256_K_50() | $AR.word32_pack_inline(0x27, 0x48, 0x77, 0x4c))
+  else
+  if $AR.eq_g1(t, 51) then
+    (SHA256_K_51() | $AR.word32_pack_inline(0x34, 0xb0, 0xbc, 0xb5))
+  else
+  if $AR.eq_g1(t, 52) then
+    (SHA256_K_52() | $AR.word32_pack_inline(0x39, 0x1c, 0x0c, 0xb3))
+  else
+  if $AR.eq_g1(t, 53) then
+    (SHA256_K_53() | $AR.word32_pack_inline(0x4e, 0xd8, 0xaa, 0x4a))
+  else
+  if $AR.eq_g1(t, 54) then
+    (SHA256_K_54() | $AR.word32_pack_inline(0x5b, 0x9c, 0xca, 0x4f))
+  else
+  if $AR.eq_g1(t, 55) then
+    (SHA256_K_55() | $AR.word32_pack_inline(0x68, 0x2e, 0x6f, 0xf3))
+  else
+  if $AR.eq_g1(t, 56) then
+    (SHA256_K_56() | $AR.word32_pack_inline(0x74, 0x8f, 0x82, 0xee))
+  else
+  if $AR.eq_g1(t, 57) then
+    (SHA256_K_57() | $AR.word32_pack_inline(0x78, 0xa5, 0x63, 0x6f))
+  else
+  if $AR.eq_g1(t, 58) then
+    (SHA256_K_58() | $AR.word32_pack_inline(0x84, 0xc8, 0x78, 0x14))
+  else
+  if $AR.eq_g1(t, 59) then
+    (SHA256_K_59() | $AR.word32_pack_inline(0x8c, 0xc7, 0x02, 0x08))
+  else
+  if $AR.eq_g1(t, 60) then
+    (SHA256_K_60() | $AR.word32_pack_inline(0x90, 0xbe, 0xff, 0xfa))
+  else
+  if $AR.eq_g1(t, 61) then
+    (SHA256_K_61() | $AR.word32_pack_inline(0xa4, 0x50, 0x6c, 0xeb))
+  else
+  if $AR.eq_g1(t, 62) then
+    (SHA256_K_62() | $AR.word32_pack_inline(0xbe, 0xf9, 0xa3, 0xf7))
+  else
+  (SHA256_K_63() | $AR.word32_pack_inline(0xc6, 0x71, 0x78, 0xf2))
 
 (* Deprecated (sha256#48): sha256_k is kept as published, with the two 16-bit halves as ints; use sha256_k_w32. It is removed in a later version, after one published version with both. *)
 
@@ -1535,10 +1535,10 @@ implement sha1_f {t}{bh,bl,ch,cl,dh,dl} (t, bh, bl, ch, cl, dh, dl) =
 
 
 implement sha1_k_w32 {t} (t) =
-  if $AR.lt_g1(t, 20) then (SHA1_K_0_to_19() | $AR.word32_pack(0x5a, 0x82, 0x79, 0x99))
-  else if $AR.lt_g1(t, 40) then (SHA1_K_20_to_39() | $AR.word32_pack(0x6e, 0xd9, 0xeb, 0xa1))
-  else if $AR.lt_g1(t, 60) then (SHA1_K_40_to_59() | $AR.word32_pack(0x8f, 0x1b, 0xbc, 0xdc))
-  else (SHA1_K_60_to_79() | $AR.word32_pack(0xca, 0x62, 0xc1, 0xd6))
+  if $AR.lt_g1(t, 20) then (SHA1_K_0_to_19() | $AR.word32_pack_inline(0x5a, 0x82, 0x79, 0x99))
+  else if $AR.lt_g1(t, 40) then (SHA1_K_20_to_39() | $AR.word32_pack_inline(0x6e, 0xd9, 0xeb, 0xa1))
+  else if $AR.lt_g1(t, 60) then (SHA1_K_40_to_59() | $AR.word32_pack_inline(0x8f, 0x1b, 0xbc, 0xdc))
+  else (SHA1_K_60_to_79() | $AR.word32_pack_inline(0xca, 0x62, 0xc1, 0xd6))
 
 (* Deprecated (sha256#48): sha1_k is kept as published, with the two 16-bit halves as ints; use sha1_k_w32. It is removed in a later version, after one published version with both. *)
 
@@ -1577,13 +1577,13 @@ implement sha1_k {t} (t) =
 
 
 implement sha1_round_w32 (t, a_word, b_word, c_word, d_word, e_word, k_word, w_word) = let
-  val (turn | turn5_word) = $AR.word32_rotr(a_word, 27)
+  val (turn | turn5_word) = $AR.word32_rotr_inline(a_word, 27)
   val (function | f_word) = sha1_f_w32(t, b_word, c_word, d_word)
   val (add1 | sum1_word) = $AR.word32_add(turn5_word, f_word)
   val (add2 | sum2_word) = $AR.word32_add(sum1_word, e_word)
   val (add3 | sum3_word) = $AR.word32_add(sum2_word, k_word)
   val (add4 | new_a_word) = $AR.word32_add(sum3_word, w_word)
-  val (turn30 | new_c_word) = $AR.word32_rotr(b_word, 2)
+  val (turn30 | new_c_word) = $AR.word32_rotr_inline(b_word, 2)
 in (SHA1_ROUND_mk(turn, function, add1, add2, add3, add4, turn30)
     | @(new_a_word, new_c_word)) end
 
@@ -1901,7 +1901,7 @@ in (BITLEN_mk(low, mid, high) | @(byte2, byte3, byte4, byte5, byte6, byte7)) end
 fn _emit {block_loc:agz}{block_cells,base,message:$A.cells}{i:nat | i < 64}{value:nat | value < 256}
   (block_array: $A.barr(block_loc, 64, block_cells), i: int i, value: int value, held: HELD(base, block_cells, i, message), list: LIST(message))
   : [block_cells_after,message_after:$A.cells] (HELD(base, block_cells_after, i + 1, message_after), LIST(message_after), SNOC(message, value, message_after) | $A.barr(block_loc, 64, block_cells_after)) = let
-  val (set | block_array) = $A.barr_set(block_array, i, value)
+  val (set | block_array) = $A.barr_set_inline(block_array, i, value)
   prval kept = held_frame(held, set)
   prval (snoc, listed) = snoc_list{message}{value}(list)
 in (HELD_next(kept, $A.setc_nth_same(set), snoc), listed, snoc | block_array) end
@@ -1993,7 +1993,7 @@ in (held2, PAD_mk(counted, ZCOUNT_long(), lengths, snoc128, more, written) | blo
 
 
 
-implement sha256_iv_w32 () = (SHA256_IV_mk() | @($AR.word32_pack(0x6a, 0x09, 0xe6, 0x67), $AR.word32_pack(0xbb, 0x67, 0xae, 0x85), $AR.word32_pack(0x3c, 0x6e, 0xf3, 0x72), $AR.word32_pack(0xa5, 0x4f, 0xf5, 0x3a), $AR.word32_pack(0x51, 0x0e, 0x52, 0x7f), $AR.word32_pack(0x9b, 0x05, 0x68, 0x8c), $AR.word32_pack(0x1f, 0x83, 0xd9, 0xab), $AR.word32_pack(0x5b, 0xe0, 0xcd, 0x19)))
+implement sha256_iv_w32 () = (SHA256_IV_mk() | @($AR.word32_pack_inline(0x6a, 0x09, 0xe6, 0x67), $AR.word32_pack_inline(0xbb, 0x67, 0xae, 0x85), $AR.word32_pack_inline(0x3c, 0x6e, 0xf3, 0x72), $AR.word32_pack_inline(0xa5, 0x4f, 0xf5, 0x3a), $AR.word32_pack_inline(0x51, 0x0e, 0x52, 0x7f), $AR.word32_pack_inline(0x9b, 0x05, 0x68, 0x8c), $AR.word32_pack_inline(0x1f, 0x83, 0xd9, 0xab), $AR.word32_pack_inline(0x5b, 0xe0, 0xcd, 0x19)))
 
 (* Deprecated (sha256#48): sha256_iv is kept as published, with the two 16-bit halves as ints; use sha256_iv_w32. It is removed in a later version, after one published version with both. *)
 
@@ -2009,7 +2009,7 @@ implement sha256_iv () = (SHA256_IV_mk() | @(0x6a09, 0xe667, 0xbb67, 0xae85, 0x3
 
 
 
-implement sha1_iv_w32 () = (SHA1_IV_mk() | @($AR.word32_pack(0x67, 0x45, 0x23, 0x01), $AR.word32_pack(0xef, 0xcd, 0xab, 0x89), $AR.word32_pack(0x98, 0xba, 0xdc, 0xfe), $AR.word32_pack(0x10, 0x32, 0x54, 0x76), $AR.word32_pack(0xc3, 0xd2, 0xe1, 0xf0)))
+implement sha1_iv_w32 () = (SHA1_IV_mk() | @($AR.word32_pack_inline(0x67, 0x45, 0x23, 0x01), $AR.word32_pack_inline(0xef, 0xcd, 0xab, 0x89), $AR.word32_pack_inline(0x98, 0xba, 0xdc, 0xfe), $AR.word32_pack_inline(0x10, 0x32, 0x54, 0x76), $AR.word32_pack_inline(0xc3, 0xd2, 0xe1, 0xf0)))
 
 (* Deprecated (sha256#48): sha1_iv is kept as published, with the two 16-bit halves as ints; use sha1_iv_w32. It is removed in a later version, after one published version with both. *)
 
@@ -2123,8 +2123,8 @@ fun _feed {block_loc,data_loc:agz}{n:nat}{data_cells,message_before,block_cells,
   if i >= length then (data_held, block_held, list, counted | @(block_array, i, fill))
   else if fill >= 64 then (data_held, block_held, list, counted | @(block_array, i, fill))
   else let
-    val [value:int] (cell | value) = $A.barr_get(data, i)
-    val (set | block_array) = $A.barr_set(block_array, fill, value)
+    val [value:int] (cell | value) = $A.barr_get_inline(data, i)
+    val (set | block_array) = $A.barr_set_inline(block_array, fill, value)
     prval kept = held_frame(block_held, set)
     prval (snoc, list_after) = snoc_list{message}{value}(list)
   in _feed(block_array, data, length, i + 1, fill + 1,
@@ -2230,12 +2230,12 @@ fun _hex_bytes {chain_loc,out_loc:agz}{chain_cells,out_cells:$A.cells}{n:nat | n
   : [out_cells_after:$A.cells] (HEXOF(out_cells_after, chain_cells, 32) | $A.barr(out_loc, 64, out_cells_after)) =
   if n >= 32 then (done | out)
   else let
-    val [value:int] (nth | value) = $A.barr_get(chain_array, n)
+    val [value:int] (nth | value) = $A.barr_get_inline(chain_array, n)
     val [high_nibble:int, low_nibble:int] @(high_nibble, low_nibble) = _split16(value)
     val [first_char:int] (first | first_char) = _hex_char(high_nibble)
     val [second_char:int] (second | second_char) = _hex_char(low_nibble)
-    val (set_even | out) = $A.barr_set(out, 2 * n, first_char)
-    val (set_odd | out) = $A.barr_set(out, 2 * n + 1, second_char)
+    val (set_even | out) = $A.barr_set_inline(out, 2 * n, first_char)
+    val (set_odd | out) = $A.barr_set_inline(out, 2 * n + 1, second_char)
     prval kept = hexof_frame(hexof_frame(done, set_even), set_odd)
     prval at_even = $A.setc_nth_other(set_odd, $A.setc_nth_same(set_even))
     prval at_odd = $A.setc_nth_same(set_odd)
@@ -2825,7 +2825,7 @@ fun _copy_arr {ld,lb:agz}{nd:pos}{from,count:nat | from + count <= nd; count <= 
   : [cs2:$A.cells] $A.barr(lb, 4096, cs2) =
   if j >= count then piece
   else let
-    val (_ | piece) = $A.barr_set(piece, j, _octet($A.get<byte>(data, from + j)))
+    val (_ | piece) = $A.barr_set_inline(piece, j, _octet($A.get<byte>(data, from + j)))
   in _copy_arr(piece, data, from, count, j + 1) end
 
 fun _copy_borrow {ld,lb:agz}{nd:pos}{from,count:nat | from + count <= nd; count <= 4096}{j:nat | j <= count}{cs:$A.cells} .<count - j>.
@@ -2833,7 +2833,7 @@ fun _copy_borrow {ld,lb:agz}{nd:pos}{from,count:nat | from + count <= nd; count 
   : [cs2:$A.cells] $A.barr(lb, 4096, cs2) =
   if j >= count then piece
   else let
-    val (_ | piece) = $A.barr_set(piece, j, _octet($A.read<byte>(data, from + j)))
+    val (_ | piece) = $A.barr_set_inline(piece, j, _octet($A.read<byte>(data, from + j)))
   in _copy_borrow(piece, data, from, count, j + 1) end
 
 (* The first count cells of a barr put in an array of the caller's *)
@@ -2841,7 +2841,7 @@ fun _copy_out {lt,lo:agz}{n:pos}{count:nat | count <= n}{j:nat | j <= count}{cs:
   (source: !$A.barr(lt, n, cs), out: !$A.arr(byte, lo, n), count: int count, j: int j): void =
   if j >= count then ()
   else let
-    val (_ | v) = $A.barr_get(source, j)
+    val (_ | v) = $A.barr_get_inline(source, j)
     val () = $A.set<byte>(out, j, $A.int2byte(v))
   in _copy_out(source, out, count, j + 1) end
 
