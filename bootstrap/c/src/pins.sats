@@ -1,7 +1,11 @@
 staload A = "array/src/lib.sats"
 staload B = "builder/src/lib.sats"
 staload E = "env/src/lib.sats"
+staload L = "list/src/lib.sats"
+staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
+
+
 
 
 
@@ -962,7 +966,68 @@ staload "helpers.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn pins_main (): bool
+
 
 
 

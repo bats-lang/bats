@@ -1,0 +1,54 @@
+#!/bin/sh
+# run_cmd_capture_outcome (bats-lang/bats#444, capture area): real children
+# that write in pieces with pauses, more than a pipe holds, and exit non-zero
+# give the outcomes of the type, apart; and a caller that ignores the
+# "longer" case does not compile.
+# usage: tests/capture-outcome/check.sh <bats-binary> <repository-dir>
+set -u
+BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
+REPO=$(cd "$2" && pwd)
+HERE=$(cd "$(dirname "$0")" && pwd)
+ROOT=$(cd "$HERE/../.." && pwd)
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+fail() { echo "FAIL: $*" >&2; exit 1; }
+# A copy of the compiler's project with the driver as a second binary
+mkdir -p "$TMP/app"
+cp -R "$ROOT/bats.toml" "$ROOT/src" "$TMP/app/"
+[ ! -f "$ROOT/bats.lock" ] || cp "$ROOT/bats.lock" "$TMP/app/"
+cp "$HERE/driver.bats" "$TMP/app/src/bin/capture-outcome.bats"
+cd "$TMP/app"
+"$BATS" build --repository "$REPO" > "$TMP/build.log" 2>&1 || { cat "$TMP/build.log"; fail "the driver did not build"; }
+./dist/debug/capture-outcome > "$TMP/got" 2>&1 || { cat "$TMP/got"; fail "the driver failed"; }
+cat > "$TMP/want" <<'WANT'
+old-form: status=3 len=3
+small: fits 3
+empty: fits 0
+paused: fits 8
+failed: failed status=3 kept=3
+exact: fits 4096
+one-over: longer status=0 written=4097
+pieces: longer status=0 written=10000
+longer-failed: longer status=5 written=10000
+pipe-full: longer status=0 written=300000
+stderr-heavy: fits 2
+WANT
+cat "$TMP/got"
+diff "$TMP/want" "$TMP/got" || fail "outcomes differ"
+# A caller that does not handle CaptureLonger is rejected
+cat >> src/bin/capture-outcome.bats <<'BAD'
+
+fn ignore_longer {le:agz}{lo:agz}
+  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry),
+   outbuf: !$A.arr(byte, lo, 4096)): int =
+  case+ run_cmd_capture_outcome(exec_bv, argv, outbuf) of
+  | ~CaptureFits(n) => n
+  | ~CaptureFailed(_, n) => n
+  | ~CaptureReadFailed(_, n, _) => n
+  | ~CaptureNotRun(_) => 0
+BAD
+if "$BATS" check --repository "$REPO" > "$TMP/bad.log" 2>&1; then
+  fail "a match without CaptureLonger was accepted"
+fi
+grep -q 'CaptureLonger\|non-exhaustive\|nonexhaustive\|exhaust' "$TMP/bad.log" || { cat "$TMP/bad.log"; fail "rejected, but not for the missing case"; }
+echo "capture-outcome: ok"

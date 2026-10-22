@@ -14,6 +14,7 @@
 #use result as R
 #use str as S
 #use sha256 as SHA
+#use toml as T
 
 (* ============================================================
    Proven byte reads
@@ -1692,6 +1693,87 @@ in
   | ~$R.err(e) => @(0 - e, 0)
 end
 
+(* How a captured run went (capture area: bats#444). The child's stdout is
+   read to its end, so bats never closes the pipe under a writer (no
+   SIGPIPE, no race on the exit status); the first 4096 bytes are kept.
+   CaptureFits: exit 0, the output fits (its length). CaptureFailed: a
+   non-zero status, the output fits. CaptureLonger: more than the buffer,
+   the child's own status and the bytes it wrote (at least that many past
+   1 GiB, where reading stops). CaptureReadFailed: a read failed, with
+   what was kept. CaptureNotRun: the errno of the failure to run it.
+   Linear: a caller matches every constructor. *)
+#pub datavtype capture_outcome =
+  | CaptureFits of ([k:nat | k <= 4096] int k)
+  | CaptureFailed of (int, [k:nat | k <= 4096] int k)
+  | CaptureLonger of (int, int)
+  | CaptureReadFailed of (int, [k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureNotRun of (int)
+
+(* Where a read of the child's output ended (capture area) *)
+datavtype capture_end =
+  | CaptureEnded of ()
+  | CaptureEndFailed of ($F.io_error)
+
+(* chunk[i, m) put at out[filled + i] (capture area) *)
+fun capture_put {lo:agz}{lc:agz}{f:nat}{m:nat | m <= 4096; f + m <= 4096}{i:nat | i <= m} .<m - i>.
+  (out: !$A.arr(byte, lo, 4096), filled: int f,
+   chunk: !$A.arr(byte, lc, 4096), m: int m, i: int i): int(f + m) =
+  if i >= m then filled + m
+  else let
+    val () = $A.set<byte>(out, filled + i, $A.get<byte>(chunk, i))
+  in capture_put(out, filled, chunk, m, i + 1) end
+
+(* Reads fd to its end, keeping the first 4096 bytes in out; stops at
+   1 GiB (capture area) *)
+fun capture_read {lo:agz}{lc:agz}{f:nat | f <= 4096}{t:nat | t <= 1073741824}
+  .<1073741824 - t>.
+  (fd: !$F.fd, out: !$A.arr(byte, lo, 4096), chunk: !$A.arr(byte, lc, 4096),
+   filled: int f, total: int t)
+  : @([g:nat | g <= 4096] int g, [u:nat] int u, capture_end) =
+  case+ $F.file_read(fd, chunk, 4096) of
+  | ~$R.err(e) => @(filled, total, CaptureEndFailed(e))
+  | ~$R.ok(k) =>
+    if k <= 0 then @(filled, total, CaptureEnded())
+    else if total + k > 1073741824 then @(filled, 1073741824, CaptureEnded())
+    else let
+      val kept = (if filled + k <= 4096 then capture_put(out, filled, chunk, k, 0)
+                  else capture_put(out, filled, chunk, 4096 - filled, 0)): [g:nat | g <= 4096] int g
+    in capture_read(fd, out, chunk, kept, total + k) end
+
+(* As run_cmd_capture, with the outcome a type: stdout is read to its end,
+   stderr goes to /dev/null, and a longer output is its own constructor *)
+#pub fn run_cmd_capture_outcome {le:agz}{lo:agz}
+  (exec_bv: !$A.borrow(byte, le, 524288),
+   argv: $L.listv($P.arg_entry),
+   outbuf: !$A.arr(byte, lo, 4096)): capture_outcome
+
+implement run_cmd_capture_outcome (exec_bv, argv, outbuf) = let
+  val sr = spawn_child(exec_bv, argv,
+    $P.dev_null(), $P.pipe_new(), $P.dev_null())
+in
+  case+ sr of
+  | ~$R.err(e) => CaptureNotRun(e)
+  | ~$R.ok(sp) => let
+      val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
+      val () = $P.pipe_end_close(sin_p)
+      val () = $P.pipe_end_close(serr_p)
+      val+ ~$P.pipe_fd(out_fd) = sout_p
+      val chunk = $A.alloc<byte>(4096)
+      val @(kept, total, ended) = capture_read(out_fd, outbuf, chunk, 0, 0)
+      val () = $A.free<byte>(chunk)
+      val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
+      val status = (case+ $P.child_wait(child) of
+        | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+    in
+      case+ ended of
+      | ~CaptureEndFailed(e) => CaptureReadFailed(status, kept, e)
+      | ~CaptureEnded() =>
+        if total > 4096 then CaptureLonger(status, total)
+        else if status = 0 then CaptureFits(kept)
+        else CaptureFailed(status, kept)
+    end
+end
+
 (* The prelude line count in <in>.pre, written next to the .dats
    in[0, il) by preprocess_one; 0 when there is none *)
 fun digits_val {lb:agz}{i,k:nat | i <= k; k <= 16} .<k - i>.
@@ -2734,18 +2816,18 @@ end
 #pub datatype heavy_command =
   | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
 
-(* A machine slot: held (its file, open and locked, and its number), the
-   parent's (a bats that holds one started this one, BATS_SLOT_HELD), or
-   none (BATS_SLOTS unset, or the slot could not be taken, which is
-   said) *)
+(* machine-slots: held, the parent's, none (unset or not a number) or refused (set, not takeable: nothing is run, bats#464) *)
 #pub datavtype machine_slot =
   | SlotHeld of ($F.fd, int)
   | SlotOfParent
   | SlotNone
+  | SlotRefused
 
 #pub fn machine_slot_take (heavy: heavy_command): machine_slot
 
 #pub fn machine_slot_release (slot: machine_slot): void
+
+#pub fn machine_slot_refused (slot: !machine_slot): bool
 
 (* BATS_SLOTS: 0 when it is not set or empty, -1 when it is not a number
    from 1 up, else the number, at most 64 *)
@@ -2925,17 +3007,30 @@ end
 
 fn slot_warn {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): void = let
   var m : $B.builder_v = $B.create()
-  val () = bput_v(m, "warning: ")
+  val () = bput_v(m, "error: ")
   val () = bput_v(m, what)
   val () = (if i >= 0 then slot_path(i, m) else slot_dir(m))
   val () = bput_v(m, why)
-  val () = bput_v(m, ", so this bats runs without a machine slot (BATS_SLOTS)\n")
+  val () = bput_v(m, ", so bats refuses to run without a machine slot (BATS_SLOTS): nothing is run\n")
 in prerr_builder(m) end
+
+(* machine-slots: a slot that cannot be taken is SlotRefused, never SlotNone, which runs without the cap (bats#464) *)
+fn slot_refuse {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): machine_slot = let
+  val () = slot_warn(what, i, why)
+in SlotRefused() end
 
 fn slot_held (fd: $F.fd, i: int, heavy: heavy_command): machine_slot = let
   val () = note_holder(i, heavy)
   val () = !g_slot_held := i + 1
 in SlotHeld(fd, i) end
+
+(* machine-slots: what trying a slot found becomes a slot; a busy slot after the wait, an unopenable or an unlockable one is refused (bats#464) *)
+fn slot_of_found (found: slot_found, i: int, heavy: heavy_command): machine_slot =
+  case+ found of
+  | ~SlotTaken(fd) => slot_held(fd, i, heavy)
+  | ~SlotBusy() => slot_refuse("cannot take ", i, " (its lock was not granted)")
+  | ~SlotUnopenable() => slot_refuse("cannot open ", i, "")
+  | ~SlotUnlockable() => slot_refuse("cannot lock ", i, " (its file system has no locks)")
 
 implement machine_slot_take (heavy) = let
   val n0 = (case+ heavy of NotHeavy() => 0 | _ => slots_wanted()): int
@@ -2951,21 +3046,15 @@ in
     val made = run_mkdir(d)
     val n = g1ofg0(n0)
   in
-    if made <> 0 then let
-      val () = slot_warn("cannot make the slots' directory ", ~1, "")
-    in SlotNone() end
+    if made <> 0 then slot_refuse("cannot make the slots' directory ", ~1, "")
     else if n < 1 then SlotNone()
     else let
       val @(found, i) = slot_free(0, n)
     in
       case+ found of
-      | ~SlotTaken(fd) => slot_held(fd, i, heavy)
-      | ~SlotUnopenable() => let
-          val () = slot_warn("cannot open ", i, "")
-        in SlotNone() end
-      | ~SlotUnlockable() => let
-          val () = slot_warn("cannot lock ", i, " (its file system has no locks)")
-        in SlotNone() end
+      | ~SlotTaken(fd) => slot_of_found(SlotTaken(fd), i, heavy)
+      | ~SlotUnopenable() => slot_of_found(SlotUnopenable(), i, heavy)
+      | ~SlotUnlockable() => slot_of_found(SlotUnlockable(), i, heavy)
       | ~SlotBusy() => let
           (* With more than one slot, a bats that waits waits for slot
              0, though another may be freed first, as gen-pwa test does *)
@@ -2986,15 +3075,7 @@ in
               val () = bput_v(m, ")\n")
             in prerr_builder(m) end)
         in
-          case+ slot_try(0, $F.LockWaits()) of
-          | ~SlotTaken(fd) => slot_held(fd, 0, heavy)
-          | ~SlotBusy() => SlotNone()
-          | ~SlotUnopenable() => let
-              val () = slot_warn("cannot open ", 0, "")
-            in SlotNone() end
-          | ~SlotUnlockable() => let
-              val () = slot_warn("cannot lock ", 0, " (its file system has no locks)")
-            in SlotNone() end
+          slot_of_found(slot_try(0, $F.LockWaits()), 0, heavy)
         end
     end
   end
@@ -3008,6 +3089,14 @@ implement machine_slot_release (slot) =
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~SlotOfParent() => ()
   | ~SlotNone() => ()
+  | ~SlotRefused() => ()
+
+implement machine_slot_refused (slot) =
+  case+ slot of
+  | SlotRefused() => true
+  | SlotHeld(_, _) => false
+  | SlotOfParent() => false
+  | SlotNone() => false
 
 (* ============================================================
    The project's lock (bats-lang/bats#250)
@@ -3076,6 +3165,31 @@ implement project_lock_release (lk) =
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~ProjectUnlocked(slot) => machine_slot_release(slot)
 
+(* machine-slots: whether lk's slot was refused; the command is not run and bats exits 1 (bats#464) *)
+#pub fn project_lock_refused (lk: !project_lock): bool
+
+implement project_lock_refused (lk) =
+  case+ lk of
+  | ProjectLocked(_, slot) => machine_slot_refused(slot)
+  | ProjectUnlocked(slot) => machine_slot_refused(slot)
+
+(* machine-slots: each way a slot is not taken is refused through slot_of_found, the mapping bats#464 tests *)
+$UNITTEST.run begin
+fn slot_found_is_refused (found: slot_found): bool = let
+  val slot = slot_of_found(found, 0, HeavyCheck())
+  val refused = machine_slot_refused(slot)
+  val () = machine_slot_release(slot)
+in refused end
+fn test_unlockable_slot_is_refused (): bool = slot_found_is_refused(SlotUnlockable())
+fn test_unopenable_slot_is_refused (): bool = slot_found_is_refused(SlotUnopenable())
+fn test_busy_slot_after_the_wait_is_refused (): bool = slot_found_is_refused(SlotBusy())
+fn test_no_slot_is_not_refused (): bool = let
+  val slot = SlotNone()
+  val refused = machine_slot_refused(slot)
+  val () = machine_slot_release(slot)
+in (if refused then false else true) end
+end
+
 (* ============================================================
    File I/O
    ============================================================ *)
@@ -3119,6 +3233,21 @@ in
     val () = $A.free<byte>(content_arr)
   in WriteTooLarge() end
   else write_opened(file_open_m(path_bv, pm, $F.WriteOnly(), $F.CreateOrTruncate(), 420),
+                    content_arr, content_len)
+end
+
+(* Appends to an existing file and never reads it back (manifest) *)
+#pub fn append_file_from_builder {lp:agz}{np:pos | np < 1048576}
+  (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
+   content_b: $B.builder_v): write_result
+
+implement append_file_from_builder(path_bv, path_len, content_b) = let
+  val @(content_arr, content_len) = $B.into_arr(content_b)
+in
+  if content_len >= 524288 then let
+    val () = $A.free<byte>(content_arr)
+  in WriteTooLarge() end
+  else write_opened(file_open_n(path_bv, path_len, $F.WriteOnly(), $F.AppendExisting(), 420),
                     content_arr, content_len)
 end
 
@@ -3270,15 +3399,21 @@ fn whole_of_open (opened: $R.result($F.fd, $F.io_error)): whole_file =
         in whole_err($F.OutOfMemory()) end
       | ~$A.arena_some(ar) => let
           val p = $A.arena_alloc<byte>(ar, z + 1)
-          val k = (case+ $F.file_read(fd, p, z + 1) of
-            | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
+          val read_result = $F.file_read(fd, p, z + 1)
           val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         in
-          if k = z then whole_ok(ar, p, z + 1, z)
-          else let
-            val () = $A.arena_return<byte>(ar, p)
-            val () = $A.arena_destroy<byte>(ar)
-          in whole_err($F.DeviceError()) end
+          (* a failed read and a short read are distinct errors (manifest) *)
+          case+ read_result of
+          | ~$R.ok(k) =>
+            if k = z then whole_ok(ar, p, z + 1, z)
+            else let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err($F.DeviceError()) end
+          | ~$R.err(e) => let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err(e) end
         end))
 
 implement read_whole (path, plen) =
@@ -3297,6 +3432,42 @@ implement read_whole_m (path, m) =
 implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
+
+(* Reads a TOML file whole, FileTooLarge over the parser's limit, never cut (manifest) *)
+#pub fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
+  : $R.result($T.toml_doc, $F.io_error)
+
+implement read_toml (pa, m) = let
+  val @(fz_path, bv_path) = $A.freeze<byte>(pa)
+  val whole = read_whole_m(bv_path, m)
+  val () = $A.drop<byte>(fz_path, bv_path)
+  val () = $A.free<byte>($A.thaw<byte>(fz_path))
+in
+  case+ whole of
+  | ~whole_err(e) => $R.err(e)
+  | ~whole_ok(ar, piece, size, length) =>
+    if length > 65536 then let
+      val () = whole_free(ar, piece)
+    in $R.err($F.FileTooLarge()) end
+    else let
+      val @(fz_text, bv_text) = $A.freeze<byte>(piece)
+      val parsed = $T.parse(bv_text, length)
+      val () = $A.drop<byte>(fz_text, bv_text)
+      val () = whole_free(ar, $A.thaw<byte>(fz_text))
+    in
+      case+ parsed of
+      | ~$R.ok(doc) => $R.ok(doc)
+      (* unparsable text is InvalidInput (manifest) *)
+      | ~$R.err(_) => $R.err($F.InvalidInput())
+    end
+end
+
+(* The ./bats.toml, read whole and parsed (manifest) *)
+#pub fn read_manifest (): $R.result($T.toml_doc, $F.io_error)
+
+implement read_manifest () = let
+  val @(manifest_path, manifest_path_len) = str_into_arr("bats.toml")
+in read_toml(manifest_path, manifest_path_len) end
 
 (* build/.sats_changed is touched BEFORE a .sats is written, so a bats
    killed between the two leaves the stamp ahead (every C is made again),
