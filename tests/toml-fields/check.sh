@@ -7,17 +7,14 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR
 
-# patsopt runs, not counting the entry's generated module, which every build
-# makes again
+# patsopt-count: patsopt runs, not counting the entry's generated module that every build makes again
 ran() { grep -a -- '+ patsopt' "$1" | grep -av '_bats_entry_' | grep -avc '(cached)' || true; }
 build() { # <directory> <log file> [bats arguments]: -v build in <directory>, which must succeed
   directory=$1; log_file=$2; shift 2
   (cd "$directory" && "$BATS" -v build --only debug --only native "$@") > "$log_file" 2>&1 || { echo "FAIL: build in $directory"; cat "$log_file"; exit 1; }
 }
 program() { (cd "$1" && ./dist/debug/tf); }
-# the files of build/ and their digests, without what is not the build's (the
-# records of what passed, the stash of another mark, the graph of one run, and
-# the objects, whose debug info names the directory they were made in)
+# build-tree: the files of build/ with their digests, without records, stash, graph and objects (not the build's)
 tree() { (cd "$1/build" && find . -type f ! -path './.bats_valid/*' ! -path './.stash/*' ! -name .bats_graph ! -name '*.o' | LC_ALL=C sort | while read -r file_name; do printf '%s %s\n' "$(cksum < "$file_name")" "$file_name"; done); }
 
 module() { # <directory> <bats.toml text>: a binary of two modules
@@ -27,9 +24,7 @@ module() { # <directory> <bats.toml text>: a binary of two modules
   printf '#include "share/atspre_staload.hats"\nstaload "m.sats"\nimplement main0 () = println! (f ())\n' > "$1/src/bin/tf.bats"
 }
 
-# Fields the build does not read: a build/ made under the first manifest and
-# restored under the second is kept whole, and is the build/ a cold build
-# under the second makes
+# unchanged-fields: fields the build does not read leave a restored build/ whole and equal to a cold one
 base='[package]
 name = "tf"
 kind = "bin"
@@ -75,8 +70,7 @@ kind = "bin"
 unsafe = true
 '
 
-# kind: bats build refuses a library whatever build/ holds, and a bin again
-# builds from the same build/ with nothing made again
+# kind: bats build refuses a library whatever build/ holds, and a bin again builds from the same build/
 module "$TMP/kind_project" "$base"
 build "$TMP/kind_project" "$TMP/kind_first.log"
 printf '[package]\nname = "tf"\nkind = "lib"\n' > "$TMP/kind_project/bats.toml"
@@ -86,9 +80,7 @@ printf '%s' "$base" > "$TMP/kind_project/bats.toml"
 build "$TMP/kind_project" "$TMP/kind_again.log"
 [ "$(ran "$TMP/kind_again.log")" = 0 ] || { echo "FAIL: kind back to bin made modules again"; cat "$TMP/kind_again.log"; exit 1; }
 
-# unsafe, the field the emitted modules depend on: a $UNSAFE block is kept
-# under unsafe = true; the flag false over a restored build/ is an error and
-# makes no program; true again builds
+# unsafe: the field the emitted modules depend on; false over a restored build/ is an error, true builds
 unsafe_module() { # <dir> <bats.toml text>
   module "$1" "$2"
   printf '#include "share/atspre_staload.hats"\n\n#pub fn f (): int\n\n$UNSAFE begin\n%%{\nstatic int unused_helper (void) { return 3; }\n%%}\nend\n\nimplement f () = 1\n' > "$1/src/m.bats"
@@ -115,9 +107,7 @@ unsafe_module "$TMP/large_project" "$(cat "$TMP/large_manifest.toml")"
 build "$TMP/large_project" "$TMP/large_manifest.log"
 [ "$(program "$TMP/large_project")" = 1 ] || { echo "FAIL: large manifest: the program"; exit 1; }
 
-# a library manifest over 8192 bytes whose [package] comes after the padding:
-# upload finds the name, the kind and the version, zips the manifest whole
-# with the version injected, and the docs carry the name
+# large-library: a manifest over 8192 bytes with [package] after the padding is read whole by upload and the docs
 mkdir -p "$TMP/large_library/src" "$TMP/large_repository"
 { for line_number in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '[package]\nname = "tflarge"\nkind = "lib"\n'; } > "$TMP/large_library/bats.toml"
 [ "$(wc -c < "$TMP/large_library/bats.toml")" -gt 8192 ] || { echo "FAIL: the library manifest is not large"; exit 1; }
@@ -134,9 +124,7 @@ grep -aq '^# a line of padding' "$TMP/archived.toml" || { echo "FAIL: the archiv
 (cd "$TMP/large_library" && "$BATS" check --repository "$TMP/large_repository" > "$TMP/large_check.log" 2>&1) || { echo "FAIL: check of a large library manifest"; cat "$TMP/large_check.log"; exit 1; }
 grep -aq '^# tflarge$' "$TMP/large_library/docs/index.md" || { echo "FAIL: the docs lack the package name"; exit 1; }
 
-# [dependencies]: a constraint reaches build/ through the version it picks
-# (sources in bats_modules, keyed by content), a path dependency through the
-# directory it names
+# dependencies: a constraint reaches build/ through the version it picks, a path dependency through its directory
 mkdir -p "$TMP/repo"
 publish() { # <name> <commit date> <value>: a library whose f is value
   rm -rf "$TMP/published"; mkdir -p "$TMP/published/src"
@@ -154,11 +142,7 @@ dependent() { # <dir> <[dependencies] value>
   printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = %s\n' "$2" > "$1/bats.toml"
   printf '#use tfdep as D\n\nimplement main0 () = println! ($D.f ())\n' > "$1/src/bin/tf.bats"
 }
-# with a bats.lock, a constraint that rules out the locked version is an error
-# (what the build/ holds is never taken for the new constraint's), and after
-# the relock the other version's sources replace the old ones, so build/ is
-# made again from them; without a lock an installed package is kept, as the
-# Rust bats did
+# lock-constraint: a constraint ruling out the locked version is an error, and after the relock build/ is made again
 mkdir -p "$TMP/dependent"
 dependent "$TMP/dependent" '""'
 (cd "$TMP/dependent" && "$BATS" lock --repository "$TMP/repo") > "$TMP/dependent_lock.log" 2>&1 || { echo "FAIL: lock"; cat "$TMP/dependent_lock.log"; exit 1; }
@@ -186,9 +170,7 @@ build "$TMP/path_dependency/app" "$TMP/path_dependency_first.log"
 printf '[package]\nname = "tf"\nkind = "bin"\n\n[dependencies]\n"tfdep" = { path = "../two" }\n' > "$TMP/path_dependency/app/bats.toml"
 build "$TMP/path_dependency/app" "$TMP/path_dependency2.log"
 [ "$(program "$TMP/path_dependency/app")" = 8 ] || { echo "FAIL: path dependency two: the program"; cat "$TMP/path_dependency2.log"; exit 1; }
-# the toml package parses 65536 bytes: a manifest of exactly that many, with
-# `unsafe = true` as its last lines, is read to its end (the block is kept),
-# and one byte more is refused, never parsed cut (read as a safe package)
+# toml-limit: a manifest of exactly 65536 bytes is read to its end, one byte more is refused, never parsed cut
 filler() { yes '#' | head -c "$1"; }
 filler_manifest() { # <bytes in all>: comment lines, then yes_unsafe, then blank lines to fill
   tail_length=$(printf '%s' "$yes_unsafe" | wc -c)
@@ -205,7 +187,7 @@ rm -rf "$TMP/limit_project/build" "$TMP/limit_project/dist"
 exit_code=0; (cd "$TMP/limit_project" && "$BATS" build --only debug --only native) > "$TMP/limit_over.out" 2> "$TMP/limit_over.err" || exit_code=$?
 [ "$exit_code" = 1 ] && grep -aq "bats.toml" "$TMP/limit_over.err" && [ ! -e "$TMP/limit_project/dist/debug/tf" ] || { echo "FAIL: a manifest of 65537 bytes (exit code $exit_code)"; cat "$TMP/limit_over.err"; exit 1; }
 
-# bats add: the manifest is kept whole (more than 4096 bytes before the line)
+# add: the manifest is kept whole (more than 4096 bytes before the line)
 { for line_number in $(seq 1 100); do printf '# a line of padding that makes the manifest longer than the buffer it was once read in\n'; done; printf '%s' "$base"; printf '\n[dependencies]\n"existing" = ""\n'; } > "$TMP/add_before.toml"
 [ "$(wc -c < "$TMP/add_before.toml")" -gt 8192 ] || { echo "FAIL: the manifest of bats add is not large"; exit 1; }
 module "$TMP/add_project" "$base"
@@ -214,7 +196,7 @@ cp "$TMP/add_before.toml" "$TMP/add_project/bats.toml"
 grep -aq "^added 'added' to \[dependencies\]$" "$TMP/add.log" || { echo "FAIL: bats add said"; cat "$TMP/add.log"; exit 1; }
 { cat "$TMP/add_before.toml"; printf '"added" = ""\n'; } > "$TMP/add_expected.toml"
 cmp -s "$TMP/add_expected.toml" "$TMP/add_project/bats.toml" || { echo "FAIL: bats add changed more than the one line ($(wc -c < "$TMP/add_project/bats.toml") bytes, $(wc -c < "$TMP/add_expected.toml") expected)"; exit 1; }
-# bats remove: the manifest is kept whole, only the lines naming the package go
+# remove: the manifest is kept whole, only the lines naming the package go
 module "$TMP/remove_project" "$base"
 { cat "$TMP/add_before.toml"; printf '"added" = ""\n"added-too" = ""\n'; } > "$TMP/remove_before.toml"
 cp "$TMP/remove_before.toml" "$TMP/remove_project/bats.toml"
@@ -225,7 +207,7 @@ cmp -s "$TMP/remove_expected.toml" "$TMP/remove_project/bats.toml" || { echo "FA
 (cd "$TMP/remove_project" && "$BATS" remove absent) > "$TMP/remove_absent.log" 2>&1 || true
 grep -aq "^error: package 'absent' not found in \[dependencies\]$" "$TMP/remove_absent.log" || { echo "FAIL: bats remove of an absent package said"; cat "$TMP/remove_absent.log"; exit 1; }
 cmp -s "$TMP/remove_expected.toml" "$TMP/remove_project/bats.toml" || { echo "FAIL: bats remove of an absent package changed the manifest"; exit 1; }
-# bats remove, each case compared with cmp against the expected bytes: no final newline, a second table, an empty file, over 65536 bytes
+# remove-cases: no final newline, a second table, an empty file, over 65536 bytes, each compared with cmp
 remove_case() { # <name> <package> <before file> <expected file>
   module "$TMP/remove_$1" "$base"
   cp "$3" "$TMP/remove_$1/bats.toml"
@@ -245,4 +227,12 @@ grep -aq "^error: package 'added' not found in \[dependencies\]$" "$TMP/remove_e
 { filler 70000; printf '"other" = ""\n'; } > "$TMP/big_expected.toml"
 remove_case over_limit added "$TMP/big_before.toml" "$TMP/big_expected.toml"
 grep -aq "^removed 'added' from \[dependencies\]$" "$TMP/remove_over_limit.log" || { echo "FAIL: bats remove over 65536 bytes said"; cat "$TMP/remove_over_limit.log"; exit 1; }
+# remove-lookalikes: a commented "added", a string value holding "added", an indented "added" stay, only the real line goes (bats#445)
+printf '[dependencies]\n# "added" = ""\n"note" = "added"\n  "added" = ""\n"added" = ""\n"last" = ""\n' > "$TMP/lookalike_before.toml"
+printf '[dependencies]\n# "added" = ""\n"note" = "added"\n  "added" = ""\n"last" = ""\n' > "$TMP/lookalike_expected.toml"
+remove_case lookalikes added "$TMP/lookalike_before.toml" "$TMP/lookalike_expected.toml"
+grep -aq "^removed 'added' from \[dependencies\]$" "$TMP/remove_lookalikes.log" || { echo "FAIL: bats remove among look-alikes said"; cat "$TMP/remove_lookalikes.log"; exit 1; }
+(cd "$TMP/remove_lookalikes" && "$BATS" remove added) > "$TMP/remove_lookalikes_again.log" 2>&1 || true
+grep -aq "^error: package 'added' not found in \[dependencies\]$" "$TMP/remove_lookalikes_again.log" || { echo "FAIL: bats remove of a name left only in look-alikes said"; cat "$TMP/remove_lookalikes_again.log"; exit 1; }
+cmp -s "$TMP/lookalike_expected.toml" "$TMP/remove_lookalikes/bats.toml" || { echo "FAIL: bats remove of a name left only in look-alikes changed the manifest"; exit 1; }
 echo "toml-fields: ok"
