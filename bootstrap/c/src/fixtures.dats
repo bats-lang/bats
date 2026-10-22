@@ -34,7 +34,7 @@ staload "sha256/src/lib.dats"
    nothing else may fail. A substring that another error could also hold is
    not enough. Only patsopt's variable numbers, which change with anything
    before the snippet, are compared as "_": the number of S2EVar(N->, of
-   $N( and of S2Evar(name(N)). An expect that is not "function <name>",
+   S2EVar(N), $N( and of S2Evar(name(N)) and S2Eexi(name(N). An expect that is not "function <name>",
    "line <n>", then the error is an error of the fixture, never a pass.
 
    The project is copied to <work>/app (everything but build, dist, .git,
@@ -336,7 +336,11 @@ in if p15 >= 0 then (if p15 <= b then @(true, w - 1, lineno, p15) else @(false, 
   else @(false, a, 0, a)
 end
 
-(* An identifier's end: letters, digits and '_', from p *)
+(* Whether the byte c is a digit *)
+fn is_digit_byte (c: int): bool = c >= 48 && c <= 57
+
+(* A name's end: letters, digits and '_', and a '$' followed by a digit (a
+   variable's copy: message$15920$15923), from p; fixtures *)
 fun ident_end {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p): [r:nat | p <= r; r <= len] int r =
   if p >= len then p
@@ -344,22 +348,100 @@ fun ident_end {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<
     val c = peek(bv, p, len)
   in
     if (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || (c >= 48 && c <= 57) || c = 95
-    then ident_end(bv, len, p + 1) else p
+    then ident_end(bv, len, p + 1)
+    else if c = 36 then
+      (if p + 1 < len then
+        (if is_digit_byte(peek(bv, p + 1, len)) then ident_end(bv, len, p + 2) else p)
+      else p)
+    else p
   end
+
+(* bv[p, e) appended to out with the digits after each '$' as "_" (fixtures) *)
+fun put_name {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p, e: xi, out: !$B.builder_v >> $B.builder_v): void =
+  if p >= len then ()
+  else if p >= e then ()
+  else let
+    val c = peek(bv, p, len)
+  in
+    if c = 36 then let
+      val () = bput_v(out, "$_")
+    in put_name(bv, len, digits_end(bv, len, p + 1), e, out) end
+    else let
+      val () = put_char_v(out, c)
+    in put_name(bv, len, p + 1, e, out) end
+  end
+
+(* Whether a binder's name may start with the byte c *)
+fn name_start (c: int): bool = (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c = 95
+
+(* The end of an existential's binders at p, <name>(<n>) and, after ", ",
+   the next, ~1 when p holds no binder (fixtures) *)
+fun binder_end {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p): [r:int | r < 0 || (p < r && r <= len)] int r =
+  if p >= len then ~1
+  else if ~(name_start(peek(bv, p, len))) then ~1
+  else let
+    val e = ident_end(bv, len, p)
+    val r = step_text(bv, len, step_digits(bv, len, step_text(bv, len, e, "(")), ")")
+  in
+    if r < 0 then ~1
+    else if r > p then
+      (if r + 2 <= len then
+        (if text_has(bv, len, r, ", ") then
+          (let val r2 = binder_end(bv, len, r + 2) in if r2 >= 0 then r2 else r end)
+        else r)
+      else r)
+    else ~1
+  end
+
+(* The binders at p appended to out, their numbers and the digits after
+   each '$' as "_" (fixtures; the shape binder_end checked) *)
+fun put_binders {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p, out: !$B.builder_v >> $B.builder_v): void = let
+  val e = ident_end(bv, len, p)
+  val () = put_name(bv, len, p, e, out)
+  val () = bput_v(out, "(_)")
+  val r = step_text(bv, len, step_digits(bv, len, step_text(bv, len, e, "(")), ")")
+in
+  if r >= 0 then
+    (if r + 2 <= len then
+      (if r > p then
+        (if text_has(bv, len, r, ", ") then
+          (if binder_end(bv, len, r + 2) >= 0 then let
+            val () = bput_v(out, ", ")
+          in put_binders(bv, len, r + 2, out) end else ())
+        else ())
+      else ())
+    else ())
+  else ()
+end
 
 (* Where a variable number at p ends, to be compared as "_": patsopt
    numbers its variables as it goes, so a change anywhere before the
    snippet renumbers them, and those numbers, only, are:
 
      S2EVar(<n>->           a unification variable (kind 1)
+     S2EVar(<n>)            one not yet solved, with no arrow (kind 5)
      $<n>(                  a dynamic variable: handed$6116(-1) (kind 2)
      S2Evar(<name>(<n>))    a static variable (kind 3)
+     S2Eexi(<name>(<n>), <name>(<n>)
+                            the static variables an existential binds, each
+                            of the list (kind 4): S2Eexi(n(8480), m(8481); ...
+
+   a name may hold copies, message$15920$15923: those digits are numbers too
 
    the end of the match, ~1 when there is none *)
 fn variable_end {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len}
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p): [q:int | q < 0 || (p < q && q <= len)] int q = let
   val raw = (if p >= len then ~1
-    else if text_has(bv, len, p, "S2EVar(") then step_text(bv, len, step_digits(bv, len, p + 7), "->")
+    else if text_has(bv, len, p, "S2EVar(") then let
+      val d = step_digits(bv, len, p + 7)
+      val arrow = step_text(bv, len, d, "->")
+    in
+      (* fixtures: S2EVar(<n>->...) is solved, S2EVar(<n>) is not yet: the bare number ends at its digits *)
+      if arrow >= 0 then arrow else (if byte_at(bv, len, d) = 41 then d else ~1)
+    end
     else if peek(bv, p, len) = 36 then step_text(bv, len, step_digits(bv, len, p + 1), "(")
     else if text_has(bv, len, p, "S2Evar(") then let
       val s = p + 7
@@ -370,6 +452,8 @@ fn variable_end {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len}
         (if s < len then step_text(bv, len, step_digits(bv, len, step_text(bv, len, ident_end(bv, len, s), "(")), "))") else ~1)
       else ~1
     end
+    else if text_has(bv, len, p, "S2Eexi(") then
+      (if p + 7 <= len then binder_end(bv, len, p + 7) else ~1)
     else ~1): int
   val r = g1ofg0(raw)
 in
@@ -379,19 +463,25 @@ end
 (* The kind of the variable number at p (variable_end gave its end) *)
 fn variable_kind {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: xi): int =
-  if text_has(bv, len, p, "S2EVar(") then 1
+  if text_has(bv, len, p, "S2EVar(") then (if step_text(bv, len, step_digits(bv, len, p + 7), "->") >= 0 then 1 else 5)
   else if byte_at(bv, len, p) = 36 then 2
+  else if text_has(bv, len, p, "S2Eexi(") then 4
   else 3
 
 (* What stands for the variable number of the given kind at p *)
 fn put_normal {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len}
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p, kind: int, out: !$B.builder_v >> $B.builder_v): void =
   if kind = 1 then bput_v(out, "S2EVar(_->")
+  else if kind = 5 then bput_v(out, "S2EVar(_")
   else if kind = 2 then bput_v(out, "$_(")
+  else if kind = 4 then let
+    val () = bput_v(out, "S2Eexi(")
+    val s = p + 7
+  in if s <= len then put_binders(bv, len, s, out) else () end
   else let
     val () = bput_v(out, "S2Evar(")
     val s = p + 7
-    val () = (if s <= len then put_range(bv, len, s, ident_end(bv, len, s), out) else ())
+    val () = (if s <= len then put_name(bv, len, s, ident_end(bv, len, s), out) else ())
   in bput_v(out, "(_))") end
 
 (* bv[a, b) appended to out with its variable numbers as "_" *)

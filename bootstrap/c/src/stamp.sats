@@ -371,6 +371,7 @@ staload "_bats_inputs.sats"
 
 
 
+
 fn stamp_check {lph:agz}
   (ph: !$A.borrow(byte, lph, 512), phlen: int, mark: int): void
 
