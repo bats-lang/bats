@@ -468,7 +468,7 @@ in
               val lk = (if locks_project(chosen_command) then project_lock_take(heavy_of(chosen_command))
                 else ProjectUnlocked(SlotNone())): project_lock
             in let val () = (
-              (* A refused machine slot runs nothing (bats-lang/bats#464) *)
+              (* machine-slots: a refused slot runs nothing (bats#464) *)
               if project_lock_refused(lk) then let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)

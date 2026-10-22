@@ -13,8 +13,7 @@
 #    stand-in patsopt) runs in that slot, not waiting for it; a
 #    BATS_SLOT_HELD that no one holds is not trusted.
 #  * BATS_SLOTS unset or empty: nothing is made, read or said.
-#  * A slot that cannot be taken (its directory cannot be made, its file
-#    cannot be opened) refuses the run: exit 1, the message, nothing run.
+#  * machine-slots: a slot that cannot be taken refuses check and run (bats#464).
 # usage: tests/machine-slots/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -172,28 +171,26 @@ if grep -qi "slot" "$TMP/unset.log"; then echo "FAIL: BATS_SLOTS unset, but bats
 # a value that is not a slot count is said, and the command runs
 (cd "$TMP/p4" && BATS_SLOTS=two HOME="$H" "$BATS" check > "$TMP/bad.log" 2>&1) || { echo "FAIL: check with BATS_SLOTS=two"; cat "$TMP/bad.log"; exit 1; }
 grep -q "warning: BATS_SLOTS is not a number from 1 to 64" "$TMP/bad.log" || { echo "FAIL: BATS_SLOTS=two was not said"; cat "$TMP/bad.log"; exit 1; }
-# refused (bats#464): with BATS_SLOTS set, a run that cannot take its slot
-# exits 1 with a message that names what failed, and runs nothing: no
-# patsopt is started and no build/ is made. Each case is a fresh project.
-# Not reproduced: a file system with no locks (flock works on every one
-# this machine has); that refusal is tested at its mapping, in the
-# $UNITTEST of src/helpers.bats (test_refused_slot_is_refused).
-refused() { # <project> <BATS_LOCK_DIR> <what the message must name>
+# machine-slots: with BATS_SLOTS set, a command that cannot take its slot exits 1, names what failed and runs nothing (bats#464)
+refused() { # <project> <BATS_LOCK_DIR> <what the message must name> <command>
   : > "$LOG"
-  rc=0
-  (cd "$TMP/$1" && HOME="$H" BATS_SLOTS=1 BATS_LOCK_DIR="$2" "$BATS" check) > "$TMP/$1.log" 2>&1 || rc=$?
-  [ "$rc" = 1 ] || { echo "FAIL: a refused slot exited $rc, not 1"; cat "$TMP/$1.log"; exit 1; }
-  grep -qF "$3" "$TMP/$1.log" || { echo "FAIL: the refusal does not name \"$3\""; cat "$TMP/$1.log"; exit 1; }
-  grep -q "so bats refuses to run without a machine slot" "$TMP/$1.log" || { echo "FAIL: the refusal does not say bats refuses"; cat "$TMP/$1.log"; exit 1; }
-  [ ! -s "$LOG" ] || { echo "FAIL: a refused run started patsopt"; cat "$LOG"; exit 1; }
-  [ ! -e "$TMP/$1/build" ] || { echo "FAIL: a refused run made build/"; ls -R "$TMP/$1/build"; exit 1; }
+  exit_status=0
+  (cd "$TMP/$1" && HOME="$H" BATS_SLOTS=1 BATS_LOCK_DIR="$2" "$BATS" "$4") > "$TMP/$1.log" 2>&1 || exit_status=$?
+  [ "$exit_status" = 1 ] || { echo "FAIL: a refused $4 exited $exit_status, not 1"; cat "$TMP/$1.log"; exit 1; }
+  grep -qF "$3" "$TMP/$1.log" || { echo "FAIL: the refusal of $4 does not name \"$3\""; cat "$TMP/$1.log"; exit 1; }
+  grep -q "so bats refuses to run without a machine slot" "$TMP/$1.log" || { echo "FAIL: the refusal of $4 does not say bats refuses"; cat "$TMP/$1.log"; exit 1; }
+  [ ! -s "$LOG" ] || { echo "FAIL: a refused $4 started patsopt"; cat "$LOG"; exit 1; }
+  [ ! -e "$TMP/$1/build" ] || { echo "FAIL: a refused $4 made build/"; ls -R "$TMP/$1/build"; exit 1; }
 }
 project p6
 project p7
-# the slots' directory cannot be made: a regular file is where it goes
+project p8
+project p9
 mkdir -p "$TMP/notdir" && : > "$TMP/notdir/file"
-refused p6 "$TMP/notdir/file/slots" "error: cannot make the slots' directory $TMP/notdir/file/slots"
-# slot 0's file cannot be opened: a directory is where it goes
 mkdir -p "$TMP/badslot/slot-0.lock"
-refused p7 "$TMP/badslot" "error: cannot open $TMP/badslot/slot-0.lock"
+refused p6 "$TMP/notdir/file/slots" "error: cannot make the slots' directory $TMP/notdir/file/slots" check
+refused p7 "$TMP/badslot" "error: cannot open $TMP/badslot/slot-0.lock" check
+refused p8 "$TMP/notdir/file/slots" "error: cannot make the slots' directory $TMP/notdir/file/slots" run
+refused p9 "$TMP/badslot" "error: cannot open $TMP/badslot/slot-0.lock" run
+# machine-slots: the no-locks and lock-not-granted refusals are tested at slot_of_found in the $UNITTEST of src/helpers.bats (bats test)
 echo "machine-slots: ok"

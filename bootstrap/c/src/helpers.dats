@@ -11,6 +11,7 @@ staload "process/src/lib.dats"
 staload "result/src/lib.dats"
 staload "str/src/lib.dats"
 staload "sha256/src/lib.dats"
+staload "toml/src/lib.dats"
 (* helpers -- shared utilities for the bats compiler *)
 
 #include "share/atspre_staload.hats"
@@ -27,6 +28,7 @@ staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload SHA = "sha256/src/lib.sats"
+staload T = "toml/src/lib.sats"
 
 (* ============================================================
    Proven byte reads
@@ -2747,11 +2749,7 @@ end
 
 
 
-(* A machine slot: held (its file, open and locked, and its number), the
-   parent's (a bats that holds one started this one, BATS_SLOT_HELD), or
-   none (BATS_SLOTS unset or not a number), or refused: BATS_SLOTS is set
-   and the slot could not be taken, so the run is refused and nothing is
-   run (bats-lang/bats#464, machine-slots.md "Refused") *)
+(* machine-slots: held, the parent's, none (unset or not a number) or refused (set, not takeable: nothing is run, bats#464) *)
 
 
 
@@ -2949,9 +2947,7 @@ fn slot_warn {what_len,why_len:nat} (what: string what_len, i: int, why: string 
   val () = bput_v(m, ", so bats refuses to run without a machine slot (BATS_SLOTS): nothing is run\n")
 in prerr_builder(m) end
 
-(* A slot that cannot be taken refuses the run (bats-lang/bats#464): what
-   it could not do is said, and the slot is SlotRefused. Never SlotNone:
-   that is a run that goes on without the machine's cap. *)
+(* machine-slots: a slot that cannot be taken is SlotRefused, never SlotNone, which runs without the cap (bats#464) *)
 fn slot_refuse {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): machine_slot = let
   val () = slot_warn(what, i, why)
 in SlotRefused() end
@@ -2960,6 +2956,14 @@ fn slot_held (fd: $F.fd, i: int, heavy: heavy_command): machine_slot = let
   val () = note_holder(i, heavy)
   val () = !g_slot_held := i + 1
 in SlotHeld(fd, i) end
+
+(* machine-slots: what trying a slot found becomes a slot; a busy slot after the wait, an unopenable or an unlockable one is refused (bats#464) *)
+fn slot_of_found (found: slot_found, i: int, heavy: heavy_command): machine_slot =
+  case+ found of
+  | ~SlotTaken(fd) => slot_held(fd, i, heavy)
+  | ~SlotBusy() => slot_refuse("cannot take ", i, " (its lock was not granted)")
+  | ~SlotUnopenable() => slot_refuse("cannot open ", i, "")
+  | ~SlotUnlockable() => slot_refuse("cannot lock ", i, " (its file system has no locks)")
 
 implement machine_slot_take (heavy) = let
   val n0 = (case+ heavy of NotHeavy() => 0 | _ => slots_wanted()): int
@@ -2981,9 +2985,9 @@ in
       val @(found, i) = slot_free(0, n)
     in
       case+ found of
-      | ~SlotTaken(fd) => slot_held(fd, i, heavy)
-      | ~SlotUnopenable() => slot_refuse("cannot open ", i, "")
-      | ~SlotUnlockable() => slot_refuse("cannot lock ", i, " (its file system has no locks)")
+      | ~SlotTaken(fd) => slot_of_found(SlotTaken(fd), i, heavy)
+      | ~SlotUnopenable() => slot_of_found(SlotUnopenable(), i, heavy)
+      | ~SlotUnlockable() => slot_of_found(SlotUnlockable(), i, heavy)
       | ~SlotBusy() => let
           (* With more than one slot, a bats that waits waits for slot
              0, though another may be freed first, as gen-pwa test does *)
@@ -3004,11 +3008,7 @@ in
               val () = bput_v(m, ")\n")
             in prerr_builder(m) end)
         in
-          case+ slot_try(0, $F.LockWaits()) of
-          | ~SlotTaken(fd) => slot_held(fd, 0, heavy)
-          | ~SlotBusy() => slot_refuse("cannot take ", 0, " (its lock was not granted)")
-          | ~SlotUnopenable() => slot_refuse("cannot open ", 0, "")
-          | ~SlotUnlockable() => slot_refuse("cannot lock ", 0, " (its file system has no locks)")
+          slot_of_found(slot_try(0, $F.LockWaits()), 0, heavy)
         end
     end
   end
@@ -3098,8 +3098,7 @@ implement project_lock_release (lk) =
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~ProjectUnlocked(slot) => machine_slot_release(slot)
 
-(* Whether the machine slot of lk was refused (bats-lang/bats#464): the
-   command must not run, and bats exits 1 *)
+(* machine-slots: whether lk's slot was refused; the command is not run and bats exits 1 (bats#464) *)
 
 
 implement project_lock_refused (lk) =
@@ -3107,9 +3106,10 @@ implement project_lock_refused (lk) =
   | ProjectLocked(_, slot) => machine_slot_refused(slot)
   | ProjectUnlocked(slot) => machine_slot_refused(slot)
 
-(* A refused slot is refused (bats-lang/bats#464): the test takes the
-   refusal the cannot-lock branch takes, which no file system here
-   produces (flock works on every one this machine has) *)
+(* machine-slots: each way a slot is not taken is refused through slot_of_found, the mapping bats#464 tests *)
+
+
+
 
 
 
@@ -3166,6 +3166,21 @@ in
     val () = $A.free<byte>(content_arr)
   in WriteTooLarge() end
   else write_opened(file_open_m(path_bv, pm, $F.WriteOnly(), $F.CreateOrTruncate(), 420),
+                    content_arr, content_len)
+end
+
+(* Appends to an existing file and never reads it back (manifest) *)
+
+
+
+
+implement append_file_from_builder(path_bv, path_len, content_b) = let
+  val @(content_arr, content_len) = $B.into_arr(content_b)
+in
+  if content_len >= 524288 then let
+    val () = $A.free<byte>(content_arr)
+  in WriteTooLarge() end
+  else write_opened(file_open_n(path_bv, path_len, $F.WriteOnly(), $F.AppendExisting(), 420),
                     content_arr, content_len)
 end
 
@@ -3317,15 +3332,21 @@ fn whole_of_open (opened: $R.result($F.fd, $F.io_error)): whole_file =
         in whole_err($F.OutOfMemory()) end
       | ~$A.arena_some(ar) => let
           val p = $A.arena_alloc<byte>(ar, z + 1)
-          val k = (case+ $F.file_read(fd, p, z + 1) of
-            | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
+          val read_result = $F.file_read(fd, p, z + 1)
           val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         in
-          if k = z then whole_ok(ar, p, z + 1, z)
-          else let
-            val () = $A.arena_return<byte>(ar, p)
-            val () = $A.arena_destroy<byte>(ar)
-          in whole_err($F.DeviceError()) end
+          (* a failed read and a short read are distinct errors (manifest) *)
+          case+ read_result of
+          | ~$R.ok(k) =>
+            if k = z then whole_ok(ar, p, z + 1, z)
+            else let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err($F.DeviceError()) end
+          | ~$R.err(e) => let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err(e) end
         end))
 
 implement read_whole (path, plen) =
@@ -3344,6 +3365,42 @@ implement read_whole_m (path, m) =
 implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
+
+(* Reads a TOML file whole, FileTooLarge over the parser's limit, never cut (manifest) *)
+
+
+
+implement read_toml (pa, m) = let
+  val @(fz_path, bv_path) = $A.freeze<byte>(pa)
+  val whole = read_whole_m(bv_path, m)
+  val () = $A.drop<byte>(fz_path, bv_path)
+  val () = $A.free<byte>($A.thaw<byte>(fz_path))
+in
+  case+ whole of
+  | ~whole_err(e) => $R.err(e)
+  | ~whole_ok(ar, piece, size, length) =>
+    if length > 65536 then let
+      val () = whole_free(ar, piece)
+    in $R.err($F.FileTooLarge()) end
+    else let
+      val @(fz_text, bv_text) = $A.freeze<byte>(piece)
+      val parsed = $T.parse(bv_text, length)
+      val () = $A.drop<byte>(fz_text, bv_text)
+      val () = whole_free(ar, $A.thaw<byte>(fz_text))
+    in
+      case+ parsed of
+      | ~$R.ok(doc) => $R.ok(doc)
+      (* unparsable text is InvalidInput (manifest) *)
+      | ~$R.err(_) => $R.err($F.InvalidInput())
+    end
+end
+
+(* The ./bats.toml, read whole and parsed (manifest) *)
+
+
+implement read_manifest () = let
+  val @(manifest_path, manifest_path_len) = str_into_arr("bats.toml")
+in read_toml(manifest_path, manifest_path_len) end
 
 (* build/.sats_changed is touched BEFORE a .sats is written, so a bats
    killed between the two leaves the stamp ahead (every C is made again),
