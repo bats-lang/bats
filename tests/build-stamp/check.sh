@@ -18,7 +18,7 @@ trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR
 # The variables the C compiler and the wasm linker read (put_cc_environment,
 # bats-lang/bats#322) are unset here, so each case sets its own
-for v in CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH OBJCPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH SDKROOT DEVELOPER_DIR MACOSX_DEPLOYMENT_TARGET IPHONEOS_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET DRIVERKIT_DEPLOYMENT_TARGET RC_DEBUG_PREFIX_MAP RC_DEBUG_OPTIONS CCC_OVERRIDE_OPTIONS CLANG_NO_DEFAULT_CONFIG; do
+for v in LD_LIBRARY_PATH LD_PRELOAD LD_AUDIT LD_BIND_NOW LD_BIND_NOT LD_DYNAMIC_WEAK LD_HWCAP_MASK LD_ORIGIN_PATH GLIBC_TUNABLES DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH DYLD_VERSIONED_LIBRARY_PATH DYLD_FRAMEWORK_PATH DYLD_FALLBACK_FRAMEWORK_PATH DYLD_VERSIONED_FRAMEWORK_PATH DYLD_INSERT_LIBRARIES DYLD_IMAGE_SUFFIX DYLD_ROOT_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH OBJCPLUS_INCLUDE_PATH LIBRARY_PATH COMPILER_PATH SDKROOT DEVELOPER_DIR MACOSX_DEPLOYMENT_TARGET IPHONEOS_DEPLOYMENT_TARGET TVOS_DEPLOYMENT_TARGET WATCHOS_DEPLOYMENT_TARGET DRIVERKIT_DEPLOYMENT_TARGET RC_DEBUG_PREFIX_MAP RC_DEBUG_OPTIONS CCC_OVERRIDE_OPTIONS CLANG_NO_DEFAULT_CONFIG; do
   unset "$v"
 done
 P=$TMP/p
@@ -57,7 +57,7 @@ settle_check() { check "$1" "$TMP/settle.log"; }
 dropped() { grep -ac '^bats: dropping build/' "$1" || true; }
 say() { # <log> <what differs>: the one line that names it
   [ "$(dropped "$1")" = 1 ] || { echo "FAIL: $1 has $(dropped "$1") drop lines, expected 1"; cat "$1"; exit 1; }
-  grep -aqx "bats: dropping build/ (made by another bats: $2)" "$1" || { echo "FAIL: the line does not say '$2'"; cat "$1"; exit 1; }
+  grep -aqx "bats: dropping build/ (made by another bats: $2)" "$1" || { echo "FAIL: the line in $1 does not say '$2'"; cat "$1"; exit 1; }
 }
 kept() { # <log> <what>: nothing was dropped and patsopt did not run
   [ "$(dropped "$1")" = 0 ] || { echo "FAIL: $2 dropped build/"; cat "$1"; exit 1; }
@@ -80,13 +80,15 @@ settle "$P"
 S=$P/build/.bats_stamp
 [ -f "$S" ] || { echo "FAIL: no build/.bats_stamp"; exit 1; }
 [ "$(sed -n 1p "$S")" = "bats-stamp 2" ] || { echo "FAIL: the stamp's first line"; cat "$S"; exit 1; }
-for n in bats patsopt cc flags mark; do
+for n in bats patsopt cc libs link flags mark; do
   [ "$(grep -c "^$n " "$S")" = 1 ] || { echo "FAIL: the stamp has not one line $n"; cat "$S"; exit 1; }
 done
-[ "$(wc -l < "$S")" -eq 6 ] || { echo "FAIL: the stamp has other lines than the format and five"; cat "$S"; exit 1; }
+[ "$(wc -l < "$S")" -eq 8 ] || { echo "FAIL: the stamp has other lines than the format and seven"; cat "$S"; exit 1; }
 grep -q -E '^bats [0-9a-f]{64}$' "$S" || { echo "FAIL: bats is not a digest"; cat "$S"; exit 1; }
 grep -q -E '^patsopt [0-9a-f]{64}$' "$S" || { echo "FAIL: patsopt is not a digest"; cat "$S"; exit 1; }
 grep -q -E '^cc [0-9a-f]{64}$' "$S" || { echo "FAIL: cc is not a digest"; cat "$S"; exit 1; }
+grep -q -E '^libs [0-9a-f]{64}$' "$S" || { echo "FAIL: libs is not a digest"; cat "$S"; exit 1; }
+grep -q -E '^link [0-9a-f]{64}$' "$S" || { echo "FAIL: link is not a digest"; cat "$S"; exit 1; }
 grep -q '^flags .*\$(PATSHOME)' "$S" || { echo "FAIL: flags do not write PATSHOME as a variable"; cat "$S"; exit 1; }
 [ "$(sed -n 's/^mark //p' "$S")" = 0 ] || { echo "FAIL: mark of a native build is not 0"; cat "$S"; exit 1; }
 if grep -q -e "$P" -e "$HOME" -e "$TMP" "$S"; then echo "FAIL: the stamp holds a path"; cat "$S"; exit 1; fi
@@ -99,7 +101,7 @@ kept "$TMP/same.log" "a second build"
 cmp "$S" "$TMP/stamp.good" || { echo "FAIL: the kept stamp changed"; exit 1; }
 
 # One line differs: build/ is dropped and made again, the line named
-for line in bats patsopt cc; do
+for line in bats patsopt cc libs link; do
   edit "$S" "$line" "0000000000000000000000000000000000000000000000000000000000000000"
   build "$P" "$TMP/$line.log"
   say "$TMP/$line.log" "$line differs"
@@ -228,6 +230,100 @@ kept "$TMP/env.sde.log" "a build with another SOURCE_DATE_EPOCH"
 build "$EV" "$TMP/env.ios.log" CPATH= IPHONEOS_DEPLOYMENT_TARGET=17
 say "$TMP/env.ios.log" "cc differs"
 rebuilt "$TMP/env.ios.log" "$COLD" "a build with IPHONEOS_DEPLOYMENT_TARGET"
+
+
+# The shared libraries patsopt loads and the loader's environment
+# (bats-lang/bats#396): a private copy of libgmp, found through
+# LD_LIBRARY_PATH, changed in place (same name, other bytes) is another
+# `libs` line; the same bytes back is another drop, and kept after it. A
+# loader variable of the list, set (empty is not unset), is another `cc`
+# line, and LD_PRELOAD of a shim too.
+LIBDIR=$TMP/privlib
+mkdir -p "$LIBDIR"
+GMP=$(ldd "$HOME/.bats/ats2/bin/patsopt" | grep -o '/[^ ]*libgmp[^ ]*' | head -1)
+[ -n "$GMP" ] && [ -f "$GMP" ] || { echo "FAIL: patsopt does not load a libgmp here"; exit 1; }
+cp "$GMP" "$LIBDIR/$(basename "$GMP")"
+cp "$GMP" "$TMP/libgmp.good"
+P6=$TMP/p6
+mkdir -p "$P6"
+cp -R "$P/bats.toml" "$P/src" "$P6/"
+build "$P6" "$TMP/libs.cold.log" LD_LIBRARY_PATH="$LIBDIR"
+settle "$P6" LD_LIBRARY_PATH="$LIBDIR"
+build "$P6" "$TMP/libs.same.log" LD_LIBRARY_PATH="$LIBDIR"
+kept "$TMP/libs.same.log" "a build with the same private library"
+printf 'x' >> "$LIBDIR/$(basename "$GMP")"
+build "$P6" "$TMP/libs.changed.log" LD_LIBRARY_PATH="$LIBDIR"
+say "$TMP/libs.changed.log" "libs differs"
+rebuilt "$TMP/libs.changed.log" "$COLD" "a build with the private library changed in place"
+settle "$P6" LD_LIBRARY_PATH="$LIBDIR"
+build "$P6" "$TMP/libs.changed.again.log" LD_LIBRARY_PATH="$LIBDIR"
+kept "$TMP/libs.changed.again.log" "the build after the library changed"
+cp "$TMP/libgmp.good" "$LIBDIR/$(basename "$GMP")"
+build "$P6" "$TMP/libs.back.log" LD_LIBRARY_PATH="$LIBDIR"
+say "$TMP/libs.back.log" "libs differs"
+rebuilt "$TMP/libs.back.log" "$COLD" "a build with the private library's bytes restored"
+settle "$P6" LD_LIBRARY_PATH="$LIBDIR"
+build "$P6" "$TMP/libs.back.again.log" LD_LIBRARY_PATH="$LIBDIR"
+kept "$TMP/libs.back.again.log" "the build after the library was restored"
+# LD_PRELOAD of a shim
+printf 'int bats_preload_probe = 1;\n' > "$TMP/shim.c"
+clang -shared -fPIC -o "$TMP/shim.so" "$TMP/shim.c"
+build "$P6" "$TMP/preload.log" LD_LIBRARY_PATH="$LIBDIR" LD_PRELOAD="$TMP/shim.so"
+say "$TMP/preload.log" "cc differs"
+rebuilt "$TMP/preload.log" "$COLD" "a build with LD_PRELOAD"
+# each variable of the list, set to empty, is another cc line
+for v in LD_LIBRARY_PATH LD_PRELOAD LD_AUDIT LD_BIND_NOW LD_BIND_NOT LD_DYNAMIC_WEAK LD_HWCAP_MASK LD_ORIGIN_PATH GLIBC_TUNABLES DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH DYLD_VERSIONED_LIBRARY_PATH DYLD_FRAMEWORK_PATH DYLD_FALLBACK_FRAMEWORK_PATH DYLD_VERSIONED_FRAMEWORK_PATH DYLD_INSERT_LIBRARIES DYLD_IMAGE_SUFFIX DYLD_ROOT_PATH; do
+  build "$P6" "$TMP/loader.$v.log" "$v="
+  say "$TMP/loader.$v.log" "cc differs"
+  build "$P6" "$TMP/loader.$v.back.log"
+  say "$TMP/loader.$v.back.log" "cc differs"
+done
+
+# The native link's linker and the files the link reads
+# (bats-lang/bats#397): a private linker wrapper found through -B (clang
+# looks in the -B directories first) answers --version from a file, so the
+# answer changes with no second linker; its own bytes changed is another
+# linker too; a startup object the link reads, copied beside it, changed in
+# place is another input.
+LDBIN=$TMP/ldbin
+mkdir -p "$LDBIN"
+REAL_LD=$(command -v ld)
+printf '#!/bin/sh\nif [ "$1" = --version ]; then echo "wrapper ld $(cat %s/version)"; exit 0; fi\nexec %s "$@"\n' "$LDBIN" "$REAL_LD" > "$LDBIN/ld"
+chmod +x "$LDBIN/ld"
+echo 1 > "$LDBIN/version"
+mkdir -p "$TMP/ldshim"
+cat > "$TMP/ldshim/clang" <<SHIM
+#!/bin/sh
+exec "$REAL" -B"$LDBIN" "\$@"
+SHIM
+chmod +x "$TMP/ldshim/clang"
+CRT=$(clang -### -o "$TMP/crt.out" "$TMP/shim.so" 2>&1 | grep -o '"[^"]*crtn.o"' | head -1 | tr -d '"')
+[ -f "$CRT" ] || { echo "FAIL: the link line names no crtn.o"; exit 1; }
+cp "$CRT" "$LDBIN/crtn.o"
+P7=$TMP/p7
+mkdir -p "$P7"
+cp -R "$P/bats.toml" "$P/src" "$P7/"
+LDPATH=PATH="$TMP/ldshim:$PATH"
+build "$P7" "$TMP/link.cold.log" "$LDPATH"
+settle "$P7" "$LDPATH"
+build "$P7" "$TMP/link.same.log" "$LDPATH"
+kept "$TMP/link.same.log" "a build with the same linker"
+echo 2 > "$LDBIN/version"
+build "$P7" "$TMP/link.version.log" "$LDPATH"
+say "$TMP/link.version.log" "link differs"
+rebuilt "$TMP/link.version.log" "$COLD" "a build with another linker version"
+settle "$P7" "$LDPATH"
+printf '# another linker\n' >> "$LDBIN/ld"
+build "$P7" "$TMP/link.bytes.log" "$LDPATH"
+say "$TMP/link.bytes.log" "link differs"
+settle "$P7" "$LDPATH"
+printf 'x' >> "$LDBIN/crtn.o"
+build "$P7" "$TMP/link.input.log" "$LDPATH"
+say "$TMP/link.input.log" "link differs"
+rebuilt "$TMP/link.input.log" "$COLD" "a build with a link input changed in place"
+settle "$P7" "$LDPATH"
+build "$P7" "$TMP/link.input.again.log" "$LDPATH"
+kept "$TMP/link.input.again.log" "the build after the link input changed"
 
 # A build/ copied to another directory is kept: no path is in the stamp
 Q=$TMP/elsewhere/deeper/q

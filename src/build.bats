@@ -718,6 +718,12 @@ fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <
   var wc20 = $B.create()
   val ic = in_len - 1
   val () = copy_to_builder_v(in_bv, 0, ic, in_len, wc20)
+  (* -MD -MF: the depfile names the headers read (headers keyword) *)
+  var wc21 = $B.create() val () = bput_v(wc21, "-MD")
+  var wc22 = $B.create() val () = bput_v(wc22, "-MF")
+  var wc23 = $B.create()
+  val () = copy_to_builder_v(out_bv, 0, oc, out_len, wc23)
+  val () = bput_v(wc23, ".d")
   val argv = $L.list_vt_cons(mk_arg(wc1), $L.list_vt_cons(mk_arg(wc2),
     $L.list_vt_cons(mk_arg(wc3), $L.list_vt_cons(mk_arg(wc4),
     $L.list_vt_cons(mk_arg(wc5), $L.list_vt_cons(mk_arg(wc6),
@@ -728,7 +734,8 @@ fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <
     $L.list_vt_cons(mk_arg(wc15), $L.list_vt_cons(mk_arg(wc16),
     $L.list_vt_cons(mk_arg(wc17), $L.list_vt_cons(mk_arg(wc18),
     $L.list_vt_cons(mk_arg(wc19), $L.list_vt_cons(mk_arg(wc20),
-    $L.list_vt_nil()))))))))))))))))))))
+    $L.list_vt_cons(mk_arg(wc21), $L.list_vt_cons(mk_arg(wc22),
+    $L.list_vt_cons(mk_arg(wc23), $L.list_vt_nil())))))))))))))))))))))))
   val rc = run_cmd(bv_exec, argv)
   val () = $A.drop<byte>(fz_exec, bv_exec)
   val () = $A.free<byte>($A.thaw<byte>(fz_exec))
@@ -1148,6 +1155,8 @@ implement do_build {lt} (release, build_target, to_c, tclen) =
   val is_unsafe = read_unsafe_flag()
   (* This target and mode's cache in build/ (cache_swap) *)
   val () = cache_swap(target_mark(build_target, is_test_mode()))
+  (* the digest table is per build (digest keyword) *)
+  val () = digests_forget()
   (* Step 1: mkdir build directories *)
   var mb1 : $B.builder_v = $B.create()
   val () = bput_v(mb1, "build/src/bin")

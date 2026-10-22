@@ -301,4 +301,22 @@ wasm_runs=$(wc -l < "$CC_LOG")
 PATH="$TMP/shim:$PATH" run w1.log build --only debug --only wasm
 PATH="$TMP/shim:$PATH" run w2.log build --only release --only wasm
 [ "$(wc -l < "$CC_LOG")" = "$wasm_runs" ] || { echo "FAIL: a wasm object was made again by a build of the other profile"; cat "$CC_LOG"; cat w1.log w2.log; exit 1; }
+# A generated C is digested once for the native object and the wasm object
+# that both key it (bats-lang/bats#398): in a build of the wasm bin the
+# dependencies' C are under a native key and a wasm key, and -v says
+# `~ digested <path>` for each file read and hashed
+PATH="$TMP/shim:$PATH" run d0.log build --only debug --only wasm
+PATH="$TMP/shim:$PATH" run d1.log build --only debug --only wasm
+quiet d1.log "the wasm build after those"
+[ "$(grep -ac '~ digested build/bats_modules/plain/src/lib_dats.c' d1.log || true)" = 1 ] || { echo "FAIL: plain's C was not digested exactly once in one build"; grep -a digested d1.log; exit 1; }
+[ -z "$(grep -a '~ digested .*_dats.c' d1.log | sort | uniq -d)" ] || { echo "FAIL: a C was digested twice in one build"; grep -a digested d1.log; exit 1; }
+# and a C changed in place still makes both of its objects again
+tmpl_body() { # <h's value>: plain's lib as the last tmpl made it, with h another value (the same size)
+  printf '#pub fun h (): int\n#pub fun h2 (): int\n#pub fun {a:t@ype} tmpl_id (x: a): a\n\nimplement h () = %s\nimplement h2 () = 6\nimplement {a} tmpl_id (x) = x\n' "$1" > "$TMP/plain/src/lib.bats"
+}
+tmpl_body 3
+: > "$CC_LOG"
+PATH="$TMP/shim:$PATH" run d2.log build --only debug --only wasm
+grep -aq -- '+ cc -c -o build/bats_modules/plain/src/lib_dats.o' d2.log || { echo "FAIL: a changed C did not make its native object again"; cat d2.log; exit 1; }
+grep -aq 'plain/src/lib_dats.wasm.o' "$CC_LOG" || { echo "FAIL: a changed C did not make its wasm object again"; cat "$CC_LOG"; exit 1; }
 echo "build-content-keys: ok"

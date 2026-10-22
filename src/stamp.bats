@@ -11,11 +11,17 @@
                shasum -a 256 where it is absent) of bin/patsopt, prelude,
                libats, share and ccomp (cache.bats's toolchain_digest;
                bats-lang/bats#318: cksum's 32 bits missed a change)>
-     cc       <sha256 of clang --version and clang -dumpmachine, of
-               wasm-ld --version for a wasm mark, and of the environment
-               clang reads: CPATH, LIBRARY_PATH and the others named in
-               put_cc_environment, each a name and its value, digested and
-               not stored (bats-lang/bats#322)>
+     cc       <sha256 of clang --version and clang -dumpmachine, and of the
+               environment clang and the loader read: CPATH, LIBRARY_PATH,
+               LD_PRELOAD and the others named in put_cc_environment, each a
+               name and its value, digested and not stored (bats#322, #396)>
+     libs     <sha256 of the sorted sha256 of each shared library file the
+               loader resolves for bin/patsopt (ldd, or otool -L), no path
+               (bats-lang/bats#396)>
+     link     <sha256 of the linker of the mark: for a native mark the
+               linker clang -### names (version and sha256) and the sha256 of
+               each file a link reads, sorted, no path; for a wasm mark
+               wasm-ld --version (bats-lang/bats#397)>
      flags    <the flag templates patsopt and cc are run with for this
                mark, PATSHOME written $(PATSHOME)>
      mark     <the target and mode digit of build/.bats_target>
@@ -110,15 +116,33 @@ fn put_file_digest {sn:nat | sn < $B.BUILDER_CAP}
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in ok end
 
-(* What build/.bats_cc is made of: the C compiler's version and target,
-   and the wasm linker's for a wasm mark, without the lines that name
-   where they are installed (a path is not part of what they are) *)
-fn cc_listed (mark: int): bool = let
+(* build/.bats_cc: the C compiler's version and target, install paths left out (stamp keyword) *)
+fn cc_listed (): bool = let
+  val none = $A.alloc<byte>(4096)
+  val r = sh_capture("{ clang --version; clang -dumpmachine; } 2>&1 | grep -v -e '^InstalledDir:' -e '^Configuration file:' > build/.bats_cc",
+    $L.list_vt_nil(), none)
+  val () = $A.free<byte>(none)
+in r.0 = 0 end
+
+(* build/.bats_libs: the sha256 of each shared library patsopt loads, sorted, no path (stamp keyword) *)
+#define LIBS_SCRIPT "p=\"$1/bin/patsopt\"\nif command -v sha256sum >/dev/null 2>&1; then h=sha256sum; else h='shasum -a 256'; fi\nraw=build/.bats_libs.raw\nrm -f \"$raw\" \"$raw.todo\" \"$raw.new\" \"$raw.known\" \"$raw.sorted\"\nif command -v ldd >/dev/null 2>&1; then\n  ldd \"$p\" > \"$raw\" 2>&1; rc=$?\n  if [ $rc -ne 0 ] && ! grep -q 'not a dynamic' \"$raw\"; then echo \"error: ldd cannot list the shared libraries patsopt loads, so the stamp cannot be made from them\" >&2; exit 1; fi\n  { grep -o '/[^ ]*' \"$raw\" | LC_ALL=C sort -u | while IFS= read -r f; do if [ -f \"$f\" ]; then $h \"$f\"; fi; done | cut -d ' ' -f1 | LC_ALL=C sort; grep 'not found' \"$raw\" | cut -d ' ' -f1 | LC_ALL=C sort; } > build/.bats_libs\nelif command -v otool >/dev/null 2>&1; then\n  printf '%s\\n' \"$p\" > \"$raw.todo\"; : > \"$raw.known\"\n  while [ -s \"$raw.todo\" ]; do\n    : > \"$raw.new\"\n    while IFS= read -r f; do otool -L \"$f\" 2>/dev/null | tail -n +2 | cut -d ' ' -f1 | tr -d '\\t' >> \"$raw.new\"; done < \"$raw.todo\"\n    LC_ALL=C sort -u \"$raw.new\" > \"$raw.sorted\"\n    LC_ALL=C comm -23 \"$raw.sorted\" \"$raw.known\" > \"$raw.todo\"\n    cat \"$raw.todo\" >> \"$raw.known\"; LC_ALL=C sort -u \"$raw.known\" -o \"$raw.known\"\n  done\n  { while IFS= read -r f; do if [ -f \"$f\" ]; then $h \"$f\" | cut -d ' ' -f1; else echo \"no file, system build $(sw_vers -buildVersion 2>/dev/null)\"; fi; done < \"$raw.known\"; } | LC_ALL=C sort -u > build/.bats_libs\nelse\n  echo \"error: neither ldd nor otool is found, so the shared libraries patsopt loads cannot be listed and the stamp cannot be made\" >&2; exit 1\nfi\nrm -f \"$raw\" \"$raw.todo\" \"$raw.new\" \"$raw.known\" \"$raw.sorted\"\n"
+
+fn libs_listed {lph:agz}(ph: !$A.borrow(byte, lph, 512), phlen: int): bool = let
+  var home : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(ph, 0, phlen, 512, home)
+  val none = $A.alloc<byte>(4096)
+  val r = sh_capture(LIBS_SCRIPT, $L.list_vt_cons(mk_arg(home), $L.list_vt_nil()), none)
+  val () = $A.free<byte>(none)
+in r.0 = 0 end
+
+(* build/.bats_link: the mark's linker and the files a native link reads, by content (stamp keyword) *)
+#define LINK_SCRIPT "if command -v sha256sum >/dev/null 2>&1; then h=sha256sum; else h='shasum -a 256'; fi\nprobe=build/.bats_link_probe\nout=build/.bats_link\nif [ \"$1\" = wasm ]; then\n  wasm-ld --version 2>&1 | grep -v -e '^InstalledDir:' -e '^Configuration file:' > \"$out\"\n  exit $?\nfi\nprintf 'int main (void) { return 0; }\\n' > \"$probe.c\" || exit 1\nclang -c -o \"$probe.o\" \"$probe.c\" || exit 1\nld=$(clang -### -o \"$probe.out\" \"$probe.o\" 2>&1 | grep '^ \"' | tail -n 1 | cut -d '\"' -f 2)\n[ -n \"$ld\" ] || { echo \"error: clang -### does not name the linker of a native link, so the stamp cannot be made from it\" >&2; exit 1; }\nclang -Wl,-t -o \"$probe.out\" \"$probe.o\" > \"$probe.trace\" 2>&1 || { echo \"error: a native link of an empty program fails, so the stamp cannot be made from its inputs\" >&2; cat \"$probe.trace\" >&2; exit 1; }\n{\n  { \"$ld\" --version || \"$ld\" -v; } 2>&1 | grep -v -e '^InstalledDir:' -e '^Configuration file:'\n  $h \"$ld\" | cut -d ' ' -f1\n  grep -o '/[^ ()]*' \"$probe.trace\" | LC_ALL=C sort -u | while IFS= read -r f; do if [ -f \"$f\" ]; then $h \"$f\"; fi; done | cut -d ' ' -f1 | LC_ALL=C sort\n} > \"$out\"\nrm -f \"$probe.c\" \"$probe.o\" \"$probe.out\" \"$probe.trace\"\n"
+
+fn link_listed (mark: int): bool = let
   var which : $B.builder_v = $B.create()
   val () = (if mark_is_wasm(mark) then bput_v(which, "wasm") else bput_v(which, "native"))
   val none = $A.alloc<byte>(4096)
-  val r = sh_capture("{ clang --version; clang -dumpmachine; if [ \"$1\" = wasm ]; then wasm-ld --version; fi; } 2>&1 | sed -e '/^InstalledDir:/d' -e '/^Configuration file:/d' > build/.bats_cc",
-    $L.list_vt_cons(mk_arg(which), $L.list_vt_nil()), none)
+  val r = sh_capture(LINK_SCRIPT, $L.list_vt_cons(mk_arg(which), $L.list_vt_nil()), none)
   val () = $A.free<byte>(none)
 in r.0 = 0 end
 
@@ -254,6 +278,24 @@ fn put_cc_environment (c: !$SHA.ctx): bool =
   && hash_env_var("RC_DEBUG_OPTIONS", c)
   && hash_env_var("CCC_OVERRIDE_OPTIONS", c)
   && hash_env_var("CLANG_NO_DEFAULT_CONFIG", c)
+  && hash_env_var("LD_LIBRARY_PATH", c)
+  && hash_env_var("LD_PRELOAD", c)
+  && hash_env_var("LD_AUDIT", c)
+  && hash_env_var("LD_BIND_NOW", c)
+  && hash_env_var("LD_BIND_NOT", c)
+  && hash_env_var("LD_DYNAMIC_WEAK", c)
+  && hash_env_var("LD_HWCAP_MASK", c)
+  && hash_env_var("LD_ORIGIN_PATH", c)
+  && hash_env_var("GLIBC_TUNABLES", c)
+  && hash_env_var("DYLD_LIBRARY_PATH", c)
+  && hash_env_var("DYLD_FALLBACK_LIBRARY_PATH", c)
+  && hash_env_var("DYLD_VERSIONED_LIBRARY_PATH", c)
+  && hash_env_var("DYLD_FRAMEWORK_PATH", c)
+  && hash_env_var("DYLD_FALLBACK_FRAMEWORK_PATH", c)
+  && hash_env_var("DYLD_VERSIONED_FRAMEWORK_PATH", c)
+  && hash_env_var("DYLD_INSERT_LIBRARIES", c)
+  && hash_env_var("DYLD_IMAGE_SUFFIX", c)
+  && hash_env_var("DYLD_ROOT_PATH", c)
 
 (* The cc line's digest, 64 hex digits appended to out: the sha256 of
    build/.bats_cc's digest and of the environment above. false when the
@@ -272,12 +314,18 @@ fn put_cc_digest (out: !$B.builder_v >> $B.builder_v): bool = let
   val () = $A.free<byte>($A.thaw<byte>(fz_d))
 in listed && env end
 
+(* The sha256 of build/.bats_libs (stamp keyword) *)
+fn put_libs_digest (out: !$B.builder_v >> $B.builder_v): bool = put_file_digest("build/.bats_libs", out)
+
+(* The sha256 of build/.bats_link (stamp keyword) *)
+fn put_link_digest (out: !$B.builder_v >> $B.builder_v): bool = put_file_digest("build/.bats_link", out)
+
 (* The script that judges build/ against build/.bats_stamp.new, the stamp
    this bats would write, with the mark's digit as $1. Nothing to judge
    (no .bats_target and no stamp): the new stamp is put in place. Else
    the first of the format, the lines in order, and the mark that
    differs is named on stdout, and build/ but its stash goes. *)
-#define JUDGE "cd build || exit 1\nif [ ! -f .bats_target ] && [ ! -f .bats_stamp ]; then mv -f .bats_stamp.new .bats_stamp; exit 0; fi\nwhy=\nif [ ! -f .bats_stamp ]; then why='no stamp'\nelif [ \"$(sed -n 1p .bats_stamp)\" != 'bats-stamp 2' ] || sed -n '2,$p' .bats_stamp | grep -q -v -E '^[^ ]+ .+$'; then why='the stamp format differs'\nelse\n  for n in bats patsopt cc flags mark; do\n    a=$(sed -n \"s/^$n //p\" .bats_stamp); b=$(sed -n \"s/^$n //p\" .bats_stamp.new)\n    if [ \"$a\" != \"$b\" ]; then why=\"$n differs\"; break; fi\n  done\nfi\nif [ -z \"$why\" ] && [ \"$(cat .bats_target 2>/dev/null)\" != \"$1\" ]; then why='mark differs'; fi\nif [ -z \"$why\" ] && ! cmp -s .bats_stamp .bats_stamp.new; then why='the stamp differs'; fi\nif [ -n \"$why\" ]; then\n  echo \"bats: dropping build/ (made by another bats: $why)\"\n  find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_stamp.new -exec rm -rf {} +\n  mkdir -p src/bin bats_modules\nfi\nmv -f .bats_stamp.new .bats_stamp\n"
+#define JUDGE "cd build || exit 1\nif [ ! -f .bats_target ] && [ ! -f .bats_stamp ]; then mv -f .bats_stamp.new .bats_stamp; exit 0; fi\nwhy=\nif [ ! -f .bats_stamp ]; then why='no stamp'\nelif [ \"$(sed -n 1p .bats_stamp)\" != 'bats-stamp 2' ] || sed -n '2,$p' .bats_stamp | grep -q -v -E '^[^ ]+ .+$'; then why='the stamp format differs'\nelse\n  for n in bats patsopt cc libs link flags mark; do\n    a=$(sed -n \"s/^$n //p\" .bats_stamp); b=$(sed -n \"s/^$n //p\" .bats_stamp.new)\n    if [ \"$a\" != \"$b\" ]; then why=\"$n differs\"; break; fi\n  done\nfi\nif [ -z \"$why\" ] && [ \"$(cat .bats_target 2>/dev/null)\" != \"$1\" ]; then why='mark differs'; fi\nif [ -z \"$why\" ] && ! cmp -s .bats_stamp .bats_stamp.new; then why='the stamp differs'; fi\nif [ -n \"$why\" ]; then\n  echo \"bats: dropping build/ (made by another bats: $why)\"\n  find . -mindepth 1 -maxdepth 1 ! -name .stash ! -name .bats_valid ! -name .bats_stamp.new -exec rm -rf {} +\n  mkdir -p src/bin bats_modules\nfi\nmv -f .bats_stamp.new .bats_stamp\n"
 
 (* What became of the stamp this bats would write for the mark, into
    build/.bats_stamp.new: written; a part of it could not be had (said
@@ -295,13 +343,17 @@ fn stamp_write {lph:agz}
   val () = bput_v(st, "\npatsopt ")
   val tool = toolchain_digest(ph, phlen, st)
   val () = bput_v(st, "\ncc ")
-  val cc = (if cc_listed(mark) then put_cc_digest(st) else false): bool
+  val cc = (if cc_listed() then put_cc_digest(st) else false): bool
+  val () = bput_v(st, "\nlibs ")
+  val libs = (if libs_listed(ph, phlen) then put_libs_digest(st) else false): bool
+  val () = bput_v(st, "\nlink ")
+  val link = (if link_listed(mark) then put_link_digest(st) else false): bool
   val () = bput_v(st, "\nflags ")
   val () = (if mark_is_wasm(mark) then bput_v(st, FLAGS_WASM) else bput_v(st, FLAGS_NATIVE))
   val () = bput_v(st, "\nmark ")
   val () = put_int_v(st, mark)
   val () = put_char_v(st, 10)
-  val ok = (if tool && cc then true else false): bool
+  val ok = (if tool && libs && cc && link then true else false): bool
   val p = str_to_path_arr("build/.bats_stamp.new")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
   val stv = st
@@ -319,7 +371,7 @@ implement stamp_check (ph, phlen, mark) =
   case+ stamp_write(ph, phlen, mark) of
   | StampPartMissing() => let
     val () = set_build_err()
-  in prerr! ("error: the stamp of build/ (bats, the toolchain and the C compiler) cannot be made: the C compiler's version or environment could not be read (a message above says which)\n") end
+  in prerr! ("error: the stamp of build/ (bats, the toolchain and the C compiler) cannot be made: a part of it could not be read (the C compiler's version or environment, patsopt's shared libraries or the linker; a message above says which)\n") end
   (* write_settle said why, and failed the build *)
   | StampNotWritten() => ()
   | StampMade() => let

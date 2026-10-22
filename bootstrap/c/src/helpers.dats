@@ -1217,33 +1217,169 @@ implement stamp_digest_hashes(b) = let
   val () = hash_of_built(bats_stamp_path(), b)
 in put_char_v(b, 10) end
 
+(* Headers an object's compile read, from its depfile, in its key (headers keyword, bats#394) *)
 
+(* A byte that ends a name in a depfile *)
+fn dep_blank (b: int): bool = (b = 32 || b = 9 || b = 10 || b = 13)
 
+(* Where the names of a depfile c[0, n) begin, after the target's colon, or ~1 (headers keyword) *)
+fun dep_after_target {l:agz}{m:pos}{n:nat | n <= m}{i:nat | i <= n} .<n - i>.
+  (c: !$A.borrow(byte, l, m), n: int n, i: int i): [r:int | ~1 <= r; r <= n] int r =
+  if i >= n then ~1
+  else if peek(c, i, n) = 58 && (i + 1 >= n || dep_blank(peek(c, i + 1, n))) then i + 1
+  else dep_after_target(c, n, i + 1)
 
-implement input_digest_sizes(kind, in_bv, m, b) = let
-  val () = key_profile_line(kind, b)
-  val z = size_of_file(in_bv, m)
-  val () = put_int_v(b, z)
-  val () = put_char_v(b, 10)
-  val () = stamp_digest_sizes(b)
-in $AR.gte_int_int(z, 0) end
+(* The name read so far, a line feed after it, appended to names when it is
+   not empty *)
+fn dep_flush (token: $B.builder_v, names: !$B.builder_v >> $B.builder_v): void =
+  if $B.length(token) > 0 then let
+    val () = append_builder(names, token)
+  in put_char_v(names, 10) end
+  else $B.builder_free(token)
 
+(* The names of c[i, n) one to a line in names, as make escapes them (headers keyword) *)
+fun dep_scan {l:agz}{m:pos}{n:nat | n <= m}{i:nat | i <= n} .<n - i>.
+  (c: !$A.borrow(byte, l, m), n: int n, i: int i, token: $B.builder_v,
+   names: !$B.builder_v >> $B.builder_v): void =
+  if i >= n then dep_flush(token, names)
+  else let
+    val b = peek(c, i, n)
+  in
+    if i + 1 < n then let
+      val nx = peek(c, i + 1, n)
+    in
+      if b = 92 && nx = 10 then let
+        val () = dep_flush(token, names)
+      in dep_scan(c, n, i + 2, $B.create(), names) end
+      else if b = 92 && nx = 13 then
+        (if i + 2 < n then
+          (if peek(c, i + 2, n) = 10 then let
+            val () = dep_flush(token, names)
+          in dep_scan(c, n, i + 3, $B.create(), names) end
+          else let
+            var more = token
+            val () = put_char_v(more, b)
+          in dep_scan(c, n, i + 1, more, names) end)
+        else let
+          var more = token
+          val () = put_char_v(more, b)
+        in dep_scan(c, n, i + 1, more, names) end)
+      else if b = 92 && (nx = 32 || nx = 35 || nx = 92) then let
+        var more = token
+        val () = put_char_v(more, nx)
+      in dep_scan(c, n, i + 2, more, names) end
+      else if b = 36 && nx = 36 then let
+        var more = token
+        val () = put_char_v(more, 36)
+      in dep_scan(c, n, i + 2, more, names) end
+      else if dep_blank(b) then let
+        val () = dep_flush(token, names)
+      in dep_scan(c, n, i + 1, $B.create(), names) end
+      else let
+        var more = token
+        val () = put_char_v(more, b)
+      in dep_scan(c, n, i + 1, more, names) end
+    end
+    else if dep_blank(b) then let
+      val () = dep_flush(token, names)
+    in dep_scan(c, n, i + 1, $B.create(), names) end
+    else let
+      var more = token
+      val () = put_char_v(more, b)
+    in dep_scan(c, n, i + 1, more, names) end
+  end
 
+(* <out>.d for the NUL-terminated path out (headers keyword) *)
+fn dep_file_path {lo:agz}{n:pos}{m:nat | m <= n} (out_bv: !$A.borrow(byte, lo, n), m: int m): $B.builder_v = let
+  var kb : $B.builder_v = $B.create()
+  val z = find_null_bv_from(out_bv, 0, m)
+  val () = copy_to_builder_v(out_bv, 0, z, m, kb)
+  val () = bput_v(kb, ".d")
+  val () = put_char_v(kb, 0)
+in kb end
 
-
-implement input_digest_hashes(kind, in_bv, m, b) = let
-  val ok = put_file_sha256_m(in_bv, m, b)
-  val () = put_char_v(b, 10)
-  val () = stamp_digest_hashes(b)
+(* The files the compile of out read, one to a line in names; false when its depfile cannot be read (headers keyword) *)
+fn dep_names {lo:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (out_bv: !$A.borrow(byte, lo, n), m: int m, names: !$B.builder_v >> $B.builder_v): bool = let
+  val @(da, dl) = $B.into_arr(dep_file_path(out_bv, m))
+  val @(fz_d, bv_d) = $A.freeze<byte>(da)
+  val ok = (case+ read_whole_m(bv_d, dl) of
+    | ~whole_err(_) => false
+    | ~whole_ok(ar, piece, size, count) => let
+        val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+        val first = dep_after_target(bv_c, count, 0)
+        val () = (if first >= 0 then dep_scan(bv_c, count, first, $B.create(), names) else ())
+        val () = $A.drop<byte>(fz_c, bv_c)
+        val () = whole_free(ar, $A.thaw<byte>(fz_c))
+      in first >= 0 end)
+  val () = $A.drop<byte>(fz_d, bv_d)
+  val () = $A.free<byte>($A.thaw<byte>(fz_d))
 in ok end
+
+(* The size or hash line of the file at p, none for the C itself (headers keyword) *)
+fn header_one {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (is_source: bool, p: !$A.borrow(byte, lp, n), m: int m, hashes: bool,
+   out: !$B.builder_v >> $B.builder_v): bool =
+  if is_source then true
+  else if hashes then kept_hash(p, m, out)
+  else kept_size(p, m, out)
+
+(* The size or hash lines of the files in heads[i, hm), the C at skip left out; false when one cannot be read (headers keyword) *)
+fun header_lines {lh,ls:agz}{nh,ns:pos}{hm:nat | hm <= nh}{sm:nat | sm <= ns}{i:nat | i <= hm} .<hm - i>.
+  (heads: !$A.borrow(byte, lh, nh), hm: int hm, i: int i, line: $B.builder_v,
+   skip: !$A.borrow(byte, ls, ns), sm: int sm, hashes: bool,
+   out: !$B.builder_v >> $B.builder_v, ok: bool): bool =
+  if i >= hm then let
+    val () = $B.builder_free(line)
+  in ok end
+  else let
+    val b = byte2int0($A.read<byte>(heads, i))
+  in
+    if b = 10 then let
+      val () = put_char_v(line, 0)
+      val @(pa, pl) = $B.into_arr(line)
+      val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+      (* both are a path and its NUL *)
+      val is_source = (if pl = sm then same_bytes(bv_p, skip, sm, 0) else false): bool
+      val one = header_one(is_source, bv_p, pl, hashes, out)
+      val () = $A.drop<byte>(fz_p, bv_p)
+      val () = $A.free<byte>($A.thaw<byte>(fz_p))
+    in header_lines(heads, hm, i + 1, $B.create(), skip, sm, hashes, out, ok && one) end
+    else let
+      var more = line
+      val () = put_char_v(more, b)
+    in header_lines(heads, hm, i + 1, more, skip, sm, hashes, out, ok) end
+  end
+
+
+
+
+
+implement input_digest_sizes(kind, in_bv, m, heads_bv, hm, b) = let
+  val () = key_profile_line(kind, b)
+  val c_ok = kept_size(in_bv, m, b)
+  val heads_ok = header_lines(heads_bv, hm, 0, $B.create(), in_bv, m, false, b, true)
+  val () = stamp_digest_sizes(b)
+in c_ok && heads_ok end
+
+
+
+
+
+implement input_digest_hashes(kind, in_bv, m, heads_bv, hm, b) = let
+  val c_ok = kept_hash(in_bv, m, b)
+  val heads_ok = header_lines(heads_bv, hm, 0, $B.create(), in_bv, m, true, b, true)
+  val () = stamp_digest_hashes(b)
+in c_ok && heads_ok end
 
 (* Sizes and then hashes, for a caller that has no use for the sizes alone *)
 
 
 
-implement input_digest(kind, in_bv, m, b) = let
-  val sized = input_digest_sizes(kind, in_bv, m, b)
-in if sized then input_digest_hashes(kind, in_bv, m, b) else false end
+
+implement input_digest(kind, in_bv, m, heads_bv, hm, b) = let
+  val sized = input_digest_sizes(kind, in_bv, m, heads_bv, hm, b)
+in if sized then input_digest_hashes(kind, in_bv, m, heads_bv, hm, b) else false end
 
 (* The one reader of an output's key: fresh when <output>.key is the key
    the input gives now (see the comment above). Every object kind comes
@@ -1258,15 +1394,20 @@ implement key_fresh(kind, out_b, in_b) = let
   val there = file_exists_m(bv_o, ol)
   val @(ka, kl) = $B.into_arr(key_file_path(bv_o, ol))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  (* the headers the compile read, from its depfile *)
+  var hn : $B.builder_v = $B.create()
+  val listed = (if there then dep_names(bv_o, ol, hn) else false): bool
+  val @(hna, hnl) = $B.into_arr(hn)
+  val @(fz_hn, bv_hn) = $A.freeze<byte>(hna)
   (* sizes first: a different size is a changed file, with no hashing *)
   var sb : $B.builder_v = $B.create()
-  val sized = input_digest_sizes(kind, bv_i, il, sb)
+  val sized = (if listed then input_digest_sizes(kind, bv_i, il, bv_hn, hnl, sb) else false): bool
   val @(sa2, slen) = $B.into_arr(sb)
   val @(fz_sz, bv_sz) = $A.freeze<byte>(sa2)
   val same_sizes = (if there && sized then file_has_prefix(bv_k, kl, bv_sz, slen) else false): bool
   var hb : $B.builder_v = $B.create()
   val () = (if same_sizes then copy_to_builder_v(bv_sz, 0, slen, slen, hb) else ())
-  val hashed = (if same_sizes then input_digest_hashes(kind, bv_i, il, hb) else false): bool
+  val hashed = (if same_sizes then input_digest_hashes(kind, bv_i, il, bv_hn, hnl, hb) else false): bool
   val @(ha2, hlen) = $B.into_arr(hb)
   val @(fz_h, bv_h) = $A.freeze<byte>(ha2)
   val result = (if hashed then file_has_bytes_m(bv_k, kl, bv_h, hlen) else false): bool
@@ -1274,6 +1415,8 @@ implement key_fresh(kind, out_b, in_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_h))
   val () = $A.drop<byte>(fz_sz, bv_sz)
   val () = $A.free<byte>($A.thaw<byte>(fz_sz))
+  val () = $A.drop<byte>(fz_hn, bv_hn)
+  val () = $A.free<byte>($A.thaw<byte>(fz_hn))
   val () = $A.drop<byte>(fz_k, bv_k)
   val () = $A.free<byte>($A.thaw<byte>(fz_k))
   val () = $A.drop<byte>(fz_o, bv_o)
@@ -1287,8 +1430,14 @@ in result end
 
 
 implement key_record(kind, out_bv, om, in_bv, im) = let
+  var hn : $B.builder_v = $B.create()
+  val listed = dep_names(out_bv, om, hn)
+  val @(hna, hnl) = $B.into_arr(hn)
+  val @(fz_hn, bv_hn) = $A.freeze<byte>(hna)
   var tb : $B.builder_v = $B.create()
-  val ok = input_digest(kind, in_bv, im, tb)
+  val ok = (if listed then input_digest(kind, in_bv, im, bv_hn, hnl, tb) else false): bool
+  val () = $A.drop<byte>(fz_hn, bv_hn)
+  val () = $A.free<byte>($A.thaw<byte>(fz_hn))
   val tbv = tb
   val @(ka, kl) = $B.into_arr(key_file_path(out_bv, om))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
@@ -2673,8 +2822,17 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val () = copy_to_builder_v(ph, 0, phlen, 512, b7)
   val () = bput_v(b7, "/ccomp/runtime")
   (* Build argv: clang -c -o <out> <in> [opt_flags] -I<ph> -I<ph>/ccomp/runtime *)
+  (* -MD -MF: the depfile names the headers read (headers keyword) *)
+  var b8 = $B.create()
+  val () = bput_v(b8, "-MD")
+  var b9 = $B.create()
+  val () = bput_v(b9, "-MF")
+  var b10 = $B.create()
+  val () = copy_to_builder_v(out_bv, 0, cc_out_clen, out_len, b10)
+  val () = bput_v(b10, ".d")
   val tail = $L.list_vt_cons(mk_arg(b6),
-    $L.list_vt_cons(mk_arg(b7), $L.list_vt_nil()))
+    $L.list_vt_cons(mk_arg(b7), $L.list_vt_cons(mk_arg(b8),
+    $L.list_vt_cons(mk_arg(b9), $L.list_vt_cons(mk_arg(b10), $L.list_vt_nil())))))
   fun append_vt {m:nat} .<m>.
     (xs: $L.list_vt($P.arg_entry, m),
      ys: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
@@ -3910,6 +4068,11 @@ fn digest_miss {lp,li,lt:agz}{n:pos}{m:nat | m <= n; m <= 524288}{k:nat | k <= 5
    out: !$B.builder_v >> $B.builder_v): [u2:nat | u2 <= 1048576] @(bool, int u2) = let
   var sb : $B.builder_v = $B.create()
   var hb : $B.builder_v = $B.create()
+  (* -v says each file really hashed (digest keyword) *)
+  val () = (if is_verbose() then let
+      val () = print! ("  ~ digested ")
+      val () = print_borrow(p, 0, k, m)
+    in print_newline() end else ())
   val a = memo_size_raw(p, m, sb)
   val b = memo_hash_raw(p, m, hb)
   val both = (a && b): bool
@@ -3973,6 +4136,17 @@ implement memo_entry_size(p, m, out) =
 implement memo_entry_hash(p, m, out) =
   if ~digest_kept(p, m) then memo_hash_raw(p, m, out)
   else digest_entry(p, m, true, out)
+
+(* Size and hash line of a file kept in the run's table whatever its name, a C or a header (digest keyword, bats#398) *)
+
+
+
+implement kept_size(p, m, out) = digest_entry(p, m, false, out)
+
+
+
+
+implement kept_hash(p, m, out) = digest_entry(p, m, true, out)
 
 (* Whether the file at path_bv begins with bv[0, len) *)
 

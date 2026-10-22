@@ -1216,8 +1216,6 @@ fn stamp_digest_hashes (b: !$B.builder_v >> $B.builder_v): void
 
 
 
-fn input_digest_sizes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -1227,8 +1225,6 @@ fn input_digest_sizes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
 
 
 
-fn input_digest_hashes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -1237,8 +1233,148 @@ fn input_digest_hashes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
 
 
 
-fn input_digest {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn input_digest_sizes {li:agz}{lh:agz}{n:pos}{m:nat | m <= n; m <= 524288}{nh:pos}{hm:nat | hm <= nh}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
+   heads_bv: !$A.borrow(byte, lh, nh), hm: int hm, b: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+fn input_digest_hashes {li:agz}{lh:agz}{n:pos}{m:nat | m <= n; m <= 524288}{nh:pos}{hm:nat | hm <= nh}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
+   heads_bv: !$A.borrow(byte, lh, nh), hm: int hm, b: !$B.builder_v >> $B.builder_v): bool
+
+
+
+
+
+
+
+
+fn input_digest {li:agz}{lh:agz}{n:pos}{m:nat | m <= n; m <= 524288}{nh:pos}{hm:nat | hm <= nh}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
+   heads_bv: !$A.borrow(byte, lh, nh), hm: int hm, b: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -1282,8 +1418,21 @@ fn key_fresh (kind: key_of, out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
+
+
+
+
+
+
+
 fn key_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (kind: key_of, out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
+
+
+
+
+
+
 
 
 
@@ -2745,6 +2894,15 @@ fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:
 
 
 
+
+
+
+
+
+
+
+
+
 datatype heavy_command =
   | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
 
@@ -3957,6 +4115,11 @@ fn digests_forget (): void
 
 
 
+
+
+
+
+
 fn memo_entry_size {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
 
@@ -3970,6 +4133,17 @@ fn memo_entry_hash {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
 
 
+
+
+
+
+fn kept_size {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
+
+
+
+fn kept_hash {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
 
 
 
