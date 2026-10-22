@@ -151,18 +151,34 @@ failed() { grep -aqF "FAIL $2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: no F
 SNORM='fn h {n:nat} (x: int n): [m:nat] int m = x - 1'
 # an existential's binder: patsopt's S2Eexi(n(8480); ... is compared as S2Eexi(n(_); ...
 SEXI='fn h (f: char): [n:nat] bool = f'
-EXI_HEAD='the dynamic expression cannot be assigned the type [S2Eexi(EXI_NAME(EXI_NUM); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))].
-mismatch of static terms (tyleq):
-The actual term is: S2Ecst(char_t0ype)
-The needed term is: S2Ecst(bool_t0ype)
-mismatch of static terms (tyleq):
-The actual term is: S2Ecst(char_t0ype)
-The needed term is: S2Eexi(EXI_NAME(EXI_NUM); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))'
 # exi_expect <name> <number>: the expect for SEXI, with that binder name and number
 # in its S2Eexi tokens only. Its S2Evar tokens stay n(14465), the value patsopt
 # prints, so a near-miss differs from the real error in its S2Eexi token alone:
 # the fixture then fails because of the S2Eexi rule and nothing else.
-exi_expect() { printf 'function h\nline 1\n%s' "$EXI_HEAD" | sed -e "s/EXI_NAME/$1/g" -e "s/EXI_NUM/$2/g"; }
+exi_expect() {
+  printf 'function h\nline 1\nthe dynamic expression cannot be assigned the type [S2Eexi(%s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))].\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Eexi(%s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))' "$1" "$2" "$1" "$2"
+}
+# a list of binders: patsopt's S2Eexi(n(8480), m(8481); ... compares every binder
+SEXI_LIST='fn h (f: char): [n:nat; m:nat] bool = f'
+# exi_list_expect <name> <number>: the second binder of the S2Eexi tokens, the first and every S2Evar token as patsopt-like values
+exi_list_expect() {
+  printf 'function h\nline 1\nthe dynamic expression cannot be assigned the type [S2Eexi(n(14465), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(m(14466)), S2Eintinf(0)); S2Ecst(bool_t0ype))].\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Eexi(n(14465), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(m(14466)), S2Eintinf(0)); S2Ecst(bool_t0ype))' "$1" "$2" "$1" "$2"
+}
+# a name with copies: patsopt's S2Eexi(a$8630(14292); ... and S2Evar(a$8630$8631(14293)),
+# the digits after each $ and the number are all variable numbers
+SEXI_COPY='fn mk1 (): [a:nat] int a = 0
+fn h (): bool = mk1 ()'
+# exi_copy_expect <binder> <number>: the binder of the S2Eexi token (name with its $ copies, then number)
+exi_copy_expect() {
+  printf 'function h\nline 2\nthe dynamic expression cannot be assigned the type [S2Ecst(bool_t0ype)].\nmismatch of static terms (tyleq):\nThe actual term is: S2Eapp(S2Ecst(g1int_int_t0ype); S2Eextkind(atstype_int), S2Evar(a$7001$7002(15001)))\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Eexi(%s(%s); S2Eapp(S2Ecst(>=); S2Evar(a$7001(15000)), S2Eintinf(0)); S2Eapp(S2Ecst(g1int_int_t0ype); S2Eextkind(atstype_int), S2Evar(a$7001(15000))))\nThe needed term is: S2Ecst(bool_t0ype)' "$1" "$2"
+}
+# both: two binders with copies
+SEXI_COPY_LIST='fn mk2 (): [a:nat; b:nat] @(int a, int b) = @(0, 0)
+fn h (): bool = mk2 ()'
+# exi_copy_list_expect <name> <number>: the second binder of the S2Eexi token
+exi_copy_list_expect() {
+  printf 'function h\nline 2\nthe dynamic expression cannot be assigned the type [S2Ecst(bool_t0ype)].\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=-1; 0=S2Eapp(S2Ecst(int); S2Evar(a$7001$7003(15002))), 1=S2Eapp(S2Ecst(int); S2Evar(b$7002$7004(15003))))\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Eexi(a$7001(15000), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(a$7001(15000)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(b$7002(15001)), S2Eintinf(0)); S2Etyrec(flt0; npf=-1; 0=S2Eapp(S2Ecst(int); S2Evar(a$7001(15000))), 1=S2Eapp(S2Ecst(int); S2Evar(b$7002(15001)))))\nThe needed term is: S2Ecst(bool_t0ype)' "$1" "$2"
+}
 ENORM='unsolved constraint: C3NSTRprop(C3TKmain(); S2Eapp(S2Ecst(>=); S2EVar(1->S2Eapp(S2Ecst(sub_int_int); S2Evar(n(2)), S2Eintinf(1))), S2Eintinf(0)))'
 
 if [ "$ONLY" != memo ]; then
@@ -190,6 +206,10 @@ line 2
 [#error] directive is encountered: first'
 # the number of an existential's binder is other than patsopt's
 fixture "$G" reject exi-numbered "$SEXI" "$(exi_expect n 14465)"
+# the numbers of every binder of a list, and of a name's copies, are other than patsopt's
+fixture "$G" reject exi-binders "$SEXI_LIST" "$(exi_list_expect m 14466)"
+fixture "$G" reject exi-suffix "$SEXI_COPY" "$(exi_copy_expect 'a$7001' 15000)"
+fixture "$G" reject exi-suffix-binders "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'b$7002' 15001)"
 run "$TMP/good.log" "$G" --cold
 [ $rc = 0 ] || { cat "$TMP/good.log"; fail "good fixtures: status $rc"; }
 okline "$TMP/good.log" accept/ok good
@@ -198,7 +218,10 @@ okline "$TMP/good.log" reject/numbered good
 okline "$TMP/good.log" reject/dollar good
 okline "$TMP/good.log" reject/blank-line good
 okline "$TMP/good.log" reject/exi-numbered good
-said "$TMP/good.log" "fixtures: 6 ok, 0 failed" good
+okline "$TMP/good.log" reject/exi-binders good
+okline "$TMP/good.log" reject/exi-suffix good
+okline "$TMP/good.log" reject/exi-suffix-binders good
+said "$TMP/good.log" "fixtures: 9 ok, 0 failed" good
 nofail "$TMP/good.log" good
 [ -z "$(ls "$TMP/tmp")" ] || fail "the run left a temporary directory: $(ls "$TMP/tmp")"
 # the project is as it was
@@ -266,6 +289,12 @@ $(printf '%s' "$ENORM" | sed -e 's/Eintinf(1)/Eintinf(7)/')"
 # the binder's name is still compared, and so is a number that is not digits
 fixture "$B" reject exi-other-name "$SEXI" "$(exi_expect m 14465)"
 fixture "$B" reject exi-number-not-digits "$SEXI" "$(exi_expect n 14x65)"
+# the second binder's name is still compared, and so is its number; so are a copy's digits
+fixture "$B" reject exi-binders-other-name "$SEXI_LIST" "$(exi_list_expect k 14466)"
+fixture "$B" reject exi-binders-number-not-digits "$SEXI_LIST" "$(exi_list_expect m 14x66)"
+fixture "$B" reject exi-suffix-other-name "$SEXI_COPY" "$(exi_copy_expect 'b$7001' 15000)"
+fixture "$B" reject exi-suffix-digits-and-letters "$SEXI_COPY" "$(exi_copy_expect 'a$70x01' 15000)"
+fixture "$B" reject exi-suffix-binders-other-name "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'c$7002' 15001)"
 run "$TMP/bad.log" "$B"
 [ $rc = 1 ] || { cat "$TMP/bad.log"; fail "bad fixtures: status $rc, not 1"; }
 L=$TMP/bad.log
@@ -277,6 +306,9 @@ saidpart "$L" "FAIL reject/extra-line: rejected, but not as its expect says: its
 saidpart "$L" "FAIL reject/number-kept: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/exi-other-name: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/exi-number-not-digits: rejected, but not as its expect says: its error is not the one expected:" bad
+for m in exi-binders-other-name exi-binders-number-not-digits exi-suffix-other-name exi-suffix-digits-and-letters exi-suffix-binders-other-name; do
+  saidpart "$L" "FAIL reject/$m: rejected, but not as its expect says: its error is not the one expected:" bad
+done
 saidpart "$L" "FAIL reject/other-line: rejected, but not as its expect says: an error is at line 1 of its snippet, not 2: " bad
 saidpart "$L" "FAIL reject/other-function: rejected, but not as its expect says: line 1 of its snippet is not in g" bad
 saidpart "$L" "FAIL reject/no-declaration: rejected, but not as its expect says: line 0 of its snippet is not in h" bad
@@ -288,7 +320,7 @@ saidpart "$L" "FAIL reject/no-patsopt-error: rejected, but not as its expect say
 saidpart "$L" "FAIL reject/other-module: rejected, but not as its expect says: an error is in " bad
 saidpart "$L" "/src/other.bats, not src/lib.bats: unsolved constraint" bad
 saidpart "$L" "FAIL accept/no-such-line: no line \"(* not in the module *)\" in src/lib.bats" bad
-said "$L" "fixtures: 0 ok, 19 failed" bad
+said "$L" "fixtures: 0 ok, 24 failed" bad
 # the raw error is shown for a mismatch, so the reader can fix the expect
 saidpart "$L" "pattern match is nonexhaustive:" bad
 
