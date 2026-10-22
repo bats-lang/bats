@@ -1000,6 +1000,22 @@ fun word32_byte {i,h,l:nat | i < 4; h < 65536; l < 65536} (x: word32(h, l), i: i
 
 
 
+
+
+
+
+fun{} word32_rotr_inline {n,h,l:nat | 0 < n; n < 32; h < 65536; l < 65536} (x: word32(h, l), n: int n)
+  : [h2,l2:nat | h2 < 65536; l2 < 65536] (ROTR(n, h, l, h2, l2) | word32(h2, l2))
+
+fun{} word32_pack_inline {a,b,c,d:nat | a < 256; b < 256; c < 256; d < 256}
+  (a: int a, b: int b, c: int c, d: int d): word32(256*a + b, 256*c + d)
+
+fun{} word32_byte_inline {i,h,l:nat | i < 4; h < 65536; l < 65536} (x: word32(h, l), i: int i)
+  : [b:nat | b < 256] (WORD_BYTE(i, h, l, b) | int b)
+
+
+
+
 prfun word_byte_functional {i,h,l,b1,b2:nat} (WORD_BYTE(i, h, l, b1), WORD_BYTE(i, h, l, b2)): [b1 == b2] void
 
 

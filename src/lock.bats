@@ -1122,41 +1122,6 @@ in
   end
 end
 
-(* The TOML file at the NUL-terminated path pa, parsed, or why it could
-   not be read *)
-fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
-  : $R.result($T.toml_doc, $F.io_error) = let
-  val @(fz, bv) = $A.freeze<byte>(pa)
-  val fr = file_open_m(bv, m, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz, bv)
-  val () = $A.free<byte>($A.thaw<byte>(fz))
-in
-  case+ fr of
-  | ~$R.err(e) => $R.err(e)
-  | ~$R.ok(fd) => let
-      val tb = $A.alloc<byte>(65536)
-      val rr = $F.file_read(fd, tb, 65536)
-      val () = $R.discard<int><$F.io_error>($F.file_close(fd))
-    in
-      case+ rr of
-      | ~$R.err(e) => let
-          val () = $A.free<byte>(tb)
-        in $R.err(e) end
-      | ~$R.ok(tn) => let
-          val @(fz_t, bv_t) = $A.freeze<byte>(tb)
-          val pr = $T.parse(bv_t, tn)
-          val () = $A.drop<byte>(fz_t, bv_t)
-          val () = $A.free<byte>($A.thaw<byte>(fz_t))
-        in
-          case+ pr of
-          | ~$R.ok(doc) => $R.ok(doc)
-          (* a file that does not parse was read: the error, as
-             before, is the read's (none), an invalid input *)
-          | ~$R.err(_) => $R.err($F.InvalidInput())
-        end
-    end
-end
-
 (* Rust's "cannot read './bats.toml': <text> (os error <e>)" appended
    to err (config::load, io::Error's Display) *)
 fn put_cannot_read (failure: $F.io_error, err: !$B.builder_v >> $B.builder_v): void = let
@@ -1172,16 +1137,11 @@ fn put_cannot_read (failure: $F.io_error, err: !$B.builder_v >> $B.builder_v): v
   val () = put_int_v(err, e)
 in bput_v(err, ")") end
 
-(* The TOML file named name, parsed, or why it could not be read *)
-fn read_toml_named {sn:nat} (name: string sn): $R.result($T.toml_doc, $F.io_error) = let
-  val @(tp, tpl) = str_into_arr(name)
-in read_toml(tp, tpl) end
-
 (* The constraints of the project's bats.toml, from its [package] name:
    @(1, them), or @(~1, none) after writing Rust's message to err, as
    when bats.toml cannot be read (Rust: cmd_lock's config::load) *)
 fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
-  case+ read_toml_named("bats.toml") of
+  case+ read_manifest() of
   | ~$R.err(e) => let
       val () = put_cannot_read(e, err)
     in @(~1, cons_nil()) end
@@ -2175,7 +2135,7 @@ in ds end
 
 (* The project's path dependencies; none when bats.toml cannot be read *)
 fn project_pdeps (): [n:nat] pdeps(n) =
-  case+ read_toml_named("bats.toml") of
+  case+ read_manifest() of
   | ~$R.err(_) => pd_nil()
   | ~$R.ok(doc) => let
       val ds = doc_pdeps(doc)
@@ -2356,7 +2316,7 @@ fn report_config (known: bool, err: $B.builder_v): void =
 implement project_kind () = let
   var err : $B.builder_v = $B.create()
   val () = bput_v(err, "error: ")
-  val kind = (case+ read_toml_named("bats.toml") of
+  val kind = (case+ read_manifest() of
     | ~$R.err(e) => let
         val () = put_cannot_read(e, err)
       in $R.none() end
@@ -3127,6 +3087,13 @@ fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp
       val () = $T.toml_free(doc)
     in yes end
 
+(* The unsafe flag of the whole bats.toml: one reader for emission and validation, so a large manifest cannot split them (manifest) *)
+#pub fn read_unsafe_flag(): bool
+
+implement read_unsafe_flag() = let
+  val @(toml_path, toml_path_len) = str_into_arr("bats.toml")
+in toml_unsafe(toml_path, toml_path_len) end
+
 (* The package root of the dependency file p[0, pl) =
    ./bats_modules/<pkg>/src/...: the end of ./bats_modules/<pkg> *)
 fun dep_root_end {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp:agz}{i,pl:int} .<max(pl - i, 0)>. (p: !$A.borrow(byte, lp, pn), pm: int pm, i: int i, pl: int pl): pos_t =
@@ -3372,8 +3339,7 @@ fn record_passed (passed: bool, pend: $B.builder_v): void =
    dependencies, src/lib.bats and its binaries, in that order, collected
    into errs; how many. What passed is recorded when nothing failed *)
 fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
-  val @(own_toml, own_toml_len) = str_into_arr("./bats.toml")
-  val own_unsafe = toml_unsafe(own_toml, own_toml_len)
+  val own_unsafe = read_unsafe_flag()
   (* The listings of ./src and ./bats_modules, once each: the checks of
      the files and of the call cycles read the same ones, and the context
      of the records holds the dependencies' (validated.bats) *)

@@ -5,7 +5,10 @@ description: >-
   needs no ATS2), then, by bats itself, the GMP build of ATS2 (bats ats2
   install), the package repository at its pinned commit (bats
   clone-repository), the patsopt caps, and BATS_COMMIT (bats record-commit),
-  so the version a build is stamped with is the commit's. Linux runners with apt, on the pinned image ubuntu-24.04, a label that does not move (bridge#154). Called by commit:
+  so the version a build is stamped with is the commit's, and the pins of the
+  calling repository are checked (bats check-pins --discover, bats#390, bats#391: a floating input
+  fails the step). Linux runners with apt, on the pinned image ubuntu-24.04, a
+  label that does not move (bridge#154). Called by commit:
   bats-lang/bats/.github/actions/setup@<40 hex digits>. The step installs;
   it keys no cache (a build/ is kept or dropped by bats itself, bats#267).
 
@@ -171,6 +174,28 @@ runs:
         rm -rf "$src"
         sudo cp ~/bats-bin/bats /bin/bats
         echo "$HOME/bats-bin" >> "$GITHUB_PATH"
+
+    # The pin check (bats#390, bats#391, repository-prototype#353), with the
+    # compiler just built, before anything else is installed. bats lists the
+    # calling repository's files itself (bats check-pins --discover: its
+    # workflows and actions, package.json files and src/ats2.bats, tracked or
+    # untracked and not ignored) and says its findings and listed exceptions
+    # in the job log; no input turns it off. The probe is the one shell here
+    # (setup-action.md, "Shell that remains"): a compiler that predates
+    # --discover cannot say that it does.
+    - name: Check the pins of the calling repository
+      shell: bash
+      env:
+        BATS_COMMIT_BUILT: ${{ steps.pins.outputs.bats }}
+        WORKSPACE: ${{ github.workspace }}
+      run: |
+        set -eu
+        cd "$WORKSPACE"
+        probe=0
+        bats check-pins > /dev/null 2> "$RUNNER_TEMP/pins-probe.err" || probe=$?
+        grep -q -- '--discover$' "$RUNNER_TEMP/pins-probe.err" && [ "$probe" -eq 2 ] \
+          || { echo "::error::setup-bats: bats-version $BATS_COMMIT_BUILT predates bats#391: its bats has no check-pins --discover. Pin a commit of bats-lang/bats that has it"; exit 1; }
+        bats check-pins --discover
 
     # Then bats does the rest: it installs the ATS2 it pins (checked against
     # its SHA-256, in ~/.bats/ats2), clones the package repository at the

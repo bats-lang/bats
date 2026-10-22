@@ -14,7 +14,8 @@
    against the pin before anything is unpacked.
 
    What is installed is judged by <home>/.bats/ats2/.bats-ats2, the pin's
-   name and SHA-256 on a line, written last, after patsopt is built:
+   name and SHA-256 on a line, written by bats through write_settle last,
+   after the toolchain is moved into place (bats-lang/bats#372):
 
      marker equal to the pin's, bin/patsopt there   already installed
      a marker of another pin (an older ATS2 of bats's) replaced
@@ -118,15 +119,17 @@ in has end
    which is this run's own and goes when the digest is not the pin's *)
 #define VERIFY "if [ \"$1\" = \"$2\" ]; then exit 0; fi\nrm -rf \"$3\"\necho \"error: the ATS2 download has sha256 '$1', not the pinned '$2': nothing was installed\" >&2\nexit 1\n"
 
-(* $1 the base, $2 the marker, $3 the download's directory: unpack, build
-   patsopt, mark, and move into place *)
-#define BUILD "set -e\nn=\"$1/ats2.new\"\nmkdir \"$n\"\ntar -xzf \"$3/ats2.tgz\" --no-same-owner --strip-components=1 -C \"$n\"\nrm -rf \"$3\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\nprintf '%s\\n' \"$2\" > \"$n/.bats-ats2\"\na=\"$1/ats2\"\nif [ -e \"$a\" ] || [ -L \"$a\" ]; then\n  if [ -f \"$a/.bats-ats2\" ] && [ ! -L \"$a\" ]; then rm -rf \"$a\"\n  elif [ -d \"$a\" ] && [ ! -L \"$a\" ] && [ -z \"$(ls -A \"$a\")\" ]; then rmdir \"$a\"\n  else echo \"error: $a exists and was not made by bats, so it is not replaced\" >&2; exit 1; fi\nfi\nmv \"$n\" \"$a\"\n"
+(* BUILD: unpack, build and move patsopt into place, the marker is bats's write_marker after the move (bats#372, ats2-install.md) *)
+#define BUILD "set -e\nn=\"$1/ats2.new\"\nmkdir \"$n\"\ntar -xzf \"$2/ats2.tgz\" --no-same-owner --strip-components=1 -C \"$n\"\nrm -rf \"$2\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\na=\"$1/ats2\"\nif [ -e \"$a\" ] || [ -L \"$a\" ]; then\n  if [ -f \"$a/.bats-ats2\" ] && [ ! -L \"$a\" ]; then rm -rf \"$a\"\n  elif [ -d \"$a\" ] && [ ! -L \"$a\" ] && [ -z \"$(ls -A \"$a\")\" ]; then rmdir \"$a\"\n  else echo \"error: $a exists and was not made by bats, so it is not replaced\" >&2; exit 1; fi\nfi\nmv \"$n\" \"$a\"\n"
 
 (* $1 the base, $2 a download's directory (or the base's own, to clear
    only what a run killed before this one left): this module's own files,
    ats2.new and ats2-download.* *)
 #define CLEAR "rm -rf \"$1/ats2.new\" \"$1/ats2.tgz.part\" \"$1\"/ats2-download.*\n"
 #define CLEAR_ONE "rm -rf \"$1/ats2.new\" \"$2\"\n"
+
+(* MOVED_CLEAR: a failed marker write removes the moved toolchain, marker first, status 2/3 say which step failed (bats#372, ats2-install.md) *)
+#define MOVED_CLEAR "rm -rf \"$1/ats2/.bats-ats2\" || exit 2\nrm -rf \"$1/ats2\" || exit 3\n"
 
 (* The lock that makes two installs one: $HOME/.bats/ats2.lock, held with
    the file package's flock while ats2 is installed (what is installed is
@@ -190,6 +193,19 @@ fn dir_arg {l:agz} (out: !$A.borrow(byte, l, 4096), n: int): $B.builder_v = let
   val () = copy_to_builder_v(out, 0, n, 4096, b)
 in b end
 
+(* write_marker: the marker, written by bats through write_settle after the move (bats#372, ats2-install.md) *)
+fn write_marker (): int = let
+  var marker_text : $B.builder_v = marker_arg()
+  val () = put_char_v(marker_text, 10)
+  var marker_path : $B.builder_v = base_arg()
+  val () = bput_v(marker_path, "/ats2/.bats-ats2")
+  val @(marker_array, marker_length) = $B.into_arr(marker_path)
+  val @(marker_frozen, marker_view) = $A.freeze<byte>(marker_array)
+  val marker_status = write_settle(marker_view, marker_length, write_file_from_builder_m(marker_view, marker_length, marker_text))
+  val () = $A.drop<byte>(marker_frozen, marker_view)
+  val () = $A.free<byte>($A.thaw<byte>(marker_frozen))
+in marker_status end
+
 (* The install itself, under the lock: false (said) when it fails *)
 fn install_now (): bool = let
   val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
@@ -227,7 +243,7 @@ in
     in false end
     else let
       val () = println! ("building patsopt ...")
-      val built = sh_exec(BUILD, base_arg(), marker_arg(), dir_arg(bv_o, k))
+      val built = sh_exec(BUILD, base_arg(), dir_arg(bv_o, k), empty_arg())
     in
       if built <> 0 then let
         val _ = sh_exec(CLEAR_ONE, base_arg(), dir_arg(bv_o, k), empty_arg())
@@ -238,8 +254,21 @@ in
       else let
         val () = $A.drop<byte>(fz_o, bv_o)
         val () = $A.free<byte>($A.thaw<byte>(fz_o))
-        val () = println! ("ATS2 installed successfully")
-      in true end
+        val marked = write_marker()
+      in
+        if marked <> 0 then let
+          (* write_marker failed: MOVED_CLEAR removes the moved toolchain, and the message follows its status (bats#372) *)
+          val cleared = sh_exec(MOVED_CLEAR, base_arg(), empty_arg(), empty_arg())
+          val () = (if cleared = 0
+            then prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 was removed again, so the next bats ats2 install starts from nothing\n")
+            else if cleared = 2
+            then prerr! ("error: the ATS2 toolchain bats moved into ~/.bats/ats2 could not be removed, and its marker .bats-ats2 may still be there and claim a complete install: remove ~/.bats/ats2 by hand before the next bats ats2 install\n")
+            else prerr! ("error: the marker of the ATS2 toolchain bats moved into ~/.bats/ats2 was removed, but the rest of the toolchain could not be: it is still there with no marker, so the next bats ats2 install would use it as it is; move it away before then\n"))
+        in false end
+        else let
+          val () = println! ("ATS2 installed successfully")
+        in true end
+      end
     end
   end
 end
