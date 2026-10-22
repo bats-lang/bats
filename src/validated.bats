@@ -148,14 +148,14 @@ in b end
 
 (* Makes build/ and build/.bats_valid/ when they are not there *)
 fn make_directories (): void = let
-  val b = str_to_path_arr("build")
+  val @(b, b_len) = str_into_arr("build")
   val @(fz_b, bv_b) = $A.freeze<byte>(b)
-  val () = $R.discard<int><$F.io_error>($F.file_mkdir(bv_b, 524288, 493))
+  val () = $R.discard<int><$F.io_error>(file_mkdir_m(bv_b, b_len, 493))
   val () = $A.drop<byte>(fz_b, bv_b)
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
-  val v = str_to_path_arr("build/.bats_valid")
+  val @(v, v_len) = str_into_arr("build/.bats_valid")
   val @(fz_v, bv_v) = $A.freeze<byte>(v)
-  val () = $R.discard<int><$F.io_error>($F.file_mkdir(bv_v, 524288, 493))
+  val () = $R.discard<int><$F.io_error>(file_mkdir_m(bv_v, v_len, 493))
   val () = $A.drop<byte>(fz_v, bv_v)
 in $A.free<byte>($A.thaw<byte>(fz_v)) end
 
