@@ -1041,6 +1041,22 @@ fun find_text_from {bv_cap:pos} {l:agz}{sl:nat}{len:nat | len <= bv_cap}{p:nat |
   else if text_has(bv, len, p, s) then true
   else find_text_from(bv, len, p + 1, s)
 
+(* A byte of a word of a snippet: an identifier byte of the lexer, as the
+   ticket says (bats#432); the apostrophe is not one, so load' is a word
+   load. is_ident_byte is the lexer's own and is not changed for this *)
+fn is_word_byte(b: int): bool = is_ident_byte(b)
+
+(* Whether bv[0, len) holds the text s at or after p as a whole word: the
+   bytes around it are not word bytes (keyword: fixtures memo, a snippet
+   that loads) *)
+fun find_word_from {bv_cap:pos} {l:agz}{sl:nat}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p, s: string sl): bool =
+  if p >= len then false
+  else if text_has(bv, len, p, s)
+    && ~is_word_byte(byte_at(bv, len, p - 1))
+    && ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s)))) then true
+  else find_word_from(bv, len, p + 1, s)
+
 (* Whether the log bv[0, len) has a line that is a patsopt error's first *)
 fun has_error_from {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p): bool = let
@@ -1514,14 +1530,16 @@ in r end
 
 (* ---- the store ---- *)
 
-(* Whether the snippet names a file to load (load, include, #use or
-   #require anywhere in it): it reads a file the closure of the base
-   module does not name *)
+(* Whether the snippet names a file to load (staload, dynload, load or
+   include as a word, #use or #require anywhere in it): it reads a file the
+   closure of the base module does not name. A word inside a longer name
+   (Download, unloaded) loads nothing (bats#432) *)
 fn snippet_loads {cfg_cap:pos}{mv_cap:pos} {l:agz}{lm:agz}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}{cfg_len:nat | cfg_len <= cfg_cap}
   (cfg: !$A.borrow(byte, l, cfg_cap), cfg_len: int cfg_len, w: settings, mv: !$A.borrow(byte, lm, mv_cap), mv_len: int mv_len, a: int a, e: int e): bool = let
   val @(sa, sn, snippet_read) = read_file_text(fixture_path(cfg, cfg_len, w, mv, mv_len, a, e, "snippet.bats"))
   val @(fz, bv) = $A.freeze<byte>(sa)
-  val loads = (~snippet_read || find_text_from(bv, sn, 0, "load") || find_text_from(bv, sn, 0, "include")
+  val loads = (~snippet_read || find_word_from(bv, sn, 0, "staload") || find_word_from(bv, sn, 0, "dynload")
+    || find_word_from(bv, sn, 0, "load") || find_word_from(bv, sn, 0, "include")
     || find_text_from(bv, sn, 0, "#use") || find_text_from(bv, sn, 0, "#require")): bool
   val () = $A.drop<byte>(fz, bv)
 in ($A.free<byte>($A.thaw<byte>(fz)); loads) end
