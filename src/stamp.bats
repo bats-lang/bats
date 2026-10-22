@@ -89,8 +89,8 @@ fn mark_is_wasm (mark: int): bool = (mark = 1 || mark = 3)
    its bytes is returned beside the status *)
 fn sh_capture {sn:nat}{lo:agz}
   (script: string sn, args: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -99,19 +99,19 @@ fn sh_capture {sn:nat}{lo:agz}
   val () = bput_v(b3, script)
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
-  val r = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val r = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4), args)))), out)
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in r end
 
 (* The sha256 of the file at the path, appended to out; false when it
    cannot be read *)
 fn put_file_digest {sn:nat | sn < $B.BUILDER_CAP}
   (path: string sn, out: !$B.builder_v >> $B.builder_v): bool = let
-  val p = str_to_path_arr(path)
+  val @(p, p_len) = str_into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val ok = put_file_sha256(bv_p, out)
+  val ok = put_file_sha256_m(bv_p, p_len, out)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in ok end
@@ -232,9 +232,9 @@ in hash_builder(c, h) end
    changed inside the process). *)
 fn hash_env_var {sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, c: !$SHA.ctx): bool = let
-  val na = str_to_path_arr(name)
+  val na = str_to_exact_arr(name)
   val buf = $A.alloc<byte>(131072)
-  val got = $E.get_cstr(na, 524288, buf, 131072)
+  val got = $E.get_cstr(na, g1u2i(string1_length(name)) + 1, buf, 131072)
   val () = $A.free<byte>(na)
   val ok = (case+ got of
     | ~$R.none() => let
@@ -354,11 +354,11 @@ fn stamp_write {lph:agz}
   val () = put_int_v(st, mark)
   val () = put_char_v(st, 10)
   val ok = (if tool && libs && cc && link then true else false): bool
-  val p = str_to_path_arr("build/.bats_stamp.new")
+  val @(p, p_len) = str_into_arr("build/.bats_stamp.new")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
   val stv = st
   val made = (if ok then
-      (if write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, stv)) = 0 then StampMade() else StampNotWritten())
+      (if write_settle(bv_p, p_len, write_file_from_builder_m(bv_p, p_len, stv)) = 0 then StampMade() else StampNotWritten())
     else let val () = $B.builder_free(stv) in StampPartMissing() end): stamp_made
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))

@@ -27,9 +27,9 @@ staload "lock.sats"
 (* The tests of the .bats file at the NUL-terminated path p, as
    <targets><name>NUL entries appended to out (collect_tests); the number
    of them *)
-fn file_tests {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): int =
-  case+ read_whole(p, 524288) of
+fn file_tests {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, out: !$B.builder_v >> $B.builder_v): int =
+  case+ read_whole_m(p, pm) of
   | ~whole_err(_) => 0
   | ~whole_ok(ar, piece, m, n) => let
       val @(fz_s, bv_s) = $A.freeze<byte>(piece)
@@ -41,64 +41,64 @@ fn file_tests {lp:agz}
     in k end
 
 (* Whether t[p, p + fl) is f[0, fl) *)
-fun match_here {lt,lf:agz}{j:nat | j <= 4096} .<4096 - j>.
-  (t: !$A.borrow(byte, lt, 524288), p: pos_t, f: !$A.borrow(byte, lf, 4096), j: int j, fl: int): bool =
+fun match_here {lt,lf:agz}{nt:pos}{tm:nat | tm <= nt}{j:nat | j <= 4096} .<4096 - j>.
+  (t: !$A.borrow(byte, lt, nt), tm: int tm, p: pos_t, f: !$A.borrow(byte, lf, 4096), j: int j, fl: int): bool =
   if j >= fl then true
   else if j >= 4096 then false
-  else if peek(t, p + j, 524288) <> byte2int0($A.read<byte>(f, j)) then false
-  else match_here(t, p, f, j + 1, fl)
+  else if peek(t, p + j, tm) <> byte2int0($A.read<byte>(f, j)) then false
+  else match_here(t, tm, p, f, j + 1, fl)
 
 (* Whether the name t[p, e) contains f[0, fl) (Rust: --filter, a
-   substring match on the test name) *)
-fun name_has {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int, f: !$A.borrow(byte, lf, 4096), fl: int): bool =
+   substring match on the test name); t holds tm bytes *)
+fun name_has {lt,lf:agz}{nt:pos}{tm:nat | tm <= nt}{p:nat | p <= tm} .<tm - p>.
+  (t: !$A.borrow(byte, lt, nt), tm: int tm, p: int p, e: int, f: !$A.borrow(byte, lf, 4096), fl: int): bool =
   if p + fl > e then false
-  else if match_here(t, p, f, 0, fl) then true
-  else if p >= 524288 then false
-  else name_has(t, p + 1, e, f, fl)
+  else if match_here(t, tm, p, f, 0, fl) then true
+  else if p >= tm then false
+  else name_has(t, tm, p + 1, e, f, fl)
 
 (* The calls of the selected tests among the entries t[p, e) of module
    Tm, appended to out; the number selected. A test is selected when
    its block targets the runner's target (wasm when wasm, else native)
    and its name contains the filter. *)
-fun put_calls {lt,lf:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (t: !$A.borrow(byte, lt, 524288), p: int p, e: int, m: int, k: int, wasm: bool,
+fun put_calls {lt,lf:agz}{nt:pos}{tm:nat | tm <= nt}{p:nat | p <= tm} .<tm - p>.
+  (t: !$A.borrow(byte, lt, nt), tm: int tm, p: int p, e: int, m: int, k: int, wasm: bool,
    f: !$A.borrow(byte, lf, 4096), fl: int, out: !$B.builder_v >> $B.builder_v, sel: int): int =
   if p >= e then sel
-  else if p >= 524288 then sel
+  else if p >= tm then sel
   else let
     val targets = targets_of_byte(byte2int0($A.read<byte>(t, p)))
-    val ne = find_null_bv_from(t, p + 1, 524288)
+    val ne = find_null_bv_from(t, p + 1, tm)
     val targeted = runs_on(targets, wasm)
-    val chosen = (if ~targeted then false else name_has(t, p + 1, ne, f, fl)): bool
+    val chosen = (if ~targeted then false else name_has(t, tm, p + 1, ne, f, fl)): bool
     val () = (if chosen then let
         val () = bput_v(out, "  val f = f + __bats_run($T")
         val () = put_int_v(out, m)
         val () = bput_v(out, ".__bats_test(")
         val () = put_int_v(out, k)
         val () = bput_v(out, "), \"")
-        val () = copy_to_builder_v(t, p + 1, ne, 524288, out)
+        val () = copy_to_builder_v(t, p + 1, ne, tm, out)
       in bput_v(out, "\")\n") end
       else ())
     val nx = ne + 1
   in
     if nx <= p then sel
-    else if nx > 524288 then sel
-    else put_calls(t, nx, e, m, k + 1, wasm, f, fl, out, (if chosen then sel + 1 else sel))
+    else if nx > tm then sel
+    else put_calls(t, tm, nx, e, m, k + 1, wasm, f, fl, out, (if chosen then sel + 1 else sel))
   end
 
 (* Whether files[p] starts src/bin/ *)
-fn in_src_bin {l:agz} (files: !$A.borrow(byte, l, 524288), p: pos_t): bool = let
+fn in_src_bin {l:agz}{n:pos}{fm:nat | fm <= n} (files: !$A.borrow(byte, l, n), fm: int fm, p: pos_t): bool = let
   var c = @[char][8]('s', 'r', 'c', '/', 'b', 'i', 'n', '/')
-in lit_at(files, p, 524288, c, 8) end
+in lit_at(files, p, fm, c, 8) end
 
 (* The module files[p, ne) (src/<stem>.bats) with tests t[0, tlen):
    its staload as Tm appended to stl, the calls of its selected native
    tests to calls and of its selected wasm tests to wcalls; @(native
    tests selected, wasm tests selected) *)
-fn add_module {lf,lt,lg:agz}
-  (files: !$A.borrow(byte, lf, 524288), p: pos_t, ne: pos_t,
-   t: !$A.borrow(byte, lt, 524288), tlen: int, m: int,
+fn add_module {lf,lt,lg:agz}{nf:pos}{fm:nat | fm <= nf}{nt:pos}{tm:nat | tm <= nt}
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, p: pos_t, ne: pos_t,
+   t: !$A.borrow(byte, lt, nt), tlen: int tm, m: int,
    f: !$A.borrow(byte, lg, 4096), fl: int, want_native: bool, want_wasm: bool,
    stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v,
    wcalls: !$B.builder_v >> $B.builder_v): @(int, int) = let
@@ -106,18 +106,18 @@ fn add_module {lf,lt,lg:agz}
   val () = put_int_v(stl, m)
   val () = bput_v(stl, " = \"")
   (* src/<stem>.bats: the module's .sats is <stem>.sats *)
-  val () = copy_to_builder_v(files, p + 4, ne - 5, 524288, stl)
+  val () = copy_to_builder_v(files, p + 4, ne - 5, fm, stl)
   val () = bput_v(stl, ".sats\"\n")
-  val sn = (if want_native then put_calls(t, 0, tlen, m, 0, false, f, fl, calls, 0) else 0): int
-  val sw = (if want_wasm then put_calls(t, 0, tlen, m, 0, true, f, fl, wcalls, 0) else 0): int
+  val sn = (if want_native then put_calls(t, tlen, 0, tlen, m, 0, false, f, fl, calls, 0) else 0): int
+  val sw = (if want_wasm then put_calls(t, tlen, 0, tlen, m, 0, true, f, fl, wcalls, 0) else 0): int
 in @(sn, sw) end
 
 (* The file files[p, ne) with k tests t[0, tlen) added to the scan:
    @(native selected, wasm selected, modules, files of src/bin/ with
    tests) updated *)
-fn add_file {lf,lt,lg:agz}
-  (k: int, is_bin: bool, files: !$A.borrow(byte, lf, 524288), p: pos_t, ne: pos_t,
-   t: !$A.borrow(byte, lt, 524288), tlen: int,
+fn add_file {lf,lt,lg:agz}{nf:pos}{fm:nat | fm <= nf}{nt:pos}{tm:nat | tm <= nt}
+  (k: int, is_bin: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, p: pos_t, ne: pos_t,
+   t: !$A.borrow(byte, lt, nt), tlen: int tm,
    f: !$A.borrow(byte, lg, 4096), fl: int, want_native: bool, want_wasm: bool,
    stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v,
    wcalls: !$B.builder_v >> $B.builder_v,
@@ -126,77 +126,77 @@ fn add_file {lf,lt,lg:agz}
   else if is_bin then let
     (* The runner links the modules of src/, not the binaries *)
     val () = prerr! ("error: the tests of ")
-    val () = prerr_seg(files, p, ne, 524288)
+    val () = prerr_seg(files, p, ne, fm)
     val () = prerr! (" cannot run: move them to a module of src/\n")
   in @(nat, was, m, bins + 1) end
   else let
-    val @(sn, sw) = add_module(files, p, ne, t, tlen, m, f, fl, want_native, want_wasm, stl, calls, wcalls)
+    val @(sn, sw) = add_module(files, fm, p, ne, t, tlen, m, f, fl, want_native, want_wasm, stl, calls, wcalls)
   in @(nat + sn, was + sw, m + 1, bins) end
 
 (* Over the sorted .bats files files[p, e) of src/: for each module of
    src/ with tests, a staload of it as Tm and the calls of its selected
    tests, appended to stl and calls. @(native tests selected, wasm tests
    selected, modules, files of src/bin/ with tests) *)
-fun scan_modules {lf,lt:agz}{p:nat | p <= 524288} .<524288 - p>.
-  (files: !$A.borrow(byte, lf, 524288), p: int p, e: int,
+fun scan_modules {lf,lt:agz}{nf:pos}{fm:nat | fm <= nf}{p:nat | p <= fm} .<fm - p>.
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, p: int p, e: int,
    f: !$A.borrow(byte, lt, 4096), fl: int, want_native: bool, want_wasm: bool,
    stl: !$B.builder_v >> $B.builder_v, calls: !$B.builder_v >> $B.builder_v,
    wcalls: !$B.builder_v >> $B.builder_v,
    nat: int, was: int, m: int, bins: int): @(int, int, int, int) =
   if p >= e then @(nat, was, m, bins)
-  else if p >= 524288 then @(nat, was, m, bins)
+  else if p >= fm then @(nat, was, m, bins)
   else let
-    val ne = find_null_bv_from(files, p, 524288)
+    val ne = find_null_bv_from(files, p, fm)
     var pb : $B.builder_v = $B.create()
-    val () = copy_to_builder_v(files, p, ne + 1, 524288, pb)
-    val @(pa, _) = $B.to_arr(pb)
+    val () = copy_to_builder_v(files, p, ne + 1, fm, pb)
+    val @(pa, pal) = $B.into_arr(pb)
     val @(fz_p, bv_p) = $A.freeze<byte>(pa)
     var tb : $B.builder_v = $B.create()
-    val k = file_tests(bv_p, tb)
+    val k = file_tests(bv_p, pal, tb)
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
-    val @(ta, tlen) = $B.to_arr(tb)
+    val @(ta, tlen) = $B.into_arr(tb)
     val @(fz_t, bv_t) = $A.freeze<byte>(ta)
-    val is_bin = in_src_bin(files, p)
-    val @(n2, w2, m2, b2) = add_file(k, is_bin, files, p, ne, bv_t, tlen, f, fl,
+    val is_bin = in_src_bin(files, fm, p)
+    val @(n2, w2, m2, b2) = add_file(k, is_bin, files, fm, p, ne, bv_t, tlen, f, fl,
       want_native, want_wasm, stl, calls, wcalls, nat, was, m, bins)
     val () = $A.drop<byte>(fz_t, bv_t)
     val () = $A.free<byte>($A.thaw<byte>(fz_t))
     val nx = ne + 1
   in
     if nx <= p then @(n2, w2, m2, b2)
-    else if nx > 524288 then @(n2, w2, m2, b2)
-    else scan_modules(files, nx, e, f, fl, want_native, want_wasm, stl, calls, wcalls, n2, w2, m2, b2)
+    else if nx > fm then @(n2, w2, m2, b2)
+    else scan_modules(files, fm, nx, e, f, fl, want_native, want_wasm, stl, calls, wcalls, n2, w2, m2, b2)
   end
 
 (* Runs sh -c cmd; its exit status *)
 fn run_sh {sn:nat | sn < 524288} (cmd: string sn): int = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_e, bv_e) = $A.freeze<byte>(exec)
+  val (nul_e | exec) = $P.path_of_string_proved("sh")
+  val @(fz_e, bv_e) = $A.barr_freeze(exec)
   var b1 = $B.create() val () = bput_v(b1, "sh")
   var b2 = $B.create() val () = bput_v(b2, "-c")
   var b3 = $B.create() val () = bput_v(b3, cmd)
   val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
-  val r = run_cmd(bv_e, argv)
-  val () = $A.drop<byte>(fz_e, bv_e)
-  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+  val r = run_cmd(nul_e | bv_e, argv)
+  val () = $A.cborrow_drop(fz_e, bv_e)
+  val () = $A.barr_free($A.barr_thaw(fz_e))
 in r end
 
 (* Writes b to the path s *)
 fn write_to {sn:nat | sn < 524288} (s: string sn, b: $B.builder_v): int = let
-  val pa = str_to_path_arr(s)
+  val @(pa, pa_len) = str_into_arr(s)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
+  val r = write_settle(bv_p, pa_len, write_file_from_builder_m(bv_p, pa_len, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
 
 (* Changes to the directory s; whether it could *)
 fn chdir_to {sn:nat | sn < 524288} (s: string sn): bool = let
-  val pa = str_to_path_arr(s)
+  val @(pa, pa_len) = str_into_arr(s)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val ok = (case+ $F.file_chdir(bv_p, 524288) of
+  val ok = (case+ file_chdir_m(bv_p, pa_len) of
     | ~$R.ok(_) => true | ~$R.err(_) => false): bool
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
@@ -205,12 +205,12 @@ in ok end
 (* Runs the built native runner; whether its tests passed *)
 fn run_native_runner (n: int): bool = let
   val () = (if ~is_quiet() then prerr! ("running ", n, " native test(s)\n") else ())
-  val ex = str_to_path_arr("build/_bats_test/dist/debug/_bats_test")
-  val @(fz_x, bv_x) = $A.freeze<byte>(ex)
+  val (nul_x | ex) = $P.path_of_string_proved("build/_bats_test/dist/debug/_bats_test")
+  val @(fz_x, bv_x) = $A.barr_freeze(ex)
   var a0 = $B.create() val () = bput_v(a0, "_bats_test")
-  val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val st = run_program(nul_x | bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_nil()))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
   val passed = (case+ st of ~Exited(status) => status = 0 | ~NotStarted() => false): bool
 in
   if passed then true
@@ -223,13 +223,13 @@ end
    tests passed *)
 fn run_wasm_runner (n: int): bool = let
   val () = (if ~is_quiet() then prerr! ("running ", n, " wasm test(s)\n") else ())
-  val ex = str_to_path_arr("node")
-  val @(fz_x, bv_x) = $A.freeze<byte>(ex)
+  val (nul_x | ex) = $P.path_of_string_proved("node")
+  val @(fz_x, bv_x) = $A.barr_freeze(ex)
   var a0 = $B.create() val () = bput_v(a0, "node")
   var a1 = $B.create() val () = bput_v(a1, "build/_bats_test_wasm/_bats_test_harness.mjs")
-  val st = run_program(bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil())))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val st = run_program(nul_x | bv_x, $L.list_vt_cons(mk_arg(a0), $L.list_vt_cons(mk_arg(a1), $L.list_vt_nil())))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in
   case+ st of
   | ~Exited(0) => true
@@ -248,9 +248,9 @@ fn runner_write {sn:nat | sn < 4096} (wasm: bool, rel: string sn, b: $B.builder_
   val () = (if wasm then bput_v(pb, "build/_bats_test_wasm/") else bput_v(pb, "build/_bats_test/"))
   val () = bput_v(pb, rel)
   val () = put_char_v(pb, 0)
-  val @(pa, _) = $B.to_arr(pb)
+  val @(pa, pal) = $B.into_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val r = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
+  val r = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in r end
@@ -277,8 +277,8 @@ in h end
    with one binary whose main0 runs the selected tests, and runs it
    (natively, or in Node): stl[0, sl) staloads the modules, calls runs
    the n tests. Whether the tests passed; the error is reported. *)
-fn run_runner {ls:agz}
-  (wasm: bool, stl: !$A.borrow(byte, ls, 524288), sl: int, calls: $B.builder_v, n: int): bool = let
+fn run_runner {ls:agz}{ns:pos}{sn:nat | sn <= ns}
+  (wasm: bool, stl: !$A.borrow(byte, ls, ns), sl: int sn, calls: $B.builder_v, n: int): bool = let
   val rc = (if wasm then run_sh("rm -rf build/_bats_test_wasm && mkdir -p build/_bats_test_wasm/src/bin && cp src/*.bats build/_bats_test_wasm/src/ && ln -s ../../bats_modules build/_bats_test_wasm/bats_modules")
             else run_sh("rm -rf build/_bats_test && mkdir -p build/_bats_test/src/bin && cp src/*.bats build/_bats_test/src/ && ln -s ../../bats_modules build/_bats_test/bats_modules")): int
   var toml : $B.builder_v = $B.create()
@@ -288,7 +288,7 @@ fn run_runner {ls:agz}
   var runner : $B.builder_v = $B.create()
   val () = (if wasm then bput_v(runner, "#target wasm binary\n\n") else ())
   val () = bput_v(runner, "#include \"share/atspre_staload.hats\"\n\n")
-  val () = copy_to_builder_v(stl, 0, sl, 524288, runner)
+  val () = copy_to_builder_v(stl, 0, sl, sl, runner)
   val () = bput_v(runner, "\n(* 1 when the test failed; its PASS or FAIL line, as the Rust bats's runner prints it *)\n")
   val () = bput_v(runner, "fn __bats_run (ok: bool, name: string): int =\n  if ok then let val () = println! (\"  PASS \", name) in 0 end\n  else let val () = println! (\"  FAIL \", name) in 1 end\n\n")
   val () = bput_v(runner, "implement main0 () = let\n  val f = 0\n")
@@ -354,7 +354,7 @@ fn finish_test (nn: int, nw: int, bins: int, stl: $B.builder_v, calls: $B.builde
     val () = $B.builder_free(wcalls)
   in if is_quiet() then () else prerr! ("no tests found\n") end
   else let
-    val @(sa, sl) = $B.to_arr(stl)
+    val @(sa, sl) = $B.into_arr(stl)
     val @(fz_s, bv_s) = $A.freeze<byte>(sa)
     val () = set_test_mode(true)
     val ok_n = (if nn > 0 then run_runner(false, bv_s, sl, calls, nn)
@@ -374,12 +374,12 @@ fn finish_test (nn: int, nw: int, bins: int, stl: $B.builder_v, calls: $B.builde
 implement do_test (f, fl, want_native, want_wasm) = let
   var sd : $B.builder_v = $B.create()
   val () = bput_v(sd, "src")
-  val @(fa, flen) = sorted_bats_files(sd)
+  val @(fa, flen) = sorted_bats_files_m(sd)
   val @(fz_f, bv_f) = $A.freeze<byte>(fa)
   var stl : $B.builder_v = $B.create()
   var calls : $B.builder_v = $B.create()
   var wcalls : $B.builder_v = $B.create()
-  val @(nn, nw, _, bins) = scan_modules(bv_f, 0, flen, f, fl, want_native, want_wasm, stl, calls, wcalls, 0, 0, 0, 0)
+  val @(nn, nw, _, bins) = scan_modules(bv_f, flen, 0, flen, f, fl, want_native, want_wasm, stl, calls, wcalls, 0, 0, 0, 0)
   val () = $A.drop<byte>(fz_f, bv_f)
   val () = $A.free<byte>($A.thaw<byte>(fz_f))
 in finish_test(nn, nw, bins, stl, calls, wcalls) end
@@ -390,8 +390,8 @@ in finish_test(nn, nw, bins, stl, calls, wcalls) end
 
 (* The sidecar line in sc (the hash so far) completed and written to
    zp + ".sha256", or the error when the archive could not be hashed *)
-fn finish_sidecar {lz:agz}
-  (ok: bool, sc: $B.builder_v, zp: !$A.borrow(byte, lz, 524288), zlen: int): void =
+fn finish_sidecar {lz:agz}{nz:pos}{zm:nat | zm <= nz; zm <= 524288}
+  (ok: bool, sc: $B.builder_v, zp: !$A.borrow(byte, lz, nz), zm: int zm, zlen: int): void =
   if ~ok then let
     val () = $B.builder_free(sc)
     val () = set_build_err()
@@ -399,27 +399,27 @@ fn finish_sidecar {lz:agz}
   else let
     var line = sc
     val () = bput_v(line, "  ")
-    val base = find_basename_start(zp, 0, 524288, ~1)
-    val () = copy_to_builder_v(zp, base, zlen, 524288, line)
+    val base = find_basename_start(zp, 0, zm, ~1)
+    val () = copy_to_builder_v(zp, base, zlen, zm, line)
     val () = bput_v(line, "\n")
     var sp: $B.builder_v = $B.create()
-    val () = copy_to_builder_v(zp, 0, zlen, 524288, sp)
+    val () = copy_to_builder_v(zp, 0, zlen, zm, sp)
     val () = bput_v(sp, ".sha256")
     val () = put_char_v(sp, 0)
-    val @(spa, _) = $B.to_arr(sp)
+    val @(spa, spl) = $B.into_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
     (* said, and the build failed, if the sidecar cannot be written *)
-    val _ = write_settle(bv_sp, 524288, write_file_from_builder(bv_sp, 524288, line))
+    val _ = write_settle(bv_sp, spl, write_file_from_builder_m(bv_sp, spl, line))
     val () = $A.drop<byte>(fz_sp, bv_sp)
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
   in end
 
 (* Writes "<sha256 of the archive>  <archive filename>\n" to the sidecar
    of the archive at zp[0, zlen) (NUL-terminated), as the Rust bats did *)
-fn write_sidecar {lz:agz} (zp: !$A.borrow(byte, lz, 524288), zlen: int): void = let
+fn write_sidecar {lz:agz}{nz:pos}{zm:nat | zm <= nz; zm <= 524288} (zp: !$A.borrow(byte, lz, nz), zm: int zm, zlen: int): void = let
   var sc: $B.builder_v = $B.create()
-  val ok = put_file_sha256(zp, sc)
-in finish_sidecar(ok, sc, zp, zlen) end
+  val ok = put_file_sha256_m(zp, zm, sc)
+in finish_sidecar(ok, sc, zp, zm, zlen) end
 
 (* The end of the line starting at i: the next '\n', or len *)
 fun line_end {l:agz}{n:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
@@ -489,18 +489,18 @@ fun any_version_line {l:agz}{n:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
   end
 
 (* version = "<v>" and a newline *)
-fn put_version_line {lv:agz}{nv:pos}
+fn put_version_line {lv:agz}{vn:pos}{nv:nat | nv <= vn}
   (out: !$B.builder_v >> $B.builder_v,
-   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): void = let
+   v: !$A.borrow(byte, lv, vn), vlen: int, nv: int nv): void = let
   val () = bput_v(out, "version = \"")
   val () = copy_to_builder_v(v, 0, vlen, nv, out)
 in bput_v(out, "\"\n") end
 
 (* One line b[i, ce) of inject_lines *)
-fn inject_line {l:agz}{n:pos}{lv:agz}{nv:pos}
+fn inject_line {l:agz}{n:pos}{lv:agz}{vn:pos}{nv:nat | nv <= vn}
   (b: !$A.borrow(byte, l, n), i: pos_t, ce: pos_t, n: int n,
    replace: bool, ver_line: bool, pkg_line: bool,
-   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
+   v: !$A.borrow(byte, lv, vn), vlen: int, nv: int nv,
    out: !$B.builder_v >> $B.builder_v): void =
   if replace && ver_line then put_version_line(out, v, vlen, nv)
   else let
@@ -523,9 +523,9 @@ fn chop_cr {l:agz}{n:pos}{i,e:nat | i <= e; e <= n}
    line present (replace), each one becomes the new version line;
    otherwise the version line goes after "[package]". Every line ends
    with '\n' and loses a trailing '\r', as str::lines does. *)
-fun inject_lines {l:agz}{n:pos}{lv:agz}{nv:pos}{i,len:nat | i <= len; len <= n} .<len - i>.
+fun inject_lines {l:agz}{n:pos}{lv:agz}{vn:pos}{nv:nat | nv <= vn}{i,len:nat | i <= len; len <= n} .<len - i>.
   (b: !$A.borrow(byte, l, n), i: int i, len: int len, n: int n, replace: bool,
-   v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv,
+   v: !$A.borrow(byte, lv, vn), vlen: int, nv: int nv,
    out: !$B.builder_v >> $B.builder_v): void =
   if i >= len then ()
   else let
@@ -547,11 +547,11 @@ fun free_args {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
 
 (* Writes bats.toml with the version injected (Rust: write_with_version)
    to build/upload/bats.toml; 0 on success *)
-fn write_with_version {lv:agz}{nv:pos}
-  (v: !$A.borrow(byte, lv, nv), vlen: int, nv: int nv): int = let
-  val manifest_path = str_to_path_arr("bats.toml")
+fn write_with_version {lv:agz}{vn:pos}{nv:nat | nv <= vn}
+  (v: !$A.borrow(byte, lv, vn), vlen: int, nv: int nv): int = let
+  val @(manifest_path, manifest_path_len) = str_into_arr("bats.toml")
   val @(fz_path, bv_path) = $A.freeze<byte>(manifest_path)
-  val whole = read_whole(bv_path, 524288)
+  val whole = read_whole_m(bv_path, manifest_path_len)
   val () = $A.drop<byte>(fz_path, bv_path)
   val () = $A.free<byte>($A.thaw<byte>(fz_path))
 in
@@ -567,9 +567,9 @@ in
       var dir: $B.builder_v = $B.create()
       val () = bput_v(dir, "build/upload")
       val _ = run_mkdir(dir)
-      val upath = str_to_path_arr("build/upload/bats.toml")
+      val @(upath, upath_len) = str_into_arr("build/upload/bats.toml")
       val @(fz_op, bv_op) = $A.freeze<byte>(upath)
-      val rc = write_settle(bv_op, 524288, write_file_from_builder(bv_op, 524288, out))
+      val rc = write_settle(bv_op, upath_len, write_file_from_builder_m(bv_op, upath_len, out))
       val () = $A.drop<byte>(fz_op, bv_op)
       val () = $A.free<byte>($A.thaw<byte>(fz_op))
     in rc end
@@ -581,8 +581,8 @@ end
 (* git rev-parse --git-dir's exit code: 0 in a repository, > 0 outside
    one, -errno when git could not be run (Rust: resolve_version) *)
 fn git_dir_rc (): int = let
-  val git_exec = str_to_path_arr("git")
-  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  val (nul_ge | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_ge, bv_ge) = $A.barr_freeze(git_exec)
   var b1 = $B.create()
   val () = bput_v(b1, "git")
   var b2 = $B.create()
@@ -592,16 +592,16 @@ fn git_dir_rc (): int = let
   val argv = $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
-  val @(rc, _) = run_cmd_capture(bv_ge, argv, out)
+  val @(rc, _) = run_cmd_capture(nul_ge | bv_ge, argv, out)
   val () = $A.free<byte>(out)
-  val () = $A.drop<byte>(fz_ge, bv_ge)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  val () = $A.cborrow_drop(fz_ge, bv_ge)
+  val () = $A.barr_free($A.barr_thaw(fz_ge))
 in rc end
 
 (* Whether git status --porcelain lists anything (Rust: resolve_version) *)
 fn git_tree_dirty (): bool = let
-  val git_exec = str_to_path_arr("git")
-  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  val (nul_ge | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_ge, bv_ge) = $A.barr_freeze(git_exec)
   var b1 = $B.create()
   val () = bput_v(b1, "git")
   var b2 = $B.create()
@@ -611,10 +611,10 @@ fn git_tree_dirty (): bool = let
   val argv = $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
-  val @(_, olen) = run_cmd_capture(bv_ge, argv, out)
+  val @(_, olen) = run_cmd_capture(nul_ge | bv_ge, argv, out)
   val () = $A.free<byte>(out)
-  val () = $A.drop<byte>(fz_ge, bv_ge)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  val () = $A.cborrow_drop(fz_ge, bv_ge)
+  val () = $A.barr_free($A.barr_thaw(fz_ge))
 in olen > 0 end
 
 (* Whether a[0, t) and b[0, t) hold the same bytes *)
@@ -690,14 +690,14 @@ end
 
 (* A version: bytes with the array's size, the length, and whether it
    came from [package] version (true) or from git (false) *)
-vtypedef version_arr = [l:agz][n:pos] @($A.arr(byte, l, n), int n, int, bool)
+vtypedef version_arr = [l:agz][n:pos][m:nat | m <= n] @($A.arr(byte, l, n), int m, int, bool)
 
 (* The version from git: the last commit's date and seconds since
    midnight, with dev1 off the trunk (Rust: resolve_version) *)
 fn git_version (): version_arr = let
   (* Get version from git commit timestamp *)
-  val git_exec = str_to_path_arr("git")
-  val @(fz_ge, bv_ge) = $A.freeze<byte>(git_exec)
+  val (nul_ge | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_ge, bv_ge) = $A.barr_freeze(git_exec)
   (* Get commit timestamp *)
   var ts_b1 = $B.create()
   val () = bput_v(ts_b1, "git")
@@ -711,7 +711,7 @@ fn git_version (): version_arr = let
     $L.list_vt_cons(mk_arg(ts_b2), $L.list_vt_cons(mk_arg(ts_b3),
     $L.list_vt_cons(mk_arg(ts_b4), $L.list_vt_nil()))))
   val ts_out = $A.alloc<byte>(4096)
-  val @(ts_rc, ts_len) = run_cmd_capture(bv_ge, ts_argv, ts_out)
+  val @(ts_rc, ts_len) = run_cmd_capture(nul_ge | bv_ge, ts_argv, ts_out)
   val ts = parse_decimal(ts_out, ts_len, 4096)
   val () = $A.free<byte>(ts_out)
   val @(yr, mo, dy, secs) = timestamp_to_calver(ts)
@@ -728,13 +728,13 @@ fn git_version (): version_arr = let
     $L.list_vt_cons(mk_arg(br_b2), $L.list_vt_cons(mk_arg(br_b3),
     $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
   val br_out = $A.alloc<byte>(4096)
-  val @(br_rc, br_len) = run_cmd_capture(bv_ge, br_argv, br_out)
+  val @(br_rc, br_len) = run_cmd_capture(nul_ge | bv_ge, br_argv, br_out)
   val @(trunk, _, tlen) = read_trunk()
   val is_main = on_trunk(br_out, br_len, trunk, tlen)
   val () = $A.free<byte>(trunk)
   val () = $A.free<byte>(br_out)
-  val () = $A.drop<byte>(fz_ge, bv_ge)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ge))
+  val () = $A.cborrow_drop(fz_ge, bv_ge)
+  val () = $A.barr_free($A.barr_thaw(fz_ge))
   (* Build version string *)
   var vb_b: $B.builder_v = $B.create()
   val () = put_int_v(vb_b, yr)
@@ -745,8 +745,8 @@ fn git_version (): version_arr = let
   val () = put_char_v(vb_b, 46)
   val () = put_int_v(vb_b, secs)
   val () = (if ~is_main then bput_v(vb_b, "dev1") else bput_v(vb_b, ""))
-  val @(va, vl) = $B.to_arr(vb_b)
-in @(va, 524288, vl, false) end
+  val @(va, vl) = $B.into_arr(vb_b)
+in @(va, vl, vl, false) end
 
 (* Prints Rust's "invalid version part '<part>' in '<version>'" *)
 fn invalid_version_part {l:agz}{n:pos}
@@ -786,7 +786,7 @@ in
       var out: $B.builder_v = $B.create()
       val @(bad_s, bad_e) = parse_version_parts(bv_a, 0, be, n, out)
       val () = put_dev1(out, dev)
-      val @(va, vl) = $B.to_arr(out)
+      val @(va, vl) = $B.into_arr(out)
       val () = (if bad_s >= 0 then invalid_version_part(bv_a, bad_s, bad_e, t, n) else ())
       val () = $A.drop<byte>(fz_a, bv_a)
       val () = $A.free<byte>($A.thaw<byte>(fz_a))
@@ -794,7 +794,7 @@ in
       if bad_s >= 0 then let
         val () = $A.free<byte>(va)
       in $R.err(InvalidVersion()) end
-      else $R.ok(@(va, 524288, vl, true))
+      else $R.ok(@(va, vl, vl, true))
     end
   | ~$R.none() =>
     let
@@ -912,14 +912,14 @@ implement do_upload {lr} (repo, rplen) =
                     val () = put_char_v(b, (if $AR.eq_int_int(byte_val, 47) then 95 else byte_val): int)
                   in copy_replace_slash(bv, i + 1, len, b) end
                 val () = copy_replace_slash(bv_nb, 0, nlen, pfx)
-                val @(pfx_arr, pfx_len) = $B.to_arr(pfx)
+                val @(pfx_arr, pfx_len) = $B.into_arr(pfx)
                 val @(fz_px, bv_px) = $A.freeze<byte>(pfx_arr)
-                val () = copy_to_builder_v(bv_px, 0, pfx_len, 524288, zip_path)
+                val () = copy_to_builder_v(bv_px, 0, pfx_len, pfx_len, zip_path)
                 val () = bput_v(zip_path, "_")
                 val () = copy_to_builder_v(bv_vb, 0, verlen, vmax, zip_path)
                 val () = bput_v(zip_path, ".bats")
                 val () = put_char_v(zip_path, 0)
-                val @(zpa, zpa_len) = $B.to_arr(zip_path)
+                val @(zpa, zpa_len) = $B.into_arr(zip_path)
                 val @(fz_zp, bv_zp) = $A.freeze<byte>(zpa)
                 (* mkdir + zip *)
                 var mkd: $B.builder_v = $B.create()
@@ -927,14 +927,14 @@ implement do_upload {lr} (repo, rplen) =
                 val () = bput_v(mkd, "/")
                 val () = copy_to_builder_v(bv_nb, 0, nlen, 256, mkd)
                 val _ = run_mkdir(mkd)
-                val zip_exec = str_to_path_arr("zip")
-                val @(fz_ze, bv_ze) = $A.freeze<byte>(zip_exec)
+                val (nul_ze | zip_exec) = $P.path_of_string_proved("zip")
+                val @(fz_ze, bv_ze) = $A.barr_freeze(zip_exec)
                 var za1 = $B.create()
                 val () = bput_v(za1, "zip")
                 var za2 = $B.create()
                 val () = bput_v(za2, "-r")
                 var za3 = $B.create()
-                val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, za3)
+                val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, zpa_len, za3)
                 var za5 = $B.create()
                 val () = bput_v(za5, "src/")
                 (* Rust: "uploaded <name> v<version> to <repository>" *)
@@ -945,15 +945,15 @@ implement do_upload {lr} (repo, rplen) =
                 val () = copy_to_builder_v(bv_vb, 0, verlen, vmax, um)
                 val () = bput_v(um, " to ")
                 val () = copy_to_builder_v(repo, 0, rplen, 4096, um)
-                val @(uma, umlen) = $B.to_arr(um)
+                val @(uma, umlen) = $B.into_arr(um)
                 val @(fz_um, bv_um) = $A.freeze<byte>(uma)
                 val () = $A.drop<byte>(fz_nb, bv_nb)
                 val () = $A.free<byte>($A.thaw<byte>(fz_nb))
                 val () = $A.drop<byte>(fz_px, bv_px)
                 val () = $A.free<byte>($A.thaw<byte>(fz_px))
-                val dp = str_to_path_arr("docs")
+                val @(dp, dp_len) = str_into_arr("docs")
                 val @(fz_dp, bv_dp) = $A.freeze<byte>(dp)
-                val has_docs = file_exists_path(bv_dp)
+                val has_docs = file_exists_m(bv_dp, dp_len)
                 val () = $A.drop<byte>(fz_dp, bv_dp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_dp))
                 val zip_docs = (if has_docs then let
@@ -974,10 +974,10 @@ implement do_upload {lr} (repo, rplen) =
                       var zj2 = $B.create()
                       val () = bput_v(zj2, "-j")
                       var zj3 = $B.create()
-                      val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, 524288, zj3)
+                      val () = copy_to_builder_v(bv_zp, 0, zpa_len - 1, zpa_len, zj3)
                       var zj4 = $B.create()
                       val () = bput_v(zj4, "build/upload/bats.toml")
-                    in run_cmd(bv_ze, $L.list_vt_cons(mk_arg(zj1),
+                    in run_cmd(nul_ze | bv_ze, $L.list_vt_cons(mk_arg(zj1),
                          $L.list_vt_cons(mk_arg(zj2), $L.list_vt_cons(mk_arg(zj3),
                          $L.list_vt_cons(mk_arg(zj4), $L.list_vt_nil()))))) end
                   end): int
@@ -992,9 +992,9 @@ implement do_upload {lr} (repo, rplen) =
                 val rc = (if toml_rc <> 0 then let
                     val () = free_args(zip_argv)
                   in toml_rc end
-                  else run_cmd(bv_ze, zip_argv)): int
-                val () = $A.drop<byte>(fz_ze, bv_ze)
-                val () = $A.free<byte>($A.thaw<byte>(fz_ze))
+                  else run_cmd(nul_ze | bv_ze, zip_argv)): int
+                val () = $A.cborrow_drop(fz_ze, bv_ze)
+                val () = $A.barr_free($A.barr_thaw(fz_ze))
               in
                 if rc <> 0 then let
                   val () = $A.drop<byte>(fz_zp, bv_zp)
@@ -1007,13 +1007,13 @@ implement do_upload {lr} (repo, rplen) =
                 in prerr! ("error: upload failed\n") end
                 else let
                   (* The sidecar zip_path + ".sha256" *)
-                  val () = write_sidecar(bv_zp, zpa_len - 1)
+                  val () = write_sidecar(bv_zp, zpa_len, zpa_len - 1)
                   val () = $A.drop<byte>(fz_zp, bv_zp)
                   val () = $A.free<byte>($A.thaw<byte>(fz_zp))
                   val () = $A.drop<byte>(fz_vb, bv_vb)
                   val () = $A.free<byte>($A.thaw<byte>(fz_vb))
                   val () = (if is_quiet() then () else let
-                      val () = prerr_seg(bv_um, 0, umlen, 524288)
+                      val () = prerr_seg(bv_um, 0, umlen, umlen)
                     in prerr_newline() end)
                   val () = $A.drop<byte>(fz_um, bv_um)
                   val () = $A.free<byte>($A.thaw<byte>(fz_um))
@@ -1066,9 +1066,9 @@ implement do_completions(target) =
 #pub fn file_exists {sn:nat | sn < $B.BUILDER_CAP} (path: string sn): bool
 
 implement file_exists(path) = let
-  val pa = str_to_path_arr(path)
+  val @(pa, pa_len) = str_into_arr(path)
   val @(fz, bv) = $A.freeze<byte>(pa)
-  val fex_or = file_open_path(bv, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val fex_or = file_open_m(bv, pa_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in case+ fex_or of
@@ -1119,9 +1119,9 @@ implement write_claude_rules() = let
   val () = $B.bput(rb, "- Pattern matching: `case+ x of | 0 => ... | n => ...`\n")
   val () = $B.bput(rb, "- Types: `int`, `string`, `bool`, `void`\n")
   val () = $B.bput(rb, "- No semicolons at end of expressions\n")
-  val rp = str_to_path_arr(".claude/rules/bats.md")
+  val @(rp, rp_len) = str_into_arr(".claude/rules/bats.md")
   val @(fz_rp, bv_rp) = $A.freeze<byte>(rp)
-  val _ = write_settle(bv_rp, 524288, write_file_from_builder(bv_rp, 524288, rb))
+  val _ = write_settle(bv_rp, rp_len, write_file_from_builder_m(bv_rp, rp_len, rb))
   val () = $A.drop<byte>(fz_rp, bv_rp)
   val () = $A.free<byte>($A.thaw<byte>(fz_rp))
 in end
@@ -1154,8 +1154,8 @@ in
 end
 
 (* Whether the NUL-terminated path in p exists. *)
-fn path_exists {l:agz} (p: !$A.borrow(byte, l, 524288)): bool =
-  case+ file_open_path(p, $F.ReadOnly(), $F.OpenExisting(), 0) of
+fn path_exists {l:agz}{n:pos}{m:nat | m <= n; m <= 524288} (p: !$A.borrow(byte, l, n), m: int m): bool =
+  case+ file_open_m(p, m, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
   | ~$R.err(_) => false
 
@@ -1172,21 +1172,21 @@ fn add_project_name (b: !$B.builder_v >> $B.builder_v): void = let
 in $A.free<byte>($A.thaw<byte>(fz_c)) end
 
 (* The NUL-terminated path "src/bin/<name>.bats" or "src/lib.bats". *)
-fn init_source_path {ln:agz}
-  (kind: package_kind, name: !$A.borrow(byte, ln, 524288), nlen: int): $B.builder_v = let
+fn init_source_path {ln:agz}{nn:pos}{nm:nat | nm <= nn}
+  (kind: package_kind, name: !$A.borrow(byte, ln, nn), nlen: int nm): $B.builder_v = let
   var p: $B.builder_v = $B.create()
   val () = (case+ kind of
     | Binary() => let
         val () = bput_v(p, "src/bin/")
-        val () = copy_to_builder_v(name, 0, nlen, 524288, p)
+        val () = copy_to_builder_v(name, 0, nlen, nlen, p)
       in bput_v(p, ".bats") end
     | Library() => bput_v(p, "src/lib.bats")): void
   val () = put_char_v(p, 0)
 in p end
 
 (* Writes b to the NUL-terminated path in p; 0 on success. *)
-fn write_to {lp:agz} (p: !$A.borrow(byte, lp, 524288), b: $B.builder_v): int =
-  write_settle(p, 524288, write_file_from_builder(p, 524288, b))
+fn write_to {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (p: !$A.borrow(byte, lp, n), m: int m, b: $B.builder_v): int =
+  write_settle(p, m, write_file_from_builder_m(p, m, b))
 
 (* bats init <kind>: as the Rust bats's cmd_init. arg: the kind argument
    in arg[0, alen). *)
@@ -1203,36 +1203,36 @@ implement do_init {la} (arg, alen, claude) =
   | ~$R.some(kind) => let
     var nb: $B.builder_v = $B.create()
     val () = add_project_name(nb)
-    val @(na, nlen) = $B.to_arr(nb)
+    val @(na, nlen) = $B.into_arr(nb)
     val @(fz_n, bv_n) = $A.freeze<byte>(na)
     val sp = init_source_path(kind, bv_n, nlen)
-    val @(spa, splen) = $B.to_arr(sp)
+    val @(spa, splen) = $B.into_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
-    val tp = str_to_path_arr("bats.toml")
+    val @(tp, tp_len) = str_into_arr("bats.toml")
     val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-    val gp = str_to_path_arr(".gitignore")
+    val @(gp, gp_len) = str_into_arr(".gitignore")
     val @(fz_gp, bv_gp) = $A.freeze<byte>(gp)
-    val c_toml = path_exists(bv_tp)
-    val c_src = path_exists(bv_sp)
-    val c_gi = path_exists(bv_gp)
+    val c_toml = path_exists(bv_tp, tp_len)
+    val c_src = path_exists(bv_sp, splen)
+    val c_gi = path_exists(bv_gp, gp_len)
     val () = (if c_toml || c_src || c_gi then let
         val () = prerr! ("error: refusing to overwrite existing files:")
         val () = prerr_newline()
         val () = (if c_toml then let val () = prerr! ("  bats.toml") in prerr_newline() end else ())
         val () = (if c_src then let
             val () = prerr! ("  ")
-            val () = prerr_seg(bv_sp, 0, splen - 1, 524288)
+            val () = prerr_seg(bv_sp, 0, splen - 1, splen)
           in prerr_newline() end else ())
         val () = (if c_gi then let val () = prerr! ("  .gitignore") in prerr_newline() end else ())
       in set_build_err() end
       else let
         var toml: $B.builder_v = $B.create()
         val () = bput_v(toml, "[package]\nname = \"")
-        val () = copy_to_builder_v(bv_n, 0, nlen, 524288, toml)
+        val () = copy_to_builder_v(bv_n, 0, nlen, nlen, toml)
         val () = (case+ kind of
           | Binary() => bput_v(toml, "\"\nkind = \"bin\"\n")
           | Library() => bput_v(toml, "\"\nkind = \"lib\"\n")): void
-        val r1 = write_to(bv_tp, toml)
+        val r1 = write_to(bv_tp, tp_len, toml)
         var dir: $B.builder_v = $B.create()
         val () = (case+ kind of Binary() => bput_v(dir, "src/bin") | Library() => bput_v(dir, "src")): void
         val _ = run_mkdir(dir)
@@ -1243,10 +1243,10 @@ implement do_init {la} (arg, alen, claude) =
               val () = bput_v(src, "implement ")
             in bput_v(src, "main0 () = println! (\"hello, world!\")\n") end
           | Library() => bput_v(src, "#pub fun hello(): void\n\nimplement hello () = println! (\"hello from library\")\n")): void
-        val r2 = write_to(bv_sp, src)
+        val r2 = write_to(bv_sp, splen, src)
         var gi: $B.builder_v = $B.create()
         val () = bput_v(gi, "build/\ndist/\ndocs/\nbats_modules/\n")
-        val r3 = write_to(bv_gp, gi)
+        val r3 = write_to(bv_gp, gp_len, gi)
       in
         if r1 <> 0 then let
           val () = prerr! ("error: cannot write bats.toml")
@@ -1254,7 +1254,7 @@ implement do_init {la} (arg, alen, claude) =
         in set_build_err() end
         else if r2 <> 0 then let
           val () = prerr! ("error: cannot write ")
-          val () = prerr_seg(bv_sp, 0, splen - 1, 524288)
+          val () = prerr_seg(bv_sp, 0, splen - 1, splen)
           val () = prerr_newline()
         in set_build_err() end
         else if r3 <> 0 then let
@@ -1269,7 +1269,7 @@ implement do_init {la} (arg, alen, claude) =
             val () = prerr! ("created ")
             val () = prerr_seg(arg, 0, alen, 4096)
             val () = prerr! (" project '")
-            val () = prerr_seg(bv_n, 0, nlen, 524288)
+            val () = prerr_seg(bv_n, 0, nlen, nlen)
             val () = prerr! ("'")
           in prerr_newline() end
         end
@@ -1290,32 +1290,24 @@ implement do_init {la} (arg, alen, claude) =
 #pub fn do_tree(): void
 
 implement do_tree() = let
-  val la = str_to_path_arr("bats.lock")
+  val @(la, la_len) = str_into_arr("bats.lock")
   val @(fz_la, bv_la) = $A.freeze<byte>(la)
-  val lock_or = file_open_path(bv_la, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val lock_whole = read_whole_m(bv_la, la_len)
   val () = $A.drop<byte>(fz_la, bv_la)
   val () = $A.free<byte>($A.thaw<byte>(fz_la))
 in
-  case+ lock_or of
-  | ~$R.ok(lfd) => let
-      val lock_buf = $A.alloc<byte>(524288)
-      val lr = $F.file_read(lfd, lock_buf, 524288)
-      val lock_len = (case+ lr of | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-      val lcr = $F.file_close(lfd)
-      val () = $R.discard<int><$F.io_error>(lcr)
+  case+ lock_whole of
+  | ~whole_ok(ar, lock_buf, lock_cap, lock_len) => let
+      val @(fz_lb, bv_lb) = $A.freeze<byte>(lock_buf)
+      (* Use C helper to print Unicode tree *)
+      val () = (if lock_len > 0 then print_borrow(bv_lb, 0, lock_len, lock_len) else ())
+      val () = $A.drop<byte>(fz_lb, bv_lb)
+      val () = whole_free(ar, $A.thaw<byte>(fz_lb))
     in
-      if lock_len > 0 then let
-        (* Use C helper to print Unicode tree *)
-        val @(fz_lb, bv_lb) = $A.freeze<byte>(lock_buf)
-        val () = print_borrow(bv_lb, 0, lock_len, 524288)
-        val () = $A.drop<byte>(fz_lb, bv_lb)
-        val () = $A.free<byte>($A.thaw<byte>(fz_lb))
-      in end
-      else let
-        val () = $A.free<byte>(lock_buf)
-      in println! ("no dependencies") end
+      if lock_len > 0 then ()
+      else println! ("no dependencies")
     end
-  | ~$R.err(_) => println! ("error: no bats.lock found (run lock first)")
+  | ~whole_err(_) => println! ("error: no bats.lock found (run lock first)")
 end
 
 (* ============================================================
@@ -1328,13 +1320,13 @@ end
 
 implement do_add(bv, pkg_start, pkg_len, max) = let
   (* the line is appended and the file never rewritten (manifest) *)
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
   var dependency_line: $B.builder_v = $B.create()
   val () = bput_v(dependency_line, "\"")
   val () = copy_to_builder_v(bv, pkg_start, pkg_start + pkg_len, max, dependency_line)
   val () = bput_v(dependency_line, "\" = \"\"\n")
-  val rc = write_settle(bv_tp, 524288, append_file_from_builder(bv_tp, 524288, dependency_line))
+  val rc = write_settle(bv_tp, tp_len, append_file_from_builder_m(bv_tp, tp_len, dependency_line))
   val () = $A.drop<byte>(fz_tp, bv_tp)
   val () = $A.free<byte>($A.thaw<byte>(fz_tp))
 in
@@ -1403,9 +1395,9 @@ fun copy_without_package {lt:agz}{nt:pos}{lp:agz}{np:pos}{ps:int}{i,len,r:nat | 
   end
 
 implement do_remove(bv, pkg_start, pkg_len, max) = let
-  val tp = str_to_path_arr("bats.toml")
+  val @(tp, tp_len) = str_into_arr("bats.toml")
   val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val whole = read_whole(bv_tp, 524288)
+  val whole = read_whole_m(bv_tp, tp_len)
 in
   case+ whole of
   | ~whole_ok(ar, piece, size, length) => let
@@ -1418,7 +1410,7 @@ in
       val built = out
     in
       if removed > 0 then let
-        val rc = write_settle(bv_tp, 524288, write_file_from_builder(bv_tp, 524288, built))
+        val rc = write_settle(bv_tp, tp_len, write_file_from_builder_m(bv_tp, tp_len, built))
         val () = $A.drop<byte>(fz_tp, bv_tp)
         val () = $A.free<byte>($A.thaw<byte>(fz_tp))
       in
@@ -1450,18 +1442,18 @@ end
 #pub fn run_process_demo(): void
 
 implement run_process_demo() = let
-  val exec = str_to_path_arr("echo")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("echo")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var ba1 = $B.create()
   val () = bput_v(ba1, "echo")
   var ba2 = $B.create()
   val () = bput_v(ba2, "check passed")
   val argv = $L.list_vt_cons(mk_arg(ba1),
     $L.list_vt_cons(mk_arg(ba2), $L.list_vt_nil()))
-  val spawn_r = spawn_child(bv_exec, argv,
+  val spawn_r = spawn_child(nul_exec | bv_exec, argv,
     $P.dev_null(), $P.pipe_new(), $P.dev_null())
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in
   case+ spawn_r of
   | ~$R.ok(sp) => let
@@ -1514,9 +1506,9 @@ fn is_built {le:agz} (ent: !$A.borrow(byte, le, 1024), len: int, release: profil
   val () = (if is_release(release) then bput_v(pb, "dist/release/") else bput_v(pb, "dist/debug/"))
   val () = copy_to_builder_v(ent, 0, len, 1024, pb)
   val () = put_char_v(pb, 0)
-  val @(pa, _) = $B.to_arr(pb)
+  val @(pa, pal) = $B.into_arr(pb)
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
-  val built = (case+ file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val built = (case+ file_open_m(bv_p, pal, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.ok(fd) => let val () = $R.discard<int><$F.io_error>($F.file_close(fd)) in true end
     | ~$R.err(_) => false): bool
   val () = $A.drop<byte>(fz_p, bv_p)
@@ -1553,9 +1545,9 @@ fun collect_built_from {n,i:nat | i <= n} .<n - i>.
   end
 
 fn collect_built (names: !$B.builder_v >> $B.builder_v, release: profile): int = let
-  val sb = str_to_path_arr("src/bin")
+  val @(sb, sb_len) = str_into_arr("src/bin")
   val @(fz_sb, bv_sb) = $A.freeze<byte>(sb)
-  val count = (case+ $F.dir_read(bv_sb, 524288) of
+  val count = (case+ dir_read_m(bv_sb, sb_len) of
     | ~$R.ok(es) => let
         val c = collect_built_from(es, 0, $F.entries_count(es), names, release, 0)
         val () = $F.entries_free(es)
@@ -1571,44 +1563,44 @@ datatype binary_choice = NamedBinary | OnlyBinary | NoBinary
 
 (* Appends the chosen binary's name: bin[0, blen) for the one --bin
    names, the first entry of n for the only one, nothing for none. *)
-fn add_choice {lb,ln:agz}
+fn add_choice {lb,ln:agz}{nn:pos}{nl:nat | nl <= nn}
   (cmd: !$B.builder_v >> $B.builder_v, choice: binary_choice,
-   bin: !$A.borrow(byte, lb, 256), blen: int, n: !$A.borrow(byte, ln, 524288)): void =
+   bin: !$A.borrow(byte, lb, 256), blen: int, n: !$A.borrow(byte, ln, nn), nlen: int nl): void =
   case+ choice of
   | NamedBinary() => copy_to_builder_v(bin, 0, blen, 256, cmd)
-  | OnlyBinary() => copy_to_builder_v(n, 0, find_null_bv_from(n, 0, 524288), 524288, cmd)
+  | OnlyBinary() => copy_to_builder_v(n, 0, find_null_bv_from(n, 0, nlen), nlen, cmd)
   | NoBinary() => ()
 
-(* Whether the entry at n[s, NUL) equals b[0, blen). *)
-fun entry_eq {ln,lb:agz}{s,i:nat | s + i <= 524288; i <= 256} .<256 - i>.
-  (n: !$A.borrow(byte, ln, 524288), s: int s,
+(* Whether the entry at n[s, NUL) equals b[0, blen); the list n holds nl bytes. *)
+fun entry_eq {ln,lb:agz}{nn:pos}{nl:nat | nl <= nn}{s,i:nat | s + i <= nl; i <= 256} .<256 - i>.
+  (n: !$A.borrow(byte, ln, nn), nl: int nl, s: int s,
    b: !$A.borrow(byte, lb, 256), blen: int, i: int i): bool =
-  if s + i >= 524288 then false
+  if s + i >= nl then false
   else if i >= blen then byte2int0($A.read<byte>(n, s + i)) = 0
   else if i >= 256 then false
   else if byte2int0($A.read<byte>(n, s + i)) <> byte2int0($A.read<byte>(b, i)) then false
-  else entry_eq(n, s, b, blen, i + 1)
+  else entry_eq(n, nl, s, b, blen, i + 1)
 
 (* Whether some entry of the NUL-terminated list n[s, nlen) is b[0, blen). *)
-fun list_has {ln,lb:agz}{s:nat | s <= 524288} .<524288 - s>.
-  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: int s,
+fun list_has {ln,lb:agz}{nn:pos}{nl:nat | nl <= nn}{s:nat | s <= nl} .<nl - s>.
+  (n: !$A.borrow(byte, ln, nn), nlen: int nl, s: int s,
    b: !$A.borrow(byte, lb, 256), blen: int): bool =
   if s >= nlen then false
-  else if entry_eq(n, s, b, blen, 0) then true
+  else if entry_eq(n, nlen, s, b, blen, 0) then true
   else let
-    val e = $S.find_null_bv_at(n, s, 524288)
-  in if e >= 524288 then false else list_has(n, nlen, e + 1, b, blen) end
+    val e = nul_in(n, s, nlen)
+  in if e >= nlen then false else list_has(n, nlen, e + 1, b, blen) end
 
 
 (* The NUL-terminated entries of n[s, nlen) to stderr, ", "-separated. *)
-fun prerr_names {ln:agz}{s:nat | s <= 524288} .<524288 - s>.
-  (n: !$A.borrow(byte, ln, 524288), nlen: int, s: int s, first: bool): void =
+fun prerr_names {ln:agz}{nn:pos}{nl:nat | nl <= nn}{s:nat | s <= nl} .<nl - s>.
+  (n: !$A.borrow(byte, ln, nn), nlen: int nl, s: int s, first: bool): void =
   if s >= nlen then ()
   else let
-    val e = $S.find_null_bv_at(n, s, 524288)
+    val e = nul_in(n, s, nlen)
     val () = (if first then () else prerr! (", "))
-    val () = prerr_seg(n, s, e, 524288)
-  in if e >= 524288 then () else prerr_names(n, nlen, e + 1, false) end
+    val () = prerr_seg(n, s, e, nlen)
+  in if e >= nlen then () else prerr_names(n, nlen, e + 1, false) end
 
 (* bin: the --bin name in bin[0, blen); blen is 0 when it was not
    given. extra: the arguments
@@ -1626,7 +1618,7 @@ implement do_run {lb,le} (release, bin, blen, extra, elen, lk) = let
   (* The binaries the build produced, NUL-terminated, in name order *)
   var names: $B.builder_v = $B.create()
   val count = collect_built(names, release)
-  val @(na, nlen) = $B.to_arr(names)
+  val @(na, nlen) = $B.into_arr(names)
   val @(fz_n, bv_n) = $A.freeze<byte>(na)
   (* As the Rust bats: --bin names one of them; without it there must be
      exactly one. *)
@@ -1648,33 +1640,34 @@ implement do_run {lb,le} (release, bin, blen, extra, elen, lk) = let
   var cmd: $B.builder_v = $B.create()
   val () = (if is_release(release) then bput_v(cmd, "./dist/release/")
     else bput_v(cmd, "./dist/debug/"))
-  val () = add_choice(cmd, choice, bin, blen, bv_n)
+  val () = add_choice(cmd, choice, bin, blen, bv_n, nlen)
   val chosen = (case+ choice of NoBinary() => false | _ => true): bool
   val () = $A.drop<byte>(fz_n, bv_n)
   val () = $A.free<byte>($A.thaw<byte>(fz_n))
-  val () = put_char_v(cmd, 0)
-  val @(exec_a, exec_len) = $B.to_arr(cmd)
-  val @(fz_ea, bv_ea) = $A.freeze<byte>(exec_a)
+  val (nul_ea | exec_a, exec_len) = path_of_builder(cmd)
+  val @(fz_ea, bv_ea) = $A.barr_freeze(exec_a)
 in
   if ~chosen then let
-    val () = $A.drop<byte>(fz_ea, bv_ea)
-    val () = $A.free<byte>($A.thaw<byte>(fz_ea))
+    val () = $A.cborrow_drop(fz_ea, bv_ea)
+    val () = $A.barr_free($A.barr_thaw(fz_ea))
   in set_exit_code(1) end
   else let
+    val view_ea = $A.cborrow_view(fz_ea, bv_ea)
     var run_b1 = $B.create()
-    val () = copy_to_builder_v(bv_ea, 0, exec_len - 1, 524288, run_b1)
+    val () = copy_to_builder_v(view_ea, 0, exec_len, exec_len, run_b1)
     val extras = rev_arg_list(extra_arg_list(extra, 0, elen, $L.list_vt_nil()), $L.list_vt_nil())
     val run_argv = $L.list_vt_cons(mk_arg(run_b1), extras)
-    val () = (case+ run_program(bv_ea, run_argv) of
+    val () = (case+ run_program(nul_ea | bv_ea, run_argv) of
     | ~NotStarted() => let
       val () = prerr! ("error: cannot run '")
-      val () = prerr_seg(bv_ea, 0, exec_len - 1, 524288)
+      val () = prerr_seg(view_ea, 0, exec_len, exec_len)
       val () = prerr! ("'")
       val () = prerr_newline()
     in set_exit_code(1) end
     | ~Exited(status) => set_exit_code(status)): void
-    val () = $A.drop<byte>(fz_ea, bv_ea)
-  in $A.free<byte>($A.thaw<byte>(fz_ea)) end
+    val () = $A.cborrow_view_drop(fz_ea, view_ea)
+    val () = $A.cborrow_drop(fz_ea, bv_ea)
+  in $A.barr_free($A.barr_thaw(fz_ea)) end
 end
 
 (* ============================================================
