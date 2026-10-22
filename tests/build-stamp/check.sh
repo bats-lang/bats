@@ -2,8 +2,10 @@
 # build/ carries a stamp of who made it (bats-lang/bats#267), and is kept
 # only when this bats would write the same one: build/.bats_stamp holds
 # the running bats's digest (`bats`), the ATS2 toolchain's (`patsopt`),
-# the C compiler's (`cc`), the flag templates (`flags`) and the target
-# and mode (`mark`). A difference in any line drops build/ with one line
+# the C compiler's and the loader environment's (`cc`), the shared
+# libraries patsopt loads (`libs`), the linker and the files the link
+# reads (`link`), the flag templates (`flags`) and the target and mode
+# (`mark`). A difference in any line drops build/ with one line
 # on stderr naming it, and every module is made again; an unchanged
 # stamp keeps everything (patsopt does not run); a build/ with no stamp
 # (made before stamps) is dropped once; a stash (a build/ of another
@@ -90,6 +92,7 @@ grep -q -E '^cc [0-9a-f]{64}$' "$S" || { echo "FAIL: cc is not a digest"; cat "$
 grep -q -E '^libs [0-9a-f]{64}$' "$S" || { echo "FAIL: libs is not a digest"; cat "$S"; exit 1; }
 grep -q -E '^link [0-9a-f]{64}$' "$S" || { echo "FAIL: link is not a digest"; cat "$S"; exit 1; }
 grep -q '^flags .*\$(PATSHOME)' "$S" || { echo "FAIL: flags do not write PATSHOME as a variable"; cat "$S"; exit 1; }
+grep -q '^flags .* -I\$(PATSHOME)/ccomp/runtime -MD -MF OUT\.d;' "$S" || { echo "FAIL: flags do not name the depfile arguments of the cc"; cat "$S"; exit 1; }
 [ "$(sed -n 's/^mark //p' "$S")" = 0 ] || { echo "FAIL: mark of a native build is not 0"; cat "$S"; exit 1; }
 if grep -q -e "$P" -e "$HOME" -e "$TMP" "$S"; then echo "FAIL: the stamp holds a path"; cat "$S"; exit 1; fi
 cp "$S" "$TMP/stamp.good"

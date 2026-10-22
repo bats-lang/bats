@@ -1240,8 +1240,11 @@ in b end
    file that is not there), one per line, the same files in the same order:
      1. the step's input: for an object its C (a module's C has its own
         key, the check memo's: cache.bats, bats#323);
-     2. build/.bats_stamp: the digest of this bats, patsopt, cc, the flag
-        templates and the target and mode that made build/ (bats#273).
+     2. for an object, the headers its compile read, one size and one
+        hash each, in the depfile's order (headers keyword, bats#394);
+     3. build/.bats_stamp: the digest of this bats, patsopt, cc, the
+        libraries patsopt loads, the link, the flag templates and the
+        target and mode that made build/ (bats#273, bats#394).
    A size is a negative only: equal sizes say nothing until the hashes
    agree. No time is read. The record of a step is this text in
    <output>.key, written after the step passed and removed before it

@@ -5,7 +5,7 @@
 # bats would write before anything in the stash is used (stamp.bats). A check
 # leaves the other mark's cache in build/.stash/2 (mark 2, the native check's;
 # build/ holds mark 3). This plays that stash:
-#   * each stamp line of it edited in turn (bats, patsopt, cc, flags, mark):
+#   * each stamp line of it edited in turn (bats, patsopt, cc, libs, link, flags, mark):
 #     the check that swaps it in drops it with one line naming the line, makes
 #     every module again (the count of a cold check), and leaves the stash
 #     with the stamp this bats writes, byte for byte as it was;
@@ -86,7 +86,7 @@ SAVE=$TMP/saved
 cp -Rp "$P" "$SAVE"
 D=$TMP/case
 
-for line in bats patsopt cc flags mark; do
+for line in bats patsopt cc libs link flags mark; do
   case $line in
     flags) value="clang -c -O3" ;;
     mark) value=3 ;;
