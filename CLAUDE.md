@@ -136,3 +136,4 @@ A comment states its reason in one line and names the area by keyword; the detai
 | `.claude/rules/with-env.md` | bats with-env |
 | `.claude/rules/setup-action.md` | The setup step other bats repositories call (#274) |
 | `.claude/rules/check-pins.md` | bats check-pins: floating CI inputs (#390) |
+| `.claude/rules/capture.md` | Captured runs: the outcome of a child whose output is longer than the buffer (#444) |
