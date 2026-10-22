@@ -2344,46 +2344,6 @@ staload "validated.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn project_kind (): $R.option(package_kind)
 
 
@@ -3154,6 +3114,12 @@ fn project_kind (): $R.option(package_kind)
 
 
 
+
+
+
+
+
+fn read_unsafe_flag(): bool
 
 
 

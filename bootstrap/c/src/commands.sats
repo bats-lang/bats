@@ -28,6 +28,7 @@ staload "build.sats"
 staload "lexer.sats"
 staload "emitter.sats"
 staload "docs.sats"
+staload "lock.sats"
 
 
 
@@ -836,49 +837,7 @@ fn do_test {lf:agz} (f: !$A.borrow(byte, lf, 4096), fl: int, want_native: bool, 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1393,28 +1352,51 @@ fn do_add {l:agz}{n:pos}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn do_remove {l:agz}{n:pos}
   (bv: !$A.borrow(byte, l, n), pkg_start: pos_t, pkg_len: int,
    max: int n): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

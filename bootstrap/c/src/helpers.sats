@@ -10,6 +10,8 @@ staload P = "process/src/lib.sats"
 staload R = "result/src/lib.sats"
 staload S = "str/src/lib.sats"
 staload SHA = "sha256/src/lib.sats"
+staload T = "toml/src/lib.sats"
+
 
 
 
@@ -1799,6 +1801,87 @@ fn run_cmd_capture {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
 
 
 
+datavtype capture_outcome =
+  | CaptureFits of ([k:nat | k <= 4096] int k)
+  | CaptureFailed of (int, [k:nat | k <= 4096] int k)
+  | CaptureLonger of (int, int)
+  | CaptureReadFailed of (int, [k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureNotRun of (int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn run_cmd_capture_outcome {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs),
+   argv: $L.listv($P.arg_entry),
+   outbuf: !$A.arr(byte, lo, 4096)): capture_outcome
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2823,17 +2906,24 @@ datatype heavy_command =
   | HeavyCheck | HeavyBuild | HeavyTest | HeavyRun | NotHeavy
 
 
-
-
-
 datavtype machine_slot =
   | SlotHeld of ($F.fd, int)
   | SlotOfParent
   | SlotNone
+  | SlotRefused
 
 fn machine_slot_take (heavy: heavy_command): machine_slot
 
 fn machine_slot_release (slot: machine_slot): void
+
+fn machine_slot_refused (slot: !machine_slot): bool
+
+
+
+
+
+
+
 
 
 
@@ -3165,6 +3255,31 @@ fn project_lock_release (lk: project_lock): void
 
 
 
+fn project_lock_refused (lk: !project_lock): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3199,6 +3314,20 @@ fn write_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+fn append_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, content_b: $B.builder_v): write_result
 
 
 
@@ -3403,6 +3532,12 @@ fn read_whole {lp:agz}{np:pos | np < 1048576}
 
 
 
+
+
+
+
+
+
 fn read_whole_m {lp:agz}{np:pos}{m:nat | m <= np; m <= 524288}
   (path: !$A.borrow(byte, lp, np), m: int m): whole_file
 
@@ -3412,6 +3547,42 @@ fn read_whole_m {lp:agz}{np:pos}{m:nat | m <= np; m <= 524288}
 
 fn whole_free {la,l:agz}{m:pos}
   (ar: $A.arena(byte, la, m, m, 1), p: $A.arrx(byte, l, m, la)): void
+
+
+
+
+
+
+fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
+  : $R.result($T.toml_doc, $F.io_error)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn read_manifest (): $R.result($T.toml_doc, $F.io_error)
 
 
 
