@@ -30,25 +30,25 @@ A `build/` is restored by content, so what matters of `bats.toml` is whether a f
 
 ### Every reader of `bats.toml`
 
-| reader | where | serves | bytes read | does | fields judged |
+| reader | where (the search that finds it) | serves | bytes read | does | fields judged |
 |---|---|---|---|---|---|
-| `read_toml`, `read_manifest` | `src/helpers.bats` 3324 to 3357 | every parsing reader below | whole (`read_whole_m`); over 65536 is `FileTooLarge` | reads only | all |
-| `package_value` | `src/commands.bats` 641 | `upload` (via `read_trunk`, 663, and the version, 773) | whole | reads only | `version`, `trunk` |
-| `do_upload` | `src/commands.bats` 834 | `upload` | whole | reads only | `name`, `kind` |
-| `write_with_version` | `src/commands.bats` 554 | `upload` | whole (`read_whole`) | reads; writes the manifest with the version injected to `build/upload/bats.toml`, whole (the archive's copy) | `version` (rewritten) |
-| the `zip` of `upload` | `src/commands.bats` 969 to 986 | `upload` | whole (the zip command) | reads; archives | none |
-| `generate_lib_docs` | `src/docs.bats` 547 | `check` | whole | reads only | `name`, `kind` |
-| `project_kind` | `src/lock.bats` 2319 | `build`, `run`, `check`, `lock` | whole | reads only | `kind` |
-| `project_cons` | `src/lock.bats` 1144 | `lock`, `check`, `build` | whole | reads only | `[package] name`, `[dependencies]` |
-| `project_pdeps` | `src/lock.bats` 2138 | `build`, `check` | whole | reads only | `[dependencies]` paths |
-| a dependency's constraints | `src/lock.bats` 1177 | `lock` | whole | reads only | `[dependencies]` |
-| a path dependency's constraints | `src/lock.bats` 2166 | `lock` | whole | reads only | `[dependencies]` |
-| `toml_version_is` | `src/lock.bats` 1416 | `lock`, `fetch` | whole | reads only | `[package] version` |
-| `toml_unsafe` via `read_unsafe_flag` and `dep_unsafe` | `src/lock.bats` 3068, 3094, 3116 | emission, validation (`build.bats` 1148, `lock.bats` 3151, 3342), the test runner (`commands.bats` 286) | whole | reads only | `unsafe` |
-| `do_add` (`bats add`) | `src/commands.bats` 1329 | `add` | none: opens bats.toml for appending (`append_file_from_builder`, `src/helpers.bats`) | appends one line; the rest of the file is neither read nor written | none |
-| `do_remove` (`bats remove`) | `src/commands.bats` 1406 | `remove` | whole (`read_whole`) | rewrites whole through `write_settle`, only when a line names the package; no external tool | none |
-| `put_file_sha256_m` | `src/helpers.bats` 1221 (the project's input digest, `inputs_digest` of `src/inputs.bats`), `src/fixtures.bats` 1132 (`path_sha`) | the inputs digest, the fixtures' memo | whole, in 64 KiB chunks | reads only | none: the file's content |
-| `project_lock_take` | `src/helpers.bats` 3037 | `check`, `build`, `test`, `run`, `lock`, ... | none: `flock` on the file opened read-only | reads nothing | none |
-| `init`, the existence checks of `build.bats` (1316, 1360, 1970, 2376) | `src/commands.bats` 1211 | `init`, `fetch`, the closure walk | none: whether the file exists | reads nothing | none |
+| `read_toml`, `read_manifest` | `read_toml` and `read_manifest` in `src/helpers.bats`: `grep -n 'implement read_toml\|implement read_manifest' src/helpers.bats` | every parsing reader below | whole (`read_whole_m`); over 65536 is `FileTooLarge` | reads only | all |
+| `package_value` | `package_value` in `src/commands.bats`: `grep -n 'fn package_value' src/commands.bats` | `upload` (via `read_trunk`, and the version) | whole | reads only | `version`, `trunk` |
+| `do_upload` | `do_upload` in `src/commands.bats`: `grep -n 'implement do_upload' src/commands.bats` | `upload` | whole | reads only | `name`, `kind` |
+| `write_with_version` | `write_with_version` in `src/commands.bats`: `grep -n 'fn write_with_version' src/commands.bats` | `upload` | whole (`read_whole`) | reads; writes the manifest with the version injected to `build/upload/bats.toml`, whole (the archive's copy) | `version` (rewritten) |
+| the `zip` of `upload` | `do_upload` in `src/commands.bats`: `grep -n 'build/upload/bats.toml' src/commands.bats` | `upload` | whole (the zip command) | reads; archives | none |
+| `generate_lib_docs` | `generate_lib_docs` in `src/docs.bats`: `grep -n 'implement generate_lib_docs' src/docs.bats` | `check` | whole | reads only | `name`, `kind` |
+| `project_kind` | `project_kind` in `src/lock.bats`: `grep -n 'fn project_kind' src/lock.bats` | `build`, `run`, `check`, `lock` | whole | reads only | `kind` |
+| `project_cons` | `project_cons` in `src/lock.bats`: `grep -n 'fn project_cons' src/lock.bats` | `lock`, `check`, `build` | whole | reads only | `[package] name`, `[dependencies]` |
+| `project_pdeps` | `project_pdeps` in `src/lock.bats`: `grep -n 'fn project_pdeps' src/lock.bats` | `build`, `check` | whole | reads only | `[dependencies]` paths |
+| a dependency's constraints | the constraints reader in `src/lock.bats`: `grep -n 'read_toml' src/lock.bats` (the first) | `lock` | whole | reads only | `[dependencies]` |
+| a path dependency's constraints | the path dependency's reader in `src/lock.bats`: `grep -n 'read_toml' src/lock.bats` (the third) | `lock` | whole | reads only | `[dependencies]` |
+| `toml_version_is` | `toml_version_is` in `src/lock.bats`: `grep -n 'fn toml_version_is' src/lock.bats` | `lock`, `fetch` | whole | reads only | `[package] version` |
+| `toml_unsafe` via `read_unsafe_flag` and `dep_unsafe` | `toml_unsafe`, `read_unsafe_flag` and `dep_unsafe` in `src/lock.bats`: `grep -n 'toml_unsafe\|read_unsafe_flag\|dep_unsafe' src/lock.bats` | emission, validation (`grep -n 'read_unsafe_flag\|dep_unsafe' src/build.bats src/lock.bats`), the test runner (`grep -n 'read_unsafe_flag' src/commands.bats`) | whole | reads only | `unsafe` |
+| `do_add` (`bats add`) | `do_add` in `src/commands.bats`: `grep -n 'implement do_add' src/commands.bats` | `add` | none: opens bats.toml for appending (`append_file_from_builder`, `src/helpers.bats`) | appends one line; the rest of the file is neither read nor written | none |
+| `do_remove` (`bats remove`) | `do_remove` in `src/commands.bats`: `grep -n 'implement do_remove' src/commands.bats` | `remove` | whole (`read_whole`) | rewrites whole through `write_settle`, only when a line names the package; no external tool | none |
+| `put_file_sha256_m` | `put_file_sha256_m` in `src/helpers.bats` (the project's input digest, `inputs_digest` of `src/inputs.bats`) and `path_sha` in `src/fixtures.bats`: `grep -n 'put_file_sha256_m\|path_sha(str_builder("bats.toml")' src/helpers.bats src/fixtures.bats` | the inputs digest, the fixtures' memo | whole, in 64 KiB chunks | reads only | none: the file's content |
+| `project_lock_take` | `project_lock_take` in `src/helpers.bats`: `grep -n 'implement project_lock_take' src/helpers.bats` | `check`, `build`, `test`, `run`, `lock`, ... | none: `flock` on the file opened read-only | reads nothing | none |
+| `init` in `src/commands.bats` and the existence checks of `src/build.bats`: `grep -n '"bats.toml"' src/commands.bats` and `grep -n '/bats.toml' src/build.bats` | `init`, `fetch`, the closure walk | none: whether the file exists | reads nothing | none |
 
-The output buffers of the toml package's calls are not readers of the file; each is a ceiling on one value, and a value that does not fit makes `T.get` answer none, read as unset: a name, a version or a kind of 256 bytes or more (32 for the kind, 16 for `unsafe`), and a constraint or a path of more than 4096 bytes (`src/lock.bats` 683, 2095; the whole document is 65536 bytes at most). The key lists (`T.keys`, `src/lock.bats` 716, 2126) have 65536 bytes, as many as the document holds.
+The output buffers of the toml package's calls are not readers of the file; each is a ceiling on one value, and a value that does not fit makes `T.get` answer none, read as unset: a name, a version or a kind of 256 bytes or more (32 for the kind, 16 for `unsafe`), and a constraint or a path of more than 4096 bytes (`grep -n 'T.get' src/lock.bats`; the whole document is 65536 bytes at most). The key lists (`T.keys`, `grep -n 'T.keys' src/lock.bats`) have 65536 bytes, as many as the document holds.
