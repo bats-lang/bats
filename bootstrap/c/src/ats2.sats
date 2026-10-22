@@ -479,7 +479,6 @@ datatype ats2_talk = Say | Quiet
 
 
 
-
 fn ats2_ensure (talk: ats2_talk): bool
 
 

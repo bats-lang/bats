@@ -38,10 +38,10 @@ diff "$TMP/want" "$TMP/got" || fail "outcomes differ"
 # A caller that does not handle CaptureLonger is rejected
 cat >> src/bin/capture-outcome.bats <<'BAD'
 
-fn ignore_longer {le:agz}{lo:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry),
+fn ignore_longer {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs), argv: $L.listv($P.arg_entry),
    outbuf: !$A.arr(byte, lo, 4096)): int =
-  case+ run_cmd_capture_outcome(exec_bv, argv, outbuf) of
+  case+ run_cmd_capture_outcome(nul | exec_bv, argv, outbuf) of
   | ~CaptureFits(n) => n
   | ~CaptureFailed(_, n) => n
   | ~CaptureReadFailed(_, n, _) => n

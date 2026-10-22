@@ -11,8 +11,8 @@ staload "helpers.sats"
 
 (* One child: sh -c <script>, its outcome printed as one line *)
 fn play {sn:nat} (name: string, script: string sn): void = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -20,10 +20,10 @@ fn play {sn:nat} (name: string, script: string sn): void = let
   var b3 = $B.create()
   val () = bput_v(b3, script)
   val out = $A.alloc<byte>(4096)
-  val outcome = run_cmd_capture_outcome(bv_x, $L.list_vt_cons(mk_arg(b1),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
   val () = $A.free<byte>(out)
 in
   case+ outcome of
@@ -36,8 +36,8 @@ end
 
 (* The old form, kept beside the new one for a version (repository-prototype#381) *)
 fn play_old (): void = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "sh")
   var b2 = $B.create()
@@ -45,10 +45,10 @@ fn play_old (): void = let
   var b3 = $B.create()
   val () = bput_v(b3, "printf abc; exit 3")
   val out = $A.alloc<byte>(4096)
-  val @(status, n) = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1),
+  val @(status, n) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
   val () = $A.free<byte>(out)
 in println! ("old-form: status=", status, " len=", n) end
 

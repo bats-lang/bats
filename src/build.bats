@@ -79,7 +79,7 @@ in
          only moved (sats_moved): a private declaration added or changed
          before its #pub ones, as a static test's snippet is, changes no
          module that staloads it, so only this module is checked again. *)
-      val [ks:int] sc = $B.rope_chunks(sats)
+      val [ks:int] sc = rope_text(sats)
       val r1 = (if file_has_rope(sats_bv, ss, sc) then 0
         else let
           val before = (if is_test_mode() then read_whole_m(sats_bv, ss)
@@ -99,12 +99,12 @@ in
             in false end): bool
           val () = sats_stamp_end(saved, moved)
         in r end): int
-      val () = $B.rope_list_free(sc)
-      val [kd:int] dc = $B.rope_chunks(dats)
+      val () = text_list_free(sc)
+      val [kd:int] dc = rope_text(dats)
       (* a write that failed stops the module: nothing more of it is written *)
       val r2 = (if r1 = 0 then write_settle(dats_bv, sd, write_file_from_rope(dats_bv, sd, dc))
         else ~1): int
-      val () = $B.rope_list_free(dc)
+      val () = text_list_free(dc)
       (* <dats>.pre: its prelude line count, for mapping patsopt's line
          numbers back to the .bats (Rust: DatsFile.prelude_offset) *)
       var pb : $B.builder_v = $B.create()
@@ -397,8 +397,8 @@ in
     val () = $A.free<byte>($A.thaw<byte>(fz_source))
     val () = (if present then ()
       else let
-        val exec = str_to_path_arr("rm")
-        val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+        val (nul_x | exec) = $P.path_of_string_proved("rm")
+        val @(fz_x, bv_x) = $A.barr_freeze(exec)
         var b1 = $B.create()
         val () = bput_v(b1, "rm")
         var b2 = $B.create()
@@ -406,10 +406,10 @@ in
         var b3 = $B.create()
         val () = bput_v(b3, "build/src/")
         val () = copy_to_builder_v(bv_name, 0, k, max, b3)
-        val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+        val _ = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
           $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))))
-        val () = $A.drop<byte>(fz_x, bv_x)
-      in $A.free<byte>($A.thaw<byte>(fz_x)) end)
+        val () = $A.cborrow_drop(fz_x, bv_x)
+      in $A.barr_free($A.barr_thaw(fz_x)) end)
     val () = $A.drop<byte>(fz_name, bv_name)
   in $A.free<byte>($A.thaw<byte>(fz_name)) end
 end
@@ -426,9 +426,9 @@ fn prune_orphans (): void = let
       val () = (if is_dot_or_dotdot(name, name_len, 1024) then $A.free<byte>(name)
         else prune_cached(name, name_len, 1024))
     in prune_each(es, i + 1, n) end
-  val dir = str_to_path_arr("build/src")
+  val @(dir, dir_len) = str_into_arr("build/src")
   val @(fz_dir, bv_dir) = $A.freeze<byte>(dir)
-  val listed = $F.dir_read(bv_dir, 524288)
+  val listed = dir_read_m(bv_dir, dir_len)
   val () = $A.drop<byte>(fz_dir, bv_dir)
   val () = $A.free<byte>($A.thaw<byte>(fz_dir))
 in
@@ -444,9 +444,9 @@ end
    "cleaned N artifacts", N being how many of them existed
    ============================================================ *)
 fn dir_present {sn:nat | sn < $B.BUILDER_CAP} (name: string sn): int = let
-  val p = str_to_path_arr(name)
+  val @(p, p_len) = str_into_arr(name)
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val e = file_exists_path(bv_p)
+  val e = file_exists_m(bv_p, p_len)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in if e then 1 else 0 end
@@ -455,8 +455,8 @@ in if e then 1 else 0 end
 
 implement do_clean() = let
   val removed = dir_present("build") + dir_present("dist") + dir_present("docs")
-  val exec = str_to_path_arr("rm")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("rm")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "rm")
   var b2 = $B.create()
@@ -471,9 +471,9 @@ implement do_clean() = let
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(b5), $L.list_vt_nil())))))
   (* Removal errors are ignored, as the Rust bats's remove_dir_all *)
-  val _ = run_cmd(bv_exec, argv)
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val _ = run_cmd(nul_exec | bv_exec, argv)
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in
   if is_quiet() then ()
   else prerr! ("cleaned ", removed, " artifacts\n")
@@ -590,9 +590,9 @@ implement write_wasm_runtime_h() = let
   val () = bput_v(b, "#define atspre_print_string(s) bats_host_print((s), (int)strlen(s))\n#define atspre_print_newline() bats_host_print(\"\\n\", 1)\n#define atspre_exit_void(c) bats_host_exit(c)\n")
   val () = bput_v(b, "static inline void atspre_print_int(int x) { char d[12]; int i = 12; int neg = x < 0; unsigned int u = neg ? 0u - (unsigned int)x : (unsigned int)x; do { d[--i] = (char)(48 + u % 10u); u /= 10u; } while (u); if (neg) d[--i] = 45; bats_host_print(d + i, 12 - i); }\n")
   val () = bput_v(b, "#endif\n")
-  val p = str_to_path_arr("build/_bats_wasm_runtime.h")
+  val @(p, p_len) = str_into_arr("build/_bats_wasm_runtime.h")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val rc = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
+  val rc = write_settle(bv_p, p_len, write_file_from_builder_m(bv_p, p_len, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
@@ -625,9 +625,9 @@ implement write_wasm_runtime_c() = let
   val () = bput_v(b, "prev=(void**)cur;cur=*(void**)cur;}void *p=ward_bump(n);memset(p,0,n);return p;}\n")
   val () = bput_v(b, "void free(void *ptr){if(!ptr)return;unsigned int sz=ward_hdr_read(ptr);int b=ward_bucket(sz);if(b>=0&&ward_bsz[b]==sz){*(void**)ptr=ward_fl[b];ward_fl[b]=ptr;}\n")
   val () = bput_v(b, "else{*(void**)ptr=ward_fl_over;ward_fl_over=ptr;}}\n")
-  val p = str_to_path_arr("build/_bats_wasm_runtime.c")
+  val @(p, p_len) = str_into_arr("build/_bats_wasm_runtime.c")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val rc = write_settle(bv_p, 524288, write_file_from_builder(bv_p, 524288, b))
+  val rc = write_settle(bv_p, p_len, write_file_from_builder_m(bv_p, p_len, b))
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
@@ -642,9 +642,9 @@ implement write_wasm_stubs() = let
   fn write_stub {sn:nat | sn < $B.BUILDER_CAP} (path: string sn): int = let
     var sb : $B.builder_v = $B.create()
     val () = bput_v(sb, stub)
-    val pp = str_to_path_arr(path)
+    val @(pp, pp_len) = str_into_arr(path)
     val @(fz_pp, bv_pp) = $A.freeze<byte>(pp)
-    val rc = write_settle(bv_pp, 524288, write_file_from_builder(bv_pp, 524288, sb))
+    val rc = write_settle(bv_pp, pp_len, write_file_from_builder_m(bv_pp, pp_len, sb))
     val () = $A.drop<byte>(fz_pp, bv_pp)
     val () = $A.free<byte>($A.thaw<byte>(fz_pp))
   in rc end
@@ -654,8 +654,8 @@ implement write_wasm_stubs() = let
 in r0 + r1 + r2 + r3 end
 
 fn compile_wasm_runtime(): int = let
-  val exec = str_to_path_arr("clang")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("clang")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var wa1 = $B.create() val () = bput_v(wa1, "clang")
   var wa2 = $B.create() val () = bput_v(wa2, "--target=wasm32")
   var wa3 = $B.create() val () = bput_v(wa3, "-O2")
@@ -684,16 +684,16 @@ fn compile_wasm_runtime(): int = let
     $L.list_vt_cons(mk_arg(wa15), $L.list_vt_cons(mk_arg(wa16),
     $L.list_vt_cons(mk_arg(wa17), $L.list_vt_cons(mk_arg(wa18),
     $L.list_vt_nil()))))))))))))))))))
-  val rc = run_cmd(bv_exec, argv)
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val rc = run_cmd(nul_exec | bv_exec, argv)
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in rc end
 
 fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <= no}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om): int = let
-  val exec = str_to_path_arr("clang")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("clang")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var wc1 = $B.create() val () = bput_v(wc1, "clang")
   var wc2 = $B.create() val () = bput_v(wc2, "--target=wasm32")
   var wc3 = $B.create() val () = bput_v(wc3, "-O2")
@@ -729,9 +729,9 @@ fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <
     $L.list_vt_cons(mk_arg(wc17), $L.list_vt_cons(mk_arg(wc18),
     $L.list_vt_cons(mk_arg(wc19), $L.list_vt_cons(mk_arg(wc20),
     $L.list_vt_nil()))))))))))))))))))))
-  val rc = run_cmd(bv_exec, argv)
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val rc = run_cmd(nul_exec | bv_exec, argv)
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in rc end
 
 fn wasm_cc_file {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
@@ -1040,17 +1040,82 @@ fun has_wasm_target {ns:int}{k:nat} .<k>. (xs: !spans(ns, k)): bool =
       val w = (case+ sp of | STarget(_, _, NativeLine()) => false | STarget(_, _, _) => true | _ => false): bool
     in if w then true else has_wasm_target(tl) end
 
-implement check_wasm_binary(path, pm) =
-  case+ read_whole_m(path, pm) of
-  | ~whole_err(_) => Native()
-  | ~whole_ok(ar, piece, m, n) => let
-      val @(fz_s, bv_s) = $A.freeze<byte>(piece)
-      val xs = lex_spans(bv_s, n, m)
-      val w = has_wasm_target(xs)
-      val () = spans_free(xs)
-      val () = $A.drop<byte>(fz_s, bv_s)
-      val () = whole_free(ar, $A.thaw<byte>(fz_s))
-    in (if w then Wasm() else Native()): target end
+(* The target of each binary source seen in this run, by the sha256 of its bytes, so that a pass does not lex it again (bats#368) *)
+datavtype target_memo(int) =
+  | target_memo_nil(0) of ()
+  | {l:agz}{n:pos}{m:nat | m <= n}{k:nat}
+    target_memo_cons(k + 1) of ($A.arr(byte, l, n), int m, bool, target_memo(k))
+
+vtypedef target_memo_v = [k:nat] target_memo(k)
+
+val g_target_memo = ref<target_memo_v>(target_memo_nil())
+
+(* Whether the digest b[0, kb) is a[0, ka) *)
+fun same_digest {la,lb:agz}{na,nb:pos}{ka:nat | ka <= na}{kb:nat | kb <= nb}{i:nat | i <= ka} .<ka - i>.
+  (a: !$A.arr(byte, la, na), ka: int ka, b: !$A.arr(byte, lb, nb), kb: int kb, i: int i): bool =
+  if i >= ka then ka = kb
+  else if i >= kb then false
+  else if byte2int0($A.get<byte>(a, i)) = byte2int0($A.get<byte>(b, i)) then same_digest(a, ka, b, kb, i + 1)
+  else false
+
+(* 1: native, 2: wasm, 0: not seen *)
+fun memo_find {k:nat}{lb:agz}{nb:pos}{kb:nat | kb <= nb} .<k>.
+  (memo: !target_memo(k), digest: !$A.arr(byte, lb, nb), kb: int kb): int =
+  case+ memo of
+  | target_memo_nil() => 0
+  | @target_memo_cons(stored, stored_len, wasm, rest) => let
+      val seen = same_digest(stored, stored_len, digest, kb, 0)
+      val found = (if seen then (if wasm then 2 else 1) else memo_find(rest, digest, kb)): int
+      prval () = fold@(memo)
+    in found end
+
+fun memo_free {k:nat} .<k>. (memo: target_memo(k)): void =
+  case+ memo of
+  | ~target_memo_nil() => ()
+  | ~target_memo_cons(stored, _, _, rest) => let
+      val () = $A.free<byte>(stored)
+    in memo_free(rest) end
+
+(* The memo taken out of its place (nothing is in it until it is put back) *)
+fn memo_take (): target_memo_v = let
+  var taken : target_memo_v = target_memo_nil()
+  val () = ref_exch_elt<target_memo_v>(g_target_memo, taken)
+in taken end
+
+fn memo_put (memo: target_memo_v): void = let
+  var back : target_memo_v = memo
+  val () = ref_exch_elt<target_memo_v>(g_target_memo, back)
+in memo_free(back) end
+
+implement check_wasm_binary(path, pm) = let
+  var digest : $B.builder_v = $B.create()
+  val hashed = put_file_sha256_m(path, pm, digest)
+  val @(dg_arr, dg_len) = $B.into_arr(digest)
+  val memo = memo_take()
+  val seen = memo_find(memo, dg_arr, dg_len)
+in
+  if seen > 0 then let
+    val () = memo_put(memo)
+    val () = $A.free<byte>(dg_arr)
+  in (if seen = 2 then Wasm() else Native()): target end
+  else (case+ read_whole_m(path, pm) of
+    | ~whole_err(_) => let
+        val () = memo_put(memo)
+        val () = $A.free<byte>(dg_arr)
+      in Native() end
+    | ~whole_ok(ar, piece, m, n) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        val xs = lex_spans(bv_s, n, m)
+        val w = has_wasm_target(xs)
+        val () = spans_free(xs)
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+        val () = (if hashed then memo_put(target_memo_cons(dg_arr, dg_len, w, memo))
+          else let
+            val () = memo_put(memo)
+          in $A.free<byte>(dg_arr) end)
+      in (if w then Wasm() else Native()): target end)
+end
 
 (* The cache of the target and mode mark: build/ holds one target and
    mode's (the digit in build/.bats_target), and each other one is kept
@@ -1068,9 +1133,9 @@ implement check_wasm_binary(path, pm) =
    be hashed for this run's stamp (bats#434). *)
 fn cache_swap (mark: int): void = let
   val () = names_set_fresh(false)
-  val tgt_path = str_to_path_arr("build/.bats_target")
+  val @(tgt_path, tgt_path_len) = str_into_arr("build/.bats_target")
   val @(fz_t, bv_t) = $A.freeze<byte>(tgt_path)
-  val held = (case+ file_open_path(bv_t, $F.ReadOnly(), $F.OpenExisting(), 0) of
+  val held = (case+ file_open_m(bv_t, tgt_path_len, $F.ReadOnly(), $F.OpenExisting(), 0) of
     | ~$R.ok(fd) => let
         val tb = $A.alloc<byte>(16)
         val tr = $F.file_read(fd, tb, 16)
@@ -1088,8 +1153,8 @@ in
   else if held > 9 then ()
   else if held = mark then ()
   else let
-    val exec = str_to_path_arr("sh")
-    val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+    val (nul_exec | exec) = $P.path_of_string_proved("sh")
+    val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
     var b1 = $B.create()
     val () = bput_v(b1, "sh")
     var b2 = $B.create()
@@ -1114,9 +1179,9 @@ in
     val () = bput_v(b3, "; fi")
     val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
       $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
-    val _ = run_cmd(bv_exec, argv)
-    val () = $A.drop<byte>(fz_exec, bv_exec)
-  in $A.free<byte>($A.thaw<byte>(fz_exec)) end
+    val _ = run_cmd(nul_exec | bv_exec, argv)
+    val () = $A.cborrow_drop(fz_exec, bv_exec)
+  in $A.barr_free($A.barr_thaw(fz_exec)) end
 end
 
 (* The build's target and mode as the digit kept in build/.bats_target:
@@ -1232,9 +1297,9 @@ in
          a build/ of another bats or toolchain no longer exists by now, and
          one of another target or mode is in its stash (cache_swap), so
          there is no stale object left to remove. *)
-      val tgt_path_r = str_to_path_arr("build/.bats_target")
+      val @(tgt_path_r, tgt_path_r_len) = str_into_arr("build/.bats_target")
       val @(fz_tgtr, bv_tgtr) = $A.freeze<byte>(tgt_path_r)
-      val old_tgt_or = file_open_path(bv_tgtr, $F.ReadOnly(), $F.OpenExisting(), 0)
+      val old_tgt_or = file_open_m(bv_tgtr, tgt_path_r_len, $F.ReadOnly(), $F.OpenExisting(), 0)
       val old_target = (case+ old_tgt_or of
         | ~$R.ok(otfd) => let
             val otb = $A.alloc<byte>(16)
@@ -1252,9 +1317,9 @@ in
       (* Now write new target marker *)
       var tgt_b : $B.builder_v = $B.create()
       val () = put_char_v(tgt_b, 48 + mode_mark)
-      val tgt_path = str_to_path_arr("build/.bats_target")
+      val @(tgt_path, tgt_path_len) = str_into_arr("build/.bats_target")
       val @(fz_tgtp, bv_tgtp) = $A.freeze<byte>(tgt_path)
-      val _ = write_settle(bv_tgtp, 524288, write_file_from_builder(bv_tgtp, 524288, tgt_b))
+      val _ = write_settle(bv_tgtp, tgt_path_len, write_file_from_builder_m(bv_tgtp, tgt_path_len, tgt_b))
       val () = $A.drop<byte>(fz_tgtp, bv_tgtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_tgtp))
 
@@ -1266,13 +1331,13 @@ in
       val () = bput_v(nrt_b, "void *atsruntime_malloc_undef(size_t bsz) { return malloc(bsz); }\n")
       val () = bput_v(nrt_b, "void *atsruntime_calloc_undef(size_t asz, size_t tsz) { return calloc(asz, tsz); }\n")
       val () = bput_v(nrt_b, "void *atsruntime_realloc_undef(void *ptr, size_t bsz) { return realloc(ptr, bsz); }\n")
-      val nrt_path = str_to_path_arr("build/_bats_native_runtime.c")
+      val @(nrt_path, nrt_path_len) = str_into_arr("build/_bats_native_runtime.c")
       val @(fz_nrtp, bv_nrtp) = $A.freeze<byte>(nrt_path)
-      val _ = write_settle(bv_nrtp, 524288, write_file_from_builder(bv_nrtp, 524288, nrt_b))
+      val _ = write_settle(bv_nrtp, nrt_path_len, write_file_from_builder_m(bv_nrtp, nrt_path_len, nrt_b))
       val () = $A.drop<byte>(fz_nrtp, bv_nrtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_nrtp))
-      val nrt_exec = str_to_path_arr("clang")
-      val @(fz_nrt_exec, bv_nrt_exec) = $A.freeze<byte>(nrt_exec)
+      val (nul_nrt_exec | nrt_exec) = $P.path_of_string_proved("clang")
+      val @(fz_nrt_exec, bv_nrt_exec) = $A.barr_freeze(nrt_exec)
       var na1 = $B.create() val () = bput_v(na1, "clang")
       var na2 = $B.create() val () = bput_v(na2, "-c")
       var na3 = $B.create() val () = bput_v(na3, "-o")
@@ -1281,15 +1346,15 @@ in
       val nrt_argv = $L.list_vt_cons(mk_arg(na1), $L.list_vt_cons(mk_arg(na2),
         $L.list_vt_cons(mk_arg(na3), $L.list_vt_cons(mk_arg(na4),
         $L.list_vt_cons(mk_arg(na5), $L.list_vt_nil())))))
-      val nrt_r = run_cmd(bv_nrt_exec, nrt_argv)
-      val () = $A.drop<byte>(fz_nrt_exec, bv_nrt_exec)
-      val () = $A.free<byte>($A.thaw<byte>(fz_nrt_exec))
+      val nrt_r = run_cmd(nul_nrt_exec | bv_nrt_exec, nrt_argv)
+      val () = $A.cborrow_drop(fz_nrt_exec, bv_nrt_exec)
+      val () = $A.barr_free($A.barr_thaw(fz_nrt_exec))
       val () = (if nrt_r <> 0 then let val () = set_build_err() in println! ("error: failed to compile native runtime") end else ())
 
       (* Step 3: Scan bats_modules/ for deps and preprocess *)
-      val bm_arr = str_to_path_arr("bats_modules")
+      val @(bm_arr, bm_arr_len) = str_into_arr("bats_modules")
       val @(fz_bm, bv_bm) = $A.freeze<byte>(bm_arr)
-      val bmdir_r = $F.dir_read(bv_bm, 524288)
+      val bmdir_r = dir_read_m(bv_bm, bm_arr_len)
       val () = $A.drop<byte>(fz_bm, bv_bm)
       val () = $A.free<byte>($A.thaw<byte>(fz_bm))
       val () = (case+ bmdir_r of
@@ -1678,9 +1743,9 @@ in
       (* and the digest of its inputs *)
       val () = write_inputs()
       (* Step 3b: Preprocess src/*.bats shared modules *)
-      val sm_arr = str_to_path_arr("src")
+      val @(sm_arr, sm_arr_len) = str_into_arr("src")
       val @(fz_sm, bv_sm) = $A.freeze<byte>(sm_arr)
-      val smdir_r = $F.dir_read(bv_sm, 524288)
+      val smdir_r = dir_read_m(bv_sm, sm_arr_len)
       val () = $A.drop<byte>(fz_sm, bv_sm)
       val () = $A.free<byte>($A.thaw<byte>(fz_sm))
       val () = (case+ smdir_r of
@@ -1752,9 +1817,9 @@ in
         | ~$R.err(_) => ())
 
       (* Step 4: Preprocess src/bin/*.bats *)
-      val sb_arr = str_to_path_arr("src/bin")
+      val @(sb_arr, sb_arr_len) = str_into_arr("src/bin")
       val @(fz_sb, bv_sb) = $A.freeze<byte>(sb_arr)
-      val sbdir_r = $F.dir_read(bv_sb, 524288)
+      val sbdir_r = dir_read_m(bv_sb, sb_arr_len)
       val () = $A.drop<byte>(fz_sb, bv_sb)
       val () = $A.free<byte>($A.thaw<byte>(fz_sb))
       val () = (case+ sbdir_r of
@@ -1910,9 +1975,9 @@ in
                         val () = $A.drop<byte>(fz_dsme, bv_dsme)
                         val () = $A.free<byte>($A.thaw<byte>(fz_dsme))
                       in add_src_dynloads(es, i + 1, n, eb) end
-                    val dsm_arr = str_to_path_arr("build/src")
+                    val @(dsm_arr, dsm_arr_len) = str_into_arr("build/src")
                     val @(fz_dsm, bv_dsm) = $A.freeze<byte>(dsm_arr)
-                    val () = (case+ $F.dir_read(bv_dsm, 524288) of
+                    val () = (case+ dir_read_m(bv_dsm, dsm_arr_len) of
                       | ~$R.ok(es) => let
                           val () = add_src_dynloads(es, 0, $F.entries_count(es), entry)
                         in $F.entries_free(es) end
@@ -1940,9 +2005,9 @@ in
 
                     (* Step 6: Run patsopt on all .dats files *)
                     (* patsopt for dep modules *)
-                    val bm3_arr = str_to_path_arr("bats_modules")
+                    val @(bm3_arr, bm3_arr_len) = str_into_arr("bats_modules")
                     val @(fz_bm3, bv_bm3) = $A.freeze<byte>(bm3_arr)
-                    val bdir3 = $F.dir_read(bv_bm3, 524288)
+                    val bdir3 = dir_read_m(bv_bm3, bm3_arr_len)
                     val () = $A.drop<byte>(fz_bm3, bv_bm3)
                     val () = $A.free<byte>($A.thaw<byte>(fz_bm3))
                     val () = (case+ bdir3 of
@@ -2204,9 +2269,9 @@ in
                       | ~$R.err(_) => ())
 
                     (* patsopt for src/*.dats shared modules *)
-                    val psm_arr = str_to_path_arr("build/src")
+                    val @(psm_arr, psm_arr_len) = str_into_arr("build/src")
                     val @(fz_psm, bv_psm) = $A.freeze<byte>(psm_arr)
-                    val psm_dir = $F.dir_read(bv_psm, 524288)
+                    val psm_dir = dir_read_m(bv_psm, psm_arr_len)
                     val () = $A.drop<byte>(fz_psm, bv_psm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_psm))
                     val () = (case+ psm_dir of
@@ -2346,9 +2411,9 @@ in
                     (* Step 7: clang compile all _dats.c -- skip when --to-c *)
                     val rl = (if is_to_c() then 0 else if has_build_err() then 1 else let
                     (* Compile deps *)
-                    val bm4_arr = str_to_path_arr("bats_modules")
+                    val @(bm4_arr, bm4_arr_len) = str_into_arr("bats_modules")
                     val @(fz_bm4, bv_bm4) = $A.freeze<byte>(bm4_arr)
-                    val bdir4 = $F.dir_read(bv_bm4, 524288)
+                    val bdir4 = dir_read_m(bv_bm4, bm4_arr_len)
                     val () = $A.drop<byte>(fz_bm4, bv_bm4)
                     val () = $A.free<byte>($A.thaw<byte>(fz_bm4))
                     val () = (case+ bdir4 of
@@ -2614,9 +2679,9 @@ in
                       | ~$R.err(_) => ())
 
                     (* Compile src/*.dats shared modules *)
-                    val csm_arr = str_to_path_arr("build/src")
+                    val @(csm_arr, csm_arr_len) = str_into_arr("build/src")
                     val @(fz_csm, bv_csm) = $A.freeze<byte>(csm_arr)
-                    val csm_dir = $F.dir_read(bv_csm, 524288)
+                    val csm_dir = dir_read_m(bv_csm, csm_arr_len)
                     val () = $A.drop<byte>(fz_csm, bv_csm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_csm))
                     val () = (case+ csm_dir of
@@ -2754,9 +2819,9 @@ in
                       val () = deps_free(w_cl)
                       val wl_argc1 = wl_argc0 + w_dc
                       (* Compile src modules and add .o to link *)
-                      val wsm_a = str_to_path_arr("build/src")
+                      val @(wsm_a, wsm_a_len) = str_into_arr("build/src")
                       val @(fz_wsma, bv_wsma) = $A.freeze<byte>(wsm_a)
-                      val wsm_dr = $F.dir_read(bv_wsma, 524288)
+                      val wsm_dr = dir_read_m(bv_wsma, wsm_a_len)
                       val () = $A.drop<byte>(fz_wsma, bv_wsma)
                       val () = $A.free<byte>($A.thaw<byte>(fz_wsma))
                       val wl_sm_cnt = (case+ wsm_dr of
@@ -2818,12 +2883,12 @@ in
                       var mb_w2 : $B.builder_v = $B.create()
                       val () = (if is_release(rel) then bput_v(mb_w2, "dist/release") else bput_v(mb_w2, "dist/debug"))
                       val _ = run_mkdir(mb_w2)
-                      val wld_exec = str_to_path_arr("wasm-ld")
-                      val @(fz_wld, bv_wld) = $A.freeze<byte>(wld_exec)
+                      val (nul_wld | wld_exec) = $P.path_of_string_proved("wasm-ld")
+                      val @(fz_wld, bv_wld) = $A.barr_freeze(wld_exec)
                       val wl_list = split_null_to_list(wl)
-                      val wlr = run_cmd(bv_wld, wl_list)
-                      val () = $A.drop<byte>(fz_wld, bv_wld)
-                      val () = $A.free<byte>($A.thaw<byte>(fz_wld))
+                      val wlr = run_cmd(nul_wld | bv_wld, wl_list)
+                      val () = $A.cborrow_drop(fz_wld, bv_wld)
+                      val () = $A.barr_free($A.barr_thaw(fz_wld))
                     in wlr end else let
 
                     (* Compile binary *)
@@ -2915,9 +2980,9 @@ in
                     val () = put_dep_objects(lk_cl, link)
                     val () = deps_free(lk_cl)
                     (* Link src/*.dats shared module .o files *)
-                    val lsm_arr = str_to_path_arr("build/src")
+                    val @(lsm_arr, lsm_arr_len) = str_into_arr("build/src")
                     val @(fz_lsm, bv_lsm) = $A.freeze<byte>(lsm_arr)
-                    val lsm_dir = $F.dir_read(bv_lsm, 524288)
+                    val lsm_dir = dir_read_m(bv_lsm, lsm_arr_len)
                     val () = $A.drop<byte>(fz_lsm, bv_lsm)
                     val () = $A.free<byte>($A.thaw<byte>(fz_lsm))
                     val () = (case+ lsm_dir of
@@ -2953,11 +3018,11 @@ in
                       else bput_v(link, " -g -O0"))
                     (* Convert space-separated link command to arg_entry list *)
                     val link_argv = split_spaces_to_list(link)
-                    val cc_exec = str_to_path_arr("clang")
-                    val @(fz_cce, bv_cce) = $A.freeze<byte>(cc_exec)
-                    val lr = run_cmd(bv_cce, link_argv)
-                    val () = $A.drop<byte>(fz_cce, bv_cce)
-                    val () = $A.free<byte>($A.thaw<byte>(fz_cce))
+                    val (nul_cce | cc_exec) = $P.path_of_string_proved("clang")
+                    val @(fz_cce, bv_cce) = $A.barr_freeze(cc_exec)
+                    val lr = run_cmd(nul_cce | bv_cce, link_argv)
+                    val () = $A.cborrow_drop(fz_cce, bv_cce)
+                    val () = $A.barr_free($A.barr_thaw(fz_cce))
                     in lr end): int
                     in rl end): int
 
@@ -2985,14 +3050,14 @@ in
                         var mv_n : $B.builder_v = $B.create()
                         val () = bput_v(mv_n, "mv")
                         val a0 = mk_arg(mv_n)
-                        val mv_exec = str_to_path_arr("mv")
-                        val @(fz_mve, bv_mve) = $A.freeze<byte>(mv_exec)
+                        val (nul_mve | mv_exec) = $P.path_of_string_proved("mv")
+                        val @(fz_mve, bv_mve) = $A.barr_freeze(mv_exec)
                         val mv_argv = $L.list_vt_cons(a0,
                           $L.list_vt_cons(a1,
                           $L.list_vt_cons(a2, $L.list_vt_nil())))
-                        val _mvr = run_cmd(bv_mve, mv_argv)
-                        val () = $A.drop<byte>(fz_mve, bv_mve)
-                        val () = $A.free<byte>($A.thaw<byte>(fz_mve))
+                        val _mvr = run_cmd(nul_mve | bv_mve, mv_argv)
+                        val () = $A.cborrow_drop(fz_mve, bv_mve)
+                        val () = $A.barr_free($A.barr_thaw(fz_mve))
                       in end else ()
                     else ())
                     val () = (if is_to_c() then ()
@@ -3028,9 +3093,9 @@ in
         | ~$R.err(_) => ())
 
       (* Run patsopt on src/lib.bats if scan_src_modules preprocessed it *)
-      val lib_d_path = str_to_path_arr("build/src/lib.dats")
+      val @(lib_d_path, lib_d_path_len) = str_into_arr("build/src/lib.dats")
       val @(fz_ldp, bv_ldp) = $A.freeze<byte>(lib_d_path)
-      val lib_or = file_open_path(bv_ldp, $F.ReadOnly(), $F.OpenExisting(), 0)
+      val lib_or = file_open_m(bv_ldp, lib_d_path_len, $F.ReadOnly(), $F.OpenExisting(), 0)
       val () = $A.drop<byte>(fz_ldp, bv_ldp)
       val () = $A.free<byte>($A.thaw<byte>(fz_ldp))
       val lib_exists = (case+ lib_or of
@@ -3070,9 +3135,9 @@ in
           val () = ()
           (* The library's other modules: type-check them too, or an
              error in one only shows up in some consumer's build. *)
-          val src_dir = str_to_path_arr("build/src")
+          val @(src_dir, src_dir_len) = str_into_arr("build/src")
           val @(fz_sd, bv_sd) = $A.freeze<byte>(src_dir)
-          val () = patsopt_dir_extra(bv_sd, 10, bv_patshome, phlen)
+          val () = patsopt_dir_extra(bv_sd, src_dir_len, bv_patshome, phlen)
           val () = $A.drop<byte>(fz_sd, bv_sd)
           val () = $A.free<byte>($A.thaw<byte>(fz_sd))
         in end
@@ -3088,8 +3153,8 @@ in
                 val () = copy_to_builder_v(to_c, 0, tclen, 4096, md)
                 val _ = run_mkdir(md)
                 (* cp -r build/ <target>/ — copy all C files *)
-                val cp_exec = str_to_path_arr("cp")
-                val @(fz_cpe, bv_cpe) = $A.freeze<byte>(cp_exec)
+                val (nul_cpe | cp_exec) = $P.path_of_string_proved("cp")
+                val @(fz_cpe, bv_cpe) = $A.barr_freeze(cp_exec)
                 var cpa1 = $B.create() val () = bput_v(cpa1, "cp")
                 var cpa2 = $B.create() val () = bput_v(cpa2, "-r")
                 var cpa3 = $B.create() val () = bput_v(cpa3, "build/.")
@@ -3099,13 +3164,13 @@ in
                 val cp_argv = $L.list_vt_cons(mk_arg(cpa1), $L.list_vt_cons(mk_arg(cpa2),
                   $L.list_vt_cons(mk_arg(cpa3), $L.list_vt_cons(mk_arg(cpa4),
                   $L.list_vt_nil()))))
-                val _ = run_cmd(bv_cpe, cp_argv)
-                val () = $A.drop<byte>(fz_cpe, bv_cpe)
-                val () = $A.free<byte>($A.thaw<byte>(fz_cpe))
+                val _ = run_cmd(nul_cpe | bv_cpe, cp_argv)
+                val () = $A.cborrow_drop(fz_cpe, bv_cpe)
+                val () = $A.barr_free($A.barr_thaw(fz_cpe))
                 (* but not the other targets' and modes' caches (cache_swap):
                    only this build's C *)
-                val rm_exec = str_to_path_arr("rm")
-                val @(fz_rme, bv_rme) = $A.freeze<byte>(rm_exec)
+                val (nul_rme | rm_exec) = $P.path_of_string_proved("rm")
+                val @(fz_rme, bv_rme) = $A.barr_freeze(rm_exec)
                 var rma1 = $B.create() val () = bput_v(rma1, "rm")
                 var rma2 = $B.create() val () = bput_v(rma2, "-rf")
                 var rma3 = $B.create()
@@ -3113,9 +3178,9 @@ in
                 val () = bput_v(rma3, "/.stash")
                 val rm_argv = $L.list_vt_cons(mk_arg(rma1), $L.list_vt_cons(mk_arg(rma2),
                   $L.list_vt_cons(mk_arg(rma3), $L.list_vt_nil())))
-                val _ = run_cmd(bv_rme, rm_argv)
-                val () = $A.drop<byte>(fz_rme, bv_rme)
-                val () = $A.free<byte>($A.thaw<byte>(fz_rme))
+                val _ = run_cmd(nul_rme | bv_rme, rm_argv)
+                val () = $A.cborrow_drop(fz_rme, bv_rme)
+                val () = $A.barr_free($A.barr_thaw(fz_rme))
                 (* Generate Makefile *)
                 var mf : $B.builder_v = $B.create()
                 (* The C is compiled with bats's own runtime header and not ATS2's
