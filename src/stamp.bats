@@ -153,7 +153,7 @@ in r.0 = 0 end
    another clang. The list is the one place these names are written
    (put_cc_environment). The wasm linker reads none of them: the wasm
    mark's cc line digests the same list only because its C is compiled by
-   clang too, and the linker's version is in the same line.
+   clang too; the wasm linker's version is in the link line (link keyword).
 
    What was verified, and how: the names clang's manual documents
    (clang.llvm.org/docs/CommandGuide/clang.html, ENVIRONMENT) are CPATH,
