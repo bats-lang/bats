@@ -478,6 +478,12 @@ in
               val lk = (if locks_project(chosen_command) then project_lock_take(heavy_of(chosen_command))
                 else ProjectUnlocked(SlotNone())): project_lock
             in let val () = (
+              (* machine-slots: a refused slot runs nothing (bats#464) *)
+              if project_lock_refused(lk) then let
+                val () = $AP.parse_result_free(r)
+                val () = $A.free<byte>(arg_buf)
+                val () = set_build_err()
+              in end else (
               case+ chosen_command of
               | Build() => let
                 val () = $AP.parse_result_free(r)
@@ -543,7 +549,10 @@ in
                 val () = $A.free<byte>(arg_buf)
                 val @(fz_bin, bv_bin) = $A.freeze<byte>(bin_buf)
                 val run_lock = project_lock_take(HeavyRun())
-                val () = (if ~bin_package() then project_lock_release(run_lock)
+                val () = (if project_lock_refused(run_lock) then let
+                    val () = set_build_err()
+                  in project_lock_release(run_lock) end
+                  else if ~bin_package() then project_lock_release(run_lock)
                   else if ~resolve_deps(bv_repo, repo_len) then project_lock_release(run_lock)
                   else if validate_project() then
                   do_run(run_profile, bv_bin, bin_len, bv_extra, extra_len, run_lock)
@@ -674,7 +683,7 @@ in
               | UnknownCommand() => let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
-              in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|ats2|clone-repository|record-commit|completions> [--only debug|release]") end)
+              in println! ("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|ats2|clone-repository|record-commit|completions> [--only debug|release]") end))
               val () = project_lock_release(lk)
               val () = $A.drop<byte>(fz_repo, bv_repo)
               val () = $A.free<byte>($A.thaw<byte>(fz_repo))
