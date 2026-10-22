@@ -34,7 +34,7 @@ staload "sha256/src/lib.dats"
    nothing else may fail. A substring that another error could also hold is
    not enough. Only patsopt's variable numbers, which change with anything
    before the snippet, are compared as "_": the number of S2EVar(N->, of
-   $N( and of S2Evar(name(N)) and S2Eexi(name(N). An expect that is not "function <name>",
+   S2EVar(N), $N( and of S2Evar(name(N)) and S2Eexi(name(N). An expect that is not "function <name>",
    "line <n>", then the error is an error of the fixture, never a pass.
 
    The project is copied to <work>/app (everything but build, dist, .git,
@@ -422,6 +422,7 @@ end
    snippet renumbers them, and those numbers, only, are:
 
      S2EVar(<n>->           a unification variable (kind 1)
+     S2EVar(<n>)            one not yet solved, with no arrow (kind 5)
      $<n>(                  a dynamic variable: handed$6116(-1) (kind 2)
      S2Evar(<name>(<n>))    a static variable (kind 3)
      S2Eexi(<name>(<n>), <name>(<n>)
@@ -434,7 +435,13 @@ end
 fn variable_end {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len}
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p): [q:int | q < 0 || (p < q && q <= len)] int q = let
   val raw = (if p >= len then ~1
-    else if text_has(bv, len, p, "S2EVar(") then step_text(bv, len, step_digits(bv, len, p + 7), "->")
+    else if text_has(bv, len, p, "S2EVar(") then let
+      val d = step_digits(bv, len, p + 7)
+      val arrow = step_text(bv, len, d, "->")
+    in
+      (* fixtures: S2EVar(<n>->...) is solved, S2EVar(<n>) is not yet: the bare number ends at its digits *)
+      if arrow >= 0 then arrow else (if byte_at(bv, len, d) = 41 then d else ~1)
+    end
     else if peek(bv, p, len) = 36 then step_text(bv, len, step_digits(bv, len, p + 1), "(")
     else if text_has(bv, len, p, "S2Evar(") then let
       val s = p + 7
@@ -456,7 +463,7 @@ end
 (* The kind of the variable number at p (variable_end gave its end) *)
 fn variable_kind {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: xi): int =
-  if text_has(bv, len, p, "S2EVar(") then 1
+  if text_has(bv, len, p, "S2EVar(") then (if step_text(bv, len, step_digits(bv, len, p + 7), "->") >= 0 then 1 else 5)
   else if byte_at(bv, len, p) = 36 then 2
   else if text_has(bv, len, p, "S2Eexi(") then 4
   else 3
@@ -465,6 +472,7 @@ fn variable_kind {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}
 fn put_normal {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len}
   (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p, kind: int, out: !$B.builder_v >> $B.builder_v): void =
   if kind = 1 then bput_v(out, "S2EVar(_->")
+  else if kind = 5 then bput_v(out, "S2EVar(_")
   else if kind = 2 then bput_v(out, "$_(")
   else if kind = 4 then let
     val () = bput_v(out, "S2Eexi(")

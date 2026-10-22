@@ -189,6 +189,15 @@ fn h (): bool = mk2 ()'
 exi_copy_list_expect() {
   printf 'function h\nline 2\nthe dynamic expression cannot be assigned the type [S2Ecst(bool_t0ype)].\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=-1; 0=S2Eapp(S2Ecst(int); S2Evar(a$7001$7003(15002))), 1=S2Eapp(S2Ecst(int); S2Evar(b$7002$7004(15003))))\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Eexi(a$7001(15000), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(a$7001(15000)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(b$7002(15001)), S2Eintinf(0)); S2Etyrec(flt0; npf=-1; 0=S2Eapp(S2Ecst(int); S2Evar(a$7001(15000))), 1=S2Eapp(S2Ecst(int); S2Evar(b$7002(15001)))))\nThe needed term is: S2Ecst(bool_t0ype)' "$1" "$2"
 }
+# an unsolved variable with no arrow: patsopt's S2EVar(5245), S2EVar(5246) is compared as S2EVar(_), S2EVar(_)
+SEVAR='dataprop PA (int, int) = | PA0 (0, 0)
+dataprop PB (int, int) = | PB0 (0, 0)
+fn h {a:int} (pf: PB(a, a) | x: int): [k:int; j:int] (PA(k, j) | int) = (pf | x)'
+# evar_expect <token>: the expect for SEVAR with <token> in the first S2EVar of its first needed term;
+# every other number is a value other than patsopt's, so a near-miss differs in that token alone
+evar_expect() {
+  printf 'function h\nline 3\nthe dynamic expression cannot be assigned the type [S2Eexi(k(9002), j(9003); ; S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PA); S2Evar(k(9002)), S2Evar(j(9003))), 1=S2Ecst(int)))].\nmismatch of static terms (tyleq):\nThe actual term is: S2Eapp(S2Ecst(PB); S2Evar(a(9001)), S2Evar(a(9001)))\nThe needed term is: S2Eapp(S2Ecst(PA); S2EVar(%s), S2EVar(7102))\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PB); S2Evar(a(9001)), S2Evar(a(9001))), 1=S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int)))\nThe needed term is: S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PA); S2EVar(7101), S2EVar(7102)), 1=S2Ecst(int))\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PB); S2Evar(a(9001)), S2Evar(a(9001))), 1=S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int)))\nThe needed term is: S2Eexi(k(9002), j(9003); ; S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PA); S2Evar(k(9002)), S2Evar(j(9003))), 1=S2Ecst(int)))' "$1"
+}
 ENORM='unsolved constraint: C3NSTRprop(C3TKmain(); S2Eapp(S2Ecst(>=); S2EVar(1->S2Eapp(S2Ecst(sub_int_int); S2Evar(n(2)), S2Eintinf(1))), S2Eintinf(0)))'
 
 if [ "$ONLY" != memo ]; then
@@ -220,6 +229,8 @@ fixture "$G" reject exi-numbered "$SEXI" "$(exi_expect n 14465)"
 fixture "$G" reject exi-binders "$SEXI_LIST" "$(exi_list_expect m 14466)"
 fixture "$G" reject exi-suffix "$SEXI_COPY" "$(exi_copy_expect 'a$7001' 15000)"
 fixture "$G" reject exi-suffix-binders "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'b$7002' 15001)"
+# the number of a variable with no arrow is other than patsopt's
+fixture "$G" reject evar-bare "$SEVAR" "$(evar_expect 7101)"
 run "$TMP/good.log" "$G" --cold
 [ $rc = 0 ] || { cat "$TMP/good.log"; fail "good fixtures: status $rc"; }
 okline "$TMP/good.log" accept/ok good
@@ -231,7 +242,8 @@ okline "$TMP/good.log" reject/exi-numbered good
 okline "$TMP/good.log" reject/exi-binders good
 okline "$TMP/good.log" reject/exi-suffix good
 okline "$TMP/good.log" reject/exi-suffix-binders good
-said "$TMP/good.log" "fixtures: 9 ok, 0 failed" good
+okline "$TMP/good.log" reject/evar-bare good
+said "$TMP/good.log" "fixtures: 10 ok, 0 failed" good
 nofail "$TMP/good.log" good
 [ -z "$(ls "$TMP/tmp")" ] || fail "the run left a temporary directory: $(ls "$TMP/tmp")"
 # the project is as it was
@@ -305,6 +317,9 @@ fixture "$B" reject exi-binders-number-not-digits "$SEXI_LIST" "$(exi_list_expec
 fixture "$B" reject exi-suffix-other-name "$SEXI_COPY" "$(exi_copy_expect 'b$7001' 15000)"
 fixture "$B" reject exi-suffix-digits-and-letters "$SEXI_COPY" "$(exi_copy_expect 'a$70x01' 15000)"
 fixture "$B" reject exi-suffix-binders-other-name "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'c$7002' 15001)"
+# a bare S2EVar's number is digits, not letters or a mix
+fixture "$B" reject evar-bare-not-digits "$SEVAR" "$(evar_expect 71x1)"
+fixture "$B" reject evar-bare-name "$SEVAR" "$(evar_expect name)"
 run "$TMP/bad.log" "$B"
 [ $rc = 1 ] || { cat "$TMP/bad.log"; fail "bad fixtures: status $rc, not 1"; }
 L=$TMP/bad.log
@@ -316,7 +331,7 @@ saidpart "$L" "FAIL reject/extra-line: rejected, but not as its expect says: its
 saidpart "$L" "FAIL reject/number-kept: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/exi-other-name: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/exi-number-not-digits: rejected, but not as its expect says: its error is not the one expected:" bad
-for m in exi-binders-other-name exi-binders-number-not-digits exi-suffix-other-name exi-suffix-digits-and-letters exi-suffix-binders-other-name; do
+for m in exi-binders-other-name exi-binders-number-not-digits exi-suffix-other-name exi-suffix-digits-and-letters exi-suffix-binders-other-name evar-bare-not-digits evar-bare-name; do
   saidpart "$L" "FAIL reject/$m: rejected, but not as its expect says: its error is not the one expected:" bad
 done
 saidpart "$L" "FAIL reject/other-line: rejected, but not as its expect says: an error is at line 1 of its snippet, not 2: " bad
@@ -330,7 +345,7 @@ saidpart "$L" "FAIL reject/no-patsopt-error: rejected, but not as its expect say
 saidpart "$L" "FAIL reject/other-module: rejected, but not as its expect says: an error is in " bad
 saidpart "$L" "/src/other.bats, not src/lib.bats: unsolved constraint" bad
 saidpart "$L" "FAIL accept/no-such-line: no line \"(* not in the module *)\" in src/lib.bats" bad
-said "$L" "fixtures: 0 ok, 24 failed" bad
+said "$L" "fixtures: 0 ok, 26 failed" bad
 # the raw error is shown for a mismatch, so the reader can fix the expect
 saidpart "$L" "pattern match is nonexhaustive:" bad
 
