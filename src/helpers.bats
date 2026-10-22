@@ -2736,16 +2736,20 @@ end
 
 (* A machine slot: held (its file, open and locked, and its number), the
    parent's (a bats that holds one started this one, BATS_SLOT_HELD), or
-   none (BATS_SLOTS unset, or the slot could not be taken, which is
-   said) *)
+   none (BATS_SLOTS unset or not a number), or refused: BATS_SLOTS is set
+   and the slot could not be taken, so the run is refused and nothing is
+   run (bats-lang/bats#464, machine-slots.md "Refused") *)
 #pub datavtype machine_slot =
   | SlotHeld of ($F.fd, int)
   | SlotOfParent
   | SlotNone
+  | SlotRefused
 
 #pub fn machine_slot_take (heavy: heavy_command): machine_slot
 
 #pub fn machine_slot_release (slot: machine_slot): void
+
+#pub fn machine_slot_refused (slot: !machine_slot): bool
 
 (* BATS_SLOTS: 0 when it is not set or empty, -1 when it is not a number
    from 1 up, else the number, at most 64 *)
@@ -2925,12 +2929,19 @@ end
 
 fn slot_warn {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): void = let
   var m : $B.builder_v = $B.create()
-  val () = bput_v(m, "warning: ")
+  val () = bput_v(m, "error: ")
   val () = bput_v(m, what)
   val () = (if i >= 0 then slot_path(i, m) else slot_dir(m))
   val () = bput_v(m, why)
-  val () = bput_v(m, ", so this bats runs without a machine slot (BATS_SLOTS)\n")
+  val () = bput_v(m, ", so bats refuses to run without a machine slot (BATS_SLOTS): nothing is run\n")
 in prerr_builder(m) end
+
+(* A slot that cannot be taken refuses the run (bats-lang/bats#464): what
+   it could not do is said, and the slot is SlotRefused. Never SlotNone:
+   that is a run that goes on without the machine's cap. *)
+fn slot_refuse {what_len,why_len:nat} (what: string what_len, i: int, why: string why_len): machine_slot = let
+  val () = slot_warn(what, i, why)
+in SlotRefused() end
 
 fn slot_held (fd: $F.fd, i: int, heavy: heavy_command): machine_slot = let
   val () = note_holder(i, heavy)
@@ -2951,21 +2962,15 @@ in
     val made = run_mkdir(d)
     val n = g1ofg0(n0)
   in
-    if made <> 0 then let
-      val () = slot_warn("cannot make the slots' directory ", ~1, "")
-    in SlotNone() end
+    if made <> 0 then slot_refuse("cannot make the slots' directory ", ~1, "")
     else if n < 1 then SlotNone()
     else let
       val @(found, i) = slot_free(0, n)
     in
       case+ found of
       | ~SlotTaken(fd) => slot_held(fd, i, heavy)
-      | ~SlotUnopenable() => let
-          val () = slot_warn("cannot open ", i, "")
-        in SlotNone() end
-      | ~SlotUnlockable() => let
-          val () = slot_warn("cannot lock ", i, " (its file system has no locks)")
-        in SlotNone() end
+      | ~SlotUnopenable() => slot_refuse("cannot open ", i, "")
+      | ~SlotUnlockable() => slot_refuse("cannot lock ", i, " (its file system has no locks)")
       | ~SlotBusy() => let
           (* With more than one slot, a bats that waits waits for slot
              0, though another may be freed first, as gen-pwa test does *)
@@ -2988,13 +2993,9 @@ in
         in
           case+ slot_try(0, $F.LockWaits()) of
           | ~SlotTaken(fd) => slot_held(fd, 0, heavy)
-          | ~SlotBusy() => SlotNone()
-          | ~SlotUnopenable() => let
-              val () = slot_warn("cannot open ", 0, "")
-            in SlotNone() end
-          | ~SlotUnlockable() => let
-              val () = slot_warn("cannot lock ", 0, " (its file system has no locks)")
-            in SlotNone() end
+          | ~SlotBusy() => slot_refuse("cannot take ", 0, " (its lock was not granted)")
+          | ~SlotUnopenable() => slot_refuse("cannot open ", 0, "")
+          | ~SlotUnlockable() => slot_refuse("cannot lock ", 0, " (its file system has no locks)")
         end
     end
   end
@@ -3008,6 +3009,14 @@ implement machine_slot_release (slot) =
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~SlotOfParent() => ()
   | ~SlotNone() => ()
+  | ~SlotRefused() => ()
+
+implement machine_slot_refused (slot) =
+  case+ slot of
+  | SlotRefused() => true
+  | SlotHeld(_, _) => false
+  | SlotOfParent() => false
+  | SlotNone() => false
 
 (* ============================================================
    The project's lock (bats-lang/bats#250)
@@ -3075,6 +3084,31 @@ implement project_lock_release (lk) =
       val () = machine_slot_release(slot)
     in $R.discard<int><$F.io_error>($F.file_close(fd)) end
   | ~ProjectUnlocked(slot) => machine_slot_release(slot)
+
+(* Whether the machine slot of lk was refused (bats-lang/bats#464): the
+   command must not run, and bats exits 1 *)
+#pub fn project_lock_refused (lk: !project_lock): bool
+
+implement project_lock_refused (lk) =
+  case+ lk of
+  | ProjectLocked(_, slot) => machine_slot_refused(slot)
+  | ProjectUnlocked(slot) => machine_slot_refused(slot)
+
+(* A refused slot is refused (bats-lang/bats#464): the test takes the
+   refusal the cannot-lock branch takes, which no file system here
+   produces (flock works on every one this machine has) *)
+$UNITTEST.run begin
+fn test_refused_slot_is_refused (): bool = let
+  val s = slot_refuse("cannot lock ", 0, " (its file system has no locks)")
+  val r = machine_slot_refused(s)
+  val () = machine_slot_release(s)
+in r end
+fn test_no_slot_is_not_refused (): bool = let
+  val s = SlotNone()
+  val r = machine_slot_refused(s)
+  val () = machine_slot_release(s)
+in (if r then false else true) end
+end
 
 (* ============================================================
    File I/O
