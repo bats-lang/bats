@@ -1715,6 +1715,87 @@ fn run_cmd_capture {le:agz}{lo:agz}
 
 
 
+datavtype capture_outcome =
+  | CaptureFits of ([k:nat | k <= 4096] int k)
+  | CaptureFailed of (int, [k:nat | k <= 4096] int k)
+  | CaptureLonger of (int, int)
+  | CaptureReadFailed of (int, [k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureNotRun of (int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn run_cmd_capture_outcome {le:agz}{lo:agz}
+  (exec_bv: !$A.borrow(byte, le, 524288),
+   argv: $L.listv($P.arg_entry),
+   outbuf: !$A.arr(byte, lo, 4096)): capture_outcome
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
