@@ -550,59 +550,39 @@ fn kind_is_lib {l:agz} (kbuf: !$A.arr(byte, l, 32), klen: int): bool =
 
 
 
-implement generate_lib_docs() = let
-  val tp = str_to_path_arr("bats.toml")
-  val @(fz_tp, bv_tp) = $A.freeze<byte>(tp)
-  val tor = file_open_path(bv_tp, $F.ReadOnly(), $F.OpenExisting(), 0)
-  val () = $A.drop<byte>(fz_tp, bv_tp)
-  val () = $A.free<byte>($A.thaw<byte>(fz_tp))
-in
-  case+ tor of
-  | ~$R.ok(tfd) => let
-      val tbuf = $A.alloc<byte>(8192)
-      val trr = $F.file_read(tfd, tbuf, 8192)
-      val tn = (case+ trr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 8192] int k
-      val () = $R.discard<int><$F.io_error>($F.file_close(tfd))
-      val @(fz_tb, bv_tb) = $A.freeze<byte>(tbuf)
-      val pr = $T.parse(bv_tb, tn)
-      val () = $A.drop<byte>(fz_tb, bv_tb)
-      val () = $A.free<byte>($A.thaw<byte>(fz_tb))
-    in
-      case+ pr of
-      | ~$R.ok(doc) => let
-          val sec = $A.alloc<byte>(7)
-          val () = make_package(sec)
-          val @(fz_s, bv_s) = $A.freeze<byte>(sec)
-          val kn = $A.alloc<byte>(4)
-          val () = make_name(kn)
-          val @(fz_kn, bv_kn) = $A.freeze<byte>(kn)
-          val nbuf = $A.alloc<byte>(256)
-          val nr = $T.get(doc, bv_s, 7, bv_kn, 4, nbuf, 256)
-          val () = $A.drop<byte>(fz_kn, bv_kn)
-          val () = $A.free<byte>($A.thaw<byte>(fz_kn))
-          val kk = $A.alloc<byte>(4)
-          val () = make_kind(kk)
-          val @(fz_kk, bv_kk) = $A.freeze<byte>(kk)
-          val kbuf = $A.alloc<byte>(32)
-          val kr = $T.get(doc, bv_s, 7, bv_kk, 4, kbuf, 32)
-          val () = $A.drop<byte>(fz_kk, bv_kk)
-          val () = $A.free<byte>($A.thaw<byte>(fz_kk))
-          val () = $A.drop<byte>(fz_s, bv_s)
-          val () = $A.free<byte>($A.thaw<byte>(fz_s))
-          val () = $T.toml_free(doc)
-          val klen = (case+ kr of | ~$R.some(k) => k | ~$R.none() => 0): int
-          (* No kind is a library, as in Rust's config::load *)
-          val is_lib = kind_is_lib(kbuf, klen)
-          val () = $A.free<byte>(kbuf)
-          val nlen = (case+ nr of | ~$R.some(k) => k | ~$R.none() => 0): int
-          val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
-          val rc = (if ~is_lib then NotLibrary()
-                    else if generate_docs(bv_nb, nlen, 256) < 0 then DocsFailed()
-                    else Written()): docs
-          val () = $A.drop<byte>(fz_nb, bv_nb)
-          val () = $A.free<byte>($A.thaw<byte>(fz_nb))
-        in rc end
-      | ~$R.err(_) => NotLibrary()
-    end
+implement generate_lib_docs() =
+  case+ read_manifest() of
+  | ~$R.ok(doc) => let
+      val sec = $A.alloc<byte>(7)
+      val () = make_package(sec)
+      val @(fz_s, bv_s) = $A.freeze<byte>(sec)
+      val kn = $A.alloc<byte>(4)
+      val () = make_name(kn)
+      val @(fz_kn, bv_kn) = $A.freeze<byte>(kn)
+      val nbuf = $A.alloc<byte>(256)
+      val nr = $T.get(doc, bv_s, 7, bv_kn, 4, nbuf, 256)
+      val () = $A.drop<byte>(fz_kn, bv_kn)
+      val () = $A.free<byte>($A.thaw<byte>(fz_kn))
+      val kk = $A.alloc<byte>(4)
+      val () = make_kind(kk)
+      val @(fz_kk, bv_kk) = $A.freeze<byte>(kk)
+      val kbuf = $A.alloc<byte>(32)
+      val kr = $T.get(doc, bv_s, 7, bv_kk, 4, kbuf, 32)
+      val () = $A.drop<byte>(fz_kk, bv_kk)
+      val () = $A.free<byte>($A.thaw<byte>(fz_kk))
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = $T.toml_free(doc)
+      val klen = (case+ kr of | ~$R.some(k) => k | ~$R.none() => 0): int
+      (* No kind is a library, as in Rust's config::load *)
+      val is_lib = kind_is_lib(kbuf, klen)
+      val () = $A.free<byte>(kbuf)
+      val nlen = (case+ nr of | ~$R.some(k) => k | ~$R.none() => 0): int
+      val @(fz_nb, bv_nb) = $A.freeze<byte>(nbuf)
+      val rc = (if ~is_lib then NotLibrary()
+                else if generate_docs(bv_nb, nlen, 256) < 0 then DocsFailed()
+                else Written()): docs
+      val () = $A.drop<byte>(fz_nb, bv_nb)
+      val () = $A.free<byte>($A.thaw<byte>(fz_nb))
+    in rc end
   | ~$R.err(_) => NotLibrary()
-end

@@ -14,6 +14,7 @@
 #use result as R
 #use str as S
 #use sha256 as SHA
+#use toml as T
 
 (* ============================================================
    Proven byte reads
@@ -3122,6 +3123,21 @@ in
                     content_arr, content_len)
 end
 
+(* Appends to an existing file and never reads it back (manifest) *)
+#pub fn append_file_from_builder {lp:agz}{np:pos | np < 1048576}
+  (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
+   content_b: $B.builder_v): write_result
+
+implement append_file_from_builder(path_bv, path_len, content_b) = let
+  val @(content_arr, content_len) = $B.into_arr(content_b)
+in
+  if content_len >= 524288 then let
+    val () = $A.free<byte>(content_arr)
+  in WriteTooLarge() end
+  else write_opened(file_open_n(path_bv, path_len, $F.WriteOnly(), $F.AppendExisting(), 420),
+                    content_arr, content_len)
+end
+
 (* ============================================================
    Ropes: text of any length (a module's .sats and .dats)
    ============================================================ *)
@@ -3270,15 +3286,21 @@ fn whole_of_open (opened: $R.result($F.fd, $F.io_error)): whole_file =
         in whole_err($F.OutOfMemory()) end
       | ~$A.arena_some(ar) => let
           val p = $A.arena_alloc<byte>(ar, z + 1)
-          val k = (case+ $F.file_read(fd, p, z + 1) of
-            | ~$R.ok(k) => k | ~$R.err(_) => ~1): int
+          val read_result = $F.file_read(fd, p, z + 1)
           val () = $R.discard<int><$F.io_error>($F.file_close(fd))
         in
-          if k = z then whole_ok(ar, p, z + 1, z)
-          else let
-            val () = $A.arena_return<byte>(ar, p)
-            val () = $A.arena_destroy<byte>(ar)
-          in whole_err($F.DeviceError()) end
+          (* a failed read and a short read are distinct errors (manifest) *)
+          case+ read_result of
+          | ~$R.ok(k) =>
+            if k = z then whole_ok(ar, p, z + 1, z)
+            else let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err($F.DeviceError()) end
+          | ~$R.err(e) => let
+              val () = $A.arena_return<byte>(ar, p)
+              val () = $A.arena_destroy<byte>(ar)
+            in whole_err(e) end
         end))
 
 implement read_whole (path, plen) =
@@ -3297,6 +3319,42 @@ implement read_whole_m (path, m) =
 implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
+
+(* Reads a TOML file whole, FileTooLarge over the parser's limit, never cut (manifest) *)
+#pub fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
+  : $R.result($T.toml_doc, $F.io_error)
+
+implement read_toml (pa, m) = let
+  val @(fz_path, bv_path) = $A.freeze<byte>(pa)
+  val whole = read_whole_m(bv_path, m)
+  val () = $A.drop<byte>(fz_path, bv_path)
+  val () = $A.free<byte>($A.thaw<byte>(fz_path))
+in
+  case+ whole of
+  | ~whole_err(e) => $R.err(e)
+  | ~whole_ok(ar, piece, size, length) =>
+    if length > 65536 then let
+      val () = whole_free(ar, piece)
+    in $R.err($F.FileTooLarge()) end
+    else let
+      val @(fz_text, bv_text) = $A.freeze<byte>(piece)
+      val parsed = $T.parse(bv_text, length)
+      val () = $A.drop<byte>(fz_text, bv_text)
+      val () = whole_free(ar, $A.thaw<byte>(fz_text))
+    in
+      case+ parsed of
+      | ~$R.ok(doc) => $R.ok(doc)
+      (* unparsable text is InvalidInput (manifest) *)
+      | ~$R.err(_) => $R.err($F.InvalidInput())
+    end
+end
+
+(* The ./bats.toml, read whole and parsed (manifest) *)
+#pub fn read_manifest (): $R.result($T.toml_doc, $F.io_error)
+
+implement read_manifest () = let
+  val @(manifest_path, manifest_path_len) = str_into_arr("bats.toml")
+in read_toml(manifest_path, manifest_path_len) end
 
 (* build/.sats_changed is touched BEFORE a .sats is written, so a bats
    killed between the two leaves the stamp ahead (every C is made again),
