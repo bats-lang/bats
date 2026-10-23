@@ -55,6 +55,10 @@
 #    and nothing else (not a stray file, not a directory without the
 #    memo's mark, not through a link, not in a directory that is no memo),
 #    and is a usage error with --only.
+#  * the call cycles of the files a run has read are kept for its next
+#    fixture, and a fixture whose module has the size of an earlier one's but
+#    other bytes is judged on its own (a cycle is refused after an acyclic
+#    snippet of the same size was kept; a snippet again is served its scan);
 # bats-lang/bats#305 is the bug the toolchain case works around.
 #
 # Mutants. Each is one edit of src/fixtures.bats (`old` -> `new`; rebuild
@@ -116,6 +120,8 @@
 #     killed by: "memo prune: listed"
 #  21. store-in-no-memo: `&& memo_ready(bv_m, mn) &&` -> `&& true &&`
 #     killed by: "the first run kept 0 files, not 8"
+#  22. scan-bytes-unchecked (src/recursion.bats): `else if same_source(bytes_view, source, source_size, 0) then let` -> `else if true then let`
+#     killed by: "scans: status 0, not 1"
 #
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
@@ -932,6 +938,26 @@ printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\nstaload "back
 printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\n\n#pub fn lone (): int\n\nimplement lone () = pong ()\n' > "$MPC/src/back.bats"
 (cd "$MPC" && HOME=$H "$BATS" check > "$TMP/c6.log" 2>&1) && { cat "$TMP/c6.log"; fail "memo cycle: bats check passed a cycle through another module's implement"; }
 rm -rf "$MPC" "$MWC" "$MC"
+
+# ---- the scan of a file kept for the next fixture of a run is the file's only while its bytes are (bats-lang/bats#405)
+# a-acyclic and b-cyclic put a snippet of the same size into front.bats: b's module is not a's, whatever its size
+# (b makes pong call lone, which calls pong: a cycle, refused before patsopt), and c is a's snippet again
+MPS=$TMP/mproj-scan; MFS=$TMP/mfix-scan; MWS=$TMP/mwork-scan; MS=$TMP/memo-scan
+mkdir -p "$MPS/src"
+printf '[package]\nname = "fx"\nkind = "lib"\n' > "$MPS/bats.toml"
+printf '#include "share/atspre_staload.hats"\n' > "$MPS/src/lib.bats"
+printf '#include "share/atspre_staload.hats"\n\n#pub fn pong (): int\n' > "$MPS/src/ring.bats"
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\n\n#pub fn lone (): int\n\n#pub fn lone2 (): int\n\nimplement lone () = pong ()\n\nimplement lone2 () = 4\n' > "$MPS/src/back.bats"
+printf '#include "share/atspre_staload.hats"\nstaload "ring.sats"\nstaload "back.sats"\n\n(* end *)\n' > "$MPS/src/front.bats"
+mfix "$MFS" accept a-acyclic src/front.bats '(* end *)' 'implement pong () = lone2 ()'
+mfix "$MFS" accept b-cyclic src/front.bats '(* end *)' 'implement pong () = lone  ()'
+mfix "$MFS" accept c-acyclic src/front.bats '(* end *)' 'implement pong () = lone2 ()'
+mrunx "$MPS" "$MFS" "$MWS" "$MS" "$TMP/s1.log" --cold
+[ $rc = 1 ] || { cat "$TMP/s1.log"; fail "scans: status $rc, not 1"; }
+okline "$TMP/s1.log" "accept/a-acyclic" "scans a"
+okline "$TMP/s1.log" "accept/c-acyclic" "scans c"
+failed "$TMP/s1.log" "accept/b-cyclic: should type-check" "scans: b-cyclic after a-acyclic (the same size, other bytes)"
+rm -rf "$MPS" "$MWS" "$MS"
 
 [ -z "${TIMES:-}" ] || cat "$TMP/times"
 echo "ok"
