@@ -8,8 +8,8 @@ paths:
 
 # A failing test script keeps its temp directory (keep-on-fail)
 
-A failure that leaves nothing to read cannot be root-caused (#478: a fixtures case failed
-once and its directory, logs and memo were gone). Every script under `tests/` and
+A failure that leaves nothing to read cannot be root-caused, so a failing test keeps its
+directory, logs and memo. Every script under `tests/` and
 `scripts/bootstrap-c.sh` sources `tests/keep-on-fail.sh` in place of its own `mktemp` and
 trap.
 
@@ -26,8 +26,9 @@ trap.
 * A script killed by a signal runs no exit trap, so its directory stays as well.
 
 `tests/keep-on-fail/check.sh` runs a failing script (also one that dies of `set -e`), a
-passing one and one with a teardown, and checks the neutral name and the test's name in
-the `kept:` line. In CI `check.yml` sets `BATS_KEPT_DIR` to a directory
+passing one and one with a teardown (its hook must see the directory still there on a pass
+and on a failure, and a failure's directory must remain), and checks the neutral name and the
+test's name in the `kept:` line. In CI `check.yml` sets `BATS_KEPT_DIR` to a directory
 of the runner and, when a step fails, uploads it as the artifact `kept-check`; a green run
 uploads nothing.
 

@@ -64,25 +64,36 @@ dir3=$(cat "$TMP/passes.dir")
 [ ! -e "$dir3" ] || fail "passing script's directory $dir3 is still there"
 [ ! -s "$TMP/passes.err" ] || fail "passing script said: $(cat "$TMP/passes.err")"
 
-# KEEP_ON_FAIL_TEARDOWN runs on a pass and on a failure, before the directory goes
+# KEEP_ON_FAIL_TEARDOWN runs on a pass and on a failure, before the directory goes: the
+# hook records whether the directory still held the script's file when it ran
 cat > "$TMP/scripts/teardown-ok.sh" <<EOF
 set -eu
-teardown() { touch "$TMP/teardown.ok.ran"; }
+teardown() { [ -f "\$TMP/log" ] && echo "\$TMP" > "$TMP/teardown.ok.saw"; }
 KEEP_ON_FAIL_TEARDOWN=teardown
 . "$HELPER"
+echo data > "\$TMP/log"
+echo "\$TMP" > "$TMP/teardown.ok.dir"
 EOF
 BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/teardown-ok.sh" || fail "teardown script failed"
-[ -e "$TMP/teardown.ok.ran" ] || fail "teardown did not run on a pass"
+[ -e "$TMP/teardown.ok.saw" ] || fail "teardown did not run on a pass, or ran after the directory went"
+dir5=$(cat "$TMP/teardown.ok.dir")
+[ ! -e "$dir5" ] || fail "the passing teardown script's directory $dir5 is still there"
 cat > "$TMP/scripts/teardown-bad.sh" <<EOF
 set -eu
-teardown() { touch "$TMP/teardown.bad.ran"; }
+teardown() { [ -f "\$TMP/log" ] && echo "\$TMP" > "$TMP/teardown.bad.saw"; }
 KEEP_ON_FAIL_TEARDOWN=teardown
 . "$HELPER"
+echo data > "\$TMP/log"
+echo "\$TMP" > "$TMP/teardown.bad.dir"
 exit 1
 EOF
 BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/teardown-bad.sh" 2> "$TMP/teardown-bad.err" &&
   fail "bad teardown script passed"
-[ -e "$TMP/teardown.bad.ran" ] || fail "teardown did not run on a failure"
+[ -e "$TMP/teardown.bad.saw" ] || fail "teardown did not run on a failure, or after the directory went"
+dir6=$(cat "$TMP/teardown.bad.dir")
+[ -f "$dir6/log" ] || fail "the failing teardown script's directory $dir6 was not kept"
+last=$(tail -n 1 "$TMP/teardown-bad.err")
+[ "$last" = "kept: $dir6 (scripts)" ] || fail "teardown failure: last stderr line: $last"
 
 # without BATS_KEPT_DIR the directory is under TMPDIR
 BATS_KEPT_DIR= TMPDIR=$TMP/other sh "$TMP/scripts/fails.sh" 2> "$TMP/other.err" || true
