@@ -303,7 +303,7 @@ in case+ dr of
                 val () = bput_v(fi, "/")
                 val () = copy_to_builder_v(bv_e, 0, el, 1024, fi)
                 val () = put_char_v(fi, 0)
-              in native_object_fresh(rel, fo, fi) end
+              in native_object_fresh(rel, ph, phlen, fo, fi) end
               (* the arrays run_cc takes are made only for an object that is made *)
               val _ = (if cc_fresh then 0 else let
                   var ob : $B.builder_v = $B.create()
@@ -694,48 +694,7 @@ fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <
    out_bv: !$A.borrow(byte, lo, no), out_len: int om): int = let
   val (nul_exec | exec) = $P.path_of_string_proved("clang")
   val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
-  var wc1 = $B.create() val () = bput_v(wc1, "clang")
-  var wc2 = $B.create() val () = bput_v(wc2, "--target=wasm32")
-  var wc3 = $B.create() val () = bput_v(wc3, "-O2")
-  var wc4 = $B.create() val () = bput_v(wc4, "-nostdlib")
-  var wc5 = $B.create() val () = bput_v(wc5, "-ffreestanding")
-  var wc6 = $B.create() val () = bput_v(wc6, "-fvisibility=default")
-  var wc7 = $B.create() val () = bput_v(wc7, "-D_ATS_CCOMP_HEADER_NONE_")
-  var wc8 = $B.create() val () = bput_v(wc8, "-D_ATS_CCOMP_EXCEPTION_NONE_")
-  var wc9 = $B.create() val () = bput_v(wc9, "-D_ATS_CCOMP_PRELUDE_NONE_")
-  var wc10 = $B.create() val () = bput_v(wc10, "-D_ATS_CCOMP_RUNTIME_NONE_")
-  var wc11 = $B.create() val () = bput_v(wc11, "-include")
-  var wc12 = $B.create() val () = bput_v(wc12, "build/_bats_wasm_runtime.h")
-  var wc13 = $B.create() val () = bput_v(wc13, "-I")
-  var wc14 = $B.create() val () = bput_v(wc14, "build/_bats_wasm_stubs")
-  var wc15 = $B.create() val () = bput_v(wc15, "-Wno-implicit-function-declaration")
-  var wc16 = $B.create() val () = bput_v(wc16, "-Wno-int-conversion")
-  var wc17 = $B.create() val () = bput_v(wc17, "-c")
-  var wc18 = $B.create() val () = bput_v(wc18, "-o")
-  var wc19 = $B.create()
-  val oc = out_len - 1
-  val () = copy_to_builder_v(out_bv, 0, oc, out_len, wc19)
-  var wc20 = $B.create()
-  val ic = in_len - 1
-  val () = copy_to_builder_v(in_bv, 0, ic, in_len, wc20)
-  (* -MD -MF: the depfile names the headers read (headers keyword) *)
-  var wc21 = $B.create() val () = bput_v(wc21, "-MD")
-  var wc22 = $B.create() val () = bput_v(wc22, "-MF")
-  var wc23 = $B.create()
-  val () = copy_to_builder_v(out_bv, 0, oc, out_len, wc23)
-  val () = bput_v(wc23, ".d")
-  val argv = $L.list_vt_cons(mk_arg(wc1), $L.list_vt_cons(mk_arg(wc2),
-    $L.list_vt_cons(mk_arg(wc3), $L.list_vt_cons(mk_arg(wc4),
-    $L.list_vt_cons(mk_arg(wc5), $L.list_vt_cons(mk_arg(wc6),
-    $L.list_vt_cons(mk_arg(wc7), $L.list_vt_cons(mk_arg(wc8),
-    $L.list_vt_cons(mk_arg(wc9), $L.list_vt_cons(mk_arg(wc10),
-    $L.list_vt_cons(mk_arg(wc11), $L.list_vt_cons(mk_arg(wc12),
-    $L.list_vt_cons(mk_arg(wc13), $L.list_vt_cons(mk_arg(wc14),
-    $L.list_vt_cons(mk_arg(wc15), $L.list_vt_cons(mk_arg(wc16),
-    $L.list_vt_cons(mk_arg(wc17), $L.list_vt_cons(mk_arg(wc18),
-    $L.list_vt_cons(mk_arg(wc19), $L.list_vt_cons(mk_arg(wc20),
-    $L.list_vt_cons(mk_arg(wc21), $L.list_vt_cons(mk_arg(wc22),
-    $L.list_vt_cons(mk_arg(wc23), $L.list_vt_nil())))))))))))))))))))))))
+  val argv = wasm_cc_argv(in_bv, in_len, out_bv, out_len, false)
   val rc = run_cmd(nul_exec | bv_exec, argv)
   val () = $A.cborrow_drop(fz_exec, bv_exec)
   val () = $A.barr_free($A.barr_thaw(fz_exec))
@@ -761,6 +720,8 @@ fn wasm_cc_file {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   val @(oa, ol) = $B.into_arr(ob)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
   val () = (if wasm_fresh then () else key_drop(bv_o, ol))
+  (* the text the object is made from, before cc reads the headers (preprocess keyword) *)
+  val _ = (if wasm_fresh then 0 else preprocess_wasm(path, path_len, bv_o, ol)): int
   val rc = (if wasm_fresh then 0 else run_wasm_cc(path, path_len, bv_o, ol)): int
   val () = (if rc = 0 && ~wasm_fresh then wasm_object_record(bv_o, ol, path, path_len) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
@@ -2515,7 +2476,7 @@ in
                        val () = copy_to_builder_v(bv_sde, 0, sel, 1024, nci)
                        val () = bput_v(nci, "/src/lib_dats.c")
                        val () = put_char_v(nci, 0)
-                     in native_object_fresh(rr3, nco, nci) end
+                     in native_object_fresh(rr3, ph3, ph3len, nco, nci) end
                      val _ = (if ns_cc_fresh then 0 else run_cc(ph3, ph3len, bv_co, co_len, bv_ci, ci_len, rr3)): int
                                                   val () = $A.drop<byte>(fz_co, bv_co)
                                                   val () = $A.free<byte>($A.thaw<byte>(fz_co))
@@ -2558,7 +2519,7 @@ in
                                     val () = copy_to_builder_v(bv_de, 0, dlen, 1024, ib)
                                     val () = bput_v(ib, "/src/lib_dats.c")
                                     val () = put_char_v(ib, 0)
-                                  in (if native_object_fresh(rr, ob, ib) then 1 else 0): int end
+                                  in (if native_object_fresh(rr, ph, phlen, ob, ib) then 1 else 0): int end
                                   val () = (if cc_fresh > 0 then ()
                                   else let
                                   var co_b : $B.builder_v = $B.create()
@@ -2634,7 +2595,7 @@ in
                                                     val () = bput_v(fi, "/src/")
                                                     val () = copy_to_builder_v(bv_d4, 0, dl4, 1024, fi)
                                                     val () = put_char_v(fi, 0)
-                                                  in (if native_object_fresh(rr2, fo, fi) then 1 else 0): int end
+                                                  in (if native_object_fresh(rr2, ph2, ph2len, fo, fi) then 1 else 0): int end
                                                   val () = (if cf > 0 then ()
                                                   else let
                                                     var xo : $B.builder_v = $B.create()
@@ -2721,7 +2682,7 @@ in
                                     val () = bput_v(fi, "build/src/")
                                     val () = copy_to_builder_v(bv_dcsm, 0, dl_csm, 1024, fi)
                                     val () = put_char_v(fi, 0)
-                                  in (if native_object_fresh(rr_cm, fo, fi) then 1 else 0): int end
+                                  in (if native_object_fresh(rr_cm, ph_cm, ph_cm_len, fo, fi) then 1 else 0): int end
                                   val () = (if cf_sm > 0 then ()
                                   else let
                                     var xo_sm : $B.builder_v = $B.create()
@@ -2912,7 +2873,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ib)
                       val () = bput_v(ib, "_dats.c")
                       val () = put_char_v(ib, 0)
-                    in (if native_object_fresh(rel, ob, ib) then 1 else 0): int end
+                    in (if native_object_fresh(rel, ph, phlen, ob, ib) then 1 else 0): int end
                     val () = (if bin_cc_fresh > 0 then ()
                     else let
                     var co_b : $B.builder_v = $B.create()
@@ -2948,7 +2909,7 @@ in
                       val () = copy_to_builder_v(bv_e, 0, stem_len, 1024, ib)
                       val () = bput_v(ib, "_dats.c")
                       val () = put_char_v(ib, 0)
-                    in (if native_object_fresh(rel, ob, ib) then 1 else 0): int end
+                    in (if native_object_fresh(rel, ph, phlen, ob, ib) then 1 else 0): int end
                     val () = (if ent_cc_fresh > 0 then ()
                     else let
                     var ceo_b : $B.builder_v = $B.create()

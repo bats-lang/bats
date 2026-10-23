@@ -1,15 +1,17 @@
 #!/bin/sh
-# An object is keyed on the headers its compile read (bats-lang/bats#394,
-# #338, #395): cc is run with -MD -MF <object>.d, and the object's key holds
-# the size and sha256 of each header the depfile lists, re-read at every
-# check. A header changed in place (the same name, the same size, another
-# byte) makes the object again, native and wasm alike; with nothing changed
-# no cc runs; a depfile that is missing or garbled makes the object again.
-# The header is found through C_INCLUDE_PATH, which clang reads as a system
-# include directory, and which is in the stamp, so its value is the same
-# before and after the change: only the header's bytes differ. A generated
-# C and each header are read and hashed once for the native and the wasm
-# object of a build (-v says `~ digested <path>` for each).
+# An object is keyed on the text its compile reads (bats-lang/bats#394, #338,
+# #395, #477): cc -E, with the object's own flags, gives the preprocessed text
+# of its C, and the key holds the size and sha256 of that text, made again at
+# every check. A header changed in place (the same name, the same size,
+# another byte) makes the object again, native and wasm alike; so does a
+# header that did not exist at the last compile and now shadows one later on
+# the search path (an angle include found through C_INCLUDE_PATH, and a
+# quoted one that a new file beside the including file now takes); with
+# nothing changed no cc runs and no preprocessed text is left behind. The
+# search path is in the stamp, so its value is the same before and after:
+# only what the preprocessor now finds differs. A generated C is read and
+# hashed once for the native and the wasm object of a build (-v says
+# `~ digested <path>`).
 # usage: tests/build-headers/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -17,13 +19,16 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 unset BATS_CACHE_DIR
 HDR=$TMP/include
-mkdir -p "$HDR" "$TMP/p/src/bin"
-export C_INCLUDE_PATH=$HDR
+EARLIER=$TMP/earlier
+mkdir -p "$HDR" "$EARLIER" "$TMP/p/src/bin"
+export C_INCLUDE_PATH=$EARLIER:$HDR
 printf '[package]\nname = "hd"\nkind = "bin"\nunsafe = true\n' > "$TMP/p/bats.toml"
-printf '#target native\n\n$UNSAFE begin\n\n%%{\n#include <hdr_native.h>\nint hdr_native_value (void) { return HDR_NATIVE_VALUE; }\n%%}\n\nend\n\nimplement main0 () = ()\n' > "$TMP/p/src/bin/tool.bats"
-printf '#target wasm binary\n\n$UNSAFE begin\n\n%%{\n#include <hdr_wasm.h>\nint hdr_wasm_value (void) { return HDR_WASM_VALUE; }\n%%}\n\nend\n\nimplement main0 () = ()\n' > "$TMP/p/src/bin/web.bats"
+printf '#target native\n\n$UNSAFE begin\n\n%%{\n#include <hdr_native.h>\n#include "hdr_native_q.h"\nint hdr_native_value (void) { return HDR_NATIVE_VALUE + HDR_NATIVE_Q_VALUE; }\n%%}\n\nend\n\nimplement main0 () = ()\n' > "$TMP/p/src/bin/tool.bats"
+printf '#target wasm binary\n\n$UNSAFE begin\n\n%%{\n#include <hdr_wasm.h>\n#include "hdr_wasm_q.h"\nint hdr_wasm_value (void) { return HDR_WASM_VALUE + HDR_WASM_Q_VALUE; }\n%%}\n\nend\n\nimplement main0 () = ()\n' > "$TMP/p/src/bin/web.bats"
 printf '#define HDR_NATIVE_VALUE 1\n' > "$HDR/hdr_native.h"
 printf '#define HDR_WASM_VALUE 1\n' > "$HDR/hdr_wasm.h"
+printf '#define HDR_NATIVE_Q_VALUE 1\n' > "$HDR/hdr_native_q.h"
+printf '#define HDR_WASM_Q_VALUE 1\n' > "$HDR/hdr_wasm_q.h"
 # a stand-in clang notes each compile of a keyed object (the runtimes are made at every build and are not counted)
 CC_LOG=$TMP/cc-runs
 mkdir -p "$TMP/shim"
@@ -53,21 +58,28 @@ if cmp -s "$TMP/tool.before.o" build/src/bin/tool_dats.o; then echo "FAIL: the n
 : > "$CC_LOG"
 build n3.log native
 [ ! -s "$CC_LOG" ] || { echo "FAIL: the build after the header changed ran cc"; cat "$CC_LOG"; exit 1; }
-[ -f build/src/bin/tool_dats.o.d ] || { echo "FAIL: no depfile beside the native object"; ls build/src/bin; exit 1; }
-grep -q 'hdr_native.h' build/src/bin/tool_dats.o.d || { echo "FAIL: the depfile does not list the header"; cat build/src/bin/tool_dats.o.d; exit 1; }
-# the depfile garbled, then gone: the object is made again, once
-printf 'garbled\n' > build/src/bin/tool_dats.o.d
-build n4.log native
-[ "$(runs 'bin/tool_dats.o ')" = 1 ] || { echo "FAIL: a garbled depfile did not make the object again"; cat "$CC_LOG"; exit 1; }
+[ ! -e build/src/bin/tool_dats.o.i ] || { echo "FAIL: the preprocessed text is left beside the native object"; exit 1; }
+# a header that did not exist at the last compile, earlier on the search path
+# than the one the compile found (bats#477): the stamp's C_INCLUDE_PATH is the
+# same, no listed header changed, and the object holds the old value
 : > "$CC_LOG"
-rm -f build/src/bin/tool_dats.o.d
-build n5.log native
-[ "$(runs 'bin/tool_dats.o ')" = 1 ] || { echo "FAIL: a missing depfile did not make the object again"; cat "$CC_LOG"; exit 1; }
+cp build/src/bin/tool_dats.o "$TMP/tool.beforeshadow.o"
+printf '#define HDR_NATIVE_VALUE 5\n' > "$EARLIER/hdr_native.h"
+build s0.log native
+[ "$(runs 'bin/tool_dats.o ')" = 1 ] || { echo "FAIL: a native header that shadows a listed one earlier on the search path did not make the bin's object again"; cat "$CC_LOG"; cat s0.log; exit 1; }
+if cmp -s "$TMP/tool.beforeshadow.o" build/src/bin/tool_dats.o; then echo "FAIL: the native object holds the shadowed header"; exit 1; fi
 : > "$CC_LOG"
-build n6.log native
-[ ! -s "$CC_LOG" ] || { echo "FAIL: the build after the depfile came back ran cc"; cat "$CC_LOG"; exit 1; }
-# a header the compile read is read and hashed once, whoever names it
-for h in $(grep -a '~ digested /' n6.log | sort | uniq -d); do echo "FAIL: $h was digested twice"; exit 1; done
+build s1.log native
+[ ! -s "$CC_LOG" ] || { echo "FAIL: the build after the shadowing header ran cc"; cat "$CC_LOG"; exit 1; }
+# the same for a quoted include, taken from the directory of the including file
+cp build/src/bin/tool_dats.o "$TMP/tool.beforeq.o"
+printf '#define HDR_NATIVE_Q_VALUE 7\n' > build/src/bin/hdr_native_q.h
+build s2.log native
+[ "$(runs 'bin/tool_dats.o ')" = 1 ] || { echo "FAIL: a native quoted header beside the including file did not make the bin's object again"; cat "$CC_LOG"; cat s2.log; exit 1; }
+if cmp -s "$TMP/tool.beforeq.o" build/src/bin/tool_dats.o; then echo "FAIL: the native object holds the shadowed quoted header"; exit 1; fi
+: > "$CC_LOG"
+build s3.log native
+[ ! -s "$CC_LOG" ] || { echo "FAIL: the build after the shadowing quoted header ran cc"; cat "$CC_LOG"; exit 1; }
 # wasm
 : > "$CC_LOG"
 build w0.log wasm
@@ -84,8 +96,7 @@ if cmp -s "$TMP/web.before.o" build/src/bin/web_dats.wasm.o; then echo "FAIL: th
 : > "$CC_LOG"
 build w3.log wasm
 [ ! -s "$CC_LOG" ] || { echo "FAIL: the wasm build after the header changed ran cc"; cat "$CC_LOG"; exit 1; }
-[ -f build/src/bin/web_dats.wasm.o.d ] || { echo "FAIL: no depfile beside the wasm object"; ls build/src/bin; exit 1; }
-grep -q 'hdr_wasm.h' build/src/bin/web_dats.wasm.o.d || { echo "FAIL: the wasm depfile does not list the header"; cat build/src/bin/web_dats.wasm.o.d; exit 1; }
+[ ! -e build/src/bin/web_dats.wasm.o.i ] || { echo "FAIL: the preprocessed text is left beside the wasm object"; exit 1; }
 # a wasm object is kept across the profiles, with its header
 PATH="$TMP/shim:$PATH" "$BATS" -v build --only release --only wasm > w4.log 2>&1 || { echo "FAIL: release wasm build"; cat w4.log; exit 1; }
 [ ! -s "$CC_LOG" ] || { echo "FAIL: a release wasm build made a wasm object again"; cat "$CC_LOG"; exit 1; }
@@ -93,4 +104,21 @@ PATH="$TMP/shim:$PATH" "$BATS" -v build --only release --only wasm > w4.log 2>&1
 # native key and a wasm key, and is digested once
 n=$(grep -ac '~ digested build/_bats_entry_web_dats.c' w3.log || true)
 [ "$n" = 1 ] || { echo "FAIL: the entry's C was digested $n times in one build, not once"; cat w3.log; exit 1; }
+# the same for wasm
+cp build/src/bin/web_dats.wasm.o "$TMP/web.beforeshadow.o"
+printf '#define HDR_WASM_VALUE 5\n' > "$EARLIER/hdr_wasm.h"
+build s4.log wasm
+[ "$(runs 'bin/web_dats.wasm.o ')" = 1 ] || { echo "FAIL: a wasm header that shadows a listed one earlier on the search path did not make the bin's object again"; cat "$CC_LOG"; cat s4.log; exit 1; }
+if cmp -s "$TMP/web.beforeshadow.o" build/src/bin/web_dats.wasm.o; then echo "FAIL: the wasm object holds the shadowed header"; exit 1; fi
+: > "$CC_LOG"
+build s5.log wasm
+[ ! -s "$CC_LOG" ] || { echo "FAIL: the wasm build after the shadowing header ran cc"; cat "$CC_LOG"; exit 1; }
+cp build/src/bin/web_dats.wasm.o "$TMP/web.beforeq.o"
+printf '#define HDR_WASM_Q_VALUE 7\n' > build/src/bin/hdr_wasm_q.h
+build s6.log wasm
+[ "$(runs 'bin/web_dats.wasm.o ')" = 1 ] || { echo "FAIL: a wasm quoted header beside the including file did not make the bin's object again"; cat "$CC_LOG"; cat s6.log; exit 1; }
+if cmp -s "$TMP/web.beforeq.o" build/src/bin/web_dats.wasm.o; then echo "FAIL: the wasm object holds the shadowed quoted header"; exit 1; fi
+: > "$CC_LOG"
+build s7.log wasm
+[ ! -s "$CC_LOG" ] || { echo "FAIL: the wasm build after the shadowing quoted header ran cc"; cat "$CC_LOG"; exit 1; }
 echo "build-headers: ok"
