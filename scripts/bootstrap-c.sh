@@ -17,8 +17,7 @@ OUT=${3:-bootstrap/c}
 ROOT=$(pwd)
 PATSHOME_DIR=${PATSHOME:-$HOME/.bats/ats2}
 
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../tests/keep-on-fail.sh"
 
 "$BATS" build --to-c "$TMP/c" --repository "$REPO" >/dev/null
 

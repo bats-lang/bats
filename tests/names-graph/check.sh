@@ -33,8 +33,7 @@
 # usage: tests/names-graph/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR BATS_COLD
 P=$TMP/app
 mkdir -p "$P/src/bin"

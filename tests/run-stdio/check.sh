@@ -6,8 +6,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$(cd "$2" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/p/src/bin"
 printf '[package]\nname = "runio"\nkind = "bin"\n\n[dependencies]\n"array" = ""\n"env" = ""\n"result" = ""\n"str" = ""\n' > "$TMP/p/bats.toml"
 cat > "$TMP/p/src/bin/runio.bats" <<'PROG'

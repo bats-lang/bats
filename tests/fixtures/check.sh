@@ -126,8 +126,7 @@
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR BATS_COMMIT BATS_COLD BATS_MEMO_DIR XDG_CACHE_HOME
 ONLY=${3:-}
 T_START=$(date +%s)

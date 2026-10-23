@@ -24,8 +24,7 @@ BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$2
 here=$(cd "$(dirname "$0")" && pwd)
 with_env() { "$BATS" with-env "$@"; }
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 # other tests assume these are unset, and the caller's must not leak in
 unset BATS_REPOSITORY BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD
 fail() { echo "FAIL: $*" >&2; exit 1; }

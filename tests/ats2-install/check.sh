@@ -28,8 +28,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 fail() { echo "FAIL: $1"; exit 1; }
 ok() { echo "ok   $1"; }
 name=$(sed -n 's/^#define ATS2_NAME "\(.*\)"$/\1/p' "$ROOT/src/ats2.bats")

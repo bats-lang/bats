@@ -9,8 +9,7 @@
 # usage: tests/wasm-prelude-con1/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 d=$TMP/p; mkdir -p "$d/src"
 printf '[package]\nname = "wc"\nkind = "lib"\n' > "$d/bats.toml"
 cat > "$d/src/lib.bats" <<'B'

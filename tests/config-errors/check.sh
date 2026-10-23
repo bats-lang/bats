@@ -9,8 +9,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 HERE=$(cd "$(dirname "$0")" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 n=0
 for body in '[package]\nkind = "lib"\n' '# c\n\n[package]\nkind = "bin"\nversion = "1"\n' \
   '[dependencies]\n' '' 'x = 1\n' '[package]\nname = 3\n' '[package]\nname = "a"\nkind = 5\n' \

@@ -15,8 +15,7 @@
 # usage: tests/locked-deps/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/repo"
 publish() { # <name> <commit date> [<used package>]
   rm -rf "$TMP/p"; mkdir -p "$TMP/p/src"

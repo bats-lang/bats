@@ -7,8 +7,7 @@
 # usage: tests/dep-module-use/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 p=$TMP/p
 mkdir -p "$p/src/bin" "$p/bats_modules/q/src" "$p/bats_modules/r/src"
 printf '[package]\nname = "mu"\nkind = "bin"\n' > "$p/bats.toml"

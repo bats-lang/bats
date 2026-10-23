@@ -7,8 +7,7 @@
 # usage: tests/init/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 fail() { echo "FAIL: $*"; exit 1; }
 
 mkdir -p "$TMP/myproj" && cd "$TMP/myproj"
