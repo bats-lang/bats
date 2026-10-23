@@ -1,7 +1,9 @@
 #!/bin/sh
 # keep-on-fail (bats-lang/bats#478): a script that sources tests/keep-on-fail.sh
-# keeps its temp directory when it exits non-zero, ends stderr with `kept: <path>`,
-# and removes the directory when it exits 0. Detail: .claude/rules/keep-on-fail.md.
+# keeps its temp directory when it exits non-zero, ends stderr with
+# `kept: <path> (<test>)`, and removes the directory when it exits 0. The directory's
+# name is neutral (`bats-tmp.XXXXXX`) and carries no word of the test's name.
+# Detail: .claude/rules/keep-on-fail.md.
 # usage: tests/keep-on-fail/check.sh [ignored arguments]
 set -eu
 HELPER=$(cd "$(dirname "$0")/.." && pwd)/keep-on-fail.sh
@@ -27,7 +29,13 @@ dir=$(cat "$TMP/fails.dir")
 [ "$(cat "$dir/log")" = evidence ] || fail "failing script's file is not in $dir"
 case $dir in "$KEPT"/*) ;; *) fail "$dir is not under BATS_KEPT_DIR $KEPT" ;; esac
 last=$(tail -n 1 "$TMP/fails.err")
-[ "$last" = "kept: $dir" ] || fail "last stderr line: $last"
+[ "$last" = "kept: $dir (scripts)" ] || fail "last stderr line: $last"
+base=$(basename "$dir")
+case $base in
+  *scripts*) fail "directory name $base carries the test's name (scripts)" ;;
+  bats-tmp.??????) ;;
+  *) fail "directory name $base is not bats-tmp.XXXXXX" ;;
+esac
 grep -q 'some output' "$TMP/fails.err" || fail "the script's own stderr is lost"
 
 # a script that fails under set -e (a command that fails, no exit) is kept too
@@ -42,7 +50,7 @@ BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/errexit.sh" 2> "$TMP/errexit.err" &&
 dir2=$(cat "$TMP/errexit.dir")
 [ -d "$dir2" ] || fail "set -e script's directory is gone"
 last=$(tail -n 1 "$TMP/errexit.err")
-[ "$last" = "kept: $dir2" ] || fail "set -e: no kept line"
+[ "$last" = "kept: $dir2 (scripts)" ] || fail "set -e: no kept line"
 
 # a script that passes: its directory is gone and nothing is said
 cat > "$TMP/scripts/passes.sh" <<EOF
@@ -56,25 +64,36 @@ dir3=$(cat "$TMP/passes.dir")
 [ ! -e "$dir3" ] || fail "passing script's directory $dir3 is still there"
 [ ! -s "$TMP/passes.err" ] || fail "passing script said: $(cat "$TMP/passes.err")"
 
-# KEEP_ON_FAIL_TEARDOWN runs on a pass and on a failure, before the directory goes
+# KEEP_ON_FAIL_TEARDOWN runs on a pass and on a failure, before the directory goes: the
+# hook records whether the directory still held the script's file when it ran
 cat > "$TMP/scripts/teardown-ok.sh" <<EOF
 set -eu
-teardown() { touch "$TMP/teardown.ok.ran"; }
+teardown() { [ -f "\$TMP/log" ] && echo "\$TMP" > "$TMP/teardown.ok.saw"; }
 KEEP_ON_FAIL_TEARDOWN=teardown
 . "$HELPER"
+echo data > "\$TMP/log"
+echo "\$TMP" > "$TMP/teardown.ok.dir"
 EOF
 BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/teardown-ok.sh" || fail "teardown script failed"
-[ -e "$TMP/teardown.ok.ran" ] || fail "teardown did not run on a pass"
+[ -e "$TMP/teardown.ok.saw" ] || fail "no teardown on a pass, or it ran after the directory went"
+dir5=$(cat "$TMP/teardown.ok.dir")
+[ ! -e "$dir5" ] || fail "the passing teardown script's directory $dir5 is still there"
 cat > "$TMP/scripts/teardown-bad.sh" <<EOF
 set -eu
-teardown() { touch "$TMP/teardown.bad.ran"; }
+teardown() { [ -f "\$TMP/log" ] && echo "\$TMP" > "$TMP/teardown.bad.saw"; }
 KEEP_ON_FAIL_TEARDOWN=teardown
 . "$HELPER"
+echo data > "\$TMP/log"
+echo "\$TMP" > "$TMP/teardown.bad.dir"
 exit 1
 EOF
 BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/teardown-bad.sh" 2> "$TMP/teardown-bad.err" &&
   fail "bad teardown script passed"
-[ -e "$TMP/teardown.bad.ran" ] || fail "teardown did not run on a failure"
+[ -e "$TMP/teardown.bad.saw" ] || fail "no teardown on a failure, or it ran after the directory"
+dir6=$(cat "$TMP/teardown.bad.dir")
+[ -f "$dir6/log" ] || fail "the failing teardown script's directory $dir6 was not kept"
+last=$(tail -n 1 "$TMP/teardown-bad.err")
+[ "$last" = "kept: $dir6 (scripts)" ] || fail "teardown failure: last stderr line: $last"
 
 # without BATS_KEPT_DIR the directory is under TMPDIR
 BATS_KEPT_DIR= TMPDIR=$TMP/other sh "$TMP/scripts/fails.sh" 2> "$TMP/other.err" || true
