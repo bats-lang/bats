@@ -62,6 +62,7 @@
 staload "helpers.sats"
 staload "cache.sats"
 staload "lock.sats"
+staload "recursion.sats"
 
 (* An int of any index: what a function takes or answers when its index is
    not needed outside it (the sort-less int the prelude writes int as is not
@@ -1453,6 +1454,8 @@ fn probe_in {cfg_cap:pos}{mv_cap:pos}{bv_f_cap:pos} {l:agz}{lm:agz}{lx:agz}{mv_l
   var md0 : $B.builder_v = $B.create()
   val have_dir = memo_dir_into(cfg, cfg_len, w, md0)
   val md = md0
+  (* scan memo: the unchanged files are not scanned again for each fixture (recursion.md) *)
+  val () = remember_scans()
 in
   (* what has no patsopt in it is checked first, as a check does it: a
      project that is refused there is not served from the memo *)
