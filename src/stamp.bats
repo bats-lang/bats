@@ -83,7 +83,8 @@ staload "_bats_inputs.sats"
 fn put_flags_common (st: !$B.builder_v >> $B.builder_v): void = let
   val () = bput_v(st, "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; ")
   val () = bput_v(st, "cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) ")
-  val () = bput_v(st, "-I$(PATSHOME)/ccomp/runtime; pre clang -E -P -o OUT.i IN [-O2 | -g -O0] ")
+  val () = bput_v(st, "-I$(PATSHOME)/ccomp/runtime; pre clang -E -P -frewrite-includes -o OUT.i ")
+  val () = bput_v(st, "IN [-O2 | -g -O0] ")
   val () = bput_v(st, "-I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; ")
 in end
 
@@ -99,8 +100,9 @@ fn put_flags_wasm (st: !$B.builder_v >> $B.builder_v): void = let
   val () = bput_v(st, "-D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include ")
   val () = bput_v(st, "build/_bats_wasm_runtime.h -I build/_bats_wasm_stubs ")
   val () = bput_v(st, "-Wno-implicit-function-declaration -Wno-int-conversion -c -o OUT IN; wasm ")
-  val () = bput_v(st, "pre the wasm cc with -E -P -o OUT.i in place of -c -o OUT; link wasm-ld ")
-  val () = bput_v(st, "--no-entry --allow-undefined --lto-O2 -z stack-size=1048576 ")
+  val () = bput_v(st, "pre the wasm cc with -E -P -frewrite-includes -o OUT.i in place of ")
+  val () = bput_v(st, "-c -o OUT; ")
+  val () = bput_v(st, "link wasm-ld --no-entry --allow-undefined --lto-O2 -z stack-size=1048576 ")
   val () = bput_v(st, "--initial-memory=16777216 --max-memory=268435456 --export=bats_dynload ")
   val () = bput_v(st, "--export=mainats_0_void --export=malloc -o OUT OBJECTS")
 in end

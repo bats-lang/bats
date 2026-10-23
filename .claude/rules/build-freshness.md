@@ -98,44 +98,52 @@ all the same: a header changed in place, or a header that did not exist at the l
 shadows a listed one earlier on the path. A key of the headers a compile found (a depfile) cannot
 see the second, since it holds what was found and not what was looked for; the text the preprocessor
 gives holds both, because any file it takes instead is in the text. So every object bats keys is
-preceded by `clang -E -P` with the object's own flags (`native_cc_argv`, `wasm_cc_argv` in
-`src/helpers.bats`: the same argument list as the compile, `-E -P` for `-c` and `<object>.i` for the
-output, so `-O`, `-D` and `-I` are the compile's), native (`run_cc`, the module, dependency and
-entry objects) and wasm (`run_wasm_cc`), and the key holds, after the C's line and before the
-stamp's, the size and then the sha256 of that text: sizes first as for the C, a different size is a
-changed object. A check makes the text again (`native_object_fresh`, `wasm_object_fresh`), digests
-it and removes it; a compile makes it before cc runs and the key written after cc passed digests
-that text and removes it, so a header changed while cc runs is a key that is not equal at the next
-check, never a stale hit. A text that cannot be made (cc fails) or read is a key that is not equal
-(the object is made again). The runtimes (`_bats_native_runtime.o`, `_bats_wasm_runtime.wasm.o`) are
-compiled at every build and have no key, so there is nothing for them to go stale.
+preceded by `clang -E -P -frewrite-includes` with the object's own flags (`native_cc_argv`,
+`wasm_cc_argv` in `src/helpers.bats`: the same argument list as the compile,
+`-E -P -frewrite-includes` for `-c` and `<object>.i` for the output, so `-O`, `-D` and `-I` are the
+compile's), native (`run_cc`, the module, dependency and entry objects) and wasm (`run_wasm_cc`),
+and the key holds, after the C's line and before the stamp's, the size and then the sha256 of that
+text: sizes first as for the C, a different size is a changed object. A check makes the text again
+(`native_object_fresh`, `wasm_object_fresh`), digests it and removes it; a compile makes it before
+cc runs and the key written after cc passed digests that text and removes it, so a header changed
+while cc runs is a key that is not equal at the next check, never a stale hit. A text that cannot be
+made (cc fails) or read is a key that is not equal (the object is made again). The runtimes
+(`_bats_native_runtime.o`, `_bats_wasm_runtime.wasm.o`) are compiled at every build and have no key,
+so there is nothing for them to go stale.
 
-**The key holds no directory of the toolchain.** Without `-P`, the text has a line marker (`# 12
-"path"`) for every header with the absolute path it was found at: the ATS2 home (`-I$(PATSHOME)`)
-and the C compiler's install directory (its resource directory, found beside the binary). A `build/`
-made where those are elsewhere, with the same files, would then have a key that differs and every
-object made again, where the stamp keeps it (stamp.md: no line of it holds a path). `-P` writes the
-text without the markers, and no path is left in the text (a grep of the text of a bats module's C
-for an absolute path finds none), so the key is the same wherever the toolchain is. A header still
-changes the text when its content does, whether it is changed in place or shadows another; a
-shadowing header with the same bytes as the one it shadows gives the same text and so the same
-object, which is kept rightly. What `-P` costs is the line numbers of a header, which the object's
-debug info (`-g`, native debug objects) records: a header changed only in comments or blank lines
-can give the same text and keeps its object, whose debug info then names the old lines, and the C
-compiler's own warnings are not in the key. Alternatives: dropping only the marker lines from the
-digested text needs bats to read and filter the text (a second pass over megabytes in bats, to get
-what the preprocessor already gives); `-ffile-prefix-map` rewrites the paths of the compile, not of
-the preprocessor's markers, and would change the object's own flags. The test is
-`tests/build-toolchain-path`.
+**The text holds every line of every header, and no path.** The key changes whenever the object a
+clean build would write changes, debug info included: a native debug object (`-g`) records the line
+of each header function and type, so a header changed only in a comment or a blank line, which moves
+those lines, must make the object again. `-frewrite-includes` writes the source of every file the
+compile reads, comments and blank lines as they are, with each `#if` marked with the outcome it had
+(`evaluated` or `disabled`, so a `__has_include` that now finds a file is in the text), and `-P`
+drops the line markers (`# 12 "path"`), the only lines of the preprocessor's output that hold an
+absolute path: the ATS2 home (`-I$(PATSHOME)`) and the C compiler's install directory (its resource
+directory, found beside the binary). `-P` alone is not enough: it writes a gap of more than eight
+lines as one newline, so a longer comment is not in its text. The text names no directory of the
+toolchain (a grep of it for the ATS2 home or the compiler's directory finds none), so a `build/`
+made where those are elsewhere, with the same files, keeps its objects, as the stamp keeps it
+(stamp.md: no line of it holds a path). The key is of what the compile reads and not of where the
+toolchain is; a shadowing header with the same bytes as the one it shadows gives the same text and
+so the same object, which is kept. The C compiler's own warnings are not in the key. Alternatives:
+dropping only the marker lines from the markers' text needs bats to read and filter the text (a
+second pass over megabytes in bats, to get what the preprocessor already gives);
+`-ffile-prefix-map`, `-fmacro-prefix-map` and `-fdebug-prefix-map` rewrite the paths the compile
+writes (`__FILE__`, debug info) and not the markers of `-E`'s output, which clang 18 leaves as
+found;
+keeping the markers and hashing the text of the headers read in a depfile would add a depfile
+parser (garbled and missing files, escaped names) for what `-frewrite-includes` gives in one run.
 
 What comparable tools do: ccache's preprocessor mode and sccache hash the preprocessed output,
-ccache with the line markers, and its `base_dir` option rewrites absolute paths in them so that a
-build tree at another path is not a miss; its direct and depend modes hash the headers a compile
-read (a manifest) and fall back to the preprocessor when one is missing or differs, because a
-manifest of what was found cannot see a file that now shadows one. The tests: `tests/build-headers`
-(native and wasm header changed in place with its mtime put back, a new header earlier on
-`C_INCLUDE_PATH` and a new quoted header beside the including file, native and wasm, no cc and no
-preprocessed text left in a no-change run, a wasm object kept across profiles),
+ccache with the line markers (its `-g` objects need them), and its `base_dir` option rewrites
+absolute paths in them so that a build tree at another path is not a miss; its direct and depend
+modes hash the headers a compile read (a manifest) and fall back to the preprocessor when one is
+missing or differs, because a manifest of what was found cannot see a file that now shadows one.
+The tests: `tests/build-headers` (native and wasm header changed in place with its mtime put back, a
+header changed only in twelve comment lines, whose native `-g` object is made again and is the one a
+clean build writes, and whose wasm object (no debug info) is made again with the same bytes, a new
+header earlier on `C_INCLUDE_PATH` and a new quoted header beside the including file, native and
+wasm, no cc and no preprocessed text left in a no-change run, a wasm object kept across profiles),
 `tests/build-toolchain-path` (the ATS2 home and a copy of the C compiler with its resource directory
 moved to other directories: no object is made again and `build/` is kept, a shadowing header with
 other bytes still makes the object again, one with the same bytes does not, and a control with a

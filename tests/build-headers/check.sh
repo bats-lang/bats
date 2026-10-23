@@ -11,7 +11,12 @@
 # search path is in the stamp, so its value is the same before and after:
 # only what the preprocessor now finds differs. A generated C is read and
 # hashed once for the native and the wasm object of a build (-v says
-# `~ digested <path>`).
+# `~ digested <path>`). The text keeps every line of every header
+# (-frewrite-includes): a header changed only in a comment, a line added, gives
+# another text, so a -g native object, whose debug info names the lines of
+# a header's function, is made again and is the object a clean build writes.
+# A wasm object has no debug info (no -g): its object is the same bytes, and it is
+# made again all the same, since the key is of the lines and not of the object.
 # usage: tests/build-headers/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -26,19 +31,23 @@ printf '[package]\nname = "hd"\nkind = "bin"\nunsafe = true\n' > "$TMP/p/bats.to
 NATIVE_SRC=$TMP/p/src/bin/tool.bats
 printf '#target native\n\n$UNSAFE begin\n\n%%{\n' > "$NATIVE_SRC"
 printf '#include <hdr_native.h>\n#include "hdr_native_q.h"\n' >> "$NATIVE_SRC"
+printf '#include <hdr_native_lines.h>\n' >> "$NATIVE_SRC"
 printf 'int hdr_native_value (void)\n' >> "$NATIVE_SRC"
-printf '{ return HDR_NATIVE_VALUE + HDR_NATIVE_Q_VALUE; }\n' >> "$NATIVE_SRC"
+printf '{ return HDR_NATIVE_VALUE + HDR_NATIVE_Q_VALUE + hdr_native_lines (); }\n' >> "$NATIVE_SRC"
 printf '%%}\n\nend\n\nimplement main0 () = ()\n' >> "$NATIVE_SRC"
 WASM_SRC=$TMP/p/src/bin/web.bats
 printf '#target wasm binary\n\n$UNSAFE begin\n\n%%{\n' > "$WASM_SRC"
 printf '#include <hdr_wasm.h>\n#include "hdr_wasm_q.h"\n' >> "$WASM_SRC"
+printf '#include <hdr_wasm_lines.h>\n' >> "$WASM_SRC"
 printf 'int hdr_wasm_value (void)\n' >> "$WASM_SRC"
-printf '{ return HDR_WASM_VALUE + HDR_WASM_Q_VALUE; }\n' >> "$WASM_SRC"
+printf '{ return HDR_WASM_VALUE + HDR_WASM_Q_VALUE + hdr_wasm_lines (); }\n' >> "$WASM_SRC"
 printf '%%}\n\nend\n\nimplement main0 () = ()\n' >> "$WASM_SRC"
 printf '#define HDR_NATIVE_VALUE 1\n' > "$HDR/hdr_native.h"
 printf '#define HDR_WASM_VALUE 1\n' > "$HDR/hdr_wasm.h"
 printf '#define HDR_NATIVE_Q_VALUE 1\n' > "$HDR/hdr_native_q.h"
 printf '#define HDR_WASM_Q_VALUE 1\n' > "$HDR/hdr_wasm_q.h"
+printf 'static inline int hdr_native_lines (void) { return 3; }\n' > "$HDR/hdr_native_lines.h"
+printf 'static inline int hdr_wasm_lines (void) { return 3; }\n' > "$HDR/hdr_wasm_lines.h"
 # a stand-in clang notes each compile of a keyed object (not the runtimes, made at every build)
 CC_LOG=$TMP/cc-runs
 mkdir -p "$TMP/shim"
@@ -113,6 +122,29 @@ differs "$TMP/tool.beforeq.o" build/src/bin/tool_dats.o \
 : > "$CC_LOG"
 build s3.log native
 no_cc "the build after the shadowing quoted header"
+# a header changed only in a comment, twelve lines added (bats#477; the -P text of a gap of
+# more than eight lines is one line): the code is the same and the
+# lines of the function are not, which the debug info of the -g object holds (the quoted header
+# beside the C is taken away first, so a clean build below sees the same headers)
+rm -f build/src/bin/hdr_native_q.h
+build l3.log native
+: > "$CC_LOG"
+cp build/src/bin/tool_dats.o "$TMP/tool.beforelines.o"
+{ for i in 1 2 3 4 5 6 7 8 9 10 11 12; do printf '// only a comment, line %s\n' $i; done
+  printf 'static inline int hdr_native_lines (void) { return 3; }\n'; } > "$HDR/hdr_native_lines.h"
+build l0.log native
+again 'bin/tool_dats.o ' l0.log "a native header changed only in a comment"
+differs "$TMP/tool.beforelines.o" build/src/bin/tool_dats.o \
+  "the native object holds the lines of the header before the comment"
+: > "$CC_LOG"
+build l1.log native
+no_cc "the build after the comment"
+# and it is the object a clean build writes
+cp build/src/bin/tool_dats.o "$TMP/tool.commented.o"
+rm -rf build
+build l2.log native
+cmp -s "$TMP/tool.commented.o" build/src/bin/tool_dats.o ||
+  { echo "FAIL: the native object kept after a comment is not a clean build's"; exit 1; }
 # wasm
 : > "$CC_LOG"
 build w0.log wasm
@@ -131,6 +163,18 @@ differs "$TMP/web.before.o" build/src/bin/web_dats.wasm.o "the wasm object holds
 build w3.log wasm
 no_cc "the wasm build after the header changed"
 absent build/src/bin/web_dats.wasm.o.i "the preprocessed text is left beside the wasm object"
+# the same comment in a wasm header: made again, and the same bytes (no debug info)
+: > "$CC_LOG"
+cp build/src/bin/web_dats.wasm.o "$TMP/web.beforelines.o"
+{ for i in 1 2 3 4 5 6 7 8 9 10 11 12; do printf '// only a comment, line %s\n' $i; done
+  printf 'static inline int hdr_wasm_lines (void) { return 3; }\n'; } > "$HDR/hdr_wasm_lines.h"
+build w5.log wasm
+again 'bin/web_dats.wasm.o ' w5.log "a wasm header changed only in a comment"
+cmp -s "$TMP/web.beforelines.o" build/src/bin/web_dats.wasm.o ||
+  { echo "FAIL: a comment changed the wasm object, which has no debug info"; exit 1; }
+: > "$CC_LOG"
+build w6.log wasm
+no_cc "the wasm build after the comment"
 # a wasm object is kept across the profiles, with its header
 PATH="$TMP/shim:$PATH" "$BATS" -v build --only release --only wasm > w4.log 2>&1 ||
   { echo "FAIL: release wasm build"; cat w4.log; exit 1; }

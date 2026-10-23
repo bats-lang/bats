@@ -30,8 +30,9 @@ for the mark, `PATSHOME` written `$(PATSHOME)`, both profiles in one template si
 both) and `mark` (the target and mode digit of `build/.bats_target`). No line holds a path, so a
 `build/` copied to another directory, or made on another machine with the same bats, ATS2 and C
 compiler, keeps (bats-lang/bats#250 made the C path-independent), and so does its objects: the key
-of an object holds the text of its C preprocessed with `-P`, which has no line markers and so names
-neither the ATS2 home nor the C compiler's install directory (build-freshness.md,
+of an object holds the text of its C preprocessed with `-P -frewrite-includes` (every line of every
+header, and no line marker) and so names neither the ATS2 home nor the C compiler's install
+directory (build-freshness.md,
 `tests/build-toolchain-path`). After `cache_swap` has put the mark's `build/` in place (from its
 stash if it had been put aside: every stash carries the stamp of whoever made it, and is judged when
 it is swapped in), `check`, `build`, `test` and `run`'s build compare the stamp they would write

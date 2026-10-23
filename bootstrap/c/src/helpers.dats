@@ -2862,12 +2862,15 @@ end
 fn bput_when {sn:nat} (b: !$B.builder_v >> $B.builder_v, on: bool, s: string sn): void =
   if on then bput_v(b, s) else ()
 
-(* -P for the preprocess: no line markers, no toolchain path in the text (preprocess keyword) *)
+(* The preprocess keeps every source line and no line marker (preprocess keyword): -P drops the
+   markers, which name the toolchain, and -frewrite-includes writes each header's source as it is *)
 fn pre_flags (pre: bool): $L.listv($P.arg_entry) =
   if pre then let
     var bp = $B.create()
     val () = bput_v(bp, "-P")
-  in $L.list_vt_cons(mk_arg(bp), $L.list_vt_nil()) end
+    var br = $B.create()
+    val () = bput_v(br, "-frewrite-includes")
+  in $L.list_vt_cons(mk_arg(bp), $L.list_vt_cons(mk_arg(br), $L.list_vt_nil())) end
   else $L.list_vt_nil()
 
 fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
@@ -2907,7 +2910,7 @@ fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524
   val () = bput_v(b7, "-I")
   val () = copy_to_builder_v(ph, 0, phlen, 512, b7)
   val () = bput_v(b7, "/ccomp/runtime")
-  (* argv: clang -c -o <out> <in> [opt_flags] -I<ph>; the preprocess: -E -P (preprocess keyword) *)
+  (* argv: clang -c -o <out> <in> [opt_flags] -I<ph>; the preprocess: -E -P -frewrite-includes *)
   val tail = $L.list_vt_cons(mk_arg(b6), $L.list_vt_cons(mk_arg(b7), $L.list_vt_nil()))
   fun append_vt {m:nat} .<m>.
     (xs: $L.list_vt($P.arg_entry, m),
@@ -2949,7 +2952,7 @@ implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
   var wc20 = $B.create()
   val ic = in_len - 1
   val () = copy_to_builder_v(in_bv, 0, ic, in_len, wc20)
-  (* argv: clang --target=wasm32 ... -c -o <out> <in>; the preprocess: -E -P (preprocess keyword) *)
+  (* argv: clang --target=wasm32 ... -c -o <out> <in>; the preprocess: -E -P -frewrite-includes *)
   in $L.list_vt_cons(mk_arg(wc1), $L.list_vt_cons(mk_arg(wc2),
     $L.list_vt_cons(mk_arg(wc3), $L.list_vt_cons(mk_arg(wc4),
     $L.list_vt_cons(mk_arg(wc5), $L.list_vt_cons(mk_arg(wc6),

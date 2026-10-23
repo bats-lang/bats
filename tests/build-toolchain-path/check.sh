@@ -1,6 +1,7 @@
 #!/bin/sh
 # An object's key does not hold the directories of the toolchain (bats-lang/bats#477,
-# stamp.md): the preprocessed text it digests is made with -P, which writes no line markers,
+# stamp.md): the preprocessed text it digests is made with -P (no line markers),
+# and -frewrite-includes (every line of every header as it is),
 # and the markers are the only place the text names the ATS2 home or the C compiler's install
 # directory. So a build/ made where the ATS2 home and the C compiler are in one directory
 # keeps its objects when they are in another (the same files), the way the stamp keeps it,
@@ -120,13 +121,16 @@ kept "$TMP/same.n.log" "a build with nothing changed"
 kept "$TMP/same.w.log" "a build with nothing changed"
 
 # The text names no directory of the toolchain, where the text with line markers does
-for flags in -P ""; do
+for name in dropped kept; do
+  if [ $name = kept ]; then flags="-P -frewrite-includes"; else flags="-frewrite-includes"; fi
   (cd "$TMP/pn" && "$TMP/a/llvm/bin/clang" -E $flags -I"$TMP/a/home/.bats/ats2" \
-    -I"$TMP/a/home/.bats/ats2/ccomp/runtime" -o "$TMP/text$flags.i" build/src/bin/tool_dats.c)
+    -I"$TMP/a/home/.bats/ats2/ccomp/runtime" -o "$TMP/text-$name.i" build/src/bin/tool_dats.c)
 done
-! grep -q -e "$TMP/a" "$TMP/text-P.i" || fail "the text (-P) names a directory of the toolchain"
-grep -q -e "$TMP/a/home" "$TMP/text.i" || fail "the text with line markers names no ATS2 home"
-grep -q -e "$TMP/a/llvm" "$TMP/text.i" || fail "the text with markers names no compiler directory"
+! grep -q -e "$TMP/a" "$TMP/text-kept.i" || fail "the text (-P) names a directory of the toolchain"
+grep -q -e "$TMP/a/home" "$TMP/text-dropped.i" ||
+  fail "the text with line markers names no ATS2 home"
+grep -q -e "$TMP/a/llvm" "$TMP/text-dropped.i" ||
+  fail "the text with markers names no compiler directory"
 
 # The ATS2 home and the C compiler's directory moved: the same files in other directories
 mkdir -p "$TMP/b"
