@@ -293,7 +293,10 @@ quiet r7.log "the build after those"
 CC_LOG=$TMP/wasm-cc-runs
 mkdir -p "$TMP/shim"
 REAL_CLANG=$(command -v clang)
-printf '#!/bin/sh\ncase "$*" in *-o\ build/_bats_wasm_runtime*) ;; *-c\ -o\ *.wasm.o\ *) echo "$*" >> "%s";; esac\nexec "%s" "$@"\n' "$CC_LOG" "$REAL_CLANG" > "$TMP/shim/clang"
+printf '#!/bin/sh\ncase "$*" in\n' > "$TMP/shim/clang"
+printf '  *-o\\ build/_bats_wasm_runtime*) ;;\n' >> "$TMP/shim/clang"
+printf '  *-c\\ -o\\ *.wasm.o\\ *) echo "$*" >> "%s";;\n' "$CC_LOG" >> "$TMP/shim/clang"
+printf 'esac\nexec "%s" "$@"\n' "$REAL_CLANG" >> "$TMP/shim/clang"
 chmod +x "$TMP/shim/clang"
 : > "$CC_LOG"
 PATH="$TMP/shim:$PATH" run w0.log build --only release --only wasm

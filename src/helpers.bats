@@ -1267,7 +1267,8 @@ implement stamp_digest_hashes(b) = let
 in put_char_v(b, 10) end
 
 (* <out>.i for the NUL-terminated path out (preprocess keyword) *)
-fn pre_file_path {lo:agz}{n:pos}{m:nat | m <= n} (out_bv: !$A.borrow(byte, lo, n), m: int m): $B.builder_v = let
+fn pre_file_path {lo:agz}{n:pos}{m:nat | m <= n}
+  (out_bv: !$A.borrow(byte, lo, n), m: int m): $B.builder_v = let
   var kb : $B.builder_v = $B.create()
   val z = find_null_bv_from(out_bv, 0, m)
   val () = copy_to_builder_v(out_bv, 0, z, m, kb)
@@ -1276,7 +1277,8 @@ fn pre_file_path {lo:agz}{n:pos}{m:nat | m <= n} (out_bv: !$A.borrow(byte, lo, n
 in kb end
 
 (* Removes the preprocessed text of the object out (preprocess keyword) *)
-fn pre_remove {lo:agz}{n:pos}{m:nat | m <= n; m <= 524288} (out_bv: !$A.borrow(byte, lo, n), m: int m): void = let
+fn pre_remove {lo:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (out_bv: !$A.borrow(byte, lo, n), m: int m): void = let
   val @(pa, pl) = $B.into_arr(pre_file_path(out_bv, m))
   val @(fz_p, bv_p) = $A.freeze<byte>(pa)
   val () = remove_output_m(bv_p, pl, pl)
@@ -1284,7 +1286,8 @@ fn pre_remove {lo:agz}{n:pos}{m:nat | m <= n; m <= 524288} (out_bv: !$A.borrow(b
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in end
 
-#pub fn input_digest_sizes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+#pub fn input_digest_sizes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  {np:pos}{pm:nat | pm <= np; pm <= 524288}
   (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
    pre_bv: !$A.borrow(byte, lp, np), pm: int pm, b: !$B.builder_v >> $B.builder_v): bool
 
@@ -1297,7 +1300,8 @@ implement input_digest_sizes(kind, in_bv, m, pre_bv, pm, b) = let
   val () = stamp_digest_sizes(b)
 in c_ok && z >= 0 end
 
-#pub fn input_digest_hashes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+#pub fn input_digest_hashes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  {np:pos}{pm:nat | pm <= np; pm <= 524288}
   (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
    pre_bv: !$A.borrow(byte, lp, np), pm: int pm, b: !$B.builder_v >> $B.builder_v): bool
 
@@ -1310,7 +1314,8 @@ implement input_digest_hashes(kind, in_bv, m, pre_bv, pm, b) = let
 in c_ok && pre_ok end
 
 (* Sizes and then hashes, for a caller that has no use for the sizes alone *)
-#pub fn input_digest {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+#pub fn input_digest {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  {np:pos}{pm:nat | pm <= np; pm <= 524288}
   (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
    pre_bv: !$A.borrow(byte, lp, np), pm: int pm, b: !$B.builder_v >> $B.builder_v): bool
 
@@ -1322,7 +1327,8 @@ in if sized then input_digest_hashes(kind, in_bv, m, pre_bv, pm, b) else false e
    the input gives now (see the comment above). Every object kind comes
    through here with its own key_of. *)
 #pub fn key_fresh {lph:agz}
-  (kind: key_of, ph: !$A.borrow(byte, lph, 512), phlen: int, out_b: $B.builder_v, in_b: $B.builder_v): bool
+  (kind: key_of, ph: !$A.borrow(byte, lph, 512), phlen: int,
+   out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 implement key_fresh(kind, ph, phlen, out_b, in_b) = let
   val @(oa, ol) = $B.into_arr(out_b)
@@ -1332,7 +1338,7 @@ implement key_fresh(kind, ph, phlen, out_b, in_b) = let
   val there = file_exists_m(bv_o, ol)
   val @(ka, kl) = $B.into_arr(key_file_path(bv_o, ol))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
-  (* what the compile would read now: the preprocessed text of the C with the object's flags, so a header that shadows another is in it (preprocess keyword) *)
+  (* the text the compile would read now, so a shadowing header is in it (preprocess keyword) *)
   val _ = (if there then (case+ kind of
     | KeyOfWasmObject() => preprocess_wasm(bv_i, il, bv_o, ol)
     | KeyOfDebugObject() => preprocess_native(ph, phlen, bv_o, ol, bv_i, il, Debug())
@@ -1348,7 +1354,8 @@ implement key_fresh(kind, ph, phlen, out_b, in_b) = let
   val same_sizes = (if there && sized then file_has_prefix(bv_k, kl, bv_sz, slen) else false): bool
   var hb : $B.builder_v = $B.create()
   val () = (if same_sizes then copy_to_builder_v(bv_sz, 0, slen, slen, hb) else ())
-  val hashed = (if same_sizes then input_digest_hashes(kind, bv_i, il, bv_pre, pl, hb) else false): bool
+  val hashed = (if same_sizes
+    then input_digest_hashes(kind, bv_i, il, bv_pre, pl, hb) else false): bool
   val @(ha2, hlen) = $B.into_arr(hb)
   val @(fz_h, bv_h) = $A.freeze<byte>(ha2)
   val result = (if hashed then file_has_bytes_m(bv_k, kl, bv_h, hlen) else false): bool
@@ -1395,11 +1402,13 @@ in end
    object's does not (bats-lang/bats#320). Written and read by key_record
    and key_fresh alone. *)
 #pub fn native_object_fresh {lph:agz}
-  (rel: profile, ph: !$A.borrow(byte, lph, 512), phlen: int, out_b: $B.builder_v, in_b: $B.builder_v): bool
+  (rel: profile, ph: !$A.borrow(byte, lph, 512), phlen: int,
+   out_b: $B.builder_v, in_b: $B.builder_v): bool
 
-implement native_object_fresh(rel, ph, phlen, out_b, in_b) = key_fresh(object_key(rel), ph, phlen, out_b, in_b)
+implement native_object_fresh(rel, ph, phlen, out_b, in_b) =
+  key_fresh(object_key(rel), ph, phlen, out_b, in_b)
 
-(* A wasm object's compile takes no PATSHOME: the array is only the type's *)
+(* A wasm object's key (preprocess keyword): its compile takes no PATSHOME *)
 #pub fn wasm_object_fresh (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 implement wasm_object_fresh(out_b, in_b) = let
@@ -2828,11 +2837,20 @@ in
   | ~$R.err(_) => ~1
 end
 
-(* s appended to b when on *)
+(* s appended to b when on: the preprocess names its output <out>.i (preprocess keyword) *)
 fn bput_when {sn:nat} (b: !$B.builder_v >> $B.builder_v, on: bool, s: string sn): void =
   if on then bput_v(b, s) else ()
 
-fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
+(* -P for the preprocess: no line markers, no toolchain path in the text (preprocess keyword) *)
+fn pre_flags (pre: bool): $L.listv($P.arg_entry) =
+  if pre then let
+    var bp = $B.create()
+    val () = bput_v(bp, "-P")
+  in $L.list_vt_cons(mk_arg(bp), $L.list_vt_nil()) end
+  else $L.list_vt_nil()
+
+fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
@@ -2868,7 +2886,7 @@ fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524
   val () = bput_v(b7, "-I")
   val () = copy_to_builder_v(ph, 0, phlen, 512, b7)
   val () = bput_v(b7, "/ccomp/runtime")
-  (* argv: clang -c -o <out> <in> [opt_flags] -I<ph> -I<ph>/ccomp/runtime; the preprocess (preprocess keyword) is -E and <out>.i, the rest the same *)
+  (* argv: clang -c -o <out> <in> [opt_flags] -I<ph>; the preprocess: -E -P (preprocess keyword) *)
   val tail = $L.list_vt_cons(mk_arg(b6), $L.list_vt_cons(mk_arg(b7), $L.list_vt_nil()))
   fun append_vt {m:nat} .<m>.
     (xs: $L.list_vt($P.arg_entry, m),
@@ -2878,7 +2896,7 @@ fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524
     | ~$L.list_vt_cons(x, tl) => $L.list_vt_cons(x, append_vt(tl, ys))
 in $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
-    $L.list_vt_cons(mk_arg(b5), append_vt(opt_args, tail)))))) end
+    $L.list_vt_cons(mk_arg(b5), append_vt(pre_flags(pre), append_vt(opt_args, tail))))))) end
 
 #pub fn wasm_cc_argv {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <= no}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
@@ -2910,7 +2928,7 @@ implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
   var wc20 = $B.create()
   val ic = in_len - 1
   val () = copy_to_builder_v(in_bv, 0, ic, in_len, wc20)
-  (* argv: clang --target=wasm32 ... -c -o <out> <in>; the preprocess (preprocess keyword) is -E and <out>.i, the rest the same *)
+  (* argv: clang --target=wasm32 ... -c -o <out> <in>; the preprocess: -E -P (preprocess keyword) *)
   in $L.list_vt_cons(mk_arg(wc1), $L.list_vt_cons(mk_arg(wc2),
     $L.list_vt_cons(mk_arg(wc3), $L.list_vt_cons(mk_arg(wc4),
     $L.list_vt_cons(mk_arg(wc5), $L.list_vt_cons(mk_arg(wc6),
@@ -2921,9 +2939,10 @@ implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
     $L.list_vt_cons(mk_arg(wc15), $L.list_vt_cons(mk_arg(wc16),
     $L.list_vt_cons(mk_arg(wc17), $L.list_vt_cons(mk_arg(wc18),
     $L.list_vt_cons(mk_arg(wc19), $L.list_vt_cons(mk_arg(wc20),
-    $L.list_vt_nil())))))))))))))))))))) end
+    pre_flags(pre))))))))))))))))))))) end
 
-#pub fn preprocess_wasm {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524288}{om:nat | om <= no; om <= 524288}
+#pub fn preprocess_wasm {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524288}
+  {om:nat | om <= no; om <= 524288}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om): int
 
@@ -2937,14 +2956,16 @@ implement preprocess_wasm(in_bv, in_len, out_bv, out_len) = let
   val () = $A.barr_free($A.barr_thaw(fz_exec))
 in rc end
 
-#pub fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
+#pub fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    rel: profile): int
 
-(* The text clang's preprocessor gives for the C of an object, in <out>.i, with the object's own flags (preprocess keyword): the key of the object holds its digest *)
-#pub fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
+(* The preprocessed text of an object's C in <out>.i, digested in its key (preprocess keyword) *)
+#pub fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,

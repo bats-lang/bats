@@ -10,7 +10,43 @@ paths:
 
 # Build freshness
 
-A build reuses what an earlier build produced when it is still fresh; the Rust bats rewrote every `.sats` and `.dats` on every build, so its cache (input mtime equal to the recorded one) reran patsopt on everything. A `.bats` is emitted again only when its bytes are not those its `.dats` was emitted from (their sha256, kept in `<dats>.src`; an mtime cannot tell, since a relocked dependency's files keep their archive's older mtimes, `tests/source-replaced`); its `.sats` is written only when its bytes change, and then `build/.sats_changed` is written. Nothing reads a time to decide what is fresh (bats#254: a build and its inputs are made in one whole second, a stash is moved with its mtimes, a file is touched or replaced with an old time; each gave a build that did the work again, or not at all). A module's C and its object each have a key beside them, `<C>.key` and `<object>.key`, written after the tool passed and removed before it runs: for a C the check memo's key (check-memo.md: the sizes and sha256s of the files patsopt read for the module, its `.dats` and every `.sats`, `.hats` and staloaded dependency `.dats` it reaches, and the names of the project's `.sats` and `.hats`), and in a build also `build/.sats_changed` (bats#323: a template body changed in a dependency's `.dats`, its `.sats` the same, is instantiated again in the C of every module that staloads that `.dats`, which the key of the module's own `.dats` and the stamp did not see, so a dependent's C and object kept the old body), for an object the sha256 of its C, and for a native object also a line naming its profile, debug or release (bats#320: the two profiles share `build/`, a native object's cc flags are the profile's, `-g -O0` or `-O2`, and a release object was reused by a debug build and the reverse), so a build of the other profile makes the object again, and the headers its compile read (below); the C's key and a wasm object's name no profile, since patsopt's C is the same in both and the wasm cc flags are fixed (`-O2`, no `-g`), so a wasm object is kept across debug and release builds (the other flags, the target and the mode are in `build/.bats_stamp`, which drops a `build/` that differs). An output is fresh when it is there and its key equals the one its inputs give now; the sizes are compared first, and a different size is a changed file with nothing hashed. A key that is missing, short or garbled makes its output again. `build/.sats_changed` is written whenever an emitted `.sats` changes, with new bytes each time (the sha256 of what it held), so in a build a change to a `.sats` rebuilds every module's C, as before (a check and a test do not read it: see check-memo.md), and a body-only change rebuilds its own module and the modules that staload its `.dats` (a dependent of a library), no others (`tests/sats-change`, `tests/build-content-keys`). The same keys serve the dependencies under a namespace (bridge, dom), the extra modules of a dependency, the wasm objects, the binary's own module and the entry's object (the entry's C is made again by every build, and an object is made again only when that C differs). The cost: every no-change check reads and hashes each module's `.dats`, each C once, and each header an object's depfile lists, once (the run's digest table below); the tests are `tests/build-content-keys`, which plays the no-change runs after a cold one with no settling, every file of `build/` given a time in the future and long ago, a changed body of the same size, a changed `.sats`, and a garbled or missing key.
+A build reuses what an earlier build produced when it is still fresh; the Rust bats rewrote every
+`.sats` and `.dats` on every build, so its cache (input mtime equal to the recorded one) reran
+patsopt on everything. A `.bats` is emitted again only when its bytes are not those its `.dats` was
+emitted from (their sha256, kept in `<dats>.src`; an mtime cannot tell, since a relocked
+dependency's files keep their archive's older mtimes, `tests/source-replaced`); its `.sats` is
+written only when its bytes change, and then `build/.sats_changed` is written. Nothing reads a time
+to decide what is fresh (bats#254: a build and its inputs are made in one whole second, a stash is
+moved with its mtimes, a file is touched or replaced with an old time; each gave a build that did
+the work again, or not at all). A module's C and its object each have a key beside them, `<C>.key`
+and `<object>.key`, written after the tool passed and removed before it runs: for a C the check
+memo's key (check-memo.md: the sizes and sha256s of the files patsopt read for the module, its
+`.dats` and every `.sats`, `.hats` and staloaded dependency `.dats` it reaches, and the names of the
+project's `.sats` and `.hats`), and in a build also `build/.sats_changed` (bats#323: a template body
+changed in a dependency's `.dats`, its `.sats` the same, is instantiated again in the C of every
+module that staloads that `.dats`, which the key of the module's own `.dats` and the stamp did not
+see, so a dependent's C and object kept the old body), for an object the sha256 of its C, and for a
+native object also a line naming its profile, debug or release (bats#320: the two profiles share
+`build/`, a native object's cc flags are the profile's, `-g -O0` or `-O2`, and a release object was
+reused by a debug build and the reverse), so a build of the other profile makes the object again,
+and the preprocessed text of its C (below); the C's key and a wasm object's name no profile, since
+patsopt's C is the same in both and the wasm cc flags are fixed (`-O2`, no `-g`), so a wasm object
+is kept across debug and release builds (the other flags, the target and the mode are in
+`build/.bats_stamp`, which drops a `build/` that differs). An output is fresh when it is there and
+its key equals the one its inputs give now; the sizes are compared first, and a different size is a
+changed file with nothing hashed. A key that is missing, short or garbled makes its output again.
+`build/.sats_changed` is written whenever an emitted `.sats` changes, with new bytes each time (the
+sha256 of what it held), so in a build a change to a `.sats` rebuilds every module's C, as before (a
+check and a test do not read it: see check-memo.md), and a body-only change rebuilds its own module
+and the modules that staload its `.dats` (a dependent of a library), no others (`tests/sats-change`,
+`tests/build-content-keys`). The same keys serve the dependencies under a namespace (bridge, dom),
+the extra modules of a dependency, the wasm objects, the binary's own module and the entry's object
+(the entry's C is made again by every build, and an object is made again only when that C differs).
+The cost: every no-change check reads and hashes each module's `.dats`, each C once, and the
+preprocessed text of each object once (the run's digest table below); the tests are
+`tests/build-content-keys`, which plays the no-change runs after a cold one with no settling, every
+file of `build/` given a time in the future and long ago, a changed body of the same size, a changed
+`.sats`, and a garbled or missing key.
 
 ## What of bats.toml reaches build/ (bats#381)
 
@@ -55,6 +91,66 @@ The output buffers of the toml package's calls are not readers of the file; each
 
 ## Objects are keyed on the text their compile reads (bats#394, #338, #395, #477)
 
-An object's key holds its C, the profile, the preprocessed text of its C and the stamp, because what the C compiler's search path (`C_INCLUDE_PATH`, `CPATH`, a sysroot, an SDK, the directory of the including file) finds for an `#include` can change with the C, the environment's value and the stamp all the same: a header changed in place, or a header that did not exist at the last compile and now shadows a listed one earlier on the path. A key of the headers a compile found (a depfile) cannot see the second, since it holds what was found and not what was looked for; the text the preprocessor gives holds both, because any file it takes instead is in the text. So every object bats keys is preceded by `clang -E` with the object's own flags (`native_cc_argv`, `wasm_cc_argv` in `src/helpers.bats`: the same argument list as the compile, `-E` for `-c` and `<object>.i` for the output, so `-O`, `-D` and `-I` are the compile's), native (`run_cc`, the module, dependency and entry objects) and wasm (`run_wasm_cc`), and the key holds, after the C's line and before the stamp's, the size and then the sha256 of that text: sizes first as for the C, a different size is a changed object. A check makes the text again (`native_object_fresh`, `wasm_object_fresh`), digests it and removes it; a compile makes it before cc runs and the key written after cc passed digests that text and removes it, so a header changed while cc runs is a key that is not equal at the next check, never a stale hit. A text that cannot be made (cc fails) or read is a key that is not equal (the object is made again). The text holds the line markers (`# 12 "path"`), so a moved header or a line added to the C is a changed key, as the object's debug info would differ. The cost is one preprocess of each object at each check. The runtimes (`_bats_native_runtime.o`, `_bats_wasm_runtime.wasm.o`) are compiled at every build and have no key, so there is nothing for them to go stale. What comparable tools do: ccache's preprocessor mode and sccache hash the preprocessed output, and its direct and depend modes hash the headers a compile read (a manifest) and fall back to the preprocessor when one is missing or differs, because a manifest of what was found cannot see a file that now shadows one. The tests: `tests/build-headers` (native and wasm header changed in place with its mtime put back, a new header earlier on `C_INCLUDE_PATH` and a new quoted header beside the including file, native and wasm, no cc and no preprocessed text left in a no-change run, a wasm object kept across profiles) and the stamp's.
+An object's key holds its C, the profile, the preprocessed text of its C and the stamp, because what
+the C compiler's search path (`C_INCLUDE_PATH`, `CPATH`, a sysroot, an SDK, the directory of the
+including file) finds for an `#include` can change with the C, the environment's value and the stamp
+all the same: a header changed in place, or a header that did not exist at the last compile and now
+shadows a listed one earlier on the path. A key of the headers a compile found (a depfile) cannot
+see the second, since it holds what was found and not what was looked for; the text the preprocessor
+gives holds both, because any file it takes instead is in the text. So every object bats keys is
+preceded by `clang -E -P` with the object's own flags (`native_cc_argv`, `wasm_cc_argv` in
+`src/helpers.bats`: the same argument list as the compile, `-E -P` for `-c` and `<object>.i` for the
+output, so `-O`, `-D` and `-I` are the compile's), native (`run_cc`, the module, dependency and
+entry objects) and wasm (`run_wasm_cc`), and the key holds, after the C's line and before the
+stamp's, the size and then the sha256 of that text: sizes first as for the C, a different size is a
+changed object. A check makes the text again (`native_object_fresh`, `wasm_object_fresh`), digests
+it and removes it; a compile makes it before cc runs and the key written after cc passed digests
+that text and removes it, so a header changed while cc runs is a key that is not equal at the next
+check, never a stale hit. A text that cannot be made (cc fails) or read is a key that is not equal
+(the object is made again). The runtimes (`_bats_native_runtime.o`, `_bats_wasm_runtime.wasm.o`) are
+compiled at every build and have no key, so there is nothing for them to go stale.
 
-**Each file is digested once for a build (bats#398).** The native and the wasm key of a C (a wasm bin's build makes both for the dependencies' C) both ask for the file's size and sha256 through the run's digest table (`kept_size`, `kept_hash`, the table of check-memo.md), so the second key of a C finds the line in the table (`digest_entry`); the preprocessed text is not in the table, since it is made again for each key; the digest is not passed between the keys. A C's lines in an object's key are its size and its sha256 (`kept_size`, `kept_hash`), the same for the native and the wasm key. `-v` says `~ digested <path>` for each file really read, which `tests/build-content-keys` counts (a C once in a build) and `tests/build-headers` (the entry's C once). The table is emptied at the start of every build (`digests_forget` in `do_build`, after `cache_swap`), so a C seen by an earlier build of the process, or of the other mark (its `build/` is another set of files), is read again; within a build a C is written by patsopt before it is first asked for. So a check, which builds the native mark and then the wasm one, digests a dependency's C once in each, not once in all: the two marks' `build/` are different files.
+**The key holds no directory of the toolchain.** Without `-P`, the text has a line marker (`# 12
+"path"`) for every header with the absolute path it was found at: the ATS2 home (`-I$(PATSHOME)`)
+and the C compiler's install directory (its resource directory, found beside the binary). A `build/`
+made where those are elsewhere, with the same files, would then have a key that differs and every
+object made again, where the stamp keeps it (stamp.md: no line of it holds a path). `-P` writes the
+text without the markers, and no path is left in the text (a grep of the text of a bats module's C
+for an absolute path finds none), so the key is the same wherever the toolchain is. A header still
+changes the text when its content does, whether it is changed in place or shadows another; a
+shadowing header with the same bytes as the one it shadows gives the same text and so the same
+object, which is kept rightly. What `-P` costs is the line numbers of a header, which the object's
+debug info (`-g`, native debug objects) records: a header changed only in comments or blank lines
+can give the same text and keeps its object, whose debug info then names the old lines, and the C
+compiler's own warnings are not in the key. Alternatives: dropping only the marker lines from the
+digested text needs bats to read and filter the text (a second pass over megabytes in bats, to get
+what the preprocessor already gives); `-ffile-prefix-map` rewrites the paths of the compile, not of
+the preprocessor's markers, and would change the object's own flags. The test is
+`tests/build-toolchain-path`.
+
+What comparable tools do: ccache's preprocessor mode and sccache hash the preprocessed output,
+ccache with the line markers, and its `base_dir` option rewrites absolute paths in them so that a
+build tree at another path is not a miss; its direct and depend modes hash the headers a compile
+read (a manifest) and fall back to the preprocessor when one is missing or differs, because a
+manifest of what was found cannot see a file that now shadows one. The tests: `tests/build-headers`
+(native and wasm header changed in place with its mtime put back, a new header earlier on
+`C_INCLUDE_PATH` and a new quoted header beside the including file, native and wasm, no cc and no
+preprocessed text left in a no-change run, a wasm object kept across profiles),
+`tests/build-toolchain-path` (the ATS2 home and a copy of the C compiler with its resource directory
+moved to other directories: no object is made again and `build/` is kept, a shadowing header with
+other bytes still makes the object again, one with the same bytes does not, and a control with a
+stand-in clang that drops `-P` makes the object again after the same move) and the stamp's.
+
+**Each file is digested once for a build (bats#398).** The native and the wasm key of a C (a wasm
+bin's build makes both for the dependencies' C) both ask for the file's size and sha256 through the
+run's digest table (`kept_size`, `kept_hash`, the table of check-memo.md), so the second key of a C
+finds the line in the table (`digest_entry`); the preprocessed text is not in the table, since it is
+made again for each key; the digest is not passed between the keys. A C's lines in an object's key
+are its size and its sha256 (`kept_size`, `kept_hash`), the same for the native and the wasm key.
+`-v` says `~ digested <path>` for each file really read, which `tests/build-content-keys` counts (a
+C once in a build) and `tests/build-headers` (the entry's C once). The table is emptied at the start
+of every build (`digests_forget` in `do_build`, after `cache_swap`), so a C seen by an earlier build
+of the process, or of the other mark (its `build/` is another set of files), is read again; within a
+build a C is written by patsopt before it is first asked for. So a check, which builds the native
+mark and then the wasm one, digests a dependency's C once in each, not once in all: the two marks'
+`build/` are different files.

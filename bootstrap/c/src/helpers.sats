@@ -1297,7 +1297,10 @@ fn stamp_digest_hashes (b: !$B.builder_v >> $B.builder_v): void
 
 
 
-fn input_digest_sizes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+
+
+fn input_digest_sizes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  {np:pos}{pm:nat | pm <= np; pm <= 524288}
   (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
    pre_bv: !$A.borrow(byte, lp, np), pm: int pm, b: !$B.builder_v >> $B.builder_v): bool
 
@@ -1310,7 +1313,8 @@ fn input_digest_sizes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:po
 
 
 
-fn input_digest_hashes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+fn input_digest_hashes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  {np:pos}{pm:nat | pm <= np; pm <= 524288}
   (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
    pre_bv: !$A.borrow(byte, lp, np), pm: int pm, b: !$B.builder_v >> $B.builder_v): bool
 
@@ -1323,7 +1327,8 @@ fn input_digest_hashes {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:p
 
 
 
-fn input_digest {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+fn input_digest {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  {np:pos}{pm:nat | pm <= np; pm <= 524288}
   (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
    pre_bv: !$A.borrow(byte, lp, np), pm: int pm, b: !$B.builder_v >> $B.builder_v): bool
 
@@ -1335,7 +1340,9 @@ fn input_digest {li:agz}{lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{np:pos}{pm:
 
 
 fn key_fresh {lph:agz}
-  (kind: key_of, ph: !$A.borrow(byte, lph, 512), phlen: int, out_b: $B.builder_v, in_b: $B.builder_v): bool
+  (kind: key_of, ph: !$A.borrow(byte, lph, 512), phlen: int,
+   out_b: $B.builder_v, in_b: $B.builder_v): bool
+
 
 
 
@@ -1408,7 +1415,9 @@ fn key_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:na
 
 
 fn native_object_fresh {lph:agz}
-  (rel: profile, ph: !$A.borrow(byte, lph, 512), phlen: int, out_b: $B.builder_v, in_b: $B.builder_v): bool
+  (rel: profile, ph: !$A.borrow(byte, lph, 512), phlen: int,
+   out_b: $B.builder_v, in_b: $B.builder_v): bool
+
 
 
 
@@ -2893,6 +2902,15 @@ fn remove_output_m {lo:agz}{n:pos}{m:nat | m <= n}
 
 
 
+
+
+
+
+
+
+
+
+
 fn wasm_cc_argv {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <= no}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om, pre: bool): $L.listv($P.arg_entry)
@@ -2936,7 +2954,8 @@ fn wasm_cc_argv {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om 
 
 
 
-fn preprocess_wasm {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524288}{om:nat | om <= no; om <= 524288}
+fn preprocess_wasm {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524288}
+  {om:nat | om <= no; om <= 524288}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om): int
 
@@ -2950,14 +2969,16 @@ fn preprocess_wasm {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524
 
 
 
-fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
+fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    rel: profile): int
 
 
-fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
+fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 512), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,

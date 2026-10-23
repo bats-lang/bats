@@ -78,9 +78,32 @@ staload "_bats_inputs.sats"
    this text follows; this line says which flags a stamp was made with,
    for whoever reads it (flags keyword; `pre` is the preprocessed text the key of an
    object holds, preprocess keyword, bats#477). The profile's choice (-O2, or -g -O0) is in
-   the template, since one build/ holds both profiles' work. *)
-#define FLAGS_NATIVE "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; pre clang -E -o OUT.i IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; runtime clang -c -o build/_bats_native_runtime.o build/_bats_native_runtime.c; link clang -o BIN OBJECTS [-O2 | -g -O0]"
-#define FLAGS_WASM "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; pre clang -E -o OUT.i IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; wasm cc clang --target=wasm32 -O2 -nostdlib -ffreestanding -fvisibility=default -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include build/_bats_wasm_runtime.h -I build/_bats_wasm_stubs -Wno-implicit-function-declaration -Wno-int-conversion -c -o OUT IN; wasm pre the wasm cc with -E -o OUT.i in place of -c -o OUT; link wasm-ld --no-entry --allow-undefined --lto-O2 -z stack-size=1048576 --initial-memory=16777216 --max-memory=268435456 --export=bats_dynload --export=mainats_0_void --export=malloc -o OUT OBJECTS"
+   the template, since one build/ holds both profiles' work. The text is written by
+   put_flags_common and then put_flags_native or put_flags_wasm, in pieces that fit a line. *)
+fn put_flags_common (st: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(st, "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; ")
+  val () = bput_v(st, "cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) ")
+  val () = bput_v(st, "-I$(PATSHOME)/ccomp/runtime; pre clang -E -P -o OUT.i IN [-O2 | -g -O0] ")
+  val () = bput_v(st, "-I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; ")
+in end
+
+fn put_flags_native (st: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(st, "runtime clang -c -o build/_bats_native_runtime.o ")
+  val () = bput_v(st, "build/_bats_native_runtime.c; link clang -o BIN OBJECTS [-O2 | -g -O0]")
+in end
+
+fn put_flags_wasm (st: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(st, "wasm cc clang --target=wasm32 -O2 -nostdlib -ffreestanding ")
+  val () = bput_v(st, "-fvisibility=default -D_ATS_CCOMP_HEADER_NONE_ ")
+  val () = bput_v(st, "-D_ATS_CCOMP_EXCEPTION_NONE_ ")
+  val () = bput_v(st, "-D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include ")
+  val () = bput_v(st, "build/_bats_wasm_runtime.h -I build/_bats_wasm_stubs ")
+  val () = bput_v(st, "-Wno-implicit-function-declaration -Wno-int-conversion -c -o OUT IN; wasm ")
+  val () = bput_v(st, "pre the wasm cc with -E -P -o OUT.i in place of -c -o OUT; link wasm-ld ")
+  val () = bput_v(st, "--no-entry --allow-undefined --lto-O2 -z stack-size=1048576 ")
+  val () = bput_v(st, "--initial-memory=16777216 --max-memory=268435456 --export=bats_dynload ")
+  val () = bput_v(st, "--export=mainats_0_void --export=malloc -o OUT OBJECTS")
+in end
 
 (* The mark is a wasm one: 1, or 3 in check and test mode *)
 fn mark_is_wasm (mark: int): bool = (mark = 1 || mark = 3)
@@ -350,7 +373,8 @@ fn stamp_write {lph:agz}
   val () = bput_v(st, "\nlink ")
   val link = (if link_listed(mark) then put_link_digest(st) else false): bool
   val () = bput_v(st, "\nflags ")
-  val () = (if mark_is_wasm(mark) then bput_v(st, FLAGS_WASM) else bput_v(st, FLAGS_NATIVE))
+  val () = (let val () = put_flags_common(st) in
+    if mark_is_wasm(mark) then put_flags_wasm(st) else put_flags_native(st) end)
   val () = bput_v(st, "\nmark ")
   val () = put_int_v(st, mark)
   val () = put_char_v(st, 10)

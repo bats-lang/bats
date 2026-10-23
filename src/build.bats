@@ -2519,7 +2519,8 @@ in
                                     val () = copy_to_builder_v(bv_de, 0, dlen, 1024, ib)
                                     val () = bput_v(ib, "/src/lib_dats.c")
                                     val () = put_char_v(ib, 0)
-                                  in (if native_object_fresh(rr, ph, phlen, ob, ib) then 1 else 0): int end
+                                  in (if native_object_fresh(rr, ph, phlen, ob, ib)
+                                      then 1 else 0): int end
                                   val () = (if cc_fresh > 0 then ()
                                   else let
                                   var co_b : $B.builder_v = $B.create()
@@ -2595,7 +2596,8 @@ in
                                                     val () = bput_v(fi, "/src/")
                                                     val () = copy_to_builder_v(bv_d4, 0, dl4, 1024, fi)
                                                     val () = put_char_v(fi, 0)
-                                                  in (if native_object_fresh(rr2, ph2, ph2len, fo, fi) then 1 else 0): int end
+                                                  in (if native_object_fresh(rr2, ph2,
+                                                        ph2len, fo, fi) then 1 else 0): int end
                                                   val () = (if cf > 0 then ()
                                                   else let
                                                     var xo : $B.builder_v = $B.create()
@@ -2682,7 +2684,8 @@ in
                                     val () = bput_v(fi, "build/src/")
                                     val () = copy_to_builder_v(bv_dcsm, 0, dl_csm, 1024, fi)
                                     val () = put_char_v(fi, 0)
-                                  in (if native_object_fresh(rr_cm, ph_cm, ph_cm_len, fo, fi) then 1 else 0): int end
+                                  in (if native_object_fresh(rr_cm, ph_cm, ph_cm_len, fo, fi)
+                                      then 1 else 0): int end
                                   val () = (if cf_sm > 0 then ()
                                   else let
                                     var xo_sm : $B.builder_v = $B.create()
