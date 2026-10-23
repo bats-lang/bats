@@ -22,8 +22,7 @@
 # usage: tests/patsopt-cap/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
 REAL=$HOME/.bats/ats2
 H=$TMP/home

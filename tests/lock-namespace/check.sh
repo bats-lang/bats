@@ -6,8 +6,7 @@ set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$(cd "$2" && pwd)
 HERE=$(cd "$(dirname "$0")" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 # Run in a copy, so nothing the commands write lands in the checkout
 cp -R "$HERE/bats.toml" "$HERE/src" "$TMP/"
 cd "$TMP"

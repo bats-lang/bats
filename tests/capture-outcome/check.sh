@@ -9,8 +9,7 @@ BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$(cd "$2" && pwd)
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../.." && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 # A copy of the compiler's project with the driver as a second binary
 mkdir -p "$TMP/app"

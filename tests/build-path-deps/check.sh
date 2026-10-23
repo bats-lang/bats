@@ -6,8 +6,7 @@
 # usage: tests/build-path-deps/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/app/src/bin" "$TMP/app/bats_modules/pmine/old" "$TMP/pmine/src/sub/docs" "$TMP/pmine/src/sub/keep" "$TMP/pmine/build"
 printf '[package]\nname = "papp"\nkind = "bin"\n\n[dependencies]\n"pmine" = { path = "../pmine" }\n' > "$TMP/app/bats.toml"
 printf '#use pmine as M\n\nimplement main0 () = println! ("got ", $M.f ())\n' > "$TMP/app/src/bin/papp.bats"

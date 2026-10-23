@@ -5,8 +5,7 @@
 # usage: tests/upload-large-archive/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 if command -v sha256sum >/dev/null 2>&1; then SUM="sha256sum"; else SUM="shasum -a 256"; fi
 mkdir -p "$TMP/repo" "$TMP/lib/src"
 printf '[package]\nname = "large"\nversion = "1.0.0"\nkind = "lib"\n' > "$TMP/lib/bats.toml"

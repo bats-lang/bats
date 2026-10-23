@@ -26,8 +26,7 @@
 # usage: tests/build-content-keys/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR
 mkdir -p "$TMP/app/src/bin" "$TMP/mine/src" "$TMP/plain/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\n"ns.example/mine" = { path = "../mine" }\n"plain" = { path = "../plain" }\n' > "$TMP/app/bats.toml"

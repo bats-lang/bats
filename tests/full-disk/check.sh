@@ -25,14 +25,14 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$(cd "$2" && pwd)
-TMP=$(mktemp -d)
 MOUNTED=
 as_root() { if [ "$(id -u)" = 0 ]; then "$@"; else sudo -n "$@"; fi; }
-cleanup() {
+# the mount goes on every exit; the rest of TMP stays on a failure (keep-on-fail)
+unmount_full() {
   if [ -n "$MOUNTED" ]; then as_root umount "$TMP/full" || true; fi
-  rm -rf "$TMP"
 }
-trap cleanup EXIT
+KEEP_ON_FAIL_TEARDOWN=unmount_full
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR BATS_COLD BATS_COMMIT
 # the real ATS2 of this machine, behind a patsopt that lifts the limit
 REAL=$HOME/.bats/ats2

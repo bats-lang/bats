@@ -11,8 +11,7 @@
 # usage: tests/check-pins/check.sh <bats-binary> <repository-dir>
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 fail() { echo "FAIL: $*" >&2; cat "$TMP/out" >&2; exit 1; }
 sha=11d5960a326750d5838078e36cf38b85af677262
 digest=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef

@@ -13,8 +13,7 @@
 # usage: tests/linear-heap/check.sh <bats-binary>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 n=0
 lib() { # <unsafe> <body>
   n=$((n + 1)); d=$TMP/p$n

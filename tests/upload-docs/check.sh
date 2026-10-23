@@ -5,8 +5,7 @@
 # usage: tests/upload-docs/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/repo" "$TMP/lib/src"
 printf '[package]\nname = "updocs"\nkind = "lib"\n' > "$TMP/lib/bats.toml"
 printf '/// One.\n#pub fun f (): int\n\nimplement f () = 1\n' > "$TMP/lib/src/lib.bats"

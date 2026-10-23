@@ -10,8 +10,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 HERE=$(cd "$(dirname "$0")" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 case_() { # <name> <command>
   p=$TMP/$1
   rc=0

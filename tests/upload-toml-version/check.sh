@@ -7,8 +7,7 @@
 # usage: tests/upload-toml-version/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 case_toml() { # <name> <bats.toml content> <expected archived bats.toml, with V for the version>
   d="$TMP/$1"; r="$TMP/$1-repo"; mkdir -p "$d/src" "$r"
   printf '%b' "$2" > "$d/bats.toml"

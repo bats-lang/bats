@@ -8,8 +8,7 @@
 # usage: tests/upload-version-parse/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 n=0
 upload() { # <version>: upload a scratch package with that version
   n=$((n + 1)); d="$TMP/p$n"; r="$TMP/r$n"
