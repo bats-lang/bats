@@ -15,6 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
+      # A failing test script keeps its temp directory there (tests/keep-on-fail.sh,
+      # bats#478) and the last step uploads it
+      - name: Directory for the evidence of failed test scripts
+        run: echo "BATS_KEPT_DIR=$RUNNER_TEMP/kept" >> "$GITHUB_ENV"
+
       - name: Install libgmp-dev and wasm-ld (wasm fixtures)
         run: sudo apt-get install -y -q libgmp-dev lld
 
@@ -86,6 +91,15 @@ jobs:
           ~/stage2/bats build --repository ~/repository
           scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen2
           diff -r bootstrap/c /tmp/regen2
+
+      - name: Upload the temp directories of failed test scripts
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: kept-check
+          path: ${{ runner.temp }}/kept
+          include-hidden-files: true
+          if-no-files-found: ignore
 
   # The setup action other bats repositories call by commit
   # (bats-lang/bats#274), run on a tiny project from the commit under test

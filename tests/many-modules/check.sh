@@ -7,8 +7,7 @@
 # usage: tests/many-modules/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/p/src/bin"
 cd "$TMP/p"
 printf '[package]\nname = "many"\nkind = "bin"\n' > bats.toml

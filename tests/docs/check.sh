@@ -7,8 +7,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 HERE=$(cd "$(dirname "$0")" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 cp -R "$HERE/bats.toml" "$HERE/src" "$TMP/"
 cd "$TMP"
 "$BATS" check > check.log 2>&1 || { echo "FAIL: check"; cat check.log; exit 1; }

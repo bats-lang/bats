@@ -48,7 +48,8 @@
 #  * a torn, garbled, truncated, empty, missing, foreign, other-key or
 #    other-format .res or .key is a miss; four copies of the project side by
 #    side, five rounds, never serve or leave a torn file; a run killed while
-#    it checks leaves no file;
+#    it checks leaves no file; two stores of one key, the .key truncated by the second between the
+#    first's write and its digest, leave a .res that serves (bats-lang/bats#480);
 #  * --cold reads no memo, writes it, and reports a memo that no longer
 #    says what a cold run does (STALE MEMO), replacing it;
 #  * --prune lists and removes the .key and .res files the run did not use,
@@ -122,12 +123,16 @@
 #     killed by: "the first run kept 0 files, not 8"
 #  22. scan-bytes-unchecked (src/recursion.bats): `else if same_source(bytes_view, source, source_size, 0) then let` -> `else if true then let`
 #     killed by: "scans: status 0, not 1"
+#  23. key-digest-read-back (store_in digests a read-back of the .key it wrote):
+#     `val () = (if wrote_key then put_sha_range(bv_c, cn, 0, cn, ch) else ())` ->
+#     `val hashed = (if wrote_key then path_sha(entry_path(bv_m, mn, bv_k, kn, ".key"), ch)
+#     else false): bool`, and `hashed` for `wrote_key` in the `if` that follows
+#     killed by: "memo truncated key"
 #
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR BATS_COMMIT BATS_COLD BATS_MEMO_DIR XDG_CACHE_HOME
 ONLY=${3:-}
 T_START=$(date +%s)
@@ -864,6 +869,37 @@ done
 mrunx "$TMP/par1" "$MF" "$TMP/parw1" "$M7" "$TMP/par-last.log" --only reject/lib-bad
 memoed "$TMP/par-last.log" 1 "memo parallel last"
 rm -rf "$TMP/par1" "$TMP/par2" "$TMP/par3" "$TMP/par4" "$TMP/parw1" "$TMP/parw2" "$TMP/parw3" "$TMP/parw4"
+
+# ---- two writers of one key, the second truncating the .key between the first's write and digest
+# (bats-lang/bats#480). The .key is a FIFO: the store's write is read by a stand-in writer B's
+# reader, and the store's own read of the .key is answered by B's open and close (an empty file,
+# as B's O_TRUNC leaves it). B then leaves the whole .key. A .res that names the digest of that
+# empty read is a miss for every later run; one that names the bytes the store held is a hit.
+MQ=$TMP/memo-q
+rm -rf "$MQ"
+mrunx "$MP" "$MF" "$MW" "$MQ" "$TMP/q1.log" --only accept/lone-ok
+[ $rc = 0 ] || { cat "$TMP/q1.log"; fail "memo truncated key: first run: status $rc"; }
+qkey=$(sed -n 1p "$MW/memo-used")
+qdir=$MQ/$(printf '%s' "$qkey" | cut -c1-2)
+cp "$qdir/$qkey.key" "$TMP/q.whole"
+rm -f "$qdir/$qkey.key" "$qdir/$qkey.res"
+mkfifo "$qdir/$qkey.key"
+( cat "$qdir/$qkey.key" > "$TMP/q.written"; : > "$qdir/$qkey.key" ) 2> "$TMP/q.bg.err" &
+qpid=$!
+mrunx "$MP" "$MF" "$MW" "$MQ" "$TMP/q2.log" --only accept/lone-ok
+[ $rc = 0 ] || {
+  cat "$TMP/q2.log"; kill $qpid 2> "$TMP/q.kill.err"
+  fail "memo truncated key: store run: status $rc"
+}
+kill $qpid 2> "$TMP/q.kill.err"; wait $qpid 2> "$TMP/q.wait.err"
+cmp -s "$TMP/q.written" "$TMP/q.whole" || fail "memo truncated key: B was not given the whole .key"
+[ -f "$qdir/$qkey.res" ] || fail "memo truncated key: the store wrote no .res"
+rm -f "$qdir/$qkey.key"
+cp "$TMP/q.whole" "$qdir/$qkey.key"
+mrunx "$MP" "$MF" "$MW" "$MQ" "$TMP/q3.log" --only accept/lone-ok
+[ $rc = 0 ] || { cat "$TMP/q3.log"; fail "memo truncated key: next run: status $rc"; }
+memoed "$TMP/q3.log" 1 "memo truncated key: the .res names a digest of a truncated .key"
+rm -rf "$MQ"
 
 # ---- --prune: the files the run did not use, nothing else
 M8=$TMP/memo8

@@ -5,8 +5,7 @@
 # usage: tests/module-size/check.sh <bats-binary>
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 fail=0
 
 # A package whose src/bin/main.bats is a string of $1 bytes of x (a

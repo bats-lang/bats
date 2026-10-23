@@ -10,8 +10,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 HERE=$(cd "$(dirname "$0")" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 p=$TMP/p
 mkdir -p "$p/src/bin" "$p/bats_modules/dep/src"
 printf '[package]\nname = "pp"\nkind = "bin"\n' > "$p/bats.toml"

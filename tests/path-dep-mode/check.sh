@@ -4,8 +4,7 @@
 # usage: tests/path-dep-mode/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/app/src/bin" "$TMP/dep/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\ndep = { path = "../dep" }\n' > "$TMP/app/bats.toml"
 printf '#use dep as D\nimplement main0 () = ()\n' > "$TMP/app/src/bin/app.bats"

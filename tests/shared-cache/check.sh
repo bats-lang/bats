@@ -10,8 +10,7 @@
 # usage: tests/shared-cache/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 export BATS_CACHE_DIR="$TMP/cache"
 A=$TMP/a
 mkdir -p "$A/src/bin"

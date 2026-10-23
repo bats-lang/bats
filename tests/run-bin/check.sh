@@ -6,8 +6,7 @@
 # usage: tests/run-bin/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 mkdir -p "$TMP/a/src/bin" "$TMP/b/src/bin"
 printf '[package]\nname = "a"\nkind = "bin"\n' > "$TMP/a/bats.toml"
 printf 'implement main0 () = ()\n' > "$TMP/a/src/bin/a.bats"

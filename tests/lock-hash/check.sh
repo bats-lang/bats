@@ -6,8 +6,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$(cd "$2" && pwd)
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 if command -v sha256sum >/dev/null 2>&1; then SUM="sha256sum"; else SUM="shasum -a 256"; fi
 mkdir -p "$TMP/app/src"
 printf '[package]\nname = "lockhash"\nkind = "lib"\n\n[dependencies]\n"toml" = ""\n' > "$TMP/app/bats.toml"

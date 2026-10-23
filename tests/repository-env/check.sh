@@ -5,8 +5,7 @@
 # usage: tests/repository-env/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_REPOSITORY
 mkdir -p "$TMP/repo" "$TMP/dep/src" "$TMP/app/src"
 printf '[package]\nname = "envdep"\nkind = "lib"\n' > "$TMP/dep/bats.toml"

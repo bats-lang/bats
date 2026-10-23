@@ -3,8 +3,7 @@
 # usage: tests/toml-fields/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
-TMP=$(mktemp -d)
-trap 'rm -rf "$TMP"' EXIT
+. "$(dirname "$0")/../keep-on-fail.sh"
 unset BATS_CACHE_DIR
 
 # patsopt-count: patsopt runs, not counting the entry's generated module that every build makes again
