@@ -13,16 +13,21 @@ once and its directory, logs and memo were gone). Every script under `tests/` an
 `scripts/bootstrap-c.sh` sources `tests/keep-on-fail.sh` in place of its own `mktemp` and
 trap.
 
-* It sets `TMP` to a new absolute directory `bats-<script's directory>.XXXXXX` under
+* It sets `TMP` to a new absolute directory `bats-tmp.XXXXXX` under
   `${BATS_KEPT_DIR:-${TMPDIR:-/tmp}}`, creating that base if it is missing.
-* Exit 0 removes `TMP`. Any other exit keeps it and ends stderr with `kept: <TMP>`.
+* The directory's name is neutral and carries no word of the test's name: a test that
+  matches words in bats's output (`grep -qi slot`) would meet its own name in a path bats
+  prints. The test's name is in the `kept:` line instead.
+* Exit 0 removes `TMP`. Any other exit keeps it and ends stderr with
+  `kept: <TMP> (<script's directory name>)`.
 * A script that must tear something down on every exit (an unmount) names a function in
   `KEEP_ON_FAIL_TEARDOWN` before sourcing; it runs first, and `TMP` is kept or removed after.
 * The path to source is `"$(dirname "$0")/../keep-on-fail.sh"` (a script is run by its path).
 * A script killed by a signal runs no exit trap, so its directory stays as well.
 
 `tests/keep-on-fail/check.sh` runs a failing script (also one that dies of `set -e`), a
-passing one and one with a teardown. In CI `check.yml` sets `BATS_KEPT_DIR` to a directory
+passing one and one with a teardown, and checks the neutral name and the test's name in
+the `kept:` line. In CI `check.yml` sets `BATS_KEPT_DIR` to a directory
 of the runner and, when a step fails, uploads it as the artifact `kept-check`; a green run
 uploads nothing.
 

@@ -1,7 +1,9 @@
 #!/bin/sh
 # keep-on-fail (bats-lang/bats#478): a script that sources tests/keep-on-fail.sh
-# keeps its temp directory when it exits non-zero, ends stderr with `kept: <path>`,
-# and removes the directory when it exits 0. Detail: .claude/rules/keep-on-fail.md.
+# keeps its temp directory when it exits non-zero, ends stderr with
+# `kept: <path> (<test>)`, and removes the directory when it exits 0. The directory's
+# name is neutral (`bats-tmp.XXXXXX`) and carries no word of the test's name.
+# Detail: .claude/rules/keep-on-fail.md.
 # usage: tests/keep-on-fail/check.sh [ignored arguments]
 set -eu
 HELPER=$(cd "$(dirname "$0")/.." && pwd)/keep-on-fail.sh
@@ -27,7 +29,13 @@ dir=$(cat "$TMP/fails.dir")
 [ "$(cat "$dir/log")" = evidence ] || fail "failing script's file is not in $dir"
 case $dir in "$KEPT"/*) ;; *) fail "$dir is not under BATS_KEPT_DIR $KEPT" ;; esac
 last=$(tail -n 1 "$TMP/fails.err")
-[ "$last" = "kept: $dir" ] || fail "last stderr line: $last"
+[ "$last" = "kept: $dir (scripts)" ] || fail "last stderr line: $last"
+base=$(basename "$dir")
+case $base in
+  *scripts*) fail "directory name $base carries the test's name (scripts)" ;;
+  bats-tmp.??????) ;;
+  *) fail "directory name $base is not bats-tmp.XXXXXX" ;;
+esac
 grep -q 'some output' "$TMP/fails.err" || fail "the script's own stderr is lost"
 
 # a script that fails under set -e (a command that fails, no exit) is kept too
@@ -42,7 +50,7 @@ BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/errexit.sh" 2> "$TMP/errexit.err" &&
 dir2=$(cat "$TMP/errexit.dir")
 [ -d "$dir2" ] || fail "set -e script's directory is gone"
 last=$(tail -n 1 "$TMP/errexit.err")
-[ "$last" = "kept: $dir2" ] || fail "set -e: no kept line"
+[ "$last" = "kept: $dir2 (scripts)" ] || fail "set -e: no kept line"
 
 # a script that passes: its directory is gone and nothing is said
 cat > "$TMP/scripts/passes.sh" <<EOF
