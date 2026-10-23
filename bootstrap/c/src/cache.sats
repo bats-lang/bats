@@ -796,8 +796,8 @@ fn memo_fresh_in_check (out_b: $B.builder_v, in_b: $B.builder_v): bool
 
 
 
-fn closure_key_write {ll,lo:agz}
-  (list_bv: !$A.borrow(byte, ll, 524288), out_bv: !$A.borrow(byte, lo, 524288)): bool
+fn closure_key_write {ll,lo:agz}{nl,no:pos}{lm:nat | lm <= nl; lm <= 524288}{om:nat | om <= no; om <= 524288}
+  (list_bv: !$A.borrow(byte, ll, nl), list_len: int lm, out_bv: !$A.borrow(byte, lo, no), out_len: int om): bool
 
 
 

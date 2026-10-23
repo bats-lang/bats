@@ -87,15 +87,16 @@ implement find_null_bv_from (bv, p, m) =
    Opening a path at its own length
    ============================================================ *)
 
-(* Every path in bats is a NUL-terminated string in an array of 524288
-   bytes (the builder's capacity), and the file package copies the whole
-   of the length it is given to make the C string: file_open of such a
-   path allocated, zeroed and copied 512 KiB to open a name of 60 bytes
-   (bats#296: 20,000 opens made 37% of an unchanged check's instructions,
-   and the zeroing 19% more). These open the path at its own length: the
-   bytes up to and including its first NUL are copied into an array of
-   that size, which is the path the file package is given. A path with
-   no NUL in its array is given whole, as before. *)
+(* A path in bats is a string in an array of its own size (bats#368: the
+   builder's text, by into_arr, not a copy of 524288 bytes), and the file
+   package copies the whole of the length it is given to make the C
+   string: file_open of such a path allocated, zeroed and copied 512 KiB
+   to open a name of 60 bytes (bats#296: 20,000 opens made 37% of an
+   unchanged check's instructions, and the zeroing 19% more). These open
+   the path at its own length: the bytes up to and including its first
+   NUL are copied into an array of that size, which is the path the file
+   package is given. A path with no NUL in the first m bytes is given
+   whole, with a NUL after it. *)
 
 fun fill_path {l:agz}{lc:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
   (p: !$A.borrow(byte, l, n), c: !$A.arr(byte, lc, k + 1), i: int i, k: int k): void =
@@ -136,13 +137,6 @@ implement file_open_n (p, n, access, opening, mode) =
   if n <= 524288 then file_open_m(p, n, access, opening, mode)
   else $F.file_open(p, n, access, opening, mode)
 
-(* ... of a path in an array of 524288 bytes *)
-#pub fn file_open_path {l:agz}
-  (p: !$A.borrow(byte, l, 524288), access: $F.access, opening: $F.opening, mode: int)
-  : $R.result($F.fd, $F.io_error)
-
-implement file_open_path (p, access, opening, mode) = file_open_n(p, 524288, access, opening, mode)
-
 (* $F.file_exists of the path at its own length, in the first m bytes *)
 #pub fn file_exists_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, l, n), m: int m): bool
@@ -151,21 +145,6 @@ implement file_exists_m (p, m) = let
   val @(c, k) = path_short(p, m)
   val @(fz, bv) = $A.freeze<byte>(c)
   val r = $F.file_exists(bv, k)
-  val () = $A.drop<byte>(fz, bv)
-  val () = $A.free<byte>($A.thaw<byte>(fz))
-in r end
-
-#pub fn file_exists_path {l:agz} (p: !$A.borrow(byte, l, 524288)): bool
-
-implement file_exists_path (p) = file_exists_m(p, 524288)
-
-(* $F.dir_open of the path at its own length *)
-#pub fn dir_open_path {l:agz} (p: !$A.borrow(byte, l, 524288)): $R.result($F.dir, $F.io_error)
-
-implement dir_open_path (p) = let
-  val @(c, m) = path_short(p, 524288)
-  val @(fz, bv) = $A.freeze<byte>(c)
-  val r = $F.dir_open(bv, m)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
@@ -191,6 +170,58 @@ implement dir_read_m (p, m) = let
   val @(c, k) = path_short(p, m)
   val @(fz, bv) = $A.freeze<byte>(c)
   val r = $F.dir_read(bv, k)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.file_mkdir of the path at its own length, in the first m bytes of an
+   array of n (the length path_short gives is positive by its type) *)
+#pub fn file_mkdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, mode: int): $R.result(int, $F.io_error)
+
+implement file_mkdir_m (p, m, mode) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_mkdir(bv, k, mode)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.file_chdir of the path at its own length, in the first m bytes of an
+   array of n *)
+#pub fn file_chdir_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result(int, $F.io_error)
+
+implement file_chdir_m (p, m) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_chdir(bv, k)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.file_mode of the path at its own length, in the first m bytes of an
+   array of n *)
+#pub fn file_mode_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m): $R.result([k:nat | k <= 4095] int k, $F.io_error)
+
+implement file_mode_m (p, m) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_mode(bv, k)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in r end
+
+(* $F.file_chmod of the path at its own length, in the first m bytes of an
+   array of n *)
+#pub fn file_chmod_m {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, l, n), m: int m, mode: int): $R.result(int, $F.io_error)
+
+implement file_chmod_m (p, m, mode) = let
+  val @(c, k) = path_short(p, m)
+  val @(fz, bv) = $A.freeze<byte>(c)
+  val r = $F.file_chmod(bv, k, mode)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in r end
@@ -395,16 +426,13 @@ implement is_ident_byte(b) =
    collector (bats-lang/bats#228) *)
 #pub datatype prelude_build = NoPreludeBuild | BuildsList | BuildsOption | BuildsStream
 
-(* The words, each followed by one space. Enumerated from the prelude's
+(* The words, each followed by one space, in a table for each first letter (below) so that a token is looked for only among the words that begin as it does (bats#368). Enumerated from the prelude's
    SATS files (list.sats, option.sats, stream.sats, stream_vt.sats,
    grandom.sats, basics_dyn.sats) and libats/ML's basis.sats: the
    constructors of list, option and stream_con, the nil and cons macros,
    and every function whose result is a non-linear list, option or
    stream built from something that is not one (list_tail, which shares
    a list it is given, is not) *)
-fn list_builders (): string = "list_cons list_nil nil cons list_append list_append1_vt list_reverse_append list_reverse_append1_vt list_insert_at list_remove_at list_takeout_at list_fset_at list_fexch_at list_split_at list_tuple_0 list_tuple_1 list_tuple_2 list_tuple_3 list_tuple_4 list_tuple_5 list_tuple_6 list_of_list_vt list_vt2t grandom_list list0 list0_cons list0_nil nil0 cons0 "
-fn option_builders (): string = "Some None option_some option_none option_of_option_vt option_vt2t Some0 None0 option0 "
-fn stream_builders (): string = "stream_cons stream_nil stream_append stream_concat stream_cross stream_differ stream_drop_exn stream_filter stream_filter_cloref stream_filter_fun stream_imap stream_imap_cloref stream_imap_fun stream_inter stream_labelize stream_make_cons stream_make_nil stream_make_sing stream_map stream_map2 stream_map2_cloref stream_map2_fun stream_map_cloref stream_map_fun stream_merge stream_merge_cloref stream_merge_fun stream_mergeq stream_mergeq_cloref stream_mergeq_fun stream_scan stream_scan_cloref stream_scan_fun stream_symdiff stream_tabulate stream_tabulate_cloref stream_tabulate_fun stream_tail_exn stream_union stream_vt2t stream_zip "
 
 (* The end of the table's word that starts at i: the next space, or the
    table's end *)
@@ -440,6 +468,41 @@ fn in_word_table {l:agz}{n:pos}{p:int}
   val table1 = g1ofg0(table)
 in in_table(src, s, len, max, table1, g1u2i(string1_length(table1)), 0) end
 
+(* Whether src[s, s + len) is one of the words of table, all of which begin with lead *)
+fn in_bucket {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), s: int p, len: int, max: int n, lead: string, table: string): bool = let
+  val lead1 = g1ofg0(lead)
+  val lead_len = g1u2i(string1_length(lead1))
+in
+  if len < lead_len then false
+  else if ~(table_bytes_match(src, s, max, lead1, 0, lead_len)) then false
+  else in_word_table(src, s, len, max, table)
+end
+
+(* Whether src[s, s + len), which begins with c, is a word of the prelude that builds a non-linear list *)
+fn list_builds {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), s: int p, len: int, max: int n, c: int): bool =
+  if c = 108 then in_bucket(src, s, len, max, "list", "list_cons list_nil list_append list_append1_vt list_reverse_append list_reverse_append1_vt list_insert_at list_remove_at list_takeout_at list_fset_at list_fexch_at list_split_at list_tuple_0 list_tuple_1 list_tuple_2 list_tuple_3 list_tuple_4 list_tuple_5 list_tuple_6 list_of_list_vt list_vt2t list0 list0_cons list0_nil ")
+  else if c = 110 then in_bucket(src, s, len, max, "nil", "nil nil0 ")
+  else if c = 99 then in_bucket(src, s, len, max, "cons", "cons cons0 ")
+  else if c = 103 then in_bucket(src, s, len, max, "grandom_list", "grandom_list ")
+  else false
+
+(* ... a non-linear option *)
+fn option_builds {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), s: int p, len: int, max: int n, c: int): bool =
+  if c = 83 then in_bucket(src, s, len, max, "Some", "Some Some0 ")
+  else if c = 78 then in_bucket(src, s, len, max, "None", "None None0 ")
+  else if c = 111 then in_bucket(src, s, len, max, "option", "option_some option_none option_of_option_vt option_vt2t option0 ")
+  else false
+
+(* ... a non-linear stream *)
+fn stream_builds {l:agz}{n:pos}{p:int}
+  (src: !$A.borrow(byte, l, n), s: int p, len: int, max: int n, c: int): bool =
+  if c = 115 then in_bucket(src, s, len, max, "stream_", "stream_cons stream_nil stream_append stream_concat stream_cross stream_differ stream_drop_exn stream_filter stream_filter_cloref stream_filter_fun stream_imap stream_imap_cloref stream_imap_fun stream_inter stream_labelize stream_make_cons stream_make_nil stream_make_sing stream_map stream_map2 stream_map2_cloref stream_map2_fun stream_map_cloref stream_map_fun stream_merge stream_merge_cloref stream_merge_fun stream_mergeq stream_mergeq_cloref stream_mergeq_fun stream_scan stream_scan_cloref stream_scan_fun stream_symdiff stream_tabulate stream_tabulate_cloref stream_tabulate_fun stream_tail_exn stream_union stream_vt2t stream_zip ")
+  else false
+
+
 (* Whether build is the kind of build kind *)
 #pub fn prelude_build_is (build: prelude_build, kind: prelude_build): bool
 
@@ -458,10 +521,14 @@ implement prelude_build_of (src, s, e, max) = let
   val len = e - s
 in
   if len <= 0 then NoPreludeBuild()
-  else if in_word_table(src, s, len, max, list_builders()) then BuildsList()
-  else if in_word_table(src, s, len, max, option_builders()) then BuildsOption()
-  else if in_word_table(src, s, len, max, stream_builders()) then BuildsStream()
-  else NoPreludeBuild()
+  else let
+    val first = peek(src, s, max)
+  in
+    if list_builds(src, s, len, max, first) then BuildsList()
+    else if option_builds(src, s, len, max, first) then BuildsOption()
+    else if stream_builds(src, s, len, max, first) then BuildsStream()
+    else NoPreludeBuild()
+  end
 end
 
 (* A package's kind: a library (kind = "lib", the default) or a binary
@@ -896,8 +963,8 @@ in $A.free<byte>(ba) end
 (* bv[i, lim) to bw, the first error stopping it (a failed write empties
    the writer's buffer, so going on would write the bytes after the
    gap) *)
-#pub fn wbw_loop {l:agz}  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, 524288),
-   i: pos_t, lim: int): write_result
+#pub fn wbw_loop {l:agz}{n:pos}{m:nat | m <= n}
+  (bw: !$F.buf_writer, bv: !$A.borrow(byte, l, n), i: pos_t, lim: int, m: int m): write_result
 
 (* bv[i, lim) to bw, of the first m bytes of bv *)
 fn wbw_range {l:agz}{n:pos}{m:nat | m <= n}
@@ -915,7 +982,7 @@ in
   else loop(bw, bv, i, lim, m)
 end
 
-implement wbw_loop(bw, bv, i, lim) = wbw_range(bw, bv, i, lim, 524288)
+implement wbw_loop(bw, bv, i, lim, m) = wbw_range(bw, bv, i, lim, m)
 
 (* The writer closed after r, the result of what was written to it: r
    when that failed, else the flush's, else the close's. The file
@@ -1017,10 +1084,6 @@ implement touch_sats_stamp () = let
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in rc end
 
-(* Whether the file at path_bv holds exactly bv[0, len) *)
-#pub fn file_has_bytes {lp:agz}{lb:agz}{len:nat | len <= 524288}
-  (path_bv: !$A.borrow(byte, lp, 524288), bv: !$A.borrow(byte, lb, 524288), len: int len): bool
-
 (* ... for a path in the first pm bytes of an array of np, and the bytes in
    the first len of an array of nb (a builder's own array, bats#327). The
    file is read into len + 1 bytes: it is the same when it fills len of them
@@ -1049,9 +1112,6 @@ implement file_has_bytes_m {lp}{lb}{np}{pm}{nb}{len} (path_bv, pm, bv, len) =
       val () = $A.free<byte>($A.thaw<byte>(fz_f))
     in eq end
   | ~$R.err(_) => false
-
-implement file_has_bytes {lp}{lb}{len} (path_bv, bv, len) =
-  file_has_bytes_m(path_bv, 524288, bv, len)
 
 (* The profile a build makes: debug (-g -O0, into dist/debug) or release
    (-O2, into dist/release) *)
@@ -1180,8 +1240,11 @@ in b end
    file that is not there), one per line, the same files in the same order:
      1. the step's input: for an object its C (a module's C has its own
         key, the check memo's: cache.bats, bats#323);
-     2. build/.bats_stamp: the digest of this bats, patsopt, cc, the flag
-        templates and the target and mode that made build/ (bats#273).
+     2. for an object, the headers its compile read, one size and one
+        hash each, in the depfile's order (headers keyword, bats#394);
+     3. build/.bats_stamp: the digest of this bats, patsopt, cc, the
+        libraries patsopt loads, the link, the flag templates and the
+        target and mode that made build/ (bats#273, bats#394).
    A size is a negative only: equal sizes say nothing until the hashes
    agree. No time is read. The record of a step is this text in
    <output>.key, written after the step passed and removed before it
@@ -1203,33 +1266,169 @@ implement stamp_digest_hashes(b) = let
   val () = hash_of_built(bats_stamp_path(), b)
 in put_char_v(b, 10) end
 
-#pub fn input_digest_sizes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
+(* Headers an object's compile read, from its depfile, in its key (headers keyword, bats#394) *)
 
-implement input_digest_sizes(kind, in_bv, m, b) = let
-  val () = key_profile_line(kind, b)
-  val z = size_of_file(in_bv, m)
-  val () = put_int_v(b, z)
-  val () = put_char_v(b, 10)
-  val () = stamp_digest_sizes(b)
-in $AR.gte_int_int(z, 0) end
+(* A byte that ends a name in a depfile *)
+fn dep_blank (b: int): bool = (b = 32 || b = 9 || b = 10 || b = 13)
 
-#pub fn input_digest_hashes {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
+(* Where the names of a depfile c[0, n) begin, after the target's colon, or ~1 (headers keyword) *)
+fun dep_after_target {l:agz}{m:pos}{n:nat | n <= m}{i:nat | i <= n} .<n - i>.
+  (c: !$A.borrow(byte, l, m), n: int n, i: int i): [r:int | ~1 <= r; r <= n] int r =
+  if i >= n then ~1
+  else if peek(c, i, n) = 58 && (i + 1 >= n || dep_blank(peek(c, i + 1, n))) then i + 1
+  else dep_after_target(c, n, i + 1)
 
-implement input_digest_hashes(kind, in_bv, m, b) = let
-  val ok = put_file_sha256_m(in_bv, m, b)
-  val () = put_char_v(b, 10)
-  val () = stamp_digest_hashes(b)
+(* The name read so far, a line feed after it, appended to names when it is
+   not empty *)
+fn dep_flush (token: $B.builder_v, names: !$B.builder_v >> $B.builder_v): void =
+  if $B.length(token) > 0 then let
+    val () = append_builder(names, token)
+  in put_char_v(names, 10) end
+  else $B.builder_free(token)
+
+(* The names of c[i, n) one to a line in names, as make escapes them (headers keyword) *)
+fun dep_scan {l:agz}{m:pos}{n:nat | n <= m}{i:nat | i <= n} .<n - i>.
+  (c: !$A.borrow(byte, l, m), n: int n, i: int i, token: $B.builder_v,
+   names: !$B.builder_v >> $B.builder_v): void =
+  if i >= n then dep_flush(token, names)
+  else let
+    val b = peek(c, i, n)
+  in
+    if i + 1 < n then let
+      val nx = peek(c, i + 1, n)
+    in
+      if b = 92 && nx = 10 then let
+        val () = dep_flush(token, names)
+      in dep_scan(c, n, i + 2, $B.create(), names) end
+      else if b = 92 && nx = 13 then
+        (if i + 2 < n then
+          (if peek(c, i + 2, n) = 10 then let
+            val () = dep_flush(token, names)
+          in dep_scan(c, n, i + 3, $B.create(), names) end
+          else let
+            var more = token
+            val () = put_char_v(more, b)
+          in dep_scan(c, n, i + 1, more, names) end)
+        else let
+          var more = token
+          val () = put_char_v(more, b)
+        in dep_scan(c, n, i + 1, more, names) end)
+      else if b = 92 && (nx = 32 || nx = 35 || nx = 92) then let
+        var more = token
+        val () = put_char_v(more, nx)
+      in dep_scan(c, n, i + 2, more, names) end
+      else if b = 36 && nx = 36 then let
+        var more = token
+        val () = put_char_v(more, 36)
+      in dep_scan(c, n, i + 2, more, names) end
+      else if dep_blank(b) then let
+        val () = dep_flush(token, names)
+      in dep_scan(c, n, i + 1, $B.create(), names) end
+      else let
+        var more = token
+        val () = put_char_v(more, b)
+      in dep_scan(c, n, i + 1, more, names) end
+    end
+    else if dep_blank(b) then let
+      val () = dep_flush(token, names)
+    in dep_scan(c, n, i + 1, $B.create(), names) end
+    else let
+      var more = token
+      val () = put_char_v(more, b)
+    in dep_scan(c, n, i + 1, more, names) end
+  end
+
+(* <out>.d for the NUL-terminated path out (headers keyword) *)
+fn dep_file_path {lo:agz}{n:pos}{m:nat | m <= n} (out_bv: !$A.borrow(byte, lo, n), m: int m): $B.builder_v = let
+  var kb : $B.builder_v = $B.create()
+  val z = find_null_bv_from(out_bv, 0, m)
+  val () = copy_to_builder_v(out_bv, 0, z, m, kb)
+  val () = bput_v(kb, ".d")
+  val () = put_char_v(kb, 0)
+in kb end
+
+(* The files the compile of out read, one to a line in names; false when its depfile cannot be read (headers keyword) *)
+fn dep_names {lo:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (out_bv: !$A.borrow(byte, lo, n), m: int m, names: !$B.builder_v >> $B.builder_v): bool = let
+  val @(da, dl) = $B.into_arr(dep_file_path(out_bv, m))
+  val @(fz_d, bv_d) = $A.freeze<byte>(da)
+  val ok = (case+ read_whole_m(bv_d, dl) of
+    | ~whole_err(_) => false
+    | ~whole_ok(ar, piece, size, count) => let
+        val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+        val first = dep_after_target(bv_c, count, 0)
+        val () = (if first >= 0 then dep_scan(bv_c, count, first, $B.create(), names) else ())
+        val () = $A.drop<byte>(fz_c, bv_c)
+        val () = whole_free(ar, $A.thaw<byte>(fz_c))
+      in first >= 0 end)
+  val () = $A.drop<byte>(fz_d, bv_d)
+  val () = $A.free<byte>($A.thaw<byte>(fz_d))
 in ok end
 
-(* Sizes and then hashes, for a caller that has no use for the sizes alone *)
-#pub fn input_digest {li:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m, b: !$B.builder_v >> $B.builder_v): bool
+(* The size or hash line of the file at p, none for the C itself (headers keyword) *)
+fn header_one {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (is_source: bool, p: !$A.borrow(byte, lp, n), m: int m, hashes: bool,
+   out: !$B.builder_v >> $B.builder_v): bool =
+  if is_source then true
+  else if hashes then kept_hash(p, m, out)
+  else kept_size(p, m, out)
 
-implement input_digest(kind, in_bv, m, b) = let
-  val sized = input_digest_sizes(kind, in_bv, m, b)
-in if sized then input_digest_hashes(kind, in_bv, m, b) else false end
+(* The size or hash lines of the files in heads[i, hm), the C at skip left out; false when one cannot be read (headers keyword) *)
+fun header_lines {lh,ls:agz}{nh,ns:pos}{hm:nat | hm <= nh}{sm:nat | sm <= ns}{i:nat | i <= hm} .<hm - i>.
+  (heads: !$A.borrow(byte, lh, nh), hm: int hm, i: int i, line: $B.builder_v,
+   skip: !$A.borrow(byte, ls, ns), sm: int sm, hashes: bool,
+   out: !$B.builder_v >> $B.builder_v, ok: bool): bool =
+  if i >= hm then let
+    val () = $B.builder_free(line)
+  in ok end
+  else let
+    val b = byte2int0($A.read<byte>(heads, i))
+  in
+    if b = 10 then let
+      val () = put_char_v(line, 0)
+      val @(pa, pl) = $B.into_arr(line)
+      val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+      (* both are a path and its NUL *)
+      val is_source = (if pl = sm then same_bytes(bv_p, skip, sm, 0) else false): bool
+      val one = header_one(is_source, bv_p, pl, hashes, out)
+      val () = $A.drop<byte>(fz_p, bv_p)
+      val () = $A.free<byte>($A.thaw<byte>(fz_p))
+    in header_lines(heads, hm, i + 1, $B.create(), skip, sm, hashes, out, ok && one) end
+    else let
+      var more = line
+      val () = put_char_v(more, b)
+    in header_lines(heads, hm, i + 1, more, skip, sm, hashes, out, ok) end
+  end
+
+#pub fn input_digest_sizes {li:agz}{lh:agz}{n:pos}{m:nat | m <= n; m <= 524288}{nh:pos}{hm:nat | hm <= nh}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
+   heads_bv: !$A.borrow(byte, lh, nh), hm: int hm, b: !$B.builder_v >> $B.builder_v): bool
+
+implement input_digest_sizes(kind, in_bv, m, heads_bv, hm, b) = let
+  val () = key_profile_line(kind, b)
+  val c_ok = kept_size(in_bv, m, b)
+  val heads_ok = header_lines(heads_bv, hm, 0, $B.create(), in_bv, m, false, b, true)
+  val () = stamp_digest_sizes(b)
+in c_ok && heads_ok end
+
+#pub fn input_digest_hashes {li:agz}{lh:agz}{n:pos}{m:nat | m <= n; m <= 524288}{nh:pos}{hm:nat | hm <= nh}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
+   heads_bv: !$A.borrow(byte, lh, nh), hm: int hm, b: !$B.builder_v >> $B.builder_v): bool
+
+implement input_digest_hashes(kind, in_bv, m, heads_bv, hm, b) = let
+  val c_ok = kept_hash(in_bv, m, b)
+  val heads_ok = header_lines(heads_bv, hm, 0, $B.create(), in_bv, m, true, b, true)
+  val () = stamp_digest_hashes(b)
+in c_ok && heads_ok end
+
+(* Sizes and then hashes, for a caller that has no use for the sizes alone *)
+#pub fn input_digest {li:agz}{lh:agz}{n:pos}{m:nat | m <= n; m <= 524288}{nh:pos}{hm:nat | hm <= nh}
+  (kind: key_of, in_bv: !$A.borrow(byte, li, n), m: int m,
+   heads_bv: !$A.borrow(byte, lh, nh), hm: int hm, b: !$B.builder_v >> $B.builder_v): bool
+
+implement input_digest(kind, in_bv, m, heads_bv, hm, b) = let
+  val sized = input_digest_sizes(kind, in_bv, m, heads_bv, hm, b)
+in if sized then input_digest_hashes(kind, in_bv, m, heads_bv, hm, b) else false end
 
 (* The one reader of an output's key: fresh when <output>.key is the key
    the input gives now (see the comment above). Every object kind comes
@@ -1244,15 +1443,20 @@ implement key_fresh(kind, out_b, in_b) = let
   val there = file_exists_m(bv_o, ol)
   val @(ka, kl) = $B.into_arr(key_file_path(bv_o, ol))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+  (* the headers the compile read, from its depfile *)
+  var hn : $B.builder_v = $B.create()
+  val listed = (if there then dep_names(bv_o, ol, hn) else false): bool
+  val @(hna, hnl) = $B.into_arr(hn)
+  val @(fz_hn, bv_hn) = $A.freeze<byte>(hna)
   (* sizes first: a different size is a changed file, with no hashing *)
   var sb : $B.builder_v = $B.create()
-  val sized = input_digest_sizes(kind, bv_i, il, sb)
+  val sized = (if listed then input_digest_sizes(kind, bv_i, il, bv_hn, hnl, sb) else false): bool
   val @(sa2, slen) = $B.into_arr(sb)
   val @(fz_sz, bv_sz) = $A.freeze<byte>(sa2)
   val same_sizes = (if there && sized then file_has_prefix(bv_k, kl, bv_sz, slen) else false): bool
   var hb : $B.builder_v = $B.create()
   val () = (if same_sizes then copy_to_builder_v(bv_sz, 0, slen, slen, hb) else ())
-  val hashed = (if same_sizes then input_digest_hashes(kind, bv_i, il, hb) else false): bool
+  val hashed = (if same_sizes then input_digest_hashes(kind, bv_i, il, bv_hn, hnl, hb) else false): bool
   val @(ha2, hlen) = $B.into_arr(hb)
   val @(fz_h, bv_h) = $A.freeze<byte>(ha2)
   val result = (if hashed then file_has_bytes_m(bv_k, kl, bv_h, hlen) else false): bool
@@ -1260,6 +1464,8 @@ implement key_fresh(kind, out_b, in_b) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_h))
   val () = $A.drop<byte>(fz_sz, bv_sz)
   val () = $A.free<byte>($A.thaw<byte>(fz_sz))
+  val () = $A.drop<byte>(fz_hn, bv_hn)
+  val () = $A.free<byte>($A.thaw<byte>(fz_hn))
   val () = $A.drop<byte>(fz_k, bv_k)
   val () = $A.free<byte>($A.thaw<byte>(fz_k))
   val () = $A.drop<byte>(fz_o, bv_o)
@@ -1273,8 +1479,14 @@ in result end
   (kind: key_of, out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
 
 implement key_record(kind, out_bv, om, in_bv, im) = let
+  var hn : $B.builder_v = $B.create()
+  val listed = dep_names(out_bv, om, hn)
+  val @(hna, hnl) = $B.into_arr(hn)
+  val @(fz_hn, bv_hn) = $A.freeze<byte>(hna)
   var tb : $B.builder_v = $B.create()
-  val ok = input_digest(kind, in_bv, im, tb)
+  val ok = (if listed then input_digest(kind, in_bv, im, bv_hn, hnl, tb) else false): bool
+  val () = $A.drop<byte>(fz_hn, bv_hn)
+  val () = $A.free<byte>($A.thaw<byte>(fz_hn))
   val tbv = tb
   val @(ka, kl) = $B.into_arr(key_file_path(out_bv, om))
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
@@ -1361,11 +1573,11 @@ in b end
    Process execution
    ============================================================ *)
 
-(* Convert a filled builder into a process arg_entry *)
+(* A filled builder as a process arg_entry: the builder's own array, as big as its text *)
 #pub fn mk_arg(b: $B.builder_v): $P.arg_entry
 
 implement mk_arg(b) = let
-  val @(arr, len) = $B.to_arr(b)
+  val @(arr, len) = $B.into_arr(b)
 in @(arr, len) end
 
 fun _rev_arg_list {n:nat} .<n>.
@@ -1379,6 +1591,30 @@ fun _rev_arg_list {n:nat} .<n>.
   (xs: $L.listv($P.arg_entry), acc: $L.listv($P.arg_entry)): $L.listv($P.arg_entry)
 
 implement rev_arg_list (xs, acc) = _rev_arg_list(xs, acc)
+
+(* The builder's text as a NUL-terminated path: its bytes copied into an
+   array one longer (the NUL is its last byte, at index len, so the array
+   always has room for it whatever the builder's capacity is). The copy is
+   exact: len + 1 bytes. into_arr returns the builder's own buffer, which is
+   its capacity (grown from 64 bytes up to BUILDER_CAP), so the copy is what
+   makes the path's size exact; the buffer is not given to spawn. *)
+#pub fn path_of_builder (b: $B.builder_v)
+  : [l:agz][n:pos | n <= $B.BUILDER_CAP + 1][cs:$A.cells][k:nat | k < n] ($P.NUL_AT(cs, n, k) | $A.barr(l, n, cs), int k)
+
+implement path_of_builder (b) = let
+  val @(small, len) = $B.into_arr(b)
+  val grown = $A.alloc<byte>(len + 1)
+  val @(fz, bv) = $A.freeze<byte>(small)
+  val @(text, rest) = $A.borrow_split<byte>(fz, bv, len)
+  val () = $A.write_borrow(grown, 0, text, len)
+  val () = $A.drop<byte>(fz, $A.borrow_join<byte>(fz, text, rest))
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+  val (cells | a) = $A.barr_of_arr(grown)
+  val (set | a) = $A.barr_set(a, len, 0)
+  prval len_ok = $A.setc_len(set, cells)
+  prval nul_ok = $A.setc_nth_same(set)
+  prval nul = $P.NUL_mk(len_ok, nul_ok)
+in (nul | a, len) end
 
 (* Split a null-separated builder into a list of arg_entries *)
 #pub fn split_null_to_list(b: $B.builder_v): $L.listv($P.arg_entry)
@@ -1439,8 +1675,8 @@ in rev_arg_list(result, $L.list_vt_nil()) end
   (path_b: $B.builder_v): int
 
 implement run_mkdir(path_b) = let
-  val exec = str_to_path_arr("mkdir")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("mkdir")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "mkdir")
   val a1 = mk_arg(b1)
@@ -1450,9 +1686,9 @@ implement run_mkdir(path_b) = let
   val a3 = mk_arg(path_b)
   val argv = $L.list_vt_cons(a1, $L.list_vt_cons(a2,
     $L.list_vt_cons(a3, $L.list_vt_nil())))
-  val rc = run_cmd(bv_exec, argv)
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val rc = run_cmd(nul_exec | bv_exec, argv)
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in rc end
 
 (* ============================================================
@@ -1462,7 +1698,9 @@ in rc end
 (* The environment variable name appended to out; false when it is not
    set or is empty *)
 (* s and the NUL after it, in an array of exactly that size *)
-fn str_to_exact_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, sn + 1) = let
+#pub fn str_to_exact_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, sn + 1)
+
+implement str_to_exact_arr(s) = let
   fun fill {lb:agz}{sn:nat}{i:nat | i <= sn} .<sn - i>.
     (b: !$A.arr(byte, lb, sn + 1), s: string sn, slen: int sn, i: int i): void =
     if i >= slen then ()
@@ -1519,8 +1757,8 @@ in bput_v(out, ".lock") end
    added too, each replacing that variable. *)
 #pub fn spawn_child_with
   {sin:bool}{sout:bool}{serr:bool}
-  {lp:agz}
-  (path: !$A.borrow(byte, lp, 524288),
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: $P.NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
    argv: $L.listv($P.arg_entry),
    extra: $L.listv($P.arg_entry),
    stdin_cfg: $P.stream_config(sin),
@@ -1528,7 +1766,7 @@ in bput_v(out, ".lock") end
    stderr_cfg: $P.stream_config(serr))
   : $R.result($P.spawn_pipes(sin, sout, serr), int)
 
-implement spawn_child_with (path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
+implement spawn_child_with (nul | path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg) = let
   val held = !g_slot_held
   val extra = (if held > 0 then let
       var e : $B.builder_v = $B.create()
@@ -1538,23 +1776,23 @@ implement spawn_child_with (path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg
     else extra): $L.listv($P.arg_entry)
 in
   case+ extra of
-  | ~$L.list_vt_nil() => $P.spawn_inherit_env(path, argv, stdin_cfg, stdout_cfg, stderr_cfg)
-  | $L.list_vt_cons(_, _) => $P.spawn_inherit_env_with(path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg)
+  | ~$L.list_vt_nil() => $P.spawn_inherit_env_proved(nul | path, argv, stdin_cfg, stdout_cfg, stderr_cfg)
+  | $L.list_vt_cons(_, _) => $P.spawn_inherit_env_with_proved(nul | path, argv, extra, stdin_cfg, stdout_cfg, stderr_cfg)
 end
 
 (* As spawn_child_with, with no extra entries *)
 #pub fn spawn_child
   {sin:bool}{sout:bool}{serr:bool}
-  {lp:agz}
-  (path: !$A.borrow(byte, lp, 524288),
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: $P.NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
    argv: $L.listv($P.arg_entry),
    stdin_cfg: $P.stream_config(sin),
    stdout_cfg: $P.stream_config(sout),
    stderr_cfg: $P.stream_config(serr))
   : $R.result($P.spawn_pipes(sin, sout, serr), int)
 
-implement spawn_child (path, argv, stdin_cfg, stdout_cfg, stderr_cfg) =
-  spawn_child_with(path, argv, $L.list_vt_nil(), stdin_cfg, stdout_cfg, stderr_cfg)
+implement spawn_child (nul | path, argv, stdin_cfg, stdout_cfg, stderr_cfg) =
+  spawn_child_with(nul | path, argv, $L.list_vt_nil(), stdin_cfg, stdout_cfg, stderr_cfg)
 
 (* How running a program went: it exited with a status (1 if it did not
    exit normally), or it could not be started *)
@@ -1562,11 +1800,11 @@ implement spawn_child (path, argv, stdin_cfg, stdout_cfg, stderr_cfg) =
 
 (* Runs exec with argv, sharing this process's stdin, stdout, stderr and
    environment, as the Rust bats's Command::status did *)
-#pub fn run_program {le:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288), argv: $L.listv($P.arg_entry)): program_run
+#pub fn run_program {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs), argv: $L.listv($P.arg_entry)): program_run
 
-implement run_program (exec_bv, argv) = let
-  val spawned = spawn_child(exec_bv, argv, $P.inherit(), $P.inherit(), $P.inherit())
+implement run_program (nul | exec_bv, argv) = let
+  val spawned = spawn_child(nul | exec_bv, argv, $P.inherit(), $P.inherit(), $P.inherit())
 in
   case+ spawned of
   | ~$R.ok(sp) => let
@@ -1580,12 +1818,12 @@ in
   | ~$R.err(_) => NotStarted()
 end
 
-#pub fn run_cmd {le:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288),
+#pub fn run_cmd {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs),
    argv: $L.listv($P.arg_entry)): int
 
-implement run_cmd (exec_bv, argv) = let
-  val sr = spawn_child(exec_bv, argv,
+implement run_cmd (nul | exec_bv, argv) = let
+  val sr = spawn_child(nul | exec_bv, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
 in
   case+ sr of
@@ -1660,13 +1898,13 @@ in @(y2, m, d, secs_of_day) end
 (* Run a command and capture stdout into outbuf. Returns @(exit_code,
    stdout_len); the exit code is -errno when the command could not be
    run (Rust: Command::output's Err). *)
-#pub fn run_cmd_capture {le:agz}{lo:agz}
-  (exec_bv: !$A.borrow(byte, le, 524288),
+#pub fn run_cmd_capture {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs),
    argv: $L.listv($P.arg_entry),
    outbuf: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k)
 
-implement run_cmd_capture (exec_bv, argv, outbuf) = let
-  val sr = spawn_child(exec_bv, argv,
+implement run_cmd_capture (nul | exec_bv, argv, outbuf) = let
+  val sr = spawn_child(nul | exec_bv, argv,
     $P.dev_null(), $P.pipe_new(), $P.pipe_new())
 in
   case+ sr of
@@ -1691,6 +1929,87 @@ in
         | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
     in @(ec, olen) end
   | ~$R.err(e) => @(0 - e, 0)
+end
+
+(* How a captured run went (capture area: bats#444). The child's stdout is
+   read to its end, so bats never closes the pipe under a writer (no
+   SIGPIPE, no race on the exit status); the first 4096 bytes are kept.
+   CaptureFits: exit 0, the output fits (its length). CaptureFailed: a
+   non-zero status, the output fits. CaptureLonger: more than the buffer,
+   the child's own status and the bytes it wrote (at least that many past
+   1 GiB, where reading stops). CaptureReadFailed: a read failed, with
+   what was kept. CaptureNotRun: the errno of the failure to run it.
+   Linear: a caller matches every constructor. *)
+#pub datavtype capture_outcome =
+  | CaptureFits of ([k:nat | k <= 4096] int k)
+  | CaptureFailed of (int, [k:nat | k <= 4096] int k)
+  | CaptureLonger of (int, int)
+  | CaptureReadFailed of (int, [k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureNotRun of (int)
+
+(* Where a read of the child's output ended (capture area) *)
+datavtype capture_end =
+  | CaptureEnded of ()
+  | CaptureEndFailed of ($F.io_error)
+
+(* chunk[i, m) put at out[filled + i] (capture area) *)
+fun capture_put {lo:agz}{lc:agz}{f:nat}{m:nat | m <= 4096; f + m <= 4096}{i:nat | i <= m} .<m - i>.
+  (out: !$A.arr(byte, lo, 4096), filled: int f,
+   chunk: !$A.arr(byte, lc, 4096), m: int m, i: int i): int(f + m) =
+  if i >= m then filled + m
+  else let
+    val () = $A.set<byte>(out, filled + i, $A.get<byte>(chunk, i))
+  in capture_put(out, filled, chunk, m, i + 1) end
+
+(* Reads fd to its end, keeping the first 4096 bytes in out; stops at
+   1 GiB (capture area) *)
+fun capture_read {lo:agz}{lc:agz}{f:nat | f <= 4096}{t:nat | t <= 1073741824}
+  .<1073741824 - t>.
+  (fd: !$F.fd, out: !$A.arr(byte, lo, 4096), chunk: !$A.arr(byte, lc, 4096),
+   filled: int f, total: int t)
+  : @([g:nat | g <= 4096] int g, [u:nat] int u, capture_end) =
+  case+ $F.file_read(fd, chunk, 4096) of
+  | ~$R.err(e) => @(filled, total, CaptureEndFailed(e))
+  | ~$R.ok(k) =>
+    if k <= 0 then @(filled, total, CaptureEnded())
+    else if total + k > 1073741824 then @(filled, 1073741824, CaptureEnded())
+    else let
+      val kept = (if filled + k <= 4096 then capture_put(out, filled, chunk, k, 0)
+                  else capture_put(out, filled, chunk, 4096 - filled, 0)): [g:nat | g <= 4096] int g
+    in capture_read(fd, out, chunk, kept, total + k) end
+
+(* As run_cmd_capture, with the outcome a type: stdout is read to its end,
+   stderr goes to /dev/null, and a longer output is its own constructor *)
+#pub fn run_cmd_capture_outcome {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs),
+   argv: $L.listv($P.arg_entry),
+   outbuf: !$A.arr(byte, lo, 4096)): capture_outcome
+
+implement run_cmd_capture_outcome (nul | exec_bv, argv, outbuf) = let
+  val sr = spawn_child(nul | exec_bv, argv,
+    $P.dev_null(), $P.pipe_new(), $P.dev_null())
+in
+  case+ sr of
+  | ~$R.err(e) => CaptureNotRun(e)
+  | ~$R.ok(sp) => let
+      val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
+      val () = $P.pipe_end_close(sin_p)
+      val () = $P.pipe_end_close(serr_p)
+      val+ ~$P.pipe_fd(out_fd) = sout_p
+      val chunk = $A.alloc<byte>(4096)
+      val @(kept, total, ended) = capture_read(out_fd, outbuf, chunk, 0, 0)
+      val () = $A.free<byte>(chunk)
+      val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
+      val status = (case+ $P.child_wait(child) of
+        | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+    in
+      case+ ended of
+      | ~CaptureEndFailed(e) => CaptureReadFailed(status, kept, e)
+      | ~CaptureEnded() =>
+        if total > 4096 then CaptureLonger(status, total)
+        else if status = 0 then CaptureFits(kept)
+        else CaptureFailed(status, kept)
+    end
 end
 
 (* The prelude line count in <in>.pre, written next to the .dats
@@ -1744,22 +2063,22 @@ in
 end
 
 (* The end of the line holding e[i] (its newline, or n) *)
-fun line_end_at {le:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
-  (e: !$A.borrow(byte, le, 524288), i: int i, n: int n): [j:nat | i <= j; j <= n] int j =
+fun line_end_at {le:agz}{ne:pos}{i,n:nat | i <= n; n <= ne} .<n - i>.
+  (e: !$A.borrow(byte, le, ne), i: int i, n: int n): [j:nat | i <= j; j <= n] int j =
   if i >= n then i
   else if byte2int0($A.read<byte>(e, i)) = 10 then i
   else line_end_at(e, i + 1, n)
 
 (* Whether e[i, j) holds the k bytes of lit somewhere *)
-fun has_lit {le:agz}{m:pos | m <= 16}{i,j:nat | i <= j; j <= 524288} .<j - i>.
-  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, lit: &(@[char][m]), k: int m): bool =
+fun has_lit {le:agz}{ne:pos}{m:pos | m <= 16}{i,j:nat | i <= j; j <= ne} .<j - i>.
+  (e: !$A.borrow(byte, le, ne), i: int i, j: int j, lit: &(@[char][m]), k: int m): bool =
   if i + k > j then false
-  else if lit_at(e, i, 524288, lit, k) then true
+  else if lit_at(e, i, j, lit, k) then true
   else has_lit(e, i + 1, j, lit, k)
 
 (* The digits at e[i, j): their end, and their value *)
-fun num_at {le:agz}{i,j:nat | i <= j; j <= 524288} .<j - i>.
-  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, v: int): @([r:nat | i <= r; r <= j] int r, int) =
+fun num_at {le:agz}{ne:pos}{i,j:nat | i <= j; j <= ne} .<j - i>.
+  (e: !$A.borrow(byte, le, ne), i: int i, j: int j, v: int): @([r:nat | i <= r; r <= j] int r, int) =
   if i >= j then @(i, v)
   else let val c = byte2int0($A.read<byte>(e, i)) in
     if c < 48 then @(i, v) else if c > 57 then @(i, v)
@@ -1778,8 +2097,8 @@ fn adv_to {i,j:nat | i < j}{k:pos} (i: int i, k: int k, j: int j): [r:int | i < 
 
 (* e[i, j) with .sats and .dats as .bats and build/ dropped, and, when
    adj, each line=N as line=N-off (at least 0) *)
-fun remap_line {le:agz}{i,j:nat | i <= j; j <= 524288} .<j - i>.
-  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, adj: bool, off: int,
+fun remap_line {le:agz}{ne:pos}{i,j:nat | i <= j; j <= ne} .<j - i>.
+  (e: !$A.borrow(byte, le, ne), i: int i, j: int j, adj: bool, off: int,
    out: !$B.builder_v >> $B.builder_v): void =
   if i >= j then ()
   else let
@@ -1788,11 +2107,11 @@ fun remap_line {le:agz}{i,j:nat | i <= j; j <= 524288} .<j - i>.
     var b_c = @[char][6]('b', 'u', 'i', 'l', 'd', '/')
     var l_c = @[char][5]('l', 'i', 'n', 'e', '=')
     val ext = (if i + 5 > j then false
-               else if lit_at(e, i, 524288, s_c, 5) then true
-               else lit_at(e, i, 524288, d_c, 5)): bool
-    val bld = (if i + 6 > j then false else lit_at(e, i, 524288, b_c, 6)): bool
+               else if lit_at(e, i, j, s_c, 5) then true
+               else lit_at(e, i, j, d_c, 5)): bool
+    val bld = (if i + 6 > j then false else lit_at(e, i, j, b_c, 6)): bool
     val lin = (if ~adj then false else if i + 5 > j then false
-               else lit_at(e, i, 524288, l_c, 5)): bool
+               else lit_at(e, i, j, l_c, 5)): bool
   in
     if ext then let
       val () = bput_v(out, ".bats")
@@ -1812,15 +2131,15 @@ fun remap_line {le:agz}{i,j:nat | i <= j; j <= 524288} .<j - i>.
   end
 
 (* The line e[i, j): as is when keep, else remapped *)
-fn emit_line {le:agz}{i,j:nat | i <= j; j <= 524288}
-  (e: !$A.borrow(byte, le, 524288), i: int i, j: int j, keep: bool, adj: bool, off: int,
+fn emit_line {le:agz}{ne:pos}{i,j:nat | i <= j; j <= ne}
+  (e: !$A.borrow(byte, le, ne), i: int i, j: int j, keep: bool, adj: bool, off: int,
    out: !$B.builder_v >> $B.builder_v): void =
-  if keep then copy_to_builder_v(e, i, j, 524288, out)
+  if keep then copy_to_builder_v(e, i, j, j, out)
   else remap_line(e, i, j, adj, off, out)
 
 (* Rust's remap_errors of patsopt's stderr e[i, n), line by line *)
-fun remap_errors {le:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
-  (e: !$A.borrow(byte, le, 524288), i: int i, n: int n, off: int,
+fun remap_errors {le:agz}{ne:pos}{i,n:nat | i <= n; n <= ne} .<n - i>.
+  (e: !$A.borrow(byte, le, ne), i: int i, n: int n, off: int,
    out: !$B.builder_v >> $B.builder_v): void =
   if i >= n then ()
   else let
@@ -1838,7 +2157,7 @@ fun remap_errors {le:agz}{i,n:nat | i <= n; n <= 524288} .<n - i>.
 fn report_patsopt {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im, err: $B.builder_v): void = let
   val off = read_prelude(in_bv, in_len)
-  val @(ea, en) = $B.to_arr(err)
+  val @(ea, en) = $B.into_arr(err)
   val @(fz_e, bv_e) = $A.freeze<byte>(ea)
   var out : $B.builder_v = $B.create()
   val () = bput_v(out, "error: patsopt error:\n")
@@ -1938,7 +2257,7 @@ fn put_location {l:agz}{m:pos}{s:nat}
    out: !$B.builder_v >> $B.builder_v): void = let
   var text : $B.builder_v = $B.create()
   val () = copy_to_builder_v(c, s, e, max, text)
-  val @(text_array, text_len) = $B.to_arr(text)
+  val @(text_array, text_len) = $B.into_arr(text)
   val @(fz_text, bv_text) = $A.freeze<byte>(text_array)
   val () = bput_v(out, " --> ")
   val () = remap_line(bv_text, 0, text_len, true, off, out)
@@ -2071,8 +2390,8 @@ end
 
 (* Whether this system's sh can limit its address space to mb megabytes *)
 fn memory_limitable (mb: int): bool = let
-  val exec = str_to_path_arr("sh")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("sh")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 : $B.builder_v = $B.create()
   val () = bput_v(b1, "sh")
   var b2 : $B.builder_v = $B.create()
@@ -2083,11 +2402,11 @@ fn memory_limitable (mb: int): bool = let
   val () = bput_v(b4, "sh")
   var b5 : $B.builder_v = $B.create()
   val () = put_int_v(b5, mb)
-  val rc = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val rc = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(b5), $L.list_vt_nil()))))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in rc = 0 end
 
 (* Reads the two variables, once per process, into g_cap_secs and
@@ -2195,16 +2514,12 @@ in set_build_err() end
    succeeds).
    ============================================================ *)
 
-(* What patsopt's stdout is kept in *)
-fn stdout_path_arr (): [l:agz] $A.arr(byte, l, 524288) =
-  str_to_path_arr("build/.patsopt_stdout")
-
 (* The stdout file for a run, truncated, as a stream for the child: the
    flag says whether it could be made (else patsopt's stdout is /dev/null) *)
 fn stdout_config(): @(bool, $P.stream_config(false)) = let
-  val a = stdout_path_arr()
+  val @(a, a_len) = str_into_arr("build/.patsopt_stdout")
   val @(fz, bv) = $A.freeze<byte>(a)
-  val r = file_open_path(bv, $F.WriteOnly(), $F.CreateOrTruncate(), 420)
+  val r = file_open_m(bv, a_len, $F.WriteOnly(), $F.CreateOrTruncate(), 420)
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in
@@ -2235,9 +2550,9 @@ fn stdout_fd_read (r: $R.result($F.fd, $F.io_error), out: !$B.builder_v >> $B.bu
    more), when the stdout file could be made (ok) *)
 fn stdout_take (ok: bool): @(bool, $B.builder_v) = let
   var ob : $B.builder_v = $B.create()
-  val a = stdout_path_arr()
+  val @(a, a_len) = str_into_arr("build/.patsopt_stdout")
   val @(fz, bv) = $A.freeze<byte>(a)
-  val cut = (if ok then stdout_fd_read(file_open_path(bv, $F.ReadOnly(), $F.OpenExisting(), 0), ob)
+  val cut = (if ok then stdout_fd_read(file_open_m(bv, a_len, $F.ReadOnly(), $F.OpenExisting(), 0), ob)
     else false): bool
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
@@ -2329,8 +2644,8 @@ in number_before_percent(e, s, m, s, s) end
 (* The free space in KiB of build/ (df -Pk build's Available column), or
    -1 when df gave none *)
 fn disk_free_kib (): int = let
-  val exec = str_to_path_arr("df")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("df")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 : $B.builder_v = $B.create()
   val () = bput_v(b1, "df")
   var b2 : $B.builder_v = $B.create()
@@ -2338,14 +2653,14 @@ fn disk_free_kib (): int = let
   var b3 : $B.builder_v = $B.create()
   val () = bput_v(b3, "build")
   val out = $A.alloc<byte>(4096)
-  val @(rc, k) = run_cmd_capture(bv_x, $L.list_vt_cons(mk_arg(b1),
+  val @(rc, k) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
   val @(fz_o, bv_o) = $A.freeze<byte>(out)
   val v = (if rc = 0 then df_available(bv_o, k) else ~1): int
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
-  val () = $A.drop<byte>(fz_x, bv_x)
-  val () = $A.free<byte>($A.thaw<byte>(fz_x))
+  val () = $A.cborrow_drop(fz_x, bv_x)
+  val () = $A.barr_free($A.barr_thaw(fz_x))
 in v end
 
 implement write_settle (path_bv, m, r) =
@@ -2472,24 +2787,19 @@ implement cap_stopped (time, in_bv, in_len) = cap_report(time, in_bv, in_len)
 #pub fn remove_output_m {lo:agz}{n:pos}{m:nat | m <= n}
   (out_bv: !$A.borrow(byte, lo, n), out_len: int, m: int m): void
 
-(* ... in an array of 524288 *)
-#pub fn remove_output {lo:agz} (out_bv: !$A.borrow(byte, lo, 524288), out_len: int): void
-
-implement remove_output {lo} (out_bv, out_len) = remove_output_m(out_bv, out_len, 524288)
-
 implement remove_output_m {lo}{n}{m} (out_bv, out_len, m) = let
-  val exec = str_to_path_arr("rm")
-  val @(fz_x, bv_x) = $A.freeze<byte>(exec)
+  val (nul_x | exec) = $P.path_of_string_proved("rm")
+  val @(fz_x, bv_x) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "rm")
   var b2 = $B.create()
   val () = bput_v(b2, "-f")
   var b3 = $B.create()
   val () = copy_to_builder_v(out_bv, 0, out_len - 1, m, b3)
-  val _ = run_cmd(bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val _ = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))))
-  val () = $A.drop<byte>(fz_x, bv_x)
-in $A.free<byte>($A.thaw<byte>(fz_x)) end
+  val () = $A.cborrow_drop(fz_x, bv_x)
+in $A.barr_free($A.barr_thaw(fz_x)) end
 
 (* After a failure, as Rust's build stops at its first error, nothing
    more runs. A failed run's output (patsopt writes its #error line
@@ -2507,9 +2817,8 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
   val () = (if capped then bput_v(exec_b, "sh") else let
       val () = copy_to_builder_v(ph, 0, phlen, 512, exec_b)
     in bput_v(exec_b, "/bin/patsopt") end)
-  val () = put_char_v(exec_b, 0)
-  val @(exec_a, _) = $B.to_arr(exec_b)
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec_a)
+  val (nul_exec | exec_a, _) = path_of_builder(exec_b)
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec_a)
   var b2 = $B.create()
   val () = bput_v(b2, "-IATS")
   var b3 = $B.create()
@@ -2575,10 +2884,10 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
     val () = print_borrow(in_bv, 0, in_len, in_len)
   in print_newline() end else ())
   val @(out_ok, out_cfg) = stdout_config()
-  val sr = spawn_child_with(bv_exec, argv, envp,
+  val sr = spawn_child_with(nul_exec | bv_exec, argv, envp,
     $P.dev_null(), out_cfg, $P.pipe_new())
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in
   case+ sr of
   | ~$R.ok(sp) => let
@@ -2626,8 +2935,8 @@ end
    rel: profile): int
 
 implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
-  val exec = str_to_path_arr("clang")
-  val @(fz_exec, bv_exec) = $A.freeze<byte>(exec)
+  val (nul_exec | exec) = $P.path_of_string_proved("clang")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
   var b1 = $B.create()
   val () = bput_v(b1, "clang")
   var b2 = $B.create()
@@ -2659,8 +2968,17 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val () = copy_to_builder_v(ph, 0, phlen, 512, b7)
   val () = bput_v(b7, "/ccomp/runtime")
   (* Build argv: clang -c -o <out> <in> [opt_flags] -I<ph> -I<ph>/ccomp/runtime *)
+  (* -MD -MF: the depfile names the headers read (headers keyword) *)
+  var b8 = $B.create()
+  val () = bput_v(b8, "-MD")
+  var b9 = $B.create()
+  val () = bput_v(b9, "-MF")
+  var b10 = $B.create()
+  val () = copy_to_builder_v(out_bv, 0, cc_out_clen, out_len, b10)
+  val () = bput_v(b10, ".d")
   val tail = $L.list_vt_cons(mk_arg(b6),
-    $L.list_vt_cons(mk_arg(b7), $L.list_vt_nil()))
+    $L.list_vt_cons(mk_arg(b7), $L.list_vt_cons(mk_arg(b8),
+    $L.list_vt_cons(mk_arg(b9), $L.list_vt_cons(mk_arg(b10), $L.list_vt_nil())))))
   fun append_vt {m:nat} .<m>.
     (xs: $L.list_vt($P.arg_entry, m),
      ys: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
@@ -2678,10 +2996,10 @@ implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
     val () = print! (" ")
     val () = print_borrow(in_bv, 0, in_len, in_len)
   in print_newline() end else ())
-  val sr = spawn_child(bv_exec, argv,
+  val sr = spawn_child(nul_exec | bv_exec, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
-  val () = $A.drop<byte>(fz_exec, bv_exec)
-  val () = $A.free<byte>($A.thaw<byte>(fz_exec))
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
 in
   case+ sr of
   | ~$R.ok(sp) => let
@@ -2828,9 +3146,9 @@ fn note_write (p: $B.builder_v, b: $B.builder_v): void =
   | ~$R.err(_) => $B.builder_free(b)
   | ~$R.ok(fd) => let
       val bw = $F.buf_writer_create(fd)
-      val @(ba, bl) = $B.to_arr(b)
+      val @(ba, bl) = $B.into_arr(b)
       val @(fz_b, bv_b) = $A.freeze<byte>(ba)
-      val r = wbw_loop(bw, bv_b, 0, bl)
+      val r = wbw_loop(bw, bv_b, 0, bl, bl)
       val () = $A.drop<byte>(fz_b, bv_b)
       val () = $A.free<byte>($A.thaw<byte>(fz_b))
     in
@@ -3042,9 +3360,9 @@ implement machine_slot_refused (slot) =
 #pub fn project_lock_release (lk: project_lock): void
 
 implement project_lock_take (heavy) = let
-  val p = str_to_path_arr("bats.toml")
+  val @(p, p_len) = str_into_arr("bats.toml")
   val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val opened = file_open_path(bv_p, $F.ReadOnly(), $F.OpenExisting(), 0)
+  val opened = file_open_m(bv_p, p_len, $F.ReadOnly(), $F.OpenExisting(), 0)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
   val project = (case+ opened of
@@ -3156,23 +3474,53 @@ in
 end
 
 (* Appends to an existing file and never reads it back (manifest) *)
-#pub fn append_file_from_builder {lp:agz}{np:pos | np < 1048576}
-  (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
-   content_b: $B.builder_v): write_result
+#pub fn append_file_from_builder_m {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, content_b: $B.builder_v): write_result
 
-implement append_file_from_builder(path_bv, path_len, content_b) = let
+implement append_file_from_builder_m(path_bv, pm, content_b) = let
   val @(content_arr, content_len) = $B.into_arr(content_b)
 in
   if content_len >= 524288 then let
     val () = $A.free<byte>(content_arr)
   in WriteTooLarge() end
-  else write_opened(file_open_n(path_bv, path_len, $F.WriteOnly(), $F.AppendExisting(), 420),
+  else write_opened(file_open_m(path_bv, pm, $F.WriteOnly(), $F.AppendExisting(), 420),
                     content_arr, content_len)
 end
 
 (* ============================================================
    Ropes: text of any length (a module's .sats and .dats)
    ============================================================ *)
+
+(* text-chunks (bats#368): a rope's text in arrays of the size it needs, not the builder's 524288 *)
+#pub datavtype text_list(int) =
+  | text_nil(0)
+  | {k:nat}{lb:agz}{cap:pos}{n:nat | n <= cap; cap <= 524288}
+    text_cons(k + 1) of ($A.arr(byte, lb, cap), int n, text_list(k))
+
+(* The chunks of r, oldest first: the last is the builder's own array *)
+#pub fn rope_text(r: $B.rope): [k:nat] text_list(k)
+
+implement rope_text(r) = let
+  fun rev {a,b:nat} .<a>. (cs: $B.rope_list(a), acc: text_list(b)): text_list(a + b) =
+    case+ cs of
+    | ~$B.rope_nil() => acc
+    | ~$B.rope_cons(x, n, tl) => rev(tl, text_cons(x, n, acc))
+in
+  case+ r of
+  | ~$B.Rope(cs, b) => let
+      val @(last, last_len) = $B.into_arr(b)
+    in rev(cs, text_cons(last, last_len, text_nil())) end
+end
+
+(* Frees the chunks *)
+#pub fn text_list_free {k:nat} (cs: text_list(k)): void
+
+implement text_list_free(cs) = let
+  fun loop {k:nat} .<k>. (cs: text_list(k)): void =
+    case+ cs of
+    | ~text_nil() => ()
+    | ~text_cons(x, _, tl) => let val () = $A.free<byte>(x) in loop(tl) end
+in loop(cs) end
 
 #pub fn rput(r: !$B.rope, v: int): void
 
@@ -3199,10 +3547,10 @@ fun same_bytes {la,lb:agz}{na,nb:pos}{m:nat | m <= na; m <= nb}{j:nat | j <= m} 
   else false
 
 (* Whether the next bytes of fd are the texts of cs, in order *)
-fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
+fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !text_list(k)): bool =
   case+ cs of
-  | $B.rope_nil() => true
-  | @$B.rope_cons(a, n, tl) =>
+  | text_nil() => true
+  | @text_cons(a, n, tl) =>
     if n <= 0 then let
       val r = fd_has_chunks(fd, tl)
       prval () = fold@(cs)
@@ -3224,7 +3572,7 @@ fun fd_has_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): bool =
 
 (* Whether the file at path holds exactly the text of cs *)
 #pub fn file_has_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !$B.rope_list(k)): bool
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !text_list(k)): bool
 
 implement file_has_rope (path_bv, pm, cs) =
   case+ file_open_m(path_bv, pm, $F.ReadOnly(), $F.OpenExisting(), 0) of
@@ -3240,10 +3588,10 @@ implement file_has_rope (path_bv, pm, cs) =
   | ~$R.err(_) => false
 
 (* The texts of cs to fd, in order, the first error stopping it *)
-fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): write_result =
+fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !text_list(k)): write_result =
   case+ cs of
-  | $B.rope_nil() => Wrote()
-  | @$B.rope_cons(a, n, tl) => let
+  | text_nil() => Wrote()
+  | @text_cons(a, n, tl) => let
       val w = (if n <= 0 then Wrote() else let
           val @(fz, bv) = $A.freeze<byte>(a)
           val @(left, right) = $A.borrow_split<byte>(fz, bv, n)
@@ -3263,7 +3611,7 @@ fun fd_write_chunks {k:nat} .<k>. (fd: !$F.fd, cs: !$B.rope_list(k)): write_resu
    written and closed, or why not (a file that cannot be opened, written
    or closed) *)
 #pub fn write_file_from_rope {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{k:nat}
-  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !$B.rope_list(k)): write_result
+  (path_bv: !$A.borrow(byte, lp, np), pm: int pm, cs: !text_list(k)): write_result
 
 implement write_file_from_rope (path_bv, pm, cs) = let
   (* a .sats or .dats is written: what is kept of the names and digests of
@@ -3896,6 +4244,11 @@ fn digest_miss {lp,li,lt:agz}{n:pos}{m:nat | m <= n; m <= 524288}{k:nat | k <= 5
    out: !$B.builder_v >> $B.builder_v): [u2:nat | u2 <= 1048576] @(bool, int u2) = let
   var sb : $B.builder_v = $B.create()
   var hb : $B.builder_v = $B.create()
+  (* -v says each file really hashed (digest keyword) *)
+  val () = (if is_verbose() then let
+      val () = print! ("  ~ digested ")
+      val () = print_borrow(p, 0, k, m)
+    in print_newline() end else ())
   val a = memo_size_raw(p, m, sb)
   val b = memo_hash_raw(p, m, hb)
   val both = (a && b): bool
@@ -3960,6 +4313,17 @@ implement memo_entry_hash(p, m, out) =
   if ~digest_kept(p, m) then memo_hash_raw(p, m, out)
   else digest_entry(p, m, true, out)
 
+(* Size and hash line of a file kept in the run's table whatever its name, a C or a header (digest keyword, bats#398) *)
+#pub fn kept_size {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
+
+implement kept_size(p, m, out) = digest_entry(p, m, false, out)
+
+#pub fn kept_hash {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
+
+implement kept_hash(p, m, out) = digest_entry(p, m, true, out)
+
 (* Whether the file at path_bv begins with bv[0, len) *)
 #pub fn file_starts_with {lp:agz}{lb:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{nb:pos}{len:nat | len <= nb; len <= 524288}
   (path_bv: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, lb, nb), len: int len): bool
@@ -3983,10 +4347,7 @@ implement is_cold () =
   in set && ~zero end
 
 
-(* s and its NUL in an array of exactly that many bytes, and their number:
-   for a path that is only opened, tested or hashed (the *_m functions);
-   str_to_path_arr is for what the process package takes, an array of 524288
-   (its arg_entry), bats#327 *)
+(* s and its NUL in the builder's own array, and their number: a path to open, test or hash (the *_m functions) *)
 #pub fn str_into_arr {sn:nat} (s: string sn)
   : [n:nat | n <= $B.BUILDER_CAP][cap:pos | n <= cap; cap <= $B.BUILDER_CAP][l:agz] @($A.arr(byte, l, cap), int n)
 
@@ -3996,15 +4357,6 @@ implement str_into_arr(s) = let
   val () = put_char_v(b, 0)
   val @(a, k) = $B.into_arr(b)
 in @(a, k) end
-
-#pub fn str_to_path_arr {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): [l:agz] $A.arr(byte, l, 524288)
-
-implement str_to_path_arr(s) = let
-  var b = $B.create()
-  val () = $B.bput(b, s)
-  val () = $B.put_char(b, 0)
-  val @(arr, _) = $B.to_arr(b)
-in arr end
 
 (* ============================================================
    String constant builders
@@ -4150,14 +4502,9 @@ fun _hash_chunks {lb:agz}{r:int} .<max(r, 0)>.
 (* Appends the sha256 of the file at the NUL-terminated path p to out,
    as 64 hex digits (Rust: sha256::sha256_hex), reading it in chunks so
    any size hashes; false when it cannot be opened *)
-#pub fn put_file_sha256 {lp:agz}
-  (p: !$A.borrow(byte, lp, 524288), out: !$B.builder_v >> $B.builder_v): bool
-
 (* ... of the path in the first m bytes of an array of n (bats#327) *)
 #pub fn put_file_sha256_m {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (p: !$A.borrow(byte, lp, n), m: int m, out: !$B.builder_v >> $B.builder_v): bool
-
-implement put_file_sha256 {lp} (p, out) = put_file_sha256_m(p, 524288, out)
 
 implement put_file_sha256_m {lp}{n}{m} (p, m, out) =
   case+ file_open_m(p, m, $F.ReadOnly(), $F.OpenExisting(), 0) of
@@ -4183,30 +4530,30 @@ implement put_file_sha256_m {lp}{n}{m} (p, m, out) =
    ============================================================ *)
 
 (* The first '.' in [i, e), or e *)
-fun find_dot {l:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
-  (b: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n)
+fun find_dot {l:agz}{nb:pos}{n:nat | n <= nb}{i,e:int} .<max(e - i, 0)>.
+  (b: !$A.borrow(byte, l, nb), i: int i, e: int e, n: int n)
   : [r:int | min(i, e) <= r; r <= max(i, e)] int r =
   if i >= e then e
   else if $AR.eq_int_int(peek(b, i, n), 46) then i
   else find_dot(b, i + 1, e, n)
 
 (* Whether [i, e) is all ASCII digits *)
-fun all_digits {l:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
-  (b: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n): bool =
+fun all_digits {l:agz}{nb:pos}{n:nat | n <= nb}{i,e:int} .<max(e - i, 0)>.
+  (b: !$A.borrow(byte, l, nb), i: int i, e: int e, n: int n): bool =
   if i >= e then true
   else let val c = peek(b, i, n)
   in if c >= 48 && c <= 57 then all_digits(b, i + 1, e, n) else false end
 
 (* The first position in [i, e) that is not '0', or e *)
-fun first_nonzero {l:agz}{n:pos}{i,e:int} .<max(e - i, 0)>.
-  (b: !$A.borrow(byte, l, n), i: int i, e: int e, n: int n): pos_t =
+fun first_nonzero {l:agz}{nb:pos}{n:nat | n <= nb}{i,e:int} .<max(e - i, 0)>.
+  (b: !$A.borrow(byte, l, nb), i: int i, e: int e, n: int n): pos_t =
   if i >= e then e
   else if $AR.eq_int_int(peek(b, i, n), 48) then first_nonzero(b, i + 1, e, n)
   else i
 
 (* Whether the digits b[z, z + 10) are at most m[0, 10) *)
-fun digits_le {l:agz}{n:pos}{lm:agz}{j:nat | j <= 10} .<10 - j>.
-  (b: !$A.borrow(byte, l, n), z: pos_t, n: int n,
+fun digits_le {l:agz}{nb:pos}{n:nat | n <= nb}{lm:agz}{j:nat | j <= 10} .<10 - j>.
+  (b: !$A.borrow(byte, l, nb), z: pos_t, n: int n,
    m: !$A.borrow(byte, lm, 10), j: int j): bool =
   if j >= 10 then true
   else let
@@ -4220,8 +4567,8 @@ fun digits_le {l:agz}{n:pos}{lm:agz}{j:nat | j <= 10} .<10 - j>.
 
 (* The digits of a u32 part without leading zeros: [z, e), or z = ~1
    when [s, e) is not one (Rust: u32::from_str after an optional '+') *)
-fn u32_digits {l:agz}{n:pos}
-  (b: !$A.borrow(byte, l, n), s: pos_t, e: pos_t, n: int n): pos_t = let
+fn u32_digits {l:agz}{nb:pos}{n:nat | n <= nb}
+  (b: !$A.borrow(byte, l, nb), s: pos_t, e: pos_t, n: int n): pos_t = let
   val d = (if s < e then
     (if $AR.eq_int_int(peek(b, s, n), 43) then s + 1 else s) else s): pos_t
   var max_c = @[char][10]('4', '2', '9', '4', '9', '6', '7', '2', '9', '5')
@@ -4242,8 +4589,8 @@ end
 
 (* Rust's Version::parse over the parts of b[i, be), rendered into out:
    @(~1, ~1), or the invalid part's [start, end) *)
-fun version_parts {l:agz}{n:pos}{i,be:int} .<max(be - i, 0)>.
-  (b: !$A.borrow(byte, l, n), i: int i, be: int be, n: int n,
+fun version_parts {l:agz}{nb:pos}{n:nat | n <= nb}{i,be:int} .<max(be - i, 0)>.
+  (b: !$A.borrow(byte, l, nb), i: int i, be: int be, n: int n,
    out: !$B.builder_v >> $B.builder_v): @(pos_t, pos_t) = let
     val pe = find_dot(b, i, be, n)
     val z = u32_digits(b, i, pe, n)
@@ -4269,8 +4616,8 @@ implement put_dev1 (out, dev) =
 (* Rust's Version::parse over the parts of b[i, be), rendered into out
    (each part a u32 without '+' or leading zeros): @(~1, ~1), or the
    invalid part's [start, end) *)
-#pub fn parse_version_parts {l:agz}{n:pos}
-  (b: !$A.borrow(byte, l, n), i: pos_t, be: pos_t, n: int n,
+#pub fn parse_version_parts {l:agz}{nb:pos}{n:nat | n <= nb}
+  (b: !$A.borrow(byte, l, nb), i: pos_t, be: pos_t, n: int n,
    out: !$B.builder_v >> $B.builder_v): @(pos_t, pos_t)
 
 implement parse_version_parts (b, i, be, n, out) = version_parts(b, i, be, n, out)

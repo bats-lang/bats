@@ -70,6 +70,16 @@
 #     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
 #  3. loads-kept: `~snippet_loads(cfg, w, mv, a, e)` -> `true`
 #     killed by: "a snippet that loads a file, or one that changes the interface, was kept"
+#  3b. load-as-text: `find_word_from(bv, sn, 0, "load")` -> `find_text_from(bv, sn, 0, "load")`
+#     killed by: "Download is no loading word"
+#  3c. leading-boundary-removed: `&& ~is_word_byte(byte_at(bv, len, p - 1))` -> `&& true`
+#     killed by: "Download is no loading word"
+#  3d. trailing-boundary-removed: `&& ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))` -> `&& true`
+#     killed by: "included is no loading word"
+#  3e. apostrophe-counted: `fn is_word_byte(b: int): bool = is_ident_byte(b)` -> `fn is_word_byte(b: int): bool = is_ident_byte(b) || b = 39`
+#     killed by: "load' is a loading word"
+#  3f. end-of-file-not-a-boundary: `&& ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))` -> `&& p + g1u2i(string1_length(s)) < len && ~is_word_byte(byte_at(bv, len, p + g1u2i(string1_length(s))))`
+#     killed by: "load ending the file (no newline after it) is a loading word"
 #  4. failure-kept-as-pass: `val want_pass = (is_accept && status = 0): bool` -> `val want_pass = (is_accept): bool`
 #     killed by: "memo cold audit lie"
 #  5. no-patsopt-error-kept: `ln0 > 0 && has_error_from(bv_l, ln, 0)` -> `ln0 > 0`
@@ -149,6 +159,45 @@ failed() { grep -aqF "FAIL $2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: no F
 
 # patsopt's own text for the snippet the norm fixture holds
 SNORM='fn h {n:nat} (x: int n): [m:nat] int m = x - 1'
+# an existential's binder: patsopt's S2Eexi(n(8480); ... is compared as S2Eexi(n(_); ...
+SEXI='fn h (f: char): [n:nat] bool = f'
+# exi_expect <name> <number>: the expect for SEXI, with that binder name and number
+# in its S2Eexi tokens only. Its S2Evar tokens stay n(14465), the value patsopt
+# prints, so a near-miss differs from the real error in its S2Eexi token alone:
+# the fixture then fails because of the S2Eexi rule and nothing else.
+exi_expect() {
+  printf 'function h\nline 1\nthe dynamic expression cannot be assigned the type [S2Eexi(%s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))].\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Eexi(%s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)); S2Ecst(bool_t0ype))' "$1" "$2" "$1" "$2"
+}
+# a list of binders: patsopt's S2Eexi(n(8480), m(8481); ... compares every binder
+SEXI_LIST='fn h (f: char): [n:nat; m:nat] bool = f'
+# exi_list_expect <name> <number>: the second binder of the S2Eexi tokens, the first and every S2Evar token as patsopt-like values
+exi_list_expect() {
+  printf 'function h\nline 1\nthe dynamic expression cannot be assigned the type [S2Eexi(n(14465), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(m(14466)), S2Eintinf(0)); S2Ecst(bool_t0ype))].\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Ecst(char_t0ype)\nThe needed term is: S2Eexi(n(14465), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(n(14465)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(m(14466)), S2Eintinf(0)); S2Ecst(bool_t0ype))' "$1" "$2" "$1" "$2"
+}
+# a name with copies: patsopt's S2Eexi(a$8630(14292); ... and S2Evar(a$8630$8631(14293)),
+# the digits after each $ and the number are all variable numbers
+SEXI_COPY='fn mk1 (): [a:nat] int a = 0
+fn h (): bool = mk1 ()'
+# exi_copy_expect <binder> <number>: the binder of the S2Eexi token (name with its $ copies, then number)
+exi_copy_expect() {
+  printf 'function h\nline 2\nthe dynamic expression cannot be assigned the type [S2Ecst(bool_t0ype)].\nmismatch of static terms (tyleq):\nThe actual term is: S2Eapp(S2Ecst(g1int_int_t0ype); S2Eextkind(atstype_int), S2Evar(a$7001$7002(15001)))\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Eexi(%s(%s); S2Eapp(S2Ecst(>=); S2Evar(a$7001(15000)), S2Eintinf(0)); S2Eapp(S2Ecst(g1int_int_t0ype); S2Eextkind(atstype_int), S2Evar(a$7001(15000))))\nThe needed term is: S2Ecst(bool_t0ype)' "$1" "$2"
+}
+# both: two binders with copies
+SEXI_COPY_LIST='fn mk2 (): [a:nat; b:nat] @(int a, int b) = @(0, 0)
+fn h (): bool = mk2 ()'
+# exi_copy_list_expect <name> <number>: the second binder of the S2Eexi token
+exi_copy_list_expect() {
+  printf 'function h\nline 2\nthe dynamic expression cannot be assigned the type [S2Ecst(bool_t0ype)].\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=-1; 0=S2Eapp(S2Ecst(int); S2Evar(a$7001$7003(15002))), 1=S2Eapp(S2Ecst(int); S2Evar(b$7002$7004(15003))))\nThe needed term is: S2Ecst(bool_t0ype)\nmismatch of static terms (tyleq):\nThe actual term is: S2Eexi(a$7001(15000), %s(%s); S2Eapp(S2Ecst(>=); S2Evar(a$7001(15000)), S2Eintinf(0)), S2Eapp(S2Ecst(>=); S2Evar(b$7002(15001)), S2Eintinf(0)); S2Etyrec(flt0; npf=-1; 0=S2Eapp(S2Ecst(int); S2Evar(a$7001(15000))), 1=S2Eapp(S2Ecst(int); S2Evar(b$7002(15001)))))\nThe needed term is: S2Ecst(bool_t0ype)' "$1" "$2"
+}
+# an unsolved variable with no arrow: patsopt's S2EVar(5245), S2EVar(5246) is compared as S2EVar(_), S2EVar(_)
+SEVAR='dataprop PA (int, int) = | PA0 (0, 0)
+dataprop PB (int, int) = | PB0 (0, 0)
+fn h {a:int} (pf: PB(a, a) | x: int): [k:int; j:int] (PA(k, j) | int) = (pf | x)'
+# evar_expect <token>: the expect for SEVAR with <token> in the first S2EVar of its first needed term;
+# every other number is a value other than patsopt's, so a near-miss differs in that token alone
+evar_expect() {
+  printf 'function h\nline 3\nthe dynamic expression cannot be assigned the type [S2Eexi(k(9002), j(9003); ; S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PA); S2Evar(k(9002)), S2Evar(j(9003))), 1=S2Ecst(int)))].\nmismatch of static terms (tyleq):\nThe actual term is: S2Eapp(S2Ecst(PB); S2Evar(a(9001)), S2Evar(a(9001)))\nThe needed term is: S2Eapp(S2Ecst(PA); S2EVar(%s), S2EVar(7102))\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PB); S2Evar(a(9001)), S2Evar(a(9001))), 1=S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int)))\nThe needed term is: S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PA); S2EVar(7101), S2EVar(7102)), 1=S2Ecst(int))\nmismatch of static terms (tyleq):\nThe actual term is: S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PB); S2Evar(a(9001)), S2Evar(a(9001))), 1=S2Eapp(S2Ecst(g0int_t0ype); S2Eextkind(atstype_int)))\nThe needed term is: S2Eexi(k(9002), j(9003); ; S2Etyrec(flt0; npf=1; 0=S2Eapp(S2Ecst(PA); S2Evar(k(9002)), S2Evar(j(9003))), 1=S2Ecst(int)))' "$1"
+}
 ENORM='unsolved constraint: C3NSTRprop(C3TKmain(); S2Eapp(S2Ecst(>=); S2EVar(1->S2Eapp(S2Ecst(sub_int_int); S2Evar(n(2)), S2Eintinf(1))), S2Eintinf(0)))'
 
 if [ "$ONLY" != memo ]; then
@@ -174,6 +223,14 @@ fixture "$G" reject blank-line 'fn g (x: int): int = x
 #error "first\n\nsecond"' 'function g
 line 2
 [#error] directive is encountered: first'
+# the number of an existential's binder is other than patsopt's
+fixture "$G" reject exi-numbered "$SEXI" "$(exi_expect n 14465)"
+# the numbers of every binder of a list, and of a name's copies, are other than patsopt's
+fixture "$G" reject exi-binders "$SEXI_LIST" "$(exi_list_expect m 14466)"
+fixture "$G" reject exi-suffix "$SEXI_COPY" "$(exi_copy_expect 'a$7001' 15000)"
+fixture "$G" reject exi-suffix-binders "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'b$7002' 15001)"
+# the number of a variable with no arrow is other than patsopt's
+fixture "$G" reject evar-bare "$SEVAR" "$(evar_expect 7101)"
 run "$TMP/good.log" "$G" --cold
 [ $rc = 0 ] || { cat "$TMP/good.log"; fail "good fixtures: status $rc"; }
 okline "$TMP/good.log" accept/ok good
@@ -181,7 +238,12 @@ okline "$TMP/good.log" reject/nonexhaustive good
 okline "$TMP/good.log" reject/numbered good
 okline "$TMP/good.log" reject/dollar good
 okline "$TMP/good.log" reject/blank-line good
-said "$TMP/good.log" "fixtures: 5 ok, 0 failed" good
+okline "$TMP/good.log" reject/exi-numbered good
+okline "$TMP/good.log" reject/exi-binders good
+okline "$TMP/good.log" reject/exi-suffix good
+okline "$TMP/good.log" reject/exi-suffix-binders good
+okline "$TMP/good.log" reject/evar-bare good
+said "$TMP/good.log" "fixtures: 10 ok, 0 failed" good
 nofail "$TMP/good.log" good
 [ -z "$(ls "$TMP/tmp")" ] || fail "the run left a temporary directory: $(ls "$TMP/tmp")"
 # the project is as it was
@@ -246,6 +308,18 @@ printf '(* not in the module *)\n' > "$B/accept/no-such-line/before"
 fixture "$B" reject number-kept "$SNORM" "function h
 line 1
 $(printf '%s' "$ENORM" | sed -e 's/Eintinf(1)/Eintinf(7)/')"
+# the binder's name is still compared, and so is a number that is not digits
+fixture "$B" reject exi-other-name "$SEXI" "$(exi_expect m 14465)"
+fixture "$B" reject exi-number-not-digits "$SEXI" "$(exi_expect n 14x65)"
+# the second binder's name is still compared, and so is its number; so are a copy's digits
+fixture "$B" reject exi-binders-other-name "$SEXI_LIST" "$(exi_list_expect k 14466)"
+fixture "$B" reject exi-binders-number-not-digits "$SEXI_LIST" "$(exi_list_expect m 14x66)"
+fixture "$B" reject exi-suffix-other-name "$SEXI_COPY" "$(exi_copy_expect 'b$7001' 15000)"
+fixture "$B" reject exi-suffix-digits-and-letters "$SEXI_COPY" "$(exi_copy_expect 'a$70x01' 15000)"
+fixture "$B" reject exi-suffix-binders-other-name "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'c$7002' 15001)"
+# a bare S2EVar's number is digits, not letters or a mix
+fixture "$B" reject evar-bare-not-digits "$SEVAR" "$(evar_expect 71x1)"
+fixture "$B" reject evar-bare-name "$SEVAR" "$(evar_expect name)"
 run "$TMP/bad.log" "$B"
 [ $rc = 1 ] || { cat "$TMP/bad.log"; fail "bad fixtures: status $rc, not 1"; }
 L=$TMP/bad.log
@@ -255,6 +329,11 @@ saidpart "$L" "FAIL reject/other-word: rejected, but not as its expect says: its
 saidpart "$L" "FAIL reject/missing-line: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/extra-line: rejected, but not as its expect says: its error is not the one expected:" bad
 saidpart "$L" "FAIL reject/number-kept: rejected, but not as its expect says: its error is not the one expected:" bad
+saidpart "$L" "FAIL reject/exi-other-name: rejected, but not as its expect says: its error is not the one expected:" bad
+saidpart "$L" "FAIL reject/exi-number-not-digits: rejected, but not as its expect says: its error is not the one expected:" bad
+for m in exi-binders-other-name exi-binders-number-not-digits exi-suffix-other-name exi-suffix-digits-and-letters exi-suffix-binders-other-name evar-bare-not-digits evar-bare-name; do
+  saidpart "$L" "FAIL reject/$m: rejected, but not as its expect says: its error is not the one expected:" bad
+done
 saidpart "$L" "FAIL reject/other-line: rejected, but not as its expect says: an error is at line 1 of its snippet, not 2: " bad
 saidpart "$L" "FAIL reject/other-function: rejected, but not as its expect says: line 1 of its snippet is not in g" bad
 saidpart "$L" "FAIL reject/no-declaration: rejected, but not as its expect says: line 0 of its snippet is not in h" bad
@@ -266,7 +345,7 @@ saidpart "$L" "FAIL reject/no-patsopt-error: rejected, but not as its expect say
 saidpart "$L" "FAIL reject/other-module: rejected, but not as its expect says: an error is in " bad
 saidpart "$L" "/src/other.bats, not src/lib.bats: unsolved constraint" bad
 saidpart "$L" "FAIL accept/no-such-line: no line \"(* not in the module *)\" in src/lib.bats" bad
-said "$L" "fixtures: 0 ok, 17 failed" bad
+said "$L" "fixtures: 0 ok, 26 failed" bad
 # the raw error is shown for a mismatch, so the reader can fix the expect
 saidpart "$L" "pattern match is nonexhaustive:" bad
 
@@ -663,6 +742,81 @@ okline "$TMP/l1.log" accept/loads "memo load"
 okline "$TMP/l1.log" accept/loads-sats "memo load .sats"
 saidpart "$TMP/l1.log" "FAIL reject/moves-limit: rejected, but not as its expect says: an error is in " "memo interface changed"
 [ "$(nfiles "$M4")" = 0 ] || fail "memo: a snippet that loads a file, or one that changes the interface, was kept"
+
+# ---- the word rule, one case each (bats#432): a snippet is kept when no loading word (staload,
+# dynload, load, include) is a word of it and #use and #require are not in it. Each case is one
+# fixture in a memo of its own, must check (status 0, its own accept line) and prints one line, `ok   word/<case>: <what> [<its accept line>]`, or
+# `FAIL word/<case>: <what>: the snippet was kept` (or `not kept`); the section fails when one did not hold.
+# It runs before the memo's own in-a-name case below, which stops the run when it fails.
+wordfail=0
+wordcase() { # <case> <kept|not> <what> <snippet>: the fixture alone; kept means it checks and is kept
+  mfix "$TMP/word" accept "$1" src/lib.bats '(* end *)' "$4"
+  # WORD_AT_EOF=1: the snippet ends with its last byte, mfix's newline taken away (the end of the file is the boundary)
+  [ -z "${WORD_AT_EOF:-}" ] || printf '(* fixture-snippet *)\n%s' "$4" > "$TMP/word/accept/$1/snippet.bats"
+  wm=$TMP/word-memo-$1; wl=$TMP/word-$1.log
+  mrunx "$MP" "$TMP/word" "$MW" "$wm" "$wl" --only "accept/$1"
+  kept=$(nfiles "$wm")
+  if [ "$rc" = 0 ] && grep -aqE "^ok   accept/$1 \([0-9]+ s\)\$" "$wl"; then
+    if { [ "$2" = kept ] && [ "$kept" = 2 ]; } || { [ "$2" = not ] && [ "$kept" = 0 ]; }; then
+      echo "ok   word/$1: $3 [$(grep -aE "^ok   accept/$1 \([0-9]+ s\)\$" "$wl")]"
+    else
+      echo "FAIL word/$1: $3: the snippet was $([ "$kept" = 0 ] && echo 'not kept' || echo 'kept')"
+      wordfail=1
+    fi
+  else
+    echo "FAIL word/$1: $3: the snippet does not check (status $rc): $(grep -a '^FAIL' "$wl" | head -1)"
+    wordfail=1
+  fi
+  WORD_AT_EOF=
+}
+wordcase download kept 'Download is no loading word (a longer name, bats#432)' 'fn Download (x: int): int = x'
+wordcase included kept 'included is no loading word (include, then an identifier byte)' 'fn included (x: int): int = x'
+wordcase loaded kept 'loaded is no loading word (load, then an identifier byte)' 'fn loaded (x: int): int = x'
+wordcase apostrophe not "load' is a loading word (the apostrophe is not an identifier byte, so load is the word)" "fn load' (x: int): int = x"
+wordcase comment not 'load in a comment is a loading word (a comment counts: the scan is conservative)' '(* load *)
+
+fn g (x: int): int = x'
+wordcase end-included kept 'a longer name on the last line (a newline follows it) is no loading word' 'fn g (): int = 1
+// included'
+WORD_AT_EOF=1 wordcase eof-included kept 'a longer name ending the file (no newline after it) is no loading word' 'fn g (): int = 1
+// included'
+WORD_AT_EOF=1 wordcase eof-load not 'load ending the file (no newline after it) is a loading word' 'fn g (): int = 1
+// load'
+wordcase staload not 'staload is a loading word' 'staload "helper.sats"
+
+fn g (): int = help ()'
+wordcase dynload not 'dynload is a loading word' 'dynload "helper.dats"
+
+fn g (): int = 1'
+wordcase hash-include not '#include is a loading word' '#include "share/atspre_staload.hats"
+
+fn g (x: int): int = x'
+wordcase load-word not 'load as a word is a loading word' 'fn load (x: int): int = x'
+wordcase include-word not 'include as a word is a loading word' 'fn include (x: int): int = x'
+wordcase last-line-load not 'load on the last line (a newline follows it) is a loading word' 'fn g (): int = 1
+// load'
+wordcase use not '#use is a loading word, anywhere in the snippet' '(* #use *)
+
+fn g (x: int): int = x'
+wordcase require not '#require is a loading word, anywhere in the snippet' '(* #require *)
+
+fn g (x: int): int = x'
+[ "$wordfail" = 0 ] || fail "word cases: one or more did not hold (the FAIL lines above)"
+
+# ---- load and include inside a longer name load nothing (bats#432): the result is kept, and the
+# second run serves it
+MF4W=$TMP/mfix4w
+mfix "$MF4W" accept in-a-name src/lib.bats '(* end *)' 'fn Download (x: int): int = x
+fn unloaded_include_loader (x: int): int = Download (x)'
+M4W=$TMP/memo4w
+: > "$PLOG"; mrunx "$MP" "$MF4W" "$MW" "$M4W" "$TMP/w1.log"
+[ $rc = 0 ] || { cat "$TMP/w1.log"; fail "memo word in a name: status $rc, not 0"; }
+okline "$TMP/w1.log" accept/in-a-name "memo word in a name"
+[ "$(nfiles "$M4W")" = 2 ] || fail "memo: a snippet with load or include inside a name was not kept"
+: > "$PLOG"; mrunx "$MP" "$MF4W" "$MW" "$M4W" "$TMP/w2.log"
+[ $rc = 0 ] || { cat "$TMP/w2.log"; fail "memo word in a name again: status $rc, not 0"; }
+saidpart "$TMP/w2.log" "ok   accept/in-a-name (0 s) [memo]" "memo word in a name again"
+
 
 # ---- a run killed while it checks leaves no file
 M6=$TMP/memo6

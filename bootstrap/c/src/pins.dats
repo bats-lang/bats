@@ -871,7 +871,7 @@ fn lock_beside {lc:agz}{sn:nat}
   val () = copy_to_builder_v(cmd, file_at, file_to - 12, 4096, path)
   val () = bput_v(path, name)
   val () = put_char_v(path, 0)
-  val @(path_a, path_len) = $B.to_arr(path)
+  val @(path_a, path_len) = $B.into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
   val exists = file_exists_m(bv_p, path_len)
   val () = $A.drop<byte>(fz_p, bv_p)
@@ -914,7 +914,7 @@ fn check_file {lc:agz}
   var path : $B.builder_v = $B.create()
   val () = copy_to_builder_v(cmd, file_at, file_to, 4096, path)
   val () = put_char_v(path, 0)
-  val @(path_a, path_len) = $B.to_arr(path)
+  val @(path_a, path_len) = $B.into_arr(path)
   val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
   val status = (case+ read_whole_m(bv_p, path_len) of
     | ~whole_err(_) => let
@@ -992,8 +992,8 @@ end
    git. The status as check-pins: 0, 1, or 2 for no file, a git that fails or a
    list too long *)
 fn discover (): int = let
-  val git_exec = str_to_path_arr("git")
-  val @(fz_git, bv_git) = $A.freeze<byte>(git_exec)
+  val (nul_git | git_exec) = $P.path_of_string_proved("git")
+  val @(fz_git, bv_git) = $A.barr_freeze(git_exec)
   val argv = $L.list_vt_cons(literal_arg("git"), $L.list_vt_cons(literal_arg("ls-files"),
     $L.list_vt_cons(literal_arg("-z"), $L.list_vt_cons(literal_arg("--cached"),
     $L.list_vt_cons(literal_arg("--others"), $L.list_vt_cons(literal_arg("--exclude-standard"),
@@ -1005,7 +1005,7 @@ fn discover (): int = let
     $L.list_vt_cons(literal_arg(":(glob)**/package.json"),
     $L.list_vt_cons(literal_arg(":(glob)**/ats2.bats"), $L.list_vt_nil())))))))))))))
   val out = $A.alloc<byte>(4096)
-  val @(rc, listed) = run_cmd_capture(bv_git, argv, out)
+  val @(rc, listed) = run_cmd_capture(nul_git | bv_git, argv, out)
   val @(fz_out, bv_out) = $A.freeze<byte>(out)
   val status = (if listed >= 4096 then let
       val () = prerr! ("error: bats check-pins --discover: the files are listed in 4095 bytes or more")
@@ -1022,8 +1022,8 @@ fn discover (): int = let
     else check_files(bv_out, 0, listed, ats2_among(bv_out, 0, listed), 0)): int
   val () = $A.drop<byte>(fz_out, bv_out)
   val () = $A.free<byte>($A.thaw<byte>(fz_out))
-  val () = $A.drop<byte>(fz_git, bv_git)
-  val () = $A.free<byte>($A.thaw<byte>(fz_git))
+  val () = $A.cborrow_drop(fz_git, bv_git)
+  val () = $A.barr_free($A.barr_thaw(fz_git))
 in status end
 
 (* Runs bats check-pins when that is the command given and answers true; false for any other command *)
