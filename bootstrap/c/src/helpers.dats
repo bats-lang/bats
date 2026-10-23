@@ -552,15 +552,22 @@ end
 
 
 
+(* Whether src[p, p + m) is lit[0, m), read from index i: the characters are compared where they lie, with no array made for the literal (bats#405: the array made for each call of lit_at was a quarter of the lexer's instructions) *)
+fun lit_cmp {l:agz}{n:pos}{m:pos}{p:nat | p + m <= n}{i:nat | i <= m} .<m - i>.
+  (src: !$A.borrow(byte, l, n), p: int p, lit: &(@[char][m]), m: int m, i: int i): bool =
+  if i >= m then true
+  else let
+    val c = char2int0(lit.[i])
+    val want = (if c < 0 then c + 256 else c): int
+  in
+    if byte2int0($A.read<byte>(src, p + i)) = want then lit_cmp(src, p, lit, m, i + 1)
+    else false
+  end
+
 implement lit_at(src, pos, max, lit, m) =
   if pos < 0 then false
   else if pos + m > max then false
-  else let
-    val @(f, b) = $A.freeze<byte>($S.from_char_array(lit, m))
-    val r = $S.match_at(src, pos, b, m)
-    val () = $A.drop<byte>(f, b)
-    val () = $A.free<byte>($A.thaw<byte>(f))
-  in r end
+  else lit_cmp(src, pos, lit, m, 0)
 
 
 
