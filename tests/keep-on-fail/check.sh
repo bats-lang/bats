@@ -75,7 +75,7 @@ echo data > "\$TMP/log"
 echo "\$TMP" > "$TMP/teardown.ok.dir"
 EOF
 BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/teardown-ok.sh" || fail "teardown script failed"
-[ -e "$TMP/teardown.ok.saw" ] || fail "teardown did not run on a pass, or ran after the directory went"
+[ -e "$TMP/teardown.ok.saw" ] || fail "no teardown on a pass, or it ran after the directory went"
 dir5=$(cat "$TMP/teardown.ok.dir")
 [ ! -e "$dir5" ] || fail "the passing teardown script's directory $dir5 is still there"
 cat > "$TMP/scripts/teardown-bad.sh" <<EOF
@@ -89,7 +89,7 @@ exit 1
 EOF
 BATS_KEPT_DIR=$KEPT sh "$TMP/scripts/teardown-bad.sh" 2> "$TMP/teardown-bad.err" &&
   fail "bad teardown script passed"
-[ -e "$TMP/teardown.bad.saw" ] || fail "teardown did not run on a failure, or after the directory went"
+[ -e "$TMP/teardown.bad.saw" ] || fail "no teardown on a failure, or it ran after the directory"
 dir6=$(cat "$TMP/teardown.bad.dir")
 [ -f "$dir6/log" ] || fail "the failing teardown script's directory $dir6 was not kept"
 last=$(tail -n 1 "$TMP/teardown-bad.err")
