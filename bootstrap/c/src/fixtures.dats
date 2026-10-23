@@ -1693,10 +1693,11 @@ fn store_in {cfg_cap:pos}{mv_cap:pos}{bv_f_cap:pos} {l:agz}{lm:agz}{lx:agz}{mv_l
       val kb2 = kb
       val wrote_key = (if cn > 0 then path_write(entry_path(bv_m, mn, bv_k, kn, ".key"), kb2)
         else let val () = $B.builder_free(kb2) in false end): bool
+      (* fixtures-memo: the digest is of the bytes held, not of a read-back of the .key *)
       var ch : $B.builder_v = $B.create()
-      val hashed = (if wrote_key then path_sha(entry_path(bv_m, mn, bv_k, kn, ".key"), ch) else false): bool
+      val () = (if wrote_key then put_sha_range(bv_c, cn, 0, cn, ch) else ())
       val ch2 = ch
-      val () = (if hashed then let
+      val () = (if wrote_key then let
           val res = res_content(bv_k, kn, want_pass, ch2, bv_n, nn)
           val _ = path_write(entry_path(bv_m, mn, bv_k, kn, ".res"), res)
         in () end
