@@ -52,7 +52,8 @@ fun occs_free {n:int}{k:nat} .<k>. (xs: occs(n, k)): void =
    members), its keyword's start, its name src[ns, ne) and its body's
    identifiers *)
 datavtype def(n:int) =
-  | {k:nat}{s,e:nat | s <= e; e <= n} Def(n) of (bool, int, spos(n), int s, int e, occs(n, k))
+  | {k:nat}{name_start,name_end:nat | name_start <= name_end; name_end <= n}
+    Def(n) of (bool, int, spos(n), int name_start, int name_end, occs(n, k))
 
 datavtype defs(n:int, int) =
   | defs_nil(n, 0) of ()
@@ -89,8 +90,10 @@ fun dnames_free {m:nat} .<m>. (xs: dnames(m)): void =
    identifiers of its body so far *)
 datavtype cur(n:int) =
   | cur_none(n) of ()
-  | {l:agz}{k:nat | k <= 256}{j:nat}{s,e:nat | s <= e; e <= n}
-    cur_def(n) of ($A.arr(byte, l, 256), int k, bool, int, spos(n), int s, int e, occs(n, j))
+  | {l:agz}{k:nat | k <= 256}{j:nat}
+    {name_start,name_end:nat | name_start <= name_end; name_end <= n}
+    cur_def(n) of ($A.arr(byte, l, 256), int k, bool, int, spos(n), int name_start,
+                   int name_end, occs(n, j))
 
 (* What the scan has found: the current file's definitions (k), the
    names of every definition so far (m; m - k of them in earlier
@@ -322,34 +325,36 @@ fun occs_rev {n:int}{a,b:nat} .<a>. (xs: occs(n, a), acc: occs(n, b)): occs(n, a
 fn occs_copy {n:int}{j:nat} (xs: !occs(n, j)): occs(n, j) =
   occs_rev(occs_copy_rev(xs, occs_nil()), occs_nil())
 
-(* ds, copied onto acc, the last first, each group (an implement has none) moved by off *)
+(* definitions, copied onto acc, the last first, each group (not an implement's) moved by offset *)
 fun defs_copy_rev {n:int}{k,m:nat} .<k>.
-  (ds: !defs(n, k), off: int, acc: defs(n, m)): defs(n, m + k) =
-  case+ ds of
+  (definitions: !defs(n, k), offset: int, acc: defs(n, m)): defs(n, m + k) =
+  case+ definitions of
   | defs_nil() => acc
   | defs_cons(d, tl) => let
-      val+ @Def(impl, grp, kw, ns, ne, oc) = d
-      val copy = Def(impl, (if grp > 0 then grp + off else grp), kw, ns, ne, occs_copy(oc))
+      val+ @Def(is_implement, group_id, keyword, name_start, name_end, occurrences) = d
+      val moved = (if group_id > 0 then group_id + offset else group_id): int
+      val copy = Def(is_implement, moved, keyword, name_start, name_end, occs_copy(occurrences))
       prval () = fold@(d)
-    in defs_copy_rev(tl, off, defs_cons(copy, acc)) end
+    in defs_copy_rev(tl, offset, defs_cons(copy, acc)) end
 
 fun defs_rev {n:int}{a,b:nat} .<a>. (xs: defs(n, a), acc: defs(n, b)): defs(n, a + b) =
   case+ xs of
   | ~defs_nil() => acc
   | ~defs_cons(d, tl) => defs_rev(tl, defs_cons(d, acc))
 
-(* The names of ds (file fi, bytes bv), the last first, added to acc *)
+(* The names of definitions (file file_index, bytes bytes_view), the last first, added to acc *)
 fun names_rev {n:pos}{l:agz}{k,m:nat} .<k>.
-  (ds: !defs(n, k), bv: !$A.borrow(byte, l, n), fi: spos(RMAX), acc: dnames(m)): dnames(m + k) =
-  case+ ds of
+  (definitions: !defs(n, k), bytes_view: !$A.borrow(byte, l, n), file_index: spos(RMAX),
+   acc: dnames(m)): dnames(m + k) =
+  case+ definitions of
   | defs_nil() => acc
   | defs_cons(d, tl) => let
-      val+ @Def(impl, grp, _, ns, ne, _) = d
-      val a = $A.alloc<byte>(256)
-      val name_len = copy_name(bv, ns, ne, a, 0)
-      val nd = DName(a, name_len, impl, fi, grp)
+      val+ @Def(is_implement, group_id, _, name_start, name_end, _) = d
+      val name_bytes = $A.alloc<byte>(256)
+      val name_len = copy_name(bytes_view, name_start, name_end, name_bytes, 0)
+      val name_def = DName(name_bytes, name_len, is_implement, file_index, group_id)
       prval () = fold@(d)
-    in names_rev(tl, bv, fi, dnames_cons(nd, acc)) end
+    in names_rev(tl, bytes_view, file_index, dnames_cons(name_def, acc)) end
 
 (* xs, moved onto acc in the opposite order *)
 fun dnames_rev {a,b:nat} .<a>. (xs: dnames(a), acc: dnames(b)): dnames(a + b) =
@@ -379,14 +384,18 @@ val g_scan_run = ref<int>(0)
 (* A scan is kept for this many calls of implement_cycles after its last use *)
 #define SCAN_KEEP 64
 
+(* The release of one scan: its path, its bytes and its definitions *)
+fn scanned_release (entry: scanned): void = let
+  val+ ~Scanned(path, _, arena, source, _, _, definitions, _, _, _) = entry
+  val () = $A.free<byte>(path)
+  val () = whole_free(arena, source)
+in defs_free(definitions) end
+
 fun scans_free {c:nat} .<c>. (xs: scans(c)): void =
   case+ xs of
   | ~scans_nil() => ()
   | ~scans_cons(entry, tl) => let
-      val+ ~Scanned(path, _, arena, source, _, _, ds, _, _, _) = entry
-      val () = $A.free<byte>(path)
-      val () = whole_free(arena, source)
-      val () = defs_free(ds)
+      val () = scanned_release(entry)
     in scans_free(tl) end
 
 (* The scans used within SCAN_KEEP calls before run *)
@@ -397,96 +406,103 @@ fun scans_trim {c:nat} .<c>. (xs: scans(c), run: int): [c2:nat] scans(c2) =
       val rest = scans_trim(tl, run)
       val+ @Scanned(_, _, _, _, _, _, _, _, _, last_used) = entry
       val keep = (run - last_used <= SCAN_KEEP): bool
+      prval () = fold@(entry)
     in
-      if keep then let
-        prval () = fold@(entry)
-      in scans_cons(entry, rest) end
+      if keep then scans_cons(entry, rest)
       else let
-        prval () = fold@(entry)
-        val+ ~Scanned(path, _, arena, source, _, _, ds, _, _, _) = entry
-        val () = $A.free<byte>(path)
-        val () = whole_free(arena, source)
-        val () = defs_free(ds)
+        val () = scanned_release(entry)
       in rest end
     end
 
-(* Whether p[0, pm) and path[0, path_len) hold the same bytes *)
-fun same_path {lp:agz}{np:pos}{pm:nat | pm <= np}{path_loc:agz}{path_cap:pos}
-  {path_len:nat | path_len <= path_cap}{i:nat | i <= pm} .<pm - i>.
-  (p: !$A.borrow(byte, lp, np), pm: int pm, path: !$A.arr(byte, path_loc, path_cap),
-   path_len: int path_len, i: int i): bool =
-  if i >= pm then pm = path_len
+(* Whether path_view[0, path_mark) and path[0, path_len) hold the same bytes *)
+fun same_path {lp:agz}{np:pos}{path_mark:nat | path_mark <= np}{path_loc:agz}{path_cap:pos}
+  {path_len:nat | path_len <= path_cap}{i:nat | i <= path_mark} .<path_mark - i>.
+  (path_view: !$A.borrow(byte, lp, np), path_mark: int path_mark,
+   path: !$A.arr(byte, path_loc, path_cap), path_len: int path_len, i: int i): bool =
+  if i >= path_mark then path_mark = path_len
   else if i >= path_len then false
-  else if byte2int0($A.read<byte>(p, i)) = byte2int0($A.get<byte>(path, i)) then
-    same_path(p, pm, path, path_len, i + 1)
+  else if byte2int0($A.read<byte>(path_view, i)) = byte2int0($A.get<byte>(path, i)) then
+    same_path(path_view, path_mark, path, path_len, i + 1)
   else false
 
-(* Whether bv[i, n) and source[i, n) hold the same bytes *)
+(* Whether bytes_view[i, n) and source[i, n) hold the same bytes *)
 fun same_source {l:agz}{n:pos}{ls,o:agz}{i:nat | i <= n} .<n - i>.
-  (bv: !$A.borrow(byte, l, n), source: !$A.arrx(byte, ls, n, o), n: int n, i: int i): bool =
+  (bytes_view: !$A.borrow(byte, l, n), source: !$A.arrx(byte, ls, n, o), n: int n, i: int i)
+  : bool =
   if i >= n then true
-  else if byte2int0($A.read<byte>(bv, i)) = byte2int0($A.get<byte>(source, i)) then
-    same_source(bv, source, n, i + 1)
+  else if byte2int0($A.read<byte>(bytes_view, i)) = byte2int0($A.get<byte>(source, i)) then
+    same_source(bytes_view, source, n, i + 1)
   else false
 
-(* dst[i, n) set to the bytes of bv *)
+(* dst[i, n) set to the bytes of bytes_view *)
 fun copy_source {l:agz}{n:pos}{ld,o:agz}{i:nat | i <= n} .<n - i>.
-  (dst: !$A.arrx(byte, ld, n, o), bv: !$A.borrow(byte, l, n), n: int n, i: int i): void =
+  (dst: !$A.arrx(byte, ld, n, o), bytes_view: !$A.borrow(byte, l, n), n: int n, i: int i): void =
   if i >= n then ()
   else let
-    val () = $A.set<byte>(dst, i, $A.read<byte>(bv, i))
-  in copy_source(dst, bv, n, i + 1) end
+    val () = $A.set<byte>(dst, i, $A.read<byte>(bytes_view, i))
+  in copy_source(dst, bytes_view, n, i + 1) end
 
-(* The kept scan of the file at p[0, pm), bytes bv, after group g: its state and true, else false *)
-fun scans_use {c:nat}{lp:agz}{np:pos}{pm:nat | pm <= np}{l:agz}{n:pos}{t:nat} .<c>.
-  (xs: !scans(c), p: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, l, n), sn: int n,
-   run: int, fi: spos(RMAX), nm: dnames(t), t: int t, g: int)
-  : [k:nat] @(found(n, k, t + k), bool) =
+(* The kept scan of the file at path_view[0, path_mark), bytes bytes_view, after group: its state
+   and true, else false *)
+fun scans_use {c:nat}{lp:agz}{np:pos}{path_mark:nat | path_mark <= np}{l:agz}{n:pos}
+  {name_count:nat} .<c>.
+  (xs: !scans(c), path_view: !$A.borrow(byte, lp, np), path_mark: int path_mark,
+   bytes_view: !$A.borrow(byte, l, n), source_size: int n, run: int, file_index: spos(RMAX),
+   prior_names: dnames(name_count), name_count: int name_count, group: int)
+  : [k:nat] @(found(n, k, name_count + k), bool) =
   case+ xs of
-  | scans_nil() => @(Found(defs_nil(), 0, nm, t, cur_none(), g), false)
+  | scans_nil() =>
+    @(Found(defs_nil(), 0, prior_names, name_count, cur_none(), group), false)
   | scans_cons(entry, tl) => let
-      val+ @Scanned(path, path_len, arena, source, size, def_count, ds,
+      val+ @Scanned(path, path_len, arena, source, size, def_count, definitions,
                     group_before, group_after, last_used) = entry
     in
-      if same_path(p, pm, path, path_len, 0)
-         && (if g > 0 then group_before > 0 else group_before <= 0) then
-        (if size <> sn then let
+      if same_path(path_view, path_mark, path, path_len, 0)
+         && (if group > 0 then group_before > 0 else group_before <= 0) then
+        (if size <> source_size then let
             prval () = fold@(entry)
-          in scans_use(tl, p, pm, bv, sn, run, fi, nm, t, g) end
-        else if same_source(bv, source, sn, 0) then let
+          in scans_use(tl, path_view, path_mark, bytes_view, source_size, run, file_index,
+                       prior_names, name_count, group) end
+        else if same_source(bytes_view, source, source_size, 0) then let
             val () = last_used := run
-            val off = g - group_before
-            val fresh = defs_rev(defs_copy_rev(ds, off, defs_nil()), defs_nil())
-            val names = dnames_rev(names_rev(fresh, bv, fi, dnames_nil()), nm)
-            val after = group_after + off
+            val offset = group - group_before
+            val fresh = defs_rev(defs_copy_rev(definitions, offset, defs_nil()), defs_nil())
+            val names = dnames_rev(names_rev(fresh, bytes_view, file_index, dnames_nil()),
+                                   prior_names)
+            val after = group_after + offset
             val kept = def_count
             prval () = fold@(entry)
-          in @(Found(fresh, kept, names, t + kept, cur_none(), after), true) end
+          in @(Found(fresh, kept, names, name_count + kept, cur_none(), after), true) end
         else let
             prval () = fold@(entry)
-          in scans_use(tl, p, pm, bv, sn, run, fi, nm, t, g) end)
+          in scans_use(tl, path_view, path_mark, bytes_view, source_size, run, file_index,
+                       prior_names, name_count, group) end)
       else let
         prval () = fold@(entry)
-      in scans_use(tl, p, pm, bv, sn, run, fi, nm, t, g) end
+      in scans_use(tl, path_view, path_mark, bytes_view, source_size, run, file_index,
+                   prior_names, name_count, group) end
     end
 
-(* xs with the scan of the file at p[0, pm) added: definitions ds, groups before and after it *)
-fn scans_add {c:nat}{lp:agz}{np:pos}{pm:nat | pm <= np}{l:agz}{n:pos}{def_count:nat}
-  (xs: scans(c), p: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, l, n), sn: int n,
-   ds: !defs(n, def_count), def_count: int def_count, group_before: int, group_after: int,
-   run: int): [c2:nat] scans(c2) =
-  if sn > 268435456 then xs
-  else case+ $A.arena_create<byte>(sn) of
+(* xs with the scan of the file at path_view[0, path_mark) added: its definitions, the groups
+   before and after it *)
+fn scans_add {c:nat}{lp:agz}{np:pos}{path_mark:nat | path_mark <= np}{l:agz}{n:pos}
+  {def_count:nat}
+  (xs: scans(c), path_view: !$A.borrow(byte, lp, np), path_mark: int path_mark,
+   bytes_view: !$A.borrow(byte, l, n), source_size: int n, definitions: !defs(n, def_count),
+   def_count: int def_count, group_before: int, group_after: int, run: int)
+  : [c2:nat] scans(c2) =
+  if source_size > 268435456 then xs
+  else case+ $A.arena_create<byte>(source_size) of
   | ~$A.arena_none() => xs
   | ~$A.arena_some(arena) => let
-      val piece = $A.arena_alloc<byte>(arena, sn)
-      val () = copy_source(piece, bv, sn, 0)
+      val piece = $A.arena_alloc<byte>(arena, source_size)
+      val () = copy_source(piece, bytes_view, source_size, 0)
       var path_builder : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(p, 0, pm, pm, path_builder)
+      val () = copy_to_builder_v(path_view, 0, path_mark, path_mark, path_builder)
       val @(path, path_len) = $B.into_arr(path_builder)
-      val copy = defs_rev(defs_copy_rev(ds, 0, defs_nil()), defs_nil())
+      val copy = defs_rev(defs_copy_rev(definitions, 0, defs_nil()), defs_nil())
     in
-      scans_cons(Scanned(path, path_len, arena, piece, sn, def_count, copy,
+      scans_cons(Scanned(path, path_len, arena, piece, source_size, def_count, copy,
                          group_before, group_after, run), xs)
     end
 
@@ -506,38 +522,51 @@ in scans_free(back) end
 
 implement remember_scans () = !g_remember := true
 
-(* xs with the scan the state st holds (the file at p[0, pm), bytes bv, after group g) added *)
-fn scans_add_found {lp:agz}{np:pos}{pm:nat | pm <= np}{l:agz}{n:pos}{k,m:nat}
-  (xs: scans_v, p: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, l, n), sn: int n,
-   st: !found(n, k, m), g: int, run: int): scans_v = let
-  val+ @Found(ds, def_count, _, _, _, group_after) = st
-  val r = scans_add(xs, p, pm, bv, sn, ds, def_count, g, group_after, run)
-  prval () = fold@(st)
-in r end
+(* xs with the scan the state holds (the file at path_view[0, path_mark), bytes bytes_view, after
+   group) added *)
+fn scans_add_found {lp:agz}{np:pos}{path_mark:nat | path_mark <= np}{l:agz}{n:pos}{k,m:nat}
+  (xs: scans_v, path_view: !$A.borrow(byte, lp, np), path_mark: int path_mark,
+   bytes_view: !$A.borrow(byte, l, n), source_size: int n, state: !found(n, k, m), group: int,
+   run: int): scans_v = let
+  val+ @Found(definitions, def_count, _, _, _, group_after) = state
+  val added = scans_add(xs, path_view, path_mark, bytes_view, source_size, definitions,
+                        def_count, group, group_after, run)
+  prval () = fold@(state)
+in added end
 
-(* xs, with the scan of st added when this process remembers them, unless it came from xs *)
-fn scans_keep {lp:agz}{np:pos}{pm:nat | pm <= np}{l:agz}{n:pos}{k,m:nat}
-  (xs: scans_v, remember: bool, hit: bool, p: !$A.borrow(byte, lp, np), pm: int pm,
-   bv: !$A.borrow(byte, l, n), sn: int n, st: !found(n, k, m), g: int, run: int): scans_v =
-  if hit || ~remember then xs else scans_add_found(xs, p, pm, bv, sn, st, g, run)
+(* xs, with the scan of the state added when this process remembers them, unless it came from xs *)
+fn scans_keep {lp:agz}{np:pos}{path_mark:nat | path_mark <= np}{l:agz}{n:pos}{k,m:nat}
+  (xs: scans_v, remember: bool, hit: bool, path_view: !$A.borrow(byte, lp, np),
+   path_mark: int path_mark, bytes_view: !$A.borrow(byte, l, n), source_size: int n,
+   state: !found(n, k, m), group: int, run: int): scans_v =
+  if hit || ~remember then xs
+  else scans_add_found(xs, path_view, path_mark, bytes_view, source_size, state, group, run)
 
-(* The definitions of the file at p[0, pm), bytes bv[0, len), added to nm (t names) after group g *)
-fn scan_file {lp:agz}{np:pos}{pm:nat | pm <= np}{l:agz}{n:pos}{m:nat | m <= n}{t:nat}
-  (p: !$A.borrow(byte, lp, np), pm: int pm, bv: !$A.borrow(byte, l, n), sn: int n, len: int m,
-   fi: spos(RMAX), nm: dnames(t), t: int t, g: int): [k:nat] found(n, k, t + k) = let
+(* The definitions of the file at path_view[0, path_mark), bytes bytes_view[0, len), added to
+   prior_names (name_count names) after group *)
+fn scan_file {lp:agz}{np:pos}{path_mark:nat | path_mark <= np}{l:agz}{n:pos}{m:nat | m <= n}
+  {name_count:nat}
+  (path_view: !$A.borrow(byte, lp, np), path_mark: int path_mark,
+   bytes_view: !$A.borrow(byte, l, n), source_size: int n, len: int m, file_index: spos(RMAX),
+   prior_names: dnames(name_count), name_count: int name_count, group: int)
+  : [k:nat] found(n, k, name_count + k) = let
   val remember = !g_remember
   val run = !g_scan_run
   val memo = scans_take()
-  val @(st0, hit) = (if remember then scans_use(memo, p, pm, bv, sn, run, fi, nm, t, g)
-    else @(Found(defs_nil(), 0, nm, t, cur_none(), g), false)): [k:nat] @(found(n, k, t + k), bool)
-  val st2 = (if hit then st0 else let
-      val xs = lex_spans(bv, len, sn)
-      val st1 = scan_spans(bv, sn, xs, st0, fi)
+  val @(memo_state, hit) = (if remember then
+      scans_use(memo, path_view, path_mark, bytes_view, source_size, run, file_index,
+                prior_names, name_count, group)
+    else @(Found(defs_nil(), 0, prior_names, name_count, cur_none(), group), false))
+    : [k:nat] @(found(n, k, name_count + k), bool)
+  val final_state = (if hit then memo_state else let
+      val xs = lex_spans(bytes_view, len, source_size)
+      val scanned_state = scan_spans(bytes_view, source_size, xs, memo_state, file_index)
       val () = spans_free(xs)
-    in end_def(st1, fi) end): [k:nat] found(n, k, t + k)
-  val memo2 = scans_keep(memo, remember, hit, p, pm, bv, sn, st2, g, run)
+    in end_def(scanned_state, file_index) end): [k:nat] found(n, k, name_count + k)
+  val memo2 = scans_keep(memo, remember, hit, path_view, path_mark, bytes_view, source_size,
+                         final_state, group, run)
   val () = scans_put(memo2)
-in st2 end
+in final_state end
 
 (* pk with the file at the NUL-terminated path p (at fi in the file
    list) *)
