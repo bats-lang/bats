@@ -89,6 +89,7 @@ fn bput {sn:nat}{n:nat | n + sn <= BUILDER_CAP}
 
 
 
+
 datavtype rope_list(int) =
   | rope_nil(0)
   | {k:nat}{lb:agz}{n:nat | n <= BUILDER_CAP}
@@ -120,6 +121,113 @@ fun rope_chunks (r: rope): [k:nat] rope_list(k)
 
 
 fun rope_list_free {k:nat} (cs: rope_list(k)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+datavtype rope_sized_list(int) =
+  | rope_sized_nil(0)
+  | {k:nat}{cap:pos}{lb:agz}{n:nat | n <= cap; cap <= BUILDER_CAP}
+    rope_sized_cons(k + 1) of ($A.arr(byte, lb, cap), int n, rope_sized_list(k))
+
+
+
+
+
+datavtype sized_rope =
+  | {k:nat} SizedRope of (rope_sized_list(k), builder_v)
+
+fun sized_rope_create (): sized_rope
+
+
+fun sized_rope_put {v:nat | v < 256} (r: !sized_rope, v: int v): void
+
+
+fun sized_rope_bput {sn:nat} (r: !sized_rope, s: string sn): void
+
+
+fun sized_rope_copy {l:agz}{n:pos}{i,j:nat | i <= j; j <= n}
+  (r: !sized_rope, src: !$A.borrow(byte, l, n), start: int i, stop: int j): void
+
+
+fun sized_rope_append (r: !sized_rope, b: builder_v): void
+
+
+fun sized_rope_chunks (r: sized_rope): [k:nat] rope_sized_list(k)
+
+
+fun rope_sized_list_free {k:nat} (cs: rope_sized_list(k)): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

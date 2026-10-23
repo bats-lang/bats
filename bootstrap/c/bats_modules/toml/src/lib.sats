@@ -56,6 +56,19 @@ fun parse
   {lb:agz}{n:pos}{l:nat | l <= n}
   (input: !$A.borrow(byte, lb, n), len: int l): $R.result(toml_doc, int)
 
+
+
+
+
+datavtype toml_parse(len: int) =
+  | {len <= TOML_MAX_BUF} Whole(len) of toml_doc
+  | {len > TOML_MAX_BUF} Too_many_bytes(len) of ()
+  | Too_many_entries(len) of ()
+
+fun parse_whole
+  {lb:agz}{n:pos}{l:nat | l <= n}
+  (input: !$A.borrow(byte, lb, n), len: int l): toml_parse(l)
+
 fun get
   {lb:agz}{nb:pos}{lk:agz}{nk:pos}{lo:agz}{mo:pos}
   (doc: !toml_doc,
@@ -103,6 +116,32 @@ fun byte_at {i:int} (doc: !toml_doc, i: int i): int
 fun syntax_error
   {lo:agz}{mo:pos}
   (doc: !toml_doc, msg: !$A.arr(byte, lo, mo), max: int mo): @([o:int] int o, [k:nat | k <= mo] int k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
