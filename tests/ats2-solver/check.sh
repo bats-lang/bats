@@ -23,6 +23,8 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+echo forced failure > "$TMP/evidence"
+exit 1
 fail() { echo "FAIL: $1"; exit 1; }
 ok() { echo "ok   $1"; }
 unset BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_CACHE_DIR BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
