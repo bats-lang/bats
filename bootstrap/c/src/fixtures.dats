@@ -1464,7 +1464,7 @@ fn probe_in {cfg_cap:pos}{mv_cap:pos}{bv_f_cap:pos} {l:agz}{lm:agz}{lx:agz}{mv_l
   var md0 : $B.builder_v = $B.create()
   val have_dir = memo_dir_into(cfg, cfg_len, w, md0)
   val md = md0
-  (* the files of the project are scanned for call cycles again for each fixture: the unchanged ones are kept (recursion.bats, bats#405) *)
+  (* scan memo: the unchanged files are not scanned again for each fixture (recursion.md) *)
   val () = remember_scans()
 in
   (* what has no patsopt in it is checked first, as a check does it: a

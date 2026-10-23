@@ -538,7 +538,7 @@ end
 #pub fn lit_at {l:agz}{n:pos}{mx:nat | mx <= n}{m:pos | m <= 1048576}
   (src: !$A.borrow(byte, l, n), pos: pos_t, max: int mx, lit: &(@[char][m]), m: int m): bool
 
-(* Whether src[p, p + m) is lit[0, m), read from index i: the characters are compared where they lie, with no array made for the literal (bats#405: the array made for each call of lit_at was a quarter of the lexer's instructions) *)
+(* Whether src[p, p + m) is lit[0, m) from index i, compared in place: literal compare, lexer.md *)
 fun lit_cmp {l:agz}{n:pos}{m:pos}{p:nat | p + m <= n}{i:nat | i <= m} .<m - i>.
   (src: !$A.borrow(byte, l, n), p: int p, lit: &(@[char][m]), m: int m, i: int i): bool =
   if i >= m then true

@@ -120,7 +120,7 @@
 #     killed by: "memo prune: listed"
 #  21. store-in-no-memo: `&& memo_ready(bv_m, mn) &&` -> `&& true &&`
 #     killed by: "the first run kept 0 files, not 8"
-#  22. scan-bytes-unchecked (src/recursion.bats): `else if same_source(bv, src, sn, 0) then let` -> `else if true then let`
+#  22. scan-bytes-unchecked (src/recursion.bats): `else if same_source(bv, source, sn, 0) then let` -> `else if true then let`
 #     killed by: "scans: status 0, not 1"
 #
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
