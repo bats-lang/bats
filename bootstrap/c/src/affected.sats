@@ -153,7 +153,6 @@ staload "pins.sats"
 
 
 
-
 fn affected_main (): bool
 
 

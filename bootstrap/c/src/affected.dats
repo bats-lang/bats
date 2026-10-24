@@ -53,18 +53,17 @@ in mk_arg(b) end
 
 (* How many of the paths changed from base to head a pass lists: 0 none, 1 some,
    2 when git did not answer (it failed, or did not run). A list longer than
-   git's first 4096 bytes is some. Renames are listed as a delete and an add
-   (--no-renames), so a file moved out of an inert path is seen at both ends *)
+   git's first 4096 bytes is some. The pathspec limits the diff before git pairs a
+   rename, so a source file moved to a .md name is listed at its old path (tests/affected) *)
 fn changed_by_pass {lc:agz}
   (cmd: !$A.borrow(byte, lc, 4096), base_at: pos_t, base_to: int, head_at: pos_t, head_to: int,
    pass: int): int = let
   val (nul_git | git_exec) = $P.path_of_string_proved("git")
   val @(fz_git, bv_git) = $A.barr_freeze(git_exec)
   val argv = $L.list_vt_cons(literal_arg("git"), $L.list_vt_cons(literal_arg("diff"),
-    $L.list_vt_cons(literal_arg("--name-only"), $L.list_vt_cons(literal_arg("--no-renames"),
-    $L.list_vt_cons(literal_arg("-z"), $L.list_vt_cons(copy_arg(cmd, base_at, base_to),
-    $L.list_vt_cons(copy_arg(cmd, head_at, head_to), $L.list_vt_cons(literal_arg("--"),
-    pathspecs_of_pass(pass)))))))))
+    $L.list_vt_cons(literal_arg("--name-only"), $L.list_vt_cons(literal_arg("-z"),
+    $L.list_vt_cons(copy_arg(cmd, base_at, base_to), $L.list_vt_cons(copy_arg(cmd, head_at, head_to),
+    $L.list_vt_cons(literal_arg("--"), pathspecs_of_pass(pass))))))))
   val out = $A.alloc<byte>(4096)
   val outcome = run_cmd_capture_outcome(nul_git | bv_git, argv, out)
   val answer = (case+ outcome of
