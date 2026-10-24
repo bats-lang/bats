@@ -268,7 +268,41 @@ fn buf_write_byte(w: !buf_writer, b: int): $R.result(int, io_error)
 
 fn buf_flush(w: !buf_writer): $R.result(int, io_error)
 
+
 fn buf_writer_close(w: buf_writer): $R.result(int, io_error)
+
+
+
+datavtype close_outcome =
+  | Closed                                         (* flushed and closed *)
+  | FlushFailed of (io_error)                      (* final write failed, closed *)
+  | CloseFailed of (io_error)                      (* flushed, close failed *)
+  | FlushAndCloseFailed of (io_error, io_error)    (* flush's, then close's *)
+
+fn buf_writer_close_checked(w: buf_writer): close_outcome
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

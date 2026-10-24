@@ -450,6 +450,84 @@ prfun nth_functional {cs:cells}{i:nat}{v,w:int} (NTH(cs, i, v), NTH(cs, i, w)): 
 
 
 
+dataprop ALLIN(cells, int, int) =
+  | {lo,hi:int} ALLIN_nil(cnil(), lo, hi)
+  | {c,lo,hi:int | lo <= c; c <= hi}{cs:cells} ALLIN_cons(ccons(c, cs), lo, hi) of ALLIN(cs, lo, hi)
+
+
+dataprop ZEROS(cells, int) =
+  | ZEROS_nil(cnil(), 0)
+  | {cs:cells}{n:nat} ZEROS_cons(ccons(0, cs), n + 1) of ZEROS(cs, n)
+
+
+prfun allin_nth {cs:cells}{lo,hi:int}{i:nat}{v:int} (ALLIN(cs, lo, hi), NTH(cs, i, v)): [lo <= v; v <= hi] void
+
+
+
+
+
+
+
+
+
+prfun allin_setc {cs,cs2:cells}{lo,hi:int}{i:nat}{v:int | lo <= v; v <= hi}
+  (ALLIN(cs, lo, hi), SETC(cs, i, v, cs2)): ALLIN(cs2, lo, hi)
+
+
+
+
+
+
+
+
+
+
+prfun allin_widen {cs:cells}{lo,hi,lo2,hi2:int | lo2 <= lo; hi <= hi2}{n:nat}
+  (ALLIN(cs, lo, hi), CLEN(cs, n)): ALLIN(cs, lo2, hi2)
+
+
+
+
+
+
+
+
+
+
+prfun allin_zeros {cs:cells}{lo,hi:int | lo <= 0; 0 <= hi}{n:nat} (ZEROS(cs, n)): ALLIN(cs, lo, hi)
+
+
+
+
+
+
+
+
+
+prfun zeros_nth {cs:cells}{i:nat}{v:int}{n:nat} (ZEROS(cs, n), NTH(cs, i, v)): [v == 0] void
+
+
+
+
+
+
+
+
+
+prfun zeros_len {cs:cells}{n:nat} (ZEROS(cs, n)): CLEN(cs, n)
+
+
+
+
+
+
+
+
+
+
+
+
+
 absvtype barr(l:addr, n:int, cs:cells) = ptr
 
 
@@ -557,6 +635,74 @@ fun cborrow_view_drop {l:agz}{n:nat}{cs:cells}{k:pos}
 
 fun cborrow_get {l:agz}{n,i:nat | i < n}{cs:cells} (b: !cborrow(l, n, cs), i: int i)
   : [v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)
+
+
+
+
+
+
+
+
+
+
+
+absvtype iarr(l:addr, n:int, cs:cells) = ptr
+
+
+fun iarr_alloc {n:pos | n <= 1048576} (n: int n)
+  : [l:agz][cs:cells] (CLEN(cs, n), ZEROS(cs, n) | iarr(l, n, cs))
+
+fun iarr_free {l:agz}{n:nat}{cs:cells} (a: iarr(l, n, cs)): void
+
+
+fun iarr_get {l:agz}{n,i:nat | i < n}{cs:cells} (a: !iarr(l, n, cs), i: int i)
+  : [v:int | ~2147483648 <= v; v <= 2147483647] (NTH(cs, i, v) | int v)
+
+
+fun iarr_set {l:agz}{n,i:nat | i < n}{cs:cells}{v:int | ~2147483648 <= v; v <= 2147483647}
+  (a: iarr(l, n, cs), i: int i, v: int v)
+  : [cs2:cells] (SETC(cs, i, v, cs2) | iarr(l, n, cs2))
+
+
+
+
+fun iarr_get_in {l:agz}{n,i:nat | i < n}{cs:cells}{lo,hi:int | ~2147483648 <= lo; hi <= 2147483647}
+  (pf: ALLIN(cs, lo, hi) | a: !iarr(l, n, cs), i: int i): [v:int | lo <= v; v <= hi] int v
+
+
+
+fun iarr_set_in {l:agz}{n,i:nat | i < n}{cs:cells}{lo,hi:int | ~2147483648 <= lo; hi <= 2147483647}{v:int | lo <= v; v <= hi}
+  (pf: ALLIN(cs, lo, hi) | a: iarr(l, n, cs), i: int i, v: int v)
+  : [cs2:cells] (ALLIN(cs2, lo, hi) | iarr(l, n, cs2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
