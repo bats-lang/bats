@@ -142,6 +142,8 @@ staload "helpers.sats"
 
 
 
+fn find_nul {l:agz}{p:nat | p <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), p: int p): [r:nat | p <= r; r <= 4096] int r
 
 
 
@@ -844,6 +846,8 @@ staload "helpers.sats"
 
 
 
+fn named_file {lc:agz}{at,to:int}{sn:nat}
+  (cmd: !$A.borrow(byte, lc, 4096), at: int at, to: int to, s: string sn, sn: int sn): bool
 
 
 
@@ -965,6 +969,11 @@ staload "helpers.sats"
 
 
 
+
+
+
+
+fn literal_arg {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $P.arg_entry
 
 
 

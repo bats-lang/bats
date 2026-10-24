@@ -31,7 +31,9 @@ staload "setup.sats"
 staload "with_env.sats"
 staload "fixtures.sats"
 staload "pins.sats"
+staload "affected.sats"
 staload "_bats_inputs.sats"
+
 
 
 
