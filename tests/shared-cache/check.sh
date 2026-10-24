@@ -82,4 +82,64 @@ if (cd "$TMP/d2" && "$BATS" build --only debug --only native) > "$TMP/d2.log" 2>
 fi
 n1=$(find "$BATS_CACHE_DIR" -name '*.c' | wc -l)
 [ "$n0" = "$n1" ] || { echo "FAIL: a failed build kept $((n1 - n0)) entries"; exit 1; }
+# The size bound (bats#483): with the cache over BATS_CACHE_MAX_MB, a store
+# removes the least recently used entries first, and what was used last stays
+SC=$TMP/sized
+E=$TMP/e
+mkdir -p "$E"
+cp -R "$A/bats.toml" "$A/src" "$E/"
+m "$E" 1
+(export BATS_CACHE_DIR="$SC" BATS_CACHE_MAX_MB=1; build "$E" "$TMP/e.log")
+kept_before=$(find "$SC" -name '*.c' | wc -l)
+[ "$kept_before" -ge 4 ] || { echo "FAIL: the sized cache holds $kept_before entries"; exit 1; }
+# every entry made so far is old, the copy at another path then hits them all
+find "$SC" -name '*.c' -exec touch -t 200001010000 {} +
+F=$TMP/elsewhere/f
+mkdir -p "$F"
+cp -R "$E/bats.toml" "$E/src" "$F/"
+(export BATS_CACHE_DIR="$SC" BATS_CACHE_MAX_MB=1; build "$F" "$TMP/f.log")
+[ "$(ran "$TMP/f.log")" = 0 ] || { echo "FAIL: the copy ran patsopt"; cat "$TMP/f.log"; exit 1; }
+find "$SC" -name '*.c' > "$TMP/used.list"
+# the fillers: four entries of 300000 bytes, 1.2 MB over the 1 MB limit with the rest, each older than the last
+mkdir -p "$SC/patsopt-1/ff"
+n=1
+for stamp in 200101010000 200201010000 200301010000 200401010000; do
+  head -c 300000 /dev/zero > "$SC/patsopt-1/ff/filler$n.c"
+  touch -t "$stamp" "$SC/patsopt-1/ff/filler$n.c"
+  n=$((n + 1))
+done
+# a module that is new makes a store, which prunes
+G=$TMP/g
+mkdir -p "$G"
+cp -R "$E/bats.toml" "$E/src" "$G/"
+printf '#include "share/atspre_staload.hats"\n\n#pub fn g (): int\n\nimplement g () = 11\n' > "$G/src/n.bats"
+(export BATS_CACHE_DIR="$SC" BATS_CACHE_MAX_MB=1; build "$G" "$TMP/g.log")
+[ -e "$SC/patsopt-1/ff/filler1.c" ] && { echo "FAIL: the least recently used entry is still there"; exit 1; }
+[ -e "$SC/patsopt-1/ff/filler4.c" ] || { echo "FAIL: the most recent filler was removed"; exit 1; }
+while IFS= read -r used; do
+  [ -e "$used" ] || { echo "FAIL: $used, used by the copy, was removed"; exit 1; }
+done < "$TMP/used.list"
+size=$(find "$SC" -name '*.c' -exec wc -c {} + | awk '$2 == "total" { total = $1 } END { print total + 0 }')
+[ "$size" -le 1048576 ] || { echo "FAIL: the cache holds $size bytes, over 1 MB"; exit 1; }
+# a build against the pruned cache gives the C of a cold build
+H=$TMP/h
+mkdir -p "$H"
+cp -R "$G/bats.toml" "$G/src" "$H/"
+(export BATS_CACHE_DIR="$SC" BATS_CACHE_MAX_MB=1; build "$H" "$TMP/h.log")
+[ "$(hits "$TMP/h.log")" -ge 1 ] || { echo "FAIL: the pruned cache served nothing"; cat "$TMP/h.log"; exit 1; }
+I=$TMP/i
+mkdir -p "$I"
+cp -R "$G/bats.toml" "$G/src" "$I/"
+(export BATS_CACHE_DIR=; build "$I" "$TMP/i.log")
+[ "$(hits "$TMP/i.log")" = 0 ] || { echo "FAIL: the cold build hit"; exit 1; }
+for c in $(cd "$I/build" && find . -name '*_dats.c'); do
+  cmp "$I/build/$c" "$H/build/$c" || { echo "FAIL: $c of the pruned cache differs from the cold build"; exit 1; }
+done
+# a limit that is not a number is said, and the default is used
+J=$TMP/j
+mkdir -p "$J"
+cp -R "$G/bats.toml" "$G/src" "$J/"
+printf '#include "share/atspre_staload.hats"\n\n#pub fn g (): int\n\nimplement g () = 12\n' > "$J/src/n.bats"
+(export BATS_CACHE_DIR="$SC" BATS_CACHE_MAX_MB=banana; build "$J" "$TMP/j.log")
+grep -aq "BATS_CACHE_MAX_MB='banana' is not a whole number" "$TMP/j.log" || { echo "FAIL: a limit that is no number was not said"; cat "$TMP/j.log"; exit 1; }
 echo "shared-cache: ok"
