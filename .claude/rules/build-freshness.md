@@ -223,11 +223,12 @@ not run, and R3 and R7 are the rule for a clang whose output differs from what w
 
 **The tests** (`tests/cc-cases.sh` is their library; `tests/<file>/check.sh <bats> <repository>
 <case>` runs one case alone, with no case all of them, reporting each that fails):
-`tests/build-headers` (41 cases: shadows by `C_INCLUDE_PATH`, `CPATH`, a quoted header beside the
+`tests/build-headers` (43 cases: shadows by `C_INCLUDE_PATH`, `CPATH`, a quoted header beside the
 including file and the wasm stubs directory, with other bytes and with the very same bytes, native
 debug, native release and wasm, each equal to a clean build's; a shadow deleted again;
 `__has_include`; `#include_next`; a directory created later; a symlinked directory; relative and
-nested spellings; a header changed in place; blank and comment lines grown from nine to twenty,
+nested spellings; a quoted header over one found by `-I`, both outside the system directories;
+a header changed in place; blank and comment lines grown from nine to twenty,
 which `-P` alone prints as one newline; a header edited while cc runs; clang's output varied (no
 `-H`, a line of dots, a diagnostic that begins with a dot, dots with no path, noise, an unreadable
 header, the marker renamed, the resource directory failing, empty, relative, on two lines, `/` and
