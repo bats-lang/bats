@@ -5080,3 +5080,4 @@ implement parse_version_parts (b, i, be, n, out) = version_parts(b, i, be, n, ou
   (b: !$A.borrow(byte, l, n), i: pos_t, e: pos_t, n: int n): pos_t
 
 implement next_dot (b, i, e, n) = find_dot(b, i, e, n)
+(* scratch *)
