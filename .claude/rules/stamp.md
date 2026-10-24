@@ -27,12 +27,15 @@ per commit, which would drop `build/` on every commit; `LLD_IN_TEST`, `LLD_VERSI
 `LLVM_OVERRIDE_PRODUCER` are not, since no object or link bats makes reads them, and wasm-ld reads
 none of the list), `libs` and `link` (below), `flags` (the flag templates patsopt and cc run with
 for the mark, `PATSHOME` written `$(PATSHOME)`, both profiles in one template since a `build/` holds
-both) and `mark` (the target and mode digit of `build/.bats_target`). No line holds a path, so a
-`build/` copied to another directory, or made on another machine with the same bats, ATS2 and C
-compiler, keeps (bats-lang/bats#250 made the C path-independent), and so does its objects: the key
-of an object holds the text of its C preprocessed with `-P -frewrite-includes` (every line of every
-header, and no line marker) and so names neither the ATS2 home nor the C compiler's install
-directory (build-freshness.md,
+both) and `mark` (the target and mode digit of `build/.bats_target`). No line holds a path
+(each line is a digest, or a template that writes the ATS2 home as `$(PATSHOME)`), so a `build/`
+copied to another directory, or made on another machine with the same
+bats, ATS2 and C compiler, keeps (bats-lang/bats#250 made the C path-independent), and so do its
+objects: the key file of an object (`<object>.key`) holds only the sizes and sha256s of its C, of
+its preprocessed text with the listing of where each header was found (`<object>.i`, made and
+removed within the run), and of this stamp; the listing writes the ATS2 home and the compiler's
+resource directory as the placeholders `A` and `C` and every other path as clang printed it, so the
+toolchain moving is not a change and a header found at another path is (build-freshness.md,
 `tests/build-toolchain-path`). After `cache_swap` has put the mark's `build/` in place (from its
 stash if it had been put aside: every stash carries the stamp of whoever made it, and is judged when
 it is swapped in), `check`, `build`, `test` and `run`'s build compare the stamp they would write

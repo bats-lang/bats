@@ -89,65 +89,156 @@ A `build/` is restored by content, so what matters of `bats.toml` is whether a f
 
 The output buffers of the toml package's calls are not readers of the file; each is a ceiling on one value, and a value that does not fit makes `T.get` answer none, read as unset: a name, a version or a kind of 256 bytes or more (32 for the kind, 16 for `unsafe`), and a constraint or a path of more than 4096 bytes (`grep -n 'T.get' src/lock.bats`; the whole document is 65536 bytes at most). The key lists (`T.keys`, `grep -n 'T.keys' src/lock.bats`) have 65536 bytes, as many as the document holds.
 
-## Objects are keyed on the text their compile reads (bats#394, #338, #395, #477)
+## Objects are keyed on what their compile reads and where it found it (bats#394, #338, #395, #477)
 
-An object's key holds its C, the profile, the preprocessed text of its C and the stamp, because what
-the C compiler's search path (`C_INCLUDE_PATH`, `CPATH`, a sysroot, an SDK, the directory of the
-including file) finds for an `#include` can change with the C, the environment's value and the stamp
-all the same: a header changed in place, or a header that did not exist at the last compile and now
-shadows a listed one earlier on the path. A key of the headers a compile found (a depfile) cannot
-see the second, since it holds what was found and not what was looked for; the text the preprocessor
-gives holds both, because any file it takes instead is in the text. So every object bats keys is
-preceded by `clang -E -P -frewrite-includes` with the object's own flags (`native_cc_argv`,
-`wasm_cc_argv` in `src/helpers.bats`: the same argument list as the compile,
-`-E -P -frewrite-includes` for `-c` and `<object>.i` for the output, so `-O`, `-D` and `-I` are the
-compile's), native (`run_cc`, the module, dependency and entry objects) and wasm (`run_wasm_cc`),
-and the key holds, after the C's line and before the stamp's, the size and then the sha256 of that
-text: sizes first as for the C, a different size is a changed object. A check makes the text again
-(`native_object_fresh`, `wasm_object_fresh`), digests it and removes it; a compile makes it before
-cc runs and the key written after cc passed digests that text and removes it, so a header changed
-while cc runs is a key that is not equal at the next check, never a stale hit. A text that cannot be
-made (cc fails) or read is a key that is not equal (the object is made again). The runtimes
-(`_bats_native_runtime.o`, `_bats_wasm_runtime.wasm.o`) are compiled at every build and have no key,
-so there is nothing for them to go stale.
+**The invariant.** A kept object is the object a clean build would write, except for the location
+of the toolchain: the ATS2 home (`-I<PATSHOME>`, the `ccomp/runtime` headers) and the C compiler's
+resource directory (`clang -print-resource-dir`, where its own headers such as `stddef.h` are). When
+either moves, as a whole or alone, `build/` is kept (stamp.md) and so are the objects. What a kept
+object then still carries of the old location, each asserted by `tests/build-toolchain-path` (the
+object after the move is byte for byte the object before it, not a clean build's):
 
-**The text holds every line of every header, and no path.** The key changes whenever the object a
-clean build would write changes, debug info included: a native debug object (`-g`) records the line
-of each header function and type, so a header changed only in a comment or a blank line, which moves
-those lines, must make the object again. `-frewrite-includes` writes the source of every file the
-compile reads, comments and blank lines as they are, with each `#if` marked with the outcome it had
-(`evaluated` or `disabled`, so a `__has_include` that now finds a file is in the text), and `-P`
-drops the line markers (`# 12 "path"`), the only lines of the preprocessor's output that hold an
-absolute path: the ATS2 home (`-I$(PATSHOME)`) and the C compiler's install directory (its resource
-directory, found beside the binary). `-P` alone is not enough: it writes a gap of more than eight
-lines as one newline, so a longer comment is not in its text. The text names no directory of the
-toolchain (a grep of it for the ATS2 home or the compiler's directory finds none), so a `build/`
-made where those are elsewhere, with the same files, keeps its objects, as the stamp keeps it
-(stamp.md: no line of it holds a path). The key is of what the compile reads and not of where the
-toolchain is; a shadowing header with the same bytes as the one it shadows gives the same text and
-so the same object, which is kept. The C compiler's own warnings are not in the key. Alternatives:
-dropping only the marker lines from the markers' text needs bats to read and filter the text (a
-second pass over megabytes in bats, to get what the preprocessor already gives);
-`-ffile-prefix-map`, `-fmacro-prefix-map` and `-fdebug-prefix-map` rewrite the paths the compile
-writes (`__FILE__`, debug info) and not the markers of `-E`'s output, which clang 18 leaves as
-found;
-keeping the markers and hashing the text of the headers read in a depfile would add a depfile
-parser (garbled and missing files, escaped names) for what `-frewrite-includes` gives in one run.
+* the include file names in a native debug object's line table and declarations, for a header under
+  the ATS2 home or the resource directory;
+* a string a header under those writes with `__FILE__` or `assert`, in a release object and a wasm
+  object too;
+* the compilation directory (`DW_AT_comp_dir`, the checkout's directory): the stamp holds no path, a
+  `build/` copied elsewhere is kept and its debug objects name the old directory
+  (`tests/build-toolchain-path` T-checkout-move);
+* the producer string (compiler version), which is in the stamp's `cc` line, so another compiler
+  version drops `build/`.
 
-What comparable tools do: ccache's preprocessor mode and sccache hash the preprocessed output,
-ccache with the line markers (its `-g` objects need them), and its `base_dir` option rewrites
-absolute paths in them so that a build tree at another path is not a miss; its direct and depend
-modes hash the headers a compile read (a manifest) and fall back to the preprocessor when one is
-missing or differs, because a manifest of what was found cannot see a file that now shadows one.
-The tests: `tests/build-headers` (native and wasm header changed in place with its mtime put back, a
-header changed only in twelve comment lines, whose native `-g` object is made again and is the one a
-clean build writes, and whose wasm object (no debug info) is made again with the same bytes, a new
-header earlier on `C_INCLUDE_PATH` and a new quoted header beside the including file, native and
-wasm, no cc and no preprocessed text left in a no-change run, a wasm object kept across profiles),
-`tests/build-toolchain-path` (the ATS2 home and a copy of the C compiler with its resource directory
-moved to other directories: no object is made again and `build/` is kept, a shadowing header with
-other bytes still makes the object again, one with the same bytes does not, and a control with a
-stand-in clang that drops `-P` makes the object again after the same move) and the stamp's.
+Two things are outside what a key of preprocessed text names, and are not a difference between a
+kept object and a clean build's: a file an assembler directive reads by name (`.incbin`, `asm` in a
+user's `%{ %}`; bats emits none, and the user's C is in the key), and `__DATE__`, `__TIME__` and
+`__TIMESTAMP__` (not in generated C; in a user's C two clean builds differ from each other).
+
+The macOS SDK and sysroot are not in the exception: `SDKROOT`, `DEVELOPER_DIR` and the deployment
+targets are hashed into the stamp (`put_cc_environment`), so another SDK path drops `build/`; bats
+passes no `-isysroot`. A header an SDK provides is in the listing as found.
+
+**What the compile reads or looks for, and what each is keyed on.**
+
+* The C: its size and sha256 (`kept_size`, `kept_hash`).
+* Every line of every header, comments and blank lines included (a native `-g` object's lines): the
+  size and sha256 of the text, `clang -E -P -frewrite-includes` with the object's own flags. `-P`
+  drops the line markers, the only lines of that text that hold an absolute path. `-P` alone prints
+  a gap of more than eight lines as one newline (20 blank lines: 2 lines of output), so a longer
+  comment would not be in its text; `-P -frewrite-includes` prints all of them.
+* Every conditional, `__has_include` and `__has_include_next` included: `-frewrite-includes`
+  writes the outcome of each (`#if 1 /* evaluated by -frewrite-includes */`, or `0`), so a new file
+  that flips a branch changes the text.
+* `-include FILE`: its bytes are inlined in the text and `-H` does not list it, nor what it
+  includes. bats passes `-include` only for `build/_bats_wasm_runtime.h`, a file bats writes that
+  holds no `#include`; `-imacros` is passed nowhere. A change that adds either must key its bytes.
+* `#embed` (clang 18.1.3 rejects it), `-fprofile-use` and sanitizer lists: bats emits and passes
+  none.
+* The path each header was found at (a debug object, a `__FILE__` string): the listing, below.
+* Flags, environment, compiler, profile: the profile line of the key and the stamp
+  (`put_cc_environment` hashes `CPATH`, `C_INCLUDE_PATH`, `SDKROOT`, `DEVELOPER_DIR` and the
+  rest, so a changed value of the search path's environment drops `build/`). bats has no
+  per-project `-I`: its project directories are the including file's and, for wasm,
+  `build/_bats_wasm_stubs`.
+
+**The rules** (`src/helpers.bats`, the preprocess keyword).
+
+* R1. The preprocess input. For an object whose C is `<dir>/<name>`, bats writes
+  `<dir>/<name>.pre.c` holding the one line `#include "<name>"` and preprocesses that:
+  `clang <the object's flags> -E -P -frewrite-includes -H -o <object>.i <dir>/<name>.pre.c`. The
+  compile reads the C itself. A quoted include in the C is still searched from the C's directory
+  (the wrapper is in it). What differs between the wrapper and the compile is `__INCLUDE_LEVEL__`
+  and `__BASE_FILE__`, which are constants of the C's path and bytes, both in the key, and which
+  bats's emitted C uses neither. The text and the listing the key digests are the ones made before
+  the compile (`run_cc` preprocesses, then compiles, then `key_record` digests what was made), so a
+  header changed while cc runs is a key that is not equal at the next check, never a stale hit.
+  The wrapper, `<object>.i` and the listing file `<object>.h` are removed after.
+* R2. The stream. clang's stderr is read in 64 KiB chunks by a state machine that holds one line
+  (at most 512 KiB, 128 times PATH_MAX; longer is a failure) and nothing else, so its total size
+  has no bound; stdout is `/dev/null`. A line that starts with d >= 1 dots is a header line when a
+  space and a non-empty path follow the dots to the end of the line; a line of only dots, or dots
+  and a space with no path, is a failure; dots followed by anything else (`./inc/a.h:3:1: warning:
+  ...`) are a diagnostic and are ignored, as is a line with no dot first. (GCC's manual for `-H`:
+  "Print the name of each header file used, in addition to other normal activities. Each name is
+  indented to show how deep in the '#include' stack it is.")
+* R3. The positive control. The first header line must be depth 1 with the path of the C as handed
+  to the preprocess; anything else is a failure. A clang that prints no `-H` lines, prints them
+  elsewhere or in another form is therefore a failure for every object, and a C with no include of
+  its own (the wasm runtime header is `-include`d, which `-H` does not list) has exactly one line.
+  The marker string of `-frewrite-includes` is not read.
+* R4. The roots. The ATS2 home (`ph`, kind `A`) and the compiler's resource directory (kind `C`),
+  asked once per run and kind as `clang <that kind's flags> -print-resource-dir` (native: no flags;
+  wasm: `--target=wasm32 -O2 -nostdlib -ffreestanding ...`, the list `wasm_cc_argv` builds). A root
+  has its trailing slashes stripped and must be absolute and not `/`; the answer must be one line
+  and exit 0, else it is a failure. A `..` in it is used as printed. Roots and header paths are
+  compared as spelled, never resolved (`-print-resource-dir` and the path `-H` prints for a builtin
+  header are the same string, for a compiler reached through a link as well). A path is under a root
+  when it begins with the root and a slash; the rest is the path after that slash; the longest root
+  wins, and equal roots are one root of kind `A`.
+* R5. The roots are per run, in memory: asked where `ph` is made (the start of a check, build, test
+  or run's build) and carried in `ph`'s array ([0, 4096) the ATS2 home, [4096, 8192) the native
+  resource directory, [8192, 12288) the wasm one) to the callers of the preprocess. No file.
+* R6. The line. Each header line becomes `<dots> <kind> <rest>` with kind `A` or `C` and the rest
+  below the root, or `<dots> - <path>` for a path under no root. Distinct paths give distinct lines
+  unless they differ only in the prefix of a root. The listing is appended to `<object>.i`, which
+  the key digests (size, then sha256); the key file holds only sizes and hashes.
+* R7. A failure (R2, R3, R4, a clang that exits non-zero, a stderr read that fails, a listing that
+  cannot be written): `<object>.i`, the wrapper and the listing are removed, no key is written, the
+  object is made again at every check, never kept, and one line is said on stderr (`bats: <C>:
+  clang's header listing could not be used (<what>): the object is made again`; a root's failure
+  once per run and kind). The compile and the build go on.
+* R8. Why not a header's directory by its place in `-v`'s search list: it is injective only while
+  the list keeps its shape. A directory created before the one that held the header, with the same
+  bytes, takes the same number (`-isystem A -isystem B` with `x.h` in B, then `-isystem A -isystem D
+  -isystem B` with `x.h` in D: both `#1 x.h`), so the path the object names changed and the key
+  did not.
+
+**Research.** ccache's direct mode records the paths of the include files a compile read with
+their hashes and says "header files that were used by the compiler are recorded, but header files
+that were not used, but would have been used if they existed, are not", "it currently can't check
+with 100% accuracy if the existence of a new header file should invalidate the result", and under
+"Caveats" "The direct mode fails to pick up new header files in some rare scenarios"
+(https://ccache.dev/manual/latest.html, 4.14.2); it falls back to the preprocessor on a mismatch.
+Its preprocessor mode hashes "the preprocessor output from running the compiler with `-E`" and,
+with `hash_dir` (on by default), the current directory when the compile makes debug info; its
+`base_dir` rewrites an absolute path under a named directory to a relative one in what is hashed
+and warns against `/` as the base, which is what the roots are and why R4 refuses `/`. Bazel
+(https://bazel.build/reference/be/c-cpp, https://bazel.build/docs/sandboxing): "All header files
+that are used in the build must be declared in the `hdrs` or `srcs` of `cc_*` rules. This is
+enforced."; the sandbox "prevents the action from accidentally using any input files that are not
+declared", so a shadow is seen because an undeclared header is not there. Buck2
+(https://buck2.build/docs/rule_authors/dep_files/): a dep file is "simply a list of all the inputs
+that were used, one per line"; "If you fail to report some inputs you used, then your command will
+not re-run when they change, and you'll get stale output."; it does not address a new header that
+shadows one. clang's `-fdebug-prefix-map`, `-ffile-prefix-map` and `-fmacro-prefix-map` rewrite
+the paths the compile writes and leave the markers of `-E`'s output as found, and change the
+object's own flags. The ticket's other option, the depfile with the search list and an existence
+line for each earlier directory of each header, needs the name each header was included as (the
+found path less its directory is ambiguous for nested listed directories such as `/usr/include`
+and `/usr/include/x86_64-linux-gnu`, so a probe can be of the wrong name and miss a shadow), does
+not see `__has_include`, and does not see a listed directory renamed at its place that is not a
+root; ccache's own way, the text with its line markers and the base directories rewritten, is a
+second pass over megabytes of text and needs the compiler's install directory. Run: clang 18.1.3
+(Ubuntu 1:18.1.3-1ubuntu1) and gcc 13.3 (for `-H`'s form only) on Linux; the macOS branches were
+not run, and R3 and R7 are the rule for a clang whose output differs from what was run.
+
+**The tests** (`tests/cc-cases.sh` is their library; `tests/<file>/check.sh <bats> <repository>
+<case>` runs one case alone, with no case all of them, reporting each that fails):
+`tests/build-headers` (41 cases: shadows by `C_INCLUDE_PATH`, `CPATH`, a quoted header beside the
+including file and the wasm stubs directory, with other bytes and with the very same bytes, native
+debug, native release and wasm, each equal to a clean build's; a shadow deleted again;
+`__has_include`; `#include_next`; a directory created later; a symlinked directory; relative and
+nested spellings; a header changed in place; blank and comment lines grown from nine to twenty,
+which `-P` alone prints as one newline; a header edited while cc runs; clang's output varied (no
+`-H`, a line of dots, a diagnostic that begins with a dot, dots with no path, noise, an unreadable
+header, the marker renamed, the resource directory failing, empty, relative, on two lines, `/` and
+with `..`); a C with no include of its own; 12,000 headers) and `tests/build-toolchain-path` (28
+cases: the toolchain moved whole and in part, native debug, native release and wasm; the roots
+nested in each other; a sibling directory whose name starts with the ATS2 home's; a relative
+directory that spells like the rest of a path under a root; roots behind links; a trailing slash;
+a native and a wasm resource directory that differ; the search list gaining and losing a directory;
+the toolchain moved onto a directory the environment lists; shadows after the move and in the
+toolchain's directories; `SDKROOT`; a `build/` copied to another directory; and the control, a
+stand-in clang that drops `-P`, whose move makes the object again) and the stamp's.
 
 **Each file is digested once for a build (bats#398).** The native and the wasm key of a C (a wasm
 bin's build makes both for the dependencies' C) both ask for the file's size and sha256 through the

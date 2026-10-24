@@ -1297,6 +1297,17 @@ fn pre_file_path {lo:agz}{n:pos}{m:nat | m <= n}
   val () = put_char_v(kb, 0)
 in kb end
 
+(* <out>.h (the listing before it is appended to <out>.i) and <C>.pre.c (the file the preprocess
+   reads, which includes the C) for the NUL-terminated path (preprocess keyword) *)
+fn suffixed_path {lo:agz}{n:pos}{m:nat | m <= n}{sn:nat}
+  (path_bv: !$A.borrow(byte, lo, n), m: int m, s: string sn): $B.builder_v = let
+  var kb : $B.builder_v = $B.create()
+  val z = find_null_bv_from(path_bv, 0, m)
+  val () = copy_to_builder_v(path_bv, 0, z, m, kb)
+  val () = bput_v(kb, s)
+  val () = put_char_v(kb, 0)
+in kb end
+
 (* Removes the preprocessed text of the object out (preprocess keyword) *)
 fn pre_remove {lo:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (out_bv: !$A.borrow(byte, lo, n), m: int m): void = let
@@ -1361,7 +1372,7 @@ implement key_fresh(kind, ph, phlen, out_b, in_b) = let
   val @(fz_k, bv_k) = $A.freeze<byte>(ka)
   (* the text the compile would read now, so a shadowing header is in it (preprocess keyword) *)
   val _ = (if there then (case+ kind of
-    | KeyOfWasmObject() => preprocess_wasm(bv_i, il, bv_o, ol)
+    | KeyOfWasmObject() => preprocess_wasm(ph, phlen, bv_i, il, bv_o, ol)
     | KeyOfDebugObject() => preprocess_native(ph, phlen, bv_o, ol, bv_i, il, Debug())
     | KeyOfReleaseObject() => preprocess_native(ph, phlen, bv_o, ol, bv_i, il, Release()))
     else 0): int
@@ -1429,16 +1440,13 @@ in end
 implement native_object_fresh(rel, ph, phlen, out_b, in_b) =
   key_fresh(object_key(rel), ph, phlen, out_b, in_b)
 
-(* A wasm object's key (preprocess keyword): its compile takes no PATSHOME *)
+(* A wasm object's key (preprocess keyword): ph holds the roots, a wasm compile takes no PATSHOME *)
 
 
-implement wasm_object_fresh(out_b, in_b) = let
-  val ph = $A.alloc<byte>(512)
-  val @(fz_ph, bv_ph) = $A.freeze<byte>(ph)
-  val r = key_fresh(KeyOfWasmObject(), bv_ph, 0, out_b, in_b)
-  val () = $A.drop<byte>(fz_ph, bv_ph)
-  val () = $A.free<byte>($A.thaw<byte>(fz_ph))
-in r end
+
+
+implement wasm_object_fresh(ph, phlen, out_b, in_b) =
+  key_fresh(KeyOfWasmObject(), ph, phlen, out_b, in_b)
 
 
 
@@ -2745,7 +2753,7 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
      its first argument (see the cap's comment above) *)
   var exec_b : $B.builder_v = $B.create()
   val () = (if capped then bput_v(exec_b, "sh") else let
-      val () = copy_to_builder_v(ph, 0, phlen, 512, exec_b)
+      val () = copy_to_builder_v(ph, 0, phlen, 12288, exec_b)
     in bput_v(exec_b, "/bin/patsopt") end)
   val (nul_exec | exec_a, _) = path_of_builder(exec_b)
   val @(fz_exec, bv_exec) = $A.barr_freeze(exec_a)
@@ -2792,7 +2800,7 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
       var w6 : $B.builder_v = $B.create()
       val () = put_int_v(w6, secs)
       var w7 : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(ph, 0, phlen, 512, w7)
+      val () = copy_to_builder_v(ph, 0, phlen, 12288, w7)
       val () = bput_v(w7, "/bin/patsopt")
     in $L.list_vt_cons(mk_arg(w1), $L.list_vt_cons(mk_arg(w2),
         $L.list_vt_cons(mk_arg(w3), $L.list_vt_cons(mk_arg(w4),
@@ -2804,7 +2812,7 @@ implement patsopt_only(ph, phlen, out_bv, out_len, in_bv, in_len) =
     in $L.list_vt_cons(mk_arg(b1), rest) end): $L.listv($P.arg_entry)
   var envp_b = $B.create()
   val () = bput_v(envp_b, "PATSHOME=")
-  val () = copy_to_builder_v(ph, 0, phlen, 512, envp_b)
+  val () = copy_to_builder_v(ph, 0, phlen, 12288, envp_b)
   val envp = $L.list_vt_cons(mk_arg(envp_b), $L.list_vt_nil())
   val _verbose = if is_verbose() then 1 else 0
   val () = (if $AR.gt_int_int(_verbose, 0) then let
@@ -2858,24 +2866,313 @@ in
   | ~$R.err(_) => ~1
 end
 
+(* ---- The listing of where each header was found (preprocess keyword, bats#477) ----
+
+   The preprocess of an object reads a one-line file that includes its C, with clang's -H: one line
+   on stderr for each header entered, dots for the depth, one space and the path as clang records
+   it. The listing the key digests names the ATS2 home and the compiler's resource directory by a
+   letter and the rest of the path and every other path as found, so the toolchain moving is not a
+   change and a header found at another path is. ph is the run's array: [0, 4096) the ATS2 home,
+   [4096, 8192) the resource directory of the native compiler and [8192, 12288) of the wasm one,
+   each a NUL-terminated absolute path without a trailing slash (a first byte of NUL: none). *)
+
+(* The byte at j of bv[0, m), or ~1 *)
+fn byte_at {l:agz}{n:pos}{m:nat | m <= n}{j:int}
+  (bv: !$A.borrow(byte, l, n), m: int m, j: int j): int =
+  if j < 0 then ~1
+  else if j >= m then ~1
+  else byte2int0($A.read<byte>(bv, j))
+
+(* The number of dots that start bv[0, m) *)
+fn dots_in {l:agz}{n:pos}{m:nat | m <= n}
+  (bv: !$A.borrow(byte, l, n), m: int m): [r:nat | r <= m] int r = let
+  fun loop {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+    (bv: !$A.borrow(byte, l, n), m: int m, p: int p): [r:nat | p <= r; r <= m] int r =
+    if p >= m then p
+    else if byte2int0($A.read<byte>(bv, p)) = 46 then loop(bv, m, p + 1)
+    else p
+in loop(bv, m, 0) end
+
+(* Whether bv[a, a + len) and cv[b, b + len) are the same bytes, len > 0 *)
+fn same_run {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{p:pos}{q:nat | q <= p}{a:int}{b:int}{len:int}
+  (bv: !$A.borrow(byte, l, n), m: int m, a: int a,
+   cv: !$A.borrow(byte, k, p), q: int q, b: int b, len: int len): bool = let
+  fun loop {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{p:pos}{q:nat | q <= p}{a:int}{b:int}
+    {len:nat}{i:nat | i <= len} .<len - i>.
+    (bv: !$A.borrow(byte, l, n), m: int m, a: int a,
+     cv: !$A.borrow(byte, k, p), q: int q, b: int b, len: int len, i: int i): bool =
+    if i >= len then true
+    else let
+      val x = byte_at(bv, m, a + i)
+    in if x < 0 then false
+       else if x <> byte_at(cv, q, b + i) then false
+       else loop(bv, m, a, cv, q, b, len, i + 1) end
+in if len <= 0 then false else loop(bv, m, a, cv, q, b, len, 0) end
+
+(* The length of the NUL-terminated root at [at, at + 4096) of ph, 0 when it has none *)
+fn root_len {l:agz}{at:nat | at + 4096 <= 12288}
+  (ph: !$A.borrow(byte, l, 12288), at: int at): [r:nat | r <= 4096] int r = let
+  fun loop {l:agz}{at:nat | at + 4096 <= 12288}{k:nat | k <= 4096} .<4096 - k>.
+    (ph: !$A.borrow(byte, l, 12288), at: int at, k: int k): [r:nat | r <= 4096] int r =
+    if k >= 4096 then 0
+    else if byte2int0($A.read<byte>(ph, at + k)) = 0 then k
+    else loop(ph, at, k + 1)
+in loop(ph, at, 0) end
+
+(* The length of the ATS2 home ph[0, phlen) less its trailing slashes (0 when it is none) *)
+fn home_len {l:agz}(ph: !$A.borrow(byte, l, 12288), phlen: int): [r:nat | r <= 4096] int r = let
+  fun loop {l:agz}{i:nat | i <= 4096}{e:nat | e <= i} .<4096 - i>.
+    (ph: !$A.borrow(byte, l, 12288), phlen: int, i: int i, e: int e): [r:nat | r <= 4096] int r =
+    if i >= 4096 then e
+    else if i >= phlen then e
+    else if byte2int0($A.read<byte>(ph, i)) = 47 then loop(ph, phlen, i + 1, e)
+    else loop(ph, phlen, i + 1, i + 1)
+in loop(ph, phlen, 0, 0) end
+
+(* Whether line[ps, m) begins with the root of rl bytes at [at, ...) of ph and then a slash *)
+fn under_root {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{ps:int}{at:int}{rl:int}
+  (line: !$A.borrow(byte, l, n), m: int m, ps: int ps,
+   ph: !$A.borrow(byte, k, 12288), at: int at, rl: int rl): bool =
+  if rl <= 0 then false
+  else if m - ps <= rl then false
+  else if byte_at(line, m, ps + rl) <> 47 then false
+  else same_run(line, m, ps, ph, 12288, at, rl)
+
+(* The failure (0 none) is st[0]: 1 a line of dots, 2 a dotted line with a space and no path, 3 a
+   first header line that is not the C, 4 a line over 512 KiB, 5 the listing could not be written;
+   st[1] is 1 once a header line was seen *)
+
+(* One line of clang's stderr, line[0, m): a header line becomes a line of the listing in listp *)
+fn handle_line {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
+  {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}{s:agz}
+  (line: !$A.borrow(byte, l, n), m: int m,
+   ph: !$A.borrow(byte, k, 12288), phlen: int, which: int,
+   cpath: !$A.borrow(byte, c, nc), cplen: int cm,
+   listp: !$A.borrow(byte, q, nq), listlen: int qm,
+   st: !$A.arr(byte, s, 4)): void =
+  if byte2int0($A.get<byte>(st, 0)) <> 0 then ()
+  else if byte_at(line, m, 0) <> 46 then ()
+  else let
+    val d = dots_in(line, m)
+  in
+    if d >= m then poke_arr(st, 0, 4, 1)
+    else if byte_at(line, m, d) <> 32 then ()
+    else if d + 1 >= m then poke_arr(st, 0, 4, 2)
+    else let
+      val ps = d + 1
+      val first = (byte2int0($A.get<byte>(st, 1)) = 0): bool
+      val () = (if first then
+        (if d = 1 && m - ps = cplen && same_run(line, m, ps, cpath, cplen, 0, cplen)
+         then poke_arr(st, 1, 4, 1) else poke_arr(st, 0, 4, 3))
+        else ())
+    in
+      if byte2int0($A.get<byte>(st, 0)) <> 0 then ()
+      else let
+        val ra = (if phlen > 4096 then 0 else home_len(ph, phlen)): [r:nat] int r
+        val a_hit = (ra > 0 && under_root(line, m, ps, ph, 0, ra)): bool
+        val rc = (if phlen > 4096 then 0 else if which = 0 then root_len(ph, 4096)
+          else root_len(ph, 8192)): [r:nat] int r
+        val c_hit = (rc > 0 && (if which = 0 then under_root(line, m, ps, ph, 4096, rc)
+          else under_root(line, m, ps, ph, 8192, rc))): bool
+        var ob : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(line, 0, d, m, ob)
+        val () = put_char_v(ob, 32)
+        val () = (if a_hit && (~c_hit || ra >= rc) then let
+            val () = put_char_v(ob, 65)
+            val () = put_char_v(ob, 32)
+          in copy_to_builder_v(line, ps + ra + 1, m, m, ob) end
+          else if c_hit then let
+            val () = put_char_v(ob, 67)
+            val () = put_char_v(ob, 32)
+          in copy_to_builder_v(line, ps + rc + 1, m, m, ob) end
+          else let
+            val () = put_char_v(ob, 45)
+            val () = put_char_v(ob, 32)
+          in copy_to_builder_v(line, ps, m, m, ob) end)
+        val () = put_char_v(ob, 10)
+        val w = write_settle(listp, listlen, append_file_from_builder_m(listp, listlen, ob))
+      in if w <> 0 then poke_arr(st, 0, 4, 5) else () end
+    end
+  end
+
+(* The bytes of the chunk[i, m) of stderr: a line is held in lb until its newline (at most 512 KiB)
+   *)
+fun feed {l:agz}{n:pos}{m:nat | m <= n}{i:nat | i <= m}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
+  {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}{s:agz} .<m - i>.
+  (chunk: !$A.borrow(byte, l, n), m: int m, i: int i,
+   ph: !$A.borrow(byte, k, 12288), phlen: int, which: int,
+   cpath: !$A.borrow(byte, c, nc), cplen: int cm,
+   listp: !$A.borrow(byte, q, nq), listlen: int qm,
+   st: !$A.arr(byte, s, 4), lb: $B.builder_v): $B.builder_v =
+  if i >= m then lb
+  else let
+    val b = byte2int0($A.read<byte>(chunk, i))
+  in
+    if b = 10 then let
+      val @(la, ll) = $B.into_arr(lb)
+      val @(fz_l, bv_l) = $A.freeze<byte>(la)
+      val () = handle_line(bv_l, ll, ph, phlen, which, cpath, cplen, listp, listlen, st)
+      val () = $A.drop<byte>(fz_l, bv_l)
+      val () = $A.free<byte>($A.thaw<byte>(fz_l))
+    in feed(chunk, m, i + 1, ph, phlen, which, cpath, cplen, listp, listlen, st, $B.create()) end
+    else let
+      var lb2 : $B.builder_v = lb
+      val () = (if $B.length(lb2) >= 524288 then poke_arr(st, 0, 4, 4) else put_char_v(lb2, b))
+      val lb3 = lb2
+    in feed(chunk, m, i + 1, ph, phlen, which, cpath, cplen, listp, listlen, st, lb3) end
+  end
+
+(* All of clang's stderr, 64 KiB at a time, up to 1 GiB (16384 reads); the last line needs no
+   newline *)
+fun read_listing {f:nat}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
+  {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}{s:agz} .<f>.
+  (fd: !$F.fd, f: int f,
+   ph: !$A.borrow(byte, k, 12288), phlen: int, which: int,
+   cpath: !$A.borrow(byte, c, nc), cplen: int cm,
+   listp: !$A.borrow(byte, q, nq), listlen: int qm,
+   st: !$A.arr(byte, s, 4), lb: $B.builder_v): $B.builder_v =
+  if f <= 0 then lb
+  else let
+    val chunk = $A.alloc<byte>(65536)
+    val rr = $F.file_read(fd, chunk, 65536)
+    val n = (case+ rr of | ~$R.ok(n) => n | ~$R.err(_) => 0): [k:nat | k <= 65536] int k
+    val @(fz_c, bv_c) = $A.freeze<byte>(chunk)
+    val lb2 = (if n <= 0 then lb
+      else feed(bv_c, n, 0, ph, phlen, which, cpath, cplen, listp, listlen, st, lb)): $B.builder_v
+    val () = $A.drop<byte>(fz_c, bv_c)
+    val () = $A.free<byte>($A.thaw<byte>(fz_c))
+  in if n <= 0 then lb2
+     else read_listing(fd, f - 1, ph, phlen, which, cpath, cplen, listp, listlen, st, lb2) end
+
+(* Says why the listing of the object whose C is in_bv[0, in_len) could not be used (R7) *)
+fn say_unusable {l:agz}{n:pos}{m:nat | m <= n}{sn:nat}
+  (in_bv: !$A.borrow(byte, l, n), in_len: int m, what: string sn): void = let
+  val () = prerr! ("bats: ")
+  val () = prerr_seg(in_bv, 0, in_len - 1, in_len)
+  val () = prerr! (": clang's header listing could not be used (")
+  val () = prerr! (what)
+  val () = prerr! ("): the object is made again\n")
+in end
+
+(* The listing file (listp) appended to <out>.i; 0 when it was *)
+fn append_listing_file {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}
+  {lo:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  (listp: !$A.borrow(byte, q, nq), listlen: int qm,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om): int = let
+  val @(pa, pl) = $B.into_arr(pre_file_path(out_bv, out_len))
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val r = (case+ file_open_m(listp, listlen, $F.ReadOnly(), $F.OpenExisting(), 0) of
+    | ~$R.ok(src) =>
+      (case+ file_open_m(bv_p, pl, $F.WriteOnly(), $F.AppendExisting(), 420) of
+       | ~$R.ok(dst) => let
+           val c = (case+ $F.fd_copy(src, dst) of | ~$R.ok(_) => 0 | ~$R.err(_) => 1): int
+           val () = $R.discard<int><$F.io_error>($F.file_close(dst))
+           val () = $R.discard<int><$F.io_error>($F.file_close(src))
+         in c end
+       | ~$R.err(_) => let
+           val () = $R.discard<int><$F.io_error>($F.file_close(src))
+         in 1 end)
+    | ~$R.err(_) => 1): int
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in r end
+
+(* Runs the preprocess of the object out (argv), reads clang's stderr as the listing of where each
+   header was found and appends it to <out>.i; 0 when both are there. Any failure removes <out>.i
+   and says why (R7). which is 0 for a native object, 1 for a wasm one. *)
+fn run_preprocess {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
+  {lph:agz}{lo:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {li:agz}{ni:pos}{im:nat | 2 <= im; im <= ni; im <= 524288}
+  (nul: $P.NUL_AT(cs, ne, k) | exec_bv: !$A.cborrow(le, ne, cs), argv: $L.listv($P.arg_entry),
+   ph: !$A.borrow(byte, lph, 12288), phlen: int, which: int,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im): int = let
+  val @(la, ll) = $B.into_arr(suffixed_path(out_bv, out_len, ".h"))
+  val @(fz_l, bv_l) = $A.freeze<byte>(la)
+  val made = write_settle(bv_l, ll, write_file_from_builder_m(bv_l, ll, $B.create()))
+  val sr = spawn_child(nul | exec_bv, argv, $P.dev_null(), $P.dev_null(), $P.pipe_new())
+  val rc = (case+ sr of
+    | ~$R.ok(sp) => let
+        val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
+        val () = $P.pipe_end_close(sin_p)
+        val () = $P.pipe_end_close(sout_p)
+        val+ ~$P.pipe_fd(err_fd) = serr_p
+        val st = $A.alloc<byte>(4)
+        val () = poke_arr(st, 0, 4, 0)
+        val () = poke_arr(st, 1, 4, 0)
+        val lb = read_listing(err_fd, 16384, ph, phlen, which, in_bv, in_len - 1, bv_l, ll, st,
+          $B.create())
+        val @(ta, tl) = $B.into_arr(lb)
+        val @(fz_t, bv_t) = $A.freeze<byte>(ta)
+        val () = handle_line(bv_t, tl, ph, phlen, which, in_bv, in_len - 1, bv_l, ll, st)
+        val () = $A.drop<byte>(fz_t, bv_t)
+        val () = $A.free<byte>($A.thaw<byte>(fz_t))
+        val ecr = $F.file_close(err_fd)
+        val () = $R.discard<int><$F.io_error>(ecr)
+        val ec = (case+ $P.child_wait(child) of | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+        val bad = byte2int0($A.get<byte>(st, 0))
+        val seen = byte2int0($A.get<byte>(st, 1))
+        val () = $A.free<byte>(st)
+        val () = (if ec <> 0 then say_unusable(in_bv, in_len, "clang failed")
+          else if bad = 1 then say_unusable(in_bv, in_len, "a line of dots")
+          else if bad = 2 then say_unusable(in_bv, in_len, "dots and a space with no path")
+          else if bad = 3 then say_unusable(in_bv, in_len, "the first header line is not the C")
+          else if bad = 4 then say_unusable(in_bv, in_len, "a line over 512 KiB")
+          else if bad = 5 then say_unusable(in_bv, in_len, "the listing could not be written")
+          else if seen = 0 then say_unusable(in_bv, in_len, "no header line")
+          else ())
+      in if ec <> 0 then ec
+         else if bad <> 0 then 1
+         else if seen = 0 then 1
+         else append_listing_file(bv_l, ll, out_bv, out_len) end
+    | ~$R.err(_) => ~1): int
+  val () = remove_output_m(bv_l, ll, ll)
+  val () = $A.drop<byte>(fz_l, bv_l)
+  val () = $A.free<byte>($A.thaw<byte>(fz_l))
+  val () = (if rc <> 0 then pre_remove(out_bv, out_len) else ())
+in (if made <> 0 then 1 else rc) end
+
+(* <C>.pre.c, the file the preprocess reads: one line that includes the C by its name, in the C's
+   directory (R1). 0 when it was written. *)
+fn write_wrapper {l:agz}{n:pos}{m:nat | 2 <= m; m <= n; m <= 524288}
+  {w:agz}{nw:pos}{wm:nat | wm <= nw; wm <= 524288}
+  (in_bv: !$A.borrow(byte, l, n), in_len: int m, wp: !$A.borrow(byte, w, nw), wl: int wm): int = let
+  fun last_slash {l:agz}{n:pos}{m:nat | m <= n}{i:nat | i <= m}{r:nat | r <= m} .<i>.
+    (bv: !$A.borrow(byte, l, n), m: int m, i: int i, r: int r): [q:nat | q <= m] int q =
+    if i <= 0 then r
+    else if byte2int0($A.read<byte>(bv, i - 1)) = 47 then i
+    else last_slash(bv, m, i - 1, r)
+  val base = last_slash(in_bv, in_len - 1, in_len - 1, 0)
+  var cb : $B.builder_v = $B.create()
+  val () = bput_v(cb, "#include \"")
+  val () = copy_to_builder_v(in_bv, base, in_len - 1, in_len - 1, cb)
+  val () = bput_v(cb, "\"\n")
+  val cbv = cb
+in write_settle(wp, wl, write_file_from_builder_m(wp, wl, cbv)) end
+
+
 (* s appended to b when on: the preprocess names its output <out>.i (preprocess keyword) *)
 fn bput_when {sn:nat} (b: !$B.builder_v >> $B.builder_v, on: bool, s: string sn): void =
   if on then bput_v(b, s) else ()
 
 (* The preprocess keeps every source line and no line marker (preprocess keyword): -P drops the
-   markers, which name the toolchain, and -frewrite-includes writes each header's source as it is *)
+   markers, which name the toolchain, -frewrite-includes writes each header's source as it is and -H
+   says where each header was found *)
 fn pre_flags (pre: bool): $L.listv($P.arg_entry) =
   if pre then let
     var bp = $B.create()
     val () = bput_v(bp, "-P")
     var br = $B.create()
     val () = bput_v(br, "-frewrite-includes")
-  in $L.list_vt_cons(mk_arg(bp), $L.list_vt_cons(mk_arg(br), $L.list_vt_nil())) end
+    var bh = $B.create()
+    val () = bput_v(bh, "-H")
+  in $L.list_vt_cons(mk_arg(bp), $L.list_vt_cons(mk_arg(br),
+       $L.list_vt_cons(mk_arg(bh), $L.list_vt_nil()))) end
   else $L.list_vt_nil()
 
 fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
   {ni:pos}{im:nat | im <= ni; im <= 524288}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int,
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    rel: profile, pre: bool): $L.listv($P.arg_entry) = let
@@ -2905,10 +3202,10 @@ fn native_cc_argv {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524
          $L.list_vt_cons(mk_arg(bo0), $L.list_vt_nil())) end): $L.listv($P.arg_entry)
   var b6 = $B.create()
   val () = bput_v(b6, "-I")
-  val () = copy_to_builder_v(ph, 0, phlen, 512, b6)
+  val () = copy_to_builder_v(ph, 0, phlen, 12288, b6)
   var b7 = $B.create()
   val () = bput_v(b7, "-I")
-  val () = copy_to_builder_v(ph, 0, phlen, 512, b7)
+  val () = copy_to_builder_v(ph, 0, phlen, 12288, b7)
   val () = bput_v(b7, "/ccomp/runtime")
   (* argv: clang -c -o <out> <in> [opt_flags] -I<ph>; the preprocess: -E -P -frewrite-includes *)
   val tail = $L.list_vt_cons(mk_arg(b6), $L.list_vt_cons(mk_arg(b7), $L.list_vt_nil()))
@@ -2926,7 +3223,15 @@ in $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
 
 
 
-implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
+fun append_args {m:nat} .<m>.
+  (xs: $L.list_vt($P.arg_entry, m), ys: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
+  case+ xs of
+  | ~$L.list_vt_nil() => ys
+  | ~$L.list_vt_cons(x, tl) => $L.list_vt_cons(x, append_args(tl, ys))
+
+(* clang and the flags of a wasm compile, before -c or -E (the resource directory is asked with
+   them) *)
+fn wasm_flag_args (): $L.listv($P.arg_entry) = let
   var wc1 = $B.create() val () = bput_v(wc1, "clang")
   var wc2 = $B.create() val () = bput_v(wc2, "--target=wasm32")
   var wc3 = $B.create() val () = bput_v(wc3, "-O2")
@@ -2943,6 +3248,17 @@ implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
   var wc14 = $B.create() val () = bput_v(wc14, "build/_bats_wasm_stubs")
   var wc15 = $B.create() val () = bput_v(wc15, "-Wno-implicit-function-declaration")
   var wc16 = $B.create() val () = bput_v(wc16, "-Wno-int-conversion")
+  in $L.list_vt_cons(mk_arg(wc1), $L.list_vt_cons(mk_arg(wc2),
+    $L.list_vt_cons(mk_arg(wc3), $L.list_vt_cons(mk_arg(wc4),
+    $L.list_vt_cons(mk_arg(wc5), $L.list_vt_cons(mk_arg(wc6),
+    $L.list_vt_cons(mk_arg(wc7), $L.list_vt_cons(mk_arg(wc8),
+    $L.list_vt_cons(mk_arg(wc9), $L.list_vt_cons(mk_arg(wc10),
+    $L.list_vt_cons(mk_arg(wc11), $L.list_vt_cons(mk_arg(wc12),
+    $L.list_vt_cons(mk_arg(wc13), $L.list_vt_cons(mk_arg(wc14),
+    $L.list_vt_cons(mk_arg(wc15), $L.list_vt_cons(mk_arg(wc16),
+    $L.list_vt_nil())))))))))))))))) end
+
+implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
   var wc17 = $B.create() val () = bput_v(wc17, (if pre then "-E" else "-c"))
   var wc18 = $B.create() val () = bput_v(wc18, "-o")
   var wc19 = $B.create()
@@ -2952,33 +3268,143 @@ implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
   var wc20 = $B.create()
   val ic = in_len - 1
   val () = copy_to_builder_v(in_bv, 0, ic, in_len, wc20)
-  (* argv: clang --target=wasm32 ... -c -o <out> <in>; the preprocess: -E -P -frewrite-includes *)
-  in $L.list_vt_cons(mk_arg(wc1), $L.list_vt_cons(mk_arg(wc2),
-    $L.list_vt_cons(mk_arg(wc3), $L.list_vt_cons(mk_arg(wc4),
-    $L.list_vt_cons(mk_arg(wc5), $L.list_vt_cons(mk_arg(wc6),
-    $L.list_vt_cons(mk_arg(wc7), $L.list_vt_cons(mk_arg(wc8),
-    $L.list_vt_cons(mk_arg(wc9), $L.list_vt_cons(mk_arg(wc10),
-    $L.list_vt_cons(mk_arg(wc11), $L.list_vt_cons(mk_arg(wc12),
-    $L.list_vt_cons(mk_arg(wc13), $L.list_vt_cons(mk_arg(wc14),
-    $L.list_vt_cons(mk_arg(wc15), $L.list_vt_cons(mk_arg(wc16),
-    $L.list_vt_cons(mk_arg(wc17), $L.list_vt_cons(mk_arg(wc18),
+  (* argv: clang --target=wasm32 ... -c -o <out> <in>; the preprocess: -E, then pre_flags *)
+  in append_args(wasm_flag_args(), $L.list_vt_cons(mk_arg(wc17), $L.list_vt_cons(mk_arg(wc18),
     $L.list_vt_cons(mk_arg(wc19), $L.list_vt_cons(mk_arg(wc20),
-    pre_flags(pre))))))))))))))))))))) end
+    pre_flags(pre)))))) end
 
+(* The resource directory of the compiler a kind of object is made with (R4): the answer of
+   `clang <that kind's flags> -print-resource-dir`, one absolute line, trailing slashes stripped, in
+   ph at 4096 (native) or 8192 (wasm). 0 when it was kept, else why not: 1 clang failed, 2 an
+   answer longer than 4096 bytes, 3 an answer cut short, 4 clang did not run, 5 an empty answer,
+   6 more than one line, 7 a relative path, 8 the path /, 9 a path of 4096 bytes or more. *)
+fn take_root {lo:agz}{l:agz}{k:nat | k <= 4096}{at:int}
+  (out: !$A.arr(byte, lo, 4096), len: int k, ph: !$A.arr(byte, l, 12288), at: int at): int =
+  if len <= 1 then 5
+  else if byte2int0($A.get<byte>(out, len - 1)) <> 10 then 3
+  else let
+    fun one_line {lo:agz}{n:nat | n <= 4096}{i:nat | i <= n} .<n - i>.
+      (out: !$A.arr(byte, lo, 4096), n: int n, i: int i): bool =
+      if i >= n then true
+      else if byte2int0($A.get<byte>(out, i)) = 10 then false
+      else if byte2int0($A.get<byte>(out, i)) = 0 then false
+      else one_line(out, n, i + 1)
+    fun trim {lo:agz}{r:nat | r <= 4096} .<r>.
+      (out: !$A.arr(byte, lo, 4096), r: int r): [q:nat | q <= r] int q =
+      if r <= 0 then 0
+      else if byte2int0($A.get<byte>(out, r - 1)) = 47 then trim(out, r - 1)
+      else r
+    fun copy {lo:agz}{l:agz}{r:nat | r <= 4096}{j:nat | j <= r}{at:int} .<r - j>.
+      (out: !$A.arr(byte, lo, 4096), ph: !$A.arr(byte, l, 12288), at: int at, r: int r,
+       j: int j): void =
+      if j >= r then ()
+      else let
+        val () = poke_arr(ph, at + j, 12288, byte2int0($A.get<byte>(out, j)))
+      in copy(out, ph, at, r, j + 1) end
+  in
+    if ~one_line(out, len - 1, 0) then 6
+    else if byte2int0($A.get<byte>(out, 0)) <> 47 then 7
+    else let
+      val r = trim(out, len - 1)
+    in
+      if r <= 0 then 8
+      else if r >= 4096 then 9
+      else let
+        val () = copy(out, ph, at, r, 0)
+        val () = poke_arr(ph, at + r, 12288, 0)
+      in 0 end
+    end
+  end
 
+fn judge_root {lo:agz}{l:agz}
+  (oc: capture_outcome, out: !$A.arr(byte, lo, 4096), ph: !$A.arr(byte, l, 12288),
+   which: int): int =
+  case+ oc of
+  | ~CaptureFits(n) =>
+    (if which = 0 then take_root(out, n, ph, 4096) else take_root(out, n, ph, 8192))
+  | ~CaptureFailed(_, _) => 1
+  | ~CaptureLonger(_, _) => 2
+  | ~CaptureReadFailed(_, _, _) => 3
+  | ~CaptureNotRun(_) => 4
 
-
-
-
-implement preprocess_wasm(in_bv, in_len, out_bv, out_len) = let
-  val () = pre_remove(out_bv, out_len)
+fn ask_one {l:agz}(ph: !$A.arr(byte, l, 12288), which: int): void = let
+  val flags = (if which = 0 then let
+      var b1 = $B.create()
+      val () = bput_v(b1, "clang")
+    in $L.list_vt_cons(mk_arg(b1), $L.list_vt_nil()) end
+    else wasm_flag_args()): $L.listv($P.arg_entry)
+  var bq = $B.create()
+  val () = bput_v(bq, "-print-resource-dir")
+  val argv = append_args(flags, $L.list_vt_cons(mk_arg(bq), $L.list_vt_nil()))
   val (nul_exec | exec) = $P.path_of_string_proved("clang")
   val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
-  val argv = wasm_cc_argv(in_bv, in_len, out_bv, out_len, true)
-  val rc = run_cmd(nul_exec | bv_exec, argv)
+  val out = $A.alloc<byte>(4096)
+  val oc = run_cmd_capture_outcome(nul_exec | bv_exec, argv, out)
   val () = $A.cborrow_drop(fz_exec, bv_exec)
   val () = $A.barr_free($A.barr_thaw(fz_exec))
-in rc end
+  val why = judge_root(oc, out, ph, which)
+  val () = $A.free<byte>(out)
+  val () = (if why = 0 then () else let
+      val () = prerr! ("bats: clang's resource directory for ")
+      val () = (if which = 0 then prerr! ("native") else prerr! ("wasm"))
+      val () = prerr! (" objects could not be asked (")
+      val () = (if why = 1 then prerr! ("clang failed")
+        else if why = 2 then prerr! ("an answer over 4096 bytes")
+        else if why = 3 then prerr! ("an answer cut short")
+        else if why = 4 then prerr! ("clang did not run")
+        else if why = 5 then prerr! ("an empty answer")
+        else if why = 6 then prerr! ("more than one line")
+        else if why = 7 then prerr! ("a relative path")
+        else if why = 8 then prerr! ("the path /")
+        else prerr! ("a path of 4096 bytes or more"))
+    in prerr! ("): those objects are made again\n") end)
+in end
+
+(* Asks both compilers' resource directories, once per run (R5), into ph; a root that cannot be
+   asked stays empty, and every object of its kind is then made again *)
+
+
+implement ask_roots(ph, phlen) =
+  if phlen <= 0 then ()
+  else if phlen > 4096 then ()
+  else let
+    val () = poke_arr(ph, 4096, 12288, 0)
+    val () = poke_arr(ph, 8192, 12288, 0)
+    val () = ask_one(ph, 0)
+    val () = ask_one(ph, 1)
+  in end
+
+
+
+
+
+
+
+implement preprocess_wasm(ph, phlen, in_bv, in_len, out_bv, out_len) = let
+  val () = pre_remove(out_bv, out_len)
+in
+  if in_len < 2 then 1
+  else let
+    val @(wa, wl) = $B.into_arr(suffixed_path(in_bv, in_len, ".pre.c"))
+    val @(fz_w, bv_w) = $A.freeze<byte>(wa)
+    val wrote = write_wrapper(in_bv, in_len, bv_w, wl)
+    val root_ok = (phlen <= 4096 && root_len(ph, 8192) > 0): bool
+    val () = (if root_ok then ()
+      else say_unusable(in_bv, in_len, "the compiler's resource directory is not known"))
+    val rc = (if wrote <> 0 then wrote else if ~root_ok then 1 else let
+        val (nul_exec | exec) = $P.path_of_string_proved("clang")
+        val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
+        val argv = wasm_cc_argv(bv_w, wl, out_bv, out_len, true)
+        val r = run_preprocess(nul_exec | bv_exec, argv, ph, phlen, 1, out_bv, out_len,
+          in_bv, in_len)
+        val () = $A.cborrow_drop(fz_exec, bv_exec)
+        val () = $A.barr_free($A.barr_thaw(fz_exec))
+      in r end): int
+    val () = remove_output_m(bv_w, wl, wl)
+    val () = $A.drop<byte>(fz_w, bv_w)
+    val () = $A.free<byte>($A.thaw<byte>(fz_w))
+  in rc end
+end
 
 
 
@@ -2997,13 +3423,29 @@ in rc end
 
 implement preprocess_native(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val () = pre_remove(out_bv, out_len)
-  val (nul_exec | exec) = $P.path_of_string_proved("clang")
-  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
-  val argv = native_cc_argv(ph, phlen, out_bv, out_len, in_bv, in_len, rel, true)
-  val rc = run_cmd(nul_exec | bv_exec, argv)
-  val () = $A.cborrow_drop(fz_exec, bv_exec)
-  val () = $A.barr_free($A.barr_thaw(fz_exec))
-in rc end
+in
+  if in_len < 2 then 1
+  else let
+    val @(wa, wl) = $B.into_arr(suffixed_path(in_bv, in_len, ".pre.c"))
+    val @(fz_w, bv_w) = $A.freeze<byte>(wa)
+    val wrote = write_wrapper(in_bv, in_len, bv_w, wl)
+    val root_ok = (phlen <= 4096 && root_len(ph, 4096) > 0): bool
+    val () = (if root_ok then ()
+      else say_unusable(in_bv, in_len, "the compiler's resource directory is not known"))
+    val rc = (if wrote <> 0 then wrote else if ~root_ok then 1 else let
+        val (nul_exec | exec) = $P.path_of_string_proved("clang")
+        val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
+        val argv = native_cc_argv(ph, phlen, out_bv, out_len, bv_w, wl, rel, true)
+        val r = run_preprocess(nul_exec | bv_exec, argv, ph, phlen, 0, out_bv, out_len,
+          in_bv, in_len)
+        val () = $A.cborrow_drop(fz_exec, bv_exec)
+        val () = $A.barr_free($A.barr_thaw(fz_exec))
+      in r end): int
+    val () = remove_output_m(bv_w, wl, wl)
+    val () = $A.drop<byte>(fz_w, bv_w)
+    val () = $A.free<byte>($A.thaw<byte>(fz_w))
+  in rc end
+end
 
 implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
   val (nul_exec | exec) = $P.path_of_string_proved("clang")

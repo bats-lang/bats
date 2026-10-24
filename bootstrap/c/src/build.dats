@@ -200,14 +200,14 @@ end
 fn patsopt_dir_extra
   {ld:agz}{lph:agz}{nd:pos}{dm:nat | dm <= nd; dm <= 524288}
   (dir_bv: !$A.borrow(byte, ld, nd), dir_len: int dm,
-   ph: !$A.borrow(byte, lph, 512), phlen: int): void = let
+   ph: !$A.borrow(byte, lph, 12288), phlen: int): void = let
   val dr = dir_read_m(dir_bv, dir_len)
 in case+ dr of
   | ~$R.ok(d) => let
       fun loop {n,i:nat | i <= n} .<n - i>.
         (d: !$F.entries(n), i: int i, n: int n,
          dir_bv: !$A.borrow(byte, ld, nd), dir_len: int dm,
-         ph: !$A.borrow(byte, lph, 512), phlen: int): void =
+         ph: !$A.borrow(byte, lph, 12288), phlen: int): void =
         if i >= n then ()
         else let
           val e = $A.alloc<byte>(1024)
@@ -275,7 +275,7 @@ end
 fn cc_dir_extra
   {ld:agz}{lph:agz}{nd:pos}{dm:nat | dm <= nd; dm <= 524288}
   (dir_bv: !$A.borrow(byte, ld, nd), dir_len: int dm,
-   ph: !$A.borrow(byte, lph, 512), phlen: int,
+   ph: !$A.borrow(byte, lph, 12288), phlen: int,
    rel: profile): void = let
   val dr = dir_read_m(dir_bv, dir_len)
 in case+ dr of
@@ -283,7 +283,7 @@ in case+ dr of
       fun loop {n,i:nat | i <= n} .<n - i>.
         (d: !$F.entries(n), i: int i, n: int n,
          dir_bv: !$A.borrow(byte, ld, nd), dir_len: int dm,
-         ph: !$A.borrow(byte, lph, 512), phlen: int,
+         ph: !$A.borrow(byte, lph, 12288), phlen: int,
          rel: profile): void =
         if i >= n then ()
         else let
@@ -711,8 +711,9 @@ fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <
   val () = $A.barr_free($A.barr_thaw(fz_exec))
 in rc end
 
-fn wasm_cc_file {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
-  (path: !$A.borrow(byte, l, n), path_len: int m): int = let
+fn wasm_cc_file {lph:agz}{l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
+   path: !$A.borrow(byte, l, n), path_len: int m): int = let
   (* path is like "build/.../_dats.c", replace .c with .wasm.o for output *)
   var ob : $B.builder_v = $B.create()
   val pl = path_len - 1
@@ -727,12 +728,12 @@ fn wasm_cc_file {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   var wfi : $B.builder_v = $B.create()
   val () = copy_to_builder_v(path, 0, pl, path_len, wfi)
   val () = put_char_v(wfi, 0)
-  val wasm_fresh = wasm_object_fresh(wfo, wfi)
+  val wasm_fresh = wasm_object_fresh(ph, phlen, wfo, wfi)
   val @(oa, ol) = $B.into_arr(ob)
   val @(fz_o, bv_o) = $A.freeze<byte>(oa)
   val () = (if wasm_fresh then () else key_drop(bv_o, ol))
   (* the text the object is made from, before cc reads the headers (preprocess keyword) *)
-  val _ = (if wasm_fresh then 0 else preprocess_wasm(path, path_len, bv_o, ol)): int
+  val _ = (if wasm_fresh then 0 else preprocess_wasm(ph, phlen, path, path_len, bv_o, ol)): int
   val rc = (if wasm_fresh then 0 else run_wasm_cc(path, path_len, bv_o, ol)): int
   val () = (if rc = 0 && ~wasm_fresh then wasm_object_record(bv_o, ol, path, path_len) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
@@ -764,9 +765,10 @@ fn extra_kind {l:agz}{k:nat | k <= 1024} (e: !$A.arr(byte, l, 1024), el: int k, 
    want says (the .dats as dynloads to eb, the _dats.o as link objects
    to eb, the _dats.c compiled to wasm objects whose paths go to eb):
    the count of wasm objects added to c *)
-fun dep_extras {n,i:nat | i <= n} .<n - i>.
+fun dep_extras {n,i:nat | i <= n}{lph:agz} .<n - i>.
   (es: !$F.entries(n), i: int i, n: int n, d: !dep, want: wanted,
-   eb: !$B.builder_v >> $B.builder_v, c: int): int =
+   eb: !$B.builder_v >> $B.builder_v, c: int,
+   ph: !$A.borrow(byte, lph, 12288), phlen: int): int =
   if i >= n then c
   else let
     val e = $A.alloc<byte>(1024)
@@ -798,7 +800,7 @@ fun dep_extras {n,i:nat | i <= n} .<n - i>.
         val () = put_char_v(wp, 0)
         val @(wpa, wp_len) = $B.into_arr(wp)
         val @(fz_wp, bv_wp) = $A.freeze<byte>(wpa)
-        val rc = wasm_cc_file(bv_wp, wp_len)
+        val rc = wasm_cc_file(ph, phlen, bv_wp, wp_len)
         val c3 = (if rc = 0 then let
           val () = copy_to_builder_v(bv_wp, 0, wp_len - 2, wp_len, eb)
           val () = bput_v(eb, "wasm.o")
@@ -809,7 +811,7 @@ fun dep_extras {n,i:nat | i <= n} .<n - i>.
       in c3 end)): int
     val () = $A.drop<byte>(fz_e, bv_e)
     val () = $A.free<byte>($A.thaw<byte>(fz_e))
-  in dep_extras(es, i + 1, n, d, want, eb, c2) end
+  in dep_extras(es, i + 1, n, d, want, eb, c2, ph, phlen) end
 
 (* ============================================================
    The wasm exports: a callback JS calls on the instance is declared
@@ -938,7 +940,8 @@ fun put_dep_exports {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder
     in put_dep_exports(tl, lb, c2) end
 
 (* The extra files of d (as dep_extras) *)
-fn dep_dir_extras (d: !dep, want: wanted, eb: !$B.builder_v >> $B.builder_v, c: int): int = let
+fn dep_dir_extras {lph:agz}(d: !dep, want: wanted, eb: !$B.builder_v >> $B.builder_v, c: int,
+  ph: !$A.borrow(byte, lph, 12288), phlen: int): int = let
   var pb : $B.builder_v = $B.create()
   val () = bput_v(pb, "build/bats_modules/")
   val () = put_dep(pb, d)
@@ -952,37 +955,41 @@ fn dep_dir_extras (d: !dep, want: wanted, eb: !$B.builder_v >> $B.builder_v, c: 
 in
   case+ dr of
   | ~$R.ok(es) => let
-      val c2 = dep_extras(es, 0, $F.entries_count(es), d, want, eb, c)
+      val c2 = dep_extras(es, 0, $F.entries_count(es), d, want, eb, c, ph, phlen)
       val () = $F.entries_free(es)
     in c2 end
   | ~$R.err(_) => c
 end
 
 (* The dynloads of the dependencies xs and of their extra modules *)
-fun put_dep_dynloads {k:nat} .<k>. (xs: !deps(k), eb: !$B.builder_v >> $B.builder_v): void =
+fun put_dep_dynloads {k:nat}{lph:agz} .<k>. (xs: !deps(k), eb: !$B.builder_v >> $B.builder_v,
+  ph: !$A.borrow(byte, lph, 12288), phlen: int): void =
   case+ xs of
   | deps_nil() => ()
   | deps_cons(d, tl) => let
       val () = bput_v(eb, "dynload \"./bats_modules/")
       val () = put_dep(eb, d)
       val () = bput_v(eb, "/src/lib.dats\"\n")
-      val _ = dep_dir_extras(d, Dynloads(), eb, 0)
-    in put_dep_dynloads(tl, eb) end
+      val _ = dep_dir_extras(d, Dynloads(), eb, 0, ph, phlen)
+    in put_dep_dynloads(tl, eb, ph, phlen) end
 
 (* The link objects of the dependencies xs and of their extra modules *)
-fun put_dep_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v): void =
+fun put_dep_objects {k:nat}{lph:agz} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v,
+  ph: !$A.borrow(byte, lph, 12288), phlen: int): void =
   case+ xs of
   | deps_nil() => ()
   | deps_cons(d, tl) => let
       val () = bput_v(lb, " build/bats_modules/")
       val () = put_dep(lb, d)
       val () = bput_v(lb, "/src/lib_dats.o")
-      val _ = dep_dir_extras(d, LinkObjects(), lb, 0)
-    in put_dep_objects(tl, lb) end
+      val _ = dep_dir_extras(d, LinkObjects(), lb, 0, ph, phlen)
+    in put_dep_objects(tl, lb, ph, phlen) end
 
 (* The dependencies xs compiled to wasm objects, their NUL-terminated
    paths appended to lb; cnt plus how many *)
-fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v, cnt: int): int =
+fun put_dep_wasm_objects {k:nat}{lph:agz} .<k>.
+  (xs: !deps(k), lb: !$B.builder_v >> $B.builder_v, cnt: int,
+  ph: !$A.borrow(byte, lph, 12288), phlen: int): int =
   case+ xs of
   | deps_nil() => cnt
   | deps_cons(d, tl) => let
@@ -993,7 +1000,7 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
       val () = put_char_v(wdc, 0)
       val @(wdca, wdc_len) = $B.into_arr(wdc)
       val @(fz_wdc, bv_wdc) = $A.freeze<byte>(wdca)
-      val rc = wasm_cc_file(bv_wdc, wdc_len)
+      val rc = wasm_cc_file(ph, phlen, bv_wdc, wdc_len)
       val () = $A.drop<byte>(fz_wdc, bv_wdc)
       val () = $A.free<byte>($A.thaw<byte>(fz_wdc))
       val cnt2 = (if rc = 0 then let
@@ -1002,8 +1009,8 @@ fun put_dep_wasm_objects {k:nat} .<k>. (xs: !deps(k), lb: !$B.builder_v >> $B.bu
           val () = bput_v(lb, "/src/lib_dats.wasm.o")
           val () = put_char_v(lb, 0)
         in cnt + 1 end else cnt): int
-      val cnt3 = dep_dir_extras(d, WasmObjects(), lb, cnt2)
-    in put_dep_wasm_objects(tl, lb, cnt3) end
+      val cnt3 = dep_dir_extras(d, WasmObjects(), lb, cnt2, ph, phlen)
+    in put_dep_wasm_objects(tl, lb, cnt3, ph, phlen) end
 
 (* The target of the binary entry at path: wasm when a #target line
    names wasm (Rust: lex_target), else native *)
@@ -1212,40 +1219,41 @@ in
   if r0 <> 0 then ()
   else let
     (* Step 2: Ensure ATS2 toolchain at $HOME/.bats/ats2 *)
-    val phbuf = $A.alloc<byte>(512)
+    val phbuf = $A.alloc<byte>(12288)
     val hk = $A.alloc<byte>(4)
     val () = $A.write_byte(hk, 0, 72) (* H *)
     val () = $A.write_byte(hk, 1, 79) (* O *)
     val () = $A.write_byte(hk, 2, 77) (* M *)
     val () = $A.write_byte(hk, 3, 69) (* E *)
     val @(fz_hk, bv_hk) = $A.freeze<byte>(hk)
-    val hr = $E.get(bv_hk, 4, phbuf, 512)
+    val hr = $E.get(bv_hk, 4, phbuf, 12288)
     val () = $A.drop<byte>(fz_hk, bv_hk)
     val () = $A.free<byte>($A.thaw<byte>(fz_hk))
-    val hlen = (case+ hr of | ~$R.some(n) => n | ~$R.none() => 0): [k:nat | k <= 512] int k
+    val hlen = (case+ hr of | ~$R.some(n) => n | ~$R.none() => 0): [k:nat | k <= 12288] int k
     (* Append /.bats/ats2 to HOME *)
     fn append_bats_path {l:agz}
-      (buf: !$A.arr(byte, l, 512), pos: pos_t): pos_t =
+      (buf: !$A.arr(byte, l, 12288), pos: pos_t): pos_t =
       if pos < 0 then pos
-      else if pos + 10 >= 512 then pos
+      else if pos + 10 >= 4096 then pos
       else let
-        val () = poke_arr(buf, pos, 512, 47)
-        val () = poke_arr(buf, pos+1, 512, 46)
-        val () = poke_arr(buf, pos+2, 512, 98)
-        val () = poke_arr(buf, pos+3, 512, 97)
-        val () = poke_arr(buf, pos+4, 512, 116)
-        val () = poke_arr(buf, pos+5, 512, 115)
-        val () = poke_arr(buf, pos+6, 512, 47)
-        val () = poke_arr(buf, pos+7, 512, 97)
-        val () = poke_arr(buf, pos+8, 512, 116)
-        val () = poke_arr(buf, pos+9, 512, 115)
-        val () = poke_arr(buf, pos+10, 512, 50)
+        val () = poke_arr(buf, pos, 12288, 47)
+        val () = poke_arr(buf, pos+1, 12288, 46)
+        val () = poke_arr(buf, pos+2, 12288, 98)
+        val () = poke_arr(buf, pos+3, 12288, 97)
+        val () = poke_arr(buf, pos+4, 12288, 116)
+        val () = poke_arr(buf, pos+5, 12288, 115)
+        val () = poke_arr(buf, pos+6, 12288, 47)
+        val () = poke_arr(buf, pos+7, 12288, 97)
+        val () = poke_arr(buf, pos+8, 12288, 116)
+        val () = poke_arr(buf, pos+9, 12288, 115)
+        val () = poke_arr(buf, pos+10, 12288, 50)
       in pos + 11 end
     val phlen = append_bats_path(phbuf, hlen)
+    val () = ask_roots(phbuf, phlen)
     (* patsopt: bats keeps it in ~/.bats/ats2 and installs it, checked
        against the pin in ats2.bats, when it is not there (bats ats2 install) *)
     fn ensure_ats2 {l:agz}
-      (buf: !$A.borrow(byte, l, 512), plen: int): void =
+      (buf: !$A.borrow(byte, l, 12288), plen: int): void =
       if plen <= 0 then ()
       else if ats2_ensure(Quiet()) then ()
       else let
@@ -1341,7 +1349,7 @@ in
       val () = (case+ bmdir_r of
         | ~$R.ok(d) => let
             fun scan_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
-              (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512)): void =
+              (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 12288)): void =
               if i >= n then ()
               else let
                 val ent = $A.alloc<byte>(1024)
@@ -1383,7 +1391,8 @@ in
                             (* Process each subdir as if it were a top-level dep
                                with name <namespace>/<subdir> *)
                             fun scan_ns {n,i:nat | i <= n}{lph2:agz}{lns:agz} .<n - i>.
-                              (nsd2: !$F.entries(n), i: int i, n: int n, ph2: !$A.borrow(byte, lph2, 512),
+                              (nsd2: !$F.entries(n), i: int i, n: int n,
+                               ph2: !$A.borrow(byte, lph2, 12288),
                                ns_bv: !$A.borrow(byte, lns, 1024), ns_len: int): void =
                               if i >= n then ()
                               else let
@@ -1869,7 +1878,7 @@ in
                 in emit_bins(d, i + 1, n) end
               end
             fun scan_bins {n,i:nat | i <= n}{lph:agz} .<n - i>.
-              (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 512),
+              (d: !$F.entries(n), i: int i, n: int n, ph: !$A.borrow(byte, lph, 12288),
                phlen: int, rel: profile): void =
               if i >= n then ()
               else let
@@ -1935,7 +1944,7 @@ in
                     val () = bput_v(entry, ".sats\"\n")
                     (* dynload deps via staload-chain scanning *)
                     val cl = dep_closure(bv_sd, len_bv_sd)
-                    val () = put_dep_dynloads(cl, entry)
+                    val () = put_dep_dynloads(cl, entry, ph, phlen)
                     val () = deps_free(cl)
                     (* dynload src/*.dats shared modules, in sorted order *)
                     fun add_src_dynloads {n,i:nat | i <= n} .<n - i>.
@@ -1995,7 +2004,7 @@ in
                       | ~$R.ok(dd3) => let
                           fun patsopt_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
                             (dd3: !$F.entries(n), i: int i, n: int n,
-                             ph: !$A.borrow(byte, lph, 512), phlen: int): void =
+                             ph: !$A.borrow(byte, lph, 12288), phlen: int): void =
                             if i >= n then ()
                             else let
                               val de = $A.alloc<byte>(1024)
@@ -2035,7 +2044,8 @@ in
                                     val () = (case+ ns_r of
                                       | ~$R.ok(nsd) => let
                                           fun patsopt_ns {n,i:nat | i <= n}{lph2:agz}{lns2:agz} .<n - i>.
-                                            (nsd: !$F.entries(n), i: int i, n: int n, ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
+                                            (nsd: !$F.entries(n), i: int i, n: int n,
+                                             ph2: !$A.borrow(byte, lph2, 12288), ph2len: int,
                                              ns_name: !$A.borrow(byte, lns2, 1024), ns_len: int): void =
                                             if i >= n then ()
                                             else let
@@ -2167,7 +2177,7 @@ in
                                         fun patsopt_extra
                                           {n,i:nat | i <= n}{lph2:agz}{ld3:agz} .<n - i>.
                                           (d_pt: !$F.entries(n), i: int i, n: int n,
-                                           ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
+                                           ph2: !$A.borrow(byte, lph2, 12288), ph2len: int,
                                            dep3: !$A.borrow(byte, ld3, 1024), dep3_len: int): void =
                                           if i >= n then ()
                                           else let
@@ -2260,7 +2270,7 @@ in
                           fun patsopt_src_modules
                             {n,i:nat | i <= n}{lph_sm:agz} .<n - i>.
                             (d_psm: !$F.entries(n), i: int i, n: int n,
-                             ph_sm: !$A.borrow(byte, lph_sm, 512), ph_sm_len: int): void =
+                             ph_sm: !$A.borrow(byte, lph_sm, 12288), ph_sm_len: int): void =
                             if i >= n then ()
                             else let
                               val de_psm = $A.alloc<byte>(1024)
@@ -2401,7 +2411,7 @@ in
                       | ~$R.ok(dd4) => let
                           fun clang_deps {n,i:nat | i <= n}{lph:agz} .<n - i>.
                             (dd4: !$F.entries(n), i: int i, n: int n,
-                             ph: !$A.borrow(byte, lph, 512), phlen: int,
+                             ph: !$A.borrow(byte, lph, 12288), phlen: int,
                              rr: profile): void =
                             if i >= n then ()
                             else let
@@ -2441,7 +2451,8 @@ in
                                     val () = (case+ ns_cr of
                                       | ~$R.ok(nscd) => let
                                           fun clang_ns {n,i:nat | i <= n}{lph3:agz}{lns3:agz} .<n - i>.
-                                            (nscd: !$F.entries(n), i: int i, n: int n, ph3: !$A.borrow(byte, lph3, 512), ph3len: int,
+                                            (nscd: !$F.entries(n), i: int i, n: int n,
+                                             ph3: !$A.borrow(byte, lph3, 12288), ph3len: int,
                                              ns3: !$A.borrow(byte, lns3, 1024), ns3len: int,
                                              rr3: profile): void =
                                             if i >= n then ()
@@ -2574,7 +2585,7 @@ in
                                         fun clang_extra
                                           {n,i:nat | i <= n}{lph2:agz}{ld4:agz} .<n - i>.
                                           (d_cc: !$F.entries(n), i: int i, n: int n,
-                                           ph2: !$A.borrow(byte, lph2, 512), ph2len: int,
+                                           ph2: !$A.borrow(byte, lph2, 12288), ph2len: int,
                                            dep4: !$A.borrow(byte, ld4, 1024), dep4_len: int,
                                            rr2: profile): void =
                                           if i >= n then ()
@@ -2672,7 +2683,7 @@ in
                           fun clang_src_modules
                             {n,i:nat | i <= n}{lph_cm:agz} .<n - i>.
                             (d_csm: !$F.entries(n), i: int i, n: int n,
-                             ph_cm: !$A.borrow(byte, lph_cm, 512), ph_cm_len: int,
+                             ph_cm: !$A.borrow(byte, lph_cm, 12288), ph_cm_len: int,
                              rr_cm: profile): void =
                             if i >= n then ()
                             else let
@@ -2750,7 +2761,7 @@ in
                       val () = put_char_v(we_b, 0)
                       val @(wea, we_len) = $B.into_arr(we_b)
                       val @(fz_we, bv_we) = $A.freeze<byte>(wea)
-                      val _ = wasm_cc_file(bv_we, we_len)
+                      val _ = wasm_cc_file(ph, phlen, bv_we, we_len)
                       val () = $A.drop<byte>(fz_we, bv_we)
                       val () = $A.free<byte>($A.thaw<byte>(fz_we))
                       (* Compile binary _dats.c *)
@@ -2761,7 +2772,7 @@ in
                       val () = put_char_v(wb_b, 0)
                       val @(wba, wb_len) = $B.into_arr(wb_b)
                       val @(fz_wb, bv_wb) = $A.freeze<byte>(wba)
-                      val _ = wasm_cc_file(bv_wb, wb_len)
+                      val _ = wasm_cc_file(ph, phlen, bv_wb, wb_len)
                       val () = $A.drop<byte>(fz_wb, bv_wb)
                       val () = $A.free<byte>($A.thaw<byte>(fz_wb))
                       (* Build wasm-ld argv *)
@@ -2799,7 +2810,7 @@ in
                       val wl_argc0 = 32
                       (* Compile deps from staload chain and add .o to link *)
                       val w_cl = dep_closure(bv_sd, len_bv_sd)
-                      val w_dc = put_dep_wasm_objects(w_cl, wl, 0)
+                      val w_dc = put_dep_wasm_objects(w_cl, wl, 0, ph, phlen)
                       val () = deps_free(w_cl)
                       val wl_argc1 = wl_argc0 + w_dc
                       (* Compile src modules and add .o to link *)
@@ -2810,9 +2821,9 @@ in
                       val () = $A.free<byte>($A.thaw<byte>(fz_wsma))
                       val wl_sm_cnt = (case+ wsm_dr of
                         | ~$R.ok(wsm_d) => let
-                            fun wcc_sm {n,i:nat | i <= n} .<n - i>.
+                            fun wcc_sm {n,i:nat | i <= n}{lph_w:agz} .<n - i>.
                               (d: !$F.entries(n), i: int i, n: int n, lb: !$B.builder_v >> $B.builder_v,
-                               c: int): int =
+                               c: int, ph: !$A.borrow(byte, lph_w, 12288), phlen: int): int =
                               if i >= n then c
                               else let
                                 val se = $A.alloc<byte>(1024)
@@ -2820,7 +2831,7 @@ in
                               in let
                                 val isc = has_dats_c_ext(se, sl, 1024)
                               in if ~isc then let val () = $A.free<byte>(se)
-                                in wcc_sm(d, i + 1, n, lb, c) end
+                                in wcc_sm(d, i + 1, n, lb, c, ph, phlen) end
                               else let
                                 val @(fz_se2, bv_se2) = $A.freeze<byte>(se)
                                 var smp : $B.builder_v = $B.create()
@@ -2829,7 +2840,7 @@ in
                                 val () = put_char_v(smp, 0)
                                 val @(smpa, smpl) = $B.into_arr(smp)
                                 val @(fz_smp, bv_smp) = $A.freeze<byte>(smpa)
-                                val rc = wasm_cc_file(bv_smp, smpl)
+                                val rc = wasm_cc_file(ph, phlen, bv_smp, smpl)
                                 val c2 = (if rc = 0 then let
                                   val () = copy_to_builder_v(bv_smp, 0, smpl - 2, smpl, lb)
                                   val () = bput_v(lb, "wasm.o")
@@ -2839,10 +2850,10 @@ in
                                 val () = $A.free<byte>($A.thaw<byte>(fz_smp))
                                 val () = $A.drop<byte>(fz_se2, bv_se2)
                                 val () = $A.free<byte>($A.thaw<byte>(fz_se2))
-                              in wcc_sm(d, i + 1, n, lb, c2) end
+                              in wcc_sm(d, i + 1, n, lb, c2, ph, phlen) end
                               end
                               end
-                            val sc = wcc_sm(wsm_d, 0, $F.entries_count(wsm_d), wl, 0)
+                            val sc = wcc_sm(wsm_d, 0, $F.entries_count(wsm_d), wl, 0, ph, phlen)
                             val () = $F.entries_free(wsm_d)
                           in sc end
                         | ~$R.err(_) => 0): int
@@ -2961,7 +2972,7 @@ in
                     val () = bput_v(link, "_dats.o build/_bats_native_runtime.o")
                     (* Add dep .o files via staload-chain scanning *)
                     val lk_cl = dep_closure(bv_sd, len_bv_sd)
-                    val () = put_dep_objects(lk_cl, link)
+                    val () = put_dep_objects(lk_cl, link, ph, phlen)
                     val () = deps_free(lk_cl)
                     (* Link src/*.dats shared module .o files *)
                     val @(lsm_arr, lsm_arr_len) = str_into_arr("build/src")
