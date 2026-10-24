@@ -586,6 +586,8 @@ fn print_finding {l:agz}{n:pos}{lc:agz}
       val () = prerr_seg(bv, a, b, n)
     in prerr! (" names a tarball or a digest: the ATS2 pin is in src/ats2.bats alone") end
     else if code = 16 then prerr! ("dependencies are one to a line, as \"name\": \"version\"")
+    else if code = 18 then prerr! ("check-pins-fixture needs a reason on its first line: why the package.json files below it float")
+    else if code = 19 then prerr! ("check-pins-fixture covers no package.json at or below its directory among the files checked: remove it")
     else prerr! ("package.json has dependencies and no committed lock (package-lock.json, pnpm-lock.yaml or yarn.lock)"))
 in prerr_newline() end
 
@@ -912,6 +914,96 @@ fun workspace_lock {lc:agz}{a,e:nat | a <= e; e <= 4096} .<e - a>.
     if p >= a then workspace_lock(cmd, a, p) else false
   end
 
+(* Whether cmd[x, x + len) and cmd[y, y + len) are the same bytes *)
+fun same_range {lc:agz}{x,y,len:nat | x + len <= 4096; y + len <= 4096} .<len>.
+  (cmd: !$A.borrow(byte, lc, 4096), x: int x, y: int y, len: int len): bool =
+  if len <= 0 then true
+  else if read_byte(cmd, x, 4096) <> read_byte(cmd, y, 4096) then false
+  else same_range(cmd, x + 1, y + 1, len - 1)
+
+(* Whether the directory cmd[a, e) or one above it (the walk of workspace_lock) is the directory cmd[dir_at, dir_to) (fixture markers, keyword: check-pins-fixture) *)
+fun reaches_dir {lc:agz}{a,e,dir_at,dir_to:nat | a <= e; e <= 4096; dir_at <= dir_to; dir_to <= 4096} .<e - a>.
+  (cmd: !$A.borrow(byte, lc, 4096), a: int a, e: int e, dir_at: int dir_at, dir_to: int dir_to): bool =
+  if e - a = dir_to - dir_at then
+    (if same_range(cmd, a, dir_at, e - a) then true
+    else let
+      val p = parent_dir(cmd, a, e)
+    in
+      if p >= a then reaches_dir(cmd, a, p, dir_at, dir_to) else false
+    end)
+  else let
+    val p = parent_dir(cmd, a, e)
+  in
+    if p >= a then reaches_dir(cmd, a, p, dir_at, dir_to) else false
+  end
+
+(* The end of the nearest directory at or above cmd[a, e) that holds a check-pins-fixture, or ~1 for none (the walk stops where workspace_lock's does; keyword: check-pins-fixture) *)
+fun marker_dir {lc:agz}{a,e:nat | a <= e; e <= 4096} .<e - a>.
+  (cmd: !$A.borrow(byte, lc, 4096), a: int a, e: int e): int =
+  if file_in(cmd, a, e, "check-pins-fixture", 18) then e
+  else let
+    val p = parent_dir(cmd, a, e)
+  in
+    if p >= a then marker_dir(cmd, a, p) else ~1
+  end
+
+(* The end of the directory of the marker above the package.json cmd[file_at, file_to), or ~1 for none (keyword: check-pins-fixture) *)
+fn marker_above {lc:agz}
+  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t): int =
+  if file_at < 0 then ~1
+  else if file_to - 12 < file_at then ~1
+  else if file_to - 12 > 4096 then ~1
+  else marker_dir(cmd, file_at, file_to - 12)
+
+(* Whether the package.json cmd[p, z) is at or below the directory cmd[dir_at, dir_to) *)
+fn covers_package {lc:agz}{p,z,dir_at,dir_to:nat | z <= 4096; dir_at <= dir_to; dir_to <= 4096}
+  (cmd: !$A.borrow(byte, lc, 4096), p: int p, z: int z, dir_at: int dir_at, dir_to: int dir_to): bool =
+  if z - 12 < p then false
+  else reaches_dir(cmd, p, z - 12, dir_at, dir_to)
+
+(* Whether one of the arguments cmd[p, total) is a package.json at or below the directory cmd[dir_at, dir_to) (keyword: check-pins-fixture) *)
+fun covered_among {lc:agz}{p,dir_at,dir_to:nat | p <= 4096; dir_at <= dir_to; dir_to <= 4096} .<4096 - p>.
+  (cmd: !$A.borrow(byte, lc, 4096), p: int p, total: int, dir_at: int dir_at, dir_to: int dir_to): bool =
+  if p >= total then false
+  else let
+    val z = find_nul(cmd, p)
+  in
+    if named_file(cmd, p, z, "package.json", 12) && covers_package(cmd, p, z, dir_at, dir_to) then true
+    else if z + 1 > 4096 then false
+    else covered_among(cmd, z + 1, total, dir_at, dir_to)
+  end
+
+(* Whether a marker covers the package.json cmd[file_at, file_to), its reason being printed as the exception of line 1; false for no marker, an unreadable one or one with no reason (the marker is a finding of its own; keyword: check-pins-fixture) *)
+fn exempt_by_marker {lc:agz}
+  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t): bool = let
+  val dir_to = marker_above(cmd, file_at, file_to)
+in
+  if dir_to < 0 then false
+  else let
+    var path : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(cmd, file_at, dir_to, 4096, path)
+    val () = bput_v(path, "check-pins-fixture")
+    val () = put_char_v(path, 0)
+    val @(path_a, path_len) = $B.into_arr(path)
+    val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
+    val exempt = (case+ read_whole_m(bv_p, path_len) of
+      | ~whole_err(_) => false
+      | ~whole_ok(ar, piece, m, nbytes) => let
+          val @(fz, bv) = $A.freeze<byte>(piece)
+          val stop = line_end(bv, 0, nbytes, m)
+          val reason = skip_blank(bv, 0, stop, m)
+          val reason_stop = trim_end(bv, reason, stop, m)
+          val shown = (if reason_stop <= reason then false else let
+              val () = print_accepted(bv, m, cmd, file_at, file_to, 1, reason, reason_stop)
+            in true end): bool
+          val () = $A.drop<byte>(fz, bv)
+          val () = whole_free(ar, $A.thaw<byte>(fz))
+        in shown end): bool
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in exempt end
+end
+
 (* Whether a lock file is beside the package.json cmd[file_at, file_to), or it is a member of a pnpm workspace whose root holds the lock *)
 fn has_lock {lc:agz}
   (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t): bool =
@@ -923,18 +1015,42 @@ fn has_lock {lc:agz}
     else if file_to - 12 > 4096 then false
     else workspace_lock(cmd, file_at, file_to - 12))
 
-(* The number of findings of the file bv[0, nbytes) named cmd[file_at, file_to) *)
-fn check_text {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}
+(* The findings of the marker file bv[0, nbytes) named cmd[file_at, file_to): no reason on its first line, and no package.json among the files cmd[list_from, total) at or below its directory (keyword: check-pins-fixture) *)
+fn check_marker {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}{lf:int}
   (bv: !$A.borrow(byte, l, n), nbytes: int nbytes, n: int n,
-   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, ats2_named: bool): int =
-  if named_file(cmd, file_at, file_to, "package.json", 12) then let
-    val @(found, dependencies) = package_lines(bv, 0, nbytes, n, cmd, file_at, file_to, 1, 0, 0, false)
-  in
-    if dependencies > 0 && ~has_lock(cmd, file_at, file_to) then let
-      val () = print_finding(bv, n, cmd, file_at, file_to, 1, 17, 0, 0)
-    in found + 1 end
-    else found
-  end
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, list_from: int lf, total: int): int = let
+  val stop = line_end(bv, 0, nbytes, n)
+  val no_reason = (if has_text(bv, 0, stop, n) then 0 else let
+      val () = print_finding(bv, n, cmd, file_at, file_to, 1, 18, 0, 0)
+    in 1 end): int
+  val dir_to = file_to - 18
+  val unused = (if file_at < 0 then 0
+    else if dir_to < file_at then 0
+    else if dir_to > 4096 then 0
+    else if list_from < 0 then 0
+    else if list_from > 4096 then 0
+    else if covered_among(cmd, list_from, total, file_at, dir_to) then 0
+    else let
+      val () = print_finding(bv, n, cmd, file_at, file_to, 1, 19, 0, 0)
+    in 1 end): int
+in no_reason + unused end
+
+(* The number of findings of the file bv[0, nbytes) named cmd[file_at, file_to) *)
+fn check_text {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}{lf:int}
+  (bv: !$A.borrow(byte, l, n), nbytes: int nbytes, n: int n,
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, ats2_named: bool,
+   list_from: int lf, total: int): int =
+  if named_file(cmd, file_at, file_to, "check-pins-fixture", 18) then
+    check_marker(bv, nbytes, n, cmd, file_at, file_to, list_from, total)
+  else if named_file(cmd, file_at, file_to, "package.json", 12) then
+    (if exempt_by_marker(cmd, file_at, file_to) then 0 else let
+      val @(found, dependencies) = package_lines(bv, 0, nbytes, n, cmd, file_at, file_to, 1, 0, 0, false)
+    in
+      if dependencies > 0 && ~has_lock(cmd, file_at, file_to) then let
+        val () = print_finding(bv, n, cmd, file_at, file_to, 1, 17, 0, 0)
+      in found + 1 end
+      else found
+    end)
   else if named_file(cmd, file_at, file_to, "ats2.bats", 9) then let
     val seen = ats2_lines(bv, 0, nbytes, n, 0)
     val missing_sha = (if seen = 1 || seen = 3 then 0 else let
@@ -947,8 +1063,8 @@ fn check_text {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}
   else yaml_lines(bv, 0, nbytes, n, cmd, file_at, file_to, 1, ats2_named, @(0, 0, 0, 0, 0, 0))
 
 (* The status of the file named cmd[file_at, file_to): 0 clean, 1 findings, 2 unreadable *)
-fn check_file {lc:agz}
-  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, ats2_named: bool): int = let
+fn check_file {lc:agz}{lf:int}
+  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, ats2_named: bool, list_from: int lf, total: int): int = let
   var path : $B.builder_v = $B.create()
   val () = copy_to_builder_v(cmd, file_at, file_to, 4096, path)
   val () = put_char_v(path, 0)
@@ -962,7 +1078,7 @@ fn check_file {lc:agz}
       in 2 end
     | ~whole_ok(ar, piece, m, nbytes) => let
         val @(fz, bv) = $A.freeze<byte>(piece)
-        val found = check_text(bv, nbytes, m, cmd, file_at, file_to, ats2_named)
+        val found = check_text(bv, nbytes, m, cmd, file_at, file_to, ats2_named, list_from, total)
         val () = $A.drop<byte>(fz, bv)
         val () = whole_free(ar, $A.thaw<byte>(fz))
       in (if found > 0 then 1 else 0) end): int
@@ -971,16 +1087,16 @@ fn check_file {lc:agz}
 in status end
 
 (* The worst status of the files named by the arguments of cmd[p, total) *)
-fun check_files {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
-  (cmd: !$A.borrow(byte, lc, 4096), p: int p, total: int, ats2_named: bool, worst: int): int =
+fun check_files {lc:agz}{p:nat | p <= 4096}{lf:int} .<4096 - p>.
+  (cmd: !$A.borrow(byte, lc, 4096), p: int p, total: int, ats2_named: bool, list_from: int lf, worst: int): int =
   if p >= total then worst
   else let
     val z = find_nul(cmd, p)
-    val status = check_file(cmd, p, z, ats2_named)
+    val status = check_file(cmd, p, z, ats2_named, list_from, total)
     val worse = (if status > worst then status else worst): int
   in
     if z + 1 > 4096 then worse
-    else check_files(cmd, z + 1, total, ats2_named, worse)
+    else check_files(cmd, z + 1, total, ats2_named, list_from, worse)
   end
 
 (* Where the arguments after check-pins start, or ~1 when argv[1] is not check-pins *)
@@ -1043,7 +1159,8 @@ fn discover (): int = let
     $L.list_vt_cons(literal_arg(":(glob).github/actions/*/action.yml"),
     $L.list_vt_cons(literal_arg(":(glob).github/actions/*/action.yaml"),
     $L.list_vt_cons(literal_arg(":(glob)**/package.json"),
-    $L.list_vt_cons(literal_arg(":(glob)**/ats2.bats"), $L.list_vt_nil())))))))))))))
+    $L.list_vt_cons(literal_arg(":(glob)**/ats2.bats"),
+    $L.list_vt_cons(literal_arg(":(glob)**/check-pins-fixture"), $L.list_vt_nil()))))))))))))))
   val out = $A.alloc<byte>(4096)
   val @(rc, listed) = run_cmd_capture(nul_git | bv_git, argv, out)
   val @(fz_out, bv_out) = $A.freeze<byte>(out)
@@ -1059,7 +1176,7 @@ fn discover (): int = let
       val () = prerr! ("error: bats check-pins --discover: the repository has no workflow, action, package.json or ats2.bats to check")
       val () = prerr_newline()
     in 2 end
-    else check_files(bv_out, 0, listed, ats2_among(bv_out, 0, listed), 0)): int
+    else check_files(bv_out, 0, listed, ats2_among(bv_out, 0, listed), 0, 0)): int
   val () = $A.drop<byte>(fz_out, bv_out)
   val () = $A.free<byte>($A.thaw<byte>(fz_out))
   val () = $A.cborrow_drop(fz_git, bv_git)
@@ -1086,7 +1203,7 @@ implement pins_main () = let
             in set_exit_code(2) end
             else if first >= total then usage_error()
             else if sole_discover(cmd, first, total) then set_exit_code(discover())
-            else set_exit_code(check_files(cmd, first, total, ats2_among(cmd, first, total), 0)))
+            else set_exit_code(check_files(cmd, first, total, ats2_among(cmd, first, total), first, 0)))
         in true end
       end): bool
   val () = $A.drop<byte>(fz, cmd)

@@ -576,6 +576,94 @@ grep -q "^packages/a/package.json:1: package.json has dependencies and no commit
 grep -q "^packages/a/example/package.json:1: " "$TMP/out" || fail "--discover does not name the example member"
 echo "ok   workspace-discover (relative paths from the root)"
 
+# a directory of test fixtures declares its floating package.json files by a file named
+# check-pins-fixture (bats#504): its first line is the reason; every package.json at or below
+# it is exempt and listed on stdout as file:1: unpinned: reason; the walk is the workspace lock's
+ranged='{
+  "dependencies": {
+    "semver": "^7.8.5"
+  }
+}'
+fixture_tree() { # <name> <marker text or "-" for no marker>: <name>/fx/sub/package.json holds a range
+  mkdir -p "$TMP/$1/fx/sub/deeper"
+  printf '%s\n' "$ranged" > "$TMP/$1/fx/sub/package.json"
+  printf '%s\n' "$ranged" > "$TMP/$1/fx/sub/deeper/package.json"
+  if [ "$2" != "-" ]; then printf '%s\n' "$2" > "$TMP/$1/fx/check-pins-fixture"; fi
+}
+fixture_tree fx-ok "ranges are the point: the relock moves a dependency inside its range"
+"$BATS" check-pins "$TMP/fx-ok/fx/check-pins-fixture" "$TMP/fx-ok/fx/sub/package.json" "$TMP/fx-ok/fx/sub/deeper/package.json" > "$TMP/stdout" 2> "$TMP/stderr" \
+  || { cat "$TMP/stdout" "$TMP/stderr" > "$TMP/out"; fail "fx-ok was refused"; }
+[ ! -s "$TMP/stderr" ] || { cp "$TMP/stderr" "$TMP/out"; fail "fx-ok wrote to stderr"; }
+{
+  echo "$TMP/fx-ok/fx/sub/package.json:1: unpinned: ranges are the point: the relock moves a dependency inside its range"
+  echo "$TMP/fx-ok/fx/sub/deeper/package.json:1: unpinned: ranges are the point: the relock moves a dependency inside its range"
+} > "$TMP/expected"
+cmp -s "$TMP/stdout" "$TMP/expected" || { diff "$TMP/expected" "$TMP/stdout" > "$TMP/out"; fail "fx-ok does not list the exempted files"; }
+echo "ok   fixture-marker (accepted and listed, two levels below)"
+# the same tree without the marker is refused with the range message
+fixture_tree fx-none -
+if "$BATS" check-pins "$TMP/fx-none/fx/sub/package.json" "$TMP/fx-none/fx/sub/deeper/package.json" > "$TMP/out" 2>&1; then fail "fx-none passed"; fi
+grep -q "fx-none/fx/sub/package.json:3: dependency \"semver\": \"^7.8.5\" is not at an exact version" "$TMP/out" || fail "fx-none was refused for another reason"
+grep -q "fx-none/fx/sub/deeper/package.json:3: dependency" "$TMP/out" || fail "fx-none does not name the deeper file"
+echo "ok   fixture-marker-absent (the range is refused)"
+# a relative path reaches the marker too
+(cd "$TMP/fx-ok" && "$BATS" check-pins fx/sub/package.json ./fx/sub/deeper/package.json fx/check-pins-fixture) > "$TMP/out" 2>&1 || fail "fx-ok by relative paths was refused"
+grep -q "^fx/sub/package.json:1: unpinned: ranges are the point" "$TMP/out" || fail "fx-ok by relative paths is not listed"
+echo "ok   fixture-marker-relative (relative paths)"
+# a marker with no reason is a failure, and exempts nothing; so is one with blanks only
+for text in "" "   " "	"; do
+  fixture_tree fx-empty "$text"
+  if "$BATS" check-pins "$TMP/fx-empty/fx/check-pins-fixture" "$TMP/fx-empty/fx/sub/package.json" > "$TMP/out" 2>&1; then fail "a marker with no reason passed"; fi
+  grep -q "fx-empty/fx/check-pins-fixture:1: check-pins-fixture needs a reason on its first line" "$TMP/out" || fail "the empty marker was refused for another reason"
+  grep -q "fx-empty/fx/sub/package.json:3: dependency" "$TMP/out" || fail "a package.json under an empty marker was exempted"
+  if grep -q "covers no package.json" "$TMP/out"; then fail "the empty marker was called stale"; fi
+done
+printf '\nreason on the second line\n' > "$TMP/fx-empty/fx/check-pins-fixture"
+if "$BATS" check-pins "$TMP/fx-empty/fx/check-pins-fixture" "$TMP/fx-empty/fx/sub/package.json" > "$TMP/out" 2>&1; then fail "a marker whose first line is empty passed"; fi
+grep -q "needs a reason on its first line" "$TMP/out" || fail "the first line is not the reason"
+echo "ok   fixture-marker-no-reason (refused)"
+# a marker with no package.json at or below it is stale: a failure
+mkdir -p "$TMP/fx-stale/fx" "$TMP/fx-stale/elsewhere" "$TMP/fx-stale/fx-sibling" "$TMP/fx-stale/fy"
+echo "a reason" > "$TMP/fx-stale/fx/check-pins-fixture"
+printf '%s\n' "$exact" > "$TMP/fx-stale/elsewhere/package.json"
+printf '%s\n' "$exact" > "$TMP/fx-stale/fx-sibling/package.json"
+printf '%s\n' "$exact" > "$TMP/fx-stale/fy/package.json"
+if "$BATS" check-pins "$TMP/fx-stale/fx/check-pins-fixture" "$TMP/fx-stale/elsewhere/package.json" "$TMP/fx-stale/fx-sibling/package.json" "$TMP/fx-stale/fy/package.json" > "$TMP/out" 2>&1; then fail "a marker with no package.json below it passed"; fi
+grep -q "fx-stale/fx/check-pins-fixture:1: check-pins-fixture covers no package.json at or below its directory" "$TMP/out" || fail "the stale marker was refused for another reason"
+if "$BATS" check-pins "$TMP/fx-stale/fx/check-pins-fixture" > "$TMP/out" 2>&1; then fail "a marker alone passed"; fi
+mkdir -p "$TMP/fx-stale/fx/sub"
+printf '%s\n' "$exact" > "$TMP/fx-stale/fx/sub/package.json"
+"$BATS" check-pins "$TMP/fx-stale/fx/check-pins-fixture" "$TMP/fx-stale/fx/sub/package.json" > "$TMP/out" 2>&1 || fail "a marker above a package.json was refused"
+echo "ok   fixture-marker-stale (no package.json at or below it; a sibling with the same prefix is not below)"
+# an inner marker covers its own subtree only, and a sibling directory is not covered
+mkdir -p "$TMP/fx-inner/outer/inner/sub" "$TMP/fx-inner/outer/sibling/sub"
+printf '%s\n' "$ranged" > "$TMP/fx-inner/outer/inner/sub/package.json"
+printf '%s\n' "$ranged" > "$TMP/fx-inner/outer/sibling/sub/package.json"
+printf '%s\n' "$ranged" > "$TMP/fx-inner/outer/package.json"
+echo "inner fixtures float" > "$TMP/fx-inner/outer/inner/check-pins-fixture"
+"$BATS" check-pins "$TMP/fx-inner/outer/inner/check-pins-fixture" "$TMP/fx-inner/outer/inner/sub/package.json" "$TMP/fx-inner/outer/sibling/sub/package.json" "$TMP/fx-inner/outer/package.json" > "$TMP/stdout" 2> "$TMP/stderr"
+[ $? -eq 1 ] || fail "the sibling or the outer package.json was covered by an inner marker"
+[ "$(cat "$TMP/stdout")" = "$TMP/fx-inner/outer/inner/sub/package.json:1: unpinned: inner fixtures float" ] || { cp "$TMP/stdout" "$TMP/out"; fail "an inner marker lists more or less than its own subtree"; }
+grep -q "fx-inner/outer/sibling/sub/package.json:3: dependency" "$TMP/stderr" || { cp "$TMP/stderr" "$TMP/out"; fail "the sibling is not refused"; }
+grep -q "fx-inner/outer/package.json:3: dependency" "$TMP/stderr" || { cp "$TMP/stderr" "$TMP/out"; fail "the directory above the marker is not refused"; }
+if grep -q "inner/sub/package.json:3" "$TMP/stderr"; then cp "$TMP/stderr" "$TMP/out"; fail "the inner package.json is refused"; fi
+echo "ok   fixture-marker-inner (its own subtree only; a sibling and the parent are refused)"
+# --discover lists the markers itself: accepted and listed, refused without the marker, refused when stale
+G3="$TMP/fx-discover"; rm -rf "$G3"; mkdir -p "$G3"
+(cd "$G3" && git init -q . && mkdir -p tests/npm/current && printf '%s\n' "$ranged" > tests/npm/current/package.json \
+  && echo "a range is the point of the fixture" > tests/npm/current/check-pins-fixture && git add -A)
+(cd "$G3" && "$BATS" check-pins --discover) > "$TMP/stdout" 2> "$TMP/stderr" || { cat "$TMP/stdout" "$TMP/stderr" > "$TMP/out"; fail "--discover refused a marked fixture"; }
+[ "$(cat "$TMP/stdout")" = "tests/npm/current/package.json:1: unpinned: a range is the point of the fixture" ] || { cp "$TMP/stdout" "$TMP/out"; fail "--discover does not list the fixture"; }
+[ ! -s "$TMP/stderr" ] || { cp "$TMP/stderr" "$TMP/out"; fail "--discover wrote to stderr over a marked fixture"; }
+rm "$G3/tests/npm/current/check-pins-fixture"
+(cd "$G3" && git add -A && "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 1 ] || fail "--discover passed an unmarked range"
+grep -q "^tests/npm/current/package.json:3: dependency \"semver\"" "$TMP/out" || fail "--discover does not refuse the unmarked range"
+echo "a range is the point of the fixture" > "$G3/tests/npm/current/check-pins-fixture"
+rm "$G3/tests/npm/current/package.json"
+(cd "$G3" && git add -A && "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 1 ] || fail "--discover passed a stale marker"
+grep -q "^tests/npm/current/check-pins-fixture:1: check-pins-fixture covers no package.json" "$TMP/out" || fail "--discover does not name the stale marker"
+echo "ok   fixture-marker-discover (listed, refused without the marker, refused when stale)"
+
 # this repository's own workflows and actions are clean
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats > "$TMP/out" 2>&1) || fail "this repository's workflows are refused"
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins --discover > "$TMP/out" 2>&1) || fail "this repository is refused by --discover"
