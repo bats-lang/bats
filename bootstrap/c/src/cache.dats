@@ -30,7 +30,9 @@ staload "str/src/lib.dats"
    and only a run that passed is kept, so a hit never lets through what
    a cold build rejects. Entries are written to a temporary file and
    renamed into place, so checkouts and processes share the cache with
-   no lock; an entry not used for 7 days is removed. *)
+   no lock; an entry not used for 7 days is removed, and the least recently
+   used go first when the cache is over BATS_CACHE_MAX_MB (shared-cache:
+   size bound). *)
 
 #include "share/atspre_staload.hats"
 
@@ -51,6 +53,10 @@ staload "_bats_inputs.sats"
    the toolchain's part of a key is the hash of: it is made once per
    process, since another run may have had another toolchain *)
 val g_toolchain_listed = ref<bool>(false)
+
+(* Whether this process has already pruned the shared cache to its size
+   limit (shared-cache: size bound): once, at its first store *)
+val g_cache_pruned = ref<bool>(false)
 
 (* The directory of the cache's entries under BATS_CACHE_DIR. It is only
    a name: what an entry is valid for is in its key, which begins with the
@@ -1003,6 +1009,19 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
       val stored = sh_script("set -e; d=$(dirname \"$2\"); mkdir -p \"$d\"; t=$(mktemp \"$d/.tmp.XXXXXX\"); cp \"$1\" \"$t\"; mv -f \"$t\" \"$2\"; cd \"$3\"; if [ -z \"$(find .trimmed -mtime -1 2>/dev/null)\" ]; then touch .trimmed; find . -type f -name '*.c' -mtime +7 -exec rm -f {} +; find . -type f -name '.tmp.*' -mtime +1 -exec rm -f {} +; fi",
         $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_cons(mk_arg(e2),
         $L.list_vt_cons(mk_arg(s2), $L.list_vt_nil()))))
+      (* shared-cache: size bound; the least recently used entries go when the cache is over the limit, once a process *)
+      val () = (if stored <> 0 then ()
+        else if !g_cache_pruned then ()
+        else let
+          val () = !g_cache_pruned := true
+          var s3 : $B.builder_v = $B.create()
+          val () = copy_to_builder_v(bv_sa, 0, sl, sl, s3)
+          val pruned = sh_script("cd \"$1\" || exit 1; bad=0; max=${BATS_CACHE_MAX_MB:-2048}; case $max in ''|*[!0-9]*) echo \"warning: BATS_CACHE_MAX_MB='$max' is not a whole number of megabytes; 2048 is used\" >&2; max=2048; bad=4 ;; esac; limit=$((max * 1048576)); target=$((limit / 10 * 9)); l=$(mktemp \".tmp.XXXXXX\") || exit 1; trap 'rm -f \"$l\"' EXIT; if stat -c '%Y %s' . >/dev/null 2>&1; then find . -type f -name '*.c' -exec stat -c '%Y %s %n' {} + > \"$l\" 2>/dev/null; else find . -type f -name '*.c' -exec stat -f '%m %z %N' {} + > \"$l\" 2>/dev/null; fi; total=$(awk '{ s += $2 } END { print s + 0 }' \"$l\"); if [ \"$total\" -gt \"$limit\" ]; then LC_ALL=C sort -n \"$l\" | awk -v over=$((total - target)) 'freed < over { print $3; freed += $2 }' | xargs rm -f; fi; exit $bad",
+            $L.list_vt_cons(mk_arg(s3), $L.list_vt_nil()))
+          (* 4: a limit that is no number, said by the script (sh_script prints stderr of a failure), the default used *)
+          val () = (if pruned = 0 || pruned = 4 then ()
+            else prerr! ("warning: BATS_CACHE_DIR could not be pruned to BATS_CACHE_MAX_MB\n"))
+        in end)
       (* the copy is made beside its place and moved whole, so a failed copy
          leaves no entry a later run could take for the C: said, and the
          build goes on, since the shared cache is not what is built *)

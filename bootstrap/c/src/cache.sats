@@ -43,8 +43,14 @@ staload S = "str/src/lib.sats"
 
 
 
+
+
 staload "helpers.sats"
 staload "_bats_inputs.sats"
+
+
+
+
 
 
 
@@ -910,6 +916,19 @@ fn run_patsopt {lph:agz}{lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
