@@ -846,6 +846,8 @@ fn find_nul {l:agz}{p:nat | p <= 4096}
 
 
 
+
+
 fn named_file {lc:agz}{at,to:int}{sn:nat}
   (cmd: !$A.borrow(byte, lc, 4096), at: int at, to: int to, s: string sn, sn: int sn): bool
 
@@ -1011,7 +1013,122 @@ fn named_file {lc:agz}{at,to:int}{sn:nat}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn literal_arg {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $P.arg_entry
+
 
 
 
