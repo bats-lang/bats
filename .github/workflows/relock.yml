@@ -25,9 +25,11 @@ concurrency:
 
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@27c4400526b73660e3c23d960748599658bce275 # repository-prototype main 27c4400
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@0faff01e73481240cef47992ff9f49c5e4dd8bd2 # PR head (repository-prototype#344)
     secrets: inherit
     with:
+      base: relock-344-evidence
+      branch-prefix: relock-344/
       # bootstrap/c is the C of the compiler and its locked packages, so a
       # moved bats.lock changes it (bats#299): regenerate it as CI checks it
       # (check.yml, "Verify bootstrap/c matches sources")
