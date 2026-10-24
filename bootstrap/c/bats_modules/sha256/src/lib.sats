@@ -819,75 +819,86 @@ fun five_set {lc:agz}{n,at:nat | at + 19 < n}{cs:$A.cells}{h0_high,h0_low,h1_hig
 
 
 
+stadef cube_fraction_le (i:int, high:int, low:int, p:int) =
+  (i*4294967296 + 65536*high + low) * (i*4294967296 + 65536*high + low) * (i*4294967296 + 65536*high + low)
+    <= p * 79228162514264337593543950336
+
+stadef cube_fraction_gt (i:int, high:int, low:int, p:int) =
+  p * 79228162514264337593543950336
+    < (i*4294967296 + 65536*high + low + 1) * (i*4294967296 + 65536*high + low + 1) * (i*4294967296 + 65536*high + low + 1)
+
+
+
+
 
 
 
 
 dataprop SHA256_K(int, int, int) =
-  | SHA256_K_0(0, 0x428a, 0x2f98)
-  | SHA256_K_1(1, 0x7137, 0x4491)
-  | SHA256_K_2(2, 0xb5c0, 0xfbcf)
-  | SHA256_K_3(3, 0xe9b5, 0xdba5)
-  | SHA256_K_4(4, 0x3956, 0xc25b)
-  | SHA256_K_5(5, 0x59f1, 0x11f1)
-  | SHA256_K_6(6, 0x923f, 0x82a4)
-  | SHA256_K_7(7, 0xab1c, 0x5ed5)
-  | SHA256_K_8(8, 0xd807, 0xaa98)
-  | SHA256_K_9(9, 0x1283, 0x5b01)
-  | SHA256_K_10(10, 0x2431, 0x85be)
-  | SHA256_K_11(11, 0x550c, 0x7dc3)
-  | SHA256_K_12(12, 0x72be, 0x5d74)
-  | SHA256_K_13(13, 0x80de, 0xb1fe)
-  | SHA256_K_14(14, 0x9bdc, 0x06a7)
-  | SHA256_K_15(15, 0xc19b, 0xf174)
-  | SHA256_K_16(16, 0xe49b, 0x69c1)
-  | SHA256_K_17(17, 0xefbe, 0x4786)
-  | SHA256_K_18(18, 0x0fc1, 0x9dc6)
-  | SHA256_K_19(19, 0x240c, 0xa1cc)
-  | SHA256_K_20(20, 0x2de9, 0x2c6f)
-  | SHA256_K_21(21, 0x4a74, 0x84aa)
-  | SHA256_K_22(22, 0x5cb0, 0xa9dc)
-  | SHA256_K_23(23, 0x76f9, 0x88da)
-  | SHA256_K_24(24, 0x983e, 0x5152)
-  | SHA256_K_25(25, 0xa831, 0xc66d)
-  | SHA256_K_26(26, 0xb003, 0x27c8)
-  | SHA256_K_27(27, 0xbf59, 0x7fc7)
-  | SHA256_K_28(28, 0xc6e0, 0x0bf3)
-  | SHA256_K_29(29, 0xd5a7, 0x9147)
-  | SHA256_K_30(30, 0x06ca, 0x6351)
-  | SHA256_K_31(31, 0x1429, 0x2967)
-  | SHA256_K_32(32, 0x27b7, 0x0a85)
-  | SHA256_K_33(33, 0x2e1b, 0x2138)
-  | SHA256_K_34(34, 0x4d2c, 0x6dfc)
-  | SHA256_K_35(35, 0x5338, 0x0d13)
-  | SHA256_K_36(36, 0x650a, 0x7354)
-  | SHA256_K_37(37, 0x766a, 0x0abb)
-  | SHA256_K_38(38, 0x81c2, 0xc92e)
-  | SHA256_K_39(39, 0x9272, 0x2c85)
-  | SHA256_K_40(40, 0xa2bf, 0xe8a1)
-  | SHA256_K_41(41, 0xa81a, 0x664b)
-  | SHA256_K_42(42, 0xc24b, 0x8b70)
-  | SHA256_K_43(43, 0xc76c, 0x51a3)
-  | SHA256_K_44(44, 0xd192, 0xe819)
-  | SHA256_K_45(45, 0xd699, 0x0624)
-  | SHA256_K_46(46, 0xf40e, 0x3585)
-  | SHA256_K_47(47, 0x106a, 0xa070)
-  | SHA256_K_48(48, 0x19a4, 0xc116)
-  | SHA256_K_49(49, 0x1e37, 0x6c08)
-  | SHA256_K_50(50, 0x2748, 0x774c)
-  | SHA256_K_51(51, 0x34b0, 0xbcb5)
-  | SHA256_K_52(52, 0x391c, 0x0cb3)
-  | SHA256_K_53(53, 0x4ed8, 0xaa4a)
-  | SHA256_K_54(54, 0x5b9c, 0xca4f)
-  | SHA256_K_55(55, 0x682e, 0x6ff3)
-  | SHA256_K_56(56, 0x748f, 0x82ee)
-  | SHA256_K_57(57, 0x78a5, 0x636f)
-  | SHA256_K_58(58, 0x84c8, 0x7814)
-  | SHA256_K_59(59, 0x8cc7, 0x0208)
-  | SHA256_K_60(60, 0x90be, 0xfffa)
-  | SHA256_K_61(61, 0xa450, 0x6ceb)
-  | SHA256_K_62(62, 0xbef9, 0xa3f7)
-  | SHA256_K_63(63, 0xc671, 0x78f2)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(1, high, low, 2); cube_fraction_gt(1, high, low, 2)} SHA256_K_0(0, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(1, high, low, 3); cube_fraction_gt(1, high, low, 3)} SHA256_K_1(1, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(1, high, low, 5); cube_fraction_gt(1, high, low, 5)} SHA256_K_2(2, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(1, high, low, 7); cube_fraction_gt(1, high, low, 7)} SHA256_K_3(3, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(2, high, low, 11); cube_fraction_gt(2, high, low, 11)} SHA256_K_4(4, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(2, high, low, 13); cube_fraction_gt(2, high, low, 13)} SHA256_K_5(5, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(2, high, low, 17); cube_fraction_gt(2, high, low, 17)} SHA256_K_6(6, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(2, high, low, 19); cube_fraction_gt(2, high, low, 19)} SHA256_K_7(7, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(2, high, low, 23); cube_fraction_gt(2, high, low, 23)} SHA256_K_8(8, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 29); cube_fraction_gt(3, high, low, 29)} SHA256_K_9(9, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 31); cube_fraction_gt(3, high, low, 31)} SHA256_K_10(10, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 37); cube_fraction_gt(3, high, low, 37)} SHA256_K_11(11, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 41); cube_fraction_gt(3, high, low, 41)} SHA256_K_12(12, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 43); cube_fraction_gt(3, high, low, 43)} SHA256_K_13(13, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 47); cube_fraction_gt(3, high, low, 47)} SHA256_K_14(14, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 53); cube_fraction_gt(3, high, low, 53)} SHA256_K_15(15, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 59); cube_fraction_gt(3, high, low, 59)} SHA256_K_16(16, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(3, high, low, 61); cube_fraction_gt(3, high, low, 61)} SHA256_K_17(17, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 67); cube_fraction_gt(4, high, low, 67)} SHA256_K_18(18, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 71); cube_fraction_gt(4, high, low, 71)} SHA256_K_19(19, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 73); cube_fraction_gt(4, high, low, 73)} SHA256_K_20(20, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 79); cube_fraction_gt(4, high, low, 79)} SHA256_K_21(21, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 83); cube_fraction_gt(4, high, low, 83)} SHA256_K_22(22, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 89); cube_fraction_gt(4, high, low, 89)} SHA256_K_23(23, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 97); cube_fraction_gt(4, high, low, 97)} SHA256_K_24(24, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 101); cube_fraction_gt(4, high, low, 101)} SHA256_K_25(25, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 103); cube_fraction_gt(4, high, low, 103)} SHA256_K_26(26, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 107); cube_fraction_gt(4, high, low, 107)} SHA256_K_27(27, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 109); cube_fraction_gt(4, high, low, 109)} SHA256_K_28(28, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(4, high, low, 113); cube_fraction_gt(4, high, low, 113)} SHA256_K_29(29, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 127); cube_fraction_gt(5, high, low, 127)} SHA256_K_30(30, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 131); cube_fraction_gt(5, high, low, 131)} SHA256_K_31(31, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 137); cube_fraction_gt(5, high, low, 137)} SHA256_K_32(32, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 139); cube_fraction_gt(5, high, low, 139)} SHA256_K_33(33, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 149); cube_fraction_gt(5, high, low, 149)} SHA256_K_34(34, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 151); cube_fraction_gt(5, high, low, 151)} SHA256_K_35(35, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 157); cube_fraction_gt(5, high, low, 157)} SHA256_K_36(36, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 163); cube_fraction_gt(5, high, low, 163)} SHA256_K_37(37, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 167); cube_fraction_gt(5, high, low, 167)} SHA256_K_38(38, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 173); cube_fraction_gt(5, high, low, 173)} SHA256_K_39(39, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 179); cube_fraction_gt(5, high, low, 179)} SHA256_K_40(40, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 181); cube_fraction_gt(5, high, low, 181)} SHA256_K_41(41, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 191); cube_fraction_gt(5, high, low, 191)} SHA256_K_42(42, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 193); cube_fraction_gt(5, high, low, 193)} SHA256_K_43(43, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 197); cube_fraction_gt(5, high, low, 197)} SHA256_K_44(44, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 199); cube_fraction_gt(5, high, low, 199)} SHA256_K_45(45, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(5, high, low, 211); cube_fraction_gt(5, high, low, 211)} SHA256_K_46(46, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 223); cube_fraction_gt(6, high, low, 223)} SHA256_K_47(47, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 227); cube_fraction_gt(6, high, low, 227)} SHA256_K_48(48, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 229); cube_fraction_gt(6, high, low, 229)} SHA256_K_49(49, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 233); cube_fraction_gt(6, high, low, 233)} SHA256_K_50(50, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 239); cube_fraction_gt(6, high, low, 239)} SHA256_K_51(51, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 241); cube_fraction_gt(6, high, low, 241)} SHA256_K_52(52, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 251); cube_fraction_gt(6, high, low, 251)} SHA256_K_53(53, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 257); cube_fraction_gt(6, high, low, 257)} SHA256_K_54(54, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 263); cube_fraction_gt(6, high, low, 263)} SHA256_K_55(55, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 269); cube_fraction_gt(6, high, low, 269)} SHA256_K_56(56, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 271); cube_fraction_gt(6, high, low, 271)} SHA256_K_57(57, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 277); cube_fraction_gt(6, high, low, 277)} SHA256_K_58(58, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 281); cube_fraction_gt(6, high, low, 281)} SHA256_K_59(59, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 283); cube_fraction_gt(6, high, low, 283)} SHA256_K_60(60, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 293); cube_fraction_gt(6, high, low, 293)} SHA256_K_61(61, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 307); cube_fraction_gt(6, high, low, 307)} SHA256_K_62(62, high, low)
+  | {high,low:nat | high < 65536; low < 65536; cube_fraction_le(6, high, low, 311); cube_fraction_gt(6, high, low, 311)} SHA256_K_63(63, high, low)
 
 
 fun sha256_k_w32 {t:nat | t < 64} (t: int t)
@@ -1520,14 +1531,24 @@ fun sha1_f {t:nat | t < 80}{bh,bl,ch,cl,dh,dl:nat | bh < 65536; bl < 65536; ch <
 
 
 
+stadef sqrt_fraction_le (high:int, low:int, n:int) =
+  (65536*high + low) * (65536*high + low) <= n * 1152921504606846976
+
+stadef sqrt_fraction_gt (high:int, low:int, n:int) =
+  n * 1152921504606846976 < (65536*high + low + 1) * (65536*high + low + 1)
+
+
+
+
+
 
 
 
 dataprop SHA1_K(int, int, int) =
-  | {t:nat | 0 <= t; t <= 19} SHA1_K_0_to_19(t, 0x5a82, 0x7999)
-  | {t:nat | 20 <= t; t <= 39} SHA1_K_20_to_39(t, 0x6ed9, 0xeba1)
-  | {t:nat | 40 <= t; t <= 59} SHA1_K_40_to_59(t, 0x8f1b, 0xbcdc)
-  | {t:nat | 60 <= t; t <= 79} SHA1_K_60_to_79(t, 0xca62, 0xc1d6)
+  | {t,high,low:nat | 0 <= t; t <= 19; high < 65536; low < 65536; sqrt_fraction_le(high, low, 2); sqrt_fraction_gt(high, low, 2)} SHA1_K_0_to_19(t, high, low)
+  | {t,high,low:nat | 20 <= t; t <= 39; high < 65536; low < 65536; sqrt_fraction_le(high, low, 3); sqrt_fraction_gt(high, low, 3)} SHA1_K_20_to_39(t, high, low)
+  | {t,high,low:nat | 40 <= t; t <= 59; high < 65536; low < 65536; sqrt_fraction_le(high, low, 5); sqrt_fraction_gt(high, low, 5)} SHA1_K_40_to_59(t, high, low)
+  | {t,high,low:nat | 60 <= t; t <= 79; high < 65536; low < 65536; sqrt_fraction_le(high, low, 10); sqrt_fraction_gt(high, low, 10)} SHA1_K_60_to_79(t, high, low)
 
 
 fun sha1_k_w32 {t:nat | t < 80} (t: int t)

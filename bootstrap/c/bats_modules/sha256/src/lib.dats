@@ -814,16 +814,27 @@ implement five_set {lc}{n,at}{cs}{h0_high,h0_low,h1_high,h1_low,h2_high,h2_low,h
   prval stored4 = word_set_at(set4)
 in (FIVE_AT_mk(stored0, stored1, stored2, stored3, stored4) | cells) end
 
+(* cube_fraction_le/gt (i, high, low, p): with x = i * 2^32 + 65536 * high +
+   low, x^3 <= p * 2^96 < (x + 1)^3, that is x = floor(cbrt(p) * 2^32): i is
+   the integer part of the cube root of p and high:low the first 32 bits of
+   its fractional part (FIPS 180-4, section 4.2.2). Integers of 2^105, held by
+   the gmp solver (arith's CLAUDE.md, the infinite-precision solver);
+   keyword: round-constants (sha256#31). *)
+
+
+
+
+
+
+
+
 (* SHA256_K(t, high, low): the constant K_t of SHA-256 (section 4.2.2) is
-   the word high:low. The standard defines the 64 constants as the first 32
-   bits of the fractional parts of the cube roots of the first 64 primes; the
-   table states them as the standard prints them, and the compiler checks
-   that the rounds use the table's word for round t and no other. That each is
-   what the definition says is NOT proved: the proof needs integers of 2 to
-   the 100, which the 32-bit solver cannot hold. It is tested only through
-   the digests that depend on every word of it (tests/dynamic/vectors,
-   digest and proved, against the standard's vectors and hashlib), not
-   against the integer cube roots word by word, and owed (sha256 issue 31). *)
+   the word high:low: the first 32 bits of the fractional part of the cube
+   root of the (t+1)-th prime. Each constructor states that definition as its
+   guard (the prime p and the integer part i of its root are literals), so a
+   word that is not floor(cbrt(p) * 2^32) mod 2^32 does not type-check
+   (tests/static/reject, the sha256-k fixtures). That p is the (t+1)-th prime is not
+   proved: sha256#78. Keyword: round-constants. *)
 
 
 
@@ -1516,14 +1527,24 @@ implement sha1_f {t}{bh,bl,ch,cl,dh,dl} (t, bh, bl, ch, cl, dh, dl) =
     val (pf | @(fh, fl)) = word_parity(bh, bl, ch, cl, dh, dl)
   in (SHA1_F_parity_second(pf) | @(fh, fl)) end
 
+(* sqrt_fraction_le/gt (high, low, n): with x = 65536 * high + low,
+   x^2 <= n * 2^60 < (x + 1)^2, that is x = floor(sqrt(n) * 2^30): the integer
+   part of 2 to the 30 times the square root of n (FIPS 180-4, section 4.2.1).
+   Integers of 2^64, held by the gmp solver (arith's CLAUDE.md, the
+   infinite-precision solver); keyword: round-constants (sha256#31). *)
+
+
+
+
+
+
 (* SHA1_K(t, high, low): the constant K_t of SHA-1 (section 4.2.1) is the word
-   high:low: 5a827999 for t from 0 to 19, 6ed9eba1 from 20 to 39, 8f1bbcdc from
-   40 to 59 and ca62c1d6 from 60 to 79. The standard defines them as the
-   first 30 bits of the square roots of 2, 3, 5 and 10 times 2 to the 30 (the
-   integer part of 2 to the 30 times the root). Like SHA-256's they are stated
-   and tested only through the digests that depend on them
-   (tests/dynamic/sha1 and proved), not proved against the definition (the
-   proof needs integers of 2 to the 61 and more); owed (sha256 issue 31). *)
+   high:low: the integer part of 2 to the 30 times the square root of 2 for t
+   from 0 to 19, of 3 from 20 to 39, of 5 from 40 to 59 and of 10 from 60 to
+   79 (5a827999, 6ed9eba1, 8f1bbcdc, ca62c1d6). Each constructor states that
+   definition as its guard (n is a literal; the word is free, as SHA256_K's),
+   so a word that is not floor(sqrt(n) * 2^30) does not type-check
+   (tests/static/reject, the sha1-k fixtures). Keyword: round-constants. *)
 
 
 
