@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@11f7260d6964827e5e84aea378166bb700237d01 # PR head (repository-prototype#344)
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@b6a966f03e1f14fe70d129e644fb571afca98d00 # PR head (repository-prototype#344)
     secrets: inherit
     with:
       base: relock-344-evidence
