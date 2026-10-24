@@ -135,12 +135,17 @@ in
 end
 
 
-(* The first position at or after p of bv[0, 4096) that holds a NUL, or 4096 *)
-fun find_nul {l:agz}{p:nat | p <= 4096} .<4096 - p>.
-  (bv: !$A.borrow(byte, l, 4096), p: int p): [r:nat | p <= r; r <= 4096] int r =
-  if p >= 4096 then p
-  else if read_byte(bv, p, 4096) = 0 then p
-  else find_nul(bv, p + 1)
+(* The first position at or after p of bv[0, 4096) that holds a NUL, or 4096 (public: bats affected reads its arguments so) *)
+#pub fn find_nul {l:agz}{p:nat | p <= 4096}
+  (bv: !$A.borrow(byte, l, 4096), p: int p): [r:nat | p <= r; r <= 4096] int r
+
+implement find_nul (bv, p) = let
+  fun loop {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+    (bv: !$A.borrow(byte, l, 4096), p: int p): [r:nat | p <= r; r <= 4096] int r =
+    if p >= 4096 then p
+    else if read_byte(bv, p, 4096) = 0 then p
+    else loop(bv, p + 1)
+in loop(bv, p) end
 
 (* Whether bv[p, e) starts with the first sn bytes of s, from its byte i on *)
 fun lit_from {l:agz}{n:pos}{p,e:nat | e <= n}{sn:nat}{i:nat | i <= sn} .<sn - i>.
@@ -834,9 +839,11 @@ fun ats2_lines {l:agz}{n:pos}{p,nb:nat | p <= nb; nb <= n} .<nb - p>.
 
 (* ------------------------------------------------------------------ *)
 
-(* Whether cmd[at, to) ends with the name s after a slash or at its start *)
-fn named_file {lc:agz}{at,to:int}{sn:nat}
-  (cmd: !$A.borrow(byte, lc, 4096), at: int at, to: int to, s: string sn, sn: int sn): bool =
+(* Whether cmd[at, to) ends with the name s after a slash or at its start (public: bats affected names its command so) *)
+#pub fn named_file {lc:agz}{at,to:int}{sn:nat}
+  (cmd: !$A.borrow(byte, lc, 4096), at: int at, to: int to, s: string sn, sn: int sn): bool
+
+implement named_file (cmd, at, to, s, sn) =
   if at < 0 then false
   else if to > 4096 then false
   else if to - at < sn then false
@@ -959,8 +966,10 @@ fn usage_error (): void = let
   val () = prerr_newline()
 in set_exit_code(2) end
 
-(* An argument for the process package, made of a literal *)
-fn literal_arg {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $P.arg_entry = let
+(* An argument for the process package, made of a literal (public: bats affected runs git so) *)
+#pub fn literal_arg {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $P.arg_entry
+
+implement literal_arg (s) = let
   var b = $B.create()
   val () = bput_v(b, s)
 in mk_arg(b) end

@@ -10,9 +10,72 @@ on:
   workflow_dispatch:
 
 jobs:
+  # The cheap job: what every change runs. It asks `bats affected` whether the
+  # change touches nothing the later jobs build or test (only *.md files outside
+  # tests/ and bootstrap/), and runs `bats check-pins`; the later jobs need it and
+  # are skipped on its answer, a skipped job counting as passed where the branch
+  # rules require `check` (bats#481, .claude/rules/affected.md)
+  affected:
+    runs-on: ubuntu-24.04
+    outputs:
+      inert: ${{ steps.rule.outputs.inert }}
+    steps:
+      # two commits deep: a pull request's checkout is a merge, and HEAD^1 is the
+      # base it is merged into
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 2
+
+      # a push is judged from the commit it replaced
+      - name: Fetch the commit the push replaced
+        if: github.event_name == 'push'
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: git fetch -q --depth 1 origin "$BEFORE" || true
+
+      # The seed binary of this exact bootstrap/c, found by the content hash of its
+      # files; a miss builds it (in seconds) and the job saves it. Only `affected` and
+      # `check-pins` run on it here; the check job builds its own seed, and the
+      # fixpoint step judges the compiler, never this key (.claude/rules/affected.md)
+      - name: Seed compiler of this bootstrap/c, if one was kept
+        id: seed
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/bats-bin
+          key: seed-${{ hashFiles('bootstrap/c/**') }}
+
+      - name: Build seed compiler from bootstrap/c
+        if: steps.seed.outputs.cache-hit != 'true'
+        run: |
+          cp -R bootstrap/c ~/seed
+          make -j$(nproc) -C ~/seed debug/bats
+          mkdir -p ~/bats-bin
+          cp ~/seed/debug/bats ~/bats-bin/bats
+
+      # Every input of CI is pinned, never a name that moves
+      # (bats-lang/repository-prototype#269, bats-lang/bats#390)
+      - name: Every CI input is pinned
+        run: ~/bats-bin/bats check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats
+
+      # a pull request: the change the merge brings (HEAD^1 to HEAD); a push: the
+      # commits it brought; a dispatch: nothing changed, so everything runs
+      - name: Which jobs this change needs
+        id: rule
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before || github.sha }}
+        run: |
+          ~/bats-bin/bats affected "$BASE" HEAD >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
   check:
+    needs: affected
+    if: ${{ always() && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
     runs-on: ubuntu-24.04
     steps:
+      # the required check must not pass because the cheap job failed
+      - name: The cheap job passed
+        run: test "${{ needs.affected.result }}" = success
+
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # A failing test script keeps its temp directory there (tests/keep-on-fail.sh,
@@ -31,11 +94,6 @@ jobs:
           make -j$(nproc) -C ~/seed debug/bats
           mkdir -p ~/bats-bin
           cp ~/seed/debug/bats ~/bats-bin/bats
-
-      # Every input of CI is pinned, never a name that moves
-      # (bats-lang/repository-prototype#269, bats-lang/bats#390)
-      - name: Every CI input is pinned
-        run: ~/bats-bin/bats check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats
 
       # The GMP build of ATS2: its constraint solver does infinite-precision
       # arithmetic (the -int build computes in C int and accepts false
@@ -104,8 +162,13 @@ jobs:
   # The setup action other bats repositories call by commit
   # (bats-lang/bats#274), run on a tiny project from the commit under test
   setup-action:
+    needs: affected
+    if: ${{ always() && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
     runs-on: ubuntu-24.04
     steps:
+      - name: The cheap job passed
+        run: test "${{ needs.affected.result }}" = success
+
       # two commits deep: a pull request's head is the merge's second parent
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
