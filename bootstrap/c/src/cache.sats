@@ -375,7 +375,7 @@ staload "_bats_inputs.sats"
 
 
 fn toolchain_digest {lph:agz}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int, out: !$B.builder_v >> $B.builder_v): bool
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int, out: !$B.builder_v >> $B.builder_v): bool
 
 
 
@@ -907,7 +907,7 @@ fn closure_key_write {ll,lo:agz}{nl,no:pos}{lm:nat | lm <= nl; lm <= 524288}{om:
 
 
 fn run_patsopt {lph:agz}{lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int,
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
 

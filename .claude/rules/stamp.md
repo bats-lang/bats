@@ -7,7 +7,59 @@ paths:
 
 # The build stamp
 
-`build/` carries a stamp of who made it, and is kept only when the running bats would write the same one (`src/stamp.bats`, bats-lang/bats#267). `build/.bats_stamp` is plain text, `bats-stamp 2` and then `name value` lines: `bats` (the `_bats_inputs` digest of the running bats's own sources, which bats's own source staloads), `patsopt` (the sha256 of the listing of each file's sha256 of `bin/patsopt`, `prelude`, `libats`, `share` and `ccomp` that `BATS_CACHE_DIR`'s key also uses, `toolchain_digest` in `src/cache.bats`, made at every build, with that variable set or not), `cc` (the sha256 of the digest of `clang --version` and `clang -dumpmachine`, without the lines that name the install directory, and of the environment clang and the loader read (the loader's names are below): `CPATH`, `C_INCLUDE_PATH`, `CPLUS_INCLUDE_PATH`, `OBJC_INCLUDE_PATH`, `OBJCPLUS_INCLUDE_PATH`, `LIBRARY_PATH`, `COMPILER_PATH`, `SDKROOT`, `MACOSX_DEPLOYMENT_TARGET`, the other Apple platforms' `*_DEPLOYMENT_TARGET`, `RC_DEBUG_PREFIX_MAP`, `RC_DEBUG_OPTIONS`, `DEVELOPER_DIR`, `CCC_OVERRIDE_OPTIONS` and `CLANG_NO_DEFAULT_CONFIG`, the list in `put_cc_environment` (`src/stamp.bats`, bats-lang/bats#322): each name and its value, or unset, digested and never stored, so a `build/` made with another value is dropped as by another clang; the Darwin names were not run on a Mac; `SOURCE_DATE_EPOCH` is not in the list, since clang reads it only for `__DATE__` and `__TIME__`, which no emitted C uses, and a reproducible-build setup sets it per commit, which would drop `build/` on every commit; `LLD_IN_TEST`, `LLD_VERSION` and `LLVM_OVERRIDE_PRODUCER` are not, since no object or link bats makes reads them, and wasm-ld reads none of the list), `libs` and `link` (below), `flags` (the flag templates patsopt and cc run with for the mark, `PATSHOME` written `$(PATSHOME)`, both profiles in one template since a `build/` holds both) and `mark` (the target and mode digit of `build/.bats_target`). No line holds a path, so a `build/` copied to another directory, or made on another machine with the same bats, ATS2 and C compiler, keeps (bats-lang/bats#250 made the C path-independent). After `cache_swap` has put the mark's `build/` in place (from its stash if it had been put aside: every stash carries the stamp of whoever made it, and is judged when it is swapped in), `check`, `build`, `test` and `run`'s build compare the stamp they would write with the one in `build/`. Equal: `build/` is kept, and a build that finds nothing changed runs no patsopt for the modules (the entry's generated module is still made again, as before). Different or missing: everything in `build/` but `.stash` is removed, one line on stderr names the first line that differs (`bats: dropping build/ (made by another bats: patsopt differs)`; `no stamp`, `the stamp format differs`, `mark differs` and `the stamp differs` are the others), and the build starts from nothing. A `build/` with no stamp, every one made before this, is dropped once; one that holds no build (no `.bats_target` and no stamp) is not dropped and says nothing. This replaces the hand-bumped `build/.bats_cache_id` (`cache_buster_id`), which went with the removal of every `.o` that it and a changed target caused: with the stamp that removal is dead, since `build/` is empty or this mark's by then (`target_changed` stays as the belt for an unreadable marker). The Rust bats had no stamp, so a `build/` of another compiler was trusted if its mtimes were right. `BATS_CACHE_DIR`'s key begins with the same `bats` digest, where it had the hand-bumped `patsopt-1` (the directory of the entries keeps that name, so entries of older bats are trimmed after 7 days as before). `build/.bats_toolchain`, the listing the `patsopt` line hashes (made once per process), is no mark's, as `build/.bats_valid` is: `cache_swap` neither puts it in a stash nor takes one out of a stash (it removes that copy), since a listing swapped in from a stash made by another bats was hashed for the stamp of the next mark, the stamp got a `patsopt` digest of nobody's toolchain and the following check dropped that `build/` for "patsopt differs" and made it again (bats#434: quire's static fixtures took 10 minutes each after the move of bats from 2ea56e1 to 3f8a5ea, restoring a cache of the older bats; `tests/stash-stamp` plays a stale listing in `build/` and in the stash). The test is `tests/build-stamp`.
+`build/` carries a stamp of who made it, and is kept only when the running bats would write the same
+one (`src/stamp.bats`, bats-lang/bats#267). `build/.bats_stamp` is plain text, `bats-stamp 2` and
+then `name value` lines: `bats` (the `_bats_inputs` digest of the running bats's own sources, which
+bats's own source staloads), `patsopt` (the sha256 of the listing of each file's sha256 of
+`bin/patsopt`, `prelude`, `libats`, `share` and `ccomp` that `BATS_CACHE_DIR`'s key also uses,
+`toolchain_digest` in `src/cache.bats`, made at every build, with that variable set or not), `cc`
+(the sha256 of the digest of `clang --version` and `clang -dumpmachine`, without the lines that name
+the install directory, and of the environment clang and the loader read (the loader's names are
+below): `CPATH`, `C_INCLUDE_PATH`, `CPLUS_INCLUDE_PATH`, `OBJC_INCLUDE_PATH`,
+`OBJCPLUS_INCLUDE_PATH`, `LIBRARY_PATH`, `COMPILER_PATH`, `SDKROOT`, `MACOSX_DEPLOYMENT_TARGET`, the
+other Apple platforms' `*_DEPLOYMENT_TARGET`, `RC_DEBUG_PREFIX_MAP`, `RC_DEBUG_OPTIONS`,
+`DEVELOPER_DIR`, `CCC_OVERRIDE_OPTIONS` and `CLANG_NO_DEFAULT_CONFIG`, the list in
+`put_cc_environment` (`src/stamp.bats`, bats-lang/bats#322): each name and its value, or unset,
+digested and never stored, so a `build/` made with another value is dropped as by another clang; the
+Darwin names were not run on a Mac; `SOURCE_DATE_EPOCH` is not in the list, since clang reads it
+only for `__DATE__` and `__TIME__`, which no emitted C uses, and a reproducible-build setup sets it
+per commit, which would drop `build/` on every commit; `LLD_IN_TEST`, `LLD_VERSION` and
+`LLVM_OVERRIDE_PRODUCER` are not, since no object or link bats makes reads them, and wasm-ld reads
+none of the list), `libs` and `link` (below), `flags` (the flag templates patsopt and cc run with
+for the mark, `PATSHOME` written `$(PATSHOME)`, both profiles in one template since a `build/` holds
+both) and `mark` (the target and mode digit of `build/.bats_target`). No line holds a path
+(each line is a digest, or a template that writes the ATS2 home as `$(PATSHOME)`), so a `build/`
+copied to another directory, or made on another machine with the same
+bats, ATS2 and C compiler, keeps (bats-lang/bats#250 made the C path-independent), and so do its
+objects: the key file of an object (`<object>.key`) holds only the sizes and sha256s of its C, of
+its preprocessed text with the listing of where each header was found (`<object>.i`, made and
+removed within the run), and of this stamp; the listing writes the ATS2 home and the compiler's
+resource directory as the placeholders `A` and `C` and every other path as clang printed it, so the
+toolchain moving is not a change and a header found at another path is (build-freshness.md,
+`tests/build-toolchain-path`). After `cache_swap` has put the mark's `build/` in place (from its
+stash if it had been put aside: every stash carries the stamp of whoever made it, and is judged when
+it is swapped in), `check`, `build`, `test` and `run`'s build compare the stamp they would write
+with the one in `build/`. Equal: `build/` is kept, and a build that finds nothing changed runs no
+patsopt for the modules (the entry's generated module is still made again, as before). Different or
+missing: everything in `build/` but `.stash` is removed, one line on stderr names the first line
+that differs (`bats: dropping build/ (made by another bats: patsopt differs)`; `no stamp`, `the
+stamp format differs`, `mark differs` and `the stamp differs` are the others), and the build starts
+from nothing. A `build/` with no stamp, every one made before this, is dropped once; one that holds
+no build (no `.bats_target` and no stamp) is not dropped and says nothing. This replaces the
+hand-bumped `build/.bats_cache_id` (`cache_buster_id`), which went with the removal of every `.o`
+that it and a changed target caused: with the stamp that removal is dead, since `build/` is empty or
+this mark's by then (`target_changed` stays as the belt for an unreadable marker). The Rust bats had
+no stamp, so a `build/` of another compiler was trusted if its mtimes were right. `BATS_CACHE_DIR`'s
+key begins with the same `bats` digest, where it had the hand-bumped `patsopt-1` (the directory of
+the entries keeps that name, so entries of older bats are trimmed after 7 days as before).
+`build/.bats_toolchain`, the listing the `patsopt` line hashes (made once per process), is no
+mark's, as `build/.bats_valid` is: `cache_swap` neither puts it in a stash nor takes one out of a
+stash (it removes that copy), since a listing swapped in from a stash made by another bats was
+hashed for the stamp of the next mark, the stamp got a `patsopt` digest of nobody's toolchain and
+the following check dropped that `build/` for "patsopt differs" and made it again (bats#434: quire's
+static fixtures took 10 minutes each after the move of bats from 2ea56e1 to 3f8a5ea, restoring a
+cache of the older bats; `tests/stash-stamp` plays a stale listing in `build/` and in the stash).
+The test is `tests/build-stamp`.
 
 ## Libraries, loader and linker (bats#396, #397)
 

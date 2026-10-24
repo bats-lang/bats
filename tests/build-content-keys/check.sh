@@ -286,12 +286,16 @@ run r7.log build --only release --only native
 quiet r7.log "the build after those"
 # A wasm object's key names no profile (its cc flags are fixed: -O2, no -g):
 # it is made once, and a build of the other profile keeps it. The wasm cc is
-# found on the PATH, so a stand-in notes each run that writes a keyed .wasm.o (the
-# runtime's is made at every build, whatever changed, and is not counted).
+# found on the PATH, so a stand-in notes each compile that writes a keyed .wasm.o (the
+# runtime's is made at every build, whatever changed, and is not counted, nor
+# is the preprocess of a check, cc -E, which every build makes).
 CC_LOG=$TMP/wasm-cc-runs
 mkdir -p "$TMP/shim"
 REAL_CLANG=$(command -v clang)
-printf '#!/bin/sh\ncase "$*" in *-o\ build/_bats_wasm_runtime*) ;; *.wasm.o*) echo "$*" >> "%s";; esac\nexec "%s" "$@"\n' "$CC_LOG" "$REAL_CLANG" > "$TMP/shim/clang"
+printf '#!/bin/sh\ncase "$*" in\n' > "$TMP/shim/clang"
+printf '  *-o\\ build/_bats_wasm_runtime*) ;;\n' >> "$TMP/shim/clang"
+printf '  *-c\\ -o\\ *.wasm.o\\ *) echo "$*" >> "%s";;\n' "$CC_LOG" >> "$TMP/shim/clang"
+printf 'esac\nexec "%s" "$@"\n' "$REAL_CLANG" >> "$TMP/shim/clang"
 chmod +x "$TMP/shim/clang"
 : > "$CC_LOG"
 PATH="$TMP/shim:$PATH" run w0.log build --only release --only wasm

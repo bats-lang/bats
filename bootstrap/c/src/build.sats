@@ -1013,38 +1013,6 @@ fn write_wasm_stubs(): int
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn check_wasm_binary {l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (path: !$A.borrow(byte, l, n), m: int m): target
 
@@ -1215,6 +1183,13 @@ fn do_build {lt:agz}
 
 
 fn do_build_plain(release: profile, build_target: target): void
+
+
+
+
+
+
+
 
 
 

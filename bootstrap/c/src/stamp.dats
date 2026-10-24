@@ -79,16 +79,41 @@ staload "cache.sats"
 staload "_bats_inputs.sats"
 
 (* The flag templates, one line each, written out here and not read off
-   the argument lists in helpers.bats (run_cc, patsopt_only) and
-   build.bats (run_wasm_cc, compile_wasm_runtime, the wasm-ld and link
+   the argument lists in helpers.bats (native_cc_argv, wasm_cc_argv, patsopt_only) and
+   build.bats (compile_wasm_runtime, the wasm-ld and link
    commands). The digest of bats's own source is the stamp's first line,
    so a change to the flags there is a change of bats whether or not
    this text follows; this line says which flags a stamp was made with,
-   for whoever reads it (flags keyword; `-MD -MF OUT.d` is the depfile of
-   the headers keyword, bats#394). The profile's choice (-O2, or -g -O0) is in
-   the template, since one build/ holds both profiles' work. *)
-#define FLAGS_NATIVE "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime -MD -MF OUT.d; runtime clang -c -o build/_bats_native_runtime.o build/_bats_native_runtime.c; link clang -o BIN OBJECTS [-O2 | -g -O0]"
-#define FLAGS_WASM "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime -MD -MF OUT.d; wasm cc clang --target=wasm32 -O2 -nostdlib -ffreestanding -fvisibility=default -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include build/_bats_wasm_runtime.h -I build/_bats_wasm_stubs -Wno-implicit-function-declaration -Wno-int-conversion -c -o OUT IN -MD -MF OUT.d; link wasm-ld --no-entry --allow-undefined --lto-O2 -z stack-size=1048576 --initial-memory=16777216 --max-memory=268435456 --export=bats_dynload --export=mainats_0_void --export=malloc -o OUT OBJECTS"
+   for whoever reads it (flags keyword; `pre` is the preprocessed text the key of an
+   object holds, preprocess keyword, bats#477). The profile's choice (-O2, or -g -O0) is in
+   the template, since one build/ holds both profiles' work. The text is written by
+   put_flags_common and then put_flags_native or put_flags_wasm, in pieces that fit a line. *)
+fn put_flags_common (st: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(st, "patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; ")
+  val () = bput_v(st, "cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) ")
+  val () = bput_v(st, "-I$(PATSHOME)/ccomp/runtime; pre clang -E -P -frewrite-includes -H ")
+  val () = bput_v(st, "-o OUT.i WRAP [-O2 | -g -O0] ")
+  val () = bput_v(st, "-I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; ")
+in end
+
+fn put_flags_native (st: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(st, "runtime clang -c -o build/_bats_native_runtime.o ")
+  val () = bput_v(st, "build/_bats_native_runtime.c; link clang -o BIN OBJECTS [-O2 | -g -O0]")
+in end
+
+fn put_flags_wasm (st: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(st, "wasm cc clang --target=wasm32 -O2 -nostdlib -ffreestanding ")
+  val () = bput_v(st, "-fvisibility=default -D_ATS_CCOMP_HEADER_NONE_ ")
+  val () = bput_v(st, "-D_ATS_CCOMP_EXCEPTION_NONE_ ")
+  val () = bput_v(st, "-D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include ")
+  val () = bput_v(st, "build/_bats_wasm_runtime.h -I build/_bats_wasm_stubs ")
+  val () = bput_v(st, "-Wno-implicit-function-declaration -Wno-int-conversion -c -o OUT IN; wasm ")
+  val () = bput_v(st, "pre the wasm cc with -E -P -frewrite-includes -H -o OUT.i WRAP in place of ")
+  val () = bput_v(st, "-c -o OUT; ")
+  val () = bput_v(st, "link wasm-ld --no-entry --allow-undefined --lto-O2 -z stack-size=1048576 ")
+  val () = bput_v(st, "--initial-memory=16777216 --max-memory=268435456 --export=bats_dynload ")
+  val () = bput_v(st, "--export=mainats_0_void --export=malloc -o OUT OBJECTS")
+in end
 
 (* The mark is a wasm one: 1, or 3 in check and test mode *)
 fn mark_is_wasm (mark: int): bool = (mark = 1 || mark = 3)
@@ -136,9 +161,9 @@ in r.0 = 0 end
 (* build/.bats_libs: the sha256 of each shared library patsopt loads, sorted, no path (stamp keyword) *)
 #define LIBS_SCRIPT "p=\"$1/bin/patsopt\"\nif command -v sha256sum >/dev/null 2>&1; then h=sha256sum; else h='shasum -a 256'; fi\nraw=build/.bats_libs.raw\nrm -f \"$raw\" \"$raw.todo\" \"$raw.new\" \"$raw.known\" \"$raw.sorted\"\nif command -v ldd >/dev/null 2>&1; then\n  ldd \"$p\" > \"$raw\" 2>&1; rc=$?\n  if [ $rc -ne 0 ] && ! grep -q 'not a dynamic' \"$raw\"; then echo \"error: ldd cannot list the shared libraries patsopt loads, so the stamp cannot be made from them\" >&2; exit 1; fi\n  { grep -o '/[^ ]*' \"$raw\" | LC_ALL=C sort -u | while IFS= read -r f; do if [ -f \"$f\" ]; then $h \"$f\"; fi; done | cut -d ' ' -f1 | LC_ALL=C sort; grep 'not found' \"$raw\" | cut -d ' ' -f1 | LC_ALL=C sort; } > build/.bats_libs\nelif command -v otool >/dev/null 2>&1; then\n  printf '%s\\n' \"$p\" > \"$raw.todo\"; : > \"$raw.known\"\n  while [ -s \"$raw.todo\" ]; do\n    : > \"$raw.new\"\n    while IFS= read -r f; do otool -L \"$f\" 2>/dev/null | tail -n +2 | cut -d ' ' -f1 | tr -d '\\t' >> \"$raw.new\"; done < \"$raw.todo\"\n    LC_ALL=C sort -u \"$raw.new\" > \"$raw.sorted\"\n    LC_ALL=C comm -23 \"$raw.sorted\" \"$raw.known\" > \"$raw.todo\"\n    cat \"$raw.todo\" >> \"$raw.known\"; LC_ALL=C sort -u \"$raw.known\" -o \"$raw.known\"\n  done\n  { while IFS= read -r f; do if [ -f \"$f\" ]; then $h \"$f\" | cut -d ' ' -f1; else echo \"no file, system build $(sw_vers -buildVersion 2>/dev/null)\"; fi; done < \"$raw.known\"; } | LC_ALL=C sort -u > build/.bats_libs\nelse\n  echo \"error: neither ldd nor otool is found, so the shared libraries patsopt loads cannot be listed and the stamp cannot be made\" >&2; exit 1\nfi\nrm -f \"$raw\" \"$raw.todo\" \"$raw.new\" \"$raw.known\" \"$raw.sorted\"\n"
 
-fn libs_listed {lph:agz}(ph: !$A.borrow(byte, lph, 512), phlen: int): bool = let
+fn libs_listed {lph:agz}(ph: !$A.borrow(byte, lph, 12288), phlen: int): bool = let
   var home : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(ph, 0, phlen, 512, home)
+  val () = copy_to_builder_v(ph, 0, phlen, 12288, home)
   val none = $A.alloc<byte>(4096)
   val r = sh_capture(LIBS_SCRIPT, $L.list_vt_cons(mk_arg(home), $L.list_vt_nil()), none)
   val () = $A.free<byte>(none)
@@ -345,7 +370,7 @@ datatype stamp_made =
   | StampNotWritten
 
 fn stamp_write {lph:agz}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int, mark: int): stamp_made = let
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int, mark: int): stamp_made = let
   var st : $B.builder_v = $B.create()
   val () = bput_v(st, "bats-stamp 2\nbats ")
   val () = bput_v(st, bats_inputs_sha256())
@@ -358,7 +383,8 @@ fn stamp_write {lph:agz}
   val () = bput_v(st, "\nlink ")
   val link = (if link_listed(mark) then put_link_digest(st) else false): bool
   val () = bput_v(st, "\nflags ")
-  val () = (if mark_is_wasm(mark) then bput_v(st, FLAGS_WASM) else bput_v(st, FLAGS_NATIVE))
+  val () = (let val () = put_flags_common(st) in
+    if mark_is_wasm(mark) then put_flags_wasm(st) else put_flags_native(st) end)
   val () = bput_v(st, "\nmark ")
   val () = put_int_v(st, mark)
   val () = put_char_v(st, 10)

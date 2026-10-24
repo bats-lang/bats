@@ -385,7 +385,7 @@ implement toolchain_digest (ph, phlen, out) = let
   val listed = (if have then true
     else let
       var a1 : $B.builder_v = $B.create()
-      val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
+      val () = copy_to_builder_v(ph, 0, phlen, 12288, a1)
       var a2 : $B.builder_v = $B.create()
       val () = bput_v(a2, "build/.bats_toolchain")
       val rc = sh_script("l=\"$(pwd -P)/$2\"; t=\"$l.raw\"; cd \"$1\" || exit 1; for r in bin/patsopt prelude libats share ccomp; do [ -e \"$r\" ] || { echo \"error: the toolchain at $1 has no $r, so the stamp cannot be made from it: ATS2 is not whole\" >&2; exit 1; }; done; if command -v sha256sum >/dev/null 2>&1; then digest_cmd=sha256sum; else digest_cmd='shasum -a 256'; fi; find -L bin/patsopt prelude libats share ccomp -type f -exec $digest_cmd {} + > \"$t\" || { rm -f \"$t\"; echo \"error: the toolchain at $1 cannot be listed, so the stamp cannot be made from it\" >&2; exit 1; }; LC_ALL=C sort \"$t\" > \"$l\" || { rm -f \"$t\" \"$l\"; exit 1; }; rm -f \"$t\"",
@@ -399,7 +399,7 @@ in ok end
 
 (* The toolchain, appended to key *)
 fn put_toolchain {lph:agz}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int, key: !$B.builder_v >> $B.builder_v): bool = let
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int, key: !$B.builder_v >> $B.builder_v): bool = let
   val () = bput_v(key, "toolchain ")
   val ok = toolchain_digest(ph, phlen, key)
   val () = put_char_v(key, 10)
@@ -459,13 +459,13 @@ fun put_lines {l:agz}{m:pos}{i:nat} .<max(m - i, 0)>.
    holds a patsopt run to them (the same wrapper, in sh): 0 when it listed,
    124 when the time cap ended it, 125 when the memory cap did, else 1. *)
 fn list_inputs {lph,li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int,
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im, graph: bool): int = let
   var a1 : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(ph, 0, phlen, 512, a1)
+  val () = copy_to_builder_v(ph, 0, phlen, 12288, a1)
   val () = bput_v(a1, "/bin/patsopt")
   var a2 : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(ph, 0, phlen, 512, a2)
+  val () = copy_to_builder_v(ph, 0, phlen, 12288, a2)
   var a4 : $B.builder_v = $B.create()
   val () = bput_v(a4, "build/.bats_depgen")
   var a5 : $B.builder_v = $B.create()
@@ -485,7 +485,7 @@ in (if rc = 0 then 0 else if rc = 124 then 124 else if rc = 125 then 125 else 1)
    hex; false when one of its parts cannot be had, and then the run is
    not cached *)
 fn module_key {lph,lo,li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int,
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    hex: !$B.builder_v >> $B.builder_v): bool = let
@@ -828,7 +828,7 @@ implement closure_key_write(list_bv, list_len, out_bv, out_len) =
    it) or list_inputs is to make it. The key is written beside its place
    and renamed into it. *)
 fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
-  (ph: !$A.borrow(byte, lph, 512), phlen: int, stamped: bool,
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int, stamped: bool,
    names: !$A.borrow(byte, ln, nn), nl: int nl, listed: bool,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im): void = let
