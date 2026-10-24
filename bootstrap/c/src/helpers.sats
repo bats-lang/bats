@@ -1073,6 +1073,20 @@ fn io_error_errno (e: $F.io_error): int
 
 
 
+
+datavtype settled =
+  | Settled of ()   (* the file was written whole *)
+  | Failed of ()    (* said, with the reason, and the build failed *)
+
+
+
+
+
+
+fn write_settled {lp:agz}{n:pos}{m:nat | m <= n}
+  (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): settled
+
+
 fn write_settle {lp:agz}{n:pos}{m:nat | m <= n}
   (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): int
 
@@ -1408,6 +1422,9 @@ fn key_fresh {lph:agz}
 
 fn key_record {lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (kind: key_of, out_bv: !$A.borrow(byte, lo, no), om: int om, in_bv: !$A.borrow(byte, li, ni), im: int im): void
+
+
+
 
 
 
@@ -2242,6 +2259,11 @@ fn run_cmd_capture_outcome {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
 
 fn check_emitted_flaws {lo,li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (out_bv: !$A.borrow(byte, lo, no), out_len: int om, in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
+
+
+
+
+
 
 
 
@@ -3897,6 +3919,27 @@ fn project_lock_refused (lk: !project_lock): bool
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn write_file_from_builder {lp:agz}{np:pos | np < 1048576}
   (path_bv: !$A.borrow(byte, lp, np), path_len: int np,
    content_b: $B.builder_v): write_result
@@ -4220,6 +4263,9 @@ fn sats_stamp_save (): whole_file
 
 
 fn sats_stamp_end (saved: whole_file, back: bool): void
+
+
+
 
 
 

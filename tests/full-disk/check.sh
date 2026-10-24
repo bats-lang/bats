@@ -77,18 +77,19 @@ fresh() { # <dir>: a copy of the project
 # the log is a file too (with a limit of 0 nothing can be written to it by
 # the limited shell); the status is the function's (set -e would end the
 # subshell at a failed check, before it says the status)
+VERB=check # the command run() plays: check, or build for a case that needs an object
 run() {
   out=$(cd "$1"
     if [ "$3" = - ]; then
       st=0
-      HOME="$H" BATS_REPOSITORY="$REPO" "$BATS" check 2>&1 || st=$?
+      HOME="$H" BATS_REPOSITORY="$REPO" "$BATS" "$VERB" 2>&1 || st=$?
       echo "bats-status=$st"
     else
       blocks=$(( ($3 + unit - 1) / unit ))
       ( trap '' XFSZ
         ulimit -S -f "$blocks"
         st=0
-        HOME="$H" BATS_REPOSITORY="$REPO" "$BATS" check 2>&1 || st=$?
+        HOME="$H" BATS_REPOSITORY="$REPO" "$BATS" "$VERB" 2>&1 || st=$?
         echo "bats-status=$st" )
     fi)
   status=${out##*bats-status=}
@@ -201,6 +202,61 @@ stamp_case() { # <name> <the staloaded file> <its module> <expression>
 }
 stamp_case inputs _bats_inputs.sats _bats_inputs '$X.bats_inputs_sha256 ()'
 stamp_case facts _bats_facts.sats _bats_facts '$X.bats_commit_short ()'
+
+# A write that fails at the target marker (bats-lang/bats#367): build/.bats_target
+# is a directory (EISDIR). The marker is one byte, so no size limit singles it
+# out. The check must fail (status 1), its first error naming the marker, and
+# write nothing after it: the native runtime is the next write, and it is made
+# only by a run that went on as if the marker had been written. The next
+# check, with the directory gone, is the clean one's, file for file.
+marker_dir="$TMP/marker"
+mkdir -p "$marker_dir/src" "$marker_dir/build/.bats_target"
+printf '[package]\nname = "marker"\nkind = "bin"\n' > "$marker_dir/bats.toml"
+printf '#include "share/atspre_staload.hats"\nimplement main0 () = println! ("hi")\n' > "$marker_dir/src/marker.bats"
+status=0
+run "$marker_dir" "$TMP/marker.log" - || status=$?
+if [ "$status" != 1 ]; then
+  echo "FAIL: a marker that cannot be written: the check ended with status $status, not 1"; cat "$TMP/marker.log"; exit 1
+fi
+line=$(grep -a '^error: ' "$TMP/marker.log" | head -1)
+case "$line" in
+  "error: cannot write 'build/.bats_target': "*"(os error "*")") ;;
+  *) echo "FAIL: a marker that cannot be written: the first error does not name the marker:"; cat "$TMP/marker.log"; exit 1;;
+esac
+if [ -e "$marker_dir/build/_bats_native_runtime.c" ]; then
+  echo "FAIL: a marker that cannot be written: the native runtime was written after it"; cat "$TMP/marker.log"; exit 1
+fi
+rmdir "$marker_dir/build/.bats_target"
+run "$marker_dir" "$TMP/marker.next.log" - || { echo "FAIL: a marker that cannot be written: the check after it failed"; cat "$TMP/marker.next.log"; exit 1; }
+[ -f "$marker_dir/build/.bats_target" ] && [ -f "$marker_dir/build/_bats_native_runtime.c" ] || {
+  echo "FAIL: a marker that cannot be written: the check after it did not make the marker and the runtime"; exit 1; }
+echo "ok   a marker that cannot be written"
+
+# A write that fails at an object's key (bats-lang/bats#367): the key beside the
+# object is a directory with a file in it, so it cannot be removed or written.
+# The build must fail (status 1) saying so, naming the key, and the build after
+# it, with the directory gone, makes the key again.
+key_dir="$TMP/objkey"
+mkdir -p "$key_dir/src/bin" "$key_dir/build/src/bin/marker_dats.o.key/x"
+printf '[package]\nname = "objkey"\nkind = "bin"\n' > "$key_dir/bats.toml"
+printf '#include "share/atspre_staload.hats"\nimplement main0 () = println! ("hi")\n' > "$key_dir/src/bin/marker.bats"
+VERB=build
+status=0
+run "$key_dir" "$TMP/objkey.log" - || status=$?
+if [ "$status" != 1 ]; then
+  echo "FAIL: a key that cannot be written: the build ended with status $status, not 1"; cat "$TMP/objkey.log"; exit 1
+fi
+line=$(grep -a '^error: ' "$TMP/objkey.log" | head -1)
+case "$line" in
+  "error: cannot write 'build/src/bin/marker_dats.o.key': "*"(os error "*")") ;;
+  *) echo "FAIL: a key that cannot be written: the first error does not name the key:"; cat "$TMP/objkey.log"; exit 1;;
+esac
+rm -rf "$key_dir/build/src/bin/marker_dats.o.key"
+run "$key_dir" "$TMP/objkey.next.log" - || { echo "FAIL: a key that cannot be written: the build after it failed"; cat "$TMP/objkey.next.log"; exit 1; }
+# (a build leaves the other mode's build/ in the stash, so the key is in one of the two)
+[ -n "$(find "$key_dir/build" -type f -name marker_dats.o.key)" ] || { echo "FAIL: a key that cannot be written: the build after it made no key"; exit 1; }
+VERB=check
+echo "ok   a key that cannot be written"
 
 # A file system that really is full, where one can be mounted (root, or sudo
 # with no password: CI's runners have it; a small tmpfs, never the disk the

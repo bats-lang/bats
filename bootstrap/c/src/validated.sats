@@ -238,6 +238,13 @@ fn valid_holds {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
 
 
 
+
+
+
+
+
+
+
 fn valid_flush (pend: $B.builder_v): void
 
 
@@ -451,6 +458,10 @@ fn uses_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(by
 fn uses_hit {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
   (reuse: bool, slot: !$A.borrow(byte, ls, ns), sm: int sm, key: !$A.borrow(byte, lk, 64))
   : @(bool, $B.builder_v)
+
+
+
+
 
 
 
