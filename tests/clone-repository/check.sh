@@ -240,6 +240,43 @@ victims="$(tree "$livepid") $livepid"
 kill -9 $victims 2>/dev/null || true
 ok "a run does not clear the sibling of a shell that is still alive"
 
+# runs for one target at the same moment (bats#509): a stand-in git holds every
+# run in its fetch until all have arrived, so all reach the move into place
+# together. Every run must succeed, the target is the one clone at the commit
+# with nothing of another run's inside it, and no sibling or error is left.
+mkdir -p "$TMP/racefake" "$TMP/race"
+cat > "$TMP/racefake/git" <<SH
+#!/bin/sh
+case " \$* " in *" fetch "*)
+  : > "$TMP/race/arrived.\$\$"
+  i=0
+  while [ \$(ls "$TMP/race" | grep -c '^arrived\.') -lt 3 ]; do i=\$((i + 1)); [ \$i -lt 600 ] || exit 99; sleep 0.1; done ;;
+esac
+exec "$REAL_GIT" "\$@"
+SH
+chmod +x "$TMP/racefake/git"
+for kind in absent empty; do
+  for round in 1 2 3 4 5; do
+    rd=$TMP/race/$kind$round
+    rm -f "$TMP"/race/arrived.*
+    [ "$kind" = absent ] || mkdir "$rd"
+    pids=
+    for who in 1 2 3; do
+      ( rc=0; PATH="$TMP/racefake:$PATH" "$BATS" clone-repository "$first" --repository "$rd" > "$TMP/race/out.$who" 2> "$TMP/race/err.$who" || rc=$?; echo $rc > "$TMP/race/rc.$who" ) &
+      pids="$pids $!"
+    done
+    for pid in $pids; do wait "$pid" || true; done
+    for who in 1 2 3; do
+      [ "$(cat "$TMP/race/rc.$who")" = 0 ] || { cat "$TMP/race/err.$who"; fail "a run of three at once failed ($kind, round $round)"; }
+      grep -q "rmdir\|mv:\|cannot move" "$TMP/race/err.$who" && { cat "$TMP/race/err.$who"; fail "a run of three at once printed a system error ($kind, round $round)"; }
+    done
+    [ "$(git -C "$rd" rev-parse HEAD)" = "$first" ] || fail "three at once: not at the commit ($kind, round $round)"
+    [ -z "$(ls -A "$rd" | grep '\.new\.')" ] || fail "three at once left a sibling inside the clone: $(ls -A "$rd") ($kind, round $round)"
+    [ -z "$(ls -A "$TMP/race" | grep "^$kind$round\.new\.")" ] || fail "three at once left a sibling beside the target ($kind, round $round)"
+  done
+done
+ok "three runs at once for one target, absent or empty: all succeed, one clone, nothing nested, no sibling left"
+
 "$BATS" clone-repository "$first" extra --repository "$TMP/x1" > /dev/null 2>&1 && fail "an extra argument was accepted"
 [ ! -e "$TMP/x1" ] || fail "an extra argument cloned"
 "$BATS" clone-repository "$first" --repository "$TMP/x2" -- extra > /dev/null 2>&1 && fail "words after -- were accepted"
