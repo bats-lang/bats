@@ -2339,7 +2339,7 @@ ATSreturn(tmpret67) ;
 } /* end of [text_arg_22] */
 
 /*
-build/src/setup.dats: 7129(line=84, offs=4) -- 7303(line=87, offs=23)
+build/src/setup.dats: 7656(line=84, offs=4) -- 7830(line=87, offs=23)
 */
 /*
 local: 
@@ -2358,22 +2358,22 @@ put_env_23(atstkind_type(atstype_ptrk) arg0, atsrefarg0_type(atstkind_type(atsty
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/setup.dats: 7129(line=84, offs=4) -- 7303(line=87, offs=23)
+emit_instr: loc0 = build/src/setup.dats: 7656(line=84, offs=4) -- 7830(line=87, offs=23)
 */
 ATSINSflab(__patsflab_put_env_23):
 /*
-emit_instr: loc0 = build/src/setup.dats: 7207(line=84, offs=82) -- 7303(line=87, offs=23)
+emit_instr: loc0 = build/src/setup.dats: 7734(line=84, offs=82) -- 7830(line=87, offs=23)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7222(line=85, offs=12) -- 7239(line=85, offs=29)
+emit_instr: loc0 = build/src/setup.dats: 7749(line=85, offs=12) -- 7766(line=85, offs=29)
 */
 ATSINSmove_void(tmp71, atspre_print_string(arg0)) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7252(line=86, offs=12) -- 7280(line=86, offs=40)
+emit_instr: loc0 = build/src/setup.dats: 7779(line=86, offs=12) -- 7807(line=86, offs=40)
 */
 ATSINSmove_void(tmp72, build_057_src_057_helpers_056_sats__print_borrow(ATSPMVrefarg0(arg1), ATSPMVi0nt(0), arg2, ATSPMVi0nt(4096))) ;
 
@@ -2382,12 +2382,12 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7284(line=87, offs=4) -- 7299(line=87, offs=19)
+emit_instr: loc0 = build/src/setup.dats: 7811(line=87, offs=4) -- 7826(line=87, offs=19)
 */
 ATSINSmove_void(tmpret70, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7207(line=84, offs=82) -- 7303(line=87, offs=23)
+emit_instr: loc0 = build/src/setup.dats: 7734(line=84, offs=82) -- 7830(line=87, offs=23)
 */
 /*
 INSletpop()
@@ -2397,7 +2397,7 @@ ATSreturn_void(tmpret70) ;
 } /* end of [put_env_23] */
 
 /*
-build/src/setup.dats: 7336(line=93, offs=28) -- 8084(line=108, offs=6)
+build/src/setup.dats: 7863(line=93, offs=28) -- 8611(line=108, offs=6)
 */
 /*
 local: sh_exec_0$0(level=0), bytes_arg_21$0(level=0), text_arg_22$0(level=0), put_env_23$0(level=0)
@@ -2427,28 +2427,28 @@ ATStmpdec(tmp97, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/setup.dats: 7319(line=93, offs=11) -- 8084(line=108, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 7846(line=93, offs=11) -- 8611(line=108, offs=6)
 */
 ATSINSflab(__patsflab_clone_repository):
 /*
-emit_instr: loc0 = build/src/setup.dats: 7369(line=94, offs=6) -- 7378(line=94, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 7896(line=94, offs=6) -- 7905(line=94, offs=15)
 */
 ATSINSmove(tmp74, ATSLIB_056_prelude__lte_g0int_int__25__1(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7366(line=94, offs=3) -- 8084(line=108, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 7893(line=94, offs=3) -- 8611(line=108, offs=6)
 */
 ATSif(
 tmp74
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7384(line=94, offs=21) -- 7538(line=96, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 7911(line=94, offs=21) -- 8065(line=96, offs=15)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7401(line=95, offs=14) -- 7523(line=95, offs=136)
+emit_instr: loc0 = build/src/setup.dats: 7928(line=95, offs=14) -- 8050(line=95, offs=136)
 */
 ATSINSmove_void(tmp79, atspre_prerr_string(ATSPMVstring("error: specify the commit of the package repository\nusage: bats clone-repository <commit> --repository <dir>\n"))) ;
 
@@ -2457,35 +2457,35 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7529(line=96, offs=6) -- 7534(line=96, offs=11)
+emit_instr: loc0 = build/src/setup.dats: 8056(line=96, offs=6) -- 8061(line=96, offs=11)
 */
 ATSINSmove(tmpret73, ATSPMVbool_false()) ;
 /*
-emit_instr: loc0 = build/src/setup.dats: 7384(line=94, offs=21) -- 7538(line=96, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 7911(line=94, offs=21) -- 8065(line=96, offs=15)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7549(line=97, offs=11) -- 7558(line=97, offs=20)
+emit_instr: loc0 = build/src/setup.dats: 8076(line=97, offs=11) -- 8085(line=97, offs=20)
 */
 ATSINSmove(tmp80, ATSLIB_056_prelude__lte_g0int_int__25__2(arg3, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7546(line=97, offs=8) -- 8084(line=108, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8073(line=97, offs=8) -- 8611(line=108, offs=6)
 */
 ATSif(
 tmp80
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7564(line=97, offs=26) -- 7740(line=99, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8091(line=97, offs=26) -- 8267(line=99, offs=15)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7581(line=98, offs=14) -- 7725(line=98, offs=158)
+emit_instr: loc0 = build/src/setup.dats: 8108(line=98, offs=14) -- 8252(line=98, offs=158)
 */
 ATSINSmove_void(tmp83, atspre_prerr_string(ATSPMVstring("error: specify the directory with --repository <dir> (or BATS_REPOSITORY)\nusage: bats clone-repository <commit> --repository <dir>\n"))) ;
 
@@ -2494,104 +2494,104 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7731(line=99, offs=6) -- 7736(line=99, offs=11)
+emit_instr: loc0 = build/src/setup.dats: 8258(line=99, offs=6) -- 8263(line=99, offs=11)
 */
 ATSINSmove(tmpret73, ATSPMVbool_false()) ;
 /*
-emit_instr: loc0 = build/src/setup.dats: 7564(line=97, offs=26) -- 7740(line=99, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8091(line=97, offs=26) -- 8267(line=99, offs=15)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7748(line=100, offs=8) -- 8084(line=108, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8275(line=100, offs=8) -- 8611(line=108, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7780(line=101, offs=29) -- 7803(line=101, offs=52)
+emit_instr: loc0 = build/src/setup.dats: 8307(line=101, offs=29) -- 8330(line=101, offs=52)
 */
 ATSINSmove(tmp85, bytes_arg_21(ATSPMVrefarg0(arg0), arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7805(line=101, offs=54) -- 7825(line=101, offs=74)
+emit_instr: loc0 = build/src/setup.dats: 8332(line=101, offs=54) -- 8352(line=101, offs=74)
 */
 ATSINSmove(tmp86, bytes_arg_21(ATSPMVrefarg0(arg2), arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7827(line=101, offs=76) -- 7850(line=101, offs=99)
+emit_instr: loc0 = build/src/setup.dats: 8354(line=101, offs=76) -- 8377(line=101, offs=99)
 */
 ATSINSmove(tmp87, text_arg_22(ATSPMVstring("https://github.com/bats-lang/repository-prototype.git"))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7765(line=101, offs=14) -- 7852(line=101, offs=101)
+emit_instr: loc0 = build/src/setup.dats: 8292(line=101, offs=14) -- 8379(line=101, offs=101)
 */
-ATSINSmove(tmp84, sh_exec_0(ATSPMVstring("exec 2>&1\nset -e\ncase $1 in *[!0-9a-f]*|'') echo \"error: '$1' is not a full commit: 40 lowercase hex digits are needed, never a branch or a tag (CI is pinned)\"; exit 1 ;; esac\n[ ${#1} -eq 40 ] || { echo \"error: '$1' is not a full commit: 40 lowercase hex digits are needed\"; exit 1; }\n[ \"$(printf '%s' \"$2\" | tr -d '[:cntrl:]')\" = \"$2\" ] || { echo \"error: the directory has a control character in its name, which an environment file cannot hold\"; exit 1; }\np=$2\nwhile [ ${#p} -gt 1 ] && [ \"${p%/}\" != \"$p\" ]; do p=${p%/}; done\nif [ -L \"$p\" ]; then echo \"error: $p is a symbolic link, which is neither followed nor replaced\"; exit 1; fi\nif [ -d \"$p/.git\" ]; then\n  origin=$(git -C \"$p\" config --get remote.origin.url 2>/dev/null || true)\n  [ \"$origin\" = \"$3\" ] || { if [ -z \"$origin\" ]; then echo \"error: $p is a git repository with no origin, so it is not a clone of the package repository (a repository made by git init, as the old setup action made one, has none): it is not touched; remove it to clone again\"; else echo \"error: $p is a git repository but not a clone of the package repository (its origin is '$origin'), so it is not touched\"; fi; exit 1; }\n  if [ \"$(git -C \"$p\" rev-parse HEAD 2>/dev/null)\" = \"$1\" ]; then exit 10; fi\n  git -C \"$p\" fetch -q --depth 1 origin \"$1\"\n  git -C \"$p\" checkout -q FETCH_HEAD\n  exit 0\nfi\nif [ -e \"$p\" ] && { [ ! -d \"$p\" ] || [ -n \"$(ls -A -- \"$p\")\" ]; }; then echo \"error: $p exists and is neither an empty directory nor a clone of the package repository, so it is not replaced\"; exit 1; fi\ntop=$p; q=$p\nwhile :; do q=$(dirname -- \"$q\"); [ -e \"$q\" ] && break; top=$q; done\nmkdir -p -- \"$(dirname -- \"$p\")\"\nt=\nundo() { [ -z \"$t\" ] || rm -rf -- \"$t\"; [ \"$top\" = \"$p\" ] && return 0; q=$(dirname -- \"$p\"); while rmdir -- \"$q\" 2>/dev/null && [ \"$q\" != \"$top\" ]; do q=$(dirname -- \"$q\"); done; return 0; }\ntrap undo EXIT\nfor old in \"$p\".new.*; do\n  if [ -d \"$old\" ] && [ ! -L \"$old\" ] && [ -f \"$old/.bats-clone-pending\" ] && ! kill -0 \"$(cat \"$old/.bats-clone-pending\")\" 2>/dev/null; then rm -rf -- \"$old\"; fi\ndone\nt=$(mktemp -d -- \"$p.new.XXXXXX\")\ntrap 'exit 1' INT TERM\necho $$ > \"$t/.bats-clone-pending\"\ngit init -q -- \"$t\"\ngit -C \"$t\" remote add origin \"$3\"\ngit -C \"$t\" fetch -q --depth 1 origin \"$1\"\ngit -C \"$t\" checkout -q FETCH_HEAD\nrm -f -- \"$t/.bats-clone-pending\"\nif [ -d \"$p\" ]; then\n  m=$(ls -ld -- \"$p\" | cut -c2-10)\n  rwx=$(echo \"$m\" | sed 's/[st]/x/g; s/[ST]/-/g')\n  mx=\"u=$(echo \"$rwx\" | cut -c1-3 | tr -d -)$(echo \"$m\" | cut -c3 | sed -n 's/[sS]/s/p'),g=$(echo \"$rwx\" | cut -c4-6 | tr -d -)$(echo \"$m\" | cut -c6 | sed -n 's/[sS]/s/p'),o=$(echo \"$rwx\" | cut -c7-9 | tr -d -)$(echo \"$m\" | cut -c9 | sed -n 's/[tT]/t/p')\"\n  chmod -- \"$mx\" \"$t\"\n  rmdir -- \"$p\"\n  if ! mv -- \"$t\" \"$p\"; then mkdir -- \"$p\" && chmod -- \"$mx\" \"$p\"; exit 1; fi\nelse\n  chmod 755 -- \"$t\"\n  mv -- \"$t\" \"$p\"\nfi\ntrap - EXIT\n"), tmp85, tmp86, tmp87)) ;
+ATSINSmove(tmp84, sh_exec_0(ATSPMVstring("exec 2>&1\nset -e\ncase $1 in *[!0-9a-f]*|'') echo \"error: '$1' is not a full commit: 40 lowercase hex digits are needed, never a branch or a tag (CI is pinned)\"; exit 1 ;; esac\n[ ${#1} -eq 40 ] || { echo \"error: '$1' is not a full commit: 40 lowercase hex digits are needed\"; exit 1; }\n[ \"$(printf '%s' \"$2\" | tr -d '[:cntrl:]')\" = \"$2\" ] || { echo \"error: the directory has a control character in its name, which an environment file cannot hold\"; exit 1; }\np=$2\nwhile [ ${#p} -gt 1 ] && [ \"${p%/}\" != \"$p\" ]; do p=${p%/}; done\nif [ -L \"$p\" ]; then echo \"error: $p is a symbolic link, which is neither followed nor replaced\"; exit 1; fi\nreuse() {\n  origin=$(git -C \"$p\" config --get remote.origin.url 2>/dev/null || true)\n  [ \"$origin\" = \"$2\" ] || { if [ -z \"$origin\" ]; then echo \"error: $p is a git repository with no origin, so it is not a clone of the package repository (a repository made by git init, as the old setup action made one, has none): it is not touched; remove it to clone again\"; else echo \"error: $p is a git repository but not a clone of the package repository (its origin is '$origin'), so it is not touched\"; fi; exit 1; }\n  if [ \"$(git -C \"$p\" rev-parse HEAD 2>/dev/null)\" = \"$1\" ]; then exit 10; fi\n  git -C \"$p\" fetch -q --depth 1 origin \"$1\"\n  git -C \"$p\" checkout -q FETCH_HEAD\n  exit 0\n}\noccupied() { if [ -e \"$p\" ] && { [ ! -d \"$p\" ] || [ -n \"$(ls -A -- \"$p\")\" ]; }; then echo \"error: $p exists and is neither an empty directory nor a clone of the package repository, so it is not replaced\"; exit 1; fi; }\nif [ -d \"$p/.git\" ]; then reuse \"$1\" \"$3\"; fi\noccupied\ntop=$p; q=$p\nwhile :; do q=$(dirname -- \"$q\"); [ -e \"$q\" ] && break; top=$q; done\nmkdir -p -- \"$(dirname -- \"$p\")\"\nt=\nundo() { [ -z \"$t\" ] || rm -rf -- \"$t\"; [ \"$top\" = \"$p\" ] && return 0; q=$(dirname -- \"$p\"); while rmdir -- \"$q\" 2>/dev/null && [ \"$q\" != \"$top\" ]; do q=$(dirname -- \"$q\"); done; return 0; }\ntrap undo EXIT\nfor old in \"$p\".new.*; do\n  if [ -d \"$old\" ] && [ ! -L \"$old\" ] && [ -f \"$old/.bats-clone-pending\" ] && ! kill -0 \"$(cat \"$old/.bats-clone-pending\")\" 2>/dev/null; then rm -rf -- \"$old\"; fi\ndone\nt=$(mktemp -d -- \"$p.new.XXXXXX\")\ntrap 'exit 1' INT TERM\necho $$ > \"$t/.bats-clone-pending\"\ngit init -q -- \"$t\"\ngit -C \"$t\" remote add origin \"$3\"\ngit -C \"$t\" fetch -q --depth 1 origin \"$1\"\ngit -C \"$t\" checkout -q FETCH_HEAD\nrm -f -- \"$t/.bats-clone-pending\"\nbase=$(basename -- \"$t\")\ntries=0\nwhile :; do\ntries=$((tries + 1))\nlost=\nmx=\nif [ -d \"$p\" ]; then\n  m=$(ls -ld -- \"$p\" | cut -c2-10)\n  rwx=$(echo \"$m\" | sed 's/[st]/x/g; s/[ST]/-/g')\n  mx=\"u=$(echo \"$rwx\" | cut -c1-3 | tr -d -)$(echo \"$m\" | cut -c3 | sed -n 's/[sS]/s/p'),g=$(echo \"$rwx\" | cut -c4-6 | tr -d -)$(echo \"$m\" | cut -c6 | sed -n 's/[sS]/s/p'),o=$(echo \"$rwx\" | cut -c7-9 | tr -d -)$(echo \"$m\" | cut -c9 | sed -n 's/[tT]/t/p')\"\n  chmod -- \"$mx\" \"$t\"\n  rmdir -- \"$p\" 2>/dev/null || lost=1\nelse\n  chmod 755 -- \"$t\"\nfi\nif [ -z \"$lost\" ]; then\n  if ! mv -- \"$t\" \"$p\"; then [ -z \"$mx\" ] || { mkdir -- \"$p\" && chmod -- \"$mx\" \"$p\"; }; exit 1; fi\n  if [ ! -e \"$p/$base\" ]; then trap - EXIT; exit 0; fi\n  mv -- \"$p/$base\" \"$t\" || { rm -rf -- \"$p/$base\"; t=; exit 1; }\nfi\nif [ -d \"$p/.git\" ]; then reuse \"$1\" \"$3\"; fi\noccupied\n[ $tries -lt 5 ] || { echo \"error: $p kept changing while this run moved its clone into place, so it is left as it is; run again\"; exit 1; }\ndone\n"), tmp85, tmp86, tmp87)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7865(line=103, offs=8) -- 7882(line=103, offs=25)
+emit_instr: loc0 = build/src/setup.dats: 8392(line=103, offs=8) -- 8409(line=103, offs=25)
 */
 ATSINSmove(tmp89, ATSLIB_056_prelude__eq_g0int_int__29__1(tmp84, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7865(line=103, offs=8) -- 7882(line=103, offs=25)
+emit_instr: loc0 = build/src/setup.dats: 8392(line=103, offs=8) -- 8409(line=103, offs=25)
 */
 ATSif(
 tmp89
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7865(line=103, offs=8) -- 7882(line=103, offs=25)
+emit_instr: loc0 = build/src/setup.dats: 8392(line=103, offs=8) -- 8409(line=103, offs=25)
 */
 ATSINSmove(tmp88, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7865(line=103, offs=8) -- 7882(line=103, offs=25)
+emit_instr: loc0 = build/src/setup.dats: 8392(line=103, offs=8) -- 8409(line=103, offs=25)
 */
 ATSINSmove(tmp88, ATSLIB_056_prelude__eq_g0int_int__29__2(tmp84, ATSPMVi0nt(10))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7862(line=103, offs=5) -- 8078(line=107, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8389(line=103, offs=5) -- 8605(line=107, offs=15)
 */
 ATSif(
 tmp88
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7888(line=103, offs=31) -- 8063(line=106, offs=16)
+emit_instr: loc0 = build/src/setup.dats: 8415(line=103, offs=31) -- 8590(line=106, offs=16)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7911(line=104, offs=20) -- 7918(line=104, offs=27)
+emit_instr: loc0 = build/src/setup.dats: 8438(line=104, offs=20) -- 8445(line=104, offs=27)
 */
 ATSINSmove(tmp97, ATSLIB_056_prelude__eq_g0int_int__29__3(tmp84, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 7908(line=104, offs=17) -- 7992(line=104, offs=101)
+emit_instr: loc0 = build/src/setup.dats: 8435(line=104, offs=17) -- 8519(line=104, offs=101)
 */
 ATSif(
 tmp97
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7924(line=104, offs=33) -- 7984(line=104, offs=93)
+emit_instr: loc0 = build/src/setup.dats: 8451(line=104, offs=33) -- 8511(line=104, offs=93)
 */
 ATSINSmove_void(tmp96, atspre_prerr_string(ATSPMVstring("the package repository is at the commit already\n"))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 7990(line=104, offs=99) -- 7992(line=104, offs=101)
+emit_instr: loc0 = build/src/setup.dats: 8517(line=104, offs=99) -- 8519(line=104, offs=101)
 */
 ATSINSmove_void(tmp96, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/setup.dats: 8009(line=105, offs=16) -- 8047(line=105, offs=54)
+emit_instr: loc0 = build/src/setup.dats: 8536(line=105, offs=16) -- 8574(line=105, offs=54)
 */
 ATSINSmove_void(tmp100, put_env_23(ATSPMVstring("BATS_REPOSITORY="), ATSPMVrefarg0(arg2), arg3)) ;
 
@@ -2600,23 +2600,23 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8055(line=106, offs=8) -- 8059(line=106, offs=12)
+emit_instr: loc0 = build/src/setup.dats: 8582(line=106, offs=8) -- 8586(line=106, offs=12)
 */
 ATSINSmove(tmpret73, ATSPMVbool_true()) ;
 /*
-emit_instr: loc0 = build/src/setup.dats: 7888(line=103, offs=31) -- 8063(line=106, offs=16)
+emit_instr: loc0 = build/src/setup.dats: 8415(line=103, offs=31) -- 8590(line=106, offs=16)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 8073(line=107, offs=10) -- 8078(line=107, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8600(line=107, offs=10) -- 8605(line=107, offs=15)
 */
 ATSINSmove(tmpret73, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/setup.dats: 7748(line=100, offs=8) -- 8084(line=108, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8275(line=100, offs=8) -- 8611(line=108, offs=6)
 */
 /*
 INSletpop()
@@ -2919,7 +2919,7 @@ ATSreturn(tmpret90__3) ;
 } /* end of [ATSLIB_056_prelude__eq_g0int_int__29__3] */
 
 /*
-build/src/setup.dats: 8113(line=113, offs=25) -- 8485(line=124, offs=6)
+build/src/setup.dats: 8640(line=113, offs=25) -- 9012(line=124, offs=6)
 */
 /*
 local: sh_exec_0$0(level=0), bytes_arg_21$0(level=0), text_arg_22$0(level=0), put_env_23$0(level=0)
@@ -2944,28 +2944,28 @@ ATStmpdec(tmp110, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/setup.dats: 8099(line=113, offs=11) -- 8485(line=124, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8626(line=113, offs=11) -- 9012(line=124, offs=6)
 */
 ATSINSflab(__patsflab_record_commit):
 /*
-emit_instr: loc0 = build/src/setup.dats: 8135(line=114, offs=6) -- 8144(line=114, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8662(line=114, offs=6) -- 8671(line=114, offs=15)
 */
 ATSINSmove(tmp102, ATSLIB_056_prelude__lte_g0int_int__25__3(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8132(line=114, offs=3) -- 8485(line=124, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8659(line=114, offs=3) -- 9012(line=124, offs=6)
 */
 ATSif(
 tmp102
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 8150(line=114, offs=21) -- 8274(line=116, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8677(line=114, offs=21) -- 8801(line=116, offs=15)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 8167(line=115, offs=14) -- 8259(line=115, offs=106)
+emit_instr: loc0 = build/src/setup.dats: 8694(line=115, offs=14) -- 8786(line=115, offs=106)
 */
 ATSINSmove_void(tmp105, atspre_prerr_string(ATSPMVstring("error: specify the commit the version names\nusage: bats record-commit <commit>\n"))) ;
 
@@ -2974,39 +2974,39 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8265(line=116, offs=6) -- 8270(line=116, offs=11)
+emit_instr: loc0 = build/src/setup.dats: 8792(line=116, offs=6) -- 8797(line=116, offs=11)
 */
 ATSINSmove(tmpret101, ATSPMVbool_false()) ;
 /*
-emit_instr: loc0 = build/src/setup.dats: 8150(line=114, offs=21) -- 8274(line=116, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8677(line=114, offs=21) -- 8801(line=116, offs=15)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 8282(line=117, offs=8) -- 8485(line=124, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8809(line=117, offs=8) -- 9012(line=124, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 8315(line=118, offs=30) -- 8338(line=118, offs=53)
+emit_instr: loc0 = build/src/setup.dats: 8842(line=118, offs=30) -- 8865(line=118, offs=53)
 */
 ATSINSmove(tmp107, bytes_arg_21(ATSPMVrefarg0(arg0), arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8340(line=118, offs=55) -- 8352(line=118, offs=67)
+emit_instr: loc0 = build/src/setup.dats: 8867(line=118, offs=55) -- 8879(line=118, offs=67)
 */
 ATSINSmove(tmp108, text_arg_22(ATSPMVstring(""))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8354(line=118, offs=69) -- 8366(line=118, offs=81)
+emit_instr: loc0 = build/src/setup.dats: 8881(line=118, offs=69) -- 8893(line=118, offs=81)
 */
 ATSINSmove(tmp109, text_arg_22(ATSPMVstring(""))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8299(line=118, offs=14) -- 8367(line=118, offs=82)
+emit_instr: loc0 = build/src/setup.dats: 8826(line=118, offs=14) -- 8894(line=118, offs=82)
 */
 ATSINSmove(tmp106, sh_exec_0(ATSPMVstring("exec 2>&1\nset -e\ncase $1 in *[!0-9a-f]*|'') echo \"error: '$1' is not a full commit: 40 lowercase hex digits are needed, never a branch or a tag (CI is pinned)\" >&2; exit 1 ;; esac\n[ ${#1} -eq 40 ] || { echo \"error: '$1' is not a full commit: 40 lowercase hex digits are needed\" >&2; exit 1; }\ngit cat-file -e \"$1^{commit}\" 2>/dev/null || { echo \"error: commit $1 is not in the checkout: a pull request's head is the merge's second parent, so check out with fetch-depth: 2 (or fetch the commit)\" >&2; exit 1; }\n"), tmp107, tmp108, tmp109)) ;
 
@@ -3015,24 +3015,24 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8380(line=120, offs=8) -- 8386(line=120, offs=14)
+emit_instr: loc0 = build/src/setup.dats: 8907(line=120, offs=8) -- 8913(line=120, offs=14)
 */
 ATSINSmove(tmp110, ATSLIB_056_prelude__eq_g0int_int__29__4(tmp106, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8377(line=120, offs=5) -- 8479(line=123, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 8904(line=120, offs=5) -- 9006(line=123, offs=15)
 */
 ATSif(
 tmp110
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 8392(line=120, offs=20) -- 8464(line=122, offs=16)
+emit_instr: loc0 = build/src/setup.dats: 8919(line=120, offs=20) -- 8991(line=122, offs=16)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/setup.dats: 8411(line=121, offs=16) -- 8448(line=121, offs=53)
+emit_instr: loc0 = build/src/setup.dats: 8938(line=121, offs=16) -- 8975(line=121, offs=53)
 */
 ATSINSmove_void(tmp113, put_env_23(ATSPMVstring("BATS_COMMIT="), ATSPMVrefarg0(arg0), arg1)) ;
 
@@ -3041,23 +3041,23 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/setup.dats: 8456(line=122, offs=8) -- 8460(line=122, offs=12)
+emit_instr: loc0 = build/src/setup.dats: 8983(line=122, offs=8) -- 8987(line=122, offs=12)
 */
 ATSINSmove(tmpret101, ATSPMVbool_true()) ;
 /*
-emit_instr: loc0 = build/src/setup.dats: 8392(line=120, offs=20) -- 8464(line=122, offs=16)
+emit_instr: loc0 = build/src/setup.dats: 8919(line=120, offs=20) -- 8991(line=122, offs=16)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/setup.dats: 8474(line=123, offs=10) -- 8479(line=123, offs=15)
+emit_instr: loc0 = build/src/setup.dats: 9001(line=123, offs=10) -- 9006(line=123, offs=15)
 */
 ATSINSmove(tmpret101, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/setup.dats: 8282(line=117, offs=8) -- 8485(line=124, offs=6)
+emit_instr: loc0 = build/src/setup.dats: 8809(line=117, offs=8) -- 9012(line=124, offs=6)
 */
 /*
 INSletpop()
