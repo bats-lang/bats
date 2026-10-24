@@ -3218,9 +3218,11 @@ fn remove_output_m {lo:agz}{n:pos}{m:nat | m <= n}
 
 
 
+
 fn wasm_cc_argv {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <= no}
   (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om, pre: bool): $L.listv($P.arg_entry)
+
 
 
 

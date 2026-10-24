@@ -2876,14 +2876,14 @@ end
    [4096, 8192) the resource directory of the native compiler and [8192, 12288) of the wasm one,
    each a NUL-terminated absolute path without a trailing slash (a first byte of NUL: none). *)
 
-(* The byte at j of bv[0, m), or ~1 *)
+(* The byte at j of bv[0, m), or ~1 (preprocess keyword) *)
 fn byte_at {l:agz}{n:pos}{m:nat | m <= n}{j:int}
   (bv: !$A.borrow(byte, l, n), m: int m, j: int j): int =
   if j < 0 then ~1
   else if j >= m then ~1
   else byte2int0($A.read<byte>(bv, j))
 
-(* The number of dots that start bv[0, m) *)
+(* The number of dots that start bv[0, m) (preprocess keyword) *)
 fn dots_in {l:agz}{n:pos}{m:nat | m <= n}
   (bv: !$A.borrow(byte, l, n), m: int m): [r:nat | r <= m] int r = let
   fun loop {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
@@ -2893,7 +2893,7 @@ fn dots_in {l:agz}{n:pos}{m:nat | m <= n}
     else p
 in loop(bv, m, 0) end
 
-(* Whether bv[a, a + len) and cv[b, b + len) are the same bytes, len > 0 *)
+(* Whether bv[a, a + len) and cv[b, b + len) are the same bytes, len > 0 (preprocess keyword) *)
 fn same_run {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{p:pos}{q:nat | q <= p}{a:int}{b:int}{len:int}
   (bv: !$A.borrow(byte, l, n), m: int m, a: int a,
    cv: !$A.borrow(byte, k, p), q: int q, b: int b, len: int len): bool = let
@@ -2909,7 +2909,7 @@ fn same_run {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{p:pos}{q:nat | q <= p}{a:int}{
        else loop(bv, m, a, cv, q, b, len, i + 1) end
 in if len <= 0 then false else loop(bv, m, a, cv, q, b, len, 0) end
 
-(* The length of the NUL-terminated root at [at, at + 4096) of ph, 0 when it has none *)
+(* The length of the root at [at, at + 4096) of ph, 0 when it has none (preprocess keyword) *)
 fn root_len {l:agz}{at:nat | at + 4096 <= 12288}
   (ph: !$A.borrow(byte, l, 12288), at: int at): [r:nat | r <= 4096] int r = let
   fun loop {l:agz}{at:nat | at + 4096 <= 12288}{k:nat | k <= 4096} .<4096 - k>.
@@ -2919,7 +2919,7 @@ fn root_len {l:agz}{at:nat | at + 4096 <= 12288}
     else loop(ph, at, k + 1)
 in loop(ph, at, 0) end
 
-(* The length of the ATS2 home ph[0, phlen) less its trailing slashes (0 when it is none) *)
+(* The ATS2 home ph[0, phlen) less its trailing slashes, 0 if none (preprocess keyword) *)
 fn home_len {l:agz}(ph: !$A.borrow(byte, l, 12288), phlen: int): [r:nat | r <= 4096] int r = let
   fun loop {l:agz}{i:nat | i <= 4096}{e:nat | e <= i} .<4096 - i>.
     (ph: !$A.borrow(byte, l, 12288), phlen: int, i: int i, e: int e): [r:nat | r <= 4096] int r =
@@ -2929,7 +2929,7 @@ fn home_len {l:agz}(ph: !$A.borrow(byte, l, 12288), phlen: int): [r:nat | r <= 4
     else loop(ph, phlen, i + 1, i + 1)
 in loop(ph, phlen, 0, 0) end
 
-(* Whether line[ps, m) begins with the root of rl bytes at [at, ...) of ph and then a slash *)
+(* Whether line[ps, m) begins with the root at [at, ...) of ph and a slash (preprocess keyword) *)
 fn under_root {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{ps:int}{at:int}{rl:int}
   (line: !$A.borrow(byte, l, n), m: int m, ps: int ps,
    ph: !$A.borrow(byte, k, 12288), at: int at, rl: int rl): bool =
@@ -2940,9 +2940,9 @@ fn under_root {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{ps:int}{at:int}{rl:int}
 
 (* The failure (0 none) is st[0]: 1 a line of dots, 2 a dotted line with a space and no path, 3 a
    first header line that is not the C, 4 a line over 512 KiB, 5 the listing could not be written;
-   st[1] is 1 once a header line was seen *)
+   st[1] is 1 once a header line was seen (preprocess keyword) *)
 
-(* One line of clang's stderr, line[0, m): a header line becomes a line of the listing in listp *)
+(* One line of clang's stderr, line[0, m): a header line is a line of listp (preprocess keyword) *)
 fn handle_line {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
   {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}{s:agz}
   (line: !$A.borrow(byte, l, n), m: int m,
@@ -2995,8 +2995,8 @@ fn handle_line {l:agz}{n:pos}{m:nat | m <= n}{k:agz}{c:agz}{nc:pos}{cm:nat | cm 
     end
   end
 
-(* The bytes of the chunk[i, m) of stderr: a line is held in lb until its newline (at most 512 KiB)
-   *)
+(* The bytes of the chunk[i, m) of stderr: a line is held in lb until its newline, at most
+   512 KiB (preprocess keyword) *)
 fun feed {l:agz}{n:pos}{m:nat | m <= n}{i:nat | i <= m}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
   {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}{s:agz} .<m - i>.
   (chunk: !$A.borrow(byte, l, n), m: int m, i: int i,
@@ -3023,7 +3023,7 @@ fun feed {l:agz}{n:pos}{m:nat | m <= n}{i:nat | i <= m}{k:agz}{c:agz}{nc:pos}{cm
   end
 
 (* All of clang's stderr, 64 KiB at a time, up to 1 GiB (16384 reads); the last line needs no
-   newline *)
+   newline (preprocess keyword) *)
 fun read_listing {f:nat}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
   {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}{s:agz} .<f>.
   (fd: !$F.fd, f: int f,
@@ -3044,7 +3044,8 @@ fun read_listing {f:nat}{k:agz}{c:agz}{nc:pos}{cm:nat | cm <= nc}
   in if n <= 0 then lb2
      else read_listing(fd, f - 1, ph, phlen, which, cpath, cplen, listp, listlen, st, lb2) end
 
-(* Says why the listing of the object whose C is in_bv[0, in_len) could not be used (R7) *)
+(* Says why the listing of the object whose C is in_bv[0, in_len) is unusable (preprocess
+   keyword) *)
 fn say_unusable {l:agz}{n:pos}{m:nat | m <= n}{sn:nat}
   (in_bv: !$A.borrow(byte, l, n), in_len: int m, what: string sn): void = let
   val () = prerr! ("bats: ")
@@ -3054,7 +3055,7 @@ fn say_unusable {l:agz}{n:pos}{m:nat | m <= n}{sn:nat}
   val () = prerr! ("): the object is made again\n")
 in end
 
-(* The listing file (listp) appended to <out>.i; 0 when it was *)
+(* The listing file (listp) appended to <out>.i; 0 when it was (preprocess keyword) *)
 fn append_listing_file {q:agz}{nq:pos}{qm:nat | qm <= nq; qm <= 524288}
   {lo:agz}{no:pos}{om:nat | om <= no; om <= 524288}
   (listp: !$A.borrow(byte, q, nq), listlen: int qm,
@@ -3079,7 +3080,7 @@ in r end
 
 (* Runs the preprocess of the object out (argv), reads clang's stderr as the listing of where each
    header was found and appends it to <out>.i; 0 when both are there. Any failure removes <out>.i
-   and says why (R7). which is 0 for a native object, 1 for a wasm one. *)
+   and says why (R7). which is 0 for a native object, 1 for a wasm one. (preprocess keyword) *)
 fn run_preprocess {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
   {lph:agz}{lo:agz}{no:pos}{om:nat | om <= no; om <= 524288}
   {li:agz}{ni:pos}{im:nat | 2 <= im; im <= ni; im <= 524288}
@@ -3133,7 +3134,7 @@ fn run_preprocess {le:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
 in (if made <> 0 then 1 else rc) end
 
 (* <C>.pre.c, the file the preprocess reads: one line that includes the C by its name, in the C's
-   directory (R1). 0 when it was written. *)
+   directory (R1). 0 when it was written. (preprocess keyword) *)
 fn write_wrapper {l:agz}{n:pos}{m:nat | 2 <= m; m <= n; m <= 524288}
   {w:agz}{nw:pos}{wm:nat | wm <= nw; wm <= 524288}
   (in_bv: !$A.borrow(byte, l, n), in_len: int m, wp: !$A.borrow(byte, w, nw), wl: int wm): int = let
@@ -3229,8 +3230,8 @@ fun append_args {m:nat} .<m>.
   | ~$L.list_vt_nil() => ys
   | ~$L.list_vt_cons(x, tl) => $L.list_vt_cons(x, append_args(tl, ys))
 
-(* clang and the flags of a wasm compile, before -c or -E (the resource directory is asked with
-   them) *)
+(* clang and the flags of a wasm compile, before -c or -E; the resource directory is asked with
+   them (preprocess keyword) *)
 fn wasm_flag_args (): $L.listv($P.arg_entry) = let
   var wc1 = $B.create() val () = bput_v(wc1, "clang")
   var wc2 = $B.create() val () = bput_v(wc2, "--target=wasm32")
@@ -3277,7 +3278,8 @@ implement wasm_cc_argv(in_bv, in_len, out_bv, out_len, pre) = let
    `clang <that kind's flags> -print-resource-dir`, one absolute line, trailing slashes stripped, in
    ph at 4096 (native) or 8192 (wasm). 0 when it was kept, else why not: 1 clang failed, 2 an
    answer longer than 4096 bytes, 3 an answer cut short, 4 clang did not run, 5 an empty answer,
-   6 more than one line, 7 a relative path, 8 the path /, 9 a path of 4096 bytes or more. *)
+   6 more than one line, 7 a relative path, 8 the path /, 9 a path of 4096 bytes or more
+   (preprocess keyword) *)
 fn take_root {lo:agz}{l:agz}{k:nat | k <= 4096}{at:int}
   (out: !$A.arr(byte, lo, 4096), len: int k, ph: !$A.arr(byte, l, 12288), at: int at): int =
   if len <= 1 then 5
@@ -3361,7 +3363,7 @@ fn ask_one {l:agz}(ph: !$A.arr(byte, l, 12288), which: int): void = let
 in end
 
 (* Asks both compilers' resource directories, once per run (R5), into ph; a root that cannot be
-   asked stays empty, and every object of its kind is then made again *)
+   asked stays empty, and every object of its kind is then made again (preprocess keyword) *)
 
 
 implement ask_roots(ph, phlen) =

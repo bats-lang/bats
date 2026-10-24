@@ -69,7 +69,7 @@ if [ "$pre" = 0 ] && [ -n "${SHIM_EDIT:-}" ] && [ ! -e "$SHIM_EDIT.edited" ]; th
 fi
 if [ "$pre" = 1 ]; then
   [ -z "${SHIM_STDERR_FIRST:-}" ] || printf '%b\n' "$SHIM_STDERR_FIRST" >&2
-  errf=$(mktemp)
+  errf=$(mktemp "${TMPDIR:-/tmp}/shim-err.XXXXXX")
   "$real" "$@" 2> "$errf"
   rc=$?
   cat "$errf" >&2
