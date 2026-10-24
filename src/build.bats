@@ -1297,7 +1297,10 @@ in
       val () = put_char_v(tgt_b, 48 + mode_mark)
       val @(tgt_path, tgt_path_len) = str_into_arr("build/.bats_target")
       val @(fz_tgtp, bv_tgtp) = $A.freeze<byte>(tgt_path)
-      val _ = write_settle(bv_tgtp, tgt_path_len, write_file_from_builder_m(bv_tgtp, tgt_path_len, tgt_b))
+      (* a marker that is not written stops the build: nothing is written after it (write-errors keyword) *)
+      val marker_kept = (case+ write_settled(bv_tgtp, tgt_path_len, write_file_from_builder_m(bv_tgtp, tgt_path_len, tgt_b)) of
+        | ~Settled() => true
+        | ~Failed() => false): bool
       val () = $A.drop<byte>(fz_tgtp, bv_tgtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_tgtp))
 
@@ -1311,9 +1314,18 @@ in
       val () = bput_v(nrt_b, "void *atsruntime_realloc_undef(void *ptr, size_t bsz) { return realloc(ptr, bsz); }\n")
       val @(nrt_path, nrt_path_len) = str_into_arr("build/_bats_native_runtime.c")
       val @(fz_nrtp, bv_nrtp) = $A.freeze<byte>(nrt_path)
-      val _ = write_settle(bv_nrtp, nrt_path_len, write_file_from_builder_m(bv_nrtp, nrt_path_len, nrt_b))
+      val nrt_bf = nrt_b
+      val runtime_kept = (if marker_kept then (case+ write_settled(bv_nrtp, nrt_path_len, write_file_from_builder_m(bv_nrtp, nrt_path_len, nrt_bf)) of
+          | ~Settled() => true
+          | ~Failed() => false)
+        else let val () = $B.builder_free(nrt_bf) in false end): bool
       val () = $A.drop<byte>(fz_nrtp, bv_nrtp)
       val () = $A.free<byte>($A.thaw<byte>(fz_nrtp))
+    in
+      if ~runtime_kept then let
+        val () = $A.drop<byte>(fz_patshome, bv_patshome)
+      in $A.free<byte>($A.thaw<byte>(fz_patshome)) end
+      else let
       val (nul_nrt_exec | nrt_exec) = $P.path_of_string_proved("clang")
       val @(fz_nrt_exec, bv_nrt_exec) = $A.barr_freeze(nrt_exec)
       var na1 = $B.create() val () = bput_v(na1, "clang")
@@ -3196,10 +3208,13 @@ in
                 val () = put_char_v(mfp, 0)
                 val @(mfpa, mfpa_len) = $B.into_arr(mfp)
                 val @(fz_mfp, bv_mfp) = $A.freeze<byte>(mfpa)
-                val _ = write_settle(bv_mfp, mfpa_len, write_file_from_builder_m(bv_mfp, mfpa_len, mf))
+                val manifest_kept = (case+ write_settled(bv_mfp, mfpa_len, write_file_from_builder_m(bv_mfp, mfpa_len, mf)) of
+                  | ~Settled() => true
+                  | ~Failed() => false): bool
                 val () = $A.drop<byte>(fz_mfp, bv_mfp)
                 val () = $A.free<byte>($A.thaw<byte>(fz_mfp))
-                val () = (if ~is_quiet() then println! ("  to-c: generated") else ())
+                (* "generated" is said only of a Makefile that was written *)
+                val () = (if manifest_kept && ~is_quiet() then println! ("  to-c: generated") else ())
               in end
               else ())
       in end else () else ())
@@ -3207,5 +3222,6 @@ in
       val () = $A.drop<byte>(fz_patshome, bv_patshome)
       val () = $A.free<byte>($A.thaw<byte>(fz_patshome))
     in end
+    end
   end
 end

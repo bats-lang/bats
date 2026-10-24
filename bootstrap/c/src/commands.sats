@@ -837,6 +837,9 @@ fn do_test {lf:agz} (f: !$A.borrow(byte, lf, 4096), fl: int, want_native: bool, 
 
 
 
+
+
+
 fn do_upload {lr:agz} (repo: !$A.borrow(byte, lr, 4096), rplen: int): void
 
 
@@ -1094,6 +1097,9 @@ fn file_exists {sn:nat | sn < $B.BUILDER_CAP} (path: string sn): bool
 
 
 fn write_claude_rules(): void
+
+
+
 
 
 
