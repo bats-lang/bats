@@ -1,5 +1,5 @@
 #!/bin/sh
-# An object's key does not hold where the toolchain is (bats-lang/bats#477, build-freshness.md):
+# An object's key is the same wherever the toolchain is (bats-lang/bats#477, build-freshness.md):
 # the ATS2 home and the C compiler's resource directory are named by a placeholder in the list of
 # the headers clang entered, so a build/ made where they are in one place keeps its objects when
 # they are in another (the same files), the way the stamp keeps it: moved as a whole or one at a
