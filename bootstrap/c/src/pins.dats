@@ -871,11 +871,11 @@ fun ats2_among {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
     else ats2_among(cmd, z + 1, total)
   end
 
-(* The lock files a package.json may be beside *)
-fn lock_beside {lc:agz}{sn:nat}
-  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, name: string sn, name_len: int sn): bool = let
+(* Whether the file name is in the directory cmd[file_at, dir_to) (the path of the directory ends with its slash, or is empty for the current directory) *)
+fn file_in {lc:agz}{sn:nat}
+  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, dir_to: pos_t, name: string sn, name_len: int sn): bool = let
   var path : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(cmd, file_at, file_to - 12, 4096, path)
+  val () = copy_to_builder_v(cmd, file_at, dir_to, 4096, path)
   val () = bput_v(path, name)
   val () = put_char_v(path, 0)
   val @(path_a, path_len) = $B.into_arr(path)
@@ -885,12 +885,50 @@ fn lock_beside {lc:agz}{sn:nat}
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in exists end
 
-(* Whether a lock file is beside the package.json cmd[file_at, file_to) *)
+(* The lock files a package.json may be beside *)
+fn lock_beside {lc:agz}{sn:nat}
+  (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, name: string sn, name_len: int sn): bool =
+  file_in(cmd, file_at, file_to - 12, name, name_len)
+
+(* Where the last component of the directory cmd[a, e) starts, the directory ending with its slash at e - 1 *)
+fun component_start {lc:agz}{a,q:nat | a <= q; q <= 4096} .<q - a>.
+  (cmd: !$A.borrow(byte, lc, 4096), a: int a, q: int q): [s:nat | a <= s; s <= q] int s =
+  if q <= a then a
+  else if read_byte(cmd, q - 1, 4096) = 47 then q
+  else component_start(cmd, a, q - 1)
+
+(* The end of the parent directory of cmd[a, e) (its slash included, or a for the current directory), or ~1 when it has none: the root, or a component named .. (workspace roots, keyword: pnpm workspace lock) *)
+fn parent_dir {lc:agz}{a,e:nat | a <= e; e <= 4096}
+  (cmd: !$A.borrow(byte, lc, 4096), a: int a, e: int e): [r:int | r < e] int r =
+  if e <= a then ~1
+  else if e - a = 1 && read_byte(cmd, a, 4096) = 47 then ~1
+  else let
+    val s = component_start(cmd, a, e - 1)
+  in
+    if e - 1 - s = 2 then (if read_byte(cmd, s, 4096) = 46 && read_byte(cmd, s + 1, 4096) = 46 then ~1 else s)
+    else s
+  end
+
+(* Whether the nearest directory at or above cmd[a, e) that holds a pnpm-workspace.yaml also holds a pnpm-lock.yaml (only the existence of the two files is tested; pnpm keeps one lock at the root of a workspace; keyword: pnpm workspace lock) *)
+fun workspace_lock {lc:agz}{a,e:nat | a <= e; e <= 4096} .<e - a>.
+  (cmd: !$A.borrow(byte, lc, 4096), a: int a, e: int e): bool =
+  if file_in(cmd, a, e, "pnpm-workspace.yaml", 19) then file_in(cmd, a, e, "pnpm-lock.yaml", 14)
+  else let
+    val p = parent_dir(cmd, a, e)
+  in
+    if p >= a then workspace_lock(cmd, a, p) else false
+  end
+
+(* Whether a lock file is beside the package.json cmd[file_at, file_to), or it is a member of a pnpm workspace whose root holds the lock *)
 fn has_lock {lc:agz}
   (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t): bool =
   lock_beside(cmd, file_at, file_to, "package-lock.json", 17) || lock_beside(cmd, file_at, file_to, "npm-shrinkwrap.json", 19)
   || lock_beside(cmd, file_at, file_to, "pnpm-lock.yaml", 14) || lock_beside(cmd, file_at, file_to, "yarn.lock", 9)
   || lock_beside(cmd, file_at, file_to, "bun.lock", 8)
+  || (if file_at < 0 then false
+    else if file_to - 12 < file_at then false
+    else if file_to - 12 > 4096 then false
+    else workspace_lock(cmd, file_at, file_to - 12))
 
 (* The number of findings of the file bv[0, nbytes) named cmd[file_at, file_to) *)
 fn check_text {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}

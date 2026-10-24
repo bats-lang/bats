@@ -524,6 +524,58 @@ echo "ok   discover (a list written in pieces)"
 grep -q "cannot read --discover" "$TMP/out" || fail "--discover beside a file is not named"
 echo "ok   discover (with a file)"
 
+# a member of a pnpm workspace has its lock at the workspace root (bats#484): the nearest
+# directory above the package.json that holds a pnpm-workspace.yaml must hold a pnpm-lock.yaml
+workspace() { # <name> <lock: yes or no>: a workspace with a member two levels down
+  mkdir -p "$TMP/$1/packages/a/example"
+  : > "$TMP/$1/pnpm-workspace.yaml"
+  if [ "$2" = yes ]; then : > "$TMP/$1/pnpm-lock.yaml"; fi
+  printf '%s\n' "$exact" > "$TMP/$1/packages/a/package.json"
+  printf '%s\n' "$exact" > "$TMP/$1/packages/a/example/package.json"
+}
+workspace ws-locked yes
+for member in packages/a/package.json packages/a/example/package.json; do
+  "$BATS" check-pins "$TMP/ws-locked/$member" > "$TMP/out" 2>&1 || fail "ws-locked $member was refused"
+  [ ! -s "$TMP/out" ] || fail "ws-locked $member passed with output"
+done
+(cd "$TMP/ws-locked" && "$BATS" check-pins packages/a/package.json ./packages/a/example/package.json) > "$TMP/out" 2>&1 || fail "ws-locked by relative paths was refused"
+[ ! -s "$TMP/out" ] || fail "ws-locked by relative paths passed with output"
+echo "ok   workspace-locked (absolute and relative paths, two levels)"
+workspace ws-unlocked no
+for member in packages/a/package.json packages/a/example/package.json; do
+  if "$BATS" check-pins "$TMP/ws-unlocked/$member" > "$TMP/out" 2>&1; then fail "ws-unlocked $member passed"; fi
+  grep -q "ws-unlocked/$member:1: package.json has dependencies and no committed lock" "$TMP/out" || fail "ws-unlocked $member was refused for another reason"
+done
+echo "ok   workspace-unlocked (refused)"
+# the nearest workspace root decides: an inner workspace with no lock is not covered by the outer lock
+workspace ws-nested yes
+mkdir -p "$TMP/ws-nested/inner/pkg"
+: > "$TMP/ws-nested/inner/pnpm-workspace.yaml"
+printf '%s\n' "$exact" > "$TMP/ws-nested/inner/pkg/package.json"
+if "$BATS" check-pins "$TMP/ws-nested/inner/pkg/package.json" > "$TMP/out" 2>&1; then fail "a nested workspace with no lock passed"; fi
+grep -q "no committed lock" "$TMP/out" || fail "the nested workspace was refused for another reason"
+: > "$TMP/ws-nested/inner/pnpm-lock.yaml"
+"$BATS" check-pins "$TMP/ws-nested/inner/pkg/package.json" > "$TMP/out" 2>&1 || fail "a nested workspace with its lock was refused"
+echo "ok   workspace-nested (the nearest root decides)"
+# a lock above with no pnpm-workspace.yaml is not a workspace lock
+mkdir -p "$TMP/ws-none/packages/a"
+: > "$TMP/ws-none/pnpm-lock.yaml"
+printf '%s\n' "$exact" > "$TMP/ws-none/packages/a/package.json"
+if "$BATS" check-pins "$TMP/ws-none/packages/a/package.json" > "$TMP/out" 2>&1; then fail "a lock above with no workspace file passed"; fi
+grep -q "no committed lock" "$TMP/out" || fail "a lock with no workspace file was refused for another reason"
+echo "ok   workspace-none (a lock above without pnpm-workspace.yaml is refused)"
+# --discover from the workspace root (the audit's way) accepts the members
+G2="$TMP/ws-discover"; rm -rf "$G2"; mkdir -p "$G2"
+(cd "$G2" && git init -q . && mkdir -p packages/a/example && : > pnpm-workspace.yaml && : > pnpm-lock.yaml \
+  && printf '%s\n' "$exact" > packages/a/package.json && printf '%s\n' "$exact" > packages/a/example/package.json && git add -A)
+(cd "$G2" && "$BATS" check-pins --discover) > "$TMP/out" 2>&1 || fail "--discover refused a workspace member with its lock at the root"
+[ ! -s "$TMP/out" ] || fail "--discover over a locked workspace passed with output"
+rm "$G2/pnpm-lock.yaml"
+(cd "$G2" && git add -A && "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 1 ] || fail "--discover passed a workspace with no lock"
+grep -q "^packages/a/package.json:1: package.json has dependencies and no committed lock" "$TMP/out" || fail "--discover does not name the member"
+grep -q "^packages/a/example/package.json:1: " "$TMP/out" || fail "--discover does not name the example member"
+echo "ok   workspace-discover (relative paths from the root)"
+
 # this repository's own workflows and actions are clean
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats > "$TMP/out" 2>&1) || fail "this repository's workflows are refused"
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins --discover > "$TMP/out" 2>&1) || fail "this repository is refused by --discover"

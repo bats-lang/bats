@@ -973,6 +973,44 @@ fn named_file {lc:agz}{at,to:int}{sn:nat}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn literal_arg {sn:nat | sn < $B.BUILDER_CAP} (s: string sn): $P.arg_entry
 
 
