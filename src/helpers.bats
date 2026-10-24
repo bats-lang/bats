@@ -1073,11 +1073,7 @@ in bput_v(b, ")") end
 #pub fn write_settled {lp:agz}{n:pos}{m:nat | m <= n}
   (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): settled
 
-(* write_settled as an int, 0 when the file was written and ~1 when it was
-   not: the form before bats-lang/bats#367, kept beside write_settled for
-   one version. A caller that has no next step to stop uses write_settled
-   and matches it; this one can be dropped, which is what #367 closed
-   for the callers that did. *)
+(* deprecated (write-errors): kept one version beside write_settled; removed by bats-lang/bats#518 *)
 #pub fn write_settle {lp:agz}{n:pos}{m:nat | m <= n}
   (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): int
 

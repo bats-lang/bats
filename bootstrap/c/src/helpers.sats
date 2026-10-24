@@ -1087,10 +1087,6 @@ fn write_settled {lp:agz}{n:pos}{m:nat | m <= n}
   (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): settled
 
 
-
-
-
-
 fn write_settle {lp:agz}{n:pos}{m:nat | m <= n}
   (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): int
 
