@@ -118,8 +118,9 @@ fn print_usage(): void = let
   val () = println! ("  check-pins <file>...         Fail the CI inputs that move: uses:, -latest images, versions, npm, curl (a moving input turns a passing commit red later; keyword: inputs of CI that move)")
   val () = println! ("  affected <base> <head>       Print inert=true when only markdown files outside tests/ and bootstrap/ changed between two revisions (keyword: affected rule)")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
-  val () = println! ("  fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]")
-  val () = println! ("                               Run the accept and reject fixtures of <dir> against a copy of the project")
+  val () = println! ("  fixtures <dir> [--only <member>]... [--bless] [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]")
+  val () = println! ("                               Run the accept and reject fixtures of <dir> against a copy of the project;")
+  val () = println! ("                               --bless writes each reject's expect from its observed error (read it in the PR diff)")
   val () = println! ("  with-env <env-file> <command> [args...]")
   val () = println! ("                               Run a command with the variables of a dotenv file")
 in end

@@ -129,6 +129,8 @@
 #     else false): bool`, and `hashed` for `wrote_key` in the `if` that follows
 #     killed by: "memo truncated key"
 #
+# --bless is tests/fixtures/bless.sh, run at the end of this script.
+#
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -989,6 +991,9 @@ okline "$TMP/s1.log" "accept/a-acyclic" "scans a"
 okline "$TMP/s1.log" "accept/c-acyclic" "scans c"
 failed "$TMP/s1.log" "accept/b-cyclic: should type-check" "scans: b-cyclic after a-acyclic (the same size, other bytes)"
 rm -rf "$MPS" "$MWS" "$MS"
+
+# ---- --bless (bats-lang/bats#522): its own script
+"$(dirname "$0")/bless.sh" "$BATS" "${2:-}" || fail "bless.sh"
 
 [ -z "${TIMES:-}" ] || cat "$TMP/times"
 echo "ok"
