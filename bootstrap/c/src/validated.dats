@@ -408,6 +408,48 @@ implement uses_same (p, pm, key) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_a))
 in same end
 
+(* DESIGN CHECK (bats#421, overrides.md): the names of a file are kept as
+   the 'uses' of a file are, by the same record format (uses_hit reads and
+   uses_write writes it), under a key and a slot of their own *)
+
+(* The key of the .bats file at the NUL-terminated path p for its names
+   ('bats-facts 1 file'), as uses_key says *)
+
+
+
+
+
+
+(* build/.bats_valid/facts <path>, NUL-terminated *)
+
+
+
+implement facts_key (path_bytes, path_length) = let
+  var t : $B.builder_v = $B.create()
+  val () = bput_v(t, "bats-facts 1 file\nbats ")
+  val () = bput_v(t, bats_inputs_sha256())
+  val () = put_char_v(t, 10)
+  val () = copy_to_builder_v(path_bytes, 0, find_null_bv_from(path_bytes, 0, path_length), path_length, t)
+  val () = put_char_v(t, 10)
+  val found = put_file_sha256_m(path_bytes, path_length, t)
+  val () = put_char_v(t, 10)
+  val whole = ($B.length(t) < 524288): bool
+in @(found && whole, key_of(t)) end
+
+implement facts_same (path_bytes, path_length, key) = let
+  val @(usable, again) = facts_key(path_bytes, path_length)
+  val @(fz_a, bv_a) = $A.freeze<byte>(again)
+  val same = (if usable then same_keys(bv_a, key) else false): bool
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+in same end
+
+implement facts_slot (path_bytes, path_length) = let
+  var name : $B.builder_v = $B.create()
+  val () = bput_v(name, "facts ")
+  val () = copy_to_builder_v(path_bytes, 0, find_null_bv_from(path_bytes, 0, path_length), path_length, name)
+in valid_slot(name) end
+
 (* build/.bats_valid/uses <path>, NUL-terminated: where the record of the
    file at p is *)
 
