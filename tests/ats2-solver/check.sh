@@ -14,6 +14,9 @@
 #  * one that fails the control (a true statement) is "cannot tell" too
 #  * one that dies by a signal or with another status than 1 is "cannot tell"
 #    and not kept
+#  * one that kills itself with TERM or KILL at once (the system's OOM kill
+#    looks the same; the watcher did not fire, so no marker) is "cannot tell",
+#    not kept, and asked again by the next run (bats#371)
 #  * each case says it is checking, and leaves no probe directory behind
 #  * an answer is kept by the cksum of patsopt's bytes: the second run does not
 #    run patsopt, a changed patsopt is asked again, a moved one is not, and an
@@ -40,6 +43,8 @@ case $(cat "$MODE_FILE") in
   hangs) grep -q '1 == 2' "$f" && exec sleep 300; exit 0 ;;
   ignores) grep -q '1 == 2' "$f" && { trap '' TERM; exec sleep 300; }; exit 0 ;;
   kills) grep -q '1 == 2' "$f" && { kill -9 $PPID; exit 1; }; exit 0 ;;
+  termself) grep -q '1 == 2' "$f" && kill -TERM $$; exit 0 ;;
+  killself) grep -q '1 == 2' "$f" && kill -KILL $$; exit 0 ;;
   crashes) grep -q '1 == 2' "$f" && exit 3; exit 0 ;;
   broken) exit 2 ;;
 esac
@@ -94,6 +99,19 @@ ok "a toolchain that fails the control is said to be undecided, and not kept"
 case_run crashes crashes
 undecided "a status of 3"
 ok "a toolchain that answers the false statement with a status other than 1 is undecided, and not kept"
+
+# A TERM or KILL death of patsopt that the watcher did not send (no marker,
+# bats#371) is no answer: it is not kept, so the next run probes again
+for m in termself killself; do
+  new_home $m $m
+  install_run "a patsopt that kills itself ($m)"
+  undecided "a patsopt that kills itself ($m)"
+  [ "$(runs)" -gt 0 ] || fail "$m: the first run did not run patsopt"
+  install_run "the second run after $m"
+  [ "$(runs)" -gt 0 ] || fail "$m: the second run did not probe again"
+  undecided "the second run after $m"
+done
+ok "a TERM or KILL death with no marker is 'cannot tell', not kept, and probed again by the next run"
 
 # A patsopt that ignores the TERM sent at 20 s is ended by the KILL at 25 s
 new_home ignores ignores
