@@ -2,10 +2,16 @@
 # bats fixtures <dir> --bless [--only <member>]... (bats-lang/bats#522; the rule is in
 # .claude/rules/fixtures.md, "--bless"): writes a reject fixture's `expect` from the error patsopt
 # gives, in the form the matcher compares, and refuses what has no error to write.
-# Why this is a shell script: it runs the built bats on planted projects and compares the files it
-# writes, as every test of this directory does (tests/fixtures/check.sh; `bats test` of a package runs
-# functions in-process and cannot start the compiler binary under test); the avenue `bats test`
-# is exhausted for a test whose subject is the command line of the binary.
+# Why this is a shell script (quire#646, CLAUDE.md "we do not write shell scripts"): a bats test would
+# have to plant a project, run the built `bats` in it, read its streams and the files it wrote, and
+# remove its temp directory. bats#284 (a test driver in bats for tests/*/check.sh) and bats#285 are the
+# open tickets that build that driver, and until they land a command-level test follows the existing
+# check.sh style (bats#284). Searched: `bats test` ($UNITTEST blocks, in-process, links only src/'s
+# modules, never the built binary); the process package (spawn with pipes and an envp: can start the
+# binary; no working directory for a child, only the process-wide file_chdir); the file package
+# (file_write, file_mkdir, dir_read; no unlink, rmdir, rename, copy or mktemp, so a test's directories
+# and the planted fixtures could not be removed or copied). Detail: the PR body, bats#522.
+#
 #  * every kind of case writes an expect that passes a following run without --bless: a function
 #    name that is not the first declaration, a line other than 1, several error lines, a patsopt
 #    variable number (S2EVar(n->, S2Evar(name(n)), $n(, a binder of S2Eexi), a fixture with no
