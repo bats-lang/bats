@@ -11,7 +11,8 @@
 #    instance against the template the package implements itself; the same instance of a name
 #    that the package implements only for that instance; a dependency that replaces the
 #    implement of its own dependency (transitive); the replacement in an unsafe dependency and
-#    in an unsafe package; the replacement in a #target block that the build keeps;
+#    in an unsafe package, and inside its $UNSAFE begin ... end block
+#    (the lexer makes no spans of it); the replacement in a #target block that the build keeps;
 #  * accepted, and checked by patsopt: a package that declares and implements the name a
 #    dependency declares too (toml's and array's get); a template defined and used in one
 #    package; two dependencies that do not use each other and declare the same name; an
@@ -197,6 +198,25 @@ implement{} $A.rotr (x) = x + 2
 implement main0 () = println! ($A.rotr (1))
 X
 reject unsafe_package "'implement rotr' replaces what the package 'arith' implements"
+
+project unsafe_block bin unsafe
+dependency unsafe_block arith <<'X'
+#pub fun{} rotr (x: int): int
+
+implement{} rotr (x) = x + 1
+X
+main unsafe_block <<'X'
+#use arith as A
+
+$UNSAFE begin
+
+implement{} $A.rotr (x) = x + 2
+
+end
+
+implement main0 () = println! ($A.rotr (1))
+X
+reject unsafe_block "'implement rotr' replaces what the package 'arith' implements"
 
 project native_block bin
 dependency native_block arith <<'X'
