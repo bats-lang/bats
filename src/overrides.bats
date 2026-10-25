@@ -85,6 +85,21 @@ staload "validated.sats"
   | NoInstance of ()
   | InstanceText of name_bytes
 
+(* A name that may not be there: none when the bytes are empty or hold a NUL *)
+#pub datavtype maybe_name =
+  | NameAbsent of ()
+  | NameHere of name_bytes
+
+#pub fn name_bytes_free (name: name_bytes): void
+
+(* The name made of the bytes source_bytes[s, e), the blanks left out when
+   squeeze *)
+#pub fn name_of_range {l:agz}{n:pos}{mb:nat | mb <= n}{s,e:nat | s <= mb; e <= mb}
+  (source_bytes: !$A.borrow(byte, l, n), source_size: int mb, s: int s, e: int e, squeeze: bool): maybe_name
+
+(* A name's bytes appended to a builder *)
+#pub fn put_name_bytes (name: !name_bytes, out: !$B.builder_v >> $B.builder_v): void
+
 (* What a file says: its facts, each live in some builds *)
 #pub datavtype file_fact =
   | DeclaresName of (variants_live, name_bytes) (* a #pub fun, fn, fnx, prfun or prfn, or an 'and' of its group *)
@@ -117,7 +132,7 @@ staload "validated.sats"
    in that listing, its path from the package's root (src/lib.bats) and its
    facts *)
 #pub datavtype project_file(np:int) =
-  | {k:nat} ProjectFile of (package_number(np), listing, path_offset,
+  | {k:nat} ProjectFile(np) of (package_number(np), listing, path_offset,
                             name_bytes (* path from the package's root *), file_facts(k))
 
 #pub datavtype project_files(np:int, k:int) =
@@ -129,7 +144,7 @@ staload "validated.sats"
    (the directory between ./bats_modules/ and /src/, which is the name its
    '#use' lines give). np packages, numbered 0 .. np - 1 *)
 #pub datavtype package_root(np:int) =
-  | PackageRoot of (package_number(np), name_bytes)
+  | PackageRoot(np) of (package_number(np), name_bytes)
 
 #pub datavtype package_roots(np:int, k:int) =
   | package_roots_nil(np, 0) of ()
@@ -137,12 +152,15 @@ staload "validated.sats"
 
 (* The project: np packages and their files *)
 #pub datavtype project(np:int) =
-  | {j:nat} Project of (package_roots(np, np), project_files(np, j))
+  | {j:nat} Project(np) of (package_roots(np, np), project_files(np, j))
 
 (* The project with the package itself alone *)
 #pub fn project_new (): project(1)
 
 #pub fun project_free {np:pos} (whole: project(np)): void
+
+(* The number of packages of the project *)
+#pub fn project_package_count {np:pos} (whole: !project(np)): int np
 
 (* whole with a package of ./bats_modules of the given root added; its
    number is the np the project had *)
@@ -168,7 +186,7 @@ staload "validated.sats"
 
 (* A file of the project named by its package, listing and offset *)
 #pub datavtype file_ref(np:int) =
-  | FileRef of (package_number(np), listing, path_offset)
+  | FileRef(np) of (package_number(np), listing, path_offset)
 
 #pub datavtype file_refs(np:int, k:int) =
   | file_refs_nil(np, 0) of ()
@@ -189,7 +207,7 @@ staload "validated.sats"
 (* An implement that replaces what another package implements: the
    implementing file, the declaring file and the name *)
 #pub datavtype foreign_hit(np:int) =
-  | ForeignHit of (file_ref(np) (* implementing file *), file_ref(np) (* declaring file *),
+  | ForeignHit(np) of (file_ref(np) (* implementing file *), file_ref(np) (* declaring file *),
                    name_bytes (* the name *))
 
 #pub datavtype foreign_hits(np:int, k:int) =
@@ -257,7 +275,7 @@ fn states_next {n:int} (sp: !span(n), st: block_states): block_states =
    Names
    ============================================================ *)
 
-fn name_bytes_free (name: name_bytes): void = let
+implement name_bytes_free (name) = let
   val+ ~NameBytes(a, _) = name
 in $A.free<byte>(a) end
 
@@ -299,11 +317,6 @@ fn name_equal (a: !name_bytes, b: !name_bytes): bool = let
   prval () = fold@(b)
 in r end
 
-(* A name made of the bytes src[s, e) that are not blanks when squeeze, else
-   of all of them; none when that is empty or holds a NUL *)
-datavtype maybe_name =
-  | NoName of ()
-  | SomeName of name_bytes
 
 fun count_kept {l:agz}{n:pos}{mb:nat | mb <= n}{p:nat | p <= n}{e:nat | e <= mb}{kept:int} .<n - p>.
   (bv: !$A.borrow(byte, l, n), mx: int mb, p: int p, e: int e, squeeze: bool, kept: int kept): [r:int] int r =
@@ -332,16 +345,15 @@ fun fill_kept {l:agz}{n:pos}{mb:nat | mb <= n}{p:nat | p <= n}{e:nat | e <= mb}{
     in fill_kept(bv, mx, p + 1, e, squeeze, a, z, i + 1) end
   end
 
-fn name_of_range {l:agz}{n:pos}{mb:nat | mb <= n}{s,e:nat | s <= mb; e <= mb}
-  (bv: !$A.borrow(byte, l, n), mx: int mb, s: int s, e: int e, squeeze: bool): maybe_name = let
+implement name_of_range (bv, mx, s, e, squeeze) = let
   val c = count_kept(bv, mx, s, e, squeeze, 0)
   val size = (if c >= 1 then (if c > 524288 then 524288 else c) else 0): [z:nat | z <= 524288] int z
 in
   if size >= 1 then let
     val a = $A.alloc<byte>(size)
     val () = fill_kept(bv, mx, s, e, squeeze, a, size, 0)
-  in SomeName(NameBytes(a, size)) end
-  else NoName()
+  in NameHere(NameBytes(a, size)) end
+  else NameAbsent()
 end
 
 (* ============================================================
@@ -653,31 +665,31 @@ fn materialize {l:agz}{n:pos}{k:nat}
   (bv: !$A.borrow(byte, l, n), mx: int n, f: raw_fact(n), acc: file_facts(k)): [k2:nat] file_facts(k2) =
   case+ f of
   | ~RawDeclares(live, r) => (case+ name_in(bv, mx, r) of
-      | ~NoName() => acc
-      | ~SomeName(name) => file_facts_cons(DeclaresName(live, name), acc))
+      | ~NameAbsent() => acc
+      | ~NameHere(name) => file_facts_cons(DeclaresName(live, name), acc))
   | ~RawImplements(live, _, alias, name, inst) => (case+ name_in(bv, mx, name) of
-      | ~NoName() => acc
-      | ~SomeName(nm) => let
+      | ~NameAbsent() => acc
+      | ~NameHere(nm) => let
           val q = (case+ name_in(bv, mx, alias) of
-            | ~NoName() => Unqualified()
-            | ~SomeName(a) => QualifiedBy(a)): qualifier
+            | ~NameAbsent() => Unqualified()
+            | ~NameHere(a) => QualifiedBy(a)): qualifier
           val i = (case+ name_of_range(bv, mx, inst.0, inst.1, true) of
-            | ~NoName() => NoInstance()
-            | ~SomeName(t) => InstanceText(t)): instance_text
+            | ~NameAbsent() => NoInstance()
+            | ~NameHere(t) => InstanceText(t)): instance_text
         in file_facts_cons(ImplementsName(live, q, nm, i), acc) end)
   | ~RawUses(live, pkg, alias) => (case+ name_in(bv, mx, pkg) of
-      | ~NoName() => acc
-      | ~SomeName(root) => (case+ name_in(bv, mx, alias) of
-          | ~NoName() => let val () = name_bytes_free(root) in acc end
-          | ~SomeName(a) => file_facts_cons(UsesPackage(live, root, a), acc)))
+      | ~NameAbsent() => acc
+      | ~NameHere(root) => (case+ name_in(bv, mx, alias) of
+          | ~NameAbsent() => let val () = name_bytes_free(root) in acc end
+          | ~NameHere(a) => file_facts_cons(UsesPackage(live, root, a), acc)))
   | ~RawAliases(live, alias, path) => (case+ name_in(bv, mx, alias) of
-      | ~NoName() => acc
-      | ~SomeName(a) => (case+ name_in(bv, mx, path) of
-          | ~NoName() => let val () = name_bytes_free(a) in acc end
-          | ~SomeName(p) => file_facts_cons(AliasesFile(live, a, p), acc)))
+      | ~NameAbsent() => acc
+      | ~NameHere(a) => (case+ name_in(bv, mx, path) of
+          | ~NameAbsent() => let val () = name_bytes_free(a) in acc end
+          | ~NameHere(p) => file_facts_cons(AliasesFile(live, a, p), acc)))
   | ~RawStaloads(live, path) => (case+ name_in(bv, mx, path) of
-      | ~NoName() => acc
-      | ~SomeName(p) => file_facts_cons(StaloadsFile(live, p), acc))
+      | ~NameAbsent() => acc
+      | ~NameHere(p) => file_facts_cons(StaloadsFile(live, p), acc))
 
 fun materialize_all {l:agz}{n:pos}{j,k:nat} .<j>.
   (bv: !$A.borrow(byte, l, n), mx: int n, xs: raw_facts(n, j), acc: file_facts(k)): [k2:nat] file_facts(k2) =
@@ -764,6 +776,18 @@ fn put_name_nul (name: !name_bytes, out: !$B.builder_v >> $B.builder_v): void = 
   prval () = fold@(name)
 in end
 
+implement put_name_bytes (name, out) = let
+  val+ @NameBytes(a, m) = name
+  fun loop {la:agz}{m:pos}{i:nat | i <= m} .<m - i>.
+    (a: !$A.arr(byte, la, m), m: int m, i: int i, out: !$B.builder_v >> $B.builder_v): void =
+    if i >= m then ()
+    else let
+      val () = put_char_v(out, byte2int0($A.get<byte>(a, i)))
+    in loop(a, m, i + 1, out) end
+  val () = loop(a, m, 0, out)
+  prval () = fold@(name)
+in end
+
 fn put_empty_nul (out: !$B.builder_v >> $B.builder_v): void = put_char_v(out, 0)
 
 fn put_implement (live: variants_live, q: !qualifier, name: !name_bytes, inst: !instance_text,
@@ -814,7 +838,7 @@ fn tag_of (b: int): fact_tag =
   else if b = 83 then TagStaloads() else TagUnknown()
 
 fn free_maybe (f: maybe_name): void =
-  case+ f of ~NoName() => () | ~SomeName(a) => name_bytes_free(a)
+  case+ f of ~NameAbsent() => () | ~NameHere(a) => name_bytes_free(a)
 
 (* The field of the record body bv[0, len) that starts at off: its bytes
    (none when empty) and where the next field starts, which is past off; no
@@ -833,10 +857,10 @@ end
 
 (* The qualifier a field is *)
 fn qualifier_of (f: maybe_name): qualifier =
-  case+ f of ~NoName() => Unqualified() | ~SomeName(a) => QualifiedBy(a)
+  case+ f of ~NameAbsent() => Unqualified() | ~NameHere(a) => QualifiedBy(a)
 
 fn instance_of (f: maybe_name): instance_text =
-  case+ f of ~NoName() => NoInstance() | ~SomeName(t) => InstanceText(t)
+  case+ f of ~NameAbsent() => NoInstance() | ~NameHere(t) => InstanceText(t)
 
 (* The facts of the record body bv[0, len) from off, added to acc in order
    read; false when the rest is not a body of facts *)
@@ -854,31 +878,31 @@ fun parse_facts {l:agz}{n:pos}{m:nat | m <= n}{len:nat | len <= m}{off:nat | off
     | TagDeclares() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ f1 of
-            | ~NoName() => @(false, acc)
-            | ~SomeName(name) => parse_facts(bv, mx, len, n1, file_facts_cons(DeclaresName(live, name), acc))))
+            | ~NameAbsent() => @(false, acc)
+            | ~NameHere(name) => parse_facts(bv, mx, len, n1, file_facts_cons(DeclaresName(live, name), acc))))
     | TagStaloads() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ f1 of
-            | ~NoName() => @(false, acc)
-            | ~SomeName(name) => parse_facts(bv, mx, len, n1, file_facts_cons(StaloadsFile(live, name), acc))))
+            | ~NameAbsent() => @(false, acc)
+            | ~NameHere(name) => parse_facts(bv, mx, len, n1, file_facts_cons(StaloadsFile(live, name), acc))))
     | TagUses() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ f1 of
-            | ~NoName() => @(false, acc)
-            | ~SomeName(a) => (case+ field_at(bv, mx, len, n1) of
+            | ~NameAbsent() => @(false, acc)
+            | ~NameHere(a) => (case+ field_at(bv, mx, len, n1) of
                 | ~FieldMissing() => let val () = name_bytes_free(a) in @(false, acc) end
                 | ~FieldHere(f2, n2) => (case+ f2 of
-                    | ~NoName() => let val () = name_bytes_free(a) in @(false, acc) end
-                    | ~SomeName(b) => parse_facts(bv, mx, len, n2, file_facts_cons(UsesPackage(live, a, b), acc))))))
+                    | ~NameAbsent() => let val () = name_bytes_free(a) in @(false, acc) end
+                    | ~NameHere(b) => parse_facts(bv, mx, len, n2, file_facts_cons(UsesPackage(live, a, b), acc))))))
     | TagAliases() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ f1 of
-            | ~NoName() => @(false, acc)
-            | ~SomeName(a) => (case+ field_at(bv, mx, len, n1) of
+            | ~NameAbsent() => @(false, acc)
+            | ~NameHere(a) => (case+ field_at(bv, mx, len, n1) of
                 | ~FieldMissing() => let val () = name_bytes_free(a) in @(false, acc) end
                 | ~FieldHere(f2, n2) => (case+ f2 of
-                    | ~NoName() => let val () = name_bytes_free(a) in @(false, acc) end
-                    | ~SomeName(b) => parse_facts(bv, mx, len, n2, file_facts_cons(AliasesFile(live, a, b), acc))))))
+                    | ~NameAbsent() => let val () = name_bytes_free(a) in @(false, acc) end
+                    | ~NameHere(b) => parse_facts(bv, mx, len, n2, file_facts_cons(AliasesFile(live, a, b), acc))))))
     | TagImplements() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ field_at(bv, mx, len, n1) of
@@ -886,8 +910,8 @@ fun parse_facts {l:agz}{n:pos}{m:nat | m <= n}{len:nat | len <= m}{off:nat | off
             | ~FieldHere(f2, n2) => (case+ field_at(bv, mx, len, n2) of
                 | ~FieldMissing() => let val () = free_maybe(f1) val () = free_maybe(f2) in @(false, acc) end
                 | ~FieldHere(f3, n3) => (case+ f2 of
-                    | ~NoName() => let val () = free_maybe(f1) val () = free_maybe(f3) in @(false, acc) end
-                    | ~SomeName(nm) =>
+                    | ~NameAbsent() => let val () = free_maybe(f1) val () = free_maybe(f3) in @(false, acc) end
+                    | ~NameHere(nm) =>
                       parse_facts(bv, mx, len, n3,
                         file_facts_cons(ImplementsName(live, qualifier_of(f1), nm, instance_of(f3)), acc))))))
   end
@@ -1023,6 +1047,12 @@ fun roots_count {np:int}{k,i:nat} .<k>. (xs: !package_roots(np, k), n: int i): i
   | package_roots_nil() => n
   | package_roots_cons(_, tl) => roots_count(tl, n + 1)
 
+implement project_package_count {np} (whole) = let
+  val+ @Project(roots, _) = whole
+  val count = roots_count(roots, 0)
+  prval () = fold@(whole)
+in count end
+
 implement project_add_package {np} (whole, root) = let
   val+ ~Project(roots, files) = whole
   val number = roots_count(roots, 0)
@@ -1098,9 +1128,9 @@ fn root_before_src (path: !name_bytes): maybe_name = let
     in (if z <= m then let
           val b = $A.alloc<byte>(z)
           val () = slice_copy(a, b, 0, z, 0)
-        in SomeName(NameBytes(b, z)) end
-        else NoName()) end
-      else NoName()): maybe_name
+        in NameHere(NameBytes(b, z)) end
+        else NameAbsent()) end
+      else NameAbsent()): maybe_name
   prval () = fold@(path)
 in r end
 
@@ -1151,8 +1181,8 @@ fun find_file {np:int}{k:nat}{from:int} .<k>.
 fn resolve_text {np:int}{k,j:nat}
   (roots: !package_roots(np, k), files: !project_files(np, j), text: !name_bytes): found_file(np) =
   case+ root_before_src(text) of
-  | ~NoName() => NoFile()
-  | ~SomeName(root) => let
+  | ~NameAbsent() => NoFile()
+  | ~NameHere(root) => let
       val found = lookup_root(roots, root)
       val () = name_bytes_free(root)
     in

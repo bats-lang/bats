@@ -17,6 +17,7 @@ staload "helpers.sats"
 staload "lexer.sats"
 staload "docs.sats"
 staload "recursion.sats"
+staload "overrides.sats"
 staload "validated.sats"
 
 (* ============================================================
@@ -3340,6 +3341,197 @@ fun check_dep_cycles {lf,lx:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat 
     end
   end
 
+(* ============================================================
+   An implement that replaces another package's (overrides.bats, overrides.md)
+   ============================================================ *)
+
+(* v clamped to [0, fm] *)
+fn clamp_to {v:int}{fm:nat} (v: int v, fm: int fm): [t:nat | t <= fm] int t =
+  if v < 0 then 0 else if v > fm then fm else v
+
+(* The name of the bytes files[s, e) (clamped to the list) *)
+fn range_name {lf:agz}{nf:pos}{fm:nat | fm <= nf}{s,e:int}
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, s: int s, e: int e): maybe_name =
+  name_of_range(files, fm, clamp_to(s, fm), clamp_to(e, fm), false)
+
+(* whole with the file at the NUL-terminated path files[off, e), which is in
+   package owner and listing lst, and whose path from its package's root
+   starts at off + from *)
+fn add_foreign_file {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{e,from:int}{np:pos}
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, e: int e,
+   owner: package_number(np), lst: listing, from: int from, whole: project(np)): project(np) = let
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(files, off, e + 1, fm, pb)
+  val @(pa, pal) = $B.into_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val facts = facts_of_file(reuse, bv_p, pal)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in
+  case+ range_name(files, fm, off + from, e) of
+  | ~NameAbsent() => let val () = file_facts_free(facts) in whole end
+  | ~NameHere(rel) => project_add_file(whole, owner, lst, off, rel, facts)
+end
+
+(* whole with each file of the NUL-separated list files[off, len) *)
+fun add_foreign_files {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{from:int}{np:pos} .<fm - off>.
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int,
+   owner: package_number(np), lst: listing, from: int from, whole: project(np)): project(np) =
+  if off >= len then whole
+  else let
+    val e = nul_in(files, off, fm)
+    val whole2 = add_foreign_file(reuse, files, fm, off, e, owner, lst, from, whole)
+  in
+    if e >= fm then whole2
+    else add_foreign_files(reuse, files, fm, e + 1, len, owner, lst, from, whole2)
+  end
+
+(* whole with each package of ./bats_modules among the files files[off, len),
+   each package's files being together in the list *)
+fun add_foreign_packages {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{np:pos} .<fm - off>.
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int, whole: project(np))
+  : [np2:pos] project(np2) =
+  if off >= len then whole
+  else let
+    val e = nul_in(files, off, fm)
+    var pb : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(files, off, e + 1, fm, pb)
+    val @(pa, pal) = $B.into_arr(pb)
+    val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+    (* ./bats_modules/<root>/: the package's root and the slash after it *)
+    val k = dep_root_end(bv_p, pal, 15, e - off) + 1
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+    val number = project_package_count(whole)
+  in
+    if e >= fm then (case+ range_name(files, fm, off + 15, off + k - 1) of
+      | ~NameAbsent() => whole
+      | ~NameHere(root) => let
+          val whole2 = project_add_package(whole, root)
+        in add_foreign_files(reuse, files, fm, off, e, number, DependencyListing(), k, whole2) end)
+    else let
+      val ge = group_end(files, fm, e + 1, len, off, k)
+    in
+      case+ range_name(files, fm, off + 15, off + k - 1) of
+      | ~NameAbsent() => (if ge >= fm then whole else add_foreign_packages(reuse, files, fm, ge, len, whole))
+      | ~NameHere(root) => let
+          val whole2 = project_add_package(whole, root)
+          val whole3 = add_foreign_files(reuse, files, fm, off, ge, number, DependencyListing(), k, whole2)
+        in if ge >= fm then whole3 else add_foreign_packages(reuse, files, fm, ge, len, whole3) end
+    end
+  end
+
+(* "'implement NAME' replaces what PKG implements: ..." *)
+fn put_foreign_message (name: !name_bytes, declared_by_root: !name_bytes, in_package: bool,
+                        out: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(out, "'implement ")
+  val () = put_name_bytes(name, out)
+  val () = bput_v(out, "' replaces what ")
+  val () = (if in_package then bput_v(out, "this package")
+            else let
+              val () = bput_v(out, "the package '")
+              val () = put_name_bytes(declared_by_root, out)
+            in bput_v(out, "'") end)
+  val () = bput_v(out, " implements: it declares ")
+  val () = put_name_bytes(name, out)
+  val () = bput_v(out, " and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents")
+in end
+
+(* The implements of name in a source of n bytes (a buffer of sm) *)
+fn sites_of_name {ls:agz}{ns:pos}{n:nat | n <= ns}
+  (bv_s: !$A.borrow(byte, ls, ns), n: int n, sm: int ns, name: !name_bytes): [k:nat] implement_sites(k) = let
+  val+ @NameBytes(wa, wm) = name
+  val sites = implement_sites_of(bv_s, n, sm, wa, wm)
+  prval () = fold@(name)
+in sites end
+
+fun add_site_errors {lp,ls:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{ns:pos}{k:nat}{pl:int} .<k>.
+  (bv_p: !$A.borrow(byte, lp, np), pal: int pm, pl: int pl, bv_s: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
+   sites: !implement_sites(k), name: !name_bytes, root: !name_bytes, in_package: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ sites of
+  | implement_sites_nil() => cnt
+  | implement_sites_cons(site, tl) => let
+      val kw = (case+ site of ImplementSite(kw, _, _) => kw): pos_t
+      var m : $B.builder_v = $B.create()
+      val () = put_foreign_message(name, root, in_package, m)
+      var fy : $B.builder_v = $B.create()
+      val () = put_fancy(bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, kw, m, fy)
+      val c = add_error(cnt, fy, errs)
+    in add_site_errors(bv_p, pal, pl, bv_s, sm, n, tl, name, root, in_package, c, errs) end
+
+(* cnt, with the errors for the implements of name in the file at the
+   NUL-terminated path files[fi, NUL) *)
+fn foreign_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, fi: pos_t, name: !name_bytes, root: !name_bytes, in_package: bool,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val e = find_null_bv_from(files, fi, fm)
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(files, fi, e + 1, fm, pb)
+  val pl = e - fi
+  val @(pa, pal) = $B.into_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val c = (case+ read_whole_m(bv_p, pal) of
+    | ~whole_err(_) => cnt
+    | ~whole_ok(ar, piece, sm, n) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        val sites = sites_of_name(bv_s, n, sm, name)
+        val c1 = add_site_errors(bv_p, pal, pl, bv_s, sm, n, sites, name, root, in_package, cnt, errs)
+        val () = implement_sites_free(sites)
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+      in c1 end): int
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in c end
+
+(* cnt, with the errors for one implement of name: the implementing file impl,
+   and the file decl that declares it *)
+fn report_one {np:pos}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd}
+  (whole: !project(np), impl: !file_ref(np), decl: !file_ref(np), name: !name_bytes,
+   sfiles: !$A.borrow(byte, lf, nf), fm: int fm, dfiles: !$A.borrow(byte, ld, nd), dm: int dm,
+   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ impl of
+  | FileRef(_, il, io) => (case+ decl of
+      | FileRef(declaring, _, _) => let
+          val root = root_of_package(whole, declaring)
+          val in_package = (declaring = 0): bool
+          val c1 = (case+ il of
+            | OwnListing() => foreign_error_in(sfiles, fm, io, name, root, in_package, cnt, errs)
+            | DependencyListing() => foreign_error_in(dfiles, dm, io, name, root, in_package, cnt, errs)): int
+          val () = name_bytes_free(root)
+        in c1 end)
+
+fn report_hit {np:pos}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd}
+  (h: !foreign_hit(np), whole: !project(np), sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ h of
+  | ForeignHit(impl, decl, name) => report_one(whole, impl, decl, name, sfiles, fm, dfiles, dm, cnt, errs)
+
+fun report_foreign_hits {np:pos}{k:nat}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd} .<k>.
+  (hits: !foreign_hits(np, k), whole: !project(np), sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ hits of
+  | foreign_hits_nil() => cnt
+  | foreign_hits_cons(h, tl) => let
+      val c = report_hit(h, whole, sfiles, fm, dfiles, dm, cnt, errs)
+    in report_foreign_hits(tl, whole, sfiles, fm, dfiles, dm, c, errs) end
+
+(* cnt, with the errors for the implements, in the package's files
+   sfiles[0, fm) and in those of its dependencies dfiles[0, dm), that replace
+   what another package implements *)
+fn check_foreign {lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf; fm <= VMAX}{dm:nat | dm <= nd; dm <= VMAX}
+  (reuse: bool, sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val whole0 = project_new()
+  val whole1 = add_foreign_files(reuse, sfiles, fm, 0, fm, 0, OwnListing(), 2, whole0)
+  val whole2 = add_foreign_packages(reuse, dfiles, dm, 0, dm, whole1)
+  val hits = foreign_hits_of(whole2)
+  val c = report_foreign_hits(hits, whole2, sfiles, fm, dfiles, dm, cnt, errs)
+  val () = foreign_hits_free(hits)
+  val () = project_free(whole2)
+in c end
+
 (* Prints cnt errors as Rust does; whether there were none *)
 fn report_errors (cnt: int, errs: $B.builder_v): bool =
   if cnt <= 0 then let val () = $B.builder_free(errs) in true end
@@ -3387,14 +3579,15 @@ fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
   val c4 = check_dir(bv_x, reuse, "./src/bin", EveryFile(), own_unsafe, c3, errs, pend)
   val c5 = check_dep_cycles(bv_x, reuse, bv_d, dlen, 0, dlen, c4, errs, pend)
   val c6 = check_cycles(bv_x, reuse, cycles_name_src(), bv_s, slen, 0, slen, c5, errs, pend)
+  val c7 = check_foreign(reuse, bv_s, slen, bv_d, dlen, c6, errs)
   val () = $A.drop<byte>(fz_d, bv_d)
   val () = $A.free<byte>($A.thaw<byte>(fz_d))
   val () = $A.drop<byte>(fz_s, bv_s)
   val () = $A.free<byte>($A.thaw<byte>(fz_s))
   val () = $A.drop<byte>(fz_x, bv_x)
   val () = $A.free<byte>($A.thaw<byte>(fz_x))
-  val () = record_passed(c6 = 0, pend)
-in c6 end
+  val () = record_passed(c7 = 0, pend)
+in c7 end
 
 (* Before check, build or test: the errors Rust's preprocess_all finds in
    the package's modules, its dependencies, src/lib.bats and its binaries,
