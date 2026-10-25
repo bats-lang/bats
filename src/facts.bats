@@ -31,40 +31,6 @@
 
 staload "helpers.sats"
 
-(* bv[0, n) as a builder *)
-fn builder_of {l:agz}{nb:pos}{n:nat | n <= nb} (bv: !$A.borrow(byte, l, nb), n: int n): $B.builder_v = let
-  var b : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(bv, 0, n, n, b)
-in b end
-
-(* Writes b to the path when the file does not hold exactly its bytes:
-   what became of it (file_changed); b is consumed *)
-fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed = let
-  val @(p, pl) = str_into_arr(path)
-  val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val @(ba, bl) = $B.into_arr(b)
-  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
-  val same = file_has_bytes_m(bv_p, pl, bv_b, bl)
-  val again = builder_of(bv_b, bl)
-  val () = $A.drop<byte>(fz_b, bv_b)
-  val () = $A.free<byte>($A.thaw<byte>(fz_b))
-  val wrote = (if same then let
-      val () = $B.builder_free(again)
-    in FileSame() end
-    else (if write_settle(bv_p, pl, write_file_from_builder_m(bv_p, pl, again)) = 0 then FileWritten()
-      else FileNotWritten())): file_changed
-  val () = $A.drop<byte>(fz_p, bv_p)
-  val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in wrote end
-
-(* The .dats of the .sats just written: written when that .sats is in place
-   (sats_ok), else b is given back, so nothing follows a failed write *)
-fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: $B.builder_v): void =
-  if sats_ok then let
-    val _ = write_changed(path, b)
-  in end
-  else $B.builder_free(b)
-
 (* sh -c script, its stdout into out: its exit status and the length *)
 fn sh_capture {sn:nat}{lo:agz} (script: string sn, out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) = let
   val (nul_x | exec) = $P.path_of_string_proved("sh")
@@ -114,7 +80,7 @@ fun line_end {l:agz}{n:pos}{i,k:nat} .<max(n - i, 0)>.
 
 (* Writes build/src/_bats_facts.sats and .dats when a module names them
    (each only when its bytes change; the .sats, which never changes,
-   stamps a .sats change the first time), or removes them when none
+   stamps a .sats change the first time, before it is written), or removes them when none
    does. A commit git cannot name is an error, which says so. *)
 #pub fn write_facts (): void
 
@@ -163,15 +129,13 @@ implement write_facts () =
       val () = bput_v(sats, "fun bats_commit_short (): string 7\n\n")
       val () = bput_v(sats, "(* the commit's SHA, 40 hex digits *)\n")
       val () = bput_v(sats, "fun bats_commit_sha (): string 40\n")
-      val sats_new = write_changed("build/src/_bats_facts.sats", sats)
-      (* the stamp of a changed .sats, and the .dats only once the .sats is in
-         place: a stamp that cannot be written is said by touch_sats_stamp
-         (write_settle, which fails the build), and nothing after a failed
-         write is written (a failed write is reported, never ignored: write errors) *)
+      val sats_new = write_sats_changed("build/src/_bats_facts.sats", sats)
+      (* the stamp, then the .sats, then the .dats, as build.bats (stamp, write errors): a write
+         that fails is said and stops the module, so nothing after it is written *)
       val sats_ok = (case+ sats_new of
-        | FileWritten() => touch_sats_stamp() = 0
+        | FileWritten() => true
         | FileSame() => true
-        (* said by write_changed *)
+        (* said by write_sats_changed *)
         | FileNotWritten() => false): bool
       var dats : $B.builder_v = $B.create()
       val () = bput_v(dats, "(* _bats_facts -- written by bats from the commit it names *)\n\n")
