@@ -1,6 +1,6 @@
-(* overrides -- an implement only of what its package can see another package declare (bats#421)
+(* overrides -- an implement only of what its file cannot see another package declare (bats#421)
 
-   DESIGN CHECK, round 2: declarations only, no bodies (overrides.md).
+   DESIGN CHECK, round 3: declarations only, no bodies (overrides.md).
 
    A dependency's #pub template is meant to be instantiated by a
    dependent, not replaced by it: a dependent that writes
@@ -10,21 +10,28 @@
 
    Names, from the sources: a #pub declaration (fun, fn, fnx, prfun, prfn
    and the 'and' members of a group) declares one, an implement (also
-   primplement, implmnt), qualified ($X.name) or not, implements one, and a
-   '#use' line says which package a file loads.
+   primplement, implmnt), qualified ($X.name) or not, implements one, a
+   '#use' line loads a package, and an unaliased 'staload "./m.bats"' loads
+   a module of the file's package.
 
-   Visible set (the dats prelude, emitter.bats build_prelude: a file's
-   dats is its own sats, then an unaliased staload of the lib.dats of each
-   package its '#use' lines name, and a lib.dats loads what its own '#use'
-   lines name, closure.bats): the packages an implementing package can see
-   are the package itself and the closure of its '#use' lines over the
-   packages of ./bats_modules, a transitive dependency included. An
-   implement is rejected when the name is declared by a #pub of a package it
-   sees other than the implementing package. The implementing package
-   declaring the same name does not exempt it (its own sats comes first in
-   the prelude, so a seen package's declaration can still be what the
-   implement binds to). Two packages that do not #use each other are not
-   seen by each other: neither is rejected for a name both declare. *)
+   What a file's dats loads, from the emitter (emit_one, build_prelude,
+   emit_dep_stld): its own sats; for each '#use P', the lib.dats of P
+   (unaliased; the sats gets the alias only, which opens nothing); for each
+   unaliased staload "./m.bats", the sats of m (to the sats and the dats). A
+   lib.dats loads what any dats loads: the sats of lib, the lib.dats of the
+   packages lib.bats '#use's, the sats of the modules lib.bats staloads. A
+   sats loads only what it staloads (its '#use' lines are aliased there). So
+   from an implementing file F the files seen are, at DatsLevel, F, and the
+   DatsLevel of the lib file of each package F '#use's and of each such lib
+   file's own '#use' packages, and so on; and at SatsLevel, each module F or a
+   lib file staloads, and the modules those staload. The #use lines of a
+   dependency's other modules open nothing (closure.bats reads them to link,
+   which is wider). An implement of F is rejected when the name is declared
+   by a #pub of a seen file of a package other than F's. F's package
+   declaring the name too does not exempt it (its sats comes first in the
+   prelude, so a seen declaration can still be what the implement binds to).
+   Two packages that do not load each other are not rejected for a name
+   both declare. *)
 
 #include "share/atspre_staload.hats"
 
@@ -38,8 +45,15 @@ staload "helpers.sats"
 staload "lexer.sats"
 
 (* What a source file says about a name: it declares it (#pub), it
-   implements it, or it loads the package of that name (#use) *)
-#pub datatype name_role = DeclaresName | ImplementsName | UsesPackage
+   implements it, it loads the package of that name (#use P: the name is P as
+   written), or it loads the module of that path (an unaliased
+   staload "./m.bats": the name is the path as written, ./m.bats) *)
+#pub datatype name_role = DeclaresName | ImplementsName | UsesPackage | StaloadsModule
+
+(* How much of a file a load opens: its dats (its sats, its #use packages'
+   lib.dats and its staloaded modules) or its sats (its declarations and
+   its staloaded modules) *)
+#pub datatype load_level = DatsLevel | SatsLevel
 
 (* Which of the two listings of the project a file is in: the package's
    own files, or those of ./bats_modules *)
@@ -82,63 +96,82 @@ staload "lexer.sats"
   (reuse: bool, path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
   : [k:nat] file_names(k)
 
-(* A name found in the project, with: its role, its bytes, its hash (over
-   all of them), the package it is in, its listing and the offset of its
-   file's path in that listing *)
-#pub datavtype found_name(np:int) =
-  | FoundName of (name_role, name_bytes, int (* hash *), package_number(np),
-                  listing, path_offset)
+(* A file of the project: its package, its listing, the offset of its path
+   in that listing, its path from the package's root (src/lib.bats) and its
+   names *)
+#pub datavtype project_file(np:int) =
+  | {k:nat} ProjectFile of (package_number(np), listing, path_offset,
+                            name_bytes (* path from the package's root *), file_names(k))
 
-#pub datavtype found_names(np:int, k:int) =
-  | found_names_nil(np, 0) of ()
-  | {j:nat} found_names_cons(np, j + 1) of (found_name(np), found_names(np, j))
+#pub datavtype project_files(np:int, k:int) =
+  | project_files_nil(np, 0) of ()
+  | {j:nat} project_files_cons(np, j + 1) of (project_file(np), project_files(np, j))
 
-(* The packages one package loads (its '#use' lines that name a package of
-   the project), then the package itself first *)
-#pub datavtype package_uses(np:int) =
-  | package_uses_nil(np) of ()
-  | package_uses_cons(np) of (package_number(np), package_uses(np))
+(* The packages of the project: number 0 is the package itself (root
+   empty); the others are the packages of ./bats_modules, each with its root
+   (the directory between ./bats_modules/ and /src/, which is the name its
+   '#use' lines give). np packages, numbered 0 .. np - 1 *)
+#pub datavtype package_root(np:int) =
+  | PackageRoot of (package_number(np), name_bytes)
 
-(* A package of the project: its number, the name its '#use' lines give it
-   (the directory under ./bats_modules; empty for the package itself), and
-   the names of the packages it loads *)
-#pub datavtype project_package(np:int) =
-  | ProjectPackage of (package_number(np), name_bytes, found_names(np, 0))
+#pub datavtype package_roots(np:int, k:int) =
+  | package_roots_nil(np, 0) of ()
+  | {j:nat} package_roots_cons(np, j + 1) of (package_root(np), package_roots(np, j))
 
-(* What the project holds so far: the declared names in 64 lists by name
-   hash, and the implemented names in one list *)
-#pub datavtype declared_buckets(np:int, b:int) =
-  | declared_buckets_nil(np, 0) of ()
-  | {b0,j:nat} declared_buckets_cons(np, b0 + 1) of (found_names(np, j), declared_buckets(np, b0))
+(* The project: np packages and their files *)
+#pub datavtype project(np:int) =
+  | {k,j:nat} Project of (package_roots(np, k), project_files(np, j))
 
-#pub datavtype project_names(np:int) =
-  | {i:nat} ProjectNames of (declared_buckets(np, 64), found_names(np, i))
+(* The project with the package itself alone *)
+#pub fn project_new (): project(1)
 
-#pub fn project_names_new (): project_names(1)
+#pub fun project_free {np:pos} (whole: project(np)): void
 
-#pub fun project_names_free {np:pos} (project: project_names(np)): void
+(* whole with a package of ./bats_modules of the given root added; its
+   number is the np the project had *)
+#pub fn project_add_package {np:pos} (whole: project(np), root: name_bytes): project(np + 1)
 
-(* project with the names of one file, which is in file_listing at
-   file_offset and belongs to the package number owner; a '#use' of the
-   file is recorded as an edge from the owner to the package of that name *)
-#pub fn project_names_add {np:pos}{k:nat}
-  (project: project_names(np), names: file_names(k), owner: package_number(np),
-   file_listing: listing, file_offset: path_offset): project_names(np)
+(* whole with one file added, which belongs to the package number owner, is
+   in file_listing at file_offset, and has the path from its package's root
+   and the names given *)
+#pub fn project_add_file {np:pos}{k:nat}
+  (whole: project(np), owner: package_number(np), file_listing: listing, file_offset: path_offset,
+   path_in_package: name_bytes, names: file_names(k)): project(np)
 
-(* The packages package_number sees: itself and the closure of its '#use'
-   lines (the visible set above), by number *)
-#pub fn visible_packages {np:pos}
-  (project: !project_names(np), observer: package_number(np)): package_uses(np)
+(* The package of a root, as a '#use' line gives it *)
+#pub datavtype package_lookup(np:int) =
+  | PackageFound(np) of package_number(np)
+  | PackageMissing(np) of ()
 
-#pub fun package_uses_free {np:int} (uses: package_uses(np)): void
+#pub fn package_of_root {np:pos} (whole: !project(np), root: !name_bytes): package_lookup(np)
 
-(* An implement of a name that another package declares and the implementing
-   package sees: the implementing file's package, listing and offset, the
-   declaring file's package, listing and offset, and the name *)
+(* A file of the project named by its package, listing and offset *)
+#pub datavtype file_ref(np:int) =
+  | FileRef of (package_number(np), listing, path_offset)
+
+(* A file seen and how much of it *)
+#pub datavtype loaded_file(np:int) =
+  | LoadedFile of (file_ref(np), load_level)
+
+#pub datavtype loaded_files(np:int, k:int) =
+  | loaded_files_nil(np, 0) of ()
+  | {j:nat} loaded_files_cons(np, j + 1) of (loaded_file(np), loaded_files(np, j))
+
+#pub fun loaded_files_free {np:int}{k:nat} (loaded: loaded_files(np, k)): void
+
+(* The files seen from the file implementing (taken from whole's files by
+   its ref), as the comment at the top says: each '#use' resolved with
+   package_of_root to the lib file (src/lib.bats) of the package, each
+   staload resolved against the directory of the file that has it. Each file
+   is listed once per level, so the closure ends *)
+#pub fn files_seen_from {np:pos} (whole: !project(np), implementing: !file_ref(np))
+  : [k:nat] loaded_files(np, k)
+
+(* An implement of a name that a seen file of another package declares:
+   the implementing file, the declaring file and the name *)
 #pub datavtype foreign_hit(np:int) =
-  | ForeignHit of (package_number(np) (* implementing package *), listing, path_offset,
-                   package_number(np) (* declaring package *), listing, path_offset,
-                   name_bytes)
+  | ForeignHit of (file_ref(np) (* implementing file *), file_ref(np) (* declaring file *),
+                   name_bytes (* the name *))
 
 #pub datavtype foreign_hits(np:int, k:int) =
   | foreign_hits_nil(np, 0) of ()
@@ -146,9 +179,9 @@ staload "lexer.sats"
 
 #pub fun foreign_hits_free {np:int}{k:nat} (hits: foreign_hits(np, k)): void
 
-(* The implements of project (taken) of a name that a package they see
-   declares *)
-#pub fn foreign_hits_of {np:pos} (project: project_names(np)): [k:nat] foreign_hits(np, k)
+(* The implements of whole (taken) of a name that a file they see declares in
+   another package; the files are compared by their hash and then in full *)
+#pub fn foreign_hits_of {np:pos} (whole: project(np)): [k:nat] foreign_hits(np, k)
 
 (* Where an implement of a name is in a source: the keyword's start, the
    name's start and end, for the error that points to each *)
