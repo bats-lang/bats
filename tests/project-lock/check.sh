@@ -17,7 +17,7 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 LOG=$TMP/runs
-printf '#!/bin/sh\necho "start $PPID" >> "%s"\nsleep 1\n"%s" "$@"\nrc=$?\necho "end $PPID" >> "%s"\nexit $rc\n' "$REAL/bin/patsopt" "$LOG" "$REAL/bin/patsopt" "$LOG" > "$H/.bats/ats2/bin/patsopt"
+printf '#!/bin/sh\necho "start $PPID" >> "%s"\nsleep 1\n"%s" "$@"\nrc=$?\necho "end $PPID" >> "%s"\nexit $rc\n' "$LOG" "$REAL/bin/patsopt" "$LOG" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
 ats2_marker "$H"
 P=$TMP/p
