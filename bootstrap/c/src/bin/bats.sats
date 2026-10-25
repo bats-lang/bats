@@ -718,4 +718,36 @@ staload "_bats_inputs.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fun __BATS_main0 (): void

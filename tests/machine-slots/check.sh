@@ -18,6 +18,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -27,7 +28,6 @@ LOG=$TMP/runs
 NESTED=$TMP/nested
 cat > "$H/.bats/ats2/bin/patsopt" <<SH
 #!/bin/sh
-case "\$*" in *ats2-probe*) exec "$REAL/bin/patsopt" "\$@" ;; esac
 owner=\$PPID
 echo "start \$owner" >> "$LOG"
 # the kill case: a run waits here until the test has killed the bats that
@@ -46,6 +46,7 @@ echo "end \$owner" >> "$LOG"
 exit \$rc
 SH
 chmod +x "$H/.bats/ats2/bin/patsopt"
+ats2_marker "$H"
 project() {
   mkdir -p "$TMP/$1/src/bin"
   printf '[package]\nname = "%s"\nkind = "bin"\n' "$1" > "$TMP/$1/bats.toml"

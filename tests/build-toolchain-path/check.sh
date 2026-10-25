@@ -14,20 +14,18 @@ BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$2
 shift 2
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 . "$(dirname "$0")/../cc-cases.sh"
 # The compiler's own copy is for Linux, where the resource directory is found beside the
 # binary (<bin>/../lib/clang/<version>); the macOS branch is not run
 [ "$(uname -s)" = Linux ] || { echo "build-toolchain-path: skipped (not Linux)"; exit 0; }
 START_HOME=$HOME
-# bats probes a toolchain it did not install (bats-lang/bats#264); one known by the cksum of
-# patsopt's bytes and 21 is not (src/ats2.bats)
-known() { printf '%s 21\n' "$(cksum < "$1/.bats/ats2/bin/patsopt")" > "$1/.bats/ats2.solver"; }
 make_ats2() { # <home>: a copy of the ATS2 home of this machine
   mkdir -p "$1/.bats/ats2"
   for d in bin prelude libats share ccomp; do
     cp -R "$START_HOME/.bats/ats2/$d" "$1/.bats/ats2/"
   done
-  known "$1"
+  ats2_marker "$1"
 }
 REAL_BIN=$(readlink -f "$(command -v clang)")
 LLVM_LIB=$(cd "$(dirname "$REAL_BIN")/../lib" && pwd)
@@ -125,11 +123,10 @@ case_sibling_root() { # a user directory named like the ATS2 home plus a letter,
   set_env "$ph/x:${ph}x:$E1:$HDR"
   build cold.log nd
   cp "$P/$OBJ" "$CASE_DIR/before.o"
-  # the ATS2 home moves alone (its own directory and the solver note beside it): the sibling
+  # the ATS2 home moves alone (its own directory, marker inside): the sibling
   # directory is in no root, and stays where it is
   mkdir -p "$B/home/.bats"
   mv "$ph" "$B/home/.bats/ats2"
-  mv "$A/home/.bats/ats2.solver" "$B/home/.bats/ats2.solver"
   use "$B/home" "$A/llvm"
   : > "$CC_LOG"
   build moved.log nd

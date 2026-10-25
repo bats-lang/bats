@@ -16,6 +16,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR
 # The variables the C compiler and the wasm linker read (put_cc_environment,
 # bats-lang/bats#322) are unset here, so each case sets its own
@@ -29,12 +30,8 @@ printf '#include "share/atspre_staload.hats"\n\n#pub fn f (): int\n\nimplement f
 printf '#include "share/atspre_staload.hats"\n\n#pub fn g (): int\n\nimplement g () = 2\n' > "$P/src/n.bats"
 printf '#include "share/atspre_staload.hats"\nstaload "m.sats"\nstaload "n.sats"\nimplement main0 () = println! (f () + g ())\n' > "$P/src/bin/bs.bats"
 
-# bats probes a toolchain it did not install with a false statement
-# (bats-lang/bats#264), which the GMP build takes 20 s to not answer; the
-# toolchains made below are known (the cksum of patsopt's bytes and 21, as
-# src/ats2.bats keeps it), so they are not probed, and a toolchain changed is
-# written again
-known() { printf '%s 21\n' "$(cksum < "$1/.bats/ats2/bin/patsopt")" > "$1/.bats/ats2.solver"; }
+# a toolchain made here is marked as one bats made (src/ats2.bats)
+known() { ats2_marker "$1"; }
 
 # Freshness is by whole-second mtimes: each run ends a second on, so the
 # next finds what this one made older than now

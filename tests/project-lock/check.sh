@@ -10,14 +10,16 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR
 REAL=$HOME/.bats/ats2
 H=$TMP/home
 mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 LOG=$TMP/runs
-printf '#!/bin/sh\ncase "$*" in *ats2-probe*) exec "%s" "$@" ;; esac\necho "start $PPID" >> "%s"\nsleep 1\n"%s" "$@"\nrc=$?\necho "end $PPID" >> "%s"\nexit $rc\n' "$REAL/bin/patsopt" "$LOG" "$REAL/bin/patsopt" "$LOG" > "$H/.bats/ats2/bin/patsopt"
+printf '#!/bin/sh\necho "start $PPID" >> "%s"\nsleep 1\n"%s" "$@"\nrc=$?\necho "end $PPID" >> "%s"\nexit $rc\n' "$REAL/bin/patsopt" "$LOG" "$REAL/bin/patsopt" "$LOG" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
+ats2_marker "$H"
 P=$TMP/p
 mkdir -p "$P/src/bin"
 printf '[package]\nname = "pl"\nkind = "bin"\n' > "$P/bats.toml"

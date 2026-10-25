@@ -27,6 +27,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR
 mkdir -p "$TMP/app/src/bin" "$TMP/mine/src" "$TMP/plain/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\n"ns.example/mine" = { path = "../mine" }\n"plain" = { path = "../plain" }\n' > "$TMP/app/bats.toml"
@@ -49,11 +50,7 @@ KILL_FLAG=$TMP/kill-flag
 DEPGEN_FLAG=$TMP/depgen-flag
 printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nif [ -f "%s" ]; then case "$*" in *--depgen*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$DEPGEN_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
-# The solver of a stand-in patsopt is known (bats-lang/bats#264): bats probes a
-# toolchain it did not install by running patsopt on two small files, which
-# would be runs this test counts, so the answer is written first (the cksum of
-# patsopt's bytes and 21, as src/ats2.bats keeps it).
-printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
+ats2_marker "$H"
 # same <a> <b> <message>: the two files are the same bytes; if not, say how
 # they differ (sizes and the first 40 lines of a diff) so a failure carries
 # the data (bats-lang/bats#354)

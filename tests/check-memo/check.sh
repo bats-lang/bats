@@ -35,6 +35,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_COLD
 mkdir -p "$TMP/app/src/bin" "$TMP/plain/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\n"plain" = { path = "../plain" }\n' > "$TMP/app/bats.toml"
@@ -65,11 +66,7 @@ DEPGEN_LOG=$TMP/depgen-starts
 : > "$DEPGEN_LOG"
 printf '#!/bin/sh\nfor a in "$@"; do if [ "$a" = --depgen ]; then echo x >> "%s"; fi; done\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$DEPGEN_LOG" "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
-# The solver of a stand-in patsopt is known (bats-lang/bats#264): bats probes a
-# toolchain it did not install by running patsopt on two small files, which
-# would be runs this test counts, so the answer is written first (the cksum of
-# patsopt's bytes and 21, as src/ats2.bats keeps it).
-printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
+ats2_marker "$H"
 export HOME="$H"
 cd "$TMP/app"
 N=0

@@ -123,7 +123,7 @@ A comment states its reason in one line and names the area by keyword; the detai
 | `.claude/rules/check-memo.md` | The check memo |
 | `.claude/rules/shared-cache.md` | The shared cache (BATS_CACHE_DIR) |
 | `.claude/rules/validated.md` | Validated records and the #use memo |
-| `.claude/rules/ats2-install.md` | ATS2 install, the solver probe and the setup commands |
+| `.claude/rules/ats2-install.md` | ATS2 install and the setup commands |
 | `.claude/rules/runtime-header.md` | The C runtime header and bootstrap/c |
 | `.claude/rules/project-lock.md` | Project lock |
 | `.claude/rules/machine-slots.md` | Machine slots |

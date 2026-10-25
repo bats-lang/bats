@@ -120,7 +120,7 @@ fn print_usage(): void = let
   val () = println! ("  tree [--repository <dir>]    Show dependency tree")
   val () = println! ("  upload --repository <dir>    Package and upload a library")
   val () = println! ("  clean                        Remove generated artifacts")
-  val () = println! ("  ats2 install                 Install the pinned ATS2 (patsopt) into ~/.bats/ats2")
+  val () = println! ("  ats2 install [--force]       Install the pinned ATS2 (patsopt) into ~/.bats/ats2; --force replaces what is there")
   val () = println! ("  clone-repository <commit> --repository <dir>")
   val () = println! ("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>")
   val () = println! ("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>")
@@ -235,7 +235,7 @@ fun count_positionals {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     val c2 = peek_arr(buf, min(pos + 2, 4095), 4096)
     val c3 = peek_arr(buf, min(pos + 3, 4095), 4096)
     val valued = dash && c1 = 45
-      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || c2 = 102)
+      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || (c2 = 102 && c3 = 105))
   in
     if next >= 4096 then (if dash then count else count + 1)
     else if valued then let
@@ -267,7 +267,7 @@ fun first_positional {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     val c2 = peek_arr(buf, min(pos + 2, 4095), 4096)
     val c3 = peek_arr(buf, min(pos + 3, 4095), 4096)
     val valued = dash && c1 = 45
-      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || c2 = 102)
+      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || (c2 = 102 && c3 = 105))
   in
     if ~dash then pos
     else if next >= 4096 then ~1
@@ -299,6 +299,22 @@ in
     if nx >= 4096 then ~1 else first_positional(buf, nx + 1, len)
   end
 end
+
+(* How many arguments are exactly --force (ats2 install --force takes one; any other use is a usage error) *)
+fun count_force {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (buf: !$A.arr(byte, l, 4096), pos: int p, len: int, count: int): int =
+  if pos >= len then count
+  else if pos >= 4096 then count
+  else let
+    val next = $S.find_null_at(buf, pos, 4096)
+    val is_force = next = pos + 7 && peek_arr(buf, pos, 4096) = 45 && peek_arr(buf, pos + 1, 4096) = 45
+      && peek_arr(buf, pos + 2, 4096) = 102 && peek_arr(buf, pos + 3, 4096) = 111
+      && peek_arr(buf, pos + 4, 4096) = 114 && peek_arr(buf, pos + 5, 4096) = 99
+      && peek_arr(buf, pos + 6, 4096) = 101
+  in
+    if next >= 4096 then count
+    else count_force(buf, next + 1, len, (if is_force then count + 1 else count))
+  end
 
 (* Whether the command word at p0 is one of the commands setup runs
    (ats2, clone-repository, record-commit), whose misuse is an error *)
@@ -352,6 +368,12 @@ fn project_known (): bool =
   | ~$R.none() => false
   | ~$R.some(_) => true
 
+(* --force outside ats2 install, or given twice, is a usage error *)
+fn force_misuse (cmd: command, count: int, present: bool): bool =
+  case+ cmd of
+  | Ats2() => count > 1
+  | _ => present || count > 0
+
 fn bats_main (): void = let
   val cl_buf = $A.alloc<byte>(4096)
   val cl_read = $E.args_read(cl_buf, 4096)
@@ -366,6 +388,7 @@ in
           val effective_len = (if dd_pos >= 0 then dd_pos else cl_n): int
           val argc = count_argc(cl_buf, effective_len)
           val positionals = count_positionals(cl_buf, 0, effective_len, 0)
+          val force_count = count_force(cl_buf, 0, effective_len, 0)
           val setup_word = is_setup_word(cl_buf, command_word(cl_buf, effective_len))
           val named_only = scan_only(cl_buf, 0, effective_len,
             @{debug= false, release= false, native= false, wasm= false})
@@ -413,6 +436,9 @@ in
           var apn9 = @[char][7]('d', 'r', 'y', '-', 'r', 'u', 'n')
           var aph9 = @[char][12]('d', 'r', 'y', ' ', 'r', 'u', 'n', ' ', 'm', 'o', 'd', 'e')
           val @(p, h_dry_run) = ap_flag(p, apn9, 7, $R.none(), aph9, 12)
+          var apn15 = @[char][5]('f', 'o', 'r', 'c', 'e')
+          var aph15 = @[char][12]('r', 'e', 'p', 'l', 'a', 'c', 'e', ' ', 'A', 'T', 'S', '2')
+          val @(p, h_force) = ap_flag(p, apn15, 5, $R.none(), aph15, 12)
           var apn14 = @[char][4]('c', 'o', 'l', 'd')
           var aph14 = @[char][21]('i', 'g', 'n', 'o', 'r', 'e', ' ', 't', 'h', 'e', ' ', 'c', 'h', 'e', 'c', 'k', ' ', 'm', 'e', 'm', 'o')
           val @(p, h_cold) = ap_flag(p, apn14, 4, $R.none(), aph14, 21)
@@ -484,6 +510,11 @@ in
               if project_lock_refused(lk) then let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
+                val () = set_build_err()
+              in end else if force_misuse(chosen_command, force_count, $AP.get_bool(r, h_force)) then let
+                val () = $AP.parse_result_free(r)
+                val () = $A.free<byte>(arg_buf)
+                val () = prerr! ("error: --force is accepted once, and only by ats2 install\nusage: bats ats2 install [--force]\n")
                 val () = set_build_err()
               in end else (
               case+ chosen_command of
@@ -646,6 +677,7 @@ in
                 | ~$R.none() => println! ("error: specify a shell (bash, zsh, fish)\nusage: bats completions bash|zsh|fish")
               end
               | Ats2() => let
+                val with_force = $AP.get_bool(r, h_force)
                 val () = $AP.parse_result_free(r)
                 (* the one subcommand: install *)
                 fn is_install_arg {l2:agz} (buf: !$A.arr(byte, l2, 4096), alen: int): bool =
@@ -657,11 +689,11 @@ in
                 val () = $A.free<byte>(arg_buf)
               in
                 if positionals > 3 || extra_len > 0 then let
-                  val () = prerr! ("error: unexpected extra argument\nusage: bats ats2 install\n")
+                  val () = prerr! ("error: unexpected extra argument\nusage: bats ats2 install [--force]\n")
                 in set_build_err() end
-                else if install then (if ats2_ensure(Say()) then () else set_build_err())
+                else if install then (if (if with_force then ats2_install_force() else ats2_ensure(Say())) then () else set_build_err())
                 else let
-                  val () = prerr! ("error: specify 'install'\nusage: bats ats2 install\n")
+                  val () = prerr! ("error: specify 'install'\nusage: bats ats2 install [--force]\n")
                 in set_build_err() end
               end
               | CloneRepository() => let

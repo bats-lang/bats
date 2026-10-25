@@ -21,6 +21,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -57,11 +58,7 @@ cp "\$t" "$TMP/raw/\$(basename "\$out" .raw)"
 mv "\$t" "\$out"
 SH
 chmod +x "$H/.bats/ats2/bin/patsopt"
-# The solver of a stand-in patsopt is known (bats-lang/bats#264): bats probes a
-# toolchain it did not install by running patsopt on two small files, which
-# would be runs this test counts, so the answer is written first (the cksum of
-# patsopt's bytes and 21, as src/ats2.bats keeps it).
-printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
+ats2_marker "$H"
 
 # check <case>: the case's project checked from nothing, then every C of it
 # looked at; $TMP/raw holds what the stand-in's patsopt handed to bats
