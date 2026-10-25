@@ -11,7 +11,6 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 export BATS_CACHE_DIR="$TMP/cache"
 A=$TMP/a
 mkdir -p "$A/src/bin"
@@ -61,7 +60,7 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2"
 for d in bin prelude libats share ccomp; do cp -R "$HOME/.bats/ats2/$d" "$H/.bats/ats2/"; done
 printf '\n(* another toolchain *)\n' >> "$H/.bats/ats2/prelude/basics_pre.sats"
-ats2_marker "$H"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 C=$TMP/c
 mkdir -p "$C"
 cp -R "$A/bats.toml" "$A/src" "$C/"

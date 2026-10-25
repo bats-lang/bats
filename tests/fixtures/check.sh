@@ -133,7 +133,6 @@
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_COMMIT BATS_COLD BATS_MEMO_DIR XDG_CACHE_HOME
 ONLY=${3:-}
 T_START=$(date +%s)
@@ -467,7 +466,7 @@ PLOG=$TMP/patsopt-log; FLAG_FAIL=$TMP/flag-fail; FLAG_HANG=$TMP/flag-hang; HANG_
 : > "$PLOG"
 printf '#!/bin/sh\nd=; depgen=0; prev=; for a in "$@"; do [ "$a" = --depgen ] && depgen=1; [ "$prev" = -d ] && d=$a; prev=$a; done\nif [ $depgen = 0 ] && [ -n "$d" ]; then if grep -q "fixture-snippet" "$d" 2>/dev/null; then echo "snippet $d" >> "%s"; else echo "base $d" >> "%s"; fi; fi\nif [ $depgen = 0 ] && [ -f "%s" ]; then echo $$ > "%s"; exec sleep 600; fi\nif [ $depgen = 0 ] && [ -f "%s" ]; then exit 1; fi\nexec "%s" "$@"\n' "$PLOG" "$PLOG" "$FLAG_HANG" "$HANG_PID" "$FLAG_FAIL" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
-ats2_marker "$H"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 
 [ -z "${TIMES:-}" ] || echo "$(( $(date +%s) - T_START )) s before the memo" >> "$TMP/times"
 mkproj() { # <dir>: lib (stadefs), other (reads lib's interface), unrelated, helper

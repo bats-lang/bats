@@ -111,6 +111,7 @@ fn print_usage(): void = let
   val () = println! ("  upload --repository <dir>    Package and upload a library")
   val () = println! ("  clean                        Remove generated artifacts")
   val () = println! ("  ats2 install [--force]       Install the pinned ATS2 (patsopt) into ~/.bats/ats2; --force replaces what is there")
+  val () = println! ("  ats2 marker                  Print the marker text of the pinned ATS2 (the pin's name and SHA-256)")
   val () = println! ("  clone-repository <commit> --repository <dir>")
   val () = println! ("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>")
   val () = println! ("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>")
@@ -675,15 +676,24 @@ in
                   && peek_arr(buf, 2, 4096) = 115 && peek_arr(buf, 3, 4096) = 116
                   && peek_arr(buf, 4, 4096) = 97 && peek_arr(buf, 5, 4096) = 108
                   && peek_arr(buf, 6, 4096) = 108
+                fn is_marker_arg {l2:agz} (buf: !$A.arr(byte, l2, 4096), alen: int): bool =
+                  alen = 6 && peek_arr(buf, 0, 4096) = 109 && peek_arr(buf, 1, 4096) = 97
+                  && peek_arr(buf, 2, 4096) = 114 && peek_arr(buf, 3, 4096) = 107
+                  && peek_arr(buf, 4, 4096) = 101 && peek_arr(buf, 5, 4096) = 114
                 val install = is_install_arg(arg_buf, arg_len)
+                val marker = is_marker_arg(arg_buf, arg_len)
                 val () = $A.free<byte>(arg_buf)
               in
                 if positionals > 3 || extra_len > 0 then let
                   val () = prerr! ("error: unexpected extra argument\nusage: bats ats2 install [--force]\n")
                 in set_build_err() end
+                else if marker then (if with_force then let
+                    val () = prerr! ("error: --force is accepted once, and only by ats2 install\nusage: bats ats2 install [--force]\n")
+                  in set_build_err() end
+                  else ats2_print_marker())
                 else if install then (if (if with_force then ats2_install_force() else ats2_ensure(Say())) then () else set_build_err())
                 else let
-                  val () = prerr! ("error: specify 'install'\nusage: bats ats2 install [--force]\n")
+                  val () = prerr! ("error: specify 'install' or 'marker'\nusage: bats ats2 install [--force]\n       bats ats2 marker\n")
                 in set_build_err() end
               end
               | CloneRepository() => let

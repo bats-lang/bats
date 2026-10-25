@@ -53,6 +53,12 @@ staload "helpers.sats"
 (* Whether to say that nothing needed doing *)
 
 
+(* The state of ~/.bats/ats2 (ats2 made whole, .claude/rules/ats2-install.md): STATE's exit status, read once by ats2_state_of_status *)
+datatype ats2_state = Whole | Absent | NoMarker | OtherPin | NoPatsopt | StateFailed
+
+(* A plain install is for an absent ~/.bats/ats2; a forced one replaces what is there once ats2-temp is whole (ats2 made whole) *)
+datatype ats2_install_mode = PlainInstall | ForcedInstall
+
 (* sh -c script with up to three arguments ($1, $2, $3); sh's exit status.
    Its stdout is dropped and its stderr shown when it fails (run_cmd). *)
 fn sh_exec {sn:nat}
@@ -103,8 +109,25 @@ fn home_set (): bool = let
   val () = $B.builder_free(t)
 in has end
 
-(* STATE: 0 the pin's marker and bin/patsopt; 2 nothing at ~/.bats/ats2; else an error on stderr (3 no marker, 4 another pin's marker, 5 the pin's marker and no bin/patsopt) and nothing deleted (ats2 made whole, ats2-install.md) *)
+(* STATE: exits with the status ats2_state_of_status reads; every state but Whole and Absent says its error on stderr and deletes nothing (ats2 made whole, ats2-install.md) *)
 #define STATE "p=\"$1/ats2\"\nif [ ! -e \"$p\" ] && [ ! -L \"$p\" ]; then exit 2; fi\nuse=\"bats never deletes what is at ~/.bats/ats2 by itself; to replace it with the toolchain this bats needs, run: bats ats2 install --force\"\nif [ -f \"$p/.bats-ats2\" ]; then\n  m=$(cat \"$p/.bats-ats2\" 2>/dev/null)\n  if [ \"$m\" = \"$2\" ]; then\n    if [ -x \"$p/bin/patsopt\" ]; then exit 0; fi\n    echo \"error: ~/.bats/ats2 has the marker of this bats's pin but no bin/patsopt, so it is not a whole toolchain; $use\" >&2\n    exit 5\n  fi\n  echo \"error: ~/.bats/ats2 has the marker '$m' and this bats needs '$2'; $use\" >&2\n  exit 4\nfi\necho \"error: ~/.bats/ats2 has no marker .bats-ats2, so bats did not make it (a toolchain of your own, an -int build, anything else); $use\" >&2\nexit 3\n"
+
+fn ats2_state_of_status (status: int): ats2_state =
+  if status = 0 then Whole()
+  else if status = 2 then Absent()
+  else if status = 3 then NoMarker()
+  else if status = 4 then OtherPin()
+  else if status = 5 then NoPatsopt()
+  else StateFailed()
+
+fn ats2_state_now (): ats2_state =
+  ats2_state_of_status(sh_exec(STATE, base_arg(), marker_arg(), empty_arg()))
+
+(* The shell argument of PLACE for a mode, made here and nowhere else *)
+fn mode_arg (mode: ats2_install_mode): $B.builder_v =
+  case+ mode of
+  | PlainInstall() => text_arg("0")
+  | ForcedInstall() => text_arg("1")
 
 (* $1 the base. A private directory of this run's own, the download in it
    (fixed timeouts, a few retries); its path on stdout, or on failure what
@@ -118,7 +141,7 @@ in has end
 (* BUILD: unpack and build patsopt in ats2-temp; the marker is bats's write_marker, and PLACE moves the directory (ats2 made whole, ats2-install.md) *)
 #define BUILD "set -e\nn=\"$1/ats2-temp\"\nmkdir \"$n\"\ntar -xzf \"$2/ats2.tgz\" --no-same-owner --strip-components=1 -C \"$n\"\nrm -rf \"$2\"\nmake -j4 -C \"$n/src/CBOOT\" patsopt PATSHOME=\"$n\"\nmkdir -p \"$n/bin\"\ncp \"$n/src/CBOOT/patsopt\" \"$n/bin/patsopt\"\n"
 
-(* PLACE: $1 the base, $2 the pin's marker, $3 1 for --force. ats2-temp must hold the marker and bin/patsopt; then, with --force only, what is at ats2 goes (a link itself, never its target), and one rename puts ats2-temp in place (ats2 made whole, ats2-install.md) *)
+(* PLACE: $1 the base, $2 the pin's marker, $3 mode_arg (1 replaces what is at ats2). ats2-temp must hold the marker and bin/patsopt; then, with --force only, what is at ats2 goes (a link itself, never its target), and one rename puts ats2-temp in place (ats2 made whole, ats2-install.md) *)
 #define PLACE "n=\"$1/ats2-temp\"\na=\"$1/ats2\"\nif [ \"$(cat \"$n/.bats-ats2\" 2>/dev/null)\" != \"$2\" ] || [ ! -x \"$n/bin/patsopt\" ]; then echo \"error: the ATS2 built in ~/.bats/ats2-temp has no marker of the pin or no bin/patsopt: nothing was moved\" >&2; exit 1; fi\nif [ \"$3\" = 1 ]; then rm -rf \"$a\" || { echo \"error: cannot remove ~/.bats/ats2: nothing was moved\" >&2; exit 1; }\nelif [ -e \"$a\" ] || [ -L \"$a\" ]; then echo \"error: ~/.bats/ats2 appeared during the install, so it is not replaced: nothing was moved\" >&2; exit 1; fi\nmv \"$n\" \"$a\"\n"
 
 (* CLEAR: this module's own leftovers, ats2-temp (the one directory bats removes by itself) and ats2-download.*; CLEAR_ONE also the run's download directory $2 *)
@@ -200,8 +223,8 @@ fn write_marker (): int = let
   val () = $A.free<byte>($A.thaw<byte>(marker_frozen))
 in marker_status end
 
-(* The install itself, under the lock: false (said) when it fails; force 1 replaces what is at ats2 after ats2-temp is whole *)
-fn install_now {fsn:nat} (force: string fsn): bool = let
+(* The install itself, under the lock: false (said) when it fails; ForcedInstall replaces what is at ats2 after ats2-temp is whole *)
+fn install_now (mode: ats2_install_mode): bool = let
   val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
   val () = println! ("installing ", ATS2_NAME, " into ~/.bats/ats2 ...")
   val out = $A.alloc<byte>(4096)
@@ -253,7 +276,7 @@ in
           val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
         in false end
         else let
-          val placed = sh_exec(PLACE, base_arg(), marker_arg(), text_arg(force))
+          val placed = sh_exec(PLACE, base_arg(), marker_arg(), mode_arg(mode))
         in
           if placed <> 0 then let
             val _ = sh_exec(CLEAR, base_arg(), empty_arg(), empty_arg())
@@ -275,23 +298,29 @@ in prerr! ("error: HOME is not set, so bats cannot find or install ATS2 (~/.bats
 
 implement ats2_ensure (talk) =
   if ~home_set() then no_home()
-  else let
-    val state = sh_exec(STATE, base_arg(), marker_arg(), empty_arg())
-  in
-    if state = 0 then let
-      val () = (case+ talk of
-        | Say() => println! ("ATS2 (", ATS2_NAME, ") is already installed in ~/.bats/ats2")
-        | Quiet() => ())
-    in true end
-    else if state <> 2 then false
-    else let
-      val lk = lock_take()
-      (* judged again under the lock: another bats may have installed it *)
-      val again = sh_exec(STATE, base_arg(), marker_arg(), empty_arg())
-      val ok = (if again = 2 then install_now("0") else (again = 0)): bool
-      val () = lock_release(lk)
-    in ok end
-  end
+  else
+    case+ ats2_state_now() of
+    | Whole() => let
+        val () = (case+ talk of
+          | Say() => println! ("ATS2 (", ATS2_NAME, ") is already installed in ~/.bats/ats2")
+          | Quiet() => ())
+      in true end
+    | Absent() => let
+        val lk = lock_take()
+        (* judged again under the lock: another bats may have installed it *)
+        val ok = (case+ ats2_state_now() of
+          | Absent() => install_now(PlainInstall())
+          | Whole() => true
+          | NoMarker() => false
+          | OtherPin() => false
+          | NoPatsopt() => false
+          | StateFailed() => false): bool
+        val () = lock_release(lk)
+      in ok end
+    | NoMarker() => false
+    | OtherPin() => false
+    | NoPatsopt() => false
+    | StateFailed() => false
 
 
 
@@ -300,6 +329,11 @@ implement ats2_install_force () =
   if ~home_set() then no_home()
   else let
     val lk = lock_take()
-    val ok = install_now("1")
+    val ok = install_now(ForcedInstall())
     val () = lock_release(lk)
   in ok end
+
+
+
+(* bats ats2 marker: the marker text of the pin, the one source the tests write into a toolchain of their own (ats2 made whole) *)
+implement ats2_print_marker () = println! (ATS2_NAME, " ", ATS2_SHA256)

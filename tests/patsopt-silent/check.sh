@@ -18,7 +18,6 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -38,7 +37,7 @@ esac
 exit 1
 SH2
 chmod +x "$H/.bats/ats2/bin/patsopt"
-ats2_marker "$H"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 
 # the stand-in df: the Available column is FREE_KIB (the 1024-byte blocks), in
 # the form DF names: a file system name with a blank in it, a df that fails,

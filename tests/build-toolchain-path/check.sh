@@ -14,7 +14,6 @@ BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 REPO=$2
 shift 2
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 . "$(dirname "$0")/../cc-cases.sh"
 # The compiler's own copy is for Linux, where the resource directory is found beside the
 # binary (<bin>/../lib/clang/<version>); the macOS branch is not run
@@ -25,7 +24,7 @@ make_ats2() { # <home>: a copy of the ATS2 home of this machine
   for d in bin prelude libats share ccomp; do
     cp -R "$START_HOME/.bats/ats2/$d" "$1/.bats/ats2/"
   done
-  ats2_marker "$1"
+  mkdir -p "$1/.bats/ats2" && "$BATS" ats2 marker > "$1/.bats/ats2/.bats-ats2"
 }
 REAL_BIN=$(readlink -f "$(command -v clang)")
 LLVM_LIB=$(cd "$(dirname "$REAL_BIN")/../lib" && pwd)

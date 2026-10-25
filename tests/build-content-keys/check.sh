@@ -27,7 +27,6 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR
 mkdir -p "$TMP/app/src/bin" "$TMP/mine/src" "$TMP/plain/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\n"ns.example/mine" = { path = "../mine" }\n"plain" = { path = "../plain" }\n' > "$TMP/app/bats.toml"
@@ -50,7 +49,7 @@ KILL_FLAG=$TMP/kill-flag
 DEPGEN_FLAG=$TMP/depgen-flag
 printf '#!/bin/sh\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nif [ -f "%s" ]; then case "$*" in *--depgen*) exit 1;; esac; fi\nexec "%s" "$@"\n' "$KILL_FLAG" "$DEPGEN_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
-ats2_marker "$H"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 # same <a> <b> <message>: the two files are the same bytes; if not, say how
 # they differ (sizes and the first 40 lines of a diff) so a failure carries
 # the data (bats-lang/bats#354)

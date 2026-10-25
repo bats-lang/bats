@@ -378,6 +378,10 @@ env -u HOME PATH="$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1 && fail "n
 grep -q "HOME" "$TMP/out" || fail "no HOME is not said"
 ok "no HOME is an error"
 
+[ "$("$BATS" ats2 marker)" = "$name $sha" ] || fail "ats2 marker is not the pin's name and SHA-256"
+"$BATS" ats2 marker --force > "$TMP/out" 2>&1 && fail "ats2 marker --force was accepted"
+ok "ats2 marker prints the pin's marker text, the one the tests write into their toolchains"
+
 if grep -rIlE "$sha|ATS2-Postiats-gmp" "$ROOT/.github" "$ROOT/scripts" > "$TMP/dups" 2>/dev/null && [ -s "$TMP/dups" ]; then
   cat "$TMP/dups"; fail "the pin is named outside src/ats2.bats"
 fi

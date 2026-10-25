@@ -16,7 +16,6 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR
 # The variables the C compiler and the wasm linker read (put_cc_environment,
 # bats-lang/bats#322) are unset here, so each case sets its own
@@ -31,7 +30,7 @@ printf '#include "share/atspre_staload.hats"\n\n#pub fn g (): int\n\nimplement g
 printf '#include "share/atspre_staload.hats"\nstaload "m.sats"\nstaload "n.sats"\nimplement main0 () = println! (f () + g ())\n' > "$P/src/bin/bs.bats"
 
 # a toolchain made here is marked as one bats made (src/ats2.bats)
-known() { ats2_marker "$1"; }
+known() { mkdir -p "$1/.bats/ats2" && "$BATS" ats2 marker > "$1/.bats/ats2/.bats-ats2"; }
 
 # Freshness is by whole-second mtimes: each run ends a second on, so the
 # next finds what this one made older than now

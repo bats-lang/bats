@@ -35,7 +35,6 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_COLD
 mkdir -p "$TMP/app/src/bin" "$TMP/plain/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\n"plain" = { path = "../plain" }\n' > "$TMP/app/bats.toml"
@@ -66,7 +65,7 @@ DEPGEN_LOG=$TMP/depgen-starts
 : > "$DEPGEN_LOG"
 printf '#!/bin/sh\nfor a in "$@"; do if [ "$a" = --depgen ]; then echo x >> "%s"; fi; done\nif [ -f "%s" ]; then kill -9 $PPID; exit 1; fi\nexec "%s" "$@"\n' "$DEPGEN_LOG" "$KILL_FLAG" "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
-ats2_marker "$H"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 export HOME="$H"
 cd "$TMP/app"
 N=0

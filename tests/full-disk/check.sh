@@ -33,7 +33,6 @@ unmount_full() {
 }
 KEEP_ON_FAIL_TEARDOWN=unmount_full
 . "$(dirname "$0")/../keep-on-fail.sh"
-. "$(dirname "$0")/../ats2-marker.sh"
 unset BATS_CACHE_DIR BATS_COLD BATS_COMMIT
 # the real ATS2 of this machine, behind a patsopt that lifts the limit
 REAL=$HOME/.bats/ats2
@@ -42,7 +41,7 @@ mkdir -p "$H/.bats/ats2/bin"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 printf '#!/bin/sh\nulimit -S -f unlimited\nexec "%s" "$@"\n' "$REAL/bin/patsopt" > "$H/.bats/ats2/bin/patsopt"
 chmod +x "$H/.bats/ats2/bin/patsopt"
-ats2_marker "$H"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 
 # a project of 800 functions, each declared with a long type, so that its
 # .sats, .dats and C are of three different sizes (some 59 KB, 77 KB and 4.4

@@ -1691,6 +1691,7 @@ ATSdyncst_extfun(build_057_src_057_commands_056_sats__do_add, (atsrefarg0_type(a
 ATSdyncst_extfun(build_057_src_057_commands_056_sats__do_remove, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)), atsvoid_t0ype) ;
 ATSdyncst_mac(atspre_g0int_lte_int)
 ATSdyncst_extfun(build_057_src_057_commands_056_sats__do_completions, (atstype_boxed), atsvoid_t0ype) ;
+ATSdyncst_extfun(build_057_src_057_ats2_056_sats__ats2_print_marker, (), atsvoid_t0ype) ;
 ATSdyncst_extfun(build_057_src_057_ats2_056_sats__ats2_install_force, (), atstkind_t0ype(atstype_bool)) ;
 ATSdyncst_extfun(build_057_src_057_ats2_056_sats__ats2_ensure, (atstype_boxed), atstkind_t0ype(atstype_bool)) ;
 ATSdyncst_extfun(build_057_src_057_setup_056_sats__clone_repository, (atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int), atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int)), atstkind_t0ype(atstype_bool)) ;
@@ -3101,6 +3102,38 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g0int_int__15__125(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
+atstkind_t0ype(atstype_bool)
+is_marker_arg_335(atsrefarg0_type(atstkind_type(atstype_ptrk)), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__126(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__127(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__128(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__129(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__130(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__131(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__132(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+
+ATSstatic()
 atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__28(atstkind_type(atstype_ptrk)) ;
 
@@ -3222,17 +3255,17 @@ build_057_src_057_bin_057_bats_056_sats____BATS_main0() ;
 #if(0)
 ATSextern()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__neq_g0int_int__364(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__neq_g0int_int__372(atstkind_t0ype(atstyvar_type(tk)), atstkind_t0ype(atstype_int)) ;
 #endif // end of [QUALIFIED]
 #endif // end of [TEMPLATE]
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__neq_g0int_int__364__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__neq_g0int_int__372__1(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 ATSstatic()
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__neq_g0int_int__364__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
+ATSLIB_056_prelude__neq_g0int_int__372__2(atstkind_t0ype(atstype_int), atstkind_t0ype(atstype_int)) ;
 
 /*
 build/src/bin/bats.dats: 1262(line=45, offs=4) -- 3516(line=75, offs=4)
@@ -7910,7 +7943,7 @@ ATSreturn(tmpret211) ;
 } /* end of [heavy_of_63] */
 
 /*
-build/src/bin/bats.dats: 4772(line=100, offs=4) -- 7882(line=134, offs=7)
+build/src/bin/bats.dats: 4772(line=100, offs=4) -- 8007(line=135, offs=7)
 */
 /*
 local: 
@@ -7989,14 +8022,16 @@ print_usage_64()
 // ATStmpdec_void(tmp275) ;
 // ATStmpdec_void(tmp276) ;
 // ATStmpdec_void(tmp277) ;
+// ATStmpdec_void(tmp278) ;
+// ATStmpdec_void(tmp279) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 4772(line=100, offs=4) -- 7882(line=134, offs=7)
+emit_instr: loc0 = build/src/bin/bats.dats: 4772(line=100, offs=4) -- 8007(line=135, offs=7)
 */
 ATSINSflab(__patsflab_print_usage_64):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 4794(line=100, offs=26) -- 7882(line=134, offs=7)
+emit_instr: loc0 = build/src/bin/bats.dats: 4794(line=100, offs=26) -- 8007(line=135, offs=7)
 */
 /*
 letpush(beg)
@@ -8232,111 +8267,121 @@ emit_instr: loc0 = build/src/bin/bats.dats: 6498(line=123, offs=12) -- 6625(line
 ATSINSmove_void(tmp258, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6637(line=124, offs=12) -- 6696(line=124, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 6637(line=124, offs=12) -- 6750(line=124, offs=125)
 */
-ATSINSmove_void(tmp259, atspre_print_string(ATSPMVstring("  clone-repository <commit> --repository <dir>"))) ;
+ATSINSmove_void(tmp259, atspre_print_string(ATSPMVstring("  ats2 marker                  Print the marker text of the pinned ATS2 (the pin's name and SHA-256)"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6637(line=124, offs=12) -- 6696(line=124, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 6637(line=124, offs=12) -- 6750(line=124, offs=125)
 */
 ATSINSmove_void(tmp260, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6708(line=125, offs=12) -- 6827(line=125, offs=131)
+emit_instr: loc0 = build/src/bin/bats.dats: 6762(line=125, offs=12) -- 6821(line=125, offs=71)
 */
-ATSINSmove_void(tmp261, atspre_print_string(ATSPMVstring("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>"))) ;
+ATSINSmove_void(tmp261, atspre_print_string(ATSPMVstring("  clone-repository <commit> --repository <dir>"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6708(line=125, offs=12) -- 6827(line=125, offs=131)
+emit_instr: loc0 = build/src/bin/bats.dats: 6762(line=125, offs=12) -- 6821(line=125, offs=71)
 */
 ATSINSmove_void(tmp262, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6839(line=126, offs=12) -- 6950(line=126, offs=123)
+emit_instr: loc0 = build/src/bin/bats.dats: 6833(line=126, offs=12) -- 6952(line=126, offs=131)
 */
-ATSINSmove_void(tmp263, atspre_print_string(ATSPMVstring("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>"))) ;
+ATSINSmove_void(tmp263, atspre_print_string(ATSPMVstring("                               Clone the package repository at a full commit; prints BATS_REPOSITORY=<dir>"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6839(line=126, offs=12) -- 6950(line=126, offs=123)
+emit_instr: loc0 = build/src/bin/bats.dats: 6833(line=126, offs=12) -- 6952(line=126, offs=131)
 */
 ATSINSmove_void(tmp264, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6962(line=127, offs=12) -- 7161(line=127, offs=211)
+emit_instr: loc0 = build/src/bin/bats.dats: 6964(line=127, offs=12) -- 7075(line=127, offs=123)
 */
-ATSINSmove_void(tmp265, atspre_print_string(ATSPMVstring("  check-pins <file>...         Fail the CI inputs that move: uses:, -latest images, versions, npm, curl (a moving input turns a passing commit red later; keyword: inputs of CI that move)"))) ;
+ATSINSmove_void(tmp265, atspre_print_string(ATSPMVstring("  record-commit <commit>       Check the commit is in this repository; prints BATS_COMMIT=<commit>"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 6962(line=127, offs=12) -- 7161(line=127, offs=211)
+emit_instr: loc0 = build/src/bin/bats.dats: 6964(line=127, offs=12) -- 7075(line=127, offs=123)
 */
 ATSINSmove_void(tmp266, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7173(line=128, offs=12) -- 7343(line=128, offs=182)
+emit_instr: loc0 = build/src/bin/bats.dats: 7087(line=128, offs=12) -- 7286(line=128, offs=211)
 */
-ATSINSmove_void(tmp267, atspre_print_string(ATSPMVstring("  affected <base> <head>       Print inert=true when only markdown files outside tests/ and bootstrap/ changed between two revisions (keyword: affected rule)"))) ;
+ATSINSmove_void(tmp267, atspre_print_string(ATSPMVstring("  check-pins <file>...         Fail the CI inputs that move: uses:, -latest images, versions, npm, curl (a moving input turns a passing commit red later; keyword: inputs of CI that move)"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7173(line=128, offs=12) -- 7343(line=128, offs=182)
+emit_instr: loc0 = build/src/bin/bats.dats: 7087(line=128, offs=12) -- 7286(line=128, offs=211)
 */
 ATSINSmove_void(tmp268, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7355(line=129, offs=12) -- 7443(line=129, offs=100)
+emit_instr: loc0 = build/src/bin/bats.dats: 7298(line=129, offs=12) -- 7468(line=129, offs=182)
 */
-ATSINSmove_void(tmp269, atspre_print_string(ATSPMVstring("  completions <shell>          Generate shell completions (bash, zsh, fish)"))) ;
+ATSINSmove_void(tmp269, atspre_print_string(ATSPMVstring("  affected <base> <head>       Print inert=true when only markdown files outside tests/ and bootstrap/ changed between two revisions (keyword: affected rule)"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7355(line=129, offs=12) -- 7443(line=129, offs=100)
+emit_instr: loc0 = build/src/bin/bats.dats: 7298(line=129, offs=12) -- 7468(line=129, offs=182)
 */
 ATSINSmove_void(tmp270, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7455(line=130, offs=12) -- 7575(line=130, offs=132)
+emit_instr: loc0 = build/src/bin/bats.dats: 7480(line=130, offs=12) -- 7568(line=130, offs=100)
 */
-ATSINSmove_void(tmp271, atspre_print_string(ATSPMVstring("  fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]"))) ;
+ATSINSmove_void(tmp271, atspre_print_string(ATSPMVstring("  completions <shell>          Generate shell completions (bash, zsh, fish)"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7455(line=130, offs=12) -- 7575(line=130, offs=132)
+emit_instr: loc0 = build/src/bin/bats.dats: 7480(line=130, offs=12) -- 7568(line=130, offs=100)
 */
 ATSINSmove_void(tmp272, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7587(line=131, offs=12) -- 7704(line=131, offs=129)
+emit_instr: loc0 = build/src/bin/bats.dats: 7580(line=131, offs=12) -- 7700(line=131, offs=132)
 */
-ATSINSmove_void(tmp273, atspre_print_string(ATSPMVstring("                               Run the accept and reject fixtures of <dir> against a copy of the project"))) ;
+ATSINSmove_void(tmp273, atspre_print_string(ATSPMVstring("  fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7587(line=131, offs=12) -- 7704(line=131, offs=129)
+emit_instr: loc0 = build/src/bin/bats.dats: 7580(line=131, offs=12) -- 7700(line=131, offs=132)
 */
 ATSINSmove_void(tmp274, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7716(line=132, offs=12) -- 7770(line=132, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 7712(line=132, offs=12) -- 7829(line=132, offs=129)
 */
-ATSINSmove_void(tmp275, atspre_print_string(ATSPMVstring("  with-env <env-file> <command> [args...]"))) ;
+ATSINSmove_void(tmp275, atspre_print_string(ATSPMVstring("                               Run the accept and reject fixtures of <dir> against a copy of the project"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7716(line=132, offs=12) -- 7770(line=132, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 7712(line=132, offs=12) -- 7829(line=132, offs=129)
 */
 ATSINSmove_void(tmp276, atspre_print_newline()) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 7841(line=133, offs=12) -- 7895(line=133, offs=66)
+*/
+ATSINSmove_void(tmp277, atspre_print_string(ATSPMVstring("  with-env <env-file> <command> [args...]"))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 7841(line=133, offs=12) -- 7895(line=133, offs=66)
+*/
+ATSINSmove_void(tmp278, atspre_print_newline()) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7782(line=133, offs=12) -- 7875(line=133, offs=105)
+emit_instr: loc0 = build/src/bin/bats.dats: 7907(line=134, offs=12) -- 8000(line=134, offs=105)
 */
-ATSINSmove_void(tmp277, atspre_print_string(ATSPMVstring("                               Run a command with the variables of a dotenv file"))) ;
+ATSINSmove_void(tmp279, atspre_print_string(ATSPMVstring("                               Run a command with the variables of a dotenv file"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7782(line=133, offs=12) -- 7875(line=133, offs=105)
+emit_instr: loc0 = build/src/bin/bats.dats: 7907(line=134, offs=12) -- 8000(line=134, offs=105)
 */
 ATSINSmove_void(tmpret212, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 4794(line=100, offs=26) -- 7882(line=134, offs=7)
+emit_instr: loc0 = build/src/bin/bats.dats: 4794(line=100, offs=26) -- 8007(line=135, offs=7)
 */
 /*
 INSletpop()
@@ -8346,7 +8391,7 @@ ATSreturn_void(tmpret212) ;
 } /* end of [print_usage_64] */
 
 /*
-build/src/bin/bats.dats: 7992(line=138, offs=5) -- 8324(line=145, offs=43)
+build/src/bin/bats.dats: 8117(line=139, offs=5) -- 8449(line=146, offs=43)
 */
 /*
 local: copy_extra_65$0(level=0)
@@ -8364,102 +8409,102 @@ ATStmpdec(apy1, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy4, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret278, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp279, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp284, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp289, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp290) ;
-ATStmpdec(tmp302, atstkind_t0ype(atstype_byte)) ;
-ATStmpdec(tmp303, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp304, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret280, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp281, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp286, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp291, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp292) ;
+ATStmpdec(tmp304, atstkind_t0ype(atstype_byte)) ;
 ATStmpdec(tmp305, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp306, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp307, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 7992(line=138, offs=5) -- 8324(line=145, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8117(line=139, offs=5) -- 8449(line=146, offs=43)
 */
 ATSINSflab(__patsflab_copy_extra_65):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8153(line=141, offs=6) -- 8162(line=141, offs=15)
+emit_instr: loc0 = build/src/bin/bats.dats: 8278(line=142, offs=6) -- 8287(line=142, offs=15)
 */
-ATSINSmove(tmp279, ATSLIB_056_prelude__gte_g1int_int__66__1(arg4, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp281, ATSLIB_056_prelude__gte_g1int_int__66__1(arg4, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8150(line=141, offs=3) -- 8324(line=145, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8275(line=142, offs=3) -- 8449(line=146, offs=43)
 */
 ATSif(
-tmp279
+tmp281
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8168(line=141, offs=21) -- 8169(line=141, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 8293(line=142, offs=21) -- 8294(line=142, offs=22)
 */
-ATSINSmove(tmpret278, arg4) ;
+ATSINSmove(tmpret280, arg4) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8180(line=142, offs=11) -- 8185(line=142, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 8305(line=143, offs=11) -- 8310(line=143, offs=16)
 */
-ATSINSmove(tmp289, atspre_g1int_add_int(arg2, arg4)) ;
+ATSINSmove(tmp291, atspre_g1int_add_int(arg2, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8180(line=142, offs=11) -- 8190(line=142, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 8305(line=143, offs=11) -- 8315(line=143, offs=21)
 */
-ATSINSmove(tmp284, ATSLIB_056_prelude__gte_g0int_int__70__1(tmp289, arg3)) ;
+ATSINSmove(tmp286, ATSLIB_056_prelude__gte_g0int_int__70__1(tmp291, arg3)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8177(line=142, offs=8) -- 8324(line=145, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8302(line=143, offs=8) -- 8449(line=146, offs=43)
 */
 ATSif(
-tmp284
+tmp286
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8196(line=142, offs=27) -- 8197(line=142, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 8321(line=143, offs=27) -- 8322(line=143, offs=28)
 */
-ATSINSmove(tmpret278, arg4) ;
+ATSINSmove(tmpret280, arg4) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8205(line=143, offs=8) -- 8324(line=145, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8330(line=144, offs=8) -- 8449(line=146, offs=43)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8267(line=144, offs=59) -- 8272(line=144, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 8392(line=145, offs=59) -- 8397(line=145, offs=64)
 */
-ATSINSmove(tmp304, atspre_g1int_add_int(arg2, arg4)) ;
+ATSINSmove(tmp306, atspre_g1int_add_int(arg2, arg4)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8253(line=144, offs=45) -- 8279(line=144, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 8378(line=145, offs=45) -- 8404(line=145, offs=71)
 */
-ATSINSmove(tmp303, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp304, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp305, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp306, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8243(line=144, offs=35) -- 8280(line=144, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 8368(line=145, offs=35) -- 8405(line=145, offs=72)
 */
-ATSINSmove(tmp302, atspre_int2byte0(tmp303)) ;
+ATSINSmove(tmp304, atspre_int2byte0(tmp305)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8222(line=144, offs=14) -- 8281(line=144, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 8347(line=145, offs=14) -- 8406(line=145, offs=73)
 */
-ATSINSmove_void(tmp290, build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__74__1(ATSPMVrefarg0(arg1), arg4, tmp302)) ;
+ATSINSmove_void(tmp292, build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__74__1(ATSPMVrefarg0(arg1), arg4, tmp304)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8314(line=145, offs=33) -- 8319(line=145, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 8439(line=146, offs=33) -- 8444(line=146, offs=38)
 */
-ATSINSmove(tmp305, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp307, atspre_g1int_add_int(arg4, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8287(line=145, offs=6) -- 8320(line=145, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 8412(line=146, offs=6) -- 8445(line=146, offs=39)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
 ATSINSmove_tlcal(apy1, ATSPMVrefarg0(arg1)) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
-ATSINSmove_tlcal(apy4, tmp305) ;
+ATSINSmove_tlcal(apy4, tmp307) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -8469,7 +8514,7 @@ ATSINSfgoto(__patsflab_copy_extra_65) ;
 ATStailcal_end()
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8205(line=143, offs=8) -- 8324(line=145, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8330(line=144, offs=8) -- 8449(line=146, offs=43)
 */
 /*
 INSletpop()
@@ -8477,7 +8522,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret278) ;
+ATSreturn(tmpret280) ;
 } /* end of [copy_extra_65] */
 
 #if(0)
@@ -8500,8 +8545,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret282, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8511,15 +8556,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7652))>)(arg1)) ;
+ATSINSmove(tmp283, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7652))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280, PMVtmpltcst(g1int_gte<S2Evar(tk(7652))>)(arg0, tmp281)) ;
+ATSINSmove(tmpret282, PMVtmpltcst(g1int_gte<S2Evar(tk(7652))>)(arg0, tmp283)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280) ;
+ATSreturn(tmpret282) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66] */
 #endif // end of [TEMPLATE]
 
@@ -8542,8 +8587,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8553,15 +8598,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__1, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__1, atspre_g1int_gte_int(arg0, tmp281__1)) ;
+ATSINSmove(tmpret282__1, atspre_g1int_gte_int(arg0, tmp283__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__1) ;
+ATSreturn(tmpret282__1) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__1] */
 
 #if(0)
@@ -8584,8 +8629,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret287, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8595,15 +8640,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7639))>)(arg1)) ;
+ATSINSmove(tmp288, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7639))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285, PMVtmpltcst(g0int_gte<S2Evar(tk(7639))>)(arg0, tmp286)) ;
+ATSINSmove(tmpret287, PMVtmpltcst(g0int_gte<S2Evar(tk(7639))>)(arg0, tmp288)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285) ;
+ATSreturn(tmpret287) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70] */
 #endif // end of [TEMPLATE]
 
@@ -8626,8 +8671,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8637,15 +8682,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__1, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__1, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__1, atspre_g0int_gte_int(arg0, tmp286__1)) ;
+ATSINSmove(tmpret287__1, atspre_g0int_gte_int(arg0, tmp288__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__1) ;
+ATSreturn(tmpret287__1) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__1] */
 
 #if(0)
@@ -8668,8 +8713,8 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__74(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstyvar_type(a) arg2)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret291) ;
-ATStmpdec(tmp292, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmpret293) ;
+ATStmpdec(tmp294, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8679,15 +8724,15 @@ ATSINSflab(__patsflab_set):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17258(line=761, offs=24) -- 17276(line=761, offs=42)
 */
-ATSINSmove(tmp292, PMVtmpltcst(ptr1_add_gint<S2Evar(a(12019))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
+ATSINSmove(tmp294, PMVtmpltcst(ptr1_add_gint<S2Evar(a(12019))><S2Eextkind(atstype_int)>)(arg0, arg1)) ;
 
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17238(line=761, offs=4) -- 17280(line=761, offs=46)
 */
-ATSINSmove_void(tmpret291, PMVtmpltcst(ptr0_set<S2Evar(a(12019))>)(tmp292, arg2)) ;
+ATSINSmove_void(tmpret293, PMVtmpltcst(ptr0_set<S2Evar(a(12019))>)(tmp294, arg2)) ;
 
 ATSfunbody_end()
-ATSreturn_void(tmpret291) ;
+ATSreturn_void(tmpret293) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__74] */
 #endif // end of [TEMPLATE]
 
@@ -8710,8 +8755,8 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__74__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_byte) arg2)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret291__1) ;
-ATStmpdec(tmp292__1, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmpret293__1) ;
+ATStmpdec(tmp294__1, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8721,15 +8766,15 @@ ATSINSflab(__patsflab_set):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17258(line=761, offs=24) -- 17276(line=761, offs=42)
 */
-ATSINSmove(tmp292__1, ATSLIB_056_prelude__ptr1_add_gint__3__3(arg0, arg1)) ;
+ATSINSmove(tmp294__1, ATSLIB_056_prelude__ptr1_add_gint__3__3(arg0, arg1)) ;
 
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17238(line=761, offs=4) -- 17280(line=761, offs=46)
 */
-ATSINSmove_void(tmpret291__1, ATSLIB_056_prelude_056_unsafe__ptr0_set__78__1(tmp292__1, arg2)) ;
+ATSINSmove_void(tmpret293__1, ATSLIB_056_prelude_056_unsafe__ptr0_set__78__1(tmp294__1, arg2)) ;
 
 ATSfunbody_end()
-ATSreturn_void(tmpret291__1) ;
+ATSreturn_void(tmpret293__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__set__74__1] */
 
 /*
@@ -8839,7 +8884,7 @@ atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__78(atstkind_type(atstype_ptrk) arg0, atstyvar_type(a) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret300) ;
+// ATStmpdec_void(tmpret302) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8864,7 +8909,7 @@ ATSINSstore(ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0)
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/unsafe.dats: 2281(line=83, offs=12) -- 2288(line=83, offs=19)
 */
-ATSINSmove_void(tmpret300, ATSPMVempty()) ;
+ATSINSmove_void(tmpret302, ATSPMVempty()) ;
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/unsafe.dats: 2098(line=77, offs=12) -- 2312(line=85, offs=2)
 */
@@ -8872,7 +8917,7 @@ emit_instr: loc0 = $(PATSHOME)/prelude/DATS/unsafe.dats: 2098(line=77, offs=12) 
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn_void(tmpret300) ;
+ATSreturn_void(tmpret302) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_set__78] */
 #endif // end of [TEMPLATE]
 
@@ -8895,7 +8940,7 @@ atsvoid_t0ype
 ATSLIB_056_prelude_056_unsafe__ptr0_set__78__1(atstkind_type(atstype_ptrk) arg0, atstkind_t0ype(atstype_byte) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret300__1) ;
+// ATStmpdec_void(tmpret302__1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -8920,7 +8965,7 @@ ATSINSstore(ATSderef(ATSPMVcastfn(g1ofg0_ptr, atstkind_type(atstype_ptrk), arg0)
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/unsafe.dats: 2281(line=83, offs=12) -- 2288(line=83, offs=19)
 */
-ATSINSmove_void(tmpret300__1, ATSPMVempty()) ;
+ATSINSmove_void(tmpret302__1, ATSPMVempty()) ;
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/unsafe.dats: 2098(line=77, offs=12) -- 2312(line=85, offs=2)
 */
@@ -8928,11 +8973,11 @@ emit_instr: loc0 = $(PATSHOME)/prelude/DATS/unsafe.dats: 2098(line=77, offs=12) 
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn_void(tmpret300__1) ;
+ATSreturn_void(tmpret302__1) ;
 } /* end of [ATSLIB_056_prelude_056_unsafe__ptr0_set__78__1] */
 
 /*
-build/src/bin/bats.dats: 8396(line=148, offs=5) -- 8838(line=159, offs=6)
+build/src/bin/bats.dats: 8521(line=149, offs=5) -- 8963(line=160, offs=6)
 */
 /*
 local: find_dashdash_80$0(level=0)
@@ -8948,178 +8993,178 @@ find_dashdash_80(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0y
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret306, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp307, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp310, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp313, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp314, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret308, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp309, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp312, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp315, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp318, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp321, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp322, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp325, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp326, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp316, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp317, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp320, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp323, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp324, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp327, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp328, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp331, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp328, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp329, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp330, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp333, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8396(line=148, offs=5) -- 8838(line=159, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 8521(line=149, offs=5) -- 8963(line=160, offs=6)
 */
 ATSINSflab(__patsflab_find_dashdash_80):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8518(line=150, offs=6) -- 8528(line=150, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 8643(line=151, offs=6) -- 8653(line=151, offs=16)
 */
-ATSINSmove(tmp307, ATSLIB_056_prelude__gte_g0int_int__70__2(arg1, arg2)) ;
+ATSINSmove(tmp309, ATSLIB_056_prelude__gte_g0int_int__70__2(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8515(line=150, offs=3) -- 8838(line=159, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 8640(line=151, offs=3) -- 8963(line=160, offs=6)
 */
 ATSif(
-tmp307
+tmp309
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8534(line=150, offs=22) -- 8536(line=150, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 8659(line=151, offs=22) -- 8661(line=151, offs=24)
 */
-ATSINSmove(tmpret306, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret308, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8547(line=151, offs=11) -- 8558(line=151, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 8672(line=152, offs=11) -- 8683(line=152, offs=22)
 */
-ATSINSmove(tmp310, ATSLIB_056_prelude__gte_g1int_int__66__2(arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp312, ATSLIB_056_prelude__gte_g1int_int__66__2(arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8544(line=151, offs=8) -- 8838(line=159, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 8669(line=152, offs=8) -- 8963(line=160, offs=6)
 */
 ATSif(
-tmp310
+tmp312
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8564(line=151, offs=28) -- 8566(line=151, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 8689(line=152, offs=28) -- 8691(line=152, offs=30)
 */
-ATSINSmove(tmpret306, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret308, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
 */
-ATSINSmove(tmp318, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp320, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
 */
-ATSINSmove(tmp315, ATSLIB_056_prelude__eq_g0int_int__15__45(tmp318, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp317, ATSLIB_056_prelude__eq_g0int_int__15__45(tmp320, ATSPMVi0nt(45))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSif(
+tmp317
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp324, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp323, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp324, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp316, ATSLIB_056_prelude__eq_g0int_int__15__46(tmp323, ATSPMVi0nt(45))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp316, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSif(
+tmp316
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp328, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp327, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp328, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp315, ATSLIB_056_prelude__eq_g0int_int__15__47(tmp327, ATSPMVi0nt(0))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8702(line=153, offs=11) -- 8814(line=154, offs=46)
+*/
+ATSINSmove(tmp315, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 8699(line=153, offs=8) -- 8963(line=160, offs=6)
 */
 ATSif(
 tmp315
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 8820(line=154, offs=52) -- 8823(line=154, offs=55)
 */
-ATSINSmove(tmp322, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp321, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp322, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp314, ATSLIB_056_prelude__eq_g0int_int__15__46(tmp321, ATSPMVi0nt(45))) ;
-
+ATSINSmove(tmpret308, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp314, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSif(
-tmp314
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp326, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp325, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp326, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp313, ATSLIB_056_prelude__eq_g0int_int__15__47(tmp325, ATSPMVi0nt(0))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8577(line=152, offs=11) -- 8689(line=153, offs=46)
-*/
-ATSINSmove(tmp313, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8574(line=152, offs=8) -- 8838(line=159, offs=6)
-*/
-ATSif(
-tmp313
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8695(line=153, offs=52) -- 8698(line=153, offs=55)
-*/
-ATSINSmove(tmpret306, arg1) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 8706(line=154, offs=8) -- 8838(line=159, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 8831(line=155, offs=8) -- 8963(line=160, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8725(line=155, offs=16) -- 8756(line=155, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 8850(line=156, offs=16) -- 8881(line=156, offs=47)
 */
-ATSINSmove(tmp327, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp329, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8769(line=157, offs=8) -- 8781(line=157, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 8894(line=158, offs=8) -- 8906(line=158, offs=20)
 */
-ATSINSmove(tmp328, ATSLIB_056_prelude__gte_g1int_int__66__3(tmp327, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp330, ATSLIB_056_prelude__gte_g1int_int__66__3(tmp329, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8766(line=157, offs=5) -- 8832(line=158, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8891(line=158, offs=5) -- 8957(line=159, offs=43)
 */
 ATSif(
-tmp328
+tmp330
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8787(line=157, offs=26) -- 8789(line=157, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 8912(line=158, offs=26) -- 8914(line=158, offs=28)
 */
-ATSINSmove(tmpret306, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret308, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8818(line=158, offs=29) -- 8826(line=158, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 8943(line=159, offs=29) -- 8951(line=159, offs=37)
 */
-ATSINSmove(tmp331, atspre_g1int_add_int(tmp327, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp333, atspre_g1int_add_int(tmp329, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8799(line=158, offs=10) -- 8832(line=158, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 8924(line=159, offs=10) -- 8957(line=159, offs=43)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp331) ;
+ATSINSmove_tlcal(apy1, tmp333) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
@@ -9129,7 +9174,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 8706(line=154, offs=8) -- 8838(line=159, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 8831(line=155, offs=8) -- 8963(line=160, offs=6)
 */
 /*
 INSletpop()
@@ -9138,7 +9183,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret306) ;
+ATSreturn(tmpret308) ;
 } /* end of [find_dashdash_80] */
 
 /*
@@ -9160,8 +9205,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__2, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -9171,15 +9216,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__2, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__2, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__2, atspre_g0int_gte_int(arg0, tmp286__2)) ;
+ATSINSmove(tmpret287__2, atspre_g0int_gte_int(arg0, tmp288__2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__2) ;
+ATSreturn(tmpret287__2) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__2] */
 
 /*
@@ -9201,8 +9246,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__2, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -9212,15 +9257,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__2, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__2, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__2, atspre_g1int_gte_int(arg0, tmp281__2)) ;
+ATSINSmove(tmpret282__2, atspre_g1int_gte_int(arg0, tmp283__2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__2) ;
+ATSreturn(tmpret282__2) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__2] */
 
 /*
@@ -9365,8 +9410,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__3, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -9376,19 +9421,19 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__3, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__3, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__3, atspre_g1int_gte_int(arg0, tmp281__3)) ;
+ATSINSmove(tmpret282__3, atspre_g1int_gte_int(arg0, tmp283__3)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__3) ;
+ATSreturn(tmpret282__3) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__3] */
 
 /*
-build/src/bin/bats.dats: 9234(line=171, offs=4) -- 9410(line=174, offs=22)
+build/src/bin/bats.dats: 9359(line=172, offs=4) -- 9535(line=175, offs=22)
 */
 /*
 local: 
@@ -9401,89 +9446,89 @@ atstype_boxed
 profiles_of_88(postiats_tyrec_0 arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret332, atstype_boxed) ;
-ATStmpdec(tmp333, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp334, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret334, atstype_boxed) ;
+ATStmpdec(tmp335, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp336, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9234(line=171, offs=4) -- 9410(line=174, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 9359(line=172, offs=4) -- 9535(line=175, offs=22)
 */
 ATSINSflab(__patsflab_profiles_of_88):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9283(line=172, offs=6) -- 9312(line=172, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 9408(line=173, offs=6) -- 9437(line=173, offs=35)
 */
 ATSif(
 ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9283(line=172, offs=6) -- 9312(line=172, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 9408(line=173, offs=6) -- 9437(line=173, offs=35)
 */
-ATSINSmove(tmp333, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release))) ;
+ATSINSmove(tmp335, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9283(line=172, offs=6) -- 9312(line=172, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 9408(line=173, offs=6) -- 9437(line=173, offs=35)
 */
-ATSINSmove(tmp333, ATSPMVbool_false()) ;
+ATSINSmove(tmp335, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9280(line=172, offs=3) -- 9410(line=174, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 9405(line=173, offs=3) -- 9535(line=175, offs=22)
 */
 ATSif(
-tmp333
+tmp335
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9318(line=172, offs=41) -- 9329(line=172, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 9443(line=173, offs=41) -- 9454(line=173, offs=52)
 */
 
-ATSINSmove_con0(tmpret332, 0) ;
+ATSINSmove_con0(tmpret334, 0) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9340(line=173, offs=11) -- 9369(line=173, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 9465(line=174, offs=11) -- 9494(line=174, offs=40)
 */
 ATSif(
 ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9340(line=173, offs=11) -- 9369(line=173, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 9465(line=174, offs=11) -- 9494(line=174, offs=40)
 */
-ATSINSmove(tmp334, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug))) ;
+ATSINSmove(tmp336, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9340(line=173, offs=11) -- 9369(line=173, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 9465(line=174, offs=11) -- 9494(line=174, offs=40)
 */
-ATSINSmove(tmp334, ATSPMVbool_false()) ;
+ATSINSmove(tmp336, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9337(line=173, offs=8) -- 9410(line=174, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 9462(line=174, offs=8) -- 9535(line=175, offs=22)
 */
 ATSif(
-tmp334
+tmp336
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9375(line=173, offs=46) -- 9388(line=173, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 9500(line=174, offs=46) -- 9513(line=174, offs=59)
 */
 
-ATSINSmove_con0(tmpret332, 1) ;
+ATSINSmove_con0(tmpret334, 1) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9396(line=174, offs=8) -- 9410(line=174, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 9521(line=175, offs=8) -- 9535(line=175, offs=22)
 */
 
-ATSINSmove_con0(tmpret332, 2) ;
+ATSINSmove_con0(tmpret334, 2) ;
 
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret332) ;
+ATSreturn(tmpret334) ;
 } /* end of [profiles_of_88] */
 
 /*
-build/src/bin/bats.dats: 9415(line=176, offs=4) -- 9582(line=179, offs=21)
+build/src/bin/bats.dats: 9540(line=177, offs=4) -- 9707(line=180, offs=21)
 */
 /*
 local: 
@@ -9496,89 +9541,89 @@ atstype_boxed
 targets_of_89(postiats_tyrec_0 arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret335, atstype_boxed) ;
-ATStmpdec(tmp336, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp337, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret337, atstype_boxed) ;
+ATStmpdec(tmp338, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp339, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9415(line=176, offs=4) -- 9582(line=179, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 9540(line=177, offs=4) -- 9707(line=180, offs=21)
 */
 ATSINSflab(__patsflab_targets_of_89):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9462(line=177, offs=6) -- 9489(line=177, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 9587(line=178, offs=6) -- 9614(line=178, offs=33)
 */
 ATSif(
 ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9462(line=177, offs=6) -- 9489(line=177, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 9587(line=178, offs=6) -- 9614(line=178, offs=33)
 */
-ATSINSmove(tmp336, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm))) ;
+ATSINSmove(tmp338, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9462(line=177, offs=6) -- 9489(line=177, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 9587(line=178, offs=6) -- 9614(line=178, offs=33)
 */
-ATSINSmove(tmp336, ATSPMVbool_false()) ;
+ATSINSmove(tmp338, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9459(line=177, offs=3) -- 9582(line=179, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 9584(line=178, offs=3) -- 9707(line=180, offs=21)
 */
 ATSif(
-tmp336
+tmp338
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9495(line=177, offs=39) -- 9507(line=177, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 9620(line=178, offs=39) -- 9632(line=178, offs=51)
 */
 
-ATSINSmove_con0(tmpret335, 0) ;
+ATSINSmove_con0(tmpret337, 0) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9518(line=178, offs=11) -- 9545(line=178, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 9643(line=179, offs=11) -- 9670(line=179, offs=38)
 */
 ATSif(
 ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9518(line=178, offs=11) -- 9545(line=178, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 9643(line=179, offs=11) -- 9670(line=179, offs=38)
 */
-ATSINSmove(tmp337, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native))) ;
+ATSINSmove(tmp339, atspre_neg_bool0(ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9518(line=178, offs=11) -- 9545(line=178, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 9643(line=179, offs=11) -- 9670(line=179, offs=38)
 */
-ATSINSmove(tmp337, ATSPMVbool_false()) ;
+ATSINSmove(tmp339, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9515(line=178, offs=8) -- 9582(line=179, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 9640(line=179, offs=8) -- 9707(line=180, offs=21)
 */
 ATSif(
-tmp337
+tmp339
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9551(line=178, offs=44) -- 9561(line=178, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 9676(line=179, offs=44) -- 9686(line=179, offs=54)
 */
 
-ATSINSmove_con0(tmpret335, 1) ;
+ATSINSmove_con0(tmpret337, 1) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9569(line=179, offs=8) -- 9582(line=179, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 9694(line=180, offs=8) -- 9707(line=180, offs=21)
 */
 
-ATSINSmove_con0(tmpret335, 2) ;
+ATSINSmove_con0(tmpret337, 2) ;
 
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret335) ;
+ATSreturn(tmpret337) ;
 } /* end of [targets_of_89] */
 
 /*
-build/src/bin/bats.dats: 9587(line=181, offs=4) -- 9666(line=181, offs=83)
+build/src/bin/bats.dats: 9712(line=182, offs=4) -- 9791(line=182, offs=83)
 */
 /*
 local: 
@@ -9591,15 +9636,15 @@ atstkind_t0ype(atstype_bool)
 makes_debug_90(atstype_boxed arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret338, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret340, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9587(line=181, offs=4) -- 9666(line=181, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 9712(line=182, offs=4) -- 9791(line=182, offs=83)
 */
 ATSINSflab(__patsflab_makes_debug_90):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9621(line=181, offs=38) -- 9666(line=181, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 9746(line=182, offs=38) -- 9791(line=182, offs=83)
 */
 ATScaseof_beg()
 /*
@@ -9607,15 +9652,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9632(line=181, offs=49) -- 9645(line=181, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 9757(line=182, offs=49) -- 9770(line=182, offs=62)
 */
 ATSINSlab(__atstmplab68):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9600(line=181, offs=17) -- 9601(line=181, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 9725(line=182, offs=17) -- 9726(line=182, offs=18)
 */
 ATSifnthen(ATSCKpat_con0(arg0, 1)) { ATSINSgoto(__atstmplab70) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9645(line=181, offs=62) -- 9645(line=181, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 9770(line=182, offs=62) -- 9770(line=182, offs=62)
 */
 ATSINSlab(__atstmplab69):
 /*
@@ -9625,14 +9670,14 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9649(line=181, offs=66) -- 9654(line=181, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 9774(line=182, offs=66) -- 9779(line=182, offs=71)
 */
-ATSINSmove(tmpret338, ATSPMVbool_false()) ;
+ATSINSmove(tmpret340, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9658(line=181, offs=75) -- 9658(line=181, offs=75)
+emit_instr: loc0 = build/src/bin/bats.dats: 9783(line=182, offs=75) -- 9783(line=182, offs=75)
 */
 ATSINSlab(__atstmplab70):
 /*
@@ -9642,9 +9687,9 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9662(line=181, offs=79) -- 9666(line=181, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 9787(line=182, offs=79) -- 9791(line=182, offs=83)
 */
-ATSINSmove(tmpret338, ATSPMVbool_true()) ;
+ATSINSmove(tmpret340, ATSPMVbool_true()) ;
 ATSbranch_end()
 
 /*
@@ -9653,11 +9698,11 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret338) ;
+ATSreturn(tmpret340) ;
 } /* end of [makes_debug_90] */
 
 /*
-build/src/bin/bats.dats: 9670(line=182, offs=4) -- 9749(line=182, offs=83)
+build/src/bin/bats.dats: 9795(line=183, offs=4) -- 9874(line=183, offs=83)
 */
 /*
 local: 
@@ -9670,15 +9715,15 @@ atstkind_t0ype(atstype_bool)
 makes_release_91(atstype_boxed arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret339, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret341, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9670(line=182, offs=4) -- 9749(line=182, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 9795(line=183, offs=4) -- 9874(line=183, offs=83)
 */
 ATSINSflab(__patsflab_makes_release_91):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9706(line=182, offs=40) -- 9749(line=182, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 9831(line=183, offs=40) -- 9874(line=183, offs=83)
 */
 ATScaseof_beg()
 /*
@@ -9686,15 +9731,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9717(line=182, offs=51) -- 9728(line=182, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 9842(line=183, offs=51) -- 9853(line=183, offs=62)
 */
 ATSINSlab(__atstmplab71):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9685(line=182, offs=19) -- 9686(line=182, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 9810(line=183, offs=19) -- 9811(line=183, offs=20)
 */
 ATSifnthen(ATSCKpat_con0(arg0, 0)) { ATSINSgoto(__atstmplab73) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9728(line=182, offs=62) -- 9728(line=182, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 9853(line=183, offs=62) -- 9853(line=183, offs=62)
 */
 ATSINSlab(__atstmplab72):
 /*
@@ -9704,14 +9749,14 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9732(line=182, offs=66) -- 9737(line=182, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 9857(line=183, offs=66) -- 9862(line=183, offs=71)
 */
-ATSINSmove(tmpret339, ATSPMVbool_false()) ;
+ATSINSmove(tmpret341, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9741(line=182, offs=75) -- 9741(line=182, offs=75)
+emit_instr: loc0 = build/src/bin/bats.dats: 9866(line=183, offs=75) -- 9866(line=183, offs=75)
 */
 ATSINSlab(__atstmplab73):
 /*
@@ -9721,9 +9766,9 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9745(line=182, offs=79) -- 9749(line=182, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 9870(line=183, offs=79) -- 9874(line=183, offs=83)
 */
-ATSINSmove(tmpret339, ATSPMVbool_true()) ;
+ATSINSmove(tmpret341, ATSPMVbool_true()) ;
 ATSbranch_end()
 
 /*
@@ -9732,11 +9777,11 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret339) ;
+ATSreturn(tmpret341) ;
 } /* end of [makes_release_91] */
 
 /*
-build/src/bin/bats.dats: 9753(line=183, offs=4) -- 9829(line=183, offs=80)
+build/src/bin/bats.dats: 9878(line=184, offs=4) -- 9954(line=184, offs=80)
 */
 /*
 local: 
@@ -9749,15 +9794,15 @@ atstkind_t0ype(atstype_bool)
 makes_native_92(atstype_boxed arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret340, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret342, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9753(line=183, offs=4) -- 9829(line=183, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 9878(line=184, offs=4) -- 9954(line=184, offs=80)
 */
 ATSINSflab(__patsflab_makes_native_92):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9787(line=183, offs=38) -- 9829(line=183, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 9912(line=184, offs=38) -- 9954(line=184, offs=80)
 */
 ATScaseof_beg()
 /*
@@ -9765,15 +9810,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9798(line=183, offs=49) -- 9808(line=183, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 9923(line=184, offs=49) -- 9933(line=184, offs=59)
 */
 ATSINSlab(__atstmplab74):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9767(line=183, offs=18) -- 9768(line=183, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 9892(line=184, offs=18) -- 9893(line=184, offs=19)
 */
 ATSifnthen(ATSCKpat_con0(arg0, 1)) { ATSINSgoto(__atstmplab76) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9808(line=183, offs=59) -- 9808(line=183, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 9933(line=184, offs=59) -- 9933(line=184, offs=59)
 */
 ATSINSlab(__atstmplab75):
 /*
@@ -9783,14 +9828,14 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9812(line=183, offs=63) -- 9817(line=183, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 9937(line=184, offs=63) -- 9942(line=184, offs=68)
 */
-ATSINSmove(tmpret340, ATSPMVbool_false()) ;
+ATSINSmove(tmpret342, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9821(line=183, offs=72) -- 9821(line=183, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 9946(line=184, offs=72) -- 9946(line=184, offs=72)
 */
 ATSINSlab(__atstmplab76):
 /*
@@ -9800,9 +9845,9 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9825(line=183, offs=76) -- 9829(line=183, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 9950(line=184, offs=76) -- 9954(line=184, offs=80)
 */
-ATSINSmove(tmpret340, ATSPMVbool_true()) ;
+ATSINSmove(tmpret342, ATSPMVbool_true()) ;
 ATSbranch_end()
 
 /*
@@ -9811,11 +9856,11 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret340) ;
+ATSreturn(tmpret342) ;
 } /* end of [makes_native_92] */
 
 /*
-build/src/bin/bats.dats: 9833(line=184, offs=4) -- 9909(line=184, offs=80)
+build/src/bin/bats.dats: 9958(line=185, offs=4) -- 10034(line=185, offs=80)
 */
 /*
 local: 
@@ -9828,15 +9873,15 @@ atstkind_t0ype(atstype_bool)
 makes_wasm_93(atstype_boxed arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret341, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret343, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9833(line=184, offs=4) -- 9909(line=184, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 9958(line=185, offs=4) -- 10034(line=185, offs=80)
 */
 ATSINSflab(__patsflab_makes_wasm_93):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9865(line=184, offs=36) -- 9909(line=184, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 9990(line=185, offs=36) -- 10034(line=185, offs=80)
 */
 ATScaseof_beg()
 /*
@@ -9844,15 +9889,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9876(line=184, offs=47) -- 9888(line=184, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 10001(line=185, offs=47) -- 10013(line=185, offs=59)
 */
 ATSINSlab(__atstmplab77):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9845(line=184, offs=16) -- 9846(line=184, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 9970(line=185, offs=16) -- 9971(line=185, offs=17)
 */
 ATSifnthen(ATSCKpat_con0(arg0, 0)) { ATSINSgoto(__atstmplab79) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9888(line=184, offs=59) -- 9888(line=184, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 10013(line=185, offs=59) -- 10013(line=185, offs=59)
 */
 ATSINSlab(__atstmplab78):
 /*
@@ -9862,14 +9907,14 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9892(line=184, offs=63) -- 9897(line=184, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 10017(line=185, offs=63) -- 10022(line=185, offs=68)
 */
-ATSINSmove(tmpret341, ATSPMVbool_false()) ;
+ATSINSmove(tmpret343, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9901(line=184, offs=72) -- 9901(line=184, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 10026(line=185, offs=72) -- 10026(line=185, offs=72)
 */
 ATSINSlab(__atstmplab79):
 /*
@@ -9879,9 +9924,9 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9905(line=184, offs=76) -- 9909(line=184, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 10030(line=185, offs=76) -- 10034(line=185, offs=80)
 */
-ATSINSmove(tmpret341, ATSPMVbool_true()) ;
+ATSINSmove(tmpret343, ATSPMVbool_true()) ;
 ATSbranch_end()
 
 /*
@@ -9890,11 +9935,11 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret341) ;
+ATSreturn(tmpret343) ;
 } /* end of [makes_wasm_93] */
 
 /*
-build/src/bin/bats.dats: 9978(line=187, offs=4) -- 10507(line=192, offs=13)
+build/src/bin/bats.dats: 10103(line=188, offs=4) -- 10632(line=193, offs=13)
 */
 /*
 local: 
@@ -9907,115 +9952,115 @@ postiats_tyrec_0
 only_add_94(postiats_tyrec_0 arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret342, postiats_tyrec_0) ;
-ATStmpdec(tmp343, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp344, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret344, postiats_tyrec_0) ;
 ATStmpdec(tmp345, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp346, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp347, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp348, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 9978(line=187, offs=4) -- 10507(line=192, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 10103(line=188, offs=4) -- 10632(line=193, offs=13)
 */
 ATSINSflab(__patsflab_only_add_94):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10035(line=188, offs=6) -- 10058(line=188, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 10160(line=189, offs=6) -- 10183(line=189, offs=29)
 */
-ATSINSmove(tmp343, atspre_g0int_eq_int(arg1, ATSPMVi0nt(100))) ;
+ATSINSmove(tmp345, atspre_g0int_eq_int(arg1, ATSPMVi0nt(100))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10032(line=188, offs=3) -- 10507(line=192, offs=13)
-*/
-ATSif(
-tmp343
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10064(line=188, offs=35) -- 10142(line=188, offs=113)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__debug, ATSPMVbool_true()) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__release, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__native, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__wasm, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)) ;
-ATSINSmove_fltrec_end()
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10153(line=189, offs=11) -- 10176(line=189, offs=34)
-*/
-ATSINSmove(tmp344, atspre_g0int_eq_int(arg1, ATSPMVi0nt(114))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10150(line=189, offs=8) -- 10507(line=192, offs=13)
-*/
-ATSif(
-tmp344
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10182(line=189, offs=40) -- 10258(line=189, offs=116)
-*/
-ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__debug, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__release, ATSPMVbool_true()) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__native, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__wasm, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)) ;
-ATSINSmove_fltrec_end()
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10269(line=190, offs=11) -- 10292(line=190, offs=34)
-*/
-ATSINSmove(tmp345, atspre_g0int_eq_int(arg1, ATSPMVi0nt(110))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10266(line=190, offs=8) -- 10507(line=192, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 10157(line=189, offs=3) -- 10632(line=193, offs=13)
 */
 ATSif(
 tmp345
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10298(line=190, offs=40) -- 10375(line=190, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 10189(line=189, offs=35) -- 10267(line=189, offs=113)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__debug, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__release, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__native, ATSPMVbool_true()) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__wasm, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__debug, ATSPMVbool_true()) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__release, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__native, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__wasm, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)) ;
 ATSINSmove_fltrec_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10386(line=191, offs=11) -- 10409(line=191, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 10278(line=190, offs=11) -- 10301(line=190, offs=34)
 */
-ATSINSmove(tmp346, atspre_g0int_eq_int(arg1, ATSPMVi0nt(119))) ;
+ATSINSmove(tmp346, atspre_g0int_eq_int(arg1, ATSPMVi0nt(114))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10383(line=191, offs=8) -- 10507(line=192, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 10275(line=190, offs=8) -- 10632(line=193, offs=13)
 */
 ATSif(
 tmp346
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10415(line=191, offs=40) -- 10494(line=191, offs=119)
+emit_instr: loc0 = build/src/bin/bats.dats: 10307(line=190, offs=40) -- 10383(line=190, offs=116)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__debug, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__release, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__native, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)) ;
-ATSINSstore_fltrec_ofs(tmpret342, postiats_tyrec_0, atslab__wasm, ATSPMVbool_true()) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__debug, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__release, ATSPMVbool_true()) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__native, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__wasm, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)) ;
 ATSINSmove_fltrec_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10502(line=192, offs=8) -- 10507(line=192, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 10394(line=191, offs=11) -- 10417(line=191, offs=34)
 */
-ATSINSmove(tmpret342, arg0) ;
+ATSINSmove(tmp347, atspre_g0int_eq_int(arg1, ATSPMVi0nt(110))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10391(line=191, offs=8) -- 10632(line=193, offs=13)
+*/
+ATSif(
+tmp347
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10423(line=191, offs=40) -- 10500(line=191, offs=117)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__debug, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__release, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__native, ATSPMVbool_true()) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__wasm, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__wasm)) ;
+ATSINSmove_fltrec_end()
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10511(line=192, offs=11) -- 10534(line=192, offs=34)
+*/
+ATSINSmove(tmp348, atspre_g0int_eq_int(arg1, ATSPMVi0nt(119))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10508(line=192, offs=8) -- 10632(line=193, offs=13)
+*/
+ATSif(
+tmp348
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10540(line=192, offs=40) -- 10619(line=192, offs=119)
+*/
+ATSINSmove_fltrec_beg()
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__debug, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__debug)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__release, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__release)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__native, ATSSELfltrec(arg0, postiats_tyrec_0, atslab__native)) ;
+ATSINSstore_fltrec_ofs(tmpret344, postiats_tyrec_0, atslab__wasm, ATSPMVbool_true()) ;
+ATSINSmove_fltrec_end()
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10627(line=193, offs=8) -- 10632(line=193, offs=13)
+*/
+ATSINSmove(tmpret344, arg0) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret342) ;
+ATSreturn(tmpret344) ;
 } /* end of [only_add_94] */
 
 /*
-build/src/bin/bats.dats: 10585(line=195, offs=5) -- 11664(line=222, offs=6)
+build/src/bin/bats.dats: 10710(line=196, offs=5) -- 11789(line=223, offs=6)
 */
 /*
 local: only_add_94$0(level=0), scan_only_95$0(level=0)
@@ -10032,345 +10077,345 @@ ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, postiats_tyrec_0) ;
-ATStmpdec(tmpret347, postiats_tyrec_0) ;
-ATStmpdec(tmp348, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp351, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp354, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp355, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret349, postiats_tyrec_0) ;
+ATStmpdec(tmp350, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp353, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp356, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp357, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp358, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp359, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp362, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp365, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp366, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp369, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp370, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp373, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp374, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp377, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp378, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp381, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp382, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp360, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp361, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp364, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp367, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp368, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp371, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp372, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp375, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp376, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp379, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp380, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp383, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp384, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp385, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp386, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp387, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp390, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp393, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp394, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp395, postiats_tyrec_0) ;
-ATStmpdec(tmp396, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp399, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp400, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp401, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp404, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp387, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp388, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp389, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp392, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp395, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp396, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp397, postiats_tyrec_0) ;
+ATStmpdec(tmp398, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp401, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp402, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp403, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp406, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10585(line=195, offs=5) -- 11664(line=222, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 10710(line=196, offs=5) -- 11789(line=223, offs=6)
 */
 ATSINSflab(__patsflab_scan_only_95):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10727(line=197, offs=6) -- 10737(line=197, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 10852(line=198, offs=6) -- 10862(line=198, offs=16)
 */
-ATSINSmove(tmp348, ATSLIB_056_prelude__gte_g0int_int__70__3(arg1, arg2)) ;
+ATSINSmove(tmp350, ATSLIB_056_prelude__gte_g0int_int__70__3(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10724(line=197, offs=3) -- 11664(line=222, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 10849(line=198, offs=3) -- 11789(line=223, offs=6)
 */
 ATSif(
-tmp348
+tmp350
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10743(line=197, offs=22) -- 10748(line=197, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 10868(line=198, offs=22) -- 10873(line=198, offs=27)
 */
-ATSINSmove(tmpret347, arg3) ;
+ATSINSmove(tmpret349, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10759(line=198, offs=11) -- 10770(line=198, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 10884(line=199, offs=11) -- 10895(line=199, offs=22)
 */
-ATSINSmove(tmp351, ATSLIB_056_prelude__gte_g1int_int__66__4(arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp353, ATSLIB_056_prelude__gte_g1int_int__66__4(arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10756(line=198, offs=8) -- 11664(line=222, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 10881(line=199, offs=8) -- 11789(line=223, offs=6)
 */
 ATSif(
-tmp351
+tmp353
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10776(line=198, offs=28) -- 10781(line=198, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 10901(line=199, offs=28) -- 10906(line=199, offs=33)
 */
-ATSINSmove(tmpret347, arg3) ;
+ATSINSmove(tmpret349, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp362, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp364, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp359, ATSLIB_056_prelude__eq_g0int_int__15__48(tmp362, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp361, ATSLIB_056_prelude__eq_g0int_int__15__48(tmp364, ATSPMVi0nt(45))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSif(
+tmp361
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp368, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp367, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp368, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp360, ATSLIB_056_prelude__eq_g0int_int__15__49(tmp367, ATSPMVi0nt(45))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp360, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSif(
+tmp360
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp372, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp371, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp372, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp359, ATSLIB_056_prelude__eq_g0int_int__15__50(tmp371, ATSPMVi0nt(111))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
+*/
+ATSINSmove(tmp359, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
 ATSif(
 tmp359
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp366, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp376, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp365, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp366, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp375, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp376, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp358, ATSLIB_056_prelude__eq_g0int_int__15__49(tmp365, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp358, ATSLIB_056_prelude__eq_g0int_int__15__51(tmp375, ATSPMVi0nt(110))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
 ATSINSmove(tmp358, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
 ATSif(
 tmp358
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp370, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp380, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp369, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp370, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp379, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp380, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp357, ATSLIB_056_prelude__eq_g0int_int__15__50(tmp369, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp357, ATSLIB_056_prelude__eq_g0int_int__15__52(tmp379, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
 ATSINSmove(tmp357, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
 ATSif(
 tmp357
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp374, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp384, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp373, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp374, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp383, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp384, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
-ATSINSmove(tmp356, ATSLIB_056_prelude__eq_g0int_int__15__51(tmp373, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp356, ATSLIB_056_prelude__eq_g0int_int__15__53(tmp383, ATSPMVi0nt(121))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10958(line=201, offs=11) -- 11196(line=203, offs=86)
 */
 ATSINSmove(tmp356, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 10955(line=201, offs=8) -- 11789(line=223, offs=6)
 */
 ATSif(
 tmp356
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp378, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp377, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp378, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp355, ATSLIB_056_prelude__eq_g0int_int__15__52(tmp377, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp355, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSif(
-tmp355
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp382, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp381, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp382, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp354, ATSLIB_056_prelude__eq_g0int_int__15__53(tmp381, ATSPMVi0nt(121))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10833(line=200, offs=11) -- 11071(line=202, offs=86)
-*/
-ATSINSmove(tmp354, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 10830(line=200, offs=8) -- 11664(line=222, offs=6)
-*/
-ATSif(
-tmp354
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 11077(line=202, offs=92) -- 11518(line=216, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 11202(line=203, offs=92) -- 11643(line=217, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11121(line=203, offs=41) -- 11128(line=203, offs=48)
+emit_instr: loc0 = build/src/bin/bats.dats: 11246(line=204, offs=41) -- 11253(line=204, offs=48)
 */
-ATSINSmove(tmp385, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp387, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11117(line=203, offs=37) -- 11135(line=203, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 11242(line=204, offs=37) -- 11260(line=204, offs=55)
 */
-ATSINSmove(tmp384, atspre_g1int_min_int(tmp385, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp386, atspre_g1int_min_int(tmp387, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11096(line=203, offs=16) -- 11142(line=203, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 11221(line=204, offs=16) -- 11267(line=204, offs=62)
 */
-ATSINSmove(tmp383, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp384, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp385, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp386, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11163(line=204, offs=21) -- 11171(line=204, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 11288(line=205, offs=21) -- 11296(line=205, offs=29)
 */
-ATSINSmove(tmp386, atspre_g1int_add_int(tmp383, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp388, atspre_g1int_add_int(tmp385, ATSPMVi0nt(1))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11184(line=206, offs=8) -- 11200(line=206, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 11309(line=207, offs=8) -- 11325(line=207, offs=24)
 */
-ATSINSmove(tmp387, ATSLIB_056_prelude__gte_g0int_int__70__4(tmp386, arg2)) ;
+ATSINSmove(tmp389, ATSLIB_056_prelude__gte_g0int_int__70__4(tmp388, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11181(line=206, offs=5) -- 11512(line=215, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 11306(line=207, offs=5) -- 11637(line=216, offs=8)
 */
 ATSif(
-tmp387
+tmp389
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11206(line=206, offs=30) -- 11211(line=206, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 11331(line=207, offs=30) -- 11336(line=207, offs=35)
 */
-ATSINSmove(tmpret347, arg3) ;
+ATSINSmove(tmpret349, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11224(line=207, offs=13) -- 11241(line=207, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 11349(line=208, offs=13) -- 11366(line=208, offs=30)
 */
-ATSINSmove(tmp390, ATSLIB_056_prelude__gte_g1int_int__66__5(tmp386, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp392, ATSLIB_056_prelude__gte_g1int_int__66__5(tmp388, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11221(line=207, offs=10) -- 11512(line=215, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 11346(line=208, offs=10) -- 11637(line=216, offs=8)
 */
 ATSif(
-tmp390
+tmp392
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11247(line=207, offs=36) -- 11252(line=207, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 11372(line=208, offs=36) -- 11377(line=208, offs=41)
 */
-ATSINSmove(tmpret347, arg3) ;
+ATSINSmove(tmpret349, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11262(line=208, offs=10) -- 11512(line=215, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 11387(line=209, offs=10) -- 11637(line=216, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11281(line=209, offs=16) -- 11311(line=209, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 11406(line=210, offs=16) -- 11436(line=210, offs=46)
 */
-ATSINSmove(tmp393, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp386, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp395, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp388, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11329(line=210, offs=18) -- 11366(line=210, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 11454(line=211, offs=18) -- 11491(line=211, offs=55)
 */
-ATSINSmove(tmp394, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp386, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp396, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp388, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11389(line=211, offs=23) -- 11408(line=211, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 11514(line=212, offs=23) -- 11533(line=212, offs=42)
 */
-ATSINSmove(tmp395, only_add_94(arg3, tmp393)) ;
+ATSINSmove(tmp397, only_add_94(arg3, tmp395)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11425(line=213, offs=10) -- 11437(line=213, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 11550(line=214, offs=10) -- 11562(line=214, offs=22)
 */
-ATSINSmove(tmp396, ATSLIB_056_prelude__gte_g1int_int__66__6(tmp394, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp398, ATSLIB_056_prelude__gte_g1int_int__66__6(tmp396, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11422(line=213, offs=7) -- 11504(line=214, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 11547(line=214, offs=7) -- 11629(line=215, offs=52)
 */
 ATSif(
-tmp396
+tmp398
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11443(line=213, offs=28) -- 11452(line=213, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 11568(line=214, offs=28) -- 11577(line=214, offs=37)
 */
-ATSINSmove(tmpret347, tmp395) ;
+ATSINSmove(tmpret349, tmp397) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11479(line=214, offs=27) -- 11487(line=214, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 11604(line=215, offs=27) -- 11612(line=215, offs=35)
 */
-ATSINSmove(tmp399, atspre_g1int_add_int(tmp394, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp401, atspre_g1int_add_int(tmp396, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11464(line=214, offs=12) -- 11504(line=214, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 11589(line=215, offs=12) -- 11629(line=215, offs=52)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp399) ;
+ATSINSmove_tlcal(apy1, tmp401) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp395) ;
+ATSINSmove_tlcal(apy3, tmp397) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -10380,7 +10425,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11262(line=208, offs=10) -- 11512(line=215, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 11387(line=209, offs=10) -- 11637(line=216, offs=8)
 */
 /*
 INSletpop()
@@ -10388,54 +10433,54 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11077(line=202, offs=92) -- 11518(line=216, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 11202(line=203, offs=92) -- 11643(line=217, offs=6)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11526(line=217, offs=8) -- 11664(line=222, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 11651(line=218, offs=8) -- 11789(line=223, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11545(line=218, offs=16) -- 11576(line=218, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 11670(line=219, offs=16) -- 11701(line=219, offs=47)
 */
-ATSINSmove(tmp400, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp402, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11589(line=220, offs=8) -- 11601(line=220, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 11714(line=221, offs=8) -- 11726(line=221, offs=20)
 */
-ATSINSmove(tmp401, ATSLIB_056_prelude__gte_g1int_int__66__7(tmp400, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp403, ATSLIB_056_prelude__gte_g1int_int__66__7(tmp402, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11586(line=220, offs=5) -- 11658(line=221, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 11711(line=221, offs=5) -- 11783(line=222, offs=46)
 */
 ATSif(
-tmp401
+tmp403
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11607(line=220, offs=26) -- 11612(line=220, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 11732(line=221, offs=26) -- 11737(line=221, offs=31)
 */
-ATSINSmove(tmpret347, arg3) ;
+ATSINSmove(tmpret349, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11637(line=221, offs=25) -- 11645(line=221, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 11762(line=222, offs=25) -- 11770(line=222, offs=33)
 */
-ATSINSmove(tmp404, atspre_g1int_add_int(tmp400, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp406, atspre_g1int_add_int(tmp402, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11622(line=221, offs=10) -- 11658(line=221, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 11747(line=222, offs=10) -- 11783(line=222, offs=46)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp404) ;
+ATSINSmove_tlcal(apy1, tmp406) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
@@ -10447,7 +10492,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11526(line=217, offs=8) -- 11664(line=222, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 11651(line=218, offs=8) -- 11789(line=223, offs=6)
 */
 /*
 INSletpop()
@@ -10456,7 +10501,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret347) ;
+ATSreturn(tmpret349) ;
 } /* end of [scan_only_95] */
 
 /*
@@ -10478,8 +10523,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__3, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10489,15 +10534,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__3, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__3, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__3, atspre_g0int_gte_int(arg0, tmp286__3)) ;
+ATSINSmove(tmpret287__3, atspre_g0int_gte_int(arg0, tmp288__3)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__3) ;
+ATSreturn(tmpret287__3) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__3] */
 
 /*
@@ -10519,8 +10564,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__4, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__4, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__4, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10530,15 +10575,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__4, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__4, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__4, atspre_g1int_gte_int(arg0, tmp281__4)) ;
+ATSINSmove(tmpret282__4, atspre_g1int_gte_int(arg0, tmp283__4)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__4) ;
+ATSreturn(tmpret282__4) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__4] */
 
 /*
@@ -10806,8 +10851,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__4, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__4, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__4, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10817,15 +10862,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__4, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__4, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__4, atspre_g0int_gte_int(arg0, tmp286__4)) ;
+ATSINSmove(tmpret287__4, atspre_g0int_gte_int(arg0, tmp288__4)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__4) ;
+ATSreturn(tmpret287__4) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__4] */
 
 /*
@@ -10847,8 +10892,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__5, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__5, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10858,15 +10903,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__5, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__5, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__5, atspre_g1int_gte_int(arg0, tmp281__5)) ;
+ATSINSmove(tmpret282__5, atspre_g1int_gte_int(arg0, tmp283__5)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__5) ;
+ATSreturn(tmpret282__5) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__5] */
 
 /*
@@ -10888,8 +10933,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__6, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__6, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__6, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__6, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10899,15 +10944,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__6, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__6, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__6, atspre_g1int_gte_int(arg0, tmp281__6)) ;
+ATSINSmove(tmpret282__6, atspre_g1int_gte_int(arg0, tmp283__6)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__6) ;
+ATSreturn(tmpret282__6) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__6] */
 
 /*
@@ -10929,8 +10974,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__7, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__7, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__7, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__7, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -10940,19 +10985,19 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__7, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__7, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__7, atspre_g1int_gte_int(arg0, tmp281__7)) ;
+ATSINSmove(tmpret282__7, atspre_g1int_gte_int(arg0, tmp283__7)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__7) ;
+ATSreturn(tmpret282__7) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__7] */
 
 /*
-build/src/bin/bats.dats: 11890(line=227, offs=5) -- 12966(line=254, offs=6)
+build/src/bin/bats.dats: 12015(line=228, offs=5) -- 13091(line=255, offs=6)
 */
 /*
 local: count_positionals_109$0(level=0)
@@ -10969,13 +11014,11 @@ ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret405, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp406, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp409, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp412, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp413, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp416, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp417, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret407, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp408, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp411, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp414, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp415, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp418, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp419, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp420, atstkind_t0ype(atstype_int)) ;
@@ -10984,409 +11027,411 @@ ATStmpdec(tmp422, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp423, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp424, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp425, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp426, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp427, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp430, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp431, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp426, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp427, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp428, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp429, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp432, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp433, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp434, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp437, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp448, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp453, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp456, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp457, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp460, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp463, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp464, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp467, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp468, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp435, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp436, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp439, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp450, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp455, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp458, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp459, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp462, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp465, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp466, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp469, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp470, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp471, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 11890(line=227, offs=5) -- 12966(line=254, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 12015(line=228, offs=5) -- 13091(line=255, offs=6)
 */
 ATSINSflab(__patsflab_count_positionals_109):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12026(line=229, offs=6) -- 12036(line=229, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 12151(line=230, offs=6) -- 12161(line=230, offs=16)
 */
-ATSINSmove(tmp406, ATSLIB_056_prelude__gte_g0int_int__70__5(arg1, arg2)) ;
+ATSINSmove(tmp408, ATSLIB_056_prelude__gte_g0int_int__70__5(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12023(line=229, offs=3) -- 12966(line=254, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 12148(line=230, offs=3) -- 13091(line=255, offs=6)
 */
 ATSif(
-tmp406
+tmp408
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12042(line=229, offs=22) -- 12047(line=229, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 12167(line=230, offs=22) -- 12172(line=230, offs=27)
 */
-ATSINSmove(tmpret405, arg3) ;
+ATSINSmove(tmpret407, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12058(line=230, offs=11) -- 12069(line=230, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 12183(line=231, offs=11) -- 12194(line=231, offs=22)
 */
-ATSINSmove(tmp409, ATSLIB_056_prelude__gte_g1int_int__66__8(arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp411, ATSLIB_056_prelude__gte_g1int_int__66__8(arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12055(line=230, offs=8) -- 12966(line=254, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 12180(line=231, offs=8) -- 13091(line=255, offs=6)
 */
 ATSif(
-tmp409
+tmp411
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12075(line=230, offs=28) -- 12080(line=230, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 12200(line=231, offs=28) -- 12205(line=231, offs=33)
 */
-ATSINSmove(tmpret405, arg3) ;
+ATSINSmove(tmpret407, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12088(line=231, offs=8) -- 12966(line=254, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 12213(line=232, offs=8) -- 13091(line=255, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12107(line=232, offs=16) -- 12138(line=232, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 12232(line=233, offs=16) -- 12263(line=233, offs=47)
 */
-ATSINSmove(tmp412, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp414, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12154(line=233, offs=16) -- 12178(line=233, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 12279(line=234, offs=16) -- 12303(line=234, offs=40)
 */
-ATSINSmove(tmp416, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp418, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12154(line=233, offs=16) -- 12183(line=233, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 12279(line=234, offs=16) -- 12308(line=234, offs=45)
 */
-ATSINSmove(tmp413, ATSLIB_056_prelude__eq_g0int_int__15__54(tmp416, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp415, ATSLIB_056_prelude__eq_g0int_int__15__54(tmp418, ATSPMVi0nt(45))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12215(line=234, offs=32) -- 12222(line=234, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 12340(line=235, offs=32) -- 12347(line=235, offs=39)
 */
-ATSINSmove(tmp419, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp421, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12211(line=234, offs=28) -- 12229(line=234, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 12336(line=235, offs=28) -- 12354(line=235, offs=46)
 */
-ATSINSmove(tmp418, atspre_g1int_min_int(tmp419, ATSPMVi0nt(4095))) ;
+ATSINSmove(tmp420, atspre_g1int_min_int(tmp421, ATSPMVi0nt(4095))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12197(line=234, offs=14) -- 12236(line=234, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 12322(line=235, offs=14) -- 12361(line=235, offs=53)
 */
-ATSINSmove(tmp417, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp418, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp419, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp420, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12268(line=235, offs=32) -- 12275(line=235, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 12393(line=236, offs=32) -- 12400(line=236, offs=39)
 */
-ATSINSmove(tmp422, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp424, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12264(line=235, offs=28) -- 12282(line=235, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 12389(line=236, offs=28) -- 12407(line=236, offs=46)
 */
-ATSINSmove(tmp421, atspre_g1int_min_int(tmp422, ATSPMVi0nt(4095))) ;
+ATSINSmove(tmp423, atspre_g1int_min_int(tmp424, ATSPMVi0nt(4095))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12250(line=235, offs=14) -- 12289(line=235, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 12375(line=236, offs=14) -- 12414(line=236, offs=53)
 */
-ATSINSmove(tmp420, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp421, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp422, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp423, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12321(line=236, offs=32) -- 12328(line=236, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 12446(line=237, offs=32) -- 12453(line=237, offs=39)
 */
-ATSINSmove(tmp425, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp427, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12317(line=236, offs=28) -- 12335(line=236, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 12442(line=237, offs=28) -- 12460(line=237, offs=46)
 */
-ATSINSmove(tmp424, atspre_g1int_min_int(tmp425, ATSPMVi0nt(4095))) ;
+ATSINSmove(tmp426, atspre_g1int_min_int(tmp427, ATSPMVi0nt(4095))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12303(line=236, offs=14) -- 12342(line=236, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 12428(line=237, offs=14) -- 12467(line=237, offs=53)
 */
-ATSINSmove(tmp423, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp424, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp425, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp426, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSif(
-tmp413
+tmp415
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp427, ATSLIB_056_prelude__eq_g0int_int__15__55(tmp417, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp429, ATSLIB_056_prelude__eq_g0int_int__15__55(tmp419, ATSPMVi0nt(45))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp427, ATSPMVbool_false()) ;
+ATSINSmove(tmp429, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSif(
-tmp427
+tmp429
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp434, ATSLIB_056_prelude__eq_g0int_int__15__56(tmp420, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp436, ATSLIB_056_prelude__eq_g0int_int__15__56(tmp422, ATSPMVi0nt(114))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSif(
+tmp436
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSINSmove(tmp439, ATSLIB_056_prelude__eq_g0int_int__15__57(tmp425, ATSPMVi0nt(101))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSif(
+tmp439
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSINSmove(tmp435, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSINSmove(tmp435, ATSLIB_056_prelude__eq_g0int_int__15__58(tmp425, ATSPMVi0nt(117))) ;
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSINSmove(tmp435, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSif(
+tmp435
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSINSmove(tmp434, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
+*/
+ATSINSmove(tmp434, ATSLIB_056_prelude__eq_g0int_int__15__59(tmp422, ATSPMVi0nt(111))) ;
+
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSif(
 tmp434
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSINSmove(tmp437, ATSLIB_056_prelude__eq_g0int_int__15__57(tmp423, ATSPMVi0nt(101))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSif(
-tmp437
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSINSmove(tmp433, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp433, ATSLIB_056_prelude__eq_g0int_int__15__58(tmp423, ATSPMVi0nt(117))) ;
+ATSINSmove(tmp433, ATSLIB_056_prelude__eq_g0int_int__15__60(tmp422, ATSPMVi0nt(98))) ;
 
 } /* ATSendif */
-} ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSINSmove(tmp433, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSif(
 tmp433
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSINSmove(tmp432, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp432, ATSLIB_056_prelude__eq_g0int_int__15__59(tmp420, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp432, ATSLIB_056_prelude__eq_g0int_int__15__61(tmp422, ATSPMVi0nt(116))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSif(
 tmp432
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp431, ATSPMVbool_true()) ;
+ATSINSmove(tmp428, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp431, ATSLIB_056_prelude__eq_g0int_int__15__60(tmp420, ATSPMVi0nt(98))) ;
+ATSINSmove(tmp450, ATSLIB_056_prelude__eq_g0int_int__15__62(tmp422, ATSPMVi0nt(102))) ;
 
-} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
 ATSif(
-tmp431
+tmp450
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp430, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSINSmove(tmp430, ATSLIB_056_prelude__eq_g0int_int__15__61(tmp420, ATSPMVi0nt(116))) ;
-
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSif(
-tmp430
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSINSmove(tmp426, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSINSmove(tmp448, ATSLIB_056_prelude__eq_g0int_int__15__62(tmp420, ATSPMVi0nt(102))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSif(
-tmp448
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
-*/
-ATSINSmove(tmp426, ATSLIB_056_prelude__eq_g0int_int__15__63(tmp423, ATSPMVi0nt(105))) ;
+ATSINSmove(tmp428, ATSLIB_056_prelude__eq_g0int_int__15__63(tmp425, ATSPMVi0nt(105))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp426, ATSPMVbool_false()) ;
+ATSINSmove(tmp428, ATSPMVbool_false()) ;
 } /* ATSendif */
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12360(line=237, offs=18) -- 12484(line=238, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 12485(line=238, offs=18) -- 12609(line=239, offs=109)
 */
-ATSINSmove(tmp426, ATSPMVbool_false()) ;
+ATSINSmove(tmp428, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12497(line=240, offs=8) -- 12509(line=240, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 12622(line=241, offs=8) -- 12634(line=241, offs=20)
 */
-ATSINSmove(tmp453, ATSLIB_056_prelude__gte_g1int_int__66__9(tmp412, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp455, ATSLIB_056_prelude__gte_g1int_int__66__9(tmp414, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12494(line=240, offs=5) -- 12960(line=253, offs=84)
+emit_instr: loc0 = build/src/bin/bats.dats: 12619(line=241, offs=5) -- 13085(line=254, offs=84)
 */
 ATSif(
-tmp453
+tmp455
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12516(line=240, offs=27) -- 12549(line=240, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 12641(line=241, offs=27) -- 12674(line=241, offs=60)
 */
 ATSif(
-tmp413
+tmp415
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12529(line=240, offs=40) -- 12534(line=240, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 12654(line=241, offs=40) -- 12659(line=241, offs=45)
 */
-ATSINSmove(tmpret405, arg3) ;
+ATSINSmove(tmpret407, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12540(line=240, offs=51) -- 12549(line=240, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 12665(line=241, offs=51) -- 12674(line=241, offs=60)
 */
-ATSINSmove(tmpret405, atspre_g0int_add_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret407, atspre_g0int_add_int(arg3, ATSPMVi0nt(1))) ;
 
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12560(line=241, offs=10) -- 12960(line=253, offs=84)
+emit_instr: loc0 = build/src/bin/bats.dats: 12685(line=242, offs=10) -- 13085(line=254, offs=84)
 */
 ATSif(
-tmp426
+tmp428
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12575(line=241, offs=25) -- 12876(line=252, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 12700(line=242, offs=25) -- 13001(line=253, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12598(line=242, offs=20) -- 12606(line=242, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 12723(line=243, offs=20) -- 12731(line=243, offs=28)
 */
-ATSINSmove(tmp456, atspre_g1int_add_int(tmp412, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp458, atspre_g1int_add_int(tmp414, ATSPMVi0nt(1))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12623(line=244, offs=10) -- 12636(line=244, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 12748(line=245, offs=10) -- 12761(line=245, offs=23)
 */
-ATSINSmove(tmp457, ATSLIB_056_prelude__gte_g0int_int__70__6(tmp456, arg2)) ;
+ATSINSmove(tmp459, ATSLIB_056_prelude__gte_g0int_int__70__6(tmp458, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12620(line=244, offs=7) -- 12868(line=251, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 12745(line=245, offs=7) -- 12993(line=252, offs=10)
 */
 ATSif(
-tmp457
+tmp459
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12642(line=244, offs=29) -- 12647(line=244, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 12767(line=245, offs=29) -- 12772(line=245, offs=34)
 */
-ATSINSmove(tmpret405, arg3) ;
+ATSINSmove(tmpret407, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12662(line=245, offs=15) -- 12676(line=245, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 12787(line=246, offs=15) -- 12801(line=246, offs=29)
 */
-ATSINSmove(tmp460, ATSLIB_056_prelude__gte_g1int_int__66__10(tmp456, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp462, ATSLIB_056_prelude__gte_g1int_int__66__10(tmp458, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12659(line=245, offs=12) -- 12868(line=251, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 12784(line=246, offs=12) -- 12993(line=252, offs=10)
 */
 ATSif(
-tmp460
+tmp462
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12682(line=245, offs=35) -- 12687(line=245, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 12807(line=246, offs=35) -- 12812(line=246, offs=40)
 */
-ATSINSmove(tmpret405, arg3) ;
+ATSINSmove(tmpret407, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12699(line=246, offs=12) -- 12868(line=251, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 12824(line=247, offs=12) -- 12993(line=252, offs=10)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12722(line=247, offs=20) -- 12756(line=247, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 12847(line=248, offs=20) -- 12881(line=248, offs=54)
 */
-ATSINSmove(tmp463, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp456, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp465, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp458, ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12777(line=249, offs=12) -- 12789(line=249, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 12902(line=250, offs=12) -- 12914(line=250, offs=24)
 */
-ATSINSmove(tmp464, ATSLIB_056_prelude__gte_g1int_int__66__11(tmp463, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp466, ATSLIB_056_prelude__gte_g1int_int__66__11(tmp465, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12774(line=249, offs=9) -- 12858(line=250, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 12899(line=250, offs=9) -- 12983(line=251, offs=58)
 */
 ATSif(
-tmp464
+tmp466
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12795(line=249, offs=30) -- 12800(line=249, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 12920(line=250, offs=30) -- 12925(line=250, offs=35)
 */
-ATSINSmove(tmpret405, arg3) ;
+ATSINSmove(tmpret407, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12837(line=250, offs=37) -- 12845(line=250, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 12962(line=251, offs=37) -- 12970(line=251, offs=45)
 */
-ATSINSmove(tmp467, atspre_g1int_add_int(tmp463, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp469, atspre_g1int_add_int(tmp465, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12814(line=250, offs=14) -- 12858(line=250, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 12939(line=251, offs=14) -- 12983(line=251, offs=58)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp467) ;
+ATSINSmove_tlcal(apy1, tmp469) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSmove_tlcal(apy3, arg3) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
@@ -11398,7 +11443,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12699(line=246, offs=12) -- 12868(line=251, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 12824(line=247, offs=12) -- 12993(line=252, offs=10)
 */
 /*
 INSletpop()
@@ -11406,42 +11451,42 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12575(line=241, offs=25) -- 12876(line=252, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 12700(line=242, offs=25) -- 13001(line=253, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12909(line=253, offs=33) -- 12917(line=253, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 13034(line=254, offs=33) -- 13042(line=254, offs=41)
 */
-ATSINSmove(tmp468, atspre_g1int_add_int(tmp412, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp470, atspre_g1int_add_int(tmp414, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12925(line=253, offs=49) -- 12958(line=253, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 13050(line=254, offs=49) -- 13083(line=254, offs=82)
 */
 ATSif(
-tmp413
+tmp415
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12938(line=253, offs=62) -- 12943(line=253, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 13063(line=254, offs=62) -- 13068(line=254, offs=67)
 */
-ATSINSmove(tmp469, arg3) ;
+ATSINSmove(tmp471, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12949(line=253, offs=73) -- 12958(line=253, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 13074(line=254, offs=73) -- 13083(line=254, offs=82)
 */
-ATSINSmove(tmp469, atspre_g0int_add_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp471, atspre_g0int_add_int(arg3, ATSPMVi0nt(1))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12886(line=253, offs=10) -- 12960(line=253, offs=84)
+emit_instr: loc0 = build/src/bin/bats.dats: 13011(line=254, offs=10) -- 13085(line=254, offs=84)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp468) ;
+ATSINSmove_tlcal(apy1, tmp470) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp469) ;
+ATSINSmove_tlcal(apy3, tmp471) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -11452,7 +11497,7 @@ ATStailcal_end()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 12088(line=231, offs=8) -- 12966(line=254, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 12213(line=232, offs=8) -- 13091(line=255, offs=6)
 */
 /*
 INSletpop()
@@ -11460,7 +11505,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret405) ;
+ATSreturn(tmpret407) ;
 } /* end of [count_positionals_109] */
 
 /*
@@ -11482,8 +11527,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__5, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__5, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -11493,15 +11538,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__5, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__5, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__5, atspre_g0int_gte_int(arg0, tmp286__5)) ;
+ATSINSmove(tmpret287__5, atspre_g0int_gte_int(arg0, tmp288__5)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__5) ;
+ATSreturn(tmpret287__5) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__5] */
 
 /*
@@ -11523,8 +11568,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__8, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__8, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__8, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__8, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -11534,15 +11579,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__8, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__8, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__8, atspre_g1int_gte_int(arg0, tmp281__8)) ;
+ATSINSmove(tmpret282__8, atspre_g1int_gte_int(arg0, tmp283__8)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__8) ;
+ATSreturn(tmpret282__8) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__8] */
 
 /*
@@ -11974,8 +12019,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__9, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__9, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__9, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__9, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -11985,15 +12030,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__9, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__9, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__9, atspre_g1int_gte_int(arg0, tmp281__9)) ;
+ATSINSmove(tmpret282__9, atspre_g1int_gte_int(arg0, tmp283__9)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__9) ;
+ATSreturn(tmpret282__9) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__9] */
 
 /*
@@ -12015,8 +12060,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__6, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__6, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__6, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__6, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -12026,15 +12071,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__6, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__6, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__6, atspre_g0int_gte_int(arg0, tmp286__6)) ;
+ATSINSmove(tmpret287__6, atspre_g0int_gte_int(arg0, tmp288__6)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__6) ;
+ATSreturn(tmpret287__6) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__6] */
 
 /*
@@ -12056,8 +12101,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__10, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__10, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__10, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__10, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -12067,15 +12112,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__10, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__10, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__10, atspre_g1int_gte_int(arg0, tmp281__10)) ;
+ATSINSmove(tmpret282__10, atspre_g1int_gte_int(arg0, tmp283__10)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__10) ;
+ATSreturn(tmpret282__10) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__10] */
 
 /*
@@ -12097,8 +12142,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__11(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__11, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__11, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__11, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__11, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -12108,19 +12153,19 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__11, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__11, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__11, atspre_g1int_gte_int(arg0, tmp281__11)) ;
+ATSINSmove(tmpret282__11, atspre_g1int_gte_int(arg0, tmp283__11)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__11) ;
+ATSreturn(tmpret282__11) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__11] */
 
 /*
-build/src/bin/bats.dats: 13149(line=259, offs=5) -- 14155(line=287, offs=6)
+build/src/bin/bats.dats: 13274(line=260, offs=5) -- 14280(line=288, offs=6)
 */
 /*
 local: first_positional_127$0(level=0)
@@ -12136,13 +12181,11 @@ first_positional_127(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind
 ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret470, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp471, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp474, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp477, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp478, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp481, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp482, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret472, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp473, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp476, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp479, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp480, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp483, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp484, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp485, atstkind_t0ype(atstype_int)) ;
@@ -12151,418 +12194,420 @@ ATStmpdec(tmp487, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp488, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp489, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp490, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp491, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp492, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp495, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp496, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp491, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp492, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp493, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp494, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp497, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp498, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp499, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp502, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp513, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp518, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp519, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp522, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp523, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp526, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp529, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp530, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp533, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp534, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp500, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp501, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp504, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp515, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp520, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp521, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp524, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp525, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp528, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp531, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp532, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp535, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp536, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13149(line=259, offs=5) -- 14155(line=287, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 13274(line=260, offs=5) -- 14280(line=288, offs=6)
 */
 ATSINSflab(__patsflab_first_positional_127):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13282(line=261, offs=6) -- 13292(line=261, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 13407(line=262, offs=6) -- 13417(line=262, offs=16)
 */
-ATSINSmove(tmp471, ATSLIB_056_prelude__gte_g0int_int__70__7(arg1, arg2)) ;
+ATSINSmove(tmp473, ATSLIB_056_prelude__gte_g0int_int__70__7(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13279(line=261, offs=3) -- 14155(line=287, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 13404(line=262, offs=3) -- 14280(line=288, offs=6)
 */
 ATSif(
-tmp471
+tmp473
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13298(line=261, offs=22) -- 13300(line=261, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 13423(line=262, offs=22) -- 13425(line=262, offs=24)
 */
-ATSINSmove(tmpret470, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret472, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13311(line=262, offs=11) -- 13322(line=262, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 13436(line=263, offs=11) -- 13447(line=263, offs=22)
 */
-ATSINSmove(tmp474, ATSLIB_056_prelude__gte_g1int_int__66__12(arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp476, ATSLIB_056_prelude__gte_g1int_int__66__12(arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13308(line=262, offs=8) -- 14155(line=287, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 13433(line=263, offs=8) -- 14280(line=288, offs=6)
 */
 ATSif(
-tmp474
+tmp476
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13328(line=262, offs=28) -- 13330(line=262, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 13453(line=263, offs=28) -- 13455(line=263, offs=30)
 */
-ATSINSmove(tmpret470, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret472, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13338(line=263, offs=8) -- 14155(line=287, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 13463(line=264, offs=8) -- 14280(line=288, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13357(line=264, offs=16) -- 13388(line=264, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 13482(line=265, offs=16) -- 13513(line=265, offs=47)
 */
-ATSINSmove(tmp477, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp479, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13404(line=265, offs=16) -- 13428(line=265, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 13529(line=266, offs=16) -- 13553(line=266, offs=40)
 */
-ATSINSmove(tmp481, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp483, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13404(line=265, offs=16) -- 13433(line=265, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 13529(line=266, offs=16) -- 13558(line=266, offs=45)
 */
-ATSINSmove(tmp478, ATSLIB_056_prelude__eq_g0int_int__15__64(tmp481, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp480, ATSLIB_056_prelude__eq_g0int_int__15__64(tmp483, ATSPMVi0nt(45))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13465(line=266, offs=32) -- 13472(line=266, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 13590(line=267, offs=32) -- 13597(line=267, offs=39)
 */
-ATSINSmove(tmp484, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp486, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13461(line=266, offs=28) -- 13479(line=266, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 13586(line=267, offs=28) -- 13604(line=267, offs=46)
 */
-ATSINSmove(tmp483, atspre_g1int_min_int(tmp484, ATSPMVi0nt(4095))) ;
+ATSINSmove(tmp485, atspre_g1int_min_int(tmp486, ATSPMVi0nt(4095))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13447(line=266, offs=14) -- 13486(line=266, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 13572(line=267, offs=14) -- 13611(line=267, offs=53)
 */
-ATSINSmove(tmp482, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp483, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp484, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp485, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13518(line=267, offs=32) -- 13525(line=267, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 13643(line=268, offs=32) -- 13650(line=268, offs=39)
 */
-ATSINSmove(tmp487, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp489, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13514(line=267, offs=28) -- 13532(line=267, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 13639(line=268, offs=28) -- 13657(line=268, offs=46)
 */
-ATSINSmove(tmp486, atspre_g1int_min_int(tmp487, ATSPMVi0nt(4095))) ;
+ATSINSmove(tmp488, atspre_g1int_min_int(tmp489, ATSPMVi0nt(4095))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13500(line=267, offs=14) -- 13539(line=267, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 13625(line=268, offs=14) -- 13664(line=268, offs=53)
 */
-ATSINSmove(tmp485, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp486, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp487, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp488, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13571(line=268, offs=32) -- 13578(line=268, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 13696(line=269, offs=32) -- 13703(line=269, offs=39)
 */
-ATSINSmove(tmp490, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp492, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13567(line=268, offs=28) -- 13585(line=268, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 13692(line=269, offs=28) -- 13710(line=269, offs=46)
 */
-ATSINSmove(tmp489, atspre_g1int_min_int(tmp490, ATSPMVi0nt(4095))) ;
+ATSINSmove(tmp491, atspre_g1int_min_int(tmp492, ATSPMVi0nt(4095))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13553(line=268, offs=14) -- 13592(line=268, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 13678(line=269, offs=14) -- 13717(line=269, offs=53)
 */
-ATSINSmove(tmp488, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp489, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp490, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp491, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSif(
-tmp478
+tmp480
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp492, ATSLIB_056_prelude__eq_g0int_int__15__65(tmp482, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp494, ATSLIB_056_prelude__eq_g0int_int__15__65(tmp484, ATSPMVi0nt(45))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp492, ATSPMVbool_false()) ;
+ATSINSmove(tmp494, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSif(
-tmp492
+tmp494
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp499, ATSLIB_056_prelude__eq_g0int_int__15__66(tmp485, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp501, ATSLIB_056_prelude__eq_g0int_int__15__66(tmp487, ATSPMVi0nt(114))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSif(
+tmp501
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSINSmove(tmp504, ATSLIB_056_prelude__eq_g0int_int__15__67(tmp490, ATSPMVi0nt(101))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSif(
+tmp504
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSINSmove(tmp500, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSINSmove(tmp500, ATSLIB_056_prelude__eq_g0int_int__15__68(tmp490, ATSPMVi0nt(117))) ;
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSINSmove(tmp500, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSif(
+tmp500
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSINSmove(tmp499, ATSPMVbool_true()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
+*/
+ATSINSmove(tmp499, ATSLIB_056_prelude__eq_g0int_int__15__69(tmp487, ATSPMVi0nt(111))) ;
+
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSif(
 tmp499
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSINSmove(tmp502, ATSLIB_056_prelude__eq_g0int_int__15__67(tmp488, ATSPMVi0nt(101))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSif(
-tmp502
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSINSmove(tmp498, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp498, ATSLIB_056_prelude__eq_g0int_int__15__68(tmp488, ATSPMVi0nt(117))) ;
+ATSINSmove(tmp498, ATSLIB_056_prelude__eq_g0int_int__15__70(tmp487, ATSPMVi0nt(98))) ;
 
 } /* ATSendif */
-} ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSINSmove(tmp498, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSif(
 tmp498
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSINSmove(tmp497, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp497, ATSLIB_056_prelude__eq_g0int_int__15__69(tmp485, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp497, ATSLIB_056_prelude__eq_g0int_int__15__71(tmp487, ATSPMVi0nt(116))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSif(
 tmp497
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp496, ATSPMVbool_true()) ;
+ATSINSmove(tmp493, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp496, ATSLIB_056_prelude__eq_g0int_int__15__70(tmp485, ATSPMVi0nt(98))) ;
+ATSINSmove(tmp515, ATSLIB_056_prelude__eq_g0int_int__15__72(tmp487, ATSPMVi0nt(102))) ;
 
-} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
 ATSif(
-tmp496
+tmp515
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp495, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSINSmove(tmp495, ATSLIB_056_prelude__eq_g0int_int__15__71(tmp485, ATSPMVi0nt(116))) ;
-
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSif(
-tmp495
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSINSmove(tmp491, ATSPMVbool_true()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSINSmove(tmp513, ATSLIB_056_prelude__eq_g0int_int__15__72(tmp485, ATSPMVi0nt(102))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSif(
-tmp513
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
-*/
-ATSINSmove(tmp491, ATSLIB_056_prelude__eq_g0int_int__15__73(tmp488, ATSPMVi0nt(105))) ;
+ATSINSmove(tmp493, ATSLIB_056_prelude__eq_g0int_int__15__73(tmp490, ATSPMVi0nt(105))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp491, ATSPMVbool_false()) ;
+ATSINSmove(tmp493, ATSPMVbool_false()) ;
 } /* ATSendif */
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13610(line=269, offs=18) -- 13734(line=270, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 13735(line=270, offs=18) -- 13859(line=271, offs=109)
 */
-ATSINSmove(tmp491, ATSPMVbool_false()) ;
+ATSINSmove(tmp493, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13747(line=272, offs=8) -- 13752(line=272, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 13872(line=273, offs=8) -- 13877(line=273, offs=13)
 */
-ATSINSmove(tmp518, atspre_neg_bool0(tmp478)) ;
+ATSINSmove(tmp520, atspre_neg_bool0(tmp480)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13744(line=272, offs=5) -- 14149(line=286, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 13869(line=273, offs=5) -- 14274(line=287, offs=46)
 */
 ATSif(
-tmp518
+tmp520
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13758(line=272, offs=19) -- 13761(line=272, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 13883(line=273, offs=19) -- 13886(line=273, offs=22)
 */
-ATSINSmove(tmpret470, arg1) ;
+ATSINSmove(tmpret472, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13774(line=273, offs=13) -- 13786(line=273, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 13899(line=274, offs=13) -- 13911(line=274, offs=25)
 */
-ATSINSmove(tmp519, ATSLIB_056_prelude__gte_g1int_int__66__13(tmp477, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp521, ATSLIB_056_prelude__gte_g1int_int__66__13(tmp479, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13771(line=273, offs=10) -- 14149(line=286, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 13896(line=274, offs=10) -- 14274(line=287, offs=46)
 */
 ATSif(
-tmp519
+tmp521
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13792(line=273, offs=31) -- 13794(line=273, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 13917(line=274, offs=31) -- 13919(line=274, offs=33)
 */
-ATSINSmove(tmpret470, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret472, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13804(line=274, offs=10) -- 14149(line=286, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 13929(line=275, offs=10) -- 14274(line=287, offs=46)
 */
 ATSif(
-tmp491
+tmp493
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13819(line=274, offs=25) -- 14103(line=285, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 13944(line=275, offs=25) -- 14228(line=286, offs=8)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13842(line=275, offs=20) -- 13850(line=275, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 13967(line=276, offs=20) -- 13975(line=276, offs=28)
 */
-ATSINSmove(tmp522, atspre_g1int_add_int(tmp477, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp524, atspre_g1int_add_int(tmp479, ATSPMVi0nt(1))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13867(line=277, offs=10) -- 13880(line=277, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 13992(line=278, offs=10) -- 14005(line=278, offs=23)
 */
-ATSINSmove(tmp523, ATSLIB_056_prelude__gte_g0int_int__70__8(tmp522, arg2)) ;
+ATSINSmove(tmp525, ATSLIB_056_prelude__gte_g0int_int__70__8(tmp524, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13864(line=277, offs=7) -- 14095(line=284, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 13989(line=278, offs=7) -- 14220(line=285, offs=10)
 */
 ATSif(
-tmp523
+tmp525
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13886(line=277, offs=29) -- 13888(line=277, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 14011(line=278, offs=29) -- 14013(line=278, offs=31)
 */
-ATSINSmove(tmpret470, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret472, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13903(line=278, offs=15) -- 13917(line=278, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 14028(line=279, offs=15) -- 14042(line=279, offs=29)
 */
-ATSINSmove(tmp526, ATSLIB_056_prelude__gte_g1int_int__66__14(tmp522, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp528, ATSLIB_056_prelude__gte_g1int_int__66__14(tmp524, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13900(line=278, offs=12) -- 14095(line=284, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 14025(line=279, offs=12) -- 14220(line=285, offs=10)
 */
 ATSif(
-tmp526
+tmp528
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13923(line=278, offs=35) -- 13925(line=278, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 14048(line=279, offs=35) -- 14050(line=279, offs=37)
 */
-ATSINSmove(tmpret470, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret472, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13937(line=279, offs=12) -- 14095(line=284, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 14062(line=280, offs=12) -- 14220(line=285, offs=10)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13960(line=280, offs=20) -- 13994(line=280, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 14085(line=281, offs=20) -- 14119(line=281, offs=54)
 */
-ATSINSmove(tmp529, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp522, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp531, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp524, ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14015(line=282, offs=12) -- 14027(line=282, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 14140(line=283, offs=12) -- 14152(line=283, offs=24)
 */
-ATSINSmove(tmp530, ATSLIB_056_prelude__gte_g1int_int__66__15(tmp529, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp532, ATSLIB_056_prelude__gte_g1int_int__66__15(tmp531, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14012(line=282, offs=9) -- 14085(line=283, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 14137(line=283, offs=9) -- 14210(line=284, offs=50)
 */
 ATSif(
-tmp530
+tmp532
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14033(line=282, offs=30) -- 14035(line=282, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 14158(line=283, offs=30) -- 14160(line=283, offs=32)
 */
-ATSINSmove(tmpret470, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret472, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14071(line=283, offs=36) -- 14079(line=283, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 14196(line=284, offs=36) -- 14204(line=284, offs=44)
 */
-ATSINSmove(tmp533, atspre_g1int_add_int(tmp529, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp535, atspre_g1int_add_int(tmp531, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14049(line=283, offs=14) -- 14085(line=283, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 14174(line=284, offs=14) -- 14210(line=284, offs=50)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp533) ;
+ATSINSmove_tlcal(apy1, tmp535) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
@@ -12572,7 +12617,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13937(line=279, offs=12) -- 14095(line=284, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 14062(line=280, offs=12) -- 14220(line=285, offs=10)
 */
 /*
 INSletpop()
@@ -12580,23 +12625,23 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13819(line=274, offs=25) -- 14103(line=285, offs=8)
+emit_instr: loc0 = build/src/bin/bats.dats: 13944(line=275, offs=25) -- 14228(line=286, offs=8)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14135(line=286, offs=32) -- 14143(line=286, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 14260(line=287, offs=32) -- 14268(line=287, offs=40)
 */
-ATSINSmove(tmp534, atspre_g1int_add_int(tmp477, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp536, atspre_g1int_add_int(tmp479, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14113(line=286, offs=10) -- 14149(line=286, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 14238(line=287, offs=10) -- 14274(line=287, offs=46)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp534) ;
+ATSINSmove_tlcal(apy1, tmp536) ;
 ATSINSmove_tlcal(apy2, arg2) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
@@ -12608,7 +12653,7 @@ ATStailcal_end()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 13338(line=263, offs=8) -- 14155(line=287, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 13463(line=264, offs=8) -- 14280(line=288, offs=6)
 */
 /*
 INSletpop()
@@ -12616,7 +12661,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret470) ;
+ATSreturn(tmpret472) ;
 } /* end of [first_positional_127] */
 
 /*
@@ -12638,8 +12683,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__7, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__7, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__7, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__7, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -12649,15 +12694,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__7, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__7, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__7, atspre_g0int_gte_int(arg0, tmp286__7)) ;
+ATSINSmove(tmpret287__7, atspre_g0int_gte_int(arg0, tmp288__7)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__7) ;
+ATSreturn(tmpret287__7) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__7] */
 
 /*
@@ -12679,8 +12724,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__12, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__12, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__12, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__12, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -12690,15 +12735,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__12, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__12, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__12, atspre_g1int_gte_int(arg0, tmp281__12)) ;
+ATSINSmove(tmpret282__12, atspre_g1int_gte_int(arg0, tmp283__12)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__12) ;
+ATSreturn(tmpret282__12) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__12] */
 
 /*
@@ -13130,8 +13175,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__13, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__13, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__13, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__13, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13141,15 +13186,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__13, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__13, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__13, atspre_g1int_gte_int(arg0, tmp281__13)) ;
+ATSINSmove(tmpret282__13, atspre_g1int_gte_int(arg0, tmp283__13)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__13) ;
+ATSreturn(tmpret282__13) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__13] */
 
 /*
@@ -13171,8 +13216,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__8, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__8, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__8, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__8, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13182,15 +13227,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__8, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__8, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__8, atspre_g0int_gte_int(arg0, tmp286__8)) ;
+ATSINSmove(tmpret287__8, atspre_g0int_gte_int(arg0, tmp288__8)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__8) ;
+ATSreturn(tmpret287__8) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__8] */
 
 /*
@@ -13212,8 +13257,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__14(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__14, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__14, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__14, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__14, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13223,15 +13268,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__14, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__14, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__14, atspre_g1int_gte_int(arg0, tmp281__14)) ;
+ATSINSmove(tmpret282__14, atspre_g1int_gte_int(arg0, tmp283__14)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__14) ;
+ATSreturn(tmpret282__14) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__14] */
 
 /*
@@ -13253,8 +13298,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__15(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__15, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__15, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__15, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__15, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13264,19 +13309,19 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__15, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__15, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__15, atspre_g1int_gte_int(arg0, tmp281__15)) ;
+ATSINSmove(tmpret282__15, atspre_g1int_gte_int(arg0, tmp283__15)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__15) ;
+ATSreturn(tmpret282__15) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__15] */
 
 /*
-build/src/bin/bats.dats: 14281(line=291, offs=4) -- 14611(line=301, offs=4)
+build/src/bin/bats.dats: 14406(line=292, offs=4) -- 14736(line=302, offs=4)
 */
 /*
 local: first_positional_127$0(level=0)
@@ -13289,113 +13334,113 @@ atstkind_t0ype(atstype_int)
 command_word_144(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret535, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp536, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp537, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp542, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp545, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp546, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp549, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret537, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp538, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp539, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp544, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp547, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp548, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp551, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14281(line=291, offs=4) -- 14611(line=301, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 14406(line=292, offs=4) -- 14736(line=302, offs=4)
 */
 ATSINSflab(__patsflab_command_word_144):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14359(line=291, offs=82) -- 14611(line=301, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 14484(line=292, offs=82) -- 14736(line=302, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14379(line=292, offs=17) -- 14408(line=292, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 14504(line=293, offs=17) -- 14533(line=293, offs=46)
 */
-ATSINSmove(tmp536, first_positional_127(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), arg1)) ;
+ATSINSmove(tmp538, first_positional_127(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), arg1)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14417(line=294, offs=6) -- 14428(line=294, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 14542(line=295, offs=6) -- 14553(line=295, offs=17)
 */
-ATSINSmove(tmp537, ATSLIB_056_prelude__lt_g1int_int__145__1(tmp536, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp539, ATSLIB_056_prelude__lt_g1int_int__145__1(tmp538, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14414(line=294, offs=3) -- 14607(line=300, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 14539(line=295, offs=3) -- 14732(line=301, offs=6)
 */
 ATSif(
-tmp537
+tmp539
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14434(line=294, offs=23) -- 14436(line=294, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 14559(line=295, offs=23) -- 14561(line=295, offs=25)
 */
-ATSINSmove(tmpret535, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret537, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14447(line=295, offs=11) -- 14462(line=295, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 14572(line=296, offs=11) -- 14587(line=296, offs=26)
 */
-ATSINSmove(tmp542, ATSLIB_056_prelude__gte_g1int_int__66__16(tmp536, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp544, ATSLIB_056_prelude__gte_g1int_int__66__16(tmp538, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14444(line=295, offs=8) -- 14607(line=300, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 14569(line=296, offs=8) -- 14732(line=301, offs=6)
 */
 ATSif(
-tmp542
+tmp544
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14468(line=295, offs=32) -- 14470(line=295, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 14593(line=296, offs=32) -- 14595(line=296, offs=34)
 */
-ATSINSmove(tmpret535, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret537, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14478(line=296, offs=8) -- 14607(line=300, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 14603(line=297, offs=8) -- 14732(line=301, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14495(line=297, offs=14) -- 14530(line=297, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 14620(line=298, offs=14) -- 14655(line=298, offs=49)
 */
-ATSINSmove(tmp545, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp536, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp547, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), tmp538, ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14543(line=299, offs=8) -- 14553(line=299, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 14668(line=300, offs=8) -- 14678(line=300, offs=18)
 */
-ATSINSmove(tmp546, ATSLIB_056_prelude__gte_g1int_int__66__17(tmp545, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp548, ATSLIB_056_prelude__gte_g1int_int__66__17(tmp547, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14540(line=299, offs=5) -- 14601(line=299, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 14665(line=300, offs=5) -- 14726(line=300, offs=66)
 */
 ATSif(
-tmp546
+tmp548
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14559(line=299, offs=24) -- 14561(line=299, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 14684(line=300, offs=24) -- 14686(line=300, offs=26)
 */
-ATSINSmove(tmpret535, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret537, atspre_g1int_neg_int(ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14589(line=299, offs=54) -- 14595(line=299, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 14714(line=300, offs=54) -- 14720(line=300, offs=60)
 */
-ATSINSmove(tmp549, atspre_g1int_add_int(tmp545, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp551, atspre_g1int_add_int(tmp547, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14567(line=299, offs=32) -- 14601(line=299, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 14692(line=300, offs=32) -- 14726(line=300, offs=66)
 */
-ATSINSmove(tmpret535, first_positional_127(ATSPMVrefarg0(arg0), tmp549, arg1)) ;
+ATSINSmove(tmpret537, first_positional_127(ATSPMVrefarg0(arg0), tmp551, arg1)) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14478(line=296, offs=8) -- 14607(line=300, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 14603(line=297, offs=8) -- 14732(line=301, offs=6)
 */
 /*
 INSletpop()
@@ -13403,13 +13448,13 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14359(line=291, offs=82) -- 14611(line=301, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 14484(line=292, offs=82) -- 14736(line=302, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret535) ;
+ATSreturn(tmpret537) ;
 } /* end of [command_word_144] */
 
 #if(0)
@@ -13432,8 +13477,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lt_g1int_int__145(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret538, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp539, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret540, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp541, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13443,15 +13488,15 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp539, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7643))>)(arg1)) ;
+ATSINSmove(tmp541, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7643))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret538, PMVtmpltcst(g1int_lt<S2Evar(tk(7643))>)(arg0, tmp539)) ;
+ATSINSmove(tmpret540, PMVtmpltcst(g1int_lt<S2Evar(tk(7643))>)(arg0, tmp541)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret538) ;
+ATSreturn(tmpret540) ;
 } /* end of [ATSLIB_056_prelude__lt_g1int_int__145] */
 #endif // end of [TEMPLATE]
 
@@ -13474,8 +13519,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lt_g1int_int__145__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret538__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp539__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret540__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp541__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13485,15 +13530,15 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp539__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp541__1, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret538__1, atspre_g1int_lt_int(arg0, tmp539__1)) ;
+ATSINSmove(tmpret540__1, atspre_g1int_lt_int(arg0, tmp541__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret538__1) ;
+ATSreturn(tmpret540__1) ;
 } /* end of [ATSLIB_056_prelude__lt_g1int_int__145__1] */
 
 /*
@@ -13515,8 +13560,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__16(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__16, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__16, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__16, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__16, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13526,15 +13571,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__16, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__16, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__16, atspre_g1int_gte_int(arg0, tmp281__16)) ;
+ATSINSmove(tmpret282__16, atspre_g1int_gte_int(arg0, tmp283__16)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__16) ;
+ATSreturn(tmpret282__16) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__16] */
 
 /*
@@ -13556,8 +13601,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__17(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__17, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__17, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__17, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__17, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13567,19 +13612,19 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__17, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__17, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__17, atspre_g1int_gte_int(arg0, tmp281__17)) ;
+ATSINSmove(tmpret282__17, atspre_g1int_gte_int(arg0, tmp283__17)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__17) ;
+ATSreturn(tmpret282__17) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__17] */
 
 /*
-build/src/bin/bats.dats: 14727(line=304, offs=5) -- 15404(line=317, offs=6)
+build/src/bin/bats.dats: 14852(line=305, offs=5) -- 15529(line=318, offs=6)
 */
 /*
 local: count_force_150$0(level=0)
@@ -13596,328 +13641,328 @@ ATStmpdec(apy0, atsrefarg0_type(atstkind_type(atstype_ptrk))) ;
 ATStmpdec(apy1, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy2, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(apy3, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpret550, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp551, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp554, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp557, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp558, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp559, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret552, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp553, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp556, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp559, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp560, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp561, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp562, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp563, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp564, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp565, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp570, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp573, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp576, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp577, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp580, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp581, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp584, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp585, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp588, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp589, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp592, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp593, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp596, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp597, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp598, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp601, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp602, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp566, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp567, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp572, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp575, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp578, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp579, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp582, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp583, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp586, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp587, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp590, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp591, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp594, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp595, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp598, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp599, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp600, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp603, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp604, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14727(line=304, offs=5) -- 15404(line=317, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 14852(line=305, offs=5) -- 15529(line=318, offs=6)
 */
 ATSINSflab(__patsflab_count_force_150):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14857(line=306, offs=6) -- 14867(line=306, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 14982(line=307, offs=6) -- 14992(line=307, offs=16)
 */
-ATSINSmove(tmp551, ATSLIB_056_prelude__gte_g0int_int__70__9(arg1, arg2)) ;
+ATSINSmove(tmp553, ATSLIB_056_prelude__gte_g0int_int__70__9(arg1, arg2)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14854(line=306, offs=3) -- 15404(line=317, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 14979(line=307, offs=3) -- 15529(line=318, offs=6)
 */
 ATSif(
-tmp551
+tmp553
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14873(line=306, offs=22) -- 14878(line=306, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 14998(line=307, offs=22) -- 15003(line=307, offs=27)
 */
-ATSINSmove(tmpret550, arg3) ;
+ATSINSmove(tmpret552, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14889(line=307, offs=11) -- 14900(line=307, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 15014(line=308, offs=11) -- 15025(line=308, offs=22)
 */
-ATSINSmove(tmp554, ATSLIB_056_prelude__gte_g1int_int__66__18(arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp556, ATSLIB_056_prelude__gte_g1int_int__66__18(arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14886(line=307, offs=8) -- 15404(line=317, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 15011(line=308, offs=8) -- 15529(line=318, offs=6)
 */
 ATSif(
-tmp554
+tmp556
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14906(line=307, offs=28) -- 14911(line=307, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 15031(line=308, offs=28) -- 15036(line=308, offs=33)
 */
-ATSINSmove(tmpret550, arg3) ;
+ATSINSmove(tmpret552, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14919(line=308, offs=8) -- 15404(line=317, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 15044(line=309, offs=8) -- 15529(line=318, offs=6)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14938(line=309, offs=16) -- 14969(line=309, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 15063(line=310, offs=16) -- 15094(line=310, offs=47)
 */
-ATSINSmove(tmp557, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp559, build_057_bats_modules_057_str_057_src_057_lib_056_sats__find_null_at(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp570, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp572, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp565, ATSLIB_056_prelude__eq_g1int_int__153__1(tmp557, tmp570)) ;
+ATSINSmove(tmp567, ATSLIB_056_prelude__eq_g1int_int__153__1(tmp559, tmp572)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSif(
+tmp567
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp575, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp566, ATSLIB_056_prelude__eq_g0int_int__15__74(tmp575, ATSPMVi0nt(45))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp566, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSif(
+tmp566
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp579, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp578, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp579, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp565, ATSLIB_056_prelude__eq_g0int_int__15__75(tmp578, ATSPMVi0nt(45))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp565, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSif(
 tmp565
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp573, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), arg1, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp583, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp564, ATSLIB_056_prelude__eq_g0int_int__15__74(tmp573, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp582, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp583, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
+*/
+ATSINSmove(tmp564, ATSLIB_056_prelude__eq_g0int_int__15__76(tmp582, ATSPMVi0nt(102))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSINSmove(tmp564, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSif(
 tmp564
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp577, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp587, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp576, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp577, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp586, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp587, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp563, ATSLIB_056_prelude__eq_g0int_int__15__75(tmp576, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp563, ATSLIB_056_prelude__eq_g0int_int__15__77(tmp586, ATSPMVi0nt(111))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSINSmove(tmp563, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSif(
 tmp563
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp581, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp591, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp580, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp581, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp590, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp591, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp562, ATSLIB_056_prelude__eq_g0int_int__15__76(tmp580, ATSPMVi0nt(102))) ;
+ATSINSmove(tmp562, ATSLIB_056_prelude__eq_g0int_int__15__78(tmp590, ATSPMVi0nt(114))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSINSmove(tmp562, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSif(
 tmp562
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp585, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp595, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp584, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp585, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp594, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp595, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp561, ATSLIB_056_prelude__eq_g0int_int__15__77(tmp584, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp561, ATSLIB_056_prelude__eq_g0int_int__15__79(tmp594, ATSPMVi0nt(99))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSINSmove(tmp561, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSif(
 tmp561
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp589, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp599, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp588, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp589, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp598, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp599, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
-ATSINSmove(tmp560, ATSLIB_056_prelude__eq_g0int_int__15__78(tmp588, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp560, ATSLIB_056_prelude__eq_g0int_int__15__80(tmp598, ATSPMVi0nt(101))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 15114(line=311, offs=20) -- 15405(line=314, offs=44)
 */
 ATSINSmove(tmp560, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSif(
-tmp560
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp593, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp592, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp593, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp559, ATSLIB_056_prelude__eq_g0int_int__15__79(tmp592, ATSPMVi0nt(99))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp559, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSif(
-tmp559
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp597, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp596, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp597, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp558, ATSLIB_056_prelude__eq_g0int_int__15__80(tmp596, ATSPMVi0nt(101))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 14989(line=310, offs=20) -- 15280(line=313, offs=44)
-*/
-ATSINSmove(tmp558, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15293(line=315, offs=8) -- 15305(line=315, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 15418(line=316, offs=8) -- 15430(line=316, offs=20)
 */
-ATSINSmove(tmp598, ATSLIB_056_prelude__gte_g1int_int__66__19(tmp557, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp600, ATSLIB_056_prelude__gte_g1int_int__66__19(tmp559, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15290(line=315, offs=5) -- 15398(line=316, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 15415(line=316, offs=5) -- 15523(line=317, offs=82)
 */
 ATSif(
-tmp598
+tmp600
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15311(line=315, offs=26) -- 15316(line=315, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 15436(line=316, offs=26) -- 15441(line=316, offs=31)
 */
-ATSINSmove(tmpret550, arg3) ;
+ATSINSmove(tmpret552, arg3) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15343(line=316, offs=27) -- 15351(line=316, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 15468(line=317, offs=27) -- 15476(line=317, offs=35)
 */
-ATSINSmove(tmp601, atspre_g1int_add_int(tmp557, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp603, atspre_g1int_add_int(tmp559, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15359(line=316, offs=43) -- 15396(line=316, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 15484(line=317, offs=43) -- 15521(line=317, offs=80)
 */
 ATSif(
-tmp558
+tmp560
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15376(line=316, offs=60) -- 15385(line=316, offs=69)
+emit_instr: loc0 = build/src/bin/bats.dats: 15501(line=317, offs=60) -- 15510(line=317, offs=69)
 */
-ATSINSmove(tmp602, atspre_g0int_add_int(arg3, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp604, atspre_g0int_add_int(arg3, ATSPMVi0nt(1))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15391(line=316, offs=75) -- 15396(line=316, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 15516(line=317, offs=75) -- 15521(line=317, offs=80)
 */
-ATSINSmove(tmp602, arg3) ;
+ATSINSmove(tmp604, arg3) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15326(line=316, offs=10) -- 15398(line=316, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 15451(line=317, offs=10) -- 15523(line=317, offs=82)
 */
 ATStailcal_beg()
 ATSINSmove_tlcal(apy0, ATSPMVrefarg0(arg0)) ;
-ATSINSmove_tlcal(apy1, tmp601) ;
+ATSINSmove_tlcal(apy1, tmp603) ;
 ATSINSmove_tlcal(apy2, arg2) ;
-ATSINSmove_tlcal(apy3, tmp602) ;
+ATSINSmove_tlcal(apy3, tmp604) ;
 ATSINSargmove_tlcal(arg0, apy0) ;
 ATSINSargmove_tlcal(arg1, apy1) ;
 ATSINSargmove_tlcal(arg2, apy2) ;
@@ -13927,7 +13972,7 @@ ATStailcal_end()
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 14919(line=308, offs=8) -- 15404(line=317, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 15044(line=309, offs=8) -- 15529(line=318, offs=6)
 */
 /*
 INSletpop()
@@ -13935,7 +13980,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret550) ;
+ATSreturn(tmpret552) ;
 } /* end of [count_force_150] */
 
 /*
@@ -13957,8 +14002,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g0int_int__70__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret285__9, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp286__9, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret287__9, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp288__9, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -13968,15 +14013,15 @@ ATSINSflab(__patsflab_gte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12205(line=630, offs=30) -- 12216(line=630, offs=41)
 */
-ATSINSmove(tmp286__9, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp288__9, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12187(line=630, offs=12) -- 12218(line=630, offs=43)
 */
-ATSINSmove(tmpret285__9, atspre_g0int_gte_int(arg0, tmp286__9)) ;
+ATSINSmove(tmpret287__9, atspre_g0int_gte_int(arg0, tmp288__9)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret285__9) ;
+ATSreturn(tmpret287__9) ;
 } /* end of [ATSLIB_056_prelude__gte_g0int_int__70__9] */
 
 /*
@@ -13998,8 +14043,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__18(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__18, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__18, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__18, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__18, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -14009,15 +14054,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__18, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__18, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__18, atspre_g1int_gte_int(arg0, tmp281__18)) ;
+ATSINSmove(tmpret282__18, atspre_g1int_gte_int(arg0, tmp283__18)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__18) ;
+ATSreturn(tmpret282__18) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__18] */
 
 #if(0)
@@ -14040,8 +14085,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g1int_int__153(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret566, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp567, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret568, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp569, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -14051,15 +14096,15 @@ ATSINSflab(__patsflab_eq_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12864(line=668, offs=29) -- 12875(line=668, offs=40)
 */
-ATSINSmove(tmp567, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7655))>)(arg1)) ;
+ATSINSmove(tmp569, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7655))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12847(line=668, offs=12) -- 12877(line=668, offs=42)
 */
-ATSINSmove(tmpret566, PMVtmpltcst(g1int_eq<S2Evar(tk(7655))>)(arg0, tmp567)) ;
+ATSINSmove(tmpret568, PMVtmpltcst(g1int_eq<S2Evar(tk(7655))>)(arg0, tmp569)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret566) ;
+ATSreturn(tmpret568) ;
 } /* end of [ATSLIB_056_prelude__eq_g1int_int__153] */
 #endif // end of [TEMPLATE]
 
@@ -14082,8 +14127,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__eq_g1int_int__153__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret566__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp567__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret568__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp569__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -14093,15 +14138,15 @@ ATSINSflab(__patsflab_eq_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12864(line=668, offs=29) -- 12875(line=668, offs=40)
 */
-ATSINSmove(tmp567__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp569__1, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12847(line=668, offs=12) -- 12877(line=668, offs=42)
 */
-ATSINSmove(tmpret566__1, atspre_g1int_eq_int(arg0, tmp567__1)) ;
+ATSINSmove(tmpret568__1, atspre_g1int_eq_int(arg0, tmp569__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret566__1) ;
+ATSreturn(tmpret568__1) ;
 } /* end of [ATSLIB_056_prelude__eq_g1int_int__153__1] */
 
 /*
@@ -14410,8 +14455,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__19(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__19, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__19, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__19, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__19, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -14421,19 +14466,19 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__19, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__19, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__19, atspre_g1int_gte_int(arg0, tmp281__19)) ;
+ATSINSmove(tmpret282__19, atspre_g1int_gte_int(arg0, tmp283__19)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__19) ;
+ATSreturn(tmpret282__19) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__19] */
 
 /*
-build/src/bin/bats.dats: 15549(line=321, offs=4) -- 17022(line=324, offs=1342)
+build/src/bin/bats.dats: 15674(line=322, offs=4) -- 17147(line=325, offs=1342)
 */
 /*
 local: 
@@ -14446,27 +14491,25 @@ atstkind_t0ype(atstype_bool)
 is_setup_word_164(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret603, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp604, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp607, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp612, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp613, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret605, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp606, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp609, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp614, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp615, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp616, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp617, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp620, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp621, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp624, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp625, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp628, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp629, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp632, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp633, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp636, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp637, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp638, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp639, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp618, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp619, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp622, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp623, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp626, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp627, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp630, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp631, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp634, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp635, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp638, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp639, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp640, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp641, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp642, atstkind_t0ype(atstype_bool)) ;
@@ -14481,42 +14524,42 @@ ATStmpdec(tmp650, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp651, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp652, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp653, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp656, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp657, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp660, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp661, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp664, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp665, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp668, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp669, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp672, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp673, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp676, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp677, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp680, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp681, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp684, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp685, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp688, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp689, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp692, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp693, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp696, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp697, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp700, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp701, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp704, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp705, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp708, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp709, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp712, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp713, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp716, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp717, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp720, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp721, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp722, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp723, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp654, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp655, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp658, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp659, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp662, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp663, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp666, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp667, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp670, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp671, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp674, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp675, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp678, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp679, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp682, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp683, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp686, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp687, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp690, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp691, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp694, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp695, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp698, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp699, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp702, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp703, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp706, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp707, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp710, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp711, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp714, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp715, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp718, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp719, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp722, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp723, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp724, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp725, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp726, atstkind_t0ype(atstype_bool)) ;
@@ -14528,1036 +14571,1038 @@ ATStmpdec(tmp731, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp732, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp733, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp734, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp737, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp738, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp741, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp742, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp745, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp746, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp749, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp750, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp753, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp754, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp757, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp758, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp761, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp762, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp765, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp766, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp769, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp770, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp773, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp774, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp777, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp778, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp781, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp782, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp785, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp786, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp789, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp790, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp735, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp736, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp739, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp740, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp743, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp744, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp747, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp748, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp751, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp752, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp755, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp756, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp759, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp760, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp763, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp764, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp767, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp768, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp771, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp772, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp775, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp776, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp779, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp780, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp783, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp784, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp787, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp788, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp791, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp792, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15549(line=321, offs=4) -- 17022(line=324, offs=1342)
+emit_instr: loc0 = build/src/bin/bats.dats: 15674(line=322, offs=4) -- 17147(line=325, offs=1342)
 */
 ATSINSflab(__patsflab_is_setup_word_164):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15632(line=322, offs=6) -- 15638(line=322, offs=12)
+emit_instr: loc0 = build/src/bin/bats.dats: 15757(line=323, offs=6) -- 15763(line=323, offs=12)
 */
-ATSINSmove(tmp604, ATSLIB_056_prelude__lt_g1int_int__145__2(arg1, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp606, ATSLIB_056_prelude__lt_g1int_int__145__2(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15629(line=322, offs=3) -- 17022(line=324, offs=1342)
+emit_instr: loc0 = build/src/bin/bats.dats: 15754(line=323, offs=3) -- 17147(line=325, offs=1342)
 */
 ATSif(
-tmp604
+tmp606
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15644(line=322, offs=18) -- 15649(line=322, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 15769(line=323, offs=18) -- 15774(line=323, offs=23)
 */
-ATSINSmove(tmpret603, ATSPMVbool_false()) ;
+ATSINSmove(tmpret605, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15660(line=323, offs=11) -- 15669(line=323, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 15785(line=324, offs=11) -- 15794(line=324, offs=20)
 */
-ATSINSmove(tmp607, ATSLIB_056_prelude__gt_g1int_int__166__1(arg1, ATSPMVi0nt(4000))) ;
+ATSINSmove(tmp609, ATSLIB_056_prelude__gt_g1int_int__166__1(arg1, ATSPMVi0nt(4000))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15657(line=323, offs=8) -- 17022(line=324, offs=1342)
+emit_instr: loc0 = build/src/bin/bats.dats: 15782(line=324, offs=8) -- 17147(line=325, offs=1342)
 */
 ATSif(
-tmp607
+tmp609
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15675(line=323, offs=26) -- 15680(line=323, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 15800(line=324, offs=26) -- 15805(line=324, offs=31)
 */
-ATSINSmove(tmpret603, ATSPMVbool_false()) ;
+ATSINSmove(tmpret605, ATSPMVbool_false()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp621, atspre_g1int_add_int(arg1, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp623, atspre_g1int_add_int(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp620, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp621, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp622, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp623, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp617, ATSLIB_056_prelude__eq_g0int_int__15__81(tmp620, ATSPMVi0nt(97))) ;
+ATSINSmove(tmp619, ATSLIB_056_prelude__eq_g0int_int__15__81(tmp622, ATSPMVi0nt(97))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSif(
+tmp619
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp627, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp626, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp627, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp618, ATSLIB_056_prelude__eq_g0int_int__15__82(tmp626, ATSPMVi0nt(116))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp618, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSif(
+tmp618
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp631, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp630, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp631, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp617, ATSLIB_056_prelude__eq_g0int_int__15__83(tmp630, ATSPMVi0nt(115))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp617, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp617
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp625, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp635, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp624, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp625, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp634, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp635, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp616, ATSLIB_056_prelude__eq_g0int_int__15__82(tmp624, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp616, ATSLIB_056_prelude__eq_g0int_int__15__84(tmp634, ATSPMVi0nt(50))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp616, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp616
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp629, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp639, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp628, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp629, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp638, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp639, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp615, ATSLIB_056_prelude__eq_g0int_int__15__83(tmp628, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp615, ATSLIB_056_prelude__eq_g0int_int__15__85(tmp638, ATSPMVi0nt(0))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp615, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp615
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp633, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp632, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp633, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp614, ATSLIB_056_prelude__eq_g0int_int__15__84(tmp632, ATSPMVi0nt(50))) ;
-
+ATSINSmove(tmp614, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp614, ATSPMVbool_false()) ;
-} /* ATSendif */
+ATSINSmove(tmp659, atspre_g1int_add_int(arg1, ATSPMVi0nt(0))) ;
+
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp658, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp659, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp655, ATSLIB_056_prelude__eq_g0int_int__15__86(tmp658, ATSPMVi0nt(99))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
-tmp614
+tmp655
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp637, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp663, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp636, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp637, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp662, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp663, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp613, ATSLIB_056_prelude__eq_g0int_int__15__85(tmp636, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp654, ATSLIB_056_prelude__eq_g0int_int__15__87(tmp662, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp613, ATSPMVbool_false()) ;
+ATSINSmove(tmp654, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
-tmp613
+tmp654
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp612, ATSPMVbool_true()) ;
+ATSINSmove(tmp667, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp666, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp667, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp653, ATSLIB_056_prelude__eq_g0int_int__15__88(tmp666, ATSPMVi0nt(111))) ;
+
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp657, atspre_g1int_add_int(arg1, ATSPMVi0nt(0))) ;
-
+ATSINSmove(tmp653, ATSPMVbool_false()) ;
+} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp656, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp657, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp653, ATSLIB_056_prelude__eq_g0int_int__15__86(tmp656, ATSPMVi0nt(99))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp653
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp661, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp671, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp660, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp661, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp670, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp671, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp652, ATSLIB_056_prelude__eq_g0int_int__15__87(tmp660, ATSPMVi0nt(108))) ;
+ATSINSmove(tmp652, ATSLIB_056_prelude__eq_g0int_int__15__89(tmp670, ATSPMVi0nt(110))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp652, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp652
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp665, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp675, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp664, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp665, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp674, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp675, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp651, ATSLIB_056_prelude__eq_g0int_int__15__88(tmp664, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp651, ATSLIB_056_prelude__eq_g0int_int__15__90(tmp674, ATSPMVi0nt(101))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp651, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp651
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp669, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp679, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp668, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp669, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp678, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp679, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp650, ATSLIB_056_prelude__eq_g0int_int__15__89(tmp668, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp650, ATSLIB_056_prelude__eq_g0int_int__15__91(tmp678, ATSPMVi0nt(45))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp650, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp650
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp673, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp683, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp672, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp673, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp682, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp683, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp649, ATSLIB_056_prelude__eq_g0int_int__15__90(tmp672, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp649, ATSLIB_056_prelude__eq_g0int_int__15__92(tmp682, ATSPMVi0nt(114))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp649, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp649
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp677, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp687, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp676, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp677, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp686, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp687, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp648, ATSLIB_056_prelude__eq_g0int_int__15__91(tmp676, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp648, ATSLIB_056_prelude__eq_g0int_int__15__93(tmp686, ATSPMVi0nt(101))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp648, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp648
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp681, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp691, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp680, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp681, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp690, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp691, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp647, ATSLIB_056_prelude__eq_g0int_int__15__92(tmp680, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp647, ATSLIB_056_prelude__eq_g0int_int__15__94(tmp690, ATSPMVi0nt(112))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp647, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp647
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp685, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp695, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp684, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp685, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp694, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp695, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp646, ATSLIB_056_prelude__eq_g0int_int__15__93(tmp684, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp646, ATSLIB_056_prelude__eq_g0int_int__15__95(tmp694, ATSPMVi0nt(111))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp646, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp646
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp689, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
+ATSINSmove(tmp699, atspre_g1int_add_int(arg1, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp688, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp689, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp698, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp699, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp645, ATSLIB_056_prelude__eq_g0int_int__15__94(tmp688, ATSPMVi0nt(112))) ;
+ATSINSmove(tmp645, ATSLIB_056_prelude__eq_g0int_int__15__96(tmp698, ATSPMVi0nt(115))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp645, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp645
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp693, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp703, atspre_g1int_add_int(arg1, ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp692, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp693, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp702, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp703, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp644, ATSLIB_056_prelude__eq_g0int_int__15__95(tmp692, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp644, ATSLIB_056_prelude__eq_g0int_int__15__97(tmp702, ATSPMVi0nt(105))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp644, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp644
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp697, atspre_g1int_add_int(arg1, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp707, atspre_g1int_add_int(arg1, ATSPMVi0nt(12))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp696, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp697, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp706, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp707, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp643, ATSLIB_056_prelude__eq_g0int_int__15__96(tmp696, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp643, ATSLIB_056_prelude__eq_g0int_int__15__98(tmp706, ATSPMVi0nt(116))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp643, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp643
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp701, atspre_g1int_add_int(arg1, ATSPMVi0nt(11))) ;
+ATSINSmove(tmp711, atspre_g1int_add_int(arg1, ATSPMVi0nt(13))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp700, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp701, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp710, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp711, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp642, ATSLIB_056_prelude__eq_g0int_int__15__97(tmp700, ATSPMVi0nt(105))) ;
+ATSINSmove(tmp642, ATSLIB_056_prelude__eq_g0int_int__15__99(tmp710, ATSPMVi0nt(111))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp642, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp642
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp705, atspre_g1int_add_int(arg1, ATSPMVi0nt(12))) ;
+ATSINSmove(tmp715, atspre_g1int_add_int(arg1, ATSPMVi0nt(14))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp704, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp705, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp714, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp715, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp641, ATSLIB_056_prelude__eq_g0int_int__15__98(tmp704, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp641, ATSLIB_056_prelude__eq_g0int_int__15__100(tmp714, ATSPMVi0nt(114))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp641, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp641
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp709, atspre_g1int_add_int(arg1, ATSPMVi0nt(13))) ;
+ATSINSmove(tmp719, atspre_g1int_add_int(arg1, ATSPMVi0nt(15))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp708, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp709, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp718, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp719, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp640, ATSLIB_056_prelude__eq_g0int_int__15__99(tmp708, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp640, ATSLIB_056_prelude__eq_g0int_int__15__101(tmp718, ATSPMVi0nt(121))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp640, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp640
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp713, atspre_g1int_add_int(arg1, ATSPMVi0nt(14))) ;
+ATSINSmove(tmp723, atspre_g1int_add_int(arg1, ATSPMVi0nt(16))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp712, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp713, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp722, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp723, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp639, ATSLIB_056_prelude__eq_g0int_int__15__100(tmp712, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp614, ATSLIB_056_prelude__eq_g0int_int__15__102(tmp722, ATSPMVi0nt(0))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp639, ATSPMVbool_false()) ;
+ATSINSmove(tmp614, ATSPMVbool_false()) ;
+} /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
-tmp639
+tmp614
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp717, atspre_g1int_add_int(arg1, ATSPMVi0nt(15))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp716, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp717, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp638, ATSLIB_056_prelude__eq_g0int_int__15__101(tmp716, ATSPMVi0nt(121))) ;
-
+ATSINSmove(tmpret605, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp638, ATSPMVbool_false()) ;
-} /* ATSendif */
+ATSINSmove(tmp740, atspre_g1int_add_int(arg1, ATSPMVi0nt(0))) ;
+
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp739, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp740, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp736, ATSLIB_056_prelude__eq_g0int_int__15__103(tmp739, ATSPMVi0nt(114))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
-tmp638
+tmp736
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp721, atspre_g1int_add_int(arg1, ATSPMVi0nt(16))) ;
+ATSINSmove(tmp744, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp720, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp721, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp743, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp744, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp612, ATSLIB_056_prelude__eq_g0int_int__15__102(tmp720, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp735, ATSLIB_056_prelude__eq_g0int_int__15__104(tmp743, ATSPMVi0nt(101))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp612, ATSPMVbool_false()) ;
-} /* ATSendif */
+ATSINSmove(tmp735, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
-tmp612
+tmp735
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmpret603, ATSPMVbool_true()) ;
+ATSINSmove(tmp748, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp747, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp748, ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
+*/
+ATSINSmove(tmp734, ATSLIB_056_prelude__eq_g0int_int__15__105(tmp747, ATSPMVi0nt(99))) ;
+
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp738, atspre_g1int_add_int(arg1, ATSPMVi0nt(0))) ;
-
+ATSINSmove(tmp734, ATSPMVbool_false()) ;
+} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp737, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp738, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp734, ATSLIB_056_prelude__eq_g0int_int__15__103(tmp737, ATSPMVi0nt(114))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp734
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp742, atspre_g1int_add_int(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmp752, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp741, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp742, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp751, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp752, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp733, ATSLIB_056_prelude__eq_g0int_int__15__104(tmp741, ATSPMVi0nt(101))) ;
+ATSINSmove(tmp733, ATSLIB_056_prelude__eq_g0int_int__15__106(tmp751, ATSPMVi0nt(111))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp733, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp733
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp746, atspre_g1int_add_int(arg1, ATSPMVi0nt(2))) ;
+ATSINSmove(tmp756, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp745, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp746, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp755, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp756, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp732, ATSLIB_056_prelude__eq_g0int_int__15__105(tmp745, ATSPMVi0nt(99))) ;
+ATSINSmove(tmp732, ATSLIB_056_prelude__eq_g0int_int__15__107(tmp755, ATSPMVi0nt(114))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp732, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp732
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp750, atspre_g1int_add_int(arg1, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp760, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp749, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp750, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp759, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp760, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp731, ATSLIB_056_prelude__eq_g0int_int__15__106(tmp749, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp731, ATSLIB_056_prelude__eq_g0int_int__15__108(tmp759, ATSPMVi0nt(100))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp731, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp731
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp754, atspre_g1int_add_int(arg1, ATSPMVi0nt(4))) ;
+ATSINSmove(tmp764, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp753, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp754, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp763, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp764, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp730, ATSLIB_056_prelude__eq_g0int_int__15__107(tmp753, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp730, ATSLIB_056_prelude__eq_g0int_int__15__109(tmp763, ATSPMVi0nt(45))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp730, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp730
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp758, atspre_g1int_add_int(arg1, ATSPMVi0nt(5))) ;
+ATSINSmove(tmp768, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp757, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp758, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp767, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp768, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp729, ATSLIB_056_prelude__eq_g0int_int__15__108(tmp757, ATSPMVi0nt(100))) ;
+ATSINSmove(tmp729, ATSLIB_056_prelude__eq_g0int_int__15__110(tmp767, ATSPMVi0nt(99))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp729, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp729
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp762, atspre_g1int_add_int(arg1, ATSPMVi0nt(6))) ;
+ATSINSmove(tmp772, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp761, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp762, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp771, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp772, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp728, ATSLIB_056_prelude__eq_g0int_int__15__109(tmp761, ATSPMVi0nt(45))) ;
+ATSINSmove(tmp728, ATSLIB_056_prelude__eq_g0int_int__15__111(tmp771, ATSPMVi0nt(111))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp728, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp728
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp766, atspre_g1int_add_int(arg1, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp776, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp765, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp766, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp775, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp776, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp727, ATSLIB_056_prelude__eq_g0int_int__15__110(tmp765, ATSPMVi0nt(99))) ;
+ATSINSmove(tmp727, ATSLIB_056_prelude__eq_g0int_int__15__112(tmp775, ATSPMVi0nt(109))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp727, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp727
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp770, atspre_g1int_add_int(arg1, ATSPMVi0nt(8))) ;
+ATSINSmove(tmp780, atspre_g1int_add_int(arg1, ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp769, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp770, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp779, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp780, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp726, ATSLIB_056_prelude__eq_g0int_int__15__111(tmp769, ATSPMVi0nt(111))) ;
+ATSINSmove(tmp726, ATSLIB_056_prelude__eq_g0int_int__15__113(tmp779, ATSPMVi0nt(109))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp726, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp726
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp774, atspre_g1int_add_int(arg1, ATSPMVi0nt(9))) ;
+ATSINSmove(tmp784, atspre_g1int_add_int(arg1, ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp773, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp774, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp783, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp784, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp725, ATSLIB_056_prelude__eq_g0int_int__15__112(tmp773, ATSPMVi0nt(109))) ;
+ATSINSmove(tmp725, ATSLIB_056_prelude__eq_g0int_int__15__114(tmp783, ATSPMVi0nt(105))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp725, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp725
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp778, atspre_g1int_add_int(arg1, ATSPMVi0nt(10))) ;
+ATSINSmove(tmp788, atspre_g1int_add_int(arg1, ATSPMVi0nt(12))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp777, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp778, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp787, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp788, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp724, ATSLIB_056_prelude__eq_g0int_int__15__113(tmp777, ATSPMVi0nt(109))) ;
+ATSINSmove(tmp724, ATSLIB_056_prelude__eq_g0int_int__15__115(tmp787, ATSPMVi0nt(116))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSINSmove(tmp724, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
 ATSif(
 tmp724
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp782, atspre_g1int_add_int(arg1, ATSPMVi0nt(11))) ;
+ATSINSmove(tmp792, atspre_g1int_add_int(arg1, ATSPMVi0nt(13))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp781, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp782, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp791, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp792, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp723, ATSLIB_056_prelude__eq_g0int_int__15__114(tmp781, ATSPMVi0nt(105))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp723, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSif(
-tmp723
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp786, atspre_g1int_add_int(arg1, ATSPMVi0nt(12))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp785, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp786, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp722, ATSLIB_056_prelude__eq_g0int_int__15__115(tmp785, ATSPMVi0nt(116))) ;
+ATSINSmove(tmpret605, ATSLIB_056_prelude__eq_g0int_int__15__116(tmp791, ATSPMVi0nt(0))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
+emit_instr: loc0 = build/src/bin/bats.dats: 15814(line=325, offs=9) -- 17146(line=325, offs=1341)
 */
-ATSINSmove(tmp722, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSif(
-tmp722
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp790, atspre_g1int_add_int(arg1, ATSPMVi0nt(13))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmp789, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), tmp790, ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmpret603, ATSLIB_056_prelude__eq_g0int_int__15__116(tmp789, ATSPMVi0nt(0))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 15689(line=324, offs=9) -- 17021(line=324, offs=1341)
-*/
-ATSINSmove(tmpret603, ATSPMVbool_false()) ;
+ATSINSmove(tmpret605, ATSPMVbool_false()) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret603) ;
+ATSreturn(tmpret605) ;
 } /* end of [is_setup_word_164] */
 
 /*
@@ -15579,8 +15624,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lt_g1int_int__145__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret538__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp539__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret540__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp541__2, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -15590,15 +15635,15 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp539__2, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp541__2, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret538__2, atspre_g1int_lt_int(arg0, tmp539__2)) ;
+ATSINSmove(tmpret540__2, atspre_g1int_lt_int(arg0, tmp541__2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret538__2) ;
+ATSreturn(tmpret540__2) ;
 } /* end of [ATSLIB_056_prelude__lt_g1int_int__145__2] */
 
 #if(0)
@@ -15621,8 +15666,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__166(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret608, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp609, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret610, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp611, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -15632,15 +15677,15 @@ ATSINSflab(__patsflab_gt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12705(line=659, offs=29) -- 12716(line=659, offs=40)
 */
-ATSINSmove(tmp609, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7649))>)(arg1)) ;
+ATSINSmove(tmp611, PMVtmpltcst(g1int2int<S2Eextkind(atstype_int), S2Evar(tk(7649))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12688(line=659, offs=12) -- 12718(line=659, offs=42)
 */
-ATSINSmove(tmpret608, PMVtmpltcst(g1int_gt<S2Evar(tk(7649))>)(arg0, tmp609)) ;
+ATSINSmove(tmpret610, PMVtmpltcst(g1int_gt<S2Evar(tk(7649))>)(arg0, tmp611)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret608) ;
+ATSreturn(tmpret610) ;
 } /* end of [ATSLIB_056_prelude__gt_g1int_int__166] */
 #endif // end of [TEMPLATE]
 
@@ -15663,8 +15708,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g1int_int__166__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret608__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp609__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret610__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp611__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -15674,15 +15719,15 @@ ATSINSflab(__patsflab_gt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12705(line=659, offs=29) -- 12716(line=659, offs=40)
 */
-ATSINSmove(tmp609__1, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp611__1, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12688(line=659, offs=12) -- 12718(line=659, offs=42)
 */
-ATSINSmove(tmpret608__1, atspre_g1int_gt_int(arg0, tmp609__1)) ;
+ATSINSmove(tmpret610__1, atspre_g1int_gt_int(arg0, tmp611__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret608__1) ;
+ATSreturn(tmpret610__1) ;
 } /* end of [ATSLIB_056_prelude__gt_g1int_int__166__1] */
 
 /*
@@ -17162,7 +17207,7 @@ ATSreturn(tmpret30__116) ;
 } /* end of [ATSLIB_056_prelude__eq_g0int_int__15__116] */
 
 /*
-build/src/bin/bats.dats: 17129(line=328, offs=4) -- 17327(line=330, offs=72)
+build/src/bin/bats.dats: 17254(line=329, offs=4) -- 17452(line=331, offs=72)
 */
 /*
 local: 
@@ -17175,42 +17220,42 @@ atstkind_t0ype(atstype_int)
 opt_string_copy_205(atsrefarg0_type(atstype_boxed) arg0, atstkind_t0ype(atstype_int) arg1, atsrefarg0_type(atstkind_type(atstype_ptrk)) arg2, atstkind_t0ype(atstype_int) arg3)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret791, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp792, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret793, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp794, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17129(line=328, offs=4) -- 17327(line=330, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 17254(line=329, offs=4) -- 17452(line=331, offs=72)
 */
 ATSINSflab(__patsflab_opt_string_copy_205):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17261(line=330, offs=6) -- 17281(line=330, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 17386(line=331, offs=6) -- 17406(line=331, offs=26)
 */
-ATSINSmove(tmp792, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(arg0), arg1)) ;
+ATSINSmove(tmp794, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(arg0), arg1)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17258(line=330, offs=3) -- 17327(line=330, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 17383(line=331, offs=3) -- 17452(line=331, offs=72)
 */
 ATSif(
-tmp792
+tmp794
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17287(line=330, offs=32) -- 17320(line=330, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 17412(line=331, offs=32) -- 17445(line=331, offs=65)
 */
-ATSINSmove(tmpret791, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(arg0), arg1, ATSPMVrefarg0(arg2), arg3)) ;
+ATSINSmove(tmpret793, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(arg0), arg1, ATSPMVrefarg0(arg2), arg3)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17326(line=330, offs=71) -- 17327(line=330, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 17451(line=331, offs=71) -- 17452(line=331, offs=72)
 */
-ATSINSmove(tmpret791, ATSPMVi0nt(0)) ;
+ATSINSmove(tmpret793, ATSPMVi0nt(0)) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret791) ;
+ATSreturn(tmpret793) ;
 } /* end of [opt_string_copy_205] */
 
 /*
-build/src/bin/bats.dats: 17439(line=334, offs=4) -- 17903(line=341, offs=83)
+build/src/bin/bats.dats: 17564(line=335, offs=4) -- 18028(line=342, offs=83)
 */
 /*
 local: 
@@ -17223,201 +17268,201 @@ atstkind_t0ype(atstype_int)
 repository_from_env_206(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret793, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref794[15], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp795, atstype_arrptr) ;
-ATStmpdec(tmp796, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp797, postiats_tyrec_1) ;
-ATStmpdec(tmp800, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp801, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp802, atstype_boxed) ;
-// ATStmpdec_void(tmp803) ;
-// ATStmpdec_void(tmp806) ;
-ATStmpdec(tmp809, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp812, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp813, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret795, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref796[15], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp797, atstype_arrptr) ;
+ATStmpdec(tmp798, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp799, postiats_tyrec_1) ;
+ATStmpdec(tmp802, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp803, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp804, atstype_boxed) ;
+// ATStmpdec_void(tmp805) ;
+// ATStmpdec_void(tmp808) ;
+ATStmpdec(tmp811, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp814, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp815, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17439(line=334, offs=4) -- 17903(line=341, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 17564(line=335, offs=4) -- 18028(line=342, offs=83)
 */
 ATSINSflab(__patsflab_repository_from_env_206):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17504(line=334, offs=69) -- 17903(line=341, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 17629(line=335, offs=69) -- 18028(line=342, offs=83)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17514(line=335, offs=7) -- 17520(line=335, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 17639(line=336, offs=7) -- 17645(line=336, offs=13)
 */
 /*
-ATSINStmpdec(tmpref794) ;
+ATSINStmpdec(tmpref796) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17523(line=335, offs=16) -- 17609(line=335, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 17648(line=336, offs=16) -- 17734(line=336, offs=102)
 */
-ATSINSmove(tmp795, tmpref794) ;
+ATSINSmove(tmp797, tmpref796) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17535(line=335, offs=28) -- 17538(line=335, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 17660(line=336, offs=28) -- 17663(line=336, offs=31)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('B')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('B')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17535(line=335, offs=28) -- 17538(line=335, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 17660(line=336, offs=28) -- 17663(line=336, offs=31)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17540(line=335, offs=33) -- 17543(line=335, offs=36)
+emit_instr: loc0 = build/src/bin/bats.dats: 17665(line=336, offs=33) -- 17668(line=336, offs=36)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('A')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('A')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17540(line=335, offs=33) -- 17543(line=335, offs=36)
+emit_instr: loc0 = build/src/bin/bats.dats: 17665(line=336, offs=33) -- 17668(line=336, offs=36)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17545(line=335, offs=38) -- 17548(line=335, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 17670(line=336, offs=38) -- 17673(line=336, offs=41)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('T')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('T')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17545(line=335, offs=38) -- 17548(line=335, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 17670(line=336, offs=38) -- 17673(line=336, offs=41)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17550(line=335, offs=43) -- 17553(line=335, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 17675(line=336, offs=43) -- 17678(line=336, offs=46)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('S')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('S')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17550(line=335, offs=43) -- 17553(line=335, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 17675(line=336, offs=43) -- 17678(line=336, offs=46)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17555(line=335, offs=48) -- 17558(line=335, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 17680(line=336, offs=48) -- 17683(line=336, offs=51)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('_')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('_')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17555(line=335, offs=48) -- 17558(line=335, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 17680(line=336, offs=48) -- 17683(line=336, offs=51)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17560(line=335, offs=53) -- 17563(line=335, offs=56)
+emit_instr: loc0 = build/src/bin/bats.dats: 17685(line=336, offs=53) -- 17688(line=336, offs=56)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('R')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('R')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17560(line=335, offs=53) -- 17563(line=335, offs=56)
+emit_instr: loc0 = build/src/bin/bats.dats: 17685(line=336, offs=53) -- 17688(line=336, offs=56)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17565(line=335, offs=58) -- 17568(line=335, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 17690(line=336, offs=58) -- 17693(line=336, offs=61)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('E')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('E')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17565(line=335, offs=58) -- 17568(line=335, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 17690(line=336, offs=58) -- 17693(line=336, offs=61)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17570(line=335, offs=63) -- 17573(line=335, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 17695(line=336, offs=63) -- 17698(line=336, offs=66)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('P')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('P')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17570(line=335, offs=63) -- 17573(line=335, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 17695(line=336, offs=63) -- 17698(line=336, offs=66)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17575(line=335, offs=68) -- 17578(line=335, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 17700(line=336, offs=68) -- 17703(line=336, offs=71)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('O')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('O')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17575(line=335, offs=68) -- 17578(line=335, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 17700(line=336, offs=68) -- 17703(line=336, offs=71)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17580(line=335, offs=73) -- 17583(line=335, offs=76)
+emit_instr: loc0 = build/src/bin/bats.dats: 17705(line=336, offs=73) -- 17708(line=336, offs=76)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('S')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('S')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17580(line=335, offs=73) -- 17583(line=335, offs=76)
+emit_instr: loc0 = build/src/bin/bats.dats: 17705(line=336, offs=73) -- 17708(line=336, offs=76)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17585(line=335, offs=78) -- 17588(line=335, offs=81)
+emit_instr: loc0 = build/src/bin/bats.dats: 17710(line=336, offs=78) -- 17713(line=336, offs=81)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('I')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('I')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17585(line=335, offs=78) -- 17588(line=335, offs=81)
+emit_instr: loc0 = build/src/bin/bats.dats: 17710(line=336, offs=78) -- 17713(line=336, offs=81)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17590(line=335, offs=83) -- 17593(line=335, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 17715(line=336, offs=83) -- 17718(line=336, offs=86)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('T')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('T')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17590(line=335, offs=83) -- 17593(line=335, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 17715(line=336, offs=83) -- 17718(line=336, offs=86)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17595(line=335, offs=88) -- 17598(line=335, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 17720(line=336, offs=88) -- 17723(line=336, offs=91)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('O')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('O')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17595(line=335, offs=88) -- 17598(line=335, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 17720(line=336, offs=88) -- 17723(line=336, offs=91)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17600(line=335, offs=93) -- 17603(line=335, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 17725(line=336, offs=93) -- 17728(line=336, offs=96)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('R')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('R')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17600(line=335, offs=93) -- 17603(line=335, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 17725(line=336, offs=93) -- 17728(line=336, offs=96)
 */
-ATSINSupdate_ptrinc(tmp795, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp797, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17605(line=335, offs=98) -- 17608(line=335, offs=101)
+emit_instr: loc0 = build/src/bin/bats.dats: 17730(line=336, offs=98) -- 17733(line=336, offs=101)
 */
-ATSINSpmove(tmp795, atstkind_t0ype(atstype_char), ATSPMVchar('Y')) ;
+ATSINSpmove(tmp797, atstkind_t0ype(atstype_char), ATSPMVchar('Y')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17623(line=336, offs=14) -- 17653(line=336, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 17748(line=337, offs=14) -- 17778(line=337, offs=44)
 */
-ATSINSmove(tmp796, build_057_bats_modules_057_str_057_src_057_lib_056_sats__from_char_array(ATSPMVrefarg1(ATSPMVptrof(tmpref794[0])), ATSPMVi0nt(15))) ;
+ATSINSmove(tmp798, build_057_bats_modules_057_str_057_src_057_lib_056_sats__from_char_array(ATSPMVrefarg1(ATSPMVptrof(tmpref796[0])), ATSPMVi0nt(15))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17676(line=337, offs=23) -- 17696(line=337, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 17801(line=338, offs=23) -- 17821(line=338, offs=43)
 */
-ATSINSmove(tmp797, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__1(tmp796)) ;
+ATSINSmove(tmp799, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__1(tmp798)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17662(line=337, offs=9) -- 17666(line=337, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 17787(line=338, offs=9) -- 17791(line=338, offs=13)
 */
-ATSINSmove(tmp800, ATSSELfltrec(tmp797, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp802, ATSSELfltrec(tmp799, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17668(line=337, offs=15) -- 17672(line=337, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 17793(line=338, offs=15) -- 17797(line=338, offs=19)
 */
-ATSINSmove(tmp801, ATSSELfltrec(tmp797, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp803, ATSSELfltrec(tmp799, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17710(line=338, offs=13) -- 17737(line=338, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 17835(line=339, offs=13) -- 17862(line=339, offs=40)
 */
-ATSINSmove(tmp802, build_057_bats_modules_057_env_057_src_057_lib_056_sats__get(ATSPMVrefarg0(tmp801), ATSPMVi0nt(15), ATSPMVrefarg0(arg0), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp804, build_057_bats_modules_057_env_057_src_057_lib_056_sats__get(ATSPMVrefarg0(tmp803), ATSPMVi0nt(15), ATSPMVrefarg0(arg0), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17749(line=339, offs=12) -- 17774(line=339, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 17874(line=340, offs=12) -- 17899(line=340, offs=37)
 */
-ATSINSmove_void(tmp803, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__1(ATSPMVrefarg0(tmp800), tmp801)) ;
+ATSINSmove_void(tmp805, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__1(ATSPMVrefarg0(tmp802), tmp803)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17800(line=340, offs=26) -- 17818(line=340, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 17925(line=341, offs=26) -- 17943(line=341, offs=44)
 */
-ATSINSmove(tmp809, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__1(tmp800)) ;
+ATSINSmove(tmp811, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__1(tmp802)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17786(line=340, offs=12) -- 17820(line=340, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 17911(line=341, offs=12) -- 17945(line=341, offs=46)
 */
-ATSINSmove_void(tmp806, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__1(tmp809)) ;
+ATSINSmove_void(tmp808, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__1(tmp811)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17824(line=341, offs=4) -- 17899(line=341, offs=79)
+emit_instr: loc0 = build/src/bin/bats.dats: 17949(line=342, offs=4) -- 18024(line=342, offs=79)
 */
 ATScaseof_beg()
 /*
@@ -17425,25 +17470,25 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17839(line=341, offs=19) -- 17850(line=341, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 17964(line=342, offs=19) -- 17975(line=342, offs=30)
 */
 ATSINSlab(__atstmplab80):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17710(line=338, offs=13) -- 17737(line=338, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 17835(line=339, offs=13) -- 17862(line=339, offs=40)
 */
-ATSifthen(ATSCKptrisnull(tmp802)) { ATSINSgoto(__atstmplab83) ; } ;
+ATSifthen(ATSCKptrisnull(tmp804)) { ATSINSgoto(__atstmplab83) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17850(line=341, offs=30) -- 17850(line=341, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 17975(line=342, offs=30) -- 17975(line=342, offs=30)
 */
 ATSINSlab(__atstmplab81):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17848(line=341, offs=28) -- 17849(line=341, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 17973(line=342, offs=28) -- 17974(line=342, offs=29)
 */
-ATSINSmove(tmp812, ATSSELcon(tmp802, postiats_tysum_2, atslab__0)) ;
+ATSINSmove(tmp814, ATSSELcon(tmp804, postiats_tysum_2, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17839(line=341, offs=19) -- 17881(line=341, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 17964(line=342, offs=19) -- 18006(line=342, offs=61)
 */
-ATSINSfreecon(tmp802) ;
+ATSINSfreecon(tmp804) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -17451,41 +17496,41 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17858(line=341, offs=38) -- 17866(line=341, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 17983(line=342, offs=38) -- 17991(line=342, offs=46)
 */
-ATSINSmove(tmp813, ATSLIB_056_prelude__lt_g1int_int__145__3(tmp812, ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp815, ATSLIB_056_prelude__lt_g1int_int__145__3(tmp814, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17855(line=341, offs=35) -- 17880(line=341, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 17980(line=342, offs=35) -- 18005(line=342, offs=60)
 */
 ATSif(
-tmp813
+tmp815
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17872(line=341, offs=52) -- 17873(line=341, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 17997(line=342, offs=52) -- 17998(line=342, offs=53)
 */
-ATSINSmove(tmpret793, tmp812) ;
+ATSINSmove(tmpret795, tmp814) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17879(line=341, offs=59) -- 17880(line=341, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 18004(line=342, offs=59) -- 18005(line=342, offs=60)
 */
-ATSINSmove(tmpret793, ATSPMVi0nt(0)) ;
+ATSINSmove(tmpret795, ATSPMVi0nt(0)) ;
 } /* ATSendif */
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17884(line=341, offs=64) -- 17894(line=341, offs=74)
+emit_instr: loc0 = build/src/bin/bats.dats: 18009(line=342, offs=64) -- 18019(line=342, offs=74)
 */
 ATSINSlab(__atstmplab82):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17710(line=338, offs=13) -- 17737(line=338, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 17835(line=339, offs=13) -- 17862(line=339, offs=40)
 */
 #if(0)
-ATSifthen(ATSCKptriscons(tmp802)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptriscons(tmp804)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17894(line=341, offs=74) -- 17894(line=341, offs=74)
+emit_instr: loc0 = build/src/bin/bats.dats: 18019(line=342, offs=74) -- 18019(line=342, offs=74)
 */
 ATSINSlab(__atstmplab83):
 /*
@@ -17495,9 +17540,9 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17898(line=341, offs=78) -- 17899(line=341, offs=79)
+emit_instr: loc0 = build/src/bin/bats.dats: 18023(line=342, offs=78) -- 18024(line=342, offs=79)
 */
-ATSINSmove(tmpret793, ATSPMVi0nt(0)) ;
+ATSINSmove(tmpret795, ATSPMVi0nt(0)) ;
 ATSbranch_end()
 
 /*
@@ -17506,13 +17551,13 @@ ATSbranch_end()
 ATScaseof_end()
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17504(line=334, offs=69) -- 17903(line=341, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 17629(line=335, offs=69) -- 18028(line=342, offs=83)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn(tmpret793) ;
+ATSreturn(tmpret795) ;
 } /* end of [repository_from_env_206] */
 
 #if(0)
@@ -17535,7 +17580,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798, postiats_tyrec_1) ;
+ATStmpdec(tmpret800, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17546,11 +17591,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798) ;
+ATSreturn(tmpret800) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207] */
 #endif // end of [TEMPLATE]
 
@@ -17573,7 +17618,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__1(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__1, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__1, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17584,11 +17629,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__1, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__1, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__1, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__1, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__1) ;
+ATSreturn(tmpret800__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__1] */
 
 #if(0)
@@ -17611,7 +17656,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804) ;
+// ATStmpdec_void(tmpret806) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17621,9 +17666,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804) ;
+ATSreturn_void(tmpret806) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209] */
 #endif // end of [TEMPLATE]
 
@@ -17646,7 +17691,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__1(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__1) ;
+// ATStmpdec_void(tmpret806__1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17656,9 +17701,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__1, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__1, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__1) ;
+ATSreturn_void(tmpret806__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__1] */
 
 #if(0)
@@ -17681,7 +17726,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807) ;
+// ATStmpdec_void(tmpret809) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17691,9 +17736,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807) ;
+ATSreturn_void(tmpret809) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211] */
 #endif // end of [TEMPLATE]
 
@@ -17716,7 +17761,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__1(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__1) ;
+// ATStmpdec_void(tmpret809__1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17726,9 +17771,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__1, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__1, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__1) ;
+ATSreturn_void(tmpret809__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__1] */
 
 #if(0)
@@ -17751,7 +17796,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17761,9 +17806,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810, arg0) ;
+ATSINSmove(tmpret812, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810) ;
+ATSreturn(tmpret812) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213] */
 #endif // end of [TEMPLATE]
 
@@ -17786,7 +17831,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__1(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__1, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17796,9 +17841,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__1, arg0) ;
+ATSINSmove(tmpret812__1, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__1) ;
+ATSreturn(tmpret812__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__1] */
 
 /*
@@ -17820,8 +17865,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lt_g1int_int__145__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret538__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp539__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret540__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp541__3, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17831,19 +17876,19 @@ ATSINSflab(__patsflab_lt_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12546(line=650, offs=29) -- 12557(line=650, offs=40)
 */
-ATSINSmove(tmp539__3, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp541__3, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12529(line=650, offs=12) -- 12559(line=650, offs=42)
 */
-ATSINSmove(tmpret538__3, atspre_g1int_lt_int(arg0, tmp539__3)) ;
+ATSINSmove(tmpret540__3, atspre_g1int_lt_int(arg0, tmp541__3)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret538__3) ;
+ATSreturn(tmpret540__3) ;
 } /* end of [ATSLIB_056_prelude__lt_g1int_int__145__3] */
 
 /*
-build/src/bin/bats.dats: 17999(line=345, offs=4) -- 18135(line=346, offs=62)
+build/src/bin/bats.dats: 18124(line=346, offs=4) -- 18260(line=347, offs=62)
 */
 /*
 local: repository_from_env_206$0(level=0)
@@ -17856,38 +17901,38 @@ atstkind_t0ype(atstype_int)
 repository_len_216(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret816, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp817, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret818, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp819, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 17999(line=345, offs=4) -- 18135(line=346, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 18124(line=346, offs=4) -- 18260(line=347, offs=62)
 */
 ATSINSflab(__patsflab_repository_len_216):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18079(line=346, offs=6) -- 18091(line=346, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 18204(line=347, offs=6) -- 18216(line=347, offs=18)
 */
-ATSINSmove(tmp817, ATSLIB_056_prelude__gt_g0int_int__217__1(arg1, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp819, ATSLIB_056_prelude__gt_g0int_int__217__1(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18076(line=346, offs=3) -- 18135(line=346, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 18201(line=347, offs=3) -- 18260(line=347, offs=62)
 */
 ATSif(
-tmp817
+tmp819
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18097(line=346, offs=24) -- 18105(line=346, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 18222(line=347, offs=24) -- 18230(line=347, offs=32)
 */
-ATSINSmove(tmpret816, arg1) ;
+ATSINSmove(tmpret818, arg1) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18111(line=346, offs=38) -- 18134(line=346, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 18236(line=347, offs=38) -- 18259(line=347, offs=61)
 */
-ATSINSmove(tmpret816, repository_from_env_206(ATSPMVrefarg0(arg0))) ;
+ATSINSmove(tmpret818, repository_from_env_206(ATSPMVrefarg0(arg0))) ;
 
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret816) ;
+ATSreturn(tmpret818) ;
 } /* end of [repository_len_216] */
 
 #if(0)
@@ -17910,8 +17955,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret820, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17921,15 +17966,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7638))>)(arg1)) ;
+ATSINSmove(tmp821, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7638))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818, PMVtmpltcst(g0int_gt<S2Evar(tk(7638))>)(arg0, tmp819)) ;
+ATSINSmove(tmpret820, PMVtmpltcst(g0int_gt<S2Evar(tk(7638))>)(arg0, tmp821)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818) ;
+ATSreturn(tmpret820) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217] */
 #endif // end of [TEMPLATE]
 
@@ -17952,8 +17997,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -17963,19 +18008,19 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__1, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__1, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__1, atspre_g0int_gt_int(arg0, tmp819__1)) ;
+ATSINSmove(tmpret820__1, atspre_g0int_gt_int(arg0, tmp821__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__1) ;
+ATSreturn(tmpret820__1) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__1] */
 
 /*
-build/src/bin/bats.dats: 18503(line=355, offs=4) -- 18778(line=362, offs=17)
+build/src/bin/bats.dats: 18628(line=356, offs=4) -- 18903(line=363, offs=17)
 */
 /*
 local: 
@@ -17988,25 +18033,25 @@ atstkind_t0ype(atstype_bool)
 bin_package_220()
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret822, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp823, atstype_boxed) ;
-ATStmpdec(tmp824, atstype_boxed) ;
+ATStmpdec(tmpret824, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp825, atstype_boxed) ;
-// ATStmpdec_void(tmp826) ;
-// ATStmpdec_void(tmp827) ;
+ATStmpdec(tmp826, atstype_boxed) ;
+ATStmpdec(tmp827, atstype_boxed) ;
+// ATStmpdec_void(tmp828) ;
+// ATStmpdec_void(tmp829) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18503(line=355, offs=4) -- 18778(line=362, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 18628(line=356, offs=4) -- 18903(line=363, offs=17)
 */
 ATSINSflab(__patsflab_bin_package_220):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18534(line=356, offs=9) -- 18548(line=356, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18659(line=357, offs=9) -- 18673(line=357, offs=23)
 */
-ATSINSmove(tmp823, build_057_src_057_lock_056_sats__project_kind()) ;
+ATSINSmove(tmp825, build_057_src_057_lock_056_sats__project_kind()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18528(line=356, offs=3) -- 18778(line=362, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 18653(line=357, offs=3) -- 18903(line=363, offs=17)
 */
 ATScaseof_beg()
 /*
@@ -18014,15 +18059,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18556(line=357, offs=5) -- 18566(line=357, offs=15)
+emit_instr: loc0 = build/src/bin/bats.dats: 18681(line=358, offs=5) -- 18691(line=358, offs=15)
 */
 ATSINSlab(__atstmplab84):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18534(line=356, offs=9) -- 18548(line=356, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18659(line=357, offs=9) -- 18673(line=357, offs=23)
 */
-ATSifthen(ATSCKptriscons(tmp823)) { ATSINSmove(tmp824, ATSSELcon(tmp823, postiats_tysum_3, atslab__0)) ; ATSINSgoto(__atstmplab87) ; } ;
+ATSifthen(ATSCKptriscons(tmp825)) { ATSINSmove(tmp826, ATSSELcon(tmp825, postiats_tysum_3, atslab__0)) ; ATSINSgoto(__atstmplab87) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18566(line=357, offs=15) -- 18566(line=357, offs=15)
+emit_instr: loc0 = build/src/bin/bats.dats: 18691(line=358, offs=15) -- 18691(line=358, offs=15)
 */
 ATSINSlab(__atstmplab85):
 /*
@@ -18032,42 +18077,42 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18570(line=357, offs=19) -- 18575(line=357, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 18695(line=358, offs=19) -- 18700(line=358, offs=24)
 */
-ATSINSmove(tmpret822, ATSPMVbool_false()) ;
+ATSINSmove(tmpret824, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18580(line=358, offs=5) -- 18598(line=358, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18705(line=359, offs=5) -- 18723(line=359, offs=23)
 */
 ATSINSlab(__atstmplab86):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18534(line=356, offs=9) -- 18548(line=356, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18659(line=357, offs=9) -- 18673(line=357, offs=23)
 */
 #if(0)
-ATSifthen(ATSCKptrisnull(tmp823)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptrisnull(tmp825)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18589(line=358, offs=14) -- 18597(line=358, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 18714(line=359, offs=14) -- 18722(line=359, offs=22)
 */
-ATSINSmove(tmp824, ATSSELcon(tmp823, postiats_tysum_3, atslab__0)) ;
+ATSINSmove(tmp826, ATSSELcon(tmp825, postiats_tysum_3, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18589(line=358, offs=14) -- 18597(line=358, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 18714(line=359, offs=14) -- 18722(line=359, offs=22)
 */
 ATSINSlab(__atstmplab87):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18589(line=358, offs=14) -- 18597(line=358, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 18714(line=359, offs=14) -- 18722(line=359, offs=22)
 */
-ATSifnthen(ATSCKpat_con0(tmp824, 1)) { ATSINSmove(tmp825, tmp824) ; ATSINSgoto(__atstmplab91) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp826, 1)) { ATSINSmove(tmp827, tmp826) ; ATSINSgoto(__atstmplab91) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18598(line=358, offs=23) -- 18598(line=358, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18723(line=359, offs=23) -- 18723(line=359, offs=23)
 */
 ATSINSlab(__atstmplab88):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18580(line=358, offs=5) -- 18606(line=358, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 18705(line=359, offs=5) -- 18731(line=359, offs=31)
 */
-ATSINSfreecon(tmp823) ;
+ATSINSfreecon(tmp825) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -18075,44 +18120,44 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18602(line=358, offs=27) -- 18606(line=358, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 18727(line=359, offs=27) -- 18731(line=359, offs=31)
 */
-ATSINSmove(tmpret822, ATSPMVbool_true()) ;
+ATSINSmove(tmpret824, ATSPMVbool_true()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18611(line=359, offs=5) -- 18630(line=359, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 18736(line=360, offs=5) -- 18755(line=360, offs=24)
 */
 ATSINSlab(__atstmplab89):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18534(line=356, offs=9) -- 18548(line=356, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18659(line=357, offs=9) -- 18673(line=357, offs=23)
 */
 #if(0)
-ATSifthen(ATSCKptrisnull(tmp823)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptrisnull(tmp825)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18620(line=359, offs=14) -- 18629(line=359, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18745(line=360, offs=14) -- 18754(line=360, offs=23)
 */
-ATSINSmove(tmp825, ATSSELcon(tmp823, postiats_tysum_3, atslab__0)) ;
+ATSINSmove(tmp827, ATSSELcon(tmp825, postiats_tysum_3, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18620(line=359, offs=14) -- 18629(line=359, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18745(line=360, offs=14) -- 18754(line=360, offs=23)
 */
 ATSINSlab(__atstmplab90):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18620(line=359, offs=14) -- 18629(line=359, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 18745(line=360, offs=14) -- 18754(line=360, offs=23)
 */
 #if(0)
-ATSifnthen(ATSCKpat_con0(tmp825, 0)) { ATSINSdeadcode_fail() ; } ;
+ATSifnthen(ATSCKpat_con0(tmp827, 0)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18630(line=359, offs=24) -- 18630(line=359, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 18755(line=360, offs=24) -- 18755(line=360, offs=24)
 */
 ATSINSlab(__atstmplab91):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18611(line=359, offs=5) -- 18778(line=362, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 18736(line=360, offs=5) -- 18903(line=363, offs=17)
 */
-ATSINSfreecon(tmp823) ;
+ATSINSfreecon(tmp825) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -18120,31 +18165,31 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18634(line=359, offs=28) -- 18778(line=362, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 18759(line=360, offs=28) -- 18903(line=363, offs=17)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18653(line=360, offs=16) -- 18730(line=360, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 18778(line=361, offs=16) -- 18855(line=361, offs=93)
 */
-ATSINSmove_void(tmp826, atspre_prerr_string(ATSPMVstring("error: 'bats build' is only for binary packages (kind = \"bin\")\n"))) ;
+ATSINSmove_void(tmp828, atspre_prerr_string(ATSPMVstring("error: 'bats build' is only for binary packages (kind = \"bin\")\n"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18746(line=361, offs=16) -- 18761(line=361, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 18871(line=362, offs=16) -- 18886(line=362, offs=31)
 */
-ATSINSmove_void(tmp827, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp829, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18769(line=362, offs=8) -- 18774(line=362, offs=13)
+emit_instr: loc0 = build/src/bin/bats.dats: 18894(line=363, offs=8) -- 18899(line=363, offs=13)
 */
-ATSINSmove(tmpret822, ATSPMVbool_false()) ;
+ATSINSmove(tmpret824, ATSPMVbool_false()) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18634(line=359, offs=28) -- 18778(line=362, offs=17)
+emit_instr: loc0 = build/src/bin/bats.dats: 18759(line=360, offs=28) -- 18903(line=363, offs=17)
 */
 /*
 INSletpop()
@@ -18157,11 +18202,11 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret822) ;
+ATSreturn(tmpret824) ;
 } /* end of [bin_package_220] */
 
 /*
-build/src/bin/bats.dats: 18877(line=366, offs=4) -- 18975(line=369, offs=24)
+build/src/bin/bats.dats: 19002(line=367, offs=4) -- 19100(line=370, offs=24)
 */
 /*
 local: 
@@ -18174,21 +18219,21 @@ atstkind_t0ype(atstype_bool)
 project_known_221()
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret828, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp829, atstype_boxed) ;
+ATStmpdec(tmpret830, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp831, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18877(line=366, offs=4) -- 18975(line=369, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 19002(line=367, offs=4) -- 19100(line=370, offs=24)
 */
 ATSINSflab(__patsflab_project_known_221):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18910(line=367, offs=9) -- 18924(line=367, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 19035(line=368, offs=9) -- 19049(line=368, offs=23)
 */
-ATSINSmove(tmp829, build_057_src_057_lock_056_sats__project_kind()) ;
+ATSINSmove(tmp831, build_057_src_057_lock_056_sats__project_kind()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18904(line=367, offs=3) -- 18975(line=369, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 19029(line=368, offs=3) -- 19100(line=370, offs=24)
 */
 ATScaseof_beg()
 /*
@@ -18196,15 +18241,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18932(line=368, offs=5) -- 18942(line=368, offs=15)
+emit_instr: loc0 = build/src/bin/bats.dats: 19057(line=369, offs=5) -- 19067(line=369, offs=15)
 */
 ATSINSlab(__atstmplab92):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18910(line=367, offs=9) -- 18924(line=367, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 19035(line=368, offs=9) -- 19049(line=368, offs=23)
 */
-ATSifthen(ATSCKptriscons(tmp829)) { ATSINSgoto(__atstmplab95) ; } ;
+ATSifthen(ATSCKptriscons(tmp831)) { ATSINSgoto(__atstmplab95) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18942(line=368, offs=15) -- 18942(line=368, offs=15)
+emit_instr: loc0 = build/src/bin/bats.dats: 19067(line=369, offs=15) -- 19067(line=369, offs=15)
 */
 ATSINSlab(__atstmplab93):
 /*
@@ -18214,30 +18259,30 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18946(line=368, offs=19) -- 18951(line=368, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 19071(line=369, offs=19) -- 19076(line=369, offs=24)
 */
-ATSINSmove(tmpret828, ATSPMVbool_false()) ;
+ATSINSmove(tmpret830, ATSPMVbool_false()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18956(line=369, offs=5) -- 18967(line=369, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 19081(line=370, offs=5) -- 19092(line=370, offs=16)
 */
 ATSINSlab(__atstmplab94):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18910(line=367, offs=9) -- 18924(line=367, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 19035(line=368, offs=9) -- 19049(line=368, offs=23)
 */
 #if(0)
-ATSifthen(ATSCKptrisnull(tmp829)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptrisnull(tmp831)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18967(line=369, offs=16) -- 18967(line=369, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 19092(line=370, offs=16) -- 19092(line=370, offs=16)
 */
 ATSINSlab(__atstmplab95):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18956(line=369, offs=5) -- 18975(line=369, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 19081(line=370, offs=5) -- 19100(line=370, offs=24)
 */
-ATSINSfreecon(tmp829) ;
+ATSINSfreecon(tmp831) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -18245,9 +18290,9 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 18971(line=369, offs=20) -- 18975(line=369, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 19096(line=370, offs=20) -- 19100(line=370, offs=24)
 */
-ATSINSmove(tmpret828, ATSPMVbool_true()) ;
+ATSINSmove(tmpret830, ATSPMVbool_true()) ;
 ATSbranch_end()
 
 /*
@@ -18256,11 +18301,11 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret828) ;
+ATSreturn(tmpret830) ;
 } /* end of [project_known_221] */
 
 /*
-build/src/bin/bats.dats: 19049(line=372, offs=4) -- 19180(line=375, offs=30)
+build/src/bin/bats.dats: 19174(line=373, offs=4) -- 19305(line=376, offs=30)
 */
 /*
 local: 
@@ -18273,15 +18318,15 @@ atstkind_t0ype(atstype_bool)
 force_misuse_222(atstype_boxed arg0, atstkind_t0ype(atstype_int) arg1, atstkind_t0ype(atstype_bool) arg2)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret830, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret832, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19049(line=372, offs=4) -- 19180(line=375, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 19174(line=373, offs=4) -- 19305(line=376, offs=30)
 */
 ATSINSflab(__patsflab_force_misuse_222):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19114(line=373, offs=3) -- 19180(line=375, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 19239(line=374, offs=3) -- 19305(line=376, offs=30)
 */
 ATScaseof_beg()
 /*
@@ -18289,15 +18334,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19131(line=374, offs=5) -- 19137(line=374, offs=11)
+emit_instr: loc0 = build/src/bin/bats.dats: 19256(line=375, offs=5) -- 19262(line=375, offs=11)
 */
 ATSINSlab(__atstmplab96):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19063(line=372, offs=18) -- 19066(line=372, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 19188(line=373, offs=18) -- 19191(line=373, offs=21)
 */
 ATSifnthen(ATSCKpat_con0(arg0, 12)) { ATSINSgoto(__atstmplab98) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19137(line=374, offs=11) -- 19137(line=374, offs=11)
+emit_instr: loc0 = build/src/bin/bats.dats: 19262(line=375, offs=11) -- 19262(line=375, offs=11)
 */
 ATSINSlab(__atstmplab97):
 /*
@@ -18307,15 +18352,15 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19141(line=374, offs=15) -- 19150(line=374, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 19266(line=375, offs=15) -- 19275(line=375, offs=24)
 */
-ATSINSmove(tmpret830, ATSLIB_056_prelude__gt_g0int_int__217__2(arg1, ATSPMVi0nt(1))) ;
+ATSINSmove(tmpret832, ATSLIB_056_prelude__gt_g0int_int__217__2(arg1, ATSPMVi0nt(1))) ;
 
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19156(line=375, offs=6) -- 19156(line=375, offs=6)
+emit_instr: loc0 = build/src/bin/bats.dats: 19281(line=376, offs=6) -- 19281(line=376, offs=6)
 */
 ATSINSlab(__atstmplab98):
 /*
@@ -18325,20 +18370,20 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19160(line=375, offs=10) -- 19180(line=375, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 19285(line=376, offs=10) -- 19305(line=376, offs=30)
 */
 ATSif(
 arg2
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19160(line=375, offs=10) -- 19180(line=375, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 19285(line=376, offs=10) -- 19305(line=376, offs=30)
 */
-ATSINSmove(tmpret830, ATSPMVbool_true()) ;
+ATSINSmove(tmpret832, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19160(line=375, offs=10) -- 19180(line=375, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 19285(line=376, offs=10) -- 19305(line=376, offs=30)
 */
-ATSINSmove(tmpret830, ATSLIB_056_prelude__gt_g0int_int__217__3(arg1, ATSPMVi0nt(0))) ;
+ATSINSmove(tmpret832, ATSLIB_056_prelude__gt_g0int_int__217__3(arg1, ATSPMVi0nt(0))) ;
 
 } /* ATSendif */
 ATSbranch_end()
@@ -18349,7 +18394,7 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn(tmpret830) ;
+ATSreturn(tmpret832) ;
 } /* end of [force_misuse_222] */
 
 /*
@@ -18371,8 +18416,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__2, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -18382,15 +18427,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__2, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__2, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__2, atspre_g0int_gt_int(arg0, tmp819__2)) ;
+ATSINSmove(tmpret820__2, atspre_g0int_gt_int(arg0, tmp821__2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__2) ;
+ATSreturn(tmpret820__2) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__2] */
 
 /*
@@ -18412,8 +18457,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__3(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__3, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__3, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__3, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__3, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -18423,19 +18468,19 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__3, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__3, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__3, atspre_g0int_gt_int(arg0, tmp819__3)) ;
+ATSINSmove(tmpret820__3, atspre_g0int_gt_int(arg0, tmp821__3)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__3) ;
+ATSreturn(tmpret820__3) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__3] */
 
 /*
-build/src/bin/bats.dats: 19185(line=377, offs=4) -- 40573(line=739, offs=4)
+build/src/bin/bats.dats: 19310(line=378, offs=4) -- 41423(line=749, offs=4)
 */
 /*
 local: dispatch_cmd_0$0(level=0), locks_project_62$0(level=0), heavy_of_63$0(level=0), print_usage_64$0(level=0), copy_extra_65$0(level=0), find_dashdash_80$0(level=0), profiles_of_88$0(level=0), targets_of_89$0(level=0), makes_debug_90$0(level=0), makes_release_91$0(level=0), makes_native_92$0(level=0), makes_wasm_93$0(level=0), scan_only_95$0(level=0), count_positionals_109$0(level=0), command_word_144$0(level=0), count_force_150$0(level=0), is_setup_word_164$0(level=0), opt_string_copy_205$0(level=0), repository_len_216$0(level=0), bin_package_220$0(level=0), project_known_221$0(level=0), force_misuse_222$0(level=0)
@@ -18448,240 +18493,238 @@ atsvoid_t0ype
 bats_main_225()
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret835) ;
-ATStmpdec(tmp836, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp841, atstype_boxed) ;
-ATStmpdec(tmp842, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp843, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp844, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp847, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp848, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp851, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp852, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmpret837) ;
+ATStmpdec(tmp838, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp843, atstype_boxed) ;
+ATStmpdec(tmp844, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp845, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp846, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp849, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp850, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp853, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp854, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp857, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp858, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp854, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp855, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp856, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp859, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp860, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp860, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp861, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp862, postiats_tyrec_0) ;
-ATStmpdec(tmp863, postiats_tyrec_0) ;
-ATStmpdec(tmp864, postiats_tyrec_1) ;
-ATStmpdec(tmp866, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp867, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref868[4], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp869, atstype_arrptr) ;
-ATStmpdec(tmp870, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp871, postiats_tyrec_1) ;
-ATStmpdec(tmp873, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp874, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref875[15], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp876, atstype_arrptr) ;
-ATStmpdec(tmp877, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp878, postiats_tyrec_1) ;
-ATStmpdec(tmp880, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp881, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp882, atstype_boxed) ;
-// ATStmpdec_void(tmp883) ;
+ATStmpdec(tmp862, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp863, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp864, postiats_tyrec_0) ;
+ATStmpdec(tmp865, postiats_tyrec_0) ;
+ATStmpdec(tmp866, postiats_tyrec_1) ;
+ATStmpdec(tmp868, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp869, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref870[4], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp871, atstype_arrptr) ;
+ATStmpdec(tmp872, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp873, postiats_tyrec_1) ;
+ATStmpdec(tmp875, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp876, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref877[15], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp878, atstype_arrptr) ;
+ATStmpdec(tmp879, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp880, postiats_tyrec_1) ;
+ATStmpdec(tmp882, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp883, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp884, atstype_boxed) ;
 // ATStmpdec_void(tmp885) ;
-ATStmpdec(tmp887, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp889) ;
+// ATStmpdec_void(tmp887) ;
+ATStmpdec(tmp889, atstkind_type(atstype_ptrk)) ;
 // ATStmpdec_void(tmp891) ;
-ATStmpdec(tmp893, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmpref895[7], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp896, atstype_arrptr) ;
-ATStmpdec(tmpref897[14], atstkind_t0ype(atstype_char)) ;
+// ATStmpdec_void(tmp893) ;
+ATStmpdec(tmp895, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpref897[7], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp898, atstype_arrptr) ;
-ATStmpdec(tmp899, postiats_tyrec_4) ;
-ATStmpdec(tmp900, atstype_boxed) ;
-ATStmpdec(tmp901, atstype_boxed) ;
-ATStmpdec(tmp902, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref903[5], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp904, atstype_arrptr) ;
-ATStmpdec(tmpref905[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref899[14], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp900, atstype_arrptr) ;
+ATStmpdec(tmp901, postiats_tyrec_4) ;
+ATStmpdec(tmp902, atstype_boxed) ;
+ATStmpdec(tmp903, atstype_boxed) ;
+ATStmpdec(tmp904, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref905[5], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp906, atstype_arrptr) ;
-ATStmpdec(tmp907, postiats_tyrec_4) ;
-ATStmpdec(tmp908, atstype_boxed) ;
-ATStmpdec(tmp909, atstype_boxed) ;
-ATStmpdec(tmp910, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref911[6], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp912, atstype_arrptr) ;
-ATStmpdec(tmpref913[16], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref907[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp908, atstype_arrptr) ;
+ATStmpdec(tmp909, postiats_tyrec_4) ;
+ATStmpdec(tmp910, atstype_boxed) ;
+ATStmpdec(tmp911, atstype_boxed) ;
+ATStmpdec(tmp912, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref913[6], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp914, atstype_arrptr) ;
-ATStmpdec(tmp915, postiats_tyrec_4) ;
-ATStmpdec(tmp916, atstype_boxed) ;
-ATStmpdec(tmp917, atstype_boxed) ;
-ATStmpdec(tmp918, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref919[10], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp920, atstype_arrptr) ;
-ATStmpdec(tmpref921[18], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref915[16], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp916, atstype_arrptr) ;
+ATStmpdec(tmp917, postiats_tyrec_4) ;
+ATStmpdec(tmp918, atstype_boxed) ;
+ATStmpdec(tmp919, atstype_boxed) ;
+ATStmpdec(tmp920, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref921[10], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp922, atstype_arrptr) ;
-ATStmpdec(tmp923, postiats_tyrec_4) ;
-ATStmpdec(tmp924, atstype_boxed) ;
-ATStmpdec(tmp925, atstype_boxed) ;
-ATStmpdec(tmp926, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref927[4], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp928, atstype_arrptr) ;
-ATStmpdec(tmpref929[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref923[18], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp924, atstype_arrptr) ;
+ATStmpdec(tmp925, postiats_tyrec_4) ;
+ATStmpdec(tmp926, atstype_boxed) ;
+ATStmpdec(tmp927, atstype_boxed) ;
+ATStmpdec(tmp928, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref929[4], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp930, atstype_arrptr) ;
-ATStmpdec(tmp931, postiats_tyrec_4) ;
-ATStmpdec(tmp932, atstype_boxed) ;
-ATStmpdec(tmp933, atstype_boxed) ;
-ATStmpdec(tmp934, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref935[3], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp936, atstype_arrptr) ;
-ATStmpdec(tmpref937[11], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref931[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp932, atstype_arrptr) ;
+ATStmpdec(tmp933, postiats_tyrec_4) ;
+ATStmpdec(tmp934, atstype_boxed) ;
+ATStmpdec(tmp935, atstype_boxed) ;
+ATStmpdec(tmp936, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref937[3], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp938, atstype_arrptr) ;
-ATStmpdec(tmp939, postiats_tyrec_4) ;
-ATStmpdec(tmp940, atstype_boxed) ;
-ATStmpdec(tmp941, atstype_boxed) ;
-ATStmpdec(tmp942, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref943[4], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp944, atstype_arrptr) ;
-ATStmpdec(tmpref945[27], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref939[11], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp940, atstype_arrptr) ;
+ATStmpdec(tmp941, postiats_tyrec_4) ;
+ATStmpdec(tmp942, atstype_boxed) ;
+ATStmpdec(tmp943, atstype_boxed) ;
+ATStmpdec(tmp944, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref945[4], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp946, atstype_arrptr) ;
-ATStmpdec(tmp947, postiats_tyrec_4) ;
-ATStmpdec(tmp948, atstype_boxed) ;
-ATStmpdec(tmp949, atstype_boxed) ;
-ATStmpdec(tmp950, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref951[6], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp952, atstype_arrptr) ;
-ATStmpdec(tmpref953[19], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref947[27], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp948, atstype_arrptr) ;
+ATStmpdec(tmp949, postiats_tyrec_4) ;
+ATStmpdec(tmp950, atstype_boxed) ;
+ATStmpdec(tmp951, atstype_boxed) ;
+ATStmpdec(tmp952, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref953[6], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp954, atstype_arrptr) ;
-ATStmpdec(tmp955, postiats_tyrec_4) ;
-ATStmpdec(tmp956, atstype_boxed) ;
-ATStmpdec(tmp957, atstype_boxed) ;
-ATStmpdec(tmp958, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref959[3], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp960, atstype_arrptr) ;
-ATStmpdec(tmpref961[24], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref955[19], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp956, atstype_arrptr) ;
+ATStmpdec(tmp957, postiats_tyrec_4) ;
+ATStmpdec(tmp958, atstype_boxed) ;
+ATStmpdec(tmp959, atstype_boxed) ;
+ATStmpdec(tmp960, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref961[3], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp962, atstype_arrptr) ;
-ATStmpdec(tmp963, postiats_tyrec_4) ;
-ATStmpdec(tmp964, atstype_boxed) ;
-ATStmpdec(tmp965, atstype_boxed) ;
-ATStmpdec(tmp966, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref967[7], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp968, atstype_arrptr) ;
-ATStmpdec(tmpref969[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref963[24], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp964, atstype_arrptr) ;
+ATStmpdec(tmp965, postiats_tyrec_4) ;
+ATStmpdec(tmp966, atstype_boxed) ;
+ATStmpdec(tmp967, atstype_boxed) ;
+ATStmpdec(tmp968, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref969[7], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp970, atstype_arrptr) ;
-ATStmpdec(tmp971, postiats_tyrec_4) ;
-ATStmpdec(tmp972, atstype_boxed) ;
-ATStmpdec(tmp973, atstype_boxed) ;
-ATStmpdec(tmp974, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref975[5], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp976, atstype_arrptr) ;
-ATStmpdec(tmpref977[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref971[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp972, atstype_arrptr) ;
+ATStmpdec(tmp973, postiats_tyrec_4) ;
+ATStmpdec(tmp974, atstype_boxed) ;
+ATStmpdec(tmp975, atstype_boxed) ;
+ATStmpdec(tmp976, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref977[5], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp978, atstype_arrptr) ;
-ATStmpdec(tmp979, postiats_tyrec_4) ;
-ATStmpdec(tmp980, atstype_boxed) ;
-ATStmpdec(tmp981, atstype_boxed) ;
-ATStmpdec(tmp982, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref983[4], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp984, atstype_arrptr) ;
-ATStmpdec(tmpref985[21], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref979[12], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp980, atstype_arrptr) ;
+ATStmpdec(tmp981, postiats_tyrec_4) ;
+ATStmpdec(tmp982, atstype_boxed) ;
+ATStmpdec(tmp983, atstype_boxed) ;
+ATStmpdec(tmp984, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref985[4], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp986, atstype_arrptr) ;
-ATStmpdec(tmp987, postiats_tyrec_4) ;
-ATStmpdec(tmp988, atstype_boxed) ;
-ATStmpdec(tmp989, atstype_boxed) ;
-ATStmpdec(tmp990, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref991[4], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp992, atstype_arrptr) ;
-ATStmpdec(tmpref993[9], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref987[21], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp988, atstype_arrptr) ;
+ATStmpdec(tmp989, postiats_tyrec_4) ;
+ATStmpdec(tmp990, atstype_boxed) ;
+ATStmpdec(tmp991, atstype_boxed) ;
+ATStmpdec(tmp992, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref993[4], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp994, atstype_arrptr) ;
-ATStmpdec(tmp995, postiats_tyrec_4) ;
-ATStmpdec(tmp996, atstype_boxed) ;
-ATStmpdec(tmp997, atstype_boxed) ;
-ATStmpdec(tmp998, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref999[6], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp1000, atstype_arrptr) ;
-ATStmpdec(tmpref1001[11], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref995[9], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp996, atstype_arrptr) ;
+ATStmpdec(tmp997, postiats_tyrec_4) ;
+ATStmpdec(tmp998, atstype_boxed) ;
+ATStmpdec(tmp999, atstype_boxed) ;
+ATStmpdec(tmp1000, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref1001[6], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp1002, atstype_arrptr) ;
-ATStmpdec(tmp1003, postiats_tyrec_4) ;
-ATStmpdec(tmp1004, atstype_boxed) ;
-ATStmpdec(tmp1005, atstype_boxed) ;
-ATStmpdec(tmp1006, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref1007[7], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp1008, atstype_arrptr) ;
-ATStmpdec(tmpref1009[10], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref1003[11], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp1004, atstype_arrptr) ;
+ATStmpdec(tmp1005, postiats_tyrec_4) ;
+ATStmpdec(tmp1006, atstype_boxed) ;
+ATStmpdec(tmp1007, atstype_boxed) ;
+ATStmpdec(tmp1008, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref1009[7], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp1010, atstype_arrptr) ;
-ATStmpdec(tmp1011, postiats_tyrec_4) ;
-ATStmpdec(tmp1012, atstype_boxed) ;
-ATStmpdec(tmp1013, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmpref1014[8], atstkind_t0ype(atstype_char)) ;
-ATStmpdec(tmp1015, atstype_arrptr) ;
-ATStmpdec(tmpref1016[19], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmpref1011[10], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp1012, atstype_arrptr) ;
+ATStmpdec(tmp1013, postiats_tyrec_4) ;
+ATStmpdec(tmp1014, atstype_boxed) ;
+ATStmpdec(tmp1015, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref1016[8], atstkind_t0ype(atstype_char)) ;
 ATStmpdec(tmp1017, atstype_arrptr) ;
-ATStmpdec(tmp1018, postiats_tyrec_4) ;
-ATStmpdec(tmp1019, atstype_boxed) ;
-ATStmpdec(tmp1020, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpref1018[19], atstkind_t0ype(atstype_char)) ;
+ATStmpdec(tmp1019, atstype_arrptr) ;
+ATStmpdec(tmp1020, postiats_tyrec_4) ;
 ATStmpdec(tmp1021, atstype_boxed) ;
-// ATStmpdec_void(tmp1022) ;
+ATStmpdec(tmp1022, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1023, atstype_boxed) ;
 // ATStmpdec_void(tmp1024) ;
-ATStmpdec(tmp1026, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1028, atstype_boxed) ;
-ATStmpdec(tmp1029, atstype_boxed) ;
-ATStmpdec(tmp1030, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1031) ;
-// ATStmpdec_void(tmp1032) ;
+// ATStmpdec_void(tmp1026) ;
+ATStmpdec(tmp1028, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1030, atstype_boxed) ;
+ATStmpdec(tmp1031, atstype_boxed) ;
+ATStmpdec(tmp1032, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1033) ;
 // ATStmpdec_void(tmp1034) ;
-ATStmpdec(tmp1035, atstkind_t0ype(atstype_bool)) ;
 // ATStmpdec_void(tmp1036) ;
 ATStmpdec(tmp1037, atstkind_t0ype(atstype_bool)) ;
 // ATStmpdec_void(tmp1038) ;
 ATStmpdec(tmp1039, atstkind_t0ype(atstype_bool)) ;
 // ATStmpdec_void(tmp1040) ;
 ATStmpdec(tmp1041, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1042, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1045, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1046, postiats_tyrec_1) ;
-ATStmpdec(tmp1048, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1049, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1050, atstype_boxed) ;
-// ATStmpdec_void(tmp1051) ;
-// ATStmpdec_void(tmp1054) ;
-ATStmpdec(tmp1057, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1042) ;
+ATStmpdec(tmp1043, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1044, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1047, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1048, postiats_tyrec_1) ;
+ATStmpdec(tmp1050, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1051, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1052, atstype_boxed) ;
+// ATStmpdec_void(tmp1053) ;
+// ATStmpdec_void(tmp1056) ;
 ATStmpdec(tmp1059, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1062, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1063, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1064, postiats_tyrec_1) ;
-ATStmpdec(tmp1066, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1067, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1068, postiats_tyrec_1) ;
-ATStmpdec(tmp1070, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1071, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1061, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1064, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1065, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1066, postiats_tyrec_1) ;
+ATStmpdec(tmp1068, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1069, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1070, postiats_tyrec_1) ;
 ATStmpdec(tmp1072, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1075, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1076) ;
-ATStmpdec(tmp1077, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1080, postiats_tyrec_1) ;
-ATStmpdec(tmp1082, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1083, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1073, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1074, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1077, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1078) ;
+ATStmpdec(tmp1079, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1082, postiats_tyrec_1) ;
 ATStmpdec(tmp1084, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1087, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1088, atstype_boxed) ;
-// ATStmpdec_void(tmp1089) ;
-ATStmpdec(tmp1091, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1094, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1095, atstype_boxed) ;
-ATStmpdec(tmp1096, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1085, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1086, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1089, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1090, atstype_boxed) ;
+// ATStmpdec_void(tmp1091) ;
+ATStmpdec(tmp1093, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1096, atstkind_t0ype(atstype_int)) ;
 ATStmpdec(tmp1097, atstype_boxed) ;
-ATStmpdec(tmp1098, atstype_boxed) ;
-// ATStmpdec_void(tmp1099) ;
-ATStmpdec(tmp1100, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1098, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1099, atstype_boxed) ;
+ATStmpdec(tmp1100, atstype_boxed) ;
 // ATStmpdec_void(tmp1101) ;
-// ATStmpdec_void(tmp1102) ;
-ATStmpdec(tmp1104, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1105, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1106) ;
-// ATStmpdec_void(tmp1107) ;
+ATStmpdec(tmp1102, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1103) ;
+// ATStmpdec_void(tmp1104) ;
+ATStmpdec(tmp1106, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1107, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1108) ;
 // ATStmpdec_void(tmp1109) ;
-// ATStmpdec_void(tmp1110) ;
 // ATStmpdec_void(tmp1111) ;
-ATStmpdec(tmp1113, atstype_boxed) ;
-ATStmpdec(tmp1114, atstype_boxed) ;
-ATStmpdec(tmp1115, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1116, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1112) ;
+// ATStmpdec_void(tmp1113) ;
+ATStmpdec(tmp1115, atstype_boxed) ;
+ATStmpdec(tmp1116, atstype_boxed) ;
 ATStmpdec(tmp1117, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1118, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1119, atstkind_t0ype(atstype_bool)) ;
@@ -18690,195 +18733,199 @@ ATStmpdec(tmp1121, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1122, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1123, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1124, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1125) ;
-ATStmpdec(tmp1126, atstype_boxed) ;
-ATStmpdec(tmp1127, atstype_boxed) ;
-// ATStmpdec_void(tmp1128) ;
+ATStmpdec(tmp1125, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1126, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1127) ;
+ATStmpdec(tmp1128, atstype_boxed) ;
 ATStmpdec(tmp1129, atstype_boxed) ;
-ATStmpdec(tmp1130, atstype_boxed) ;
-// ATStmpdec_void(tmp1131) ;
+// ATStmpdec_void(tmp1130) ;
+ATStmpdec(tmp1131, atstype_boxed) ;
 ATStmpdec(tmp1132, atstype_boxed) ;
-ATStmpdec(tmp1133, atstype_boxed) ;
-// ATStmpdec_void(tmp1134) ;
-ATStmpdec(tmp1135, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1133) ;
+ATStmpdec(tmp1134, atstype_boxed) ;
+ATStmpdec(tmp1135, atstype_boxed) ;
 // ATStmpdec_void(tmp1136) ;
-ATStmpdec(tmp1137, atstype_boxed) ;
-ATStmpdec(tmp1138, atstype_boxed) ;
-// ATStmpdec_void(tmp1139) ;
-// ATStmpdec_void(tmp1140) ;
-ATStmpdec(tmp1142, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1143, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1137, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1138) ;
+ATStmpdec(tmp1139, atstype_boxed) ;
+ATStmpdec(tmp1140, atstype_boxed) ;
+// ATStmpdec_void(tmp1141) ;
+// ATStmpdec_void(tmp1142) ;
 ATStmpdec(tmp1144, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1145, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1146, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1147) ;
-// ATStmpdec_void(tmp1148) ;
-ATStmpdec(tmp1150, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1151, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1152) ;
-// ATStmpdec_void(tmp1153) ;
-ATStmpdec(tmp1155, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1158, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1174, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1177, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1178, atstype_boxed) ;
-// ATStmpdec_void(tmp1179) ;
+ATStmpdec(tmp1147, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1148, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1149) ;
+// ATStmpdec_void(tmp1150) ;
+ATStmpdec(tmp1152, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1153, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1154) ;
+// ATStmpdec_void(tmp1155) ;
+ATStmpdec(tmp1157, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1160, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1176, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1179, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1180, atstype_boxed) ;
 // ATStmpdec_void(tmp1181) ;
-// ATStmpdec_void(tmp1182) ;
-ATStmpdec(tmp1184, postiats_tyrec_1) ;
-ATStmpdec(tmp1186, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1187, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1188, atstype_boxed) ;
-ATStmpdec(tmp1189, atstype_boxed) ;
-// ATStmpdec_void(tmp1190) ;
-ATStmpdec(tmp1191, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1183) ;
+// ATStmpdec_void(tmp1184) ;
+ATStmpdec(tmp1186, postiats_tyrec_1) ;
+ATStmpdec(tmp1188, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1189, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1190, atstype_boxed) ;
+ATStmpdec(tmp1191, atstype_boxed) ;
 // ATStmpdec_void(tmp1192) ;
 ATStmpdec(tmp1193, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1194, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1194) ;
 ATStmpdec(tmp1195, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1196, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1197, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1198) ;
-ATStmpdec(tmp1201, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1203, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1204) ;
+ATStmpdec(tmp1198, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1199, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1200) ;
+ATStmpdec(tmp1203, atstkind_type(atstype_ptrk)) ;
 ATStmpdec(tmp1205, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1208, postiats_tyrec_1) ;
-ATStmpdec(tmp1210, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1211, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1212) ;
-// ATStmpdec_void(tmp1213) ;
-ATStmpdec(tmp1216, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1218) ;
+// ATStmpdec_void(tmp1206) ;
+ATStmpdec(tmp1207, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1210, postiats_tyrec_1) ;
+ATStmpdec(tmp1212, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1213, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1214) ;
+// ATStmpdec_void(tmp1215) ;
+ATStmpdec(tmp1218, atstkind_type(atstype_ptrk)) ;
 // ATStmpdec_void(tmp1220) ;
-// ATStmpdec_void(tmp1221) ;
-ATStmpdec(tmp1222, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1225, atstkind_t0ype(atstype_int)) ;
-// ATStmpdec_void(tmp1226) ;
-// ATStmpdec_void(tmp1227) ;
-ATStmpdec(tmp1229, postiats_tyrec_1) ;
-ATStmpdec(tmp1231, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1232, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1233, atstype_boxed) ;
-// ATStmpdec_void(tmp1234) ;
-ATStmpdec(tmp1235, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1236, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1222) ;
+// ATStmpdec_void(tmp1223) ;
+ATStmpdec(tmp1224, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1227, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmp1228) ;
+// ATStmpdec_void(tmp1229) ;
+ATStmpdec(tmp1231, postiats_tyrec_1) ;
+ATStmpdec(tmp1233, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1234, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1235, atstype_boxed) ;
+// ATStmpdec_void(tmp1236) ;
 ATStmpdec(tmp1237, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1238, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1239, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1240, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1241, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1242) ;
-ATStmpdec(tmp1245, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1247) ;
-// ATStmpdec_void(tmp1248) ;
+ATStmpdec(tmp1242, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1243, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1244) ;
+ATStmpdec(tmp1247, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1249) ;
 // ATStmpdec_void(tmp1250) ;
-// ATStmpdec_void(tmp1251) ;
+// ATStmpdec_void(tmp1252) ;
 // ATStmpdec_void(tmp1253) ;
-ATStmpdec(tmp1254, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1257, postiats_tyrec_1) ;
-ATStmpdec(tmp1259, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1260, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1261) ;
-// ATStmpdec_void(tmp1262) ;
-ATStmpdec(tmp1265, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1267) ;
+// ATStmpdec_void(tmp1255) ;
+ATStmpdec(tmp1256, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1259, postiats_tyrec_1) ;
+ATStmpdec(tmp1261, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1262, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1263) ;
+// ATStmpdec_void(tmp1264) ;
+ATStmpdec(tmp1267, atstkind_type(atstype_ptrk)) ;
 // ATStmpdec_void(tmp1269) ;
-// ATStmpdec_void(tmp1270) ;
-ATStmpdec(tmp1271, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1274, postiats_tyrec_1) ;
-ATStmpdec(tmp1276, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1277, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1278) ;
-// ATStmpdec_void(tmp1279) ;
-ATStmpdec(tmp1282, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1284) ;
+// ATStmpdec_void(tmp1271) ;
+// ATStmpdec_void(tmp1272) ;
+ATStmpdec(tmp1273, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1276, postiats_tyrec_1) ;
+ATStmpdec(tmp1278, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1279, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1280) ;
+// ATStmpdec_void(tmp1281) ;
+ATStmpdec(tmp1284, atstkind_type(atstype_ptrk)) ;
 // ATStmpdec_void(tmp1286) ;
-// ATStmpdec_void(tmp1287) ;
-ATStmpdec(tmp1310, atstype_boxed) ;
-// ATStmpdec_void(tmp1311) ;
-ATStmpdec(tmp1313, atstype_boxed) ;
-// ATStmpdec_void(tmp1314) ;
-ATStmpdec(tmp1315, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1288) ;
+// ATStmpdec_void(tmp1289) ;
+ATStmpdec(tmp1312, atstype_boxed) ;
+// ATStmpdec_void(tmp1313) ;
+ATStmpdec(tmp1315, atstype_boxed) ;
 // ATStmpdec_void(tmp1316) ;
-ATStmpdec(tmp1348, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1349) ;
-ATStmpdec(tmp1351, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1352, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1357) ;
-ATStmpdec(tmp1358, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1359, atstype_boxed) ;
-// ATStmpdec_void(tmp1360) ;
-// ATStmpdec_void(tmp1361) ;
-ATStmpdec(tmp1362, postiats_tyrec_1) ;
-ATStmpdec(tmp1364, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1365, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1366) ;
-ATStmpdec(tmp1367, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1368, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1373) ;
-ATStmpdec(tmp1374, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1375) ;
-ATStmpdec(tmp1378, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1380) ;
-ATStmpdec(tmp1381, postiats_tyrec_1) ;
-ATStmpdec(tmp1383, atstkind_type(atstype_ptrk)) ;
-ATStmpdec(tmp1384, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1385) ;
-ATStmpdec(tmp1386, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1387, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1317, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1318) ;
+ATStmpdec(tmp1377, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1378, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1379) ;
+ATStmpdec(tmp1381, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1382, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1387) ;
+// ATStmpdec_void(tmp1388) ;
+ATStmpdec(tmp1389, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1390, atstype_boxed) ;
+// ATStmpdec_void(tmp1391) ;
 // ATStmpdec_void(tmp1392) ;
-ATStmpdec(tmp1393, atstkind_t0ype(atstype_bool)) ;
-// ATStmpdec_void(tmp1394) ;
-ATStmpdec(tmp1397, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1399) ;
-// ATStmpdec_void(tmp1400) ;
-// ATStmpdec_void(tmp1402) ;
-// ATStmpdec_void(tmp1403) ;
+ATStmpdec(tmp1393, postiats_tyrec_1) ;
+ATStmpdec(tmp1395, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1396, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1397) ;
+ATStmpdec(tmp1398, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1399, atstkind_t0ype(atstype_bool)) ;
 // ATStmpdec_void(tmp1404) ;
+ATStmpdec(tmp1405, atstkind_t0ype(atstype_bool)) ;
 // ATStmpdec_void(tmp1406) ;
-// ATStmpdec_void(tmp1407) ;
-// ATStmpdec_void(tmp1408) ;
-// ATStmpdec_void(tmp1410) ;
-ATStmpdec(tmp1412, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1414) ;
+ATStmpdec(tmp1409, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1411) ;
+ATStmpdec(tmp1412, postiats_tyrec_1) ;
+ATStmpdec(tmp1414, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1415, atstkind_type(atstype_ptrk)) ;
 // ATStmpdec_void(tmp1416) ;
-ATStmpdec(tmp1418, atstkind_type(atstype_ptrk)) ;
-// ATStmpdec_void(tmp1420) ;
-ATStmpdec(tmp1423, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmp1417, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1418, atstkind_t0ype(atstype_bool)) ;
+// ATStmpdec_void(tmp1423) ;
+ATStmpdec(tmp1424, atstkind_t0ype(atstype_bool)) ;
 // ATStmpdec_void(tmp1425) ;
-// ATStmpdec_void(tmp1426) ;
-// ATStmpdec_void(tmp1428) ;
-// ATStmpdec_void(tmp1429) ;
+ATStmpdec(tmp1428, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1430) ;
 // ATStmpdec_void(tmp1431) ;
+// ATStmpdec_void(tmp1433) ;
+// ATStmpdec_void(tmp1434) ;
+// ATStmpdec_void(tmp1435) ;
+// ATStmpdec_void(tmp1437) ;
+// ATStmpdec_void(tmp1438) ;
+// ATStmpdec_void(tmp1439) ;
+// ATStmpdec_void(tmp1441) ;
+ATStmpdec(tmp1443, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1445) ;
+// ATStmpdec_void(tmp1447) ;
+ATStmpdec(tmp1449, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1451) ;
+ATStmpdec(tmp1454, atstkind_type(atstype_ptrk)) ;
+// ATStmpdec_void(tmp1456) ;
+// ATStmpdec_void(tmp1457) ;
+// ATStmpdec_void(tmp1459) ;
+// ATStmpdec_void(tmp1460) ;
+// ATStmpdec_void(tmp1462) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19185(line=377, offs=4) -- 40573(line=739, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 19310(line=378, offs=4) -- 41423(line=749, offs=4)
 */
 ATSINSflab(__patsflab_bats_main_225):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19206(line=377, offs=25) -- 40573(line=739, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 19331(line=378, offs=25) -- 41423(line=749, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19225(line=378, offs=16) -- 19245(line=378, offs=36)
+emit_instr: loc0 = build/src/bin/bats.dats: 19350(line=379, offs=16) -- 19370(line=379, offs=36)
 */
-ATSINSmove(tmp836, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__1(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp838, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__1(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19262(line=379, offs=17) -- 19288(line=379, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 19387(line=380, offs=17) -- 19413(line=380, offs=43)
 */
-ATSINSmove(tmp841, build_057_bats_modules_057_env_057_src_057_lib_056_sats__args_read(ATSPMVrefarg0(tmp836), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp843, build_057_bats_modules_057_env_057_src_057_lib_056_sats__args_read(ATSPMVrefarg0(tmp838), ATSPMVi0nt(4096))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19298(line=381, offs=7) -- 40569(line=738, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 19423(line=382, offs=7) -- 41419(line=748, offs=57)
 */
 ATScaseof_beg()
 /*
@@ -18886,25 +18933,25 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19323(line=382, offs=9) -- 19337(line=382, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 19448(line=383, offs=9) -- 19462(line=383, offs=23)
 */
 ATSINSlab(__atstmplab99):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19262(line=379, offs=17) -- 19288(line=379, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 19387(line=380, offs=17) -- 19413(line=380, offs=43)
 */
-ATSifthen(ATSCKptrisnull(tmp841)) { ATSINSgoto(__atstmplab102) ; } ;
+ATSifthen(ATSCKptrisnull(tmp843)) { ATSINSgoto(__atstmplab102) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19337(line=382, offs=23) -- 19337(line=382, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 19462(line=383, offs=23) -- 19462(line=383, offs=23)
 */
 ATSINSlab(__atstmplab100):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19332(line=382, offs=18) -- 19336(line=382, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 19457(line=383, offs=18) -- 19461(line=383, offs=22)
 */
-ATSINSmove(tmp842, ATSSELcon(tmp841, postiats_tysum_2, atslab__0)) ;
+ATSINSmove(tmp844, ATSSELcon(tmp843, postiats_tysum_2, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19323(line=382, offs=9) -- 40445(line=735, offs=12)
+emit_instr: loc0 = build/src/bin/bats.dats: 19448(line=383, offs=9) -- 41295(line=745, offs=12)
 */
-ATSINSfreecon(tmp841) ;
+ATSINSfreecon(tmp843) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -18912,3584 +18959,3584 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19341(line=382, offs=27) -- 40445(line=735, offs=12)
+emit_instr: loc0 = build/src/bin/bats.dats: 19466(line=383, offs=27) -- 41295(line=745, offs=12)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19368(line=383, offs=24) -- 19398(line=383, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 19493(line=384, offs=24) -- 19523(line=384, offs=54)
 */
-ATSINSmove(tmp843, find_dashdash_80(ATSPMVrefarg0(tmp836), ATSPMVi0nt(0), tmp842)) ;
+ATSINSmove(tmp845, find_dashdash_80(ATSPMVrefarg0(tmp838), ATSPMVi0nt(0), tmp844)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19498(line=385, offs=27) -- 19518(line=385, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 19623(line=386, offs=27) -- 19643(line=386, offs=47)
 */
-ATSINSmove(tmp844, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__2(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp846, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__2(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19549(line=386, offs=31) -- 19560(line=386, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 19674(line=387, offs=31) -- 19685(line=387, offs=42)
 */
-ATSINSmove(tmp848, ATSLIB_056_prelude__gte_g1int_int__66__20(tmp843, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp850, ATSLIB_056_prelude__gte_g1int_int__66__20(tmp845, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19546(line=386, offs=28) -- 19577(line=386, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 19671(line=387, offs=28) -- 19702(line=387, offs=59)
 */
 ATSif(
-tmp848
+tmp850
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19566(line=386, offs=48) -- 19570(line=386, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 19691(line=387, offs=48) -- 19695(line=387, offs=52)
 */
-ATSINSmove(tmp847, tmp842) ;
+ATSINSmove(tmp849, tmp844) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19576(line=386, offs=58) -- 19577(line=386, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 19701(line=387, offs=58) -- 19702(line=387, offs=59)
 */
-ATSINSmove(tmp847, ATSPMVi0nt(0)) ;
+ATSINSmove(tmp849, ATSPMVi0nt(0)) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19640(line=387, offs=57) -- 19650(line=387, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 19765(line=388, offs=57) -- 19775(line=388, offs=67)
 */
-ATSINSmove(tmp852, atspre_g1int_add_int(tmp843, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp854, atspre_g1int_add_int(tmp845, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19610(line=387, offs=27) -- 19665(line=387, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 19735(line=388, offs=27) -- 19790(line=388, offs=82)
 */
-ATSINSmove(tmp851, copy_extra_65(ATSPMVrefarg0(tmp836), ATSPMVrefarg0(tmp844), tmp852, tmp847, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp853, copy_extra_65(ATSPMVrefarg0(tmp838), ATSPMVrefarg0(tmp846), tmp854, tmp849, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19700(line=388, offs=35) -- 19711(line=388, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 19825(line=389, offs=35) -- 19836(line=389, offs=46)
 */
-ATSINSmove(tmp854, ATSLIB_056_prelude__gte_g1int_int__66__21(tmp843, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp856, ATSLIB_056_prelude__gte_g1int_int__66__21(tmp845, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19697(line=388, offs=32) -- 19733(line=388, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 19822(line=389, offs=32) -- 19858(line=389, offs=68)
 */
 ATSif(
-tmp854
+tmp856
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19717(line=388, offs=52) -- 19723(line=388, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 19842(line=389, offs=52) -- 19848(line=389, offs=58)
 */
-ATSINSmove(tmp853, tmp843) ;
+ATSINSmove(tmp855, tmp845) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19729(line=388, offs=64) -- 19733(line=388, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 19854(line=389, offs=64) -- 19858(line=389, offs=68)
 */
-ATSINSmove(tmp853, tmp842) ;
+ATSINSmove(tmp855, tmp844) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19761(line=389, offs=22) -- 19794(line=389, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 19886(line=390, offs=22) -- 19919(line=390, offs=55)
 */
-ATSINSmove(tmp857, build_057_src_057_helpers_056_sats__count_argc(ATSPMVrefarg0(tmp836), tmp853)) ;
+ATSINSmove(tmp859, build_057_src_057_helpers_056_sats__count_argc(ATSPMVrefarg0(tmp838), tmp855)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19823(line=390, offs=29) -- 19869(line=390, offs=75)
+emit_instr: loc0 = build/src/bin/bats.dats: 19948(line=391, offs=29) -- 19994(line=391, offs=75)
 */
-ATSINSmove(tmp858, count_positionals_109(ATSPMVrefarg0(tmp836), ATSPMVi0nt(0), tmp853, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp860, count_positionals_109(ATSPMVrefarg0(tmp838), ATSPMVi0nt(0), tmp855, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19898(line=391, offs=29) -- 19938(line=391, offs=69)
+emit_instr: loc0 = build/src/bin/bats.dats: 20023(line=392, offs=29) -- 20063(line=392, offs=69)
 */
-ATSINSmove(tmp859, count_force_150(ATSPMVrefarg0(tmp836), ATSPMVi0nt(0), tmp853, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp861, count_force_150(ATSPMVrefarg0(tmp838), ATSPMVi0nt(0), tmp855, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19988(line=392, offs=50) -- 20023(line=392, offs=85)
+emit_instr: loc0 = build/src/bin/bats.dats: 20113(line=393, offs=50) -- 20148(line=393, offs=85)
 */
-ATSINSmove(tmp861, command_word_144(ATSPMVrefarg0(tmp836), tmp853)) ;
+ATSINSmove(tmp863, command_word_144(ATSPMVrefarg0(tmp838), tmp855)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19966(line=392, offs=28) -- 20024(line=392, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 20091(line=393, offs=28) -- 20149(line=393, offs=86)
 */
-ATSINSmove(tmp860, is_setup_word_164(ATSPMVrefarg0(tmp836), tmp861)) ;
+ATSINSmove(tmp862, is_setup_word_164(ATSPMVrefarg0(tmp838), tmp863)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20100(line=394, offs=13) -- 20159(line=394, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 20225(line=395, offs=13) -- 20284(line=395, offs=72)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmp863, postiats_tyrec_0, atslab__debug, ATSPMVbool_false()) ;
-ATSINSstore_fltrec_ofs(tmp863, postiats_tyrec_0, atslab__release, ATSPMVbool_false()) ;
-ATSINSstore_fltrec_ofs(tmp863, postiats_tyrec_0, atslab__native, ATSPMVbool_false()) ;
-ATSINSstore_fltrec_ofs(tmp863, postiats_tyrec_0, atslab__wasm, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmp865, postiats_tyrec_0, atslab__debug, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmp865, postiats_tyrec_0, atslab__release, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmp865, postiats_tyrec_0, atslab__native, ATSPMVbool_false()) ;
+ATSINSstore_fltrec_ofs(tmp865, postiats_tyrec_0, atslab__wasm, ATSPMVbool_false()) ;
 ATSINSmove_fltrec_end()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20052(line=393, offs=28) -- 20160(line=394, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 20177(line=394, offs=28) -- 20285(line=395, offs=73)
 */
-ATSINSmove(tmp862, scan_only_95(ATSPMVrefarg0(tmp836), ATSPMVi0nt(0), tmp853, tmp863)) ;
+ATSINSmove(tmp864, scan_only_95(ATSPMVrefarg0(tmp838), ATSPMVi0nt(0), tmp855, tmp865)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20193(line=395, offs=33) -- 20215(line=395, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 20318(line=396, offs=33) -- 20340(line=396, offs=55)
 */
-ATSINSmove(tmp864, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__2(tmp836)) ;
+ATSINSmove(tmp866, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__2(tmp838)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20177(line=395, offs=17) -- 20182(line=395, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 20302(line=396, offs=17) -- 20307(line=396, offs=22)
 */
-ATSINSmove(tmp866, ATSSELfltrec(tmp864, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp868, ATSSELfltrec(tmp866, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20184(line=395, offs=24) -- 20189(line=395, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 20309(line=396, offs=24) -- 20314(line=396, offs=29)
 */
-ATSINSmove(tmp867, ATSSELfltrec(tmp864, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp869, ATSSELfltrec(tmp866, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20231(line=396, offs=15) -- 20236(line=396, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref868) ;
+emit_instr: loc0 = build/src/bin/bats.dats: 20356(line=397, offs=15) -- 20361(line=397, offs=20)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20239(line=396, offs=23) -- 20269(line=396, offs=53)
-*/
-ATSINSmove(tmp869, tmpref868) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20250(line=396, offs=34) -- 20253(line=396, offs=37)
-*/
-ATSINSpmove(tmp869, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20250(line=396, offs=34) -- 20253(line=396, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp869, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20255(line=396, offs=39) -- 20258(line=396, offs=42)
-*/
-ATSINSpmove(tmp869, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20255(line=396, offs=39) -- 20258(line=396, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp869, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20260(line=396, offs=44) -- 20263(line=396, offs=47)
-*/
-ATSINSpmove(tmp869, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20260(line=396, offs=44) -- 20263(line=396, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp869, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20265(line=396, offs=49) -- 20268(line=396, offs=52)
-*/
-ATSINSpmove(tmp869, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20290(line=397, offs=21) -- 20318(line=397, offs=49)
-*/
-ATSINSmove(tmp870, build_057_bats_modules_057_str_057_src_057_lib_056_sats__from_char_array(ATSPMVrefarg1(ATSPMVptrof(tmpref868[0])), ATSPMVi0nt(4))) ;
-
-/* (*nothing*) */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20371(line=399, offs=31) -- 20390(line=399, offs=50)
-*/
-ATSINSmove(tmp871, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__3(tmp870)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20357(line=399, offs=17) -- 20361(line=399, offs=21)
-*/
-ATSINSmove(tmp873, ATSSELfltrec(tmp871, postiats_tyrec_1, atslab__0)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20363(line=399, offs=23) -- 20367(line=399, offs=27)
-*/
-ATSINSmove(tmp874, ATSSELfltrec(tmp871, postiats_tyrec_1, atslab__1)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20406(line=400, offs=15) -- 20411(line=400, offs=20)
+ATSINStmpdec(tmpref870) ;
 */
 /*
-ATSINStmpdec(tmpref875) ;
+emit_instr: loc0 = build/src/bin/bats.dats: 20364(line=397, offs=23) -- 20394(line=397, offs=53)
 */
+ATSINSmove(tmp871, tmpref870) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20414(line=400, offs=23) -- 20500(line=400, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 20375(line=397, offs=34) -- 20378(line=397, offs=37)
 */
-ATSINSmove(tmp876, tmpref875) ;
+ATSINSpmove(tmp871, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20426(line=400, offs=35) -- 20429(line=400, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 20375(line=397, offs=34) -- 20378(line=397, offs=37)
 */
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
+ATSINSupdate_ptrinc(tmp871, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20426(line=400, offs=35) -- 20429(line=400, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 20380(line=397, offs=39) -- 20383(line=397, offs=42)
 */
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
+ATSINSpmove(tmp871, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20431(line=400, offs=40) -- 20434(line=400, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 20380(line=397, offs=39) -- 20383(line=397, offs=42)
 */
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+ATSINSupdate_ptrinc(tmp871, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20431(line=400, offs=40) -- 20434(line=400, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 20385(line=397, offs=44) -- 20388(line=397, offs=47)
 */
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
+ATSINSpmove(tmp871, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20436(line=400, offs=45) -- 20439(line=400, offs=48)
+emit_instr: loc0 = build/src/bin/bats.dats: 20385(line=397, offs=44) -- 20388(line=397, offs=47)
 */
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSupdate_ptrinc(tmp871, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20436(line=400, offs=45) -- 20439(line=400, offs=48)
+emit_instr: loc0 = build/src/bin/bats.dats: 20390(line=397, offs=49) -- 20393(line=397, offs=52)
 */
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
+ATSINSpmove(tmp871, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20441(line=400, offs=50) -- 20444(line=400, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 20415(line=398, offs=21) -- 20443(line=398, offs=49)
 */
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20441(line=400, offs=50) -- 20444(line=400, offs=53)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20446(line=400, offs=55) -- 20449(line=400, offs=58)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20446(line=400, offs=55) -- 20449(line=400, offs=58)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20451(line=400, offs=60) -- 20454(line=400, offs=63)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20451(line=400, offs=60) -- 20454(line=400, offs=63)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20456(line=400, offs=65) -- 20459(line=400, offs=68)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20456(line=400, offs=65) -- 20459(line=400, offs=68)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20461(line=400, offs=70) -- 20464(line=400, offs=73)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20461(line=400, offs=70) -- 20464(line=400, offs=73)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20466(line=400, offs=75) -- 20469(line=400, offs=78)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20466(line=400, offs=75) -- 20469(line=400, offs=78)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20471(line=400, offs=80) -- 20474(line=400, offs=83)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20471(line=400, offs=80) -- 20474(line=400, offs=83)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20476(line=400, offs=85) -- 20479(line=400, offs=88)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20476(line=400, offs=85) -- 20479(line=400, offs=88)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20481(line=400, offs=90) -- 20484(line=400, offs=93)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20481(line=400, offs=90) -- 20484(line=400, offs=93)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20486(line=400, offs=95) -- 20489(line=400, offs=98)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20486(line=400, offs=95) -- 20489(line=400, offs=98)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20491(line=400, offs=100) -- 20494(line=400, offs=103)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20491(line=400, offs=100) -- 20494(line=400, offs=103)
-*/
-ATSINSupdate_ptrinc(tmp876, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20496(line=400, offs=105) -- 20499(line=400, offs=108)
-*/
-ATSINSpmove(tmp876, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20521(line=401, offs=21) -- 20550(line=401, offs=50)
-*/
-ATSINSmove(tmp877, build_057_bats_modules_057_str_057_src_057_lib_056_sats__from_char_array(ATSPMVrefarg1(ATSPMVptrof(tmpref875[0])), ATSPMVi0nt(15))) ;
+ATSINSmove(tmp872, build_057_bats_modules_057_str_057_src_057_lib_056_sats__from_char_array(ATSPMVrefarg1(ATSPMVptrof(tmpref870[0])), ATSPMVi0nt(4))) ;
 
 /* (*nothing*) */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20604(line=403, offs=31) -- 20623(line=403, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 20496(line=400, offs=31) -- 20515(line=400, offs=50)
 */
-ATSINSmove(tmp878, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__4(tmp877)) ;
+ATSINSmove(tmp873, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__3(tmp872)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20590(line=403, offs=17) -- 20594(line=403, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 20482(line=400, offs=17) -- 20486(line=400, offs=21)
 */
-ATSINSmove(tmp880, ATSSELfltrec(tmp878, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp875, ATSSELfltrec(tmp873, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20596(line=403, offs=23) -- 20600(line=403, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 20488(line=400, offs=23) -- 20492(line=400, offs=27)
 */
-ATSINSmove(tmp881, ATSSELfltrec(tmp878, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp876, ATSSELfltrec(tmp873, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20643(line=404, offs=19) -- 20679(line=404, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 20531(line=401, offs=15) -- 20536(line=401, offs=20)
 */
-ATSINSmove(tmp882, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parser_new(ATSPMVrefarg0(tmp874), ATSPMVi0nt(4), ATSPMVrefarg0(tmp881), ATSPMVi0nt(15))) ;
+/*
+ATSINStmpdec(tmpref877) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20539(line=401, offs=23) -- 20625(line=401, offs=109)
+*/
+ATSINSmove(tmp878, tmpref877) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20551(line=401, offs=35) -- 20554(line=401, offs=38)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20551(line=401, offs=35) -- 20554(line=401, offs=38)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20556(line=401, offs=40) -- 20559(line=401, offs=43)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20556(line=401, offs=40) -- 20559(line=401, offs=43)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20561(line=401, offs=45) -- 20564(line=401, offs=48)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20561(line=401, offs=45) -- 20564(line=401, offs=48)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20566(line=401, offs=50) -- 20569(line=401, offs=53)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20566(line=401, offs=50) -- 20569(line=401, offs=53)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20571(line=401, offs=55) -- 20574(line=401, offs=58)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20571(line=401, offs=55) -- 20574(line=401, offs=58)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20576(line=401, offs=60) -- 20579(line=401, offs=63)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20576(line=401, offs=60) -- 20579(line=401, offs=63)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20581(line=401, offs=65) -- 20584(line=401, offs=68)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20581(line=401, offs=65) -- 20584(line=401, offs=68)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20586(line=401, offs=70) -- 20589(line=401, offs=73)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20586(line=401, offs=70) -- 20589(line=401, offs=73)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20591(line=401, offs=75) -- 20594(line=401, offs=78)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20591(line=401, offs=75) -- 20594(line=401, offs=78)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20596(line=401, offs=80) -- 20599(line=401, offs=83)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20596(line=401, offs=80) -- 20599(line=401, offs=83)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20601(line=401, offs=85) -- 20604(line=401, offs=88)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20601(line=401, offs=85) -- 20604(line=401, offs=88)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20606(line=401, offs=90) -- 20609(line=401, offs=93)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20606(line=401, offs=90) -- 20609(line=401, offs=93)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20611(line=401, offs=95) -- 20614(line=401, offs=98)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20611(line=401, offs=95) -- 20614(line=401, offs=98)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20616(line=401, offs=100) -- 20619(line=401, offs=103)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20616(line=401, offs=100) -- 20619(line=401, offs=103)
+*/
+ATSINSupdate_ptrinc(tmp878, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20621(line=401, offs=105) -- 20624(line=401, offs=108)
+*/
+ATSINSpmove(tmp878, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20646(line=402, offs=21) -- 20675(line=402, offs=50)
+*/
+ATSINSmove(tmp879, build_057_bats_modules_057_str_057_src_057_lib_056_sats__from_char_array(ATSPMVrefarg1(ATSPMVptrof(tmpref877[0])), ATSPMVi0nt(15))) ;
+
+/* (*nothing*) */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20729(line=404, offs=31) -- 20748(line=404, offs=50)
+*/
+ATSINSmove(tmp880, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__4(tmp879)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20699(line=405, offs=20) -- 20724(line=405, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 20715(line=404, offs=17) -- 20719(line=404, offs=21)
 */
-ATSINSmove_void(tmp883, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__2(ATSPMVrefarg0(tmp873), tmp874)) ;
+ATSINSmove(tmp882, ATSSELfltrec(tmp880, postiats_tyrec_1, atslab__0)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20721(line=404, offs=23) -- 20725(line=404, offs=27)
+*/
+ATSINSmove(tmp883, ATSSELfltrec(tmp880, postiats_tyrec_1, atslab__1)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 20768(line=405, offs=19) -- 20804(line=405, offs=55)
+*/
+ATSINSmove(tmp884, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parser_new(ATSPMVrefarg0(tmp876), ATSPMVi0nt(4), ATSPMVrefarg0(tmp883), ATSPMVi0nt(15))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20758(line=406, offs=34) -- 20776(line=406, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 20824(line=406, offs=20) -- 20849(line=406, offs=45)
 */
-ATSINSmove(tmp887, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__2(tmp873)) ;
+ATSINSmove_void(tmp885, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__2(ATSPMVrefarg0(tmp875), tmp876)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20744(line=406, offs=20) -- 20778(line=406, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 20883(line=407, offs=34) -- 20901(line=407, offs=52)
 */
-ATSINSmove_void(tmp885, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__2(tmp887)) ;
+ATSINSmove(tmp889, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__2(tmp875)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20798(line=407, offs=20) -- 20823(line=407, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 20869(line=407, offs=20) -- 20903(line=407, offs=54)
 */
-ATSINSmove_void(tmp889, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__3(ATSPMVrefarg0(tmp880), tmp881)) ;
+ATSINSmove_void(tmp887, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__2(tmp889)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20857(line=408, offs=34) -- 20875(line=408, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 20923(line=408, offs=20) -- 20948(line=408, offs=45)
 */
-ATSINSmove(tmp893, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__3(tmp880)) ;
+ATSINSmove_void(tmp891, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__3(ATSPMVrefarg0(tmp882), tmp883)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20843(line=408, offs=20) -- 20877(line=408, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 20982(line=409, offs=34) -- 21000(line=409, offs=52)
 */
-ATSINSmove_void(tmp891, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__3(tmp893)) ;
+ATSINSmove(tmp895, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__3(tmp882)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20892(line=409, offs=15) -- 20896(line=409, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 20968(line=409, offs=20) -- 21002(line=409, offs=54)
 */
+ATSINSmove_void(tmp893, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__3(tmp895)) ;
+
 /*
-ATSINStmpdec(tmpref895) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20899(line=409, offs=22) -- 20944(line=409, offs=67)
-*/
-ATSINSmove(tmp896, tmpref895) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20910(line=409, offs=33) -- 20913(line=409, offs=36)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('v')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20910(line=409, offs=33) -- 20913(line=409, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp896, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20915(line=409, offs=38) -- 20918(line=409, offs=41)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20915(line=409, offs=38) -- 20918(line=409, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp896, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20920(line=409, offs=43) -- 20923(line=409, offs=46)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20920(line=409, offs=43) -- 20923(line=409, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp896, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20925(line=409, offs=48) -- 20928(line=409, offs=51)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20925(line=409, offs=48) -- 20928(line=409, offs=51)
-*/
-ATSINSupdate_ptrinc(tmp896, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20930(line=409, offs=53) -- 20933(line=409, offs=56)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20930(line=409, offs=53) -- 20933(line=409, offs=56)
-*/
-ATSINSupdate_ptrinc(tmp896, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20935(line=409, offs=58) -- 20938(line=409, offs=61)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20935(line=409, offs=58) -- 20938(line=409, offs=61)
-*/
-ATSINSupdate_ptrinc(tmp896, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20940(line=409, offs=63) -- 20943(line=409, offs=66)
-*/
-ATSINSpmove(tmp896, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 20959(line=410, offs=15) -- 20963(line=410, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 21017(line=410, offs=15) -- 21021(line=410, offs=19)
 */
 /*
 ATSINStmpdec(tmpref897) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20966(line=410, offs=22) -- 21047(line=410, offs=103)
+emit_instr: loc0 = build/src/bin/bats.dats: 21024(line=410, offs=22) -- 21069(line=410, offs=67)
 */
 ATSINSmove(tmp898, tmpref897) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20978(line=410, offs=34) -- 20981(line=410, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 21035(line=410, offs=33) -- 21038(line=410, offs=36)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('v')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20978(line=410, offs=34) -- 20981(line=410, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 21035(line=410, offs=33) -- 21038(line=410, offs=36)
 */
 ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20983(line=410, offs=39) -- 20986(line=410, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 21040(line=410, offs=38) -- 21043(line=410, offs=41)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20983(line=410, offs=39) -- 20986(line=410, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 21040(line=410, offs=38) -- 21043(line=410, offs=41)
 */
 ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20988(line=410, offs=44) -- 20991(line=410, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 21045(line=410, offs=43) -- 21048(line=410, offs=46)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20988(line=410, offs=44) -- 20991(line=410, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 21045(line=410, offs=43) -- 21048(line=410, offs=46)
 */
 ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20993(line=410, offs=49) -- 20996(line=410, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 21050(line=410, offs=48) -- 21053(line=410, offs=51)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20993(line=410, offs=49) -- 20996(line=410, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 21050(line=410, offs=48) -- 21053(line=410, offs=51)
 */
 ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20998(line=410, offs=54) -- 21001(line=410, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 21055(line=410, offs=53) -- 21058(line=410, offs=56)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 20998(line=410, offs=54) -- 21001(line=410, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 21055(line=410, offs=53) -- 21058(line=410, offs=56)
 */
 ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21003(line=410, offs=59) -- 21006(line=410, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 21060(line=410, offs=58) -- 21063(line=410, offs=61)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21003(line=410, offs=59) -- 21006(line=410, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 21060(line=410, offs=58) -- 21063(line=410, offs=61)
 */
 ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21008(line=410, offs=64) -- 21011(line=410, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 21065(line=410, offs=63) -- 21068(line=410, offs=66)
 */
 ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21008(line=410, offs=64) -- 21011(line=410, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 21084(line=411, offs=15) -- 21088(line=411, offs=19)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21013(line=410, offs=69) -- 21016(line=410, offs=72)
+ATSINStmpdec(tmpref899) ;
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21013(line=410, offs=69) -- 21016(line=410, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 21091(line=411, offs=22) -- 21172(line=411, offs=103)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp900, tmpref899) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21018(line=410, offs=74) -- 21021(line=410, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21103(line=411, offs=34) -- 21106(line=411, offs=37)
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('v')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21018(line=410, offs=74) -- 21021(line=410, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21103(line=411, offs=34) -- 21106(line=411, offs=37)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21023(line=410, offs=79) -- 21026(line=410, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21108(line=411, offs=39) -- 21111(line=411, offs=42)
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21023(line=410, offs=79) -- 21026(line=410, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21108(line=411, offs=39) -- 21111(line=411, offs=42)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21028(line=410, offs=84) -- 21031(line=410, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21113(line=411, offs=44) -- 21116(line=411, offs=47)
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21028(line=410, offs=84) -- 21031(line=410, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21113(line=411, offs=44) -- 21116(line=411, offs=47)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21033(line=410, offs=89) -- 21036(line=410, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21118(line=411, offs=49) -- 21121(line=411, offs=52)
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21033(line=410, offs=89) -- 21036(line=410, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21118(line=411, offs=49) -- 21121(line=411, offs=52)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21038(line=410, offs=94) -- 21041(line=410, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 21123(line=411, offs=54) -- 21126(line=411, offs=57)
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21038(line=410, offs=94) -- 21041(line=410, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 21123(line=411, offs=54) -- 21126(line=411, offs=57)
 */
-ATSINSupdate_ptrinc(tmp898, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21043(line=410, offs=99) -- 21046(line=410, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 21128(line=411, offs=59) -- 21131(line=411, offs=62)
 */
-ATSINSpmove(tmp898, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21100(line=411, offs=53) -- 21112(line=411, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 21128(line=411, offs=59) -- 21131(line=411, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21133(line=411, offs=64) -- 21136(line=411, offs=67)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21133(line=411, offs=64) -- 21136(line=411, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21138(line=411, offs=69) -- 21141(line=411, offs=72)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21138(line=411, offs=69) -- 21141(line=411, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21143(line=411, offs=74) -- 21146(line=411, offs=77)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21143(line=411, offs=74) -- 21146(line=411, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21148(line=411, offs=79) -- 21151(line=411, offs=82)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21148(line=411, offs=79) -- 21151(line=411, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21153(line=411, offs=84) -- 21156(line=411, offs=87)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21153(line=411, offs=84) -- 21156(line=411, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21158(line=411, offs=89) -- 21161(line=411, offs=92)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21158(line=411, offs=89) -- 21161(line=411, offs=92)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21163(line=411, offs=94) -- 21166(line=411, offs=97)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21163(line=411, offs=94) -- 21166(line=411, offs=97)
+*/
+ATSINSupdate_ptrinc(tmp900, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21168(line=411, offs=99) -- 21171(line=411, offs=102)
+*/
+ATSINSpmove(tmp900, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21225(line=412, offs=53) -- 21237(line=412, offs=65)
 */
 
 /*
 #LINCONSTATUS==0
 */
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmp900, postiats_tysum_2) ;
+ATSINSmove_con1_new(tmp902, postiats_tysum_2) ;
 #if(0)
-ATSINSstore_con1_tag(tmp900, 0) ;
+ATSINSstore_con1_tag(tmp902, 0) ;
 #endif
-ATSINSstore_con1_ofs(tmp900, postiats_tysum_2, atslab__0, ATSPMVi0nt(118)) ;
+ATSINSstore_con1_ofs(tmp902, postiats_tysum_2, atslab__0, ATSPMVi0nt(118)) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21080(line=411, offs=33) -- 21123(line=411, offs=76)
+emit_instr: loc0 = build/src/bin/bats.dats: 21205(line=412, offs=33) -- 21248(line=412, offs=76)
 */
-ATSINSmove(tmp899, build_057_src_057_helpers_056_sats__ap_flag(tmp882, ATSPMVrefarg1(ATSPMVptrof(tmpref895[0])), ATSPMVi0nt(7), tmp900, ATSPMVrefarg1(ATSPMVptrof(tmpref897[0])), ATSPMVi0nt(14))) ;
+ATSINSmove(tmp901, build_057_src_057_helpers_056_sats__ap_flag(tmp884, ATSPMVrefarg1(ATSPMVptrof(tmpref897[0])), ATSPMVi0nt(7), tmp902, ATSPMVrefarg1(ATSPMVptrof(tmpref899[0])), ATSPMVi0nt(14))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21064(line=411, offs=17) -- 21065(line=411, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 21189(line=412, offs=17) -- 21190(line=412, offs=18)
 */
-ATSINSmove(tmp901, ATSSELfltrec(tmp899, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp903, ATSSELfltrec(tmp901, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21067(line=411, offs=20) -- 21076(line=411, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 21192(line=412, offs=20) -- 21201(line=412, offs=29)
 */
-ATSINSmove(tmp902, ATSSELfltrec(tmp899, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp904, ATSSELfltrec(tmp901, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21138(line=412, offs=15) -- 21142(line=412, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref903) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21145(line=412, offs=22) -- 21180(line=412, offs=57)
-*/
-ATSINSmove(tmp904, tmpref903) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21156(line=412, offs=33) -- 21159(line=412, offs=36)
-*/
-ATSINSpmove(tmp904, atstkind_t0ype(atstype_char), ATSPMVchar('q')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21156(line=412, offs=33) -- 21159(line=412, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp904, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21161(line=412, offs=38) -- 21164(line=412, offs=41)
-*/
-ATSINSpmove(tmp904, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21161(line=412, offs=38) -- 21164(line=412, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp904, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21166(line=412, offs=43) -- 21169(line=412, offs=46)
-*/
-ATSINSpmove(tmp904, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21166(line=412, offs=43) -- 21169(line=412, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp904, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21171(line=412, offs=48) -- 21174(line=412, offs=51)
-*/
-ATSINSpmove(tmp904, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21171(line=412, offs=48) -- 21174(line=412, offs=51)
-*/
-ATSINSupdate_ptrinc(tmp904, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21176(line=412, offs=53) -- 21179(line=412, offs=56)
-*/
-ATSINSpmove(tmp904, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21195(line=413, offs=15) -- 21199(line=413, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 21263(line=413, offs=15) -- 21267(line=413, offs=19)
 */
 /*
 ATSINStmpdec(tmpref905) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21202(line=413, offs=22) -- 21273(line=413, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 21270(line=413, offs=22) -- 21305(line=413, offs=57)
 */
 ATSINSmove(tmp906, tmpref905) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21214(line=413, offs=34) -- 21217(line=413, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 21281(line=413, offs=33) -- 21284(line=413, offs=36)
 */
 ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('q')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21214(line=413, offs=34) -- 21217(line=413, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 21281(line=413, offs=33) -- 21284(line=413, offs=36)
 */
 ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21219(line=413, offs=39) -- 21222(line=413, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 21286(line=413, offs=38) -- 21289(line=413, offs=41)
 */
 ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21219(line=413, offs=39) -- 21222(line=413, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 21286(line=413, offs=38) -- 21289(line=413, offs=41)
 */
 ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21224(line=413, offs=44) -- 21227(line=413, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 21291(line=413, offs=43) -- 21294(line=413, offs=46)
 */
 ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21224(line=413, offs=44) -- 21227(line=413, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 21291(line=413, offs=43) -- 21294(line=413, offs=46)
 */
 ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21229(line=413, offs=49) -- 21232(line=413, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 21296(line=413, offs=48) -- 21299(line=413, offs=51)
 */
 ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21229(line=413, offs=49) -- 21232(line=413, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 21296(line=413, offs=48) -- 21299(line=413, offs=51)
 */
 ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21234(line=413, offs=54) -- 21237(line=413, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 21301(line=413, offs=53) -- 21304(line=413, offs=56)
 */
 ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21234(line=413, offs=54) -- 21237(line=413, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 21320(line=414, offs=15) -- 21324(line=414, offs=19)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21239(line=413, offs=59) -- 21242(line=413, offs=62)
+ATSINStmpdec(tmpref907) ;
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21239(line=413, offs=59) -- 21242(line=413, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 21327(line=414, offs=22) -- 21398(line=414, offs=93)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp908, tmpref907) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21244(line=413, offs=64) -- 21247(line=413, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 21339(line=414, offs=34) -- 21342(line=414, offs=37)
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('q')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21244(line=413, offs=64) -- 21247(line=413, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 21339(line=414, offs=34) -- 21342(line=414, offs=37)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21249(line=413, offs=69) -- 21252(line=413, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 21344(line=414, offs=39) -- 21347(line=414, offs=42)
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21249(line=413, offs=69) -- 21252(line=413, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 21344(line=414, offs=39) -- 21347(line=414, offs=42)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21254(line=413, offs=74) -- 21257(line=413, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21349(line=414, offs=44) -- 21352(line=414, offs=47)
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21254(line=413, offs=74) -- 21257(line=413, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21349(line=414, offs=44) -- 21352(line=414, offs=47)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21259(line=413, offs=79) -- 21262(line=413, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21354(line=414, offs=49) -- 21357(line=414, offs=52)
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21259(line=413, offs=79) -- 21262(line=413, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21354(line=414, offs=49) -- 21357(line=414, offs=52)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21264(line=413, offs=84) -- 21267(line=413, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21359(line=414, offs=54) -- 21362(line=414, offs=57)
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21264(line=413, offs=84) -- 21267(line=413, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21359(line=414, offs=54) -- 21362(line=414, offs=57)
 */
-ATSINSupdate_ptrinc(tmp906, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21269(line=413, offs=89) -- 21272(line=413, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21364(line=414, offs=59) -- 21367(line=414, offs=62)
 */
-ATSINSpmove(tmp906, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21324(line=414, offs=51) -- 21336(line=414, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 21364(line=414, offs=59) -- 21367(line=414, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21369(line=414, offs=64) -- 21372(line=414, offs=67)
+*/
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21369(line=414, offs=64) -- 21372(line=414, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21374(line=414, offs=69) -- 21377(line=414, offs=72)
+*/
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21374(line=414, offs=69) -- 21377(line=414, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21379(line=414, offs=74) -- 21382(line=414, offs=77)
+*/
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21379(line=414, offs=74) -- 21382(line=414, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21384(line=414, offs=79) -- 21387(line=414, offs=82)
+*/
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21384(line=414, offs=79) -- 21387(line=414, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21389(line=414, offs=84) -- 21392(line=414, offs=87)
+*/
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21389(line=414, offs=84) -- 21392(line=414, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp908, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21394(line=414, offs=89) -- 21397(line=414, offs=92)
+*/
+ATSINSpmove(tmp908, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21449(line=415, offs=51) -- 21461(line=415, offs=63)
 */
 
 /*
 #LINCONSTATUS==0
 */
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmp908, postiats_tysum_2) ;
+ATSINSmove_con1_new(tmp910, postiats_tysum_2) ;
 #if(0)
-ATSINSstore_con1_tag(tmp908, 0) ;
+ATSINSstore_con1_tag(tmp910, 0) ;
 #endif
-ATSINSstore_con1_ofs(tmp908, postiats_tysum_2, atslab__0, ATSPMVi0nt(113)) ;
+ATSINSstore_con1_ofs(tmp910, postiats_tysum_2, atslab__0, ATSPMVi0nt(113)) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21304(line=414, offs=31) -- 21347(line=414, offs=74)
+emit_instr: loc0 = build/src/bin/bats.dats: 21429(line=415, offs=31) -- 21472(line=415, offs=74)
 */
-ATSINSmove(tmp907, build_057_src_057_helpers_056_sats__ap_flag(tmp901, ATSPMVrefarg1(ATSPMVptrof(tmpref903[0])), ATSPMVi0nt(5), tmp908, ATSPMVrefarg1(ATSPMVptrof(tmpref905[0])), ATSPMVi0nt(12))) ;
+ATSINSmove(tmp909, build_057_src_057_helpers_056_sats__ap_flag(tmp903, ATSPMVrefarg1(ATSPMVptrof(tmpref905[0])), ATSPMVi0nt(5), tmp910, ATSPMVrefarg1(ATSPMVptrof(tmpref907[0])), ATSPMVi0nt(12))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21290(line=414, offs=17) -- 21291(line=414, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 21415(line=415, offs=17) -- 21416(line=415, offs=18)
 */
-ATSINSmove(tmp909, ATSSELfltrec(tmp907, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp911, ATSSELfltrec(tmp909, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21293(line=414, offs=20) -- 21300(line=414, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 21418(line=415, offs=20) -- 21425(line=415, offs=27)
 */
-ATSINSmove(tmp910, ATSSELfltrec(tmp907, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp912, ATSSELfltrec(tmp909, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21362(line=415, offs=15) -- 21366(line=415, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref911) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21369(line=415, offs=22) -- 21409(line=415, offs=62)
-*/
-ATSINSmove(tmp912, tmpref911) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21380(line=415, offs=33) -- 21383(line=415, offs=36)
-*/
-ATSINSpmove(tmp912, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21380(line=415, offs=33) -- 21383(line=415, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp912, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21385(line=415, offs=38) -- 21388(line=415, offs=41)
-*/
-ATSINSpmove(tmp912, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21385(line=415, offs=38) -- 21388(line=415, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp912, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21390(line=415, offs=43) -- 21393(line=415, offs=46)
-*/
-ATSINSpmove(tmp912, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21390(line=415, offs=43) -- 21393(line=415, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp912, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21395(line=415, offs=48) -- 21398(line=415, offs=51)
-*/
-ATSINSpmove(tmp912, atstkind_t0ype(atstype_char), ATSPMVchar('-')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21395(line=415, offs=48) -- 21398(line=415, offs=51)
-*/
-ATSINSupdate_ptrinc(tmp912, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21400(line=415, offs=53) -- 21403(line=415, offs=56)
-*/
-ATSINSpmove(tmp912, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21400(line=415, offs=53) -- 21403(line=415, offs=56)
-*/
-ATSINSupdate_ptrinc(tmp912, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21405(line=415, offs=58) -- 21408(line=415, offs=61)
-*/
-ATSINSpmove(tmp912, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21424(line=416, offs=15) -- 21428(line=416, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 21487(line=416, offs=15) -- 21491(line=416, offs=19)
 */
 /*
 ATSINStmpdec(tmpref913) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21431(line=416, offs=22) -- 21522(line=416, offs=113)
+emit_instr: loc0 = build/src/bin/bats.dats: 21494(line=416, offs=22) -- 21534(line=416, offs=62)
 */
 ATSINSmove(tmp914, tmpref913) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21443(line=416, offs=34) -- 21446(line=416, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 21505(line=416, offs=33) -- 21508(line=416, offs=36)
 */
 ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21443(line=416, offs=34) -- 21446(line=416, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 21505(line=416, offs=33) -- 21508(line=416, offs=36)
 */
 ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21448(line=416, offs=39) -- 21451(line=416, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 21510(line=416, offs=38) -- 21513(line=416, offs=41)
 */
 ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21448(line=416, offs=39) -- 21451(line=416, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 21510(line=416, offs=38) -- 21513(line=416, offs=41)
 */
 ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21453(line=416, offs=44) -- 21456(line=416, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 21515(line=416, offs=43) -- 21518(line=416, offs=46)
 */
 ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21453(line=416, offs=44) -- 21456(line=416, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 21515(line=416, offs=43) -- 21518(line=416, offs=46)
 */
 ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21458(line=416, offs=49) -- 21461(line=416, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 21520(line=416, offs=48) -- 21523(line=416, offs=51)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('-')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21458(line=416, offs=49) -- 21461(line=416, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 21520(line=416, offs=48) -- 21523(line=416, offs=51)
 */
 ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21463(line=416, offs=54) -- 21466(line=416, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 21525(line=416, offs=53) -- 21528(line=416, offs=56)
 */
 ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21463(line=416, offs=54) -- 21466(line=416, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 21525(line=416, offs=53) -- 21528(line=416, offs=56)
 */
 ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21468(line=416, offs=59) -- 21471(line=416, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 21530(line=416, offs=58) -- 21533(line=416, offs=61)
 */
 ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21468(line=416, offs=59) -- 21471(line=416, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 21549(line=417, offs=15) -- 21553(line=417, offs=19)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21473(line=416, offs=64) -- 21476(line=416, offs=67)
+ATSINStmpdec(tmpref915) ;
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21473(line=416, offs=64) -- 21476(line=416, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 21556(line=417, offs=22) -- 21647(line=417, offs=113)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp916, tmpref915) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21478(line=416, offs=69) -- 21481(line=416, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 21568(line=417, offs=34) -- 21571(line=417, offs=37)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21478(line=416, offs=69) -- 21481(line=416, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 21568(line=417, offs=34) -- 21571(line=417, offs=37)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21483(line=416, offs=74) -- 21486(line=416, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21573(line=417, offs=39) -- 21576(line=417, offs=42)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21483(line=416, offs=74) -- 21486(line=416, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21573(line=417, offs=39) -- 21576(line=417, offs=42)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21488(line=416, offs=79) -- 21491(line=416, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21578(line=417, offs=44) -- 21581(line=417, offs=47)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21488(line=416, offs=79) -- 21491(line=416, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21578(line=417, offs=44) -- 21581(line=417, offs=47)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21493(line=416, offs=84) -- 21496(line=416, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21583(line=417, offs=49) -- 21586(line=417, offs=52)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21493(line=416, offs=84) -- 21496(line=416, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21583(line=417, offs=49) -- 21586(line=417, offs=52)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21498(line=416, offs=89) -- 21501(line=416, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21588(line=417, offs=54) -- 21591(line=417, offs=57)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21498(line=416, offs=89) -- 21501(line=416, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21588(line=417, offs=54) -- 21591(line=417, offs=57)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21503(line=416, offs=94) -- 21506(line=416, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 21593(line=417, offs=59) -- 21596(line=417, offs=62)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21503(line=416, offs=94) -- 21506(line=416, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 21593(line=417, offs=59) -- 21596(line=417, offs=62)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21508(line=416, offs=99) -- 21511(line=416, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 21598(line=417, offs=64) -- 21601(line=417, offs=67)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21508(line=416, offs=99) -- 21511(line=416, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 21598(line=417, offs=64) -- 21601(line=417, offs=67)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21513(line=416, offs=104) -- 21516(line=416, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 21603(line=417, offs=69) -- 21606(line=417, offs=72)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21513(line=416, offs=104) -- 21516(line=416, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 21603(line=417, offs=69) -- 21606(line=417, offs=72)
 */
-ATSINSupdate_ptrinc(tmp914, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21518(line=416, offs=109) -- 21521(line=416, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 21608(line=417, offs=74) -- 21611(line=417, offs=77)
 */
-ATSINSpmove(tmp914, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21580(line=417, offs=58) -- 21589(line=417, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 21608(line=417, offs=74) -- 21611(line=417, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21613(line=417, offs=79) -- 21616(line=417, offs=82)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21613(line=417, offs=79) -- 21616(line=417, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21618(line=417, offs=84) -- 21621(line=417, offs=87)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21618(line=417, offs=84) -- 21621(line=417, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21623(line=417, offs=89) -- 21626(line=417, offs=92)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21623(line=417, offs=89) -- 21626(line=417, offs=92)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21628(line=417, offs=94) -- 21631(line=417, offs=97)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21628(line=417, offs=94) -- 21631(line=417, offs=97)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21633(line=417, offs=99) -- 21636(line=417, offs=102)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21633(line=417, offs=99) -- 21636(line=417, offs=102)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21638(line=417, offs=104) -- 21641(line=417, offs=107)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21638(line=417, offs=104) -- 21641(line=417, offs=107)
+*/
+ATSINSupdate_ptrinc(tmp916, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21643(line=417, offs=109) -- 21646(line=417, offs=112)
+*/
+ATSINSpmove(tmp916, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21705(line=418, offs=58) -- 21714(line=418, offs=67)
 */
 
-ATSINSmove_nil(tmp916) ;
+ATSINSmove_nil(tmp918) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21554(line=417, offs=32) -- 21600(line=417, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 21679(line=418, offs=32) -- 21725(line=418, offs=78)
 */
-ATSINSmove(tmp915, build_057_src_057_helpers_056_sats__ap_string_opt(tmp909, ATSPMVrefarg1(ATSPMVptrof(tmpref911[0])), ATSPMVi0nt(6), tmp916, ATSPMVrefarg1(ATSPMVptrof(tmpref913[0])), ATSPMVi0nt(16))) ;
+ATSINSmove(tmp917, build_057_src_057_helpers_056_sats__ap_string_opt(tmp911, ATSPMVrefarg1(ATSPMVptrof(tmpref913[0])), ATSPMVi0nt(6), tmp918, ATSPMVrefarg1(ATSPMVptrof(tmpref915[0])), ATSPMVi0nt(16))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21539(line=417, offs=17) -- 21540(line=417, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 21664(line=418, offs=17) -- 21665(line=418, offs=18)
 */
-ATSINSmove(tmp917, ATSSELfltrec(tmp915, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp919, ATSSELfltrec(tmp917, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21542(line=417, offs=20) -- 21550(line=417, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 21667(line=418, offs=20) -- 21675(line=418, offs=28)
 */
-ATSINSmove(tmp918, ATSSELfltrec(tmp915, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp920, ATSSELfltrec(tmp917, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21615(line=418, offs=15) -- 21619(line=418, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref919) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21622(line=418, offs=22) -- 21683(line=418, offs=83)
-*/
-ATSINSmove(tmp920, tmpref919) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21634(line=418, offs=34) -- 21637(line=418, offs=37)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21634(line=418, offs=34) -- 21637(line=418, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21639(line=418, offs=39) -- 21642(line=418, offs=42)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21639(line=418, offs=39) -- 21642(line=418, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21644(line=418, offs=44) -- 21647(line=418, offs=47)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21644(line=418, offs=44) -- 21647(line=418, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21649(line=418, offs=49) -- 21652(line=418, offs=52)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21649(line=418, offs=49) -- 21652(line=418, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21654(line=418, offs=54) -- 21657(line=418, offs=57)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21654(line=418, offs=54) -- 21657(line=418, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21659(line=418, offs=59) -- 21662(line=418, offs=62)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21659(line=418, offs=59) -- 21662(line=418, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21664(line=418, offs=64) -- 21667(line=418, offs=67)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21664(line=418, offs=64) -- 21667(line=418, offs=67)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21669(line=418, offs=69) -- 21672(line=418, offs=72)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21669(line=418, offs=69) -- 21672(line=418, offs=72)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21674(line=418, offs=74) -- 21677(line=418, offs=77)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21674(line=418, offs=74) -- 21677(line=418, offs=77)
-*/
-ATSINSupdate_ptrinc(tmp920, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21679(line=418, offs=79) -- 21682(line=418, offs=82)
-*/
-ATSINSpmove(tmp920, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21698(line=419, offs=15) -- 21702(line=419, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 21740(line=419, offs=15) -- 21744(line=419, offs=19)
 */
 /*
 ATSINStmpdec(tmpref921) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21705(line=419, offs=22) -- 21806(line=419, offs=123)
+emit_instr: loc0 = build/src/bin/bats.dats: 21747(line=419, offs=22) -- 21808(line=419, offs=83)
 */
 ATSINSmove(tmp922, tmpref921) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21717(line=419, offs=34) -- 21720(line=419, offs=37)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21717(line=419, offs=34) -- 21720(line=419, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21722(line=419, offs=39) -- 21725(line=419, offs=42)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21722(line=419, offs=39) -- 21725(line=419, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21727(line=419, offs=44) -- 21730(line=419, offs=47)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21727(line=419, offs=44) -- 21730(line=419, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21732(line=419, offs=49) -- 21735(line=419, offs=52)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('k')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21732(line=419, offs=49) -- 21735(line=419, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21737(line=419, offs=54) -- 21740(line=419, offs=57)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21737(line=419, offs=54) -- 21740(line=419, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21742(line=419, offs=59) -- 21745(line=419, offs=62)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21742(line=419, offs=59) -- 21745(line=419, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21747(line=419, offs=64) -- 21750(line=419, offs=67)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21747(line=419, offs=64) -- 21750(line=419, offs=67)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21752(line=419, offs=69) -- 21755(line=419, offs=72)
-*/
-ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21752(line=419, offs=69) -- 21755(line=419, offs=72)
-*/
-ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21757(line=419, offs=74) -- 21760(line=419, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21759(line=419, offs=34) -- 21762(line=419, offs=37)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21757(line=419, offs=74) -- 21760(line=419, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 21759(line=419, offs=34) -- 21762(line=419, offs=37)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21762(line=419, offs=79) -- 21765(line=419, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21764(line=419, offs=39) -- 21767(line=419, offs=42)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21762(line=419, offs=79) -- 21765(line=419, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 21764(line=419, offs=39) -- 21767(line=419, offs=42)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21767(line=419, offs=84) -- 21770(line=419, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21769(line=419, offs=44) -- 21772(line=419, offs=47)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21767(line=419, offs=84) -- 21770(line=419, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 21769(line=419, offs=44) -- 21772(line=419, offs=47)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21772(line=419, offs=89) -- 21775(line=419, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21774(line=419, offs=49) -- 21777(line=419, offs=52)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21772(line=419, offs=89) -- 21775(line=419, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 21774(line=419, offs=49) -- 21777(line=419, offs=52)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21777(line=419, offs=94) -- 21780(line=419, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 21779(line=419, offs=54) -- 21782(line=419, offs=57)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21777(line=419, offs=94) -- 21780(line=419, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 21779(line=419, offs=54) -- 21782(line=419, offs=57)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21782(line=419, offs=99) -- 21785(line=419, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 21784(line=419, offs=59) -- 21787(line=419, offs=62)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21782(line=419, offs=99) -- 21785(line=419, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 21784(line=419, offs=59) -- 21787(line=419, offs=62)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21787(line=419, offs=104) -- 21790(line=419, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 21789(line=419, offs=64) -- 21792(line=419, offs=67)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21787(line=419, offs=104) -- 21790(line=419, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 21789(line=419, offs=64) -- 21792(line=419, offs=67)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21792(line=419, offs=109) -- 21795(line=419, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 21794(line=419, offs=69) -- 21797(line=419, offs=72)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21792(line=419, offs=109) -- 21795(line=419, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 21794(line=419, offs=69) -- 21797(line=419, offs=72)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21797(line=419, offs=114) -- 21800(line=419, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 21799(line=419, offs=74) -- 21802(line=419, offs=77)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21797(line=419, offs=114) -- 21800(line=419, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 21799(line=419, offs=74) -- 21802(line=419, offs=77)
 */
 ATSINSupdate_ptrinc(tmp922, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21802(line=419, offs=119) -- 21805(line=419, offs=122)
+emit_instr: loc0 = build/src/bin/bats.dats: 21804(line=419, offs=79) -- 21807(line=419, offs=82)
 */
 ATSINSpmove(tmp922, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21869(line=420, offs=63) -- 21878(line=420, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 21823(line=420, offs=15) -- 21827(line=420, offs=19)
+*/
+/*
+ATSINStmpdec(tmpref923) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21830(line=420, offs=22) -- 21931(line=420, offs=123)
+*/
+ATSINSmove(tmp924, tmpref923) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21842(line=420, offs=34) -- 21845(line=420, offs=37)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21842(line=420, offs=34) -- 21845(line=420, offs=37)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21847(line=420, offs=39) -- 21850(line=420, offs=42)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21847(line=420, offs=39) -- 21850(line=420, offs=42)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21852(line=420, offs=44) -- 21855(line=420, offs=47)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21852(line=420, offs=44) -- 21855(line=420, offs=47)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21857(line=420, offs=49) -- 21860(line=420, offs=52)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('k')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21857(line=420, offs=49) -- 21860(line=420, offs=52)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21862(line=420, offs=54) -- 21865(line=420, offs=57)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21862(line=420, offs=54) -- 21865(line=420, offs=57)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21867(line=420, offs=59) -- 21870(line=420, offs=62)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21867(line=420, offs=59) -- 21870(line=420, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21872(line=420, offs=64) -- 21875(line=420, offs=67)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21872(line=420, offs=64) -- 21875(line=420, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21877(line=420, offs=69) -- 21880(line=420, offs=72)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21877(line=420, offs=69) -- 21880(line=420, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21882(line=420, offs=74) -- 21885(line=420, offs=77)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21882(line=420, offs=74) -- 21885(line=420, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21887(line=420, offs=79) -- 21890(line=420, offs=82)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21887(line=420, offs=79) -- 21890(line=420, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21892(line=420, offs=84) -- 21895(line=420, offs=87)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21892(line=420, offs=84) -- 21895(line=420, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21897(line=420, offs=89) -- 21900(line=420, offs=92)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21897(line=420, offs=89) -- 21900(line=420, offs=92)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21902(line=420, offs=94) -- 21905(line=420, offs=97)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21902(line=420, offs=94) -- 21905(line=420, offs=97)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21907(line=420, offs=99) -- 21910(line=420, offs=102)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21907(line=420, offs=99) -- 21910(line=420, offs=102)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21912(line=420, offs=104) -- 21915(line=420, offs=107)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21912(line=420, offs=104) -- 21915(line=420, offs=107)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21917(line=420, offs=109) -- 21920(line=420, offs=112)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21917(line=420, offs=109) -- 21920(line=420, offs=112)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21922(line=420, offs=114) -- 21925(line=420, offs=117)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21922(line=420, offs=114) -- 21925(line=420, offs=117)
+*/
+ATSINSupdate_ptrinc(tmp924, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21927(line=420, offs=119) -- 21930(line=420, offs=122)
+*/
+ATSINSpmove(tmp924, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 21994(line=421, offs=63) -- 22003(line=421, offs=72)
 */
 
-ATSINSmove_nil(tmp924) ;
+ATSINSmove_nil(tmp926) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21842(line=420, offs=36) -- 21889(line=420, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 21967(line=421, offs=36) -- 22014(line=421, offs=83)
 */
-ATSINSmove(tmp923, build_057_src_057_helpers_056_sats__ap_string_opt(tmp917, ATSPMVrefarg1(ATSPMVptrof(tmpref919[0])), ATSPMVi0nt(10), tmp924, ATSPMVrefarg1(ATSPMVptrof(tmpref921[0])), ATSPMVi0nt(18))) ;
+ATSINSmove(tmp925, build_057_src_057_helpers_056_sats__ap_string_opt(tmp919, ATSPMVrefarg1(ATSPMVptrof(tmpref921[0])), ATSPMVi0nt(10), tmp926, ATSPMVrefarg1(ATSPMVptrof(tmpref923[0])), ATSPMVi0nt(18))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21823(line=420, offs=17) -- 21824(line=420, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 21948(line=421, offs=17) -- 21949(line=421, offs=18)
 */
-ATSINSmove(tmp925, ATSSELfltrec(tmp923, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp927, ATSSELfltrec(tmp925, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21826(line=420, offs=20) -- 21838(line=420, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 21951(line=421, offs=20) -- 21963(line=421, offs=32)
 */
-ATSINSmove(tmp926, ATSSELfltrec(tmp923, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp928, ATSSELfltrec(tmp925, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21904(line=421, offs=15) -- 21908(line=421, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref927) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21911(line=421, offs=22) -- 21941(line=421, offs=52)
-*/
-ATSINSmove(tmp928, tmpref927) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21922(line=421, offs=33) -- 21925(line=421, offs=36)
-*/
-ATSINSpmove(tmp928, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21922(line=421, offs=33) -- 21925(line=421, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp928, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21927(line=421, offs=38) -- 21930(line=421, offs=41)
-*/
-ATSINSpmove(tmp928, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21927(line=421, offs=38) -- 21930(line=421, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp928, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21932(line=421, offs=43) -- 21935(line=421, offs=46)
-*/
-ATSINSpmove(tmp928, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21932(line=421, offs=43) -- 21935(line=421, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp928, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21937(line=421, offs=48) -- 21940(line=421, offs=51)
-*/
-ATSINSpmove(tmp928, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21956(line=422, offs=15) -- 21960(line=422, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 22029(line=422, offs=15) -- 22033(line=422, offs=19)
 */
 /*
 ATSINStmpdec(tmpref929) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21963(line=422, offs=22) -- 22034(line=422, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 22036(line=422, offs=22) -- 22066(line=422, offs=52)
 */
 ATSINSmove(tmp930, tmpref929) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21975(line=422, offs=34) -- 21978(line=422, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22047(line=422, offs=33) -- 22050(line=422, offs=36)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
+ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21975(line=422, offs=34) -- 21978(line=422, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21980(line=422, offs=39) -- 21983(line=422, offs=42)
-*/
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 21980(line=422, offs=39) -- 21983(line=422, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 22047(line=422, offs=33) -- 22050(line=422, offs=36)
 */
 ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21985(line=422, offs=44) -- 21988(line=422, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 22052(line=422, offs=38) -- 22055(line=422, offs=41)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21985(line=422, offs=44) -- 21988(line=422, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 22052(line=422, offs=38) -- 22055(line=422, offs=41)
 */
 ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21990(line=422, offs=49) -- 21993(line=422, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 22057(line=422, offs=43) -- 22060(line=422, offs=46)
 */
 ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21990(line=422, offs=49) -- 21993(line=422, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 22057(line=422, offs=43) -- 22060(line=422, offs=46)
 */
 ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21995(line=422, offs=54) -- 21998(line=422, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 22062(line=422, offs=48) -- 22065(line=422, offs=51)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 21995(line=422, offs=54) -- 21998(line=422, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 22081(line=423, offs=15) -- 22085(line=423, offs=19)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22000(line=422, offs=59) -- 22003(line=422, offs=62)
+ATSINStmpdec(tmpref931) ;
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22000(line=422, offs=59) -- 22003(line=422, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 22088(line=423, offs=22) -- 22159(line=423, offs=93)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp932, tmpref931) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22005(line=422, offs=64) -- 22008(line=422, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 22100(line=423, offs=34) -- 22103(line=423, offs=37)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22005(line=422, offs=64) -- 22008(line=422, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 22100(line=423, offs=34) -- 22103(line=423, offs=37)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22010(line=422, offs=69) -- 22013(line=422, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 22105(line=423, offs=39) -- 22108(line=423, offs=42)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22010(line=422, offs=69) -- 22013(line=422, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 22105(line=423, offs=39) -- 22108(line=423, offs=42)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22015(line=422, offs=74) -- 22018(line=422, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 22110(line=423, offs=44) -- 22113(line=423, offs=47)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22015(line=422, offs=74) -- 22018(line=422, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 22110(line=423, offs=44) -- 22113(line=423, offs=47)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22020(line=422, offs=79) -- 22023(line=422, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 22115(line=423, offs=49) -- 22118(line=423, offs=52)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22020(line=422, offs=79) -- 22023(line=422, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 22115(line=423, offs=49) -- 22118(line=423, offs=52)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22025(line=422, offs=84) -- 22028(line=422, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 22120(line=423, offs=54) -- 22123(line=423, offs=57)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22025(line=422, offs=84) -- 22028(line=422, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 22120(line=423, offs=54) -- 22123(line=423, offs=57)
 */
-ATSINSupdate_ptrinc(tmp930, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22030(line=422, offs=89) -- 22033(line=422, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 22125(line=423, offs=59) -- 22128(line=423, offs=62)
 */
-ATSINSpmove(tmp930, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22090(line=423, offs=56) -- 22099(line=423, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 22125(line=423, offs=59) -- 22128(line=423, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22130(line=423, offs=64) -- 22133(line=423, offs=67)
+*/
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22130(line=423, offs=64) -- 22133(line=423, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22135(line=423, offs=69) -- 22138(line=423, offs=72)
+*/
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22135(line=423, offs=69) -- 22138(line=423, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22140(line=423, offs=74) -- 22143(line=423, offs=77)
+*/
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22140(line=423, offs=74) -- 22143(line=423, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22145(line=423, offs=79) -- 22148(line=423, offs=82)
+*/
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22145(line=423, offs=79) -- 22148(line=423, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22150(line=423, offs=84) -- 22153(line=423, offs=87)
+*/
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22150(line=423, offs=84) -- 22153(line=423, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp932, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22155(line=423, offs=89) -- 22158(line=423, offs=92)
+*/
+ATSINSpmove(tmp932, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22215(line=424, offs=56) -- 22224(line=424, offs=65)
 */
 
-ATSINSmove_nil(tmp932) ;
+ATSINSmove_nil(tmp934) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22064(line=423, offs=30) -- 22110(line=423, offs=76)
+emit_instr: loc0 = build/src/bin/bats.dats: 22189(line=424, offs=30) -- 22235(line=424, offs=76)
 */
-ATSINSmove(tmp931, build_057_src_057_helpers_056_sats__ap_string_opt(tmp925, ATSPMVrefarg1(ATSPMVptrof(tmpref927[0])), ATSPMVi0nt(4), tmp932, ATSPMVrefarg1(ATSPMVptrof(tmpref929[0])), ATSPMVi0nt(12))) ;
+ATSINSmove(tmp933, build_057_src_057_helpers_056_sats__ap_string_opt(tmp927, ATSPMVrefarg1(ATSPMVptrof(tmpref929[0])), ATSPMVi0nt(4), tmp934, ATSPMVrefarg1(ATSPMVptrof(tmpref931[0])), ATSPMVi0nt(12))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22051(line=423, offs=17) -- 22052(line=423, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 22176(line=424, offs=17) -- 22177(line=424, offs=18)
 */
-ATSINSmove(tmp933, ATSSELfltrec(tmp931, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp935, ATSSELfltrec(tmp933, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22054(line=423, offs=20) -- 22060(line=423, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 22179(line=424, offs=20) -- 22185(line=424, offs=26)
 */
-ATSINSmove(tmp934, ATSSELfltrec(tmp931, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp936, ATSSELfltrec(tmp933, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22125(line=424, offs=15) -- 22129(line=424, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref935) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22132(line=424, offs=22) -- 22157(line=424, offs=47)
-*/
-ATSINSmove(tmp936, tmpref935) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22143(line=424, offs=33) -- 22146(line=424, offs=36)
-*/
-ATSINSpmove(tmp936, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22143(line=424, offs=33) -- 22146(line=424, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp936, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22148(line=424, offs=38) -- 22151(line=424, offs=41)
-*/
-ATSINSpmove(tmp936, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22148(line=424, offs=38) -- 22151(line=424, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp936, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22153(line=424, offs=43) -- 22156(line=424, offs=46)
-*/
-ATSINSpmove(tmp936, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22172(line=425, offs=15) -- 22176(line=425, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 22250(line=425, offs=15) -- 22254(line=425, offs=19)
 */
 /*
 ATSINStmpdec(tmpref937) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22179(line=425, offs=22) -- 22245(line=425, offs=88)
+emit_instr: loc0 = build/src/bin/bats.dats: 22257(line=425, offs=22) -- 22282(line=425, offs=47)
 */
 ATSINSmove(tmp938, tmpref937) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22191(line=425, offs=34) -- 22194(line=425, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22268(line=425, offs=33) -- 22271(line=425, offs=36)
 */
 ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22191(line=425, offs=34) -- 22194(line=425, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22268(line=425, offs=33) -- 22271(line=425, offs=36)
 */
 ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22196(line=425, offs=39) -- 22199(line=425, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 22273(line=425, offs=38) -- 22276(line=425, offs=41)
 */
 ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22196(line=425, offs=39) -- 22199(line=425, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 22273(line=425, offs=38) -- 22276(line=425, offs=41)
 */
 ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22201(line=425, offs=44) -- 22204(line=425, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 22278(line=425, offs=43) -- 22281(line=425, offs=46)
 */
 ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22201(line=425, offs=44) -- 22204(line=425, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 22297(line=426, offs=15) -- 22301(line=426, offs=19)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22206(line=425, offs=49) -- 22209(line=425, offs=52)
+ATSINStmpdec(tmpref939) ;
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22206(line=425, offs=49) -- 22209(line=425, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 22304(line=426, offs=22) -- 22370(line=426, offs=88)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp940, tmpref939) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22211(line=425, offs=54) -- 22214(line=425, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 22316(line=426, offs=34) -- 22319(line=426, offs=37)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22211(line=425, offs=54) -- 22214(line=425, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 22316(line=426, offs=34) -- 22319(line=426, offs=37)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22216(line=425, offs=59) -- 22219(line=425, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 22321(line=426, offs=39) -- 22324(line=426, offs=42)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22216(line=425, offs=59) -- 22219(line=425, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 22321(line=426, offs=39) -- 22324(line=426, offs=42)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22221(line=425, offs=64) -- 22224(line=425, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 22326(line=426, offs=44) -- 22329(line=426, offs=47)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22221(line=425, offs=64) -- 22224(line=425, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 22326(line=426, offs=44) -- 22329(line=426, offs=47)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22226(line=425, offs=69) -- 22229(line=425, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 22331(line=426, offs=49) -- 22334(line=426, offs=52)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22226(line=425, offs=69) -- 22229(line=425, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 22331(line=426, offs=49) -- 22334(line=426, offs=52)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22231(line=425, offs=74) -- 22234(line=425, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 22336(line=426, offs=54) -- 22339(line=426, offs=57)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22231(line=425, offs=74) -- 22234(line=425, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 22336(line=426, offs=54) -- 22339(line=426, offs=57)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22236(line=425, offs=79) -- 22239(line=425, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 22341(line=426, offs=59) -- 22344(line=426, offs=62)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22236(line=425, offs=79) -- 22239(line=425, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 22341(line=426, offs=59) -- 22344(line=426, offs=62)
 */
-ATSINSupdate_ptrinc(tmp938, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22241(line=425, offs=84) -- 22244(line=425, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 22346(line=426, offs=64) -- 22349(line=426, offs=67)
 */
-ATSINSpmove(tmp938, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22300(line=426, offs=55) -- 22309(line=426, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 22346(line=426, offs=64) -- 22349(line=426, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22351(line=426, offs=69) -- 22354(line=426, offs=72)
+*/
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22351(line=426, offs=69) -- 22354(line=426, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22356(line=426, offs=74) -- 22359(line=426, offs=77)
+*/
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22356(line=426, offs=74) -- 22359(line=426, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22361(line=426, offs=79) -- 22364(line=426, offs=82)
+*/
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22361(line=426, offs=79) -- 22364(line=426, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp940, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22366(line=426, offs=84) -- 22369(line=426, offs=87)
+*/
+ATSINSpmove(tmp940, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22425(line=427, offs=55) -- 22434(line=427, offs=64)
 */
 
-ATSINSmove_nil(tmp940) ;
+ATSINSmove_nil(tmp942) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22274(line=426, offs=29) -- 22320(line=426, offs=75)
+emit_instr: loc0 = build/src/bin/bats.dats: 22399(line=427, offs=29) -- 22445(line=427, offs=75)
 */
-ATSINSmove(tmp939, build_057_src_057_helpers_056_sats__ap_string_opt(tmp933, ATSPMVrefarg1(ATSPMVptrof(tmpref935[0])), ATSPMVi0nt(3), tmp940, ATSPMVrefarg1(ATSPMVptrof(tmpref937[0])), ATSPMVi0nt(11))) ;
+ATSINSmove(tmp941, build_057_src_057_helpers_056_sats__ap_string_opt(tmp935, ATSPMVrefarg1(ATSPMVptrof(tmpref937[0])), ATSPMVi0nt(3), tmp942, ATSPMVrefarg1(ATSPMVptrof(tmpref939[0])), ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22262(line=426, offs=17) -- 22263(line=426, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 22387(line=427, offs=17) -- 22388(line=427, offs=18)
 */
-ATSINSmove(tmp941, ATSSELfltrec(tmp939, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp943, ATSSELfltrec(tmp941, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22265(line=426, offs=20) -- 22270(line=426, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 22390(line=427, offs=20) -- 22395(line=427, offs=25)
 */
-ATSINSmove(tmp942, ATSSELfltrec(tmp939, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp944, ATSSELfltrec(tmp941, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22335(line=427, offs=15) -- 22339(line=427, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref943) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22342(line=427, offs=22) -- 22372(line=427, offs=52)
-*/
-ATSINSmove(tmp944, tmpref943) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22353(line=427, offs=33) -- 22356(line=427, offs=36)
-*/
-ATSINSpmove(tmp944, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22353(line=427, offs=33) -- 22356(line=427, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp944, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22358(line=427, offs=38) -- 22361(line=427, offs=41)
-*/
-ATSINSpmove(tmp944, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22358(line=427, offs=38) -- 22361(line=427, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp944, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22363(line=427, offs=43) -- 22366(line=427, offs=46)
-*/
-ATSINSpmove(tmp944, atstkind_t0ype(atstype_char), ATSPMVchar('-')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22363(line=427, offs=43) -- 22366(line=427, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp944, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22368(line=427, offs=48) -- 22371(line=427, offs=51)
-*/
-ATSINSpmove(tmp944, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22387(line=428, offs=15) -- 22391(line=428, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 22460(line=428, offs=15) -- 22464(line=428, offs=19)
 */
 /*
 ATSINStmpdec(tmpref945) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22394(line=428, offs=22) -- 22540(line=428, offs=168)
+emit_instr: loc0 = build/src/bin/bats.dats: 22467(line=428, offs=22) -- 22497(line=428, offs=52)
 */
 ATSINSmove(tmp946, tmpref945) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22406(line=428, offs=34) -- 22409(line=428, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22478(line=428, offs=33) -- 22481(line=428, offs=36)
+*/
+ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22478(line=428, offs=33) -- 22481(line=428, offs=36)
+*/
+ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22483(line=428, offs=38) -- 22486(line=428, offs=41)
 */
 ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22406(line=428, offs=34) -- 22409(line=428, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22483(line=428, offs=38) -- 22486(line=428, offs=41)
 */
 ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22411(line=428, offs=39) -- 22414(line=428, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 22488(line=428, offs=43) -- 22491(line=428, offs=46)
 */
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('-')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22411(line=428, offs=39) -- 22414(line=428, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22416(line=428, offs=44) -- 22419(line=428, offs=47)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22416(line=428, offs=44) -- 22419(line=428, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 22488(line=428, offs=43) -- 22491(line=428, offs=46)
 */
 ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22421(line=428, offs=49) -- 22424(line=428, offs=52)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22421(line=428, offs=49) -- 22424(line=428, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22426(line=428, offs=54) -- 22429(line=428, offs=57)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22426(line=428, offs=54) -- 22429(line=428, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22431(line=428, offs=59) -- 22434(line=428, offs=62)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22431(line=428, offs=59) -- 22434(line=428, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22436(line=428, offs=64) -- 22439(line=428, offs=67)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22436(line=428, offs=64) -- 22439(line=428, offs=67)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22441(line=428, offs=69) -- 22444(line=428, offs=72)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('C')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22441(line=428, offs=69) -- 22444(line=428, offs=72)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22446(line=428, offs=74) -- 22449(line=428, offs=77)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22446(line=428, offs=74) -- 22449(line=428, offs=77)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22451(line=428, offs=79) -- 22454(line=428, offs=82)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22451(line=428, offs=79) -- 22454(line=428, offs=82)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22456(line=428, offs=84) -- 22459(line=428, offs=87)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22456(line=428, offs=84) -- 22459(line=428, offs=87)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22461(line=428, offs=89) -- 22464(line=428, offs=92)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22461(line=428, offs=89) -- 22464(line=428, offs=92)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22466(line=428, offs=94) -- 22469(line=428, offs=97)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22466(line=428, offs=94) -- 22469(line=428, offs=97)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22471(line=428, offs=99) -- 22474(line=428, offs=102)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22471(line=428, offs=99) -- 22474(line=428, offs=102)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22476(line=428, offs=104) -- 22479(line=428, offs=107)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22476(line=428, offs=104) -- 22479(line=428, offs=107)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22481(line=428, offs=109) -- 22484(line=428, offs=112)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22481(line=428, offs=109) -- 22484(line=428, offs=112)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22486(line=428, offs=114) -- 22489(line=428, offs=117)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22486(line=428, offs=114) -- 22489(line=428, offs=117)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22491(line=428, offs=119) -- 22494(line=428, offs=122)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22491(line=428, offs=119) -- 22494(line=428, offs=122)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22496(line=428, offs=124) -- 22499(line=428, offs=127)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22496(line=428, offs=124) -- 22499(line=428, offs=127)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22501(line=428, offs=129) -- 22504(line=428, offs=132)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22501(line=428, offs=129) -- 22504(line=428, offs=132)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22506(line=428, offs=134) -- 22509(line=428, offs=137)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22506(line=428, offs=134) -- 22509(line=428, offs=137)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22511(line=428, offs=139) -- 22514(line=428, offs=142)
-*/
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22511(line=428, offs=139) -- 22514(line=428, offs=142)
-*/
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22516(line=428, offs=144) -- 22519(line=428, offs=147)
+emit_instr: loc0 = build/src/bin/bats.dats: 22493(line=428, offs=48) -- 22496(line=428, offs=51)
 */
 ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22516(line=428, offs=144) -- 22519(line=428, offs=147)
+emit_instr: loc0 = build/src/bin/bats.dats: 22512(line=429, offs=15) -- 22516(line=429, offs=19)
 */
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22521(line=428, offs=149) -- 22524(line=428, offs=152)
+ATSINStmpdec(tmpref947) ;
 */
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22521(line=428, offs=149) -- 22524(line=428, offs=152)
+emit_instr: loc0 = build/src/bin/bats.dats: 22519(line=429, offs=22) -- 22665(line=429, offs=168)
 */
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp948, tmpref947) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22526(line=428, offs=154) -- 22529(line=428, offs=157)
+emit_instr: loc0 = build/src/bin/bats.dats: 22531(line=429, offs=34) -- 22534(line=429, offs=37)
 */
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22526(line=428, offs=154) -- 22529(line=428, offs=157)
+emit_instr: loc0 = build/src/bin/bats.dats: 22531(line=429, offs=34) -- 22534(line=429, offs=37)
 */
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22531(line=428, offs=159) -- 22534(line=428, offs=162)
+emit_instr: loc0 = build/src/bin/bats.dats: 22536(line=429, offs=39) -- 22539(line=429, offs=42)
 */
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22531(line=428, offs=159) -- 22534(line=428, offs=162)
+emit_instr: loc0 = build/src/bin/bats.dats: 22536(line=429, offs=39) -- 22539(line=429, offs=42)
 */
-ATSINSupdate_ptrinc(tmp946, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22536(line=428, offs=164) -- 22539(line=428, offs=167)
+emit_instr: loc0 = build/src/bin/bats.dats: 22541(line=429, offs=44) -- 22544(line=429, offs=47)
 */
-ATSINSpmove(tmp946, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22596(line=429, offs=56) -- 22605(line=429, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 22541(line=429, offs=44) -- 22544(line=429, offs=47)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22546(line=429, offs=49) -- 22549(line=429, offs=52)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22546(line=429, offs=49) -- 22549(line=429, offs=52)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22551(line=429, offs=54) -- 22554(line=429, offs=57)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22551(line=429, offs=54) -- 22554(line=429, offs=57)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22556(line=429, offs=59) -- 22559(line=429, offs=62)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22556(line=429, offs=59) -- 22559(line=429, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22561(line=429, offs=64) -- 22564(line=429, offs=67)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22561(line=429, offs=64) -- 22564(line=429, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22566(line=429, offs=69) -- 22569(line=429, offs=72)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('C')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22566(line=429, offs=69) -- 22569(line=429, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22571(line=429, offs=74) -- 22574(line=429, offs=77)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22571(line=429, offs=74) -- 22574(line=429, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22576(line=429, offs=79) -- 22579(line=429, offs=82)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22576(line=429, offs=79) -- 22579(line=429, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22581(line=429, offs=84) -- 22584(line=429, offs=87)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22581(line=429, offs=84) -- 22584(line=429, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22586(line=429, offs=89) -- 22589(line=429, offs=92)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22586(line=429, offs=89) -- 22589(line=429, offs=92)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22591(line=429, offs=94) -- 22594(line=429, offs=97)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22591(line=429, offs=94) -- 22594(line=429, offs=97)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22596(line=429, offs=99) -- 22599(line=429, offs=102)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22596(line=429, offs=99) -- 22599(line=429, offs=102)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22601(line=429, offs=104) -- 22604(line=429, offs=107)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22601(line=429, offs=104) -- 22604(line=429, offs=107)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22606(line=429, offs=109) -- 22609(line=429, offs=112)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22606(line=429, offs=109) -- 22609(line=429, offs=112)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22611(line=429, offs=114) -- 22614(line=429, offs=117)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22611(line=429, offs=114) -- 22614(line=429, offs=117)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22616(line=429, offs=119) -- 22619(line=429, offs=122)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22616(line=429, offs=119) -- 22619(line=429, offs=122)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22621(line=429, offs=124) -- 22624(line=429, offs=127)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22621(line=429, offs=124) -- 22624(line=429, offs=127)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22626(line=429, offs=129) -- 22629(line=429, offs=132)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22626(line=429, offs=129) -- 22629(line=429, offs=132)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22631(line=429, offs=134) -- 22634(line=429, offs=137)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22631(line=429, offs=134) -- 22634(line=429, offs=137)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22636(line=429, offs=139) -- 22639(line=429, offs=142)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22636(line=429, offs=139) -- 22639(line=429, offs=142)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22641(line=429, offs=144) -- 22644(line=429, offs=147)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22641(line=429, offs=144) -- 22644(line=429, offs=147)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22646(line=429, offs=149) -- 22649(line=429, offs=152)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22646(line=429, offs=149) -- 22649(line=429, offs=152)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22651(line=429, offs=154) -- 22654(line=429, offs=157)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22651(line=429, offs=154) -- 22654(line=429, offs=157)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22656(line=429, offs=159) -- 22659(line=429, offs=162)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22656(line=429, offs=159) -- 22659(line=429, offs=162)
+*/
+ATSINSupdate_ptrinc(tmp948, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22661(line=429, offs=164) -- 22664(line=429, offs=167)
+*/
+ATSINSpmove(tmp948, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22721(line=430, offs=56) -- 22730(line=430, offs=65)
 */
 
-ATSINSmove_nil(tmp948) ;
+ATSINSmove_nil(tmp950) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22570(line=429, offs=30) -- 22616(line=429, offs=76)
+emit_instr: loc0 = build/src/bin/bats.dats: 22695(line=430, offs=30) -- 22741(line=430, offs=76)
 */
-ATSINSmove(tmp947, build_057_src_057_helpers_056_sats__ap_string_opt(tmp941, ATSPMVrefarg1(ATSPMVptrof(tmpref943[0])), ATSPMVi0nt(4), tmp948, ATSPMVrefarg1(ATSPMVptrof(tmpref945[0])), ATSPMVi0nt(27))) ;
+ATSINSmove(tmp949, build_057_src_057_helpers_056_sats__ap_string_opt(tmp943, ATSPMVrefarg1(ATSPMVptrof(tmpref945[0])), ATSPMVi0nt(4), tmp950, ATSPMVrefarg1(ATSPMVptrof(tmpref947[0])), ATSPMVi0nt(27))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22557(line=429, offs=17) -- 22558(line=429, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 22682(line=430, offs=17) -- 22683(line=430, offs=18)
 */
-ATSINSmove(tmp949, ATSSELfltrec(tmp947, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp951, ATSSELfltrec(tmp949, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22560(line=429, offs=20) -- 22566(line=429, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 22685(line=430, offs=20) -- 22691(line=430, offs=26)
 */
-ATSINSmove(tmp950, ATSSELfltrec(tmp947, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp952, ATSSELfltrec(tmp949, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22631(line=430, offs=15) -- 22635(line=430, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref951) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22638(line=430, offs=22) -- 22678(line=430, offs=62)
-*/
-ATSINSmove(tmp952, tmpref951) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22649(line=430, offs=33) -- 22652(line=430, offs=36)
-*/
-ATSINSpmove(tmp952, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22649(line=430, offs=33) -- 22652(line=430, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp952, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22654(line=430, offs=38) -- 22657(line=430, offs=41)
-*/
-ATSINSpmove(tmp952, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22654(line=430, offs=38) -- 22657(line=430, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp952, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22659(line=430, offs=43) -- 22662(line=430, offs=46)
-*/
-ATSINSpmove(tmp952, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22659(line=430, offs=43) -- 22662(line=430, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp952, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22664(line=430, offs=48) -- 22667(line=430, offs=51)
-*/
-ATSINSpmove(tmp952, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22664(line=430, offs=48) -- 22667(line=430, offs=51)
-*/
-ATSINSupdate_ptrinc(tmp952, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22669(line=430, offs=53) -- 22672(line=430, offs=56)
-*/
-ATSINSpmove(tmp952, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22669(line=430, offs=53) -- 22672(line=430, offs=56)
-*/
-ATSINSupdate_ptrinc(tmp952, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22674(line=430, offs=58) -- 22677(line=430, offs=61)
-*/
-ATSINSpmove(tmp952, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22693(line=431, offs=15) -- 22697(line=431, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 22756(line=431, offs=15) -- 22760(line=431, offs=19)
 */
 /*
 ATSINStmpdec(tmpref953) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22700(line=431, offs=22) -- 22806(line=431, offs=128)
+emit_instr: loc0 = build/src/bin/bats.dats: 22763(line=431, offs=22) -- 22803(line=431, offs=62)
 */
 ATSINSmove(tmp954, tmpref953) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22712(line=431, offs=34) -- 22715(line=431, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22774(line=431, offs=33) -- 22777(line=431, offs=36)
 */
 ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22712(line=431, offs=34) -- 22715(line=431, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 22774(line=431, offs=33) -- 22777(line=431, offs=36)
 */
 ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22717(line=431, offs=39) -- 22720(line=431, offs=42)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22717(line=431, offs=39) -- 22720(line=431, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22722(line=431, offs=44) -- 22725(line=431, offs=47)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22722(line=431, offs=44) -- 22725(line=431, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22727(line=431, offs=49) -- 22730(line=431, offs=52)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22727(line=431, offs=49) -- 22730(line=431, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22732(line=431, offs=54) -- 22735(line=431, offs=57)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22732(line=431, offs=54) -- 22735(line=431, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22737(line=431, offs=59) -- 22740(line=431, offs=62)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22737(line=431, offs=59) -- 22740(line=431, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22742(line=431, offs=64) -- 22745(line=431, offs=67)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22742(line=431, offs=64) -- 22745(line=431, offs=67)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22747(line=431, offs=69) -- 22750(line=431, offs=72)
-*/
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22747(line=431, offs=69) -- 22750(line=431, offs=72)
-*/
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22752(line=431, offs=74) -- 22755(line=431, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 22779(line=431, offs=38) -- 22782(line=431, offs=41)
 */
 ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22752(line=431, offs=74) -- 22755(line=431, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 22779(line=431, offs=38) -- 22782(line=431, offs=41)
 */
 ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22757(line=431, offs=79) -- 22760(line=431, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 22784(line=431, offs=43) -- 22787(line=431, offs=46)
 */
 ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22757(line=431, offs=79) -- 22760(line=431, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 22784(line=431, offs=43) -- 22787(line=431, offs=46)
 */
 ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22762(line=431, offs=84) -- 22765(line=431, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 22789(line=431, offs=48) -- 22792(line=431, offs=51)
 */
 ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22762(line=431, offs=84) -- 22765(line=431, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 22789(line=431, offs=48) -- 22792(line=431, offs=51)
 */
 ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22767(line=431, offs=89) -- 22770(line=431, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 22794(line=431, offs=53) -- 22797(line=431, offs=56)
 */
 ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22767(line=431, offs=89) -- 22770(line=431, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 22794(line=431, offs=53) -- 22797(line=431, offs=56)
 */
 ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22772(line=431, offs=94) -- 22775(line=431, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 22799(line=431, offs=58) -- 22802(line=431, offs=61)
 */
 ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22772(line=431, offs=94) -- 22775(line=431, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 22818(line=432, offs=15) -- 22822(line=432, offs=19)
 */
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22777(line=431, offs=99) -- 22780(line=431, offs=102)
+ATSINStmpdec(tmpref955) ;
 */
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22777(line=431, offs=99) -- 22780(line=431, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 22825(line=432, offs=22) -- 22931(line=432, offs=128)
 */
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp956, tmpref955) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22782(line=431, offs=104) -- 22785(line=431, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 22837(line=432, offs=34) -- 22840(line=432, offs=37)
 */
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22782(line=431, offs=104) -- 22785(line=431, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 22837(line=432, offs=34) -- 22840(line=432, offs=37)
 */
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22787(line=431, offs=109) -- 22790(line=431, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 22842(line=432, offs=39) -- 22845(line=432, offs=42)
 */
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22787(line=431, offs=109) -- 22790(line=431, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 22842(line=432, offs=39) -- 22845(line=432, offs=42)
 */
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22792(line=431, offs=114) -- 22795(line=431, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 22847(line=432, offs=44) -- 22850(line=432, offs=47)
 */
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22792(line=431, offs=114) -- 22795(line=431, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 22847(line=432, offs=44) -- 22850(line=432, offs=47)
 */
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22797(line=431, offs=119) -- 22800(line=431, offs=122)
+emit_instr: loc0 = build/src/bin/bats.dats: 22852(line=432, offs=49) -- 22855(line=432, offs=52)
 */
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22797(line=431, offs=119) -- 22800(line=431, offs=122)
+emit_instr: loc0 = build/src/bin/bats.dats: 22852(line=432, offs=49) -- 22855(line=432, offs=52)
 */
-ATSINSupdate_ptrinc(tmp954, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22802(line=431, offs=124) -- 22805(line=431, offs=127)
+emit_instr: loc0 = build/src/bin/bats.dats: 22857(line=432, offs=54) -- 22860(line=432, offs=57)
 */
-ATSINSpmove(tmp954, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22858(line=432, offs=52) -- 22867(line=432, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 22857(line=432, offs=54) -- 22860(line=432, offs=57)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22862(line=432, offs=59) -- 22865(line=432, offs=62)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22862(line=432, offs=59) -- 22865(line=432, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22867(line=432, offs=64) -- 22870(line=432, offs=67)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22867(line=432, offs=64) -- 22870(line=432, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22872(line=432, offs=69) -- 22875(line=432, offs=72)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22872(line=432, offs=69) -- 22875(line=432, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22877(line=432, offs=74) -- 22880(line=432, offs=77)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22877(line=432, offs=74) -- 22880(line=432, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22882(line=432, offs=79) -- 22885(line=432, offs=82)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22882(line=432, offs=79) -- 22885(line=432, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22887(line=432, offs=84) -- 22890(line=432, offs=87)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22887(line=432, offs=84) -- 22890(line=432, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22892(line=432, offs=89) -- 22895(line=432, offs=92)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22892(line=432, offs=89) -- 22895(line=432, offs=92)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22897(line=432, offs=94) -- 22900(line=432, offs=97)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22897(line=432, offs=94) -- 22900(line=432, offs=97)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22902(line=432, offs=99) -- 22905(line=432, offs=102)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22902(line=432, offs=99) -- 22905(line=432, offs=102)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22907(line=432, offs=104) -- 22910(line=432, offs=107)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22907(line=432, offs=104) -- 22910(line=432, offs=107)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22912(line=432, offs=109) -- 22915(line=432, offs=112)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22912(line=432, offs=109) -- 22915(line=432, offs=112)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22917(line=432, offs=114) -- 22920(line=432, offs=117)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22917(line=432, offs=114) -- 22920(line=432, offs=117)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22922(line=432, offs=119) -- 22925(line=432, offs=122)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22922(line=432, offs=119) -- 22925(line=432, offs=122)
+*/
+ATSINSupdate_ptrinc(tmp956, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22927(line=432, offs=124) -- 22930(line=432, offs=127)
+*/
+ATSINSpmove(tmp956, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 22983(line=433, offs=52) -- 22992(line=433, offs=61)
 */
 
-ATSINSmove_nil(tmp956) ;
+ATSINSmove_nil(tmp958) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22838(line=432, offs=32) -- 22878(line=432, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 22963(line=433, offs=32) -- 23003(line=433, offs=72)
 */
-ATSINSmove(tmp955, build_057_src_057_helpers_056_sats__ap_flag(tmp949, ATSPMVrefarg1(ATSPMVptrof(tmpref951[0])), ATSPMVi0nt(6), tmp956, ATSPMVrefarg1(ATSPMVptrof(tmpref953[0])), ATSPMVi0nt(19))) ;
+ATSINSmove(tmp957, build_057_src_057_helpers_056_sats__ap_flag(tmp951, ATSPMVrefarg1(ATSPMVptrof(tmpref953[0])), ATSPMVi0nt(6), tmp958, ATSPMVrefarg1(ATSPMVptrof(tmpref955[0])), ATSPMVi0nt(19))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22823(line=432, offs=17) -- 22824(line=432, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 22948(line=433, offs=17) -- 22949(line=433, offs=18)
 */
-ATSINSmove(tmp957, ATSSELfltrec(tmp955, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp959, ATSSELfltrec(tmp957, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22826(line=432, offs=20) -- 22834(line=432, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 22951(line=433, offs=20) -- 22959(line=433, offs=28)
 */
-ATSINSmove(tmp958, ATSSELfltrec(tmp955, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp960, ATSSELfltrec(tmp957, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22893(line=433, offs=15) -- 22897(line=433, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref959) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22900(line=433, offs=22) -- 22925(line=433, offs=47)
-*/
-ATSINSmove(tmp960, tmpref959) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22911(line=433, offs=33) -- 22914(line=433, offs=36)
-*/
-ATSINSpmove(tmp960, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22911(line=433, offs=33) -- 22914(line=433, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp960, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22916(line=433, offs=38) -- 22919(line=433, offs=41)
-*/
-ATSINSpmove(tmp960, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22916(line=433, offs=38) -- 22919(line=433, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp960, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22921(line=433, offs=43) -- 22924(line=433, offs=46)
-*/
-ATSINSpmove(tmp960, atstkind_t0ype(atstype_char), ATSPMVchar('v')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22940(line=434, offs=15) -- 22944(line=434, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 23018(line=434, offs=15) -- 23022(line=434, offs=19)
 */
 /*
 ATSINStmpdec(tmpref961) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22947(line=434, offs=22) -- 23078(line=434, offs=153)
+emit_instr: loc0 = build/src/bin/bats.dats: 23025(line=434, offs=22) -- 23050(line=434, offs=47)
 */
 ATSINSmove(tmp962, tmpref961) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22959(line=434, offs=34) -- 22962(line=434, offs=37)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22959(line=434, offs=34) -- 22962(line=434, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22964(line=434, offs=39) -- 22967(line=434, offs=42)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22964(line=434, offs=39) -- 22967(line=434, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22969(line=434, offs=44) -- 22972(line=434, offs=47)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22969(line=434, offs=44) -- 22972(line=434, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22974(line=434, offs=49) -- 22977(line=434, offs=52)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22974(line=434, offs=49) -- 22977(line=434, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22979(line=434, offs=54) -- 22982(line=434, offs=57)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22979(line=434, offs=54) -- 22982(line=434, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22984(line=434, offs=59) -- 22987(line=434, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 23036(line=434, offs=33) -- 23039(line=434, offs=36)
 */
 ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22984(line=434, offs=59) -- 22987(line=434, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 23036(line=434, offs=33) -- 23039(line=434, offs=36)
 */
 ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22989(line=434, offs=64) -- 22992(line=434, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 23041(line=434, offs=38) -- 23044(line=434, offs=41)
 */
 ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22989(line=434, offs=64) -- 22992(line=434, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 23041(line=434, offs=38) -- 23044(line=434, offs=41)
 */
 ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 22994(line=434, offs=69) -- 22997(line=434, offs=72)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22994(line=434, offs=69) -- 22997(line=434, offs=72)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22999(line=434, offs=74) -- 23002(line=434, offs=77)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 22999(line=434, offs=74) -- 23002(line=434, offs=77)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23004(line=434, offs=79) -- 23007(line=434, offs=82)
-*/
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23004(line=434, offs=79) -- 23007(line=434, offs=82)
-*/
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23009(line=434, offs=84) -- 23012(line=434, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 23046(line=434, offs=43) -- 23049(line=434, offs=46)
 */
 ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('v')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23009(line=434, offs=84) -- 23012(line=434, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 23065(line=435, offs=15) -- 23069(line=435, offs=19)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23014(line=434, offs=89) -- 23017(line=434, offs=92)
+ATSINStmpdec(tmpref963) ;
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23014(line=434, offs=89) -- 23017(line=434, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 23072(line=435, offs=22) -- 23203(line=435, offs=153)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp964, tmpref963) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23019(line=434, offs=94) -- 23022(line=434, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 23084(line=435, offs=34) -- 23087(line=435, offs=37)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23019(line=434, offs=94) -- 23022(line=434, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 23084(line=435, offs=34) -- 23087(line=435, offs=37)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23024(line=434, offs=99) -- 23027(line=434, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 23089(line=435, offs=39) -- 23092(line=435, offs=42)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23024(line=434, offs=99) -- 23027(line=434, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 23089(line=435, offs=39) -- 23092(line=435, offs=42)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23029(line=434, offs=104) -- 23032(line=434, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 23094(line=435, offs=44) -- 23097(line=435, offs=47)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23029(line=434, offs=104) -- 23032(line=434, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 23094(line=435, offs=44) -- 23097(line=435, offs=47)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23034(line=434, offs=109) -- 23037(line=434, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 23099(line=435, offs=49) -- 23102(line=435, offs=52)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23034(line=434, offs=109) -- 23037(line=434, offs=112)
+emit_instr: loc0 = build/src/bin/bats.dats: 23099(line=435, offs=49) -- 23102(line=435, offs=52)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23039(line=434, offs=114) -- 23042(line=434, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 23104(line=435, offs=54) -- 23107(line=435, offs=57)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23039(line=434, offs=114) -- 23042(line=434, offs=117)
+emit_instr: loc0 = build/src/bin/bats.dats: 23104(line=435, offs=54) -- 23107(line=435, offs=57)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23044(line=434, offs=119) -- 23047(line=434, offs=122)
+emit_instr: loc0 = build/src/bin/bats.dats: 23109(line=435, offs=59) -- 23112(line=435, offs=62)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23044(line=434, offs=119) -- 23047(line=434, offs=122)
+emit_instr: loc0 = build/src/bin/bats.dats: 23109(line=435, offs=59) -- 23112(line=435, offs=62)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23049(line=434, offs=124) -- 23052(line=434, offs=127)
+emit_instr: loc0 = build/src/bin/bats.dats: 23114(line=435, offs=64) -- 23117(line=435, offs=67)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23049(line=434, offs=124) -- 23052(line=434, offs=127)
+emit_instr: loc0 = build/src/bin/bats.dats: 23114(line=435, offs=64) -- 23117(line=435, offs=67)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23054(line=434, offs=129) -- 23057(line=434, offs=132)
+emit_instr: loc0 = build/src/bin/bats.dats: 23119(line=435, offs=69) -- 23122(line=435, offs=72)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23054(line=434, offs=129) -- 23057(line=434, offs=132)
+emit_instr: loc0 = build/src/bin/bats.dats: 23119(line=435, offs=69) -- 23122(line=435, offs=72)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23059(line=434, offs=134) -- 23062(line=434, offs=137)
+emit_instr: loc0 = build/src/bin/bats.dats: 23124(line=435, offs=74) -- 23127(line=435, offs=77)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23059(line=434, offs=134) -- 23062(line=434, offs=137)
+emit_instr: loc0 = build/src/bin/bats.dats: 23124(line=435, offs=74) -- 23127(line=435, offs=77)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23064(line=434, offs=139) -- 23067(line=434, offs=142)
+emit_instr: loc0 = build/src/bin/bats.dats: 23129(line=435, offs=79) -- 23132(line=435, offs=82)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23064(line=434, offs=139) -- 23067(line=434, offs=142)
+emit_instr: loc0 = build/src/bin/bats.dats: 23129(line=435, offs=79) -- 23132(line=435, offs=82)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23069(line=434, offs=144) -- 23072(line=434, offs=147)
+emit_instr: loc0 = build/src/bin/bats.dats: 23134(line=435, offs=84) -- 23137(line=435, offs=87)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('v')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23069(line=434, offs=144) -- 23072(line=434, offs=147)
+emit_instr: loc0 = build/src/bin/bats.dats: 23134(line=435, offs=84) -- 23137(line=435, offs=87)
 */
-ATSINSupdate_ptrinc(tmp962, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23074(line=434, offs=149) -- 23077(line=434, offs=152)
+emit_instr: loc0 = build/src/bin/bats.dats: 23139(line=435, offs=89) -- 23142(line=435, offs=92)
 */
-ATSINSpmove(tmp962, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23127(line=435, offs=49) -- 23136(line=435, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 23139(line=435, offs=89) -- 23142(line=435, offs=92)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23144(line=435, offs=94) -- 23147(line=435, offs=97)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23144(line=435, offs=94) -- 23147(line=435, offs=97)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23149(line=435, offs=99) -- 23152(line=435, offs=102)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23149(line=435, offs=99) -- 23152(line=435, offs=102)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23154(line=435, offs=104) -- 23157(line=435, offs=107)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23154(line=435, offs=104) -- 23157(line=435, offs=107)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23159(line=435, offs=109) -- 23162(line=435, offs=112)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23159(line=435, offs=109) -- 23162(line=435, offs=112)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23164(line=435, offs=114) -- 23167(line=435, offs=117)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23164(line=435, offs=114) -- 23167(line=435, offs=117)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23169(line=435, offs=119) -- 23172(line=435, offs=122)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23169(line=435, offs=119) -- 23172(line=435, offs=122)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23174(line=435, offs=124) -- 23177(line=435, offs=127)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23174(line=435, offs=124) -- 23177(line=435, offs=127)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23179(line=435, offs=129) -- 23182(line=435, offs=132)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23179(line=435, offs=129) -- 23182(line=435, offs=132)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23184(line=435, offs=134) -- 23187(line=435, offs=137)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23184(line=435, offs=134) -- 23187(line=435, offs=137)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23189(line=435, offs=139) -- 23192(line=435, offs=142)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23189(line=435, offs=139) -- 23192(line=435, offs=142)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23194(line=435, offs=144) -- 23197(line=435, offs=147)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23194(line=435, offs=144) -- 23197(line=435, offs=147)
+*/
+ATSINSupdate_ptrinc(tmp964, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23199(line=435, offs=149) -- 23202(line=435, offs=152)
+*/
+ATSINSpmove(tmp964, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23252(line=436, offs=49) -- 23261(line=436, offs=58)
 */
 
-ATSINSmove_nil(tmp964) ;
+ATSINSmove_nil(tmp966) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23107(line=435, offs=29) -- 23147(line=435, offs=69)
+emit_instr: loc0 = build/src/bin/bats.dats: 23232(line=436, offs=29) -- 23272(line=436, offs=69)
 */
-ATSINSmove(tmp963, build_057_src_057_helpers_056_sats__ap_flag(tmp957, ATSPMVrefarg1(ATSPMVptrof(tmpref959[0])), ATSPMVi0nt(3), tmp964, ATSPMVrefarg1(ATSPMVptrof(tmpref961[0])), ATSPMVi0nt(24))) ;
+ATSINSmove(tmp965, build_057_src_057_helpers_056_sats__ap_flag(tmp959, ATSPMVrefarg1(ATSPMVptrof(tmpref961[0])), ATSPMVi0nt(3), tmp966, ATSPMVrefarg1(ATSPMVptrof(tmpref963[0])), ATSPMVi0nt(24))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23095(line=435, offs=17) -- 23096(line=435, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 23220(line=436, offs=17) -- 23221(line=436, offs=18)
 */
-ATSINSmove(tmp965, ATSSELfltrec(tmp963, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp967, ATSSELfltrec(tmp965, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23098(line=435, offs=20) -- 23103(line=435, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 23223(line=436, offs=20) -- 23228(line=436, offs=25)
 */
-ATSINSmove(tmp966, ATSSELfltrec(tmp963, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp968, ATSSELfltrec(tmp965, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23162(line=436, offs=15) -- 23166(line=436, offs=19)
-*/
-/*
-ATSINStmpdec(tmpref967) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23169(line=436, offs=22) -- 23214(line=436, offs=67)
-*/
-ATSINSmove(tmp968, tmpref967) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23180(line=436, offs=33) -- 23183(line=436, offs=36)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23180(line=436, offs=33) -- 23183(line=436, offs=36)
-*/
-ATSINSupdate_ptrinc(tmp968, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23185(line=436, offs=38) -- 23188(line=436, offs=41)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23185(line=436, offs=38) -- 23188(line=436, offs=41)
-*/
-ATSINSupdate_ptrinc(tmp968, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23190(line=436, offs=43) -- 23193(line=436, offs=46)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23190(line=436, offs=43) -- 23193(line=436, offs=46)
-*/
-ATSINSupdate_ptrinc(tmp968, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23195(line=436, offs=48) -- 23198(line=436, offs=51)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('-')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23195(line=436, offs=48) -- 23198(line=436, offs=51)
-*/
-ATSINSupdate_ptrinc(tmp968, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23200(line=436, offs=53) -- 23203(line=436, offs=56)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23200(line=436, offs=53) -- 23203(line=436, offs=56)
-*/
-ATSINSupdate_ptrinc(tmp968, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23205(line=436, offs=58) -- 23208(line=436, offs=61)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23205(line=436, offs=58) -- 23208(line=436, offs=61)
-*/
-ATSINSupdate_ptrinc(tmp968, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23210(line=436, offs=63) -- 23213(line=436, offs=66)
-*/
-ATSINSpmove(tmp968, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23229(line=437, offs=15) -- 23233(line=437, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 23287(line=437, offs=15) -- 23291(line=437, offs=19)
 */
 /*
 ATSINStmpdec(tmpref969) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23236(line=437, offs=22) -- 23307(line=437, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 23294(line=437, offs=22) -- 23339(line=437, offs=67)
 */
 ATSINSmove(tmp970, tmpref969) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23248(line=437, offs=34) -- 23251(line=437, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 23305(line=437, offs=33) -- 23308(line=437, offs=36)
 */
 ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23248(line=437, offs=34) -- 23251(line=437, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 23305(line=437, offs=33) -- 23308(line=437, offs=36)
 */
 ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23253(line=437, offs=39) -- 23256(line=437, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 23310(line=437, offs=38) -- 23313(line=437, offs=41)
 */
 ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23253(line=437, offs=39) -- 23256(line=437, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 23310(line=437, offs=38) -- 23313(line=437, offs=41)
 */
 ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23258(line=437, offs=44) -- 23261(line=437, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 23315(line=437, offs=43) -- 23318(line=437, offs=46)
 */
 ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23258(line=437, offs=44) -- 23261(line=437, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 23315(line=437, offs=43) -- 23318(line=437, offs=46)
 */
 ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23263(line=437, offs=49) -- 23266(line=437, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 23320(line=437, offs=48) -- 23323(line=437, offs=51)
 */
-ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('-')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23263(line=437, offs=49) -- 23266(line=437, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 23320(line=437, offs=48) -- 23323(line=437, offs=51)
 */
 ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23268(line=437, offs=54) -- 23271(line=437, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 23325(line=437, offs=53) -- 23328(line=437, offs=56)
 */
 ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23268(line=437, offs=54) -- 23271(line=437, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 23325(line=437, offs=53) -- 23328(line=437, offs=56)
 */
 ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23273(line=437, offs=59) -- 23276(line=437, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 23330(line=437, offs=58) -- 23333(line=437, offs=61)
 */
 ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23273(line=437, offs=59) -- 23276(line=437, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 23330(line=437, offs=58) -- 23333(line=437, offs=61)
 */
 ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23278(line=437, offs=64) -- 23281(line=437, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 23335(line=437, offs=63) -- 23338(line=437, offs=66)
 */
 ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23278(line=437, offs=64) -- 23281(line=437, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 23354(line=438, offs=15) -- 23358(line=438, offs=19)
 */
-ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23283(line=437, offs=69) -- 23286(line=437, offs=72)
+ATSINStmpdec(tmpref971) ;
 */
-ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23283(line=437, offs=69) -- 23286(line=437, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 23361(line=438, offs=22) -- 23432(line=438, offs=93)
 */
-ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp972, tmpref971) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23288(line=437, offs=74) -- 23291(line=437, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 23373(line=438, offs=34) -- 23376(line=438, offs=37)
 */
-ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23288(line=437, offs=74) -- 23291(line=437, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 23373(line=438, offs=34) -- 23376(line=438, offs=37)
 */
-ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23293(line=437, offs=79) -- 23296(line=437, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 23378(line=438, offs=39) -- 23381(line=438, offs=42)
 */
-ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23293(line=437, offs=79) -- 23296(line=437, offs=82)
+emit_instr: loc0 = build/src/bin/bats.dats: 23378(line=438, offs=39) -- 23381(line=438, offs=42)
 */
-ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23298(line=437, offs=84) -- 23301(line=437, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 23383(line=438, offs=44) -- 23386(line=438, offs=47)
 */
-ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('y')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23298(line=437, offs=84) -- 23301(line=437, offs=87)
+emit_instr: loc0 = build/src/bin/bats.dats: 23383(line=438, offs=44) -- 23386(line=438, offs=47)
 */
-ATSINSupdate_ptrinc(tmp970, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23303(line=437, offs=89) -- 23306(line=437, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 23388(line=438, offs=49) -- 23391(line=438, offs=52)
 */
-ATSINSpmove(tmp970, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23360(line=438, offs=53) -- 23369(line=438, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 23388(line=438, offs=49) -- 23391(line=438, offs=52)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23393(line=438, offs=54) -- 23396(line=438, offs=57)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23393(line=438, offs=54) -- 23396(line=438, offs=57)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23398(line=438, offs=59) -- 23401(line=438, offs=62)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23398(line=438, offs=59) -- 23401(line=438, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23403(line=438, offs=64) -- 23406(line=438, offs=67)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23403(line=438, offs=64) -- 23406(line=438, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23408(line=438, offs=69) -- 23411(line=438, offs=72)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23408(line=438, offs=69) -- 23411(line=438, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23413(line=438, offs=74) -- 23416(line=438, offs=77)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23413(line=438, offs=74) -- 23416(line=438, offs=77)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23418(line=438, offs=79) -- 23421(line=438, offs=82)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23418(line=438, offs=79) -- 23421(line=438, offs=82)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23423(line=438, offs=84) -- 23426(line=438, offs=87)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23423(line=438, offs=84) -- 23426(line=438, offs=87)
+*/
+ATSINSupdate_ptrinc(tmp972, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23428(line=438, offs=89) -- 23431(line=438, offs=92)
+*/
+ATSINSpmove(tmp972, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23485(line=439, offs=53) -- 23494(line=439, offs=62)
 */
 
-ATSINSmove_nil(tmp972) ;
+ATSINSmove_nil(tmp974) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23340(line=438, offs=33) -- 23380(line=438, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 23465(line=439, offs=33) -- 23505(line=439, offs=73)
 */
-ATSINSmove(tmp971, build_057_src_057_helpers_056_sats__ap_flag(tmp965, ATSPMVrefarg1(ATSPMVptrof(tmpref967[0])), ATSPMVi0nt(7), tmp972, ATSPMVrefarg1(ATSPMVptrof(tmpref969[0])), ATSPMVi0nt(12))) ;
+ATSINSmove(tmp973, build_057_src_057_helpers_056_sats__ap_flag(tmp967, ATSPMVrefarg1(ATSPMVptrof(tmpref969[0])), ATSPMVi0nt(7), tmp974, ATSPMVrefarg1(ATSPMVptrof(tmpref971[0])), ATSPMVi0nt(12))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23324(line=438, offs=17) -- 23325(line=438, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 23449(line=439, offs=17) -- 23450(line=439, offs=18)
 */
-ATSINSmove(tmp973, ATSSELfltrec(tmp971, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp975, ATSSELfltrec(tmp973, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23327(line=438, offs=20) -- 23336(line=438, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 23452(line=439, offs=20) -- 23461(line=439, offs=29)
 */
-ATSINSmove(tmp974, ATSSELfltrec(tmp971, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp976, ATSSELfltrec(tmp973, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23395(line=439, offs=15) -- 23400(line=439, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref975) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23403(line=439, offs=23) -- 23438(line=439, offs=58)
-*/
-ATSINSmove(tmp976, tmpref975) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23414(line=439, offs=34) -- 23417(line=439, offs=37)
-*/
-ATSINSpmove(tmp976, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23414(line=439, offs=34) -- 23417(line=439, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp976, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23419(line=439, offs=39) -- 23422(line=439, offs=42)
-*/
-ATSINSpmove(tmp976, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23419(line=439, offs=39) -- 23422(line=439, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp976, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23424(line=439, offs=44) -- 23427(line=439, offs=47)
-*/
-ATSINSpmove(tmp976, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23424(line=439, offs=44) -- 23427(line=439, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp976, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23429(line=439, offs=49) -- 23432(line=439, offs=52)
-*/
-ATSINSpmove(tmp976, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23429(line=439, offs=49) -- 23432(line=439, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp976, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23434(line=439, offs=54) -- 23437(line=439, offs=57)
-*/
-ATSINSpmove(tmp976, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23453(line=440, offs=15) -- 23458(line=440, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 23520(line=440, offs=15) -- 23525(line=440, offs=20)
 */
 /*
 ATSINStmpdec(tmpref977) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23461(line=440, offs=23) -- 23532(line=440, offs=94)
+emit_instr: loc0 = build/src/bin/bats.dats: 23528(line=440, offs=23) -- 23563(line=440, offs=58)
 */
 ATSINSmove(tmp978, tmpref977) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23473(line=440, offs=35) -- 23476(line=440, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 23539(line=440, offs=34) -- 23542(line=440, offs=37)
+*/
+ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23539(line=440, offs=34) -- 23542(line=440, offs=37)
+*/
+ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23544(line=440, offs=39) -- 23547(line=440, offs=42)
+*/
+ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23544(line=440, offs=39) -- 23547(line=440, offs=42)
+*/
+ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23549(line=440, offs=44) -- 23552(line=440, offs=47)
 */
 ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23473(line=440, offs=35) -- 23476(line=440, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 23549(line=440, offs=44) -- 23552(line=440, offs=47)
 */
 ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23478(line=440, offs=40) -- 23481(line=440, offs=43)
-*/
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23478(line=440, offs=40) -- 23481(line=440, offs=43)
-*/
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23483(line=440, offs=45) -- 23486(line=440, offs=48)
-*/
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23483(line=440, offs=45) -- 23486(line=440, offs=48)
-*/
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23488(line=440, offs=50) -- 23491(line=440, offs=53)
-*/
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23488(line=440, offs=50) -- 23491(line=440, offs=53)
-*/
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23493(line=440, offs=55) -- 23496(line=440, offs=58)
-*/
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23493(line=440, offs=55) -- 23496(line=440, offs=58)
-*/
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23498(line=440, offs=60) -- 23501(line=440, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 23554(line=440, offs=49) -- 23557(line=440, offs=52)
 */
 ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23498(line=440, offs=60) -- 23501(line=440, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 23554(line=440, offs=49) -- 23557(line=440, offs=52)
 */
 ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23503(line=440, offs=65) -- 23506(line=440, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 23559(line=440, offs=54) -- 23562(line=440, offs=57)
 */
 ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23503(line=440, offs=65) -- 23506(line=440, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 23578(line=441, offs=15) -- 23583(line=441, offs=20)
 */
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23508(line=440, offs=70) -- 23511(line=440, offs=73)
+ATSINStmpdec(tmpref979) ;
 */
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23508(line=440, offs=70) -- 23511(line=440, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 23586(line=441, offs=23) -- 23657(line=441, offs=94)
 */
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
+ATSINSmove(tmp980, tmpref979) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23513(line=440, offs=75) -- 23516(line=440, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 23598(line=441, offs=35) -- 23601(line=441, offs=38)
 */
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('A')) ;
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23513(line=440, offs=75) -- 23516(line=440, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 23598(line=441, offs=35) -- 23601(line=441, offs=38)
 */
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23518(line=440, offs=80) -- 23521(line=440, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 23603(line=441, offs=40) -- 23606(line=441, offs=43)
 */
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('T')) ;
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23518(line=440, offs=80) -- 23521(line=440, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 23603(line=441, offs=40) -- 23606(line=441, offs=43)
 */
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23523(line=440, offs=85) -- 23526(line=440, offs=88)
+emit_instr: loc0 = build/src/bin/bats.dats: 23608(line=441, offs=45) -- 23611(line=441, offs=48)
 */
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('S')) ;
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23523(line=440, offs=85) -- 23526(line=440, offs=88)
+emit_instr: loc0 = build/src/bin/bats.dats: 23608(line=441, offs=45) -- 23611(line=441, offs=48)
 */
-ATSINSupdate_ptrinc(tmp978, atstkind_t0ype(atstype_char)) ;
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23528(line=440, offs=90) -- 23531(line=440, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 23613(line=441, offs=50) -- 23616(line=441, offs=53)
 */
-ATSINSpmove(tmp978, atstkind_t0ype(atstype_char), ATSPMVchar('2')) ;
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23584(line=441, offs=52) -- 23593(line=441, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 23613(line=441, offs=50) -- 23616(line=441, offs=53)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23618(line=441, offs=55) -- 23621(line=441, offs=58)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23618(line=441, offs=55) -- 23621(line=441, offs=58)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23623(line=441, offs=60) -- 23626(line=441, offs=63)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23623(line=441, offs=60) -- 23626(line=441, offs=63)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23628(line=441, offs=65) -- 23631(line=441, offs=68)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23628(line=441, offs=65) -- 23631(line=441, offs=68)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23633(line=441, offs=70) -- 23636(line=441, offs=73)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23633(line=441, offs=70) -- 23636(line=441, offs=73)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23638(line=441, offs=75) -- 23641(line=441, offs=78)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('A')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23638(line=441, offs=75) -- 23641(line=441, offs=78)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23643(line=441, offs=80) -- 23646(line=441, offs=83)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('T')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23643(line=441, offs=80) -- 23646(line=441, offs=83)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23648(line=441, offs=85) -- 23651(line=441, offs=88)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('S')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23648(line=441, offs=85) -- 23651(line=441, offs=88)
+*/
+ATSINSupdate_ptrinc(tmp980, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23653(line=441, offs=90) -- 23656(line=441, offs=93)
+*/
+ATSINSpmove(tmp980, atstkind_t0ype(atstype_char), ATSPMVchar('2')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23709(line=442, offs=52) -- 23718(line=442, offs=61)
 */
 
-ATSINSmove_nil(tmp980) ;
+ATSINSmove_nil(tmp982) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23563(line=441, offs=31) -- 23605(line=441, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 23688(line=442, offs=31) -- 23730(line=442, offs=73)
 */
-ATSINSmove(tmp979, build_057_src_057_helpers_056_sats__ap_flag(tmp973, ATSPMVrefarg1(ATSPMVptrof(tmpref975[0])), ATSPMVi0nt(5), tmp980, ATSPMVrefarg1(ATSPMVptrof(tmpref977[0])), ATSPMVi0nt(12))) ;
+ATSINSmove(tmp981, build_057_src_057_helpers_056_sats__ap_flag(tmp975, ATSPMVrefarg1(ATSPMVptrof(tmpref977[0])), ATSPMVi0nt(5), tmp982, ATSPMVrefarg1(ATSPMVptrof(tmpref979[0])), ATSPMVi0nt(12))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23549(line=441, offs=17) -- 23550(line=441, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 23674(line=442, offs=17) -- 23675(line=442, offs=18)
 */
-ATSINSmove(tmp981, ATSSELfltrec(tmp979, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp983, ATSSELfltrec(tmp981, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23552(line=441, offs=20) -- 23559(line=441, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 23677(line=442, offs=20) -- 23684(line=442, offs=27)
 */
-ATSINSmove(tmp982, ATSSELfltrec(tmp979, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp984, ATSSELfltrec(tmp981, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23620(line=442, offs=15) -- 23625(line=442, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref983) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23628(line=442, offs=23) -- 23658(line=442, offs=53)
-*/
-ATSINSmove(tmp984, tmpref983) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23639(line=442, offs=34) -- 23642(line=442, offs=37)
-*/
-ATSINSpmove(tmp984, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23639(line=442, offs=34) -- 23642(line=442, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp984, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23644(line=442, offs=39) -- 23647(line=442, offs=42)
-*/
-ATSINSpmove(tmp984, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23644(line=442, offs=39) -- 23647(line=442, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp984, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23649(line=442, offs=44) -- 23652(line=442, offs=47)
-*/
-ATSINSpmove(tmp984, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23649(line=442, offs=44) -- 23652(line=442, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp984, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23654(line=442, offs=49) -- 23657(line=442, offs=52)
-*/
-ATSINSpmove(tmp984, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23673(line=443, offs=15) -- 23678(line=443, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 23745(line=443, offs=15) -- 23750(line=443, offs=20)
 */
 /*
 ATSINStmpdec(tmpref985) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23681(line=443, offs=23) -- 23797(line=443, offs=139)
+emit_instr: loc0 = build/src/bin/bats.dats: 23753(line=443, offs=23) -- 23783(line=443, offs=53)
 */
 ATSINSmove(tmp986, tmpref985) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23693(line=443, offs=35) -- 23696(line=443, offs=38)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23693(line=443, offs=35) -- 23696(line=443, offs=38)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23698(line=443, offs=40) -- 23701(line=443, offs=43)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23698(line=443, offs=40) -- 23701(line=443, offs=43)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23703(line=443, offs=45) -- 23706(line=443, offs=48)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23703(line=443, offs=45) -- 23706(line=443, offs=48)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23708(line=443, offs=50) -- 23711(line=443, offs=53)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23708(line=443, offs=50) -- 23711(line=443, offs=53)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23713(line=443, offs=55) -- 23716(line=443, offs=58)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23713(line=443, offs=55) -- 23716(line=443, offs=58)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23718(line=443, offs=60) -- 23721(line=443, offs=63)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23718(line=443, offs=60) -- 23721(line=443, offs=63)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23723(line=443, offs=65) -- 23726(line=443, offs=68)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23723(line=443, offs=65) -- 23726(line=443, offs=68)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23728(line=443, offs=70) -- 23731(line=443, offs=73)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23728(line=443, offs=70) -- 23731(line=443, offs=73)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23733(line=443, offs=75) -- 23736(line=443, offs=78)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23733(line=443, offs=75) -- 23736(line=443, offs=78)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23738(line=443, offs=80) -- 23741(line=443, offs=83)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23738(line=443, offs=80) -- 23741(line=443, offs=83)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23743(line=443, offs=85) -- 23746(line=443, offs=88)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23743(line=443, offs=85) -- 23746(line=443, offs=88)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23748(line=443, offs=90) -- 23751(line=443, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 23764(line=443, offs=34) -- 23767(line=443, offs=37)
 */
 ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23748(line=443, offs=90) -- 23751(line=443, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 23764(line=443, offs=34) -- 23767(line=443, offs=37)
 */
 ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23753(line=443, offs=95) -- 23756(line=443, offs=98)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23753(line=443, offs=95) -- 23756(line=443, offs=98)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23758(line=443, offs=100) -- 23761(line=443, offs=103)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23758(line=443, offs=100) -- 23761(line=443, offs=103)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23763(line=443, offs=105) -- 23766(line=443, offs=108)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23763(line=443, offs=105) -- 23766(line=443, offs=108)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23768(line=443, offs=110) -- 23771(line=443, offs=113)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('k')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23768(line=443, offs=110) -- 23771(line=443, offs=113)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23773(line=443, offs=115) -- 23776(line=443, offs=118)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23773(line=443, offs=115) -- 23776(line=443, offs=118)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23778(line=443, offs=120) -- 23781(line=443, offs=123)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23778(line=443, offs=120) -- 23781(line=443, offs=123)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23783(line=443, offs=125) -- 23786(line=443, offs=128)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23783(line=443, offs=125) -- 23786(line=443, offs=128)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23788(line=443, offs=130) -- 23791(line=443, offs=133)
-*/
-ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23788(line=443, offs=130) -- 23791(line=443, offs=133)
-*/
-ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23793(line=443, offs=135) -- 23796(line=443, offs=138)
+emit_instr: loc0 = build/src/bin/bats.dats: 23769(line=443, offs=39) -- 23772(line=443, offs=42)
 */
 ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23848(line=444, offs=51) -- 23857(line=444, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 23769(line=443, offs=39) -- 23772(line=443, offs=42)
+*/
+ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23774(line=443, offs=44) -- 23777(line=443, offs=47)
+*/
+ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23774(line=443, offs=44) -- 23777(line=443, offs=47)
+*/
+ATSINSupdate_ptrinc(tmp986, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23779(line=443, offs=49) -- 23782(line=443, offs=52)
+*/
+ATSINSpmove(tmp986, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23798(line=444, offs=15) -- 23803(line=444, offs=20)
+*/
+/*
+ATSINStmpdec(tmpref987) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23806(line=444, offs=23) -- 23922(line=444, offs=139)
+*/
+ATSINSmove(tmp988, tmpref987) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23818(line=444, offs=35) -- 23821(line=444, offs=38)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23818(line=444, offs=35) -- 23821(line=444, offs=38)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23823(line=444, offs=40) -- 23826(line=444, offs=43)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23823(line=444, offs=40) -- 23826(line=444, offs=43)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23828(line=444, offs=45) -- 23831(line=444, offs=48)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23828(line=444, offs=45) -- 23831(line=444, offs=48)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23833(line=444, offs=50) -- 23836(line=444, offs=53)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23833(line=444, offs=50) -- 23836(line=444, offs=53)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23838(line=444, offs=55) -- 23841(line=444, offs=58)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23838(line=444, offs=55) -- 23841(line=444, offs=58)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23843(line=444, offs=60) -- 23846(line=444, offs=63)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23843(line=444, offs=60) -- 23846(line=444, offs=63)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23848(line=444, offs=65) -- 23851(line=444, offs=68)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23848(line=444, offs=65) -- 23851(line=444, offs=68)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23853(line=444, offs=70) -- 23856(line=444, offs=73)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23853(line=444, offs=70) -- 23856(line=444, offs=73)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23858(line=444, offs=75) -- 23861(line=444, offs=78)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23858(line=444, offs=75) -- 23861(line=444, offs=78)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23863(line=444, offs=80) -- 23866(line=444, offs=83)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23863(line=444, offs=80) -- 23866(line=444, offs=83)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23868(line=444, offs=85) -- 23871(line=444, offs=88)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23868(line=444, offs=85) -- 23871(line=444, offs=88)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23873(line=444, offs=90) -- 23876(line=444, offs=93)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23873(line=444, offs=90) -- 23876(line=444, offs=93)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23878(line=444, offs=95) -- 23881(line=444, offs=98)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23878(line=444, offs=95) -- 23881(line=444, offs=98)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23883(line=444, offs=100) -- 23886(line=444, offs=103)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23883(line=444, offs=100) -- 23886(line=444, offs=103)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23888(line=444, offs=105) -- 23891(line=444, offs=108)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23888(line=444, offs=105) -- 23891(line=444, offs=108)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23893(line=444, offs=110) -- 23896(line=444, offs=113)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('k')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23893(line=444, offs=110) -- 23896(line=444, offs=113)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23898(line=444, offs=115) -- 23901(line=444, offs=118)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23898(line=444, offs=115) -- 23901(line=444, offs=118)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23903(line=444, offs=120) -- 23906(line=444, offs=123)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23903(line=444, offs=120) -- 23906(line=444, offs=123)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23908(line=444, offs=125) -- 23911(line=444, offs=128)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23908(line=444, offs=125) -- 23911(line=444, offs=128)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23913(line=444, offs=130) -- 23916(line=444, offs=133)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23913(line=444, offs=130) -- 23916(line=444, offs=133)
+*/
+ATSINSupdate_ptrinc(tmp988, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23918(line=444, offs=135) -- 23921(line=444, offs=138)
+*/
+ATSINSpmove(tmp988, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 23973(line=445, offs=51) -- 23982(line=445, offs=60)
 */
 
-ATSINSmove_nil(tmp988) ;
+ATSINSmove_nil(tmp990) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23827(line=444, offs=30) -- 23869(line=444, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 23952(line=445, offs=30) -- 23994(line=445, offs=72)
 */
-ATSINSmove(tmp987, build_057_src_057_helpers_056_sats__ap_flag(tmp981, ATSPMVrefarg1(ATSPMVptrof(tmpref983[0])), ATSPMVi0nt(4), tmp988, ATSPMVrefarg1(ATSPMVptrof(tmpref985[0])), ATSPMVi0nt(21))) ;
+ATSINSmove(tmp989, build_057_src_057_helpers_056_sats__ap_flag(tmp983, ATSPMVrefarg1(ATSPMVptrof(tmpref985[0])), ATSPMVi0nt(4), tmp990, ATSPMVrefarg1(ATSPMVptrof(tmpref987[0])), ATSPMVi0nt(21))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23814(line=444, offs=17) -- 23815(line=444, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 23939(line=445, offs=17) -- 23940(line=445, offs=18)
 */
-ATSINSmove(tmp989, ATSSELfltrec(tmp987, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp991, ATSSELfltrec(tmp989, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23817(line=444, offs=20) -- 23823(line=444, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 23942(line=445, offs=20) -- 23948(line=445, offs=26)
 */
-ATSINSmove(tmp990, ATSSELfltrec(tmp987, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp992, ATSSELfltrec(tmp989, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23884(line=445, offs=15) -- 23889(line=445, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref991) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23892(line=445, offs=23) -- 23922(line=445, offs=53)
-*/
-ATSINSmove(tmp992, tmpref991) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23903(line=445, offs=34) -- 23906(line=445, offs=37)
-*/
-ATSINSpmove(tmp992, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23903(line=445, offs=34) -- 23906(line=445, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp992, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23908(line=445, offs=39) -- 23911(line=445, offs=42)
-*/
-ATSINSpmove(tmp992, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23908(line=445, offs=39) -- 23911(line=445, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp992, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23913(line=445, offs=44) -- 23916(line=445, offs=47)
-*/
-ATSINSpmove(tmp992, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23913(line=445, offs=44) -- 23916(line=445, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp992, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23918(line=445, offs=49) -- 23921(line=445, offs=52)
-*/
-ATSINSpmove(tmp992, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23937(line=446, offs=15) -- 23942(line=446, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 24009(line=446, offs=15) -- 24014(line=446, offs=20)
 */
 /*
 ATSINStmpdec(tmpref993) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23945(line=446, offs=23) -- 24000(line=446, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 24017(line=446, offs=23) -- 24047(line=446, offs=53)
 */
 ATSINSmove(tmp994, tmpref993) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23956(line=446, offs=34) -- 23959(line=446, offs=37)
-*/
-ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23956(line=446, offs=34) -- 23959(line=446, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23961(line=446, offs=39) -- 23964(line=446, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 24028(line=446, offs=34) -- 24031(line=446, offs=37)
 */
 ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23961(line=446, offs=39) -- 23964(line=446, offs=42)
+emit_instr: loc0 = build/src/bin/bats.dats: 24028(line=446, offs=34) -- 24031(line=446, offs=37)
 */
 ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23966(line=446, offs=44) -- 23969(line=446, offs=47)
-*/
-ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23966(line=446, offs=44) -- 23969(line=446, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23971(line=446, offs=49) -- 23974(line=446, offs=52)
-*/
-ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('w')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23971(line=446, offs=49) -- 23974(line=446, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23976(line=446, offs=54) -- 23979(line=446, offs=57)
-*/
-ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23976(line=446, offs=54) -- 23979(line=446, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23981(line=446, offs=59) -- 23984(line=446, offs=62)
-*/
-ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23981(line=446, offs=59) -- 23984(line=446, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 23986(line=446, offs=64) -- 23989(line=446, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 24033(line=446, offs=39) -- 24036(line=446, offs=42)
 */
 ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23986(line=446, offs=64) -- 23989(line=446, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 24033(line=446, offs=39) -- 24036(line=446, offs=42)
 */
 ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23991(line=446, offs=69) -- 23994(line=446, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 24038(line=446, offs=44) -- 24041(line=446, offs=47)
 */
 ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23991(line=446, offs=69) -- 23994(line=446, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 24038(line=446, offs=44) -- 24041(line=446, offs=47)
 */
 ATSINSupdate_ptrinc(tmp994, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 23996(line=446, offs=74) -- 23999(line=446, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 24043(line=446, offs=49) -- 24046(line=446, offs=52)
 */
 ATSINSpmove(tmp994, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24051(line=447, offs=51) -- 24063(line=447, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 24062(line=447, offs=15) -- 24067(line=447, offs=20)
+*/
+/*
+ATSINStmpdec(tmpref995) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24070(line=447, offs=23) -- 24125(line=447, offs=78)
+*/
+ATSINSmove(tmp996, tmpref995) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24081(line=447, offs=34) -- 24084(line=447, offs=37)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24081(line=447, offs=34) -- 24084(line=447, offs=37)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24086(line=447, offs=39) -- 24089(line=447, offs=42)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24086(line=447, offs=39) -- 24089(line=447, offs=42)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24091(line=447, offs=44) -- 24094(line=447, offs=47)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24091(line=447, offs=44) -- 24094(line=447, offs=47)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24096(line=447, offs=49) -- 24099(line=447, offs=52)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('w')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24096(line=447, offs=49) -- 24099(line=447, offs=52)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24101(line=447, offs=54) -- 24104(line=447, offs=57)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24101(line=447, offs=54) -- 24104(line=447, offs=57)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24106(line=447, offs=59) -- 24109(line=447, offs=62)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('h')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24106(line=447, offs=59) -- 24109(line=447, offs=62)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24111(line=447, offs=64) -- 24114(line=447, offs=67)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24111(line=447, offs=64) -- 24114(line=447, offs=67)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24116(line=447, offs=69) -- 24119(line=447, offs=72)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24116(line=447, offs=69) -- 24119(line=447, offs=72)
+*/
+ATSINSupdate_ptrinc(tmp996, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24121(line=447, offs=74) -- 24124(line=447, offs=77)
+*/
+ATSINSpmove(tmp996, atstkind_t0ype(atstype_char), ATSPMVchar('p')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24176(line=448, offs=51) -- 24188(line=448, offs=63)
 */
 
 /*
 #LINCONSTATUS==0
 */
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmp996, postiats_tysum_2) ;
+ATSINSmove_con1_new(tmp998, postiats_tysum_2) ;
 #if(0)
-ATSINSstore_con1_tag(tmp996, 0) ;
+ATSINSstore_con1_tag(tmp998, 0) ;
 #endif
-ATSINSstore_con1_ofs(tmp996, postiats_tysum_2, atslab__0, ATSPMVi0nt(104)) ;
+ATSINSstore_con1_ofs(tmp998, postiats_tysum_2, atslab__0, ATSPMVi0nt(104)) ;
 ATSINSmove_con1_end()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24030(line=447, offs=30) -- 24074(line=447, offs=74)
+emit_instr: loc0 = build/src/bin/bats.dats: 24155(line=448, offs=30) -- 24199(line=448, offs=74)
 */
-ATSINSmove(tmp995, build_057_src_057_helpers_056_sats__ap_flag(tmp989, ATSPMVrefarg1(ATSPMVptrof(tmpref991[0])), ATSPMVi0nt(4), tmp996, ATSPMVrefarg1(ATSPMVptrof(tmpref993[0])), ATSPMVi0nt(9))) ;
+ATSINSmove(tmp997, build_057_src_057_helpers_056_sats__ap_flag(tmp991, ATSPMVrefarg1(ATSPMVptrof(tmpref993[0])), ATSPMVi0nt(4), tmp998, ATSPMVrefarg1(ATSPMVptrof(tmpref995[0])), ATSPMVi0nt(9))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24017(line=447, offs=17) -- 24018(line=447, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 24142(line=448, offs=17) -- 24143(line=448, offs=18)
 */
-ATSINSmove(tmp997, ATSSELfltrec(tmp995, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp999, ATSSELfltrec(tmp997, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24020(line=447, offs=20) -- 24026(line=447, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 24145(line=448, offs=20) -- 24151(line=448, offs=26)
 */
-ATSINSmove(tmp998, ATSSELfltrec(tmp995, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp1000, ATSSELfltrec(tmp997, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24089(line=448, offs=15) -- 24094(line=448, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref999) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24097(line=448, offs=23) -- 24137(line=448, offs=63)
-*/
-ATSINSmove(tmp1000, tmpref999) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24108(line=448, offs=34) -- 24111(line=448, offs=37)
-*/
-ATSINSpmove(tmp1000, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24108(line=448, offs=34) -- 24111(line=448, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp1000, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24113(line=448, offs=39) -- 24116(line=448, offs=42)
-*/
-ATSINSpmove(tmp1000, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24113(line=448, offs=39) -- 24116(line=448, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp1000, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24118(line=448, offs=44) -- 24121(line=448, offs=47)
-*/
-ATSINSpmove(tmp1000, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24118(line=448, offs=44) -- 24121(line=448, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp1000, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24123(line=448, offs=49) -- 24126(line=448, offs=52)
-*/
-ATSINSpmove(tmp1000, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24123(line=448, offs=49) -- 24126(line=448, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp1000, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24128(line=448, offs=54) -- 24131(line=448, offs=57)
-*/
-ATSINSpmove(tmp1000, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24128(line=448, offs=54) -- 24131(line=448, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp1000, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24133(line=448, offs=59) -- 24136(line=448, offs=62)
-*/
-ATSINSpmove(tmp1000, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24152(line=449, offs=15) -- 24157(line=449, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 24214(line=449, offs=15) -- 24219(line=449, offs=20)
 */
 /*
 ATSINStmpdec(tmpref1001) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24160(line=449, offs=23) -- 24226(line=449, offs=89)
+emit_instr: loc0 = build/src/bin/bats.dats: 24222(line=449, offs=23) -- 24262(line=449, offs=63)
 */
 ATSINSmove(tmp1002, tmpref1001) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24172(line=449, offs=35) -- 24175(line=449, offs=38)
-*/
-ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24172(line=449, offs=35) -- 24175(line=449, offs=38)
-*/
-ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24177(line=449, offs=40) -- 24180(line=449, offs=43)
-*/
-ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24177(line=449, offs=40) -- 24180(line=449, offs=43)
-*/
-ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24182(line=449, offs=45) -- 24185(line=449, offs=48)
-*/
-ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24182(line=449, offs=45) -- 24185(line=449, offs=48)
-*/
-ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24187(line=449, offs=50) -- 24190(line=449, offs=53)
-*/
-ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24187(line=449, offs=50) -- 24190(line=449, offs=53)
-*/
-ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24192(line=449, offs=55) -- 24195(line=449, offs=58)
-*/
-ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24192(line=449, offs=55) -- 24195(line=449, offs=58)
-*/
-ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24197(line=449, offs=60) -- 24200(line=449, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 24233(line=449, offs=34) -- 24236(line=449, offs=37)
 */
 ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24197(line=449, offs=60) -- 24200(line=449, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 24233(line=449, offs=34) -- 24236(line=449, offs=37)
 */
 ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24202(line=449, offs=65) -- 24205(line=449, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 24238(line=449, offs=39) -- 24241(line=449, offs=42)
 */
 ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24202(line=449, offs=65) -- 24205(line=449, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 24238(line=449, offs=39) -- 24241(line=449, offs=42)
 */
 ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24207(line=449, offs=70) -- 24210(line=449, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 24243(line=449, offs=44) -- 24246(line=449, offs=47)
 */
 ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24207(line=449, offs=70) -- 24210(line=449, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 24243(line=449, offs=44) -- 24246(line=449, offs=47)
 */
 ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24212(line=449, offs=75) -- 24215(line=449, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 24248(line=449, offs=49) -- 24251(line=449, offs=52)
 */
 ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24212(line=449, offs=75) -- 24215(line=449, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 24248(line=449, offs=49) -- 24251(line=449, offs=52)
 */
 ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24217(line=449, offs=80) -- 24220(line=449, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 24253(line=449, offs=54) -- 24256(line=449, offs=57)
 */
 ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24217(line=449, offs=80) -- 24220(line=449, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 24253(line=449, offs=54) -- 24256(line=449, offs=57)
 */
 ATSINSupdate_ptrinc(tmp1002, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24222(line=449, offs=85) -- 24225(line=449, offs=88)
+emit_instr: loc0 = build/src/bin/bats.dats: 24258(line=449, offs=59) -- 24261(line=449, offs=62)
 */
 ATSINSpmove(tmp1002, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24285(line=450, offs=59) -- 24294(line=450, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 24277(line=450, offs=15) -- 24282(line=450, offs=20)
+*/
+/*
+ATSINStmpdec(tmpref1003) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24285(line=450, offs=23) -- 24351(line=450, offs=89)
+*/
+ATSINSmove(tmp1004, tmpref1003) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24297(line=450, offs=35) -- 24300(line=450, offs=38)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24297(line=450, offs=35) -- 24300(line=450, offs=38)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24302(line=450, offs=40) -- 24305(line=450, offs=43)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24302(line=450, offs=40) -- 24305(line=450, offs=43)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24307(line=450, offs=45) -- 24310(line=450, offs=48)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24307(line=450, offs=45) -- 24310(line=450, offs=48)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24312(line=450, offs=50) -- 24315(line=450, offs=53)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24312(line=450, offs=50) -- 24315(line=450, offs=53)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24317(line=450, offs=55) -- 24320(line=450, offs=58)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24317(line=450, offs=55) -- 24320(line=450, offs=58)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24322(line=450, offs=60) -- 24325(line=450, offs=63)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('f')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24322(line=450, offs=60) -- 24325(line=450, offs=63)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24327(line=450, offs=65) -- 24330(line=450, offs=68)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('i')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24327(line=450, offs=65) -- 24330(line=450, offs=68)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24332(line=450, offs=70) -- 24335(line=450, offs=73)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('l')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24332(line=450, offs=70) -- 24335(line=450, offs=73)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24337(line=450, offs=75) -- 24340(line=450, offs=78)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24337(line=450, offs=75) -- 24340(line=450, offs=78)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24342(line=450, offs=80) -- 24345(line=450, offs=83)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24342(line=450, offs=80) -- 24345(line=450, offs=83)
+*/
+ATSINSupdate_ptrinc(tmp1004, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24347(line=450, offs=85) -- 24350(line=450, offs=88)
+*/
+ATSINSpmove(tmp1004, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24410(line=451, offs=59) -- 24419(line=451, offs=68)
 */
 
-ATSINSmove_nil(tmp1004) ;
+ATSINSmove_nil(tmp1006) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24258(line=450, offs=32) -- 24306(line=450, offs=80)
+emit_instr: loc0 = build/src/bin/bats.dats: 24383(line=451, offs=32) -- 24431(line=451, offs=80)
 */
-ATSINSmove(tmp1003, build_057_src_057_helpers_056_sats__ap_string_opt(tmp997, ATSPMVrefarg1(ATSPMVptrof(tmpref999[0])), ATSPMVi0nt(6), tmp1004, ATSPMVrefarg1(ATSPMVptrof(tmpref1001[0])), ATSPMVi0nt(11))) ;
+ATSINSmove(tmp1005, build_057_src_057_helpers_056_sats__ap_string_opt(tmp999, ATSPMVrefarg1(ATSPMVptrof(tmpref1001[0])), ATSPMVi0nt(6), tmp1006, ATSPMVrefarg1(ATSPMVptrof(tmpref1003[0])), ATSPMVi0nt(11))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24243(line=450, offs=17) -- 24244(line=450, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 24368(line=451, offs=17) -- 24369(line=451, offs=18)
 */
-ATSINSmove(tmp1005, ATSSELfltrec(tmp1003, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp1007, ATSSELfltrec(tmp1005, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24246(line=450, offs=20) -- 24254(line=450, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 24371(line=451, offs=20) -- 24379(line=451, offs=28)
 */
-ATSINSmove(tmp1006, ATSSELfltrec(tmp1003, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp1008, ATSSELfltrec(tmp1005, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24321(line=451, offs=15) -- 24326(line=451, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref1007) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24329(line=451, offs=23) -- 24374(line=451, offs=68)
-*/
-ATSINSmove(tmp1008, tmpref1007) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24340(line=451, offs=34) -- 24343(line=451, offs=37)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24340(line=451, offs=34) -- 24343(line=451, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp1008, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24345(line=451, offs=39) -- 24348(line=451, offs=42)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24345(line=451, offs=39) -- 24348(line=451, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp1008, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24350(line=451, offs=44) -- 24353(line=451, offs=47)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24350(line=451, offs=44) -- 24353(line=451, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp1008, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24355(line=451, offs=49) -- 24358(line=451, offs=52)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24355(line=451, offs=49) -- 24358(line=451, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp1008, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24360(line=451, offs=54) -- 24363(line=451, offs=57)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24360(line=451, offs=54) -- 24363(line=451, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp1008, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24365(line=451, offs=59) -- 24368(line=451, offs=62)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24365(line=451, offs=59) -- 24368(line=451, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp1008, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24370(line=451, offs=64) -- 24373(line=451, offs=67)
-*/
-ATSINSpmove(tmp1008, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24389(line=452, offs=15) -- 24394(line=452, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 24446(line=452, offs=15) -- 24451(line=452, offs=20)
 */
 /*
 ATSINStmpdec(tmpref1009) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24397(line=452, offs=23) -- 24458(line=452, offs=84)
+emit_instr: loc0 = build/src/bin/bats.dats: 24454(line=452, offs=23) -- 24499(line=452, offs=68)
 */
 ATSINSmove(tmp1010, tmpref1009) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24409(line=452, offs=35) -- 24412(line=452, offs=38)
-*/
-ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24409(line=452, offs=35) -- 24412(line=452, offs=38)
-*/
-ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24414(line=452, offs=40) -- 24417(line=452, offs=43)
-*/
-ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24414(line=452, offs=40) -- 24417(line=452, offs=43)
-*/
-ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24419(line=452, offs=45) -- 24422(line=452, offs=48)
-*/
-ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24419(line=452, offs=45) -- 24422(line=452, offs=48)
-*/
-ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24424(line=452, offs=50) -- 24427(line=452, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 24465(line=452, offs=34) -- 24468(line=452, offs=37)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24424(line=452, offs=50) -- 24427(line=452, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 24465(line=452, offs=34) -- 24468(line=452, offs=37)
 */
 ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24429(line=452, offs=55) -- 24432(line=452, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 24470(line=452, offs=39) -- 24473(line=452, offs=42)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24429(line=452, offs=55) -- 24432(line=452, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 24470(line=452, offs=39) -- 24473(line=452, offs=42)
 */
 ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24434(line=452, offs=60) -- 24437(line=452, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 24475(line=452, offs=44) -- 24478(line=452, offs=47)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24434(line=452, offs=60) -- 24437(line=452, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 24475(line=452, offs=44) -- 24478(line=452, offs=47)
 */
 ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24439(line=452, offs=65) -- 24442(line=452, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 24480(line=452, offs=49) -- 24483(line=452, offs=52)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24439(line=452, offs=65) -- 24442(line=452, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 24480(line=452, offs=49) -- 24483(line=452, offs=52)
 */
 ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24444(line=452, offs=70) -- 24447(line=452, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 24485(line=452, offs=54) -- 24488(line=452, offs=57)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24444(line=452, offs=70) -- 24447(line=452, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 24485(line=452, offs=54) -- 24488(line=452, offs=57)
 */
 ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24449(line=452, offs=75) -- 24452(line=452, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 24490(line=452, offs=59) -- 24493(line=452, offs=62)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24449(line=452, offs=75) -- 24452(line=452, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 24490(line=452, offs=59) -- 24493(line=452, offs=62)
 */
 ATSINSupdate_ptrinc(tmp1010, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24454(line=452, offs=80) -- 24457(line=452, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 24495(line=452, offs=64) -- 24498(line=452, offs=67)
 */
 ATSINSpmove(tmp1010, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24487(line=453, offs=29) -- 24524(line=453, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 24514(line=453, offs=15) -- 24519(line=453, offs=20)
 */
-ATSINSmove(tmp1011, build_057_src_057_helpers_056_sats__ap_string_pos(tmp1005, ATSPMVrefarg1(ATSPMVptrof(tmpref1007[0])), ATSPMVi0nt(7), ATSPMVrefarg1(ATSPMVptrof(tmpref1009[0])), ATSPMVi0nt(10))) ;
+/*
+ATSINStmpdec(tmpref1011) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24522(line=453, offs=23) -- 24583(line=453, offs=84)
+*/
+ATSINSmove(tmp1012, tmpref1011) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24534(line=453, offs=35) -- 24537(line=453, offs=38)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24534(line=453, offs=35) -- 24537(line=453, offs=38)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24539(line=453, offs=40) -- 24542(line=453, offs=43)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24539(line=453, offs=40) -- 24542(line=453, offs=43)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24544(line=453, offs=45) -- 24547(line=453, offs=48)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24544(line=453, offs=45) -- 24547(line=453, offs=48)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24549(line=453, offs=50) -- 24552(line=453, offs=53)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24549(line=453, offs=50) -- 24552(line=453, offs=53)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24554(line=453, offs=55) -- 24557(line=453, offs=58)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24554(line=453, offs=55) -- 24557(line=453, offs=58)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24559(line=453, offs=60) -- 24562(line=453, offs=63)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24559(line=453, offs=60) -- 24562(line=453, offs=63)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24564(line=453, offs=65) -- 24567(line=453, offs=68)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24564(line=453, offs=65) -- 24567(line=453, offs=68)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24569(line=453, offs=70) -- 24572(line=453, offs=73)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24569(line=453, offs=70) -- 24572(line=453, offs=73)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24574(line=453, offs=75) -- 24577(line=453, offs=78)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24574(line=453, offs=75) -- 24577(line=453, offs=78)
+*/
+ATSINSupdate_ptrinc(tmp1012, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24579(line=453, offs=80) -- 24582(line=453, offs=83)
+*/
+ATSINSpmove(tmp1012, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24612(line=454, offs=29) -- 24649(line=454, offs=66)
+*/
+ATSINSmove(tmp1013, build_057_src_057_helpers_056_sats__ap_string_pos(tmp1007, ATSPMVrefarg1(ATSPMVptrof(tmpref1009[0])), ATSPMVi0nt(7), ATSPMVrefarg1(ATSPMVptrof(tmpref1011[0])), ATSPMVi0nt(10))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24475(line=453, offs=17) -- 24476(line=453, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 24600(line=454, offs=17) -- 24601(line=454, offs=18)
 */
-ATSINSmove(tmp1012, ATSSELfltrec(tmp1011, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp1014, ATSSELfltrec(tmp1013, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24478(line=453, offs=20) -- 24483(line=453, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 24603(line=454, offs=20) -- 24608(line=454, offs=25)
 */
-ATSINSmove(tmp1013, ATSSELfltrec(tmp1011, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp1015, ATSSELfltrec(tmp1013, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24539(line=454, offs=15) -- 24544(line=454, offs=20)
-*/
-/*
-ATSINStmpdec(tmpref1014) ;
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24547(line=454, offs=23) -- 24597(line=454, offs=73)
-*/
-ATSINSmove(tmp1015, tmpref1014) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24558(line=454, offs=34) -- 24561(line=454, offs=37)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24558(line=454, offs=34) -- 24561(line=454, offs=37)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24563(line=454, offs=39) -- 24566(line=454, offs=42)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24563(line=454, offs=39) -- 24566(line=454, offs=42)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24568(line=454, offs=44) -- 24571(line=454, offs=47)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24568(line=454, offs=44) -- 24571(line=454, offs=47)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24573(line=454, offs=49) -- 24576(line=454, offs=52)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24573(line=454, offs=49) -- 24576(line=454, offs=52)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24578(line=454, offs=54) -- 24581(line=454, offs=57)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24578(line=454, offs=54) -- 24581(line=454, offs=57)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24583(line=454, offs=59) -- 24586(line=454, offs=62)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24583(line=454, offs=59) -- 24586(line=454, offs=62)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24588(line=454, offs=64) -- 24591(line=454, offs=67)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24588(line=454, offs=64) -- 24591(line=454, offs=67)
-*/
-ATSINSupdate_ptrinc(tmp1015, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24593(line=454, offs=69) -- 24596(line=454, offs=72)
-*/
-ATSINSpmove(tmp1015, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24612(line=455, offs=15) -- 24617(line=455, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 24664(line=455, offs=15) -- 24669(line=455, offs=20)
 */
 /*
 ATSINStmpdec(tmpref1016) ;
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24620(line=455, offs=23) -- 24726(line=455, offs=129)
+emit_instr: loc0 = build/src/bin/bats.dats: 24672(line=455, offs=23) -- 24722(line=455, offs=73)
 */
 ATSINSmove(tmp1017, tmpref1016) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24632(line=455, offs=35) -- 24635(line=455, offs=38)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24632(line=455, offs=35) -- 24635(line=455, offs=38)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24637(line=455, offs=40) -- 24640(line=455, offs=43)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24637(line=455, offs=40) -- 24640(line=455, offs=43)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24642(line=455, offs=45) -- 24645(line=455, offs=48)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24642(line=455, offs=45) -- 24645(line=455, offs=48)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24647(line=455, offs=50) -- 24650(line=455, offs=53)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24647(line=455, offs=50) -- 24650(line=455, offs=53)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24652(line=455, offs=55) -- 24655(line=455, offs=58)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24652(line=455, offs=55) -- 24655(line=455, offs=58)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24657(line=455, offs=60) -- 24660(line=455, offs=63)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24657(line=455, offs=60) -- 24660(line=455, offs=63)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24662(line=455, offs=65) -- 24665(line=455, offs=68)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24662(line=455, offs=65) -- 24665(line=455, offs=68)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24667(line=455, offs=70) -- 24670(line=455, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 24683(line=455, offs=34) -- 24686(line=455, offs=37)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24667(line=455, offs=70) -- 24670(line=455, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 24683(line=455, offs=34) -- 24686(line=455, offs=37)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24672(line=455, offs=75) -- 24675(line=455, offs=78)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24672(line=455, offs=75) -- 24675(line=455, offs=78)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24677(line=455, offs=80) -- 24680(line=455, offs=83)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24677(line=455, offs=80) -- 24680(line=455, offs=83)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24682(line=455, offs=85) -- 24685(line=455, offs=88)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24682(line=455, offs=85) -- 24685(line=455, offs=88)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24687(line=455, offs=90) -- 24690(line=455, offs=93)
-*/
-ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24687(line=455, offs=90) -- 24690(line=455, offs=93)
-*/
-ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 24692(line=455, offs=95) -- 24695(line=455, offs=98)
+emit_instr: loc0 = build/src/bin/bats.dats: 24688(line=455, offs=39) -- 24691(line=455, offs=42)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24692(line=455, offs=95) -- 24695(line=455, offs=98)
+emit_instr: loc0 = build/src/bin/bats.dats: 24688(line=455, offs=39) -- 24691(line=455, offs=42)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24697(line=455, offs=100) -- 24700(line=455, offs=103)
+emit_instr: loc0 = build/src/bin/bats.dats: 24693(line=455, offs=44) -- 24696(line=455, offs=47)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24697(line=455, offs=100) -- 24700(line=455, offs=103)
+emit_instr: loc0 = build/src/bin/bats.dats: 24693(line=455, offs=44) -- 24696(line=455, offs=47)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24702(line=455, offs=105) -- 24705(line=455, offs=108)
+emit_instr: loc0 = build/src/bin/bats.dats: 24698(line=455, offs=49) -- 24701(line=455, offs=52)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24702(line=455, offs=105) -- 24705(line=455, offs=108)
+emit_instr: loc0 = build/src/bin/bats.dats: 24698(line=455, offs=49) -- 24701(line=455, offs=52)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24707(line=455, offs=110) -- 24710(line=455, offs=113)
+emit_instr: loc0 = build/src/bin/bats.dats: 24703(line=455, offs=54) -- 24706(line=455, offs=57)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24707(line=455, offs=110) -- 24710(line=455, offs=113)
+emit_instr: loc0 = build/src/bin/bats.dats: 24703(line=455, offs=54) -- 24706(line=455, offs=57)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24712(line=455, offs=115) -- 24715(line=455, offs=118)
+emit_instr: loc0 = build/src/bin/bats.dats: 24708(line=455, offs=59) -- 24711(line=455, offs=62)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24712(line=455, offs=115) -- 24715(line=455, offs=118)
+emit_instr: loc0 = build/src/bin/bats.dats: 24708(line=455, offs=59) -- 24711(line=455, offs=62)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24717(line=455, offs=120) -- 24720(line=455, offs=123)
+emit_instr: loc0 = build/src/bin/bats.dats: 24713(line=455, offs=64) -- 24716(line=455, offs=67)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24717(line=455, offs=120) -- 24720(line=455, offs=123)
+emit_instr: loc0 = build/src/bin/bats.dats: 24713(line=455, offs=64) -- 24716(line=455, offs=67)
 */
 ATSINSupdate_ptrinc(tmp1017, atstkind_t0ype(atstype_char)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24722(line=455, offs=125) -- 24725(line=455, offs=128)
+emit_instr: loc0 = build/src/bin/bats.dats: 24718(line=455, offs=69) -- 24721(line=455, offs=72)
 */
 ATSINSpmove(tmp1017, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24755(line=456, offs=29) -- 24792(line=456, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 24737(line=456, offs=15) -- 24742(line=456, offs=20)
 */
-ATSINSmove(tmp1018, build_057_src_057_helpers_056_sats__ap_string_pos(tmp1012, ATSPMVrefarg1(ATSPMVptrof(tmpref1014[0])), ATSPMVi0nt(8), ATSPMVrefarg1(ATSPMVptrof(tmpref1016[0])), ATSPMVi0nt(19))) ;
+/*
+ATSINStmpdec(tmpref1018) ;
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24745(line=456, offs=23) -- 24851(line=456, offs=129)
+*/
+ATSINSmove(tmp1019, tmpref1018) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24757(line=456, offs=35) -- 24760(line=456, offs=38)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('s')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24757(line=456, offs=35) -- 24760(line=456, offs=38)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24762(line=456, offs=40) -- 24765(line=456, offs=43)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24762(line=456, offs=40) -- 24765(line=456, offs=43)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24767(line=456, offs=45) -- 24770(line=456, offs=48)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('b')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24767(line=456, offs=45) -- 24770(line=456, offs=48)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24772(line=456, offs=50) -- 24775(line=456, offs=53)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('c')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24772(line=456, offs=50) -- 24775(line=456, offs=53)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24777(line=456, offs=55) -- 24780(line=456, offs=58)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('o')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24777(line=456, offs=55) -- 24780(line=456, offs=58)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24782(line=456, offs=60) -- 24785(line=456, offs=63)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24782(line=456, offs=60) -- 24785(line=456, offs=63)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24787(line=456, offs=65) -- 24790(line=456, offs=68)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24787(line=456, offs=65) -- 24790(line=456, offs=68)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24792(line=456, offs=70) -- 24795(line=456, offs=73)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24792(line=456, offs=70) -- 24795(line=456, offs=73)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24797(line=456, offs=75) -- 24800(line=456, offs=78)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24797(line=456, offs=75) -- 24800(line=456, offs=78)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24802(line=456, offs=80) -- 24805(line=456, offs=83)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('d')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24802(line=456, offs=80) -- 24805(line=456, offs=83)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24807(line=456, offs=85) -- 24810(line=456, offs=88)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar(' ')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24807(line=456, offs=85) -- 24810(line=456, offs=88)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24812(line=456, offs=90) -- 24815(line=456, offs=93)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('a')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24812(line=456, offs=90) -- 24815(line=456, offs=93)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24817(line=456, offs=95) -- 24820(line=456, offs=98)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('r')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24817(line=456, offs=95) -- 24820(line=456, offs=98)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24822(line=456, offs=100) -- 24825(line=456, offs=103)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('g')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24822(line=456, offs=100) -- 24825(line=456, offs=103)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24827(line=456, offs=105) -- 24830(line=456, offs=108)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('u')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24827(line=456, offs=105) -- 24830(line=456, offs=108)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24832(line=456, offs=110) -- 24835(line=456, offs=113)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('m')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24832(line=456, offs=110) -- 24835(line=456, offs=113)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24837(line=456, offs=115) -- 24840(line=456, offs=118)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('e')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24837(line=456, offs=115) -- 24840(line=456, offs=118)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24842(line=456, offs=120) -- 24845(line=456, offs=123)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('n')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24842(line=456, offs=120) -- 24845(line=456, offs=123)
+*/
+ATSINSupdate_ptrinc(tmp1019, atstkind_t0ype(atstype_char)) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24847(line=456, offs=125) -- 24850(line=456, offs=128)
+*/
+ATSINSpmove(tmp1019, atstkind_t0ype(atstype_char), ATSPMVchar('t')) ;
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 24880(line=457, offs=29) -- 24917(line=457, offs=66)
+*/
+ATSINSmove(tmp1020, build_057_src_057_helpers_056_sats__ap_string_pos(tmp1014, ATSPMVrefarg1(ATSPMVptrof(tmpref1016[0])), ATSPMVi0nt(8), ATSPMVrefarg1(ATSPMVptrof(tmpref1018[0])), ATSPMVi0nt(19))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24743(line=456, offs=17) -- 24744(line=456, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 24868(line=457, offs=17) -- 24869(line=457, offs=18)
 */
-ATSINSmove(tmp1019, ATSSELfltrec(tmp1018, postiats_tyrec_4, atslab__0)) ;
+ATSINSmove(tmp1021, ATSSELfltrec(tmp1020, postiats_tyrec_4, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24746(line=456, offs=20) -- 24751(line=456, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 24871(line=457, offs=20) -- 24876(line=457, offs=25)
 */
-ATSINSmove(tmp1020, ATSSELfltrec(tmp1018, postiats_tyrec_4, atslab__1)) ;
+ATSINSmove(tmp1022, ATSSELfltrec(tmp1020, postiats_tyrec_4, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24816(line=457, offs=24) -- 24847(line=457, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 24941(line=458, offs=24) -- 24972(line=458, offs=55)
 */
-ATSINSmove(tmp1021, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse(tmp1019, ATSPMVrefarg0(tmp867), ATSPMVi0nt(4096), tmp857)) ;
+ATSINSmove(tmp1023, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse(tmp1021, ATSPMVrefarg0(tmp869), ATSPMVi0nt(4096), tmp859)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24867(line=458, offs=20) -- 24894(line=458, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 24992(line=459, offs=20) -- 25019(line=459, offs=47)
 */
-ATSINSmove_void(tmp1022, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__4(ATSPMVrefarg0(tmp866), tmp867)) ;
+ATSINSmove_void(tmp1024, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__4(ATSPMVrefarg0(tmp868), tmp869)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24928(line=459, offs=34) -- 24947(line=459, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 25053(line=460, offs=34) -- 25072(line=460, offs=53)
 */
-ATSINSmove(tmp1026, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__4(tmp866)) ;
+ATSINSmove(tmp1028, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__4(tmp868)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24914(line=459, offs=20) -- 24949(line=459, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 25039(line=460, offs=20) -- 25074(line=460, offs=55)
 */
-ATSINSmove_void(tmp1024, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__4(tmp1026)) ;
+ATSINSmove_void(tmp1026, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__4(tmp1028)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24971(line=461, offs=11) -- 40433(line=734, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 25096(line=462, offs=11) -- 41283(line=744, offs=64)
 */
 ATScaseof_beg()
 /*
@@ -22497,25 +22544,25 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24999(line=462, offs=13) -- 25008(line=462, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 25124(line=463, offs=13) -- 25133(line=463, offs=22)
 */
 ATSINSlab(__atstmplab103):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24816(line=457, offs=24) -- 24847(line=457, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 24941(line=458, offs=24) -- 24972(line=458, offs=55)
 */
-ATSifnthen(ATSCKpat_con1(tmp1021, 0)) { ATSINSgoto(__atstmplab106) ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1023, 0)) { ATSINSgoto(__atstmplab106) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25008(line=462, offs=22) -- 25008(line=462, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 25133(line=463, offs=22) -- 25133(line=463, offs=22)
 */
 ATSINSlab(__atstmplab104):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25006(line=462, offs=20) -- 25007(line=462, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 25131(line=463, offs=20) -- 25132(line=463, offs=21)
 */
-ATSINSmove(tmp1028, ATSSELcon(tmp1021, postiats_tysum_5, atslab__0)) ;
+ATSINSmove(tmp1030, ATSSELcon(tmp1023, postiats_tysum_5, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24999(line=462, offs=13) -- 40207(line=729, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 25124(line=463, offs=13) -- 41057(line=739, offs=20)
 */
-ATSINSfreecon(tmp1021) ;
+ATSINSfreecon(tmp1023) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -22523,368 +22570,368 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25012(line=462, offs=26) -- 40207(line=729, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 25137(line=463, offs=26) -- 41057(line=739, offs=20)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25046(line=463, offs=31) -- 25069(line=463, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 25171(line=464, offs=31) -- 25194(line=464, offs=54)
 */
-ATSINSmove(tmp1030, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp998)) ;
+ATSINSmove(tmp1032, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp1000)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25099(line=465, offs=15) -- 40203(line=729, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 25224(line=466, offs=15) -- 41053(line=739, offs=16)
 */
 ATSif(
-tmp1030
+tmp1032
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25117(line=465, offs=33) -- 25255(line=468, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 25242(line=466, offs=33) -- 25380(line=469, offs=35)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25146(line=466, offs=26) -- 25169(line=466, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 25271(line=467, offs=26) -- 25294(line=467, offs=49)
 */
-ATSINSmove_void(tmp1031, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1033, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25196(line=467, offs=26) -- 25219(line=467, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 25321(line=468, offs=26) -- 25344(line=468, offs=49)
 */
-ATSINSmove_void(tmp1032, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__5(tmp844)) ;
+ATSINSmove_void(tmp1034, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__5(tmp846)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25238(line=468, offs=18) -- 25251(line=468, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 25363(line=469, offs=18) -- 25376(line=469, offs=31)
 */
-ATSINSmove_void(tmpret835, print_usage_64()) ;
+ATSINSmove_void(tmpret837, print_usage_64()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25117(line=465, offs=33) -- 25255(line=468, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 25242(line=466, offs=33) -- 25380(line=469, offs=35)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25275(line=469, offs=20) -- 40203(line=729, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 25400(line=470, offs=20) -- 41053(line=739, offs=16)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25306(line=470, offs=28) -- 25332(line=470, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 25431(line=471, offs=28) -- 25457(line=471, offs=54)
 */
-ATSINSmove(tmp1035, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp902)) ;
+ATSINSmove(tmp1037, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp904)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25303(line=470, offs=25) -- 25363(line=470, offs=85)
-*/
-ATSif(
-tmp1035
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 25338(line=470, offs=60) -- 25354(line=470, offs=76)
-*/
-ATSINSmove_void(tmp1034, build_057_src_057_helpers_056_sats__set_verbose(ATSPMVbool_true())) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 25361(line=470, offs=83) -- 25363(line=470, offs=85)
-*/
-ATSINSmove_void(tmp1034, ATSPMVempty()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 25392(line=471, offs=28) -- 25416(line=471, offs=52)
-*/
-ATSINSmove(tmp1037, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp910)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 25389(line=471, offs=25) -- 25445(line=471, offs=81)
+emit_instr: loc0 = build/src/bin/bats.dats: 25428(line=471, offs=25) -- 25488(line=471, offs=85)
 */
 ATSif(
 tmp1037
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25422(line=471, offs=58) -- 25436(line=471, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 25463(line=471, offs=60) -- 25479(line=471, offs=76)
 */
-ATSINSmove_void(tmp1036, build_057_src_057_helpers_056_sats__set_quiet(ATSPMVbool_true())) ;
+ATSINSmove_void(tmp1036, build_057_src_057_helpers_056_sats__set_verbose(ATSPMVbool_true())) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25443(line=471, offs=79) -- 25445(line=471, offs=81)
+emit_instr: loc0 = build/src/bin/bats.dats: 25486(line=471, offs=83) -- 25488(line=471, offs=85)
 */
 ATSINSmove_void(tmp1036, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25474(line=472, offs=28) -- 25497(line=472, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 25517(line=472, offs=28) -- 25541(line=472, offs=52)
 */
-ATSINSmove(tmp1039, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp990)) ;
+ATSINSmove(tmp1039, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp912)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25471(line=472, offs=25) -- 25525(line=472, offs=79)
+emit_instr: loc0 = build/src/bin/bats.dats: 25514(line=472, offs=25) -- 25570(line=472, offs=81)
 */
 ATSif(
 tmp1039
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25503(line=472, offs=57) -- 25516(line=472, offs=70)
+emit_instr: loc0 = build/src/bin/bats.dats: 25547(line=472, offs=58) -- 25561(line=472, offs=72)
 */
-ATSINSmove_void(tmp1038, build_057_src_057_helpers_056_sats__set_cold(ATSPMVbool_true())) ;
+ATSINSmove_void(tmp1038, build_057_src_057_helpers_056_sats__set_quiet(ATSPMVbool_true())) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25523(line=472, offs=77) -- 25525(line=472, offs=79)
+emit_instr: loc0 = build/src/bin/bats.dats: 25568(line=472, offs=79) -- 25570(line=472, offs=81)
 */
 ATSINSmove_void(tmp1038, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25590(line=474, offs=28) -- 25617(line=474, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 25599(line=473, offs=28) -- 25622(line=473, offs=51)
 */
-ATSINSmove(tmp1041, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(tmp1028), tmp918)) ;
+ATSINSmove(tmp1041, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp992)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25587(line=474, offs=25) -- 26066(line=482, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 25596(line=473, offs=25) -- 25650(line=473, offs=79)
 */
 ATSif(
 tmp1041
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25623(line=474, offs=61) -- 26058(line=482, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 25628(line=473, offs=57) -- 25641(line=473, offs=70)
+*/
+ATSINSmove_void(tmp1040, build_057_src_057_helpers_056_sats__set_cold(ATSPMVbool_true())) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 25648(line=473, offs=77) -- 25650(line=473, offs=79)
+*/
+ATSINSmove_void(tmp1040, ATSPMVempty()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 25715(line=475, offs=28) -- 25742(line=475, offs=55)
+*/
+ATSINSmove(tmp1043, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(tmp1030), tmp920)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 25712(line=475, offs=25) -- 26191(line=483, offs=29)
+*/
+ATSif(
+tmp1043
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 25748(line=475, offs=61) -- 26183(line=483, offs=21)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25656(line=475, offs=30) -- 25676(line=475, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 25781(line=476, offs=30) -- 25801(line=476, offs=50)
 */
-ATSINSmove(tmp1042, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__3(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1044, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__3(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25701(line=476, offs=25) -- 25747(line=476, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 25826(line=477, offs=25) -- 25872(line=477, offs=71)
 */
-ATSINSmove(tmp1045, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1028), tmp918, ATSPMVrefarg0(tmp1042), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1047, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1030), tmp920, ATSPMVrefarg0(tmp1044), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25786(line=477, offs=39) -- 25808(line=477, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 25911(line=478, offs=39) -- 25933(line=478, offs=61)
 */
-ATSINSmove(tmp1046, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__5(tmp1042)) ;
+ATSINSmove(tmp1048, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__5(tmp1044)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25770(line=477, offs=23) -- 25775(line=477, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 25895(line=478, offs=23) -- 25900(line=478, offs=28)
 */
-ATSINSmove(tmp1048, ATSSELfltrec(tmp1046, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1050, ATSSELfltrec(tmp1048, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25777(line=477, offs=30) -- 25782(line=477, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 25902(line=478, offs=30) -- 25907(line=478, offs=35)
 */
-ATSINSmove(tmp1049, ATSSELfltrec(tmp1046, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1051, ATSSELfltrec(tmp1048, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25837(line=478, offs=28) -- 25863(line=478, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 25962(line=479, offs=28) -- 25988(line=479, offs=54)
 */
-ATSINSmove(tmp1050, build_057_bats_modules_057_file_057_src_057_lib_056_sats__file_chdir(ATSPMVrefarg0(tmp1049), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1052, build_057_bats_modules_057_file_057_src_057_lib_056_sats__file_chdir(ATSPMVrefarg0(tmp1051), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25889(line=479, offs=26) -- 25922(line=479, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 26014(line=480, offs=26) -- 26047(line=480, offs=59)
 */
-ATSINSmove_void(tmp1051, build_057_bats_modules_057_result_057_src_057_lib_056_sats__discard__250__1(tmp1050)) ;
+ATSINSmove_void(tmp1053, build_057_bats_modules_057_result_057_src_057_lib_056_sats__discard__250__1(tmp1052)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25949(line=480, offs=26) -- 25976(line=480, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 26074(line=481, offs=26) -- 26101(line=481, offs=53)
 */
-ATSINSmove_void(tmp1054, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__5(ATSPMVrefarg0(tmp1048), tmp1049)) ;
+ATSINSmove_void(tmp1056, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__5(ATSPMVrefarg0(tmp1050), tmp1051)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26016(line=481, offs=40) -- 26035(line=481, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 26141(line=482, offs=40) -- 26160(line=482, offs=59)
 */
-ATSINSmove(tmp1057, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__5(tmp1048)) ;
+ATSINSmove(tmp1059, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__5(tmp1050)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26002(line=481, offs=26) -- 26037(line=481, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 26127(line=482, offs=26) -- 26162(line=482, offs=61)
 */
-ATSINSmove_void(tmp1040, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__6(tmp1057)) ;
+ATSINSmove_void(tmp1042, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__6(tmp1059)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25623(line=474, offs=61) -- 26058(line=482, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 25748(line=475, offs=61) -- 26183(line=483, offs=21)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26064(line=482, offs=27) -- 26066(line=482, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 26189(line=483, offs=27) -- 26191(line=483, offs=29)
 */
-ATSINSmove_void(tmp1040, ATSPMVempty()) ;
+ATSINSmove_void(tmp1042, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26205(line=485, offs=30) -- 26225(line=485, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 26330(line=486, offs=30) -- 26350(line=486, offs=50)
 */
-ATSINSmove(tmp1059, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__4(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1061, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__4(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26260(line=486, offs=35) -- 26308(line=486, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 26385(line=487, offs=35) -- 26433(line=487, offs=83)
 */
-ATSINSmove(tmp1062, opt_string_copy_205(ATSPMVrefarg0(tmp1028), tmp926, ATSPMVrefarg0(tmp1059), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1064, opt_string_copy_205(ATSPMVrefarg0(tmp1030), tmp928, ATSPMVrefarg0(tmp1061), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26426(line=488, offs=30) -- 26465(line=488, offs=69)
+emit_instr: loc0 = build/src/bin/bats.dats: 26551(line=489, offs=30) -- 26590(line=489, offs=69)
 */
-ATSINSmove(tmp1063, repository_len_216(ATSPMVrefarg0(tmp1059), tmp1062)) ;
+ATSINSmove(tmp1065, repository_len_216(ATSPMVrefarg0(tmp1061), tmp1064)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26506(line=489, offs=41) -- 26530(line=489, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 26631(line=490, offs=41) -- 26655(line=490, offs=65)
 */
-ATSINSmove(tmp1064, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__6(tmp1059)) ;
+ATSINSmove(tmp1066, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__6(tmp1061)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26486(line=489, offs=21) -- 26493(line=489, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 26611(line=490, offs=21) -- 26618(line=490, offs=28)
 */
-ATSINSmove(tmp1066, ATSSELfltrec(tmp1064, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1068, ATSSELfltrec(tmp1066, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26495(line=489, offs=30) -- 26502(line=489, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 26620(line=490, offs=30) -- 26627(line=490, offs=37)
 */
-ATSINSmove(tmp1067, ATSSELfltrec(tmp1064, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1069, ATSSELfltrec(tmp1066, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26574(line=490, offs=43) -- 26599(line=490, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 26699(line=491, offs=43) -- 26724(line=491, offs=68)
 */
-ATSINSmove(tmp1068, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__7(tmp844)) ;
+ATSINSmove(tmp1070, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__7(tmp846)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26552(line=490, offs=21) -- 26560(line=490, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 26677(line=491, offs=21) -- 26685(line=491, offs=29)
 */
-ATSINSmove(tmp1070, ATSSELfltrec(tmp1068, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1072, ATSSELfltrec(tmp1070, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26562(line=490, offs=31) -- 26570(line=490, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 26687(line=491, offs=31) -- 26695(line=491, offs=39)
 */
-ATSINSmove(tmp1071, ATSSELfltrec(tmp1068, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1073, ATSSELfltrec(tmp1070, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26697(line=492, offs=28) -- 26717(line=492, offs=48)
+emit_instr: loc0 = build/src/bin/bats.dats: 26822(line=493, offs=28) -- 26842(line=493, offs=48)
 */
-ATSINSmove(tmp1072, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__5(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1074, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__5(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26745(line=493, offs=28) -- 26785(line=493, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 26870(line=494, offs=28) -- 26910(line=494, offs=68)
 */
-ATSINSmove(tmp1075, opt_string_copy_205(ATSPMVrefarg0(tmp1028), tmp950, ATSPMVrefarg0(tmp1072), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1077, opt_string_copy_205(ATSPMVrefarg0(tmp1030), tmp952, ATSPMVrefarg0(tmp1074), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26813(line=494, offs=28) -- 26823(line=494, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 26938(line=495, offs=28) -- 26948(line=495, offs=38)
 */
-ATSINSmove(tmp1077, ATSLIB_056_prelude__gt_g0int_int__217__4(tmp1075, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1079, ATSLIB_056_prelude__gt_g0int_int__217__4(tmp1077, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26810(line=494, offs=25) -- 26851(line=494, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 26935(line=495, offs=25) -- 26976(line=495, offs=66)
 */
 ATSif(
-tmp1077
+tmp1079
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26829(line=494, offs=44) -- 26842(line=494, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 26954(line=495, offs=44) -- 26967(line=495, offs=57)
 */
-ATSINSmove_void(tmp1076, build_057_src_057_helpers_056_sats__set_to_c(ATSPMVbool_true())) ;
+ATSINSmove_void(tmp1078, build_057_src_057_helpers_056_sats__set_to_c(ATSPMVbool_true())) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26849(line=494, offs=64) -- 26851(line=494, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 26974(line=495, offs=64) -- 26976(line=495, offs=66)
 */
-ATSINSmove_void(tmp1076, ATSPMVempty()) ;
+ATSINSmove_void(tmp1078, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26889(line=495, offs=37) -- 26911(line=495, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 27014(line=496, offs=37) -- 27036(line=496, offs=59)
 */
-ATSINSmove(tmp1080, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__8(tmp1072)) ;
+ATSINSmove(tmp1082, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__8(tmp1074)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26873(line=495, offs=21) -- 26878(line=495, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 26998(line=496, offs=21) -- 27003(line=496, offs=26)
 */
-ATSINSmove(tmp1082, ATSSELfltrec(tmp1080, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1084, ATSSELfltrec(tmp1082, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26880(line=495, offs=28) -- 26885(line=495, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 27005(line=496, offs=28) -- 27010(line=496, offs=33)
 */
-ATSINSmove(tmp1083, ATSSELfltrec(tmp1080, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1085, ATSSELfltrec(tmp1082, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 26973(line=497, offs=29) -- 26991(line=497, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=498, offs=29) -- 27116(line=498, offs=47)
 */
-ATSINSmove(tmp1084, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__6(ATSPMVi0nt(32))) ;
+ATSINSmove(tmp1086, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__6(ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27020(line=498, offs=29) -- 27062(line=498, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 27145(line=499, offs=29) -- 27187(line=499, offs=71)
 */
-ATSINSmove(tmp1087, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1028), tmp1013, ATSPMVrefarg0(tmp1084), ATSPMVi0nt(32))) ;
+ATSINSmove(tmp1089, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1030), tmp1015, ATSPMVrefarg0(tmp1086), ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSINSmove(tmp1088, dispatch_cmd_0(ATSPMVrefarg0(tmp1084), tmp1087)) ;
+ATSINSmove(tmp1090, dispatch_cmd_0(ATSPMVrefarg0(tmp1086), tmp1089)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27152(line=500, offs=24) -- 27173(line=500, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 27277(line=501, offs=24) -- 27298(line=501, offs=45)
 */
-ATSINSmove_void(tmp1089, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__7(tmp1084)) ;
+ATSINSmove_void(tmp1091, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__7(tmp1086)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27203(line=501, offs=29) -- 27223(line=501, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 27328(line=502, offs=29) -- 27348(line=502, offs=49)
 */
-ATSINSmove(tmp1091, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__7(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1093, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__7(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27252(line=502, offs=29) -- 27296(line=502, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 27377(line=503, offs=29) -- 27421(line=503, offs=73)
 */
-ATSINSmove(tmp1094, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1028), tmp1020, ATSPMVrefarg0(tmp1091), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1096, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1030), tmp1022, ATSPMVrefarg0(tmp1093), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27518(line=506, offs=28) -- 27546(line=506, offs=56)
+emit_instr: loc0 = build/src/bin/bats.dats: 27643(line=507, offs=28) -- 27671(line=507, offs=56)
 */
-ATSINSmove(tmp1096, locks_project_62(tmp1088)) ;
+ATSINSmove(tmp1098, locks_project_62(tmp1090)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27515(line=506, offs=25) -- 27645(line=507, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 27640(line=507, offs=25) -- 27770(line=508, offs=49)
 */
 ATSif(
-tmp1096
+tmp1098
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27571(line=506, offs=81) -- 27594(line=506, offs=104)
+emit_instr: loc0 = build/src/bin/bats.dats: 27696(line=507, offs=81) -- 27719(line=507, offs=104)
 */
-ATSINSmove(tmp1097, heavy_of_63(tmp1088)) ;
+ATSINSmove(tmp1099, heavy_of_63(tmp1090)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27553(line=506, offs=63) -- 27596(line=506, offs=106)
+emit_instr: loc0 = build/src/bin/bats.dats: 27678(line=507, offs=63) -- 27721(line=507, offs=106)
 */
-ATSINSmove(tmp1095, build_057_src_057_helpers_056_sats__project_lock_take(tmp1097)) ;
+ATSINSmove(tmp1097, build_057_src_057_helpers_056_sats__project_lock_take(tmp1099)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27634(line=507, offs=38) -- 27644(line=507, offs=48)
+emit_instr: loc0 = build/src/bin/bats.dats: 27759(line=508, offs=38) -- 27769(line=508, offs=48)
 */
 
-ATSINSmove_con0(tmp1098, 2) ;
+ATSINSmove_con0(tmp1100, 2) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27618(line=507, offs=22) -- 27645(line=507, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 27743(line=508, offs=22) -- 27770(line=508, offs=49)
 */
 
 /*
 #LINCONSTATUS==0
 */
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmp1095, postiats_tysum_5) ;
+ATSINSmove_con1_new(tmp1097, postiats_tysum_5) ;
 // #if(1)
-ATSINSstore_con1_tag(tmp1095, 1) ;
+ATSINSstore_con1_tag(tmp1097, 1) ;
 // #endif
-ATSINSstore_con1_ofs(tmp1095, postiats_tysum_5, atslab__0, tmp1098) ;
+ATSINSstore_con1_ofs(tmp1097, postiats_tysum_5, atslab__0, tmp1100) ;
 ATSINSmove_con1_end()
 } /* ATSendif */
 /*
@@ -22892,109 +22939,109 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27676(line=508, offs=16) -- 40187(line=728, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 27801(line=509, offs=16) -- 41037(line=738, offs=19)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27782(line=510, offs=18) -- 27805(line=510, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 27907(line=511, offs=18) -- 27930(line=511, offs=41)
 */
-ATSINSmove(tmp1100, build_057_src_057_helpers_056_sats__project_lock_refused(ATSPMVrefarg0(tmp1095))) ;
+ATSINSmove(tmp1102, build_057_src_057_helpers_056_sats__project_lock_refused(ATSPMVrefarg0(tmp1097))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27779(line=510, offs=15) -- 39774(line=720, offs=180)
+emit_instr: loc0 = build/src/bin/bats.dats: 27904(line=511, offs=15) -- 40624(line=730, offs=180)
 */
 ATSif(
-tmp1100
+tmp1102
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27812(line=510, offs=48) -- 27975(line=514, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 27937(line=511, offs=48) -- 28100(line=515, offs=21)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27841(line=511, offs=26) -- 27864(line=511, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 27966(line=512, offs=26) -- 27989(line=512, offs=49)
 */
-ATSINSmove_void(tmp1101, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1103, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27891(line=512, offs=26) -- 27912(line=512, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 28016(line=513, offs=26) -- 28037(line=513, offs=47)
 */
-ATSINSmove_void(tmp1102, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__8(tmp1091)) ;
+ATSINSmove_void(tmp1104, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__8(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27939(line=513, offs=26) -- 27954(line=513, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 28064(line=514, offs=26) -- 28079(line=514, offs=41)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27812(line=510, offs=48) -- 27975(line=514, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 27937(line=511, offs=48) -- 28100(line=515, offs=21)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28026(line=514, offs=72) -- 28050(line=514, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 28151(line=515, offs=72) -- 28175(line=515, offs=96)
 */
-ATSINSmove(tmp1105, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp982)) ;
+ATSINSmove(tmp1107, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp984)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27984(line=514, offs=30) -- 28051(line=514, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 28109(line=515, offs=30) -- 28176(line=515, offs=97)
 */
-ATSINSmove(tmp1104, force_misuse_222(tmp1088, tmp859, tmp1105)) ;
+ATSINSmove(tmp1106, force_misuse_222(tmp1090, tmp861, tmp1107)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27981(line=514, offs=27) -- 39774(line=720, offs=180)
+emit_instr: loc0 = build/src/bin/bats.dats: 28106(line=515, offs=27) -- 40624(line=730, offs=180)
 */
 ATSif(
-tmp1104
+tmp1106
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28057(line=514, offs=103) -- 28352(line=519, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 28182(line=515, offs=103) -- 28477(line=520, offs=21)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28086(line=515, offs=26) -- 28109(line=515, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 28211(line=516, offs=26) -- 28234(line=516, offs=49)
 */
-ATSINSmove_void(tmp1106, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1108, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28136(line=516, offs=26) -- 28157(line=516, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 28261(line=517, offs=26) -- 28282(line=517, offs=47)
 */
-ATSINSmove_void(tmp1107, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__9(tmp1091)) ;
+ATSINSmove_void(tmp1109, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__9(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28184(line=517, offs=26) -- 28290(line=517, offs=132)
+emit_instr: loc0 = build/src/bin/bats.dats: 28309(line=518, offs=26) -- 28415(line=518, offs=132)
 */
-ATSINSmove_void(tmp1109, atspre_prerr_string(ATSPMVstring("error: --force is accepted once, and only by ats2 install\nusage: bats ats2 install [--force]\n"))) ;
+ATSINSmove_void(tmp1111, atspre_prerr_string(ATSPMVstring("error: --force is accepted once, and only by ats2 install\nusage: bats ats2 install [--force]\n"))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28316(line=518, offs=26) -- 28331(line=518, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 28441(line=519, offs=26) -- 28456(line=519, offs=41)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28057(line=514, offs=103) -- 28352(line=519, offs=21)
+emit_instr: loc0 = build/src/bin/bats.dats: 28182(line=515, offs=103) -- 28477(line=520, offs=21)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28374(line=520, offs=15) -- 39773(line=720, offs=179)
+emit_instr: loc0 = build/src/bin/bats.dats: 28499(line=521, offs=15) -- 40623(line=730, offs=179)
 */
 ATScaseof_beg()
 /*
@@ -23002,15 +23049,15 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28414(line=521, offs=17) -- 28421(line=521, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 28539(line=522, offs=17) -- 28546(line=522, offs=24)
 */
 ATSINSlab(__atstmplab111):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 0)) { ATSINSgoto(__atstmplab113) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 0)) { ATSINSgoto(__atstmplab113) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28421(line=521, offs=24) -- 28421(line=521, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 28546(line=522, offs=24) -- 28546(line=522, offs=24)
 */
 ATSINSlab(__atstmplab112):
 /*
@@ -23020,333 +23067,333 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28425(line=521, offs=28) -- 30061(line=548, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 28550(line=522, offs=28) -- 30186(line=549, offs=18)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28454(line=522, offs=26) -- 28477(line=522, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 28579(line=523, offs=26) -- 28602(line=523, offs=49)
 */
-ATSINSmove_void(tmp1110, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1112, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28504(line=523, offs=26) -- 28525(line=523, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 28629(line=524, offs=26) -- 28650(line=524, offs=47)
 */
-ATSINSmove_void(tmp1111, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__10(tmp1091)) ;
+ATSINSmove_void(tmp1113, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__10(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28564(line=524, offs=38) -- 28586(line=524, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 28689(line=525, offs=38) -- 28711(line=525, offs=60)
 */
-ATSINSmove(tmp1113, profiles_of_88(tmp862)) ;
+ATSINSmove(tmp1115, profiles_of_88(tmp864)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28624(line=525, offs=37) -- 28645(line=525, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 28749(line=526, offs=37) -- 28770(line=526, offs=58)
 */
-ATSINSmove(tmp1114, targets_of_89(tmp862)) ;
+ATSINSmove(tmp1116, targets_of_89(tmp864)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28824(line=529, offs=21) -- 28837(line=529, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 28949(line=530, offs=21) -- 28962(line=530, offs=34)
 */
-ATSINSmove(tmp1116, bin_package_220()) ;
+ATSINSmove(tmp1118, bin_package_220()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28823(line=529, offs=20) -- 28837(line=529, offs=34)
-*/
-ATSINSmove(tmp1115, atspre_neg_bool0(tmp1116)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 28820(line=529, offs=17) -- 30043(line=547, offs=110)
-*/
-ATSif(
-tmp1115
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 28843(line=529, offs=40) -- 28845(line=529, offs=42)
-*/
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 28871(line=530, offs=26) -- 28902(line=530, offs=57)
-*/
-ATSINSmove(tmp1118, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1067), tmp1063)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 28870(line=530, offs=25) -- 28902(line=530, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 28948(line=530, offs=20) -- 28962(line=530, offs=34)
 */
 ATSINSmove(tmp1117, atspre_neg_bool0(tmp1118)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28867(line=530, offs=22) -- 30043(line=547, offs=110)
+emit_instr: loc0 = build/src/bin/bats.dats: 28945(line=530, offs=17) -- 30168(line=548, offs=110)
 */
 ATSif(
 tmp1117
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28908(line=530, offs=63) -- 28910(line=530, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 28968(line=530, offs=40) -- 28970(line=530, offs=42)
 */
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28936(line=531, offs=26) -- 28954(line=531, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 28996(line=531, offs=26) -- 29027(line=531, offs=57)
 */
-ATSINSmove(tmp1120, build_057_src_057_lock_056_sats__validate_project()) ;
+ATSINSmove(tmp1120, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1069), tmp1065)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28935(line=531, offs=25) -- 28954(line=531, offs=44)
+emit_instr: loc0 = build/src/bin/bats.dats: 28995(line=531, offs=25) -- 29027(line=531, offs=57)
 */
 ATSINSmove(tmp1119, atspre_neg_bool0(tmp1120)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28932(line=531, offs=22) -- 30043(line=547, offs=110)
+emit_instr: loc0 = build/src/bin/bats.dats: 28992(line=531, offs=22) -- 30168(line=548, offs=110)
 */
 ATSif(
 tmp1119
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28960(line=531, offs=50) -- 28962(line=531, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 29033(line=531, offs=63) -- 29035(line=531, offs=65)
 */
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28984(line=532, offs=22) -- 30043(line=547, offs=110)
+emit_instr: loc0 = build/src/bin/bats.dats: 29061(line=532, offs=26) -- 29079(line=532, offs=44)
+*/
+ATSINSmove(tmp1122, build_057_src_057_lock_056_sats__validate_project()) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29060(line=532, offs=25) -- 29079(line=532, offs=44)
+*/
+ATSINSmove(tmp1121, atspre_neg_bool0(tmp1122)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29057(line=532, offs=22) -- 30168(line=548, offs=110)
+*/
+ATSif(
+tmp1121
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29085(line=532, offs=50) -- 29087(line=532, offs=52)
+*/
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29109(line=533, offs=22) -- 30168(line=548, offs=110)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29160(line=535, offs=29) -- 29186(line=535, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 29285(line=536, offs=29) -- 29311(line=536, offs=55)
 */
-ATSINSmove(tmp1121, makes_debug_90(tmp1113)) ;
+ATSINSmove(tmp1123, makes_debug_90(tmp1115)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29216(line=536, offs=29) -- 29244(line=536, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 29341(line=537, offs=29) -- 29369(line=537, offs=57)
 */
-ATSINSmove(tmp1122, makes_release_91(tmp1113)) ;
+ATSINSmove(tmp1124, makes_release_91(tmp1115)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29274(line=537, offs=29) -- 29300(line=537, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 29399(line=538, offs=29) -- 29425(line=538, offs=55)
 */
-ATSINSmove(tmp1123, makes_native_92(tmp1114)) ;
+ATSINSmove(tmp1125, makes_native_92(tmp1116)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29330(line=538, offs=29) -- 29354(line=538, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 29455(line=539, offs=29) -- 29479(line=539, offs=53)
 */
-ATSINSmove(tmp1124, makes_wasm_93(tmp1114)) ;
+ATSINSmove(tmp1126, makes_wasm_93(tmp1116)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29384(line=539, offs=29) -- 29468(line=539, offs=113)
+emit_instr: loc0 = build/src/bin/bats.dats: 29509(line=540, offs=29) -- 29593(line=540, offs=113)
+*/
+ATSif(
+tmp1125
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29522(line=540, offs=42) -- 29584(line=540, offs=104)
 */
 ATSif(
 tmp1123
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29397(line=539, offs=42) -- 29459(line=539, offs=104)
+emit_instr: loc0 = build/src/bin/bats.dats: 29543(line=540, offs=63) -- 29550(line=540, offs=70)
+*/
+
+ATSINSmove_con0(tmp1128, 0) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29552(line=540, offs=72) -- 29560(line=540, offs=80)
+*/
+
+ATSINSmove_con0(tmp1129, 0) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29534(line=540, offs=54) -- 29576(line=540, offs=96)
+*/
+ATSINSmove_void(tmp1127, build_057_src_057_build_056_sats__do_build(tmp1128, tmp1129, ATSPMVrefarg0(tmp1085), tmp1077)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29582(line=540, offs=102) -- 29584(line=540, offs=104)
+*/
+ATSINSmove_void(tmp1127, ATSPMVempty()) ;
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29591(line=540, offs=111) -- 29593(line=540, offs=113)
+*/
+ATSINSmove_void(tmp1127, ATSPMVempty()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29623(line=541, offs=29) -- 29709(line=541, offs=115)
 */
 ATSif(
-tmp1121
+tmp1125
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29418(line=539, offs=63) -- 29425(line=539, offs=70)
-*/
-
-ATSINSmove_con0(tmp1126, 0) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29427(line=539, offs=72) -- 29435(line=539, offs=80)
-*/
-
-ATSINSmove_con0(tmp1127, 0) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29409(line=539, offs=54) -- 29451(line=539, offs=96)
-*/
-ATSINSmove_void(tmp1125, build_057_src_057_build_056_sats__do_build(tmp1126, tmp1127, ATSPMVrefarg0(tmp1083), tmp1075)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29457(line=539, offs=102) -- 29459(line=539, offs=104)
-*/
-ATSINSmove_void(tmp1125, ATSPMVempty()) ;
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29466(line=539, offs=111) -- 29468(line=539, offs=113)
-*/
-ATSINSmove_void(tmp1125, ATSPMVempty()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29498(line=540, offs=29) -- 29584(line=540, offs=115)
-*/
-ATSif(
-tmp1123
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29511(line=540, offs=42) -- 29575(line=540, offs=106)
-*/
-ATSif(
-tmp1122
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29532(line=540, offs=63) -- 29541(line=540, offs=72)
-*/
-
-ATSINSmove_con0(tmp1129, 1) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29543(line=540, offs=74) -- 29551(line=540, offs=82)
-*/
-
-ATSINSmove_con0(tmp1130, 0) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29523(line=540, offs=54) -- 29567(line=540, offs=98)
-*/
-ATSINSmove_void(tmp1128, build_057_src_057_build_056_sats__do_build(tmp1129, tmp1130, ATSPMVrefarg0(tmp1083), tmp1075)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29573(line=540, offs=104) -- 29575(line=540, offs=106)
-*/
-ATSINSmove_void(tmp1128, ATSPMVempty()) ;
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29582(line=540, offs=113) -- 29584(line=540, offs=115)
-*/
-ATSINSmove_void(tmp1128, ATSPMVempty()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29614(line=541, offs=29) -- 29696(line=541, offs=111)
+emit_instr: loc0 = build/src/bin/bats.dats: 29636(line=541, offs=42) -- 29700(line=541, offs=106)
 */
 ATSif(
 tmp1124
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29627(line=541, offs=42) -- 29687(line=541, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 29657(line=541, offs=63) -- 29666(line=541, offs=72)
 */
-ATSif(
-tmp1121
-) ATSthen() {
+
+ATSINSmove_con0(tmp1131, 1) ;
+
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29648(line=541, offs=63) -- 29655(line=541, offs=70)
+emit_instr: loc0 = build/src/bin/bats.dats: 29668(line=541, offs=74) -- 29676(line=541, offs=82)
 */
 
 ATSINSmove_con0(tmp1132, 0) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29657(line=541, offs=72) -- 29663(line=541, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 29648(line=541, offs=54) -- 29692(line=541, offs=98)
 */
-
-ATSINSmove_con0(tmp1133, 1) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29639(line=541, offs=54) -- 29679(line=541, offs=94)
-*/
-ATSINSmove_void(tmp1131, build_057_src_057_build_056_sats__do_build(tmp1132, tmp1133, ATSPMVrefarg0(tmp1083), tmp1075)) ;
+ATSINSmove_void(tmp1130, build_057_src_057_build_056_sats__do_build(tmp1131, tmp1132, ATSPMVrefarg0(tmp1085), tmp1077)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29685(line=541, offs=100) -- 29687(line=541, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 29698(line=541, offs=104) -- 29700(line=541, offs=106)
 */
-ATSINSmove_void(tmp1131, ATSPMVempty()) ;
+ATSINSmove_void(tmp1130, ATSPMVempty()) ;
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29694(line=541, offs=109) -- 29696(line=541, offs=111)
+emit_instr: loc0 = build/src/bin/bats.dats: 29707(line=541, offs=113) -- 29709(line=541, offs=115)
 */
-ATSINSmove_void(tmp1131, ATSPMVempty()) ;
+ATSINSmove_void(tmp1130, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29726(line=542, offs=29) -- 29932(line=546, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 29739(line=542, offs=29) -- 29821(line=542, offs=111)
 */
 ATSif(
-ATSSELfltrec(tmp862, postiats_tyrec_0, atslab__wasm)
+tmp1126
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29773(line=543, offs=24) -- 29782(line=543, offs=33)
-*/
-ATSINSmove(tmp1135, build_057_src_057_helpers_056_sats__is_to_c()) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29770(line=543, offs=21) -- 29906(line=545, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 29752(line=542, offs=42) -- 29812(line=542, offs=102)
 */
 ATSif(
-tmp1135
+tmp1123
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29810(line=544, offs=23) -- 29878(line=544, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 29773(line=542, offs=63) -- 29780(line=542, offs=70)
 */
-ATSINSmove_void(tmp1136, atspre_print_string(ATSPMVstring("error: --to-c wasm is not yet implemented without shell"))) ;
+
+ATSINSmove_con0(tmp1134, 0) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29810(line=544, offs=23) -- 29878(line=544, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 29782(line=542, offs=72) -- 29788(line=542, offs=78)
 */
-ATSINSmove_void(tmp1134, atspre_print_newline()) ;
+
+ATSINSmove_con0(tmp1135, 1) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29764(line=542, offs=54) -- 29804(line=542, offs=94)
+*/
+ATSINSmove_void(tmp1133, build_057_src_057_build_056_sats__do_build(tmp1134, tmp1135, ATSPMVrefarg0(tmp1085), tmp1077)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29904(line=545, offs=26) -- 29906(line=545, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 29810(line=542, offs=100) -- 29812(line=542, offs=102)
 */
-ATSINSmove_void(tmp1134, ATSPMVempty()) ;
+ATSINSmove_void(tmp1133, ATSPMVempty()) ;
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29930(line=546, offs=24) -- 29932(line=546, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 29819(line=542, offs=109) -- 29821(line=542, offs=111)
 */
-ATSINSmove_void(tmp1134, ATSPMVempty()) ;
+ATSINSmove_void(tmp1133, ATSPMVempty()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29851(line=543, offs=29) -- 30057(line=547, offs=26)
+*/
+ATSif(
+ATSSELfltrec(tmp864, postiats_tyrec_0, atslab__wasm)
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29898(line=544, offs=24) -- 29907(line=544, offs=33)
+*/
+ATSINSmove(tmp1137, build_057_src_057_helpers_056_sats__is_to_c()) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29895(line=544, offs=21) -- 30031(line=546, offs=28)
+*/
+ATSif(
+tmp1137
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29935(line=545, offs=23) -- 30003(line=545, offs=91)
+*/
+ATSINSmove_void(tmp1138, atspre_print_string(ATSPMVstring("error: --to-c wasm is not yet implemented without shell"))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 29935(line=545, offs=23) -- 30003(line=545, offs=91)
+*/
+ATSINSmove_void(tmp1136, atspre_print_newline()) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30029(line=546, offs=26) -- 30031(line=546, offs=28)
+*/
+ATSINSmove_void(tmp1136, ATSPMVempty()) ;
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30055(line=547, offs=24) -- 30057(line=547, offs=26)
+*/
+ATSINSmove_void(tmp1136, ATSPMVempty()) ;
 } /* ATSendif */
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29954(line=547, offs=21) -- 30038(line=547, offs=105)
+emit_instr: loc0 = build/src/bin/bats.dats: 30079(line=548, offs=21) -- 30163(line=548, offs=105)
+*/
+ATSif(
+tmp1126
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30092(line=548, offs=34) -- 30154(line=548, offs=96)
 */
 ATSif(
 tmp1124
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29967(line=547, offs=34) -- 30029(line=547, offs=96)
-*/
-ATSif(
-tmp1122
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 29988(line=547, offs=55) -- 29997(line=547, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 30113(line=548, offs=55) -- 30122(line=548, offs=64)
 */
 
-ATSINSmove_con0(tmp1137, 1) ;
+ATSINSmove_con0(tmp1139, 1) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29999(line=547, offs=66) -- 30005(line=547, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 30124(line=548, offs=66) -- 30130(line=548, offs=72)
 */
 
-ATSINSmove_con0(tmp1138, 1) ;
+ATSINSmove_con0(tmp1140, 1) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 29979(line=547, offs=46) -- 30021(line=547, offs=88)
+emit_instr: loc0 = build/src/bin/bats.dats: 30104(line=548, offs=46) -- 30146(line=548, offs=88)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_build_056_sats__do_build(tmp1137, tmp1138, ATSPMVrefarg0(tmp1083), tmp1075)) ;
+ATSINSmove_void(tmp1101, build_057_src_057_build_056_sats__do_build(tmp1139, tmp1140, ATSPMVrefarg0(tmp1085), tmp1077)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30027(line=547, offs=94) -- 30029(line=547, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 30152(line=548, offs=94) -- 30154(line=548, offs=96)
 */
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
 } /* ATSendif */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30036(line=547, offs=103) -- 30038(line=547, offs=105)
+emit_instr: loc0 = build/src/bin/bats.dats: 30161(line=548, offs=103) -- 30163(line=548, offs=105)
 */
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28984(line=532, offs=22) -- 30043(line=547, offs=110)
+emit_instr: loc0 = build/src/bin/bats.dats: 29109(line=533, offs=22) -- 30168(line=548, offs=110)
 */
 /*
 INSletpop()
@@ -23355,7 +23402,7 @@ INSletpop()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 28425(line=521, offs=28) -- 30061(line=548, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 28550(line=522, offs=28) -- 30186(line=549, offs=18)
 */
 /*
 INSletpop()
@@ -23364,15 +23411,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30078(line=549, offs=17) -- 30085(line=549, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 30203(line=550, offs=17) -- 30210(line=550, offs=24)
 */
 ATSINSlab(__atstmplab113):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 1)) { ATSINSgoto(__atstmplab115) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 1)) { ATSINSgoto(__atstmplab115) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30085(line=549, offs=24) -- 30085(line=549, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 30210(line=550, offs=24) -- 30210(line=550, offs=24)
 */
 ATSINSlab(__atstmplab114):
 /*
@@ -23382,93 +23429,93 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30089(line=549, offs=28) -- 30409(line=553, offs=149)
+emit_instr: loc0 = build/src/bin/bats.dats: 30214(line=550, offs=28) -- 30534(line=554, offs=149)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30118(line=550, offs=26) -- 30141(line=550, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 30243(line=551, offs=26) -- 30266(line=551, offs=49)
 */
-ATSINSmove_void(tmp1139, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1141, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30168(line=551, offs=26) -- 30189(line=551, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 30293(line=552, offs=26) -- 30314(line=552, offs=47)
 */
-ATSINSmove_void(tmp1140, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__11(tmp1091)) ;
+ATSINSmove_void(tmp1142, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__11(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30282(line=553, offs=22) -- 30297(line=553, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 30407(line=554, offs=22) -- 30422(line=554, offs=37)
 */
-ATSINSmove(tmp1143, project_known_221()) ;
+ATSINSmove(tmp1145, project_known_221()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30281(line=553, offs=21) -- 30297(line=553, offs=37)
-*/
-ATSINSmove(tmp1142, atspre_neg_bool0(tmp1143)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 30278(line=553, offs=18) -- 30405(line=553, offs=145)
-*/
-ATSif(
-tmp1142
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 30303(line=553, offs=43) -- 30305(line=553, offs=45)
-*/
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 30315(line=553, offs=55) -- 30346(line=553, offs=86)
-*/
-ATSINSmove(tmp1145, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1067), tmp1063)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 30314(line=553, offs=54) -- 30346(line=553, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 30406(line=554, offs=21) -- 30422(line=554, offs=37)
 */
 ATSINSmove(tmp1144, atspre_neg_bool0(tmp1145)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30311(line=553, offs=51) -- 30405(line=553, offs=145)
+emit_instr: loc0 = build/src/bin/bats.dats: 30403(line=554, offs=18) -- 30530(line=554, offs=145)
 */
 ATSif(
 tmp1144
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30352(line=553, offs=92) -- 30354(line=553, offs=94)
+emit_instr: loc0 = build/src/bin/bats.dats: 30428(line=554, offs=43) -- 30430(line=554, offs=45)
 */
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30363(line=553, offs=103) -- 30381(line=553, offs=121)
+emit_instr: loc0 = build/src/bin/bats.dats: 30440(line=554, offs=55) -- 30471(line=554, offs=86)
 */
-ATSINSmove(tmp1146, build_057_src_057_lock_056_sats__validate_project()) ;
+ATSINSmove(tmp1147, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1069), tmp1065)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30360(line=553, offs=100) -- 30405(line=553, offs=145)
+emit_instr: loc0 = build/src/bin/bats.dats: 30439(line=554, offs=54) -- 30471(line=554, offs=86)
+*/
+ATSINSmove(tmp1146, atspre_neg_bool0(tmp1147)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30436(line=554, offs=51) -- 30530(line=554, offs=145)
 */
 ATSif(
 tmp1146
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30387(line=553, offs=127) -- 30397(line=553, offs=137)
+emit_instr: loc0 = build/src/bin/bats.dats: 30477(line=554, offs=92) -- 30479(line=554, offs=94)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_commands_056_sats__do_check()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30488(line=554, offs=103) -- 30506(line=554, offs=121)
+*/
+ATSINSmove(tmp1148, build_057_src_057_lock_056_sats__validate_project()) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30485(line=554, offs=100) -- 30530(line=554, offs=145)
+*/
+ATSif(
+tmp1148
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 30512(line=554, offs=127) -- 30522(line=554, offs=137)
+*/
+ATSINSmove_void(tmp1101, build_057_src_057_commands_056_sats__do_check()) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30403(line=553, offs=143) -- 30405(line=553, offs=145)
+emit_instr: loc0 = build/src/bin/bats.dats: 30528(line=554, offs=143) -- 30530(line=554, offs=145)
 */
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30089(line=549, offs=28) -- 30409(line=553, offs=149)
+emit_instr: loc0 = build/src/bin/bats.dats: 30214(line=550, offs=28) -- 30534(line=554, offs=149)
 */
 /*
 INSletpop()
@@ -23477,15 +23524,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30426(line=554, offs=17) -- 30433(line=554, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 30551(line=555, offs=17) -- 30558(line=555, offs=24)
 */
 ATSINSlab(__atstmplab115):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 2)) { ATSINSgoto(__atstmplab117) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 2)) { ATSINSgoto(__atstmplab117) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30433(line=554, offs=24) -- 30433(line=554, offs=24)
+emit_instr: loc0 = build/src/bin/bats.dats: 30558(line=555, offs=24) -- 30558(line=555, offs=24)
 */
 ATSINSlab(__atstmplab116):
 /*
@@ -23495,32 +23542,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30437(line=554, offs=28) -- 30570(line=557, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 30562(line=555, offs=28) -- 30695(line=558, offs=32)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30466(line=555, offs=26) -- 30489(line=555, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 30591(line=556, offs=26) -- 30614(line=556, offs=49)
 */
-ATSINSmove_void(tmp1147, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1149, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30516(line=556, offs=26) -- 30537(line=556, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 30641(line=557, offs=26) -- 30662(line=557, offs=47)
 */
-ATSINSmove_void(tmp1148, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__12(tmp1091)) ;
+ATSINSmove_void(tmp1150, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__12(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30556(line=557, offs=18) -- 30566(line=557, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 30681(line=558, offs=18) -- 30691(line=558, offs=28)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_build_056_sats__do_clean()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_build_056_sats__do_clean()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30437(line=554, offs=28) -- 30570(line=557, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 30562(line=555, offs=28) -- 30695(line=558, offs=32)
 */
 /*
 INSletpop()
@@ -23529,15 +23576,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30587(line=558, offs=17) -- 30593(line=558, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 30712(line=559, offs=17) -- 30718(line=559, offs=23)
 */
 ATSINSlab(__atstmplab117):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 3)) { ATSINSgoto(__atstmplab119) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 3)) { ATSINSgoto(__atstmplab119) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30593(line=558, offs=23) -- 30593(line=558, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 30718(line=559, offs=23) -- 30718(line=559, offs=23)
 */
 ATSINSlab(__atstmplab118):
 /*
@@ -23547,42 +23594,42 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30597(line=558, offs=27) -- 30874(line=563, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 30722(line=559, offs=27) -- 30999(line=564, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30630(line=559, offs=30) -- 30654(line=559, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 30755(line=560, offs=30) -- 30779(line=560, offs=54)
 */
-ATSINSmove(tmp1150, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(tmp1028), tmp966)) ;
+ATSINSmove(tmp1152, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(tmp1030), tmp968)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30684(line=560, offs=30) -- 30712(line=560, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 30809(line=561, offs=30) -- 30837(line=561, offs=58)
 */
-ATSINSmove(tmp1151, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(tmp1028), tmp974)) ;
+ATSINSmove(tmp1153, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__is_present(ATSPMVrefarg0(tmp1030), tmp976)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30738(line=561, offs=26) -- 30761(line=561, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 30863(line=562, offs=26) -- 30886(line=562, offs=49)
 */
-ATSINSmove_void(tmp1152, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1154, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30788(line=562, offs=26) -- 30809(line=562, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 30913(line=563, offs=26) -- 30934(line=563, offs=47)
 */
-ATSINSmove_void(tmp1153, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__13(tmp1091)) ;
+ATSINSmove_void(tmp1155, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__13(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30828(line=563, offs=18) -- 30870(line=563, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 30953(line=564, offs=18) -- 30995(line=564, offs=60)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_lock_056_sats__do_lock(tmp1150, tmp1151, ATSPMVrefarg0(tmp1067), tmp1063)) ;
+ATSINSmove_void(tmp1101, build_057_src_057_lock_056_sats__do_lock(tmp1152, tmp1153, ATSPMVrefarg0(tmp1069), tmp1065)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30597(line=558, offs=27) -- 30874(line=563, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 30722(line=559, offs=27) -- 30999(line=564, offs=64)
 */
 /*
 INSletpop()
@@ -23591,15 +23638,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30891(line=564, offs=17) -- 30896(line=564, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 31016(line=565, offs=17) -- 31021(line=565, offs=22)
 */
 ATSINSlab(__atstmplab119):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 4)) { ATSINSgoto(__atstmplab121) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 4)) { ATSINSgoto(__atstmplab121) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30896(line=564, offs=22) -- 30896(line=564, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 31021(line=565, offs=22) -- 31021(line=565, offs=22)
 */
 ATSINSlab(__atstmplab120):
 /*
@@ -23609,220 +23656,220 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30900(line=564, offs=26) -- 32668(line=594, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 31025(line=565, offs=26) -- 32793(line=595, offs=58)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30934(line=565, offs=31) -- 30953(line=565, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 31059(line=566, offs=31) -- 31078(line=566, offs=50)
 */
-ATSINSmove(tmp1155, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__8(ATSPMVi0nt(256))) ;
+ATSINSmove(tmp1157, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__8(ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30984(line=566, offs=31) -- 31023(line=566, offs=70)
+emit_instr: loc0 = build/src/bin/bats.dats: 31109(line=567, offs=31) -- 31148(line=567, offs=70)
 */
-ATSINSmove(tmp1158, opt_string_copy_205(ATSPMVrefarg0(tmp1028), tmp942, ATSPMVrefarg0(tmp1155), ATSPMVi0nt(256))) ;
+ATSINSmove(tmp1160, opt_string_copy_205(ATSPMVrefarg0(tmp1030), tmp944, ATSPMVrefarg0(tmp1157), ATSPMVi0nt(256))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31518(line=575, offs=36) -- 31788(line=580, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 31643(line=576, offs=36) -- 31913(line=581, offs=38)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31550(line=576, offs=29) -- 31568(line=576, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 31675(line=577, offs=29) -- 31693(line=577, offs=47)
 */
-ATSINSmove(tmp1174, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__9(ATSPMVi0nt(32))) ;
+ATSINSmove(tmp1176, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__9(ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31597(line=577, offs=29) -- 31636(line=577, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 31722(line=578, offs=29) -- 31761(line=578, offs=68)
 */
-ATSINSmove(tmp1177, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1028), tmp934, ATSPMVrefarg0(tmp1174), ATSPMVi0nt(32))) ;
+ATSINSmove(tmp1179, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_string_copy(ATSPMVrefarg0(tmp1030), tmp936, ATSPMVrefarg0(tmp1176), ATSPMVi0nt(32))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31676(line=578, offs=40) -- 31704(line=578, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 31801(line=579, offs=40) -- 31829(line=579, offs=68)
 */
-ATSINSmove(tmp1178, check_only_release_276(ATSPMVrefarg0(tmp1174), tmp1177)) ;
+ATSINSmove(tmp1180, check_only_release_276(ATSPMVrefarg0(tmp1176), tmp1179)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31732(line=579, offs=28) -- 31749(line=579, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 31857(line=580, offs=28) -- 31874(line=580, offs=45)
 */
-ATSINSmove_void(tmp1179, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__14(tmp1174)) ;
+ATSINSmove_void(tmp1181, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__14(tmp1176)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31518(line=575, offs=36) -- 31788(line=580, offs=38)
+emit_instr: loc0 = build/src/bin/bats.dats: 31643(line=576, offs=36) -- 31913(line=581, offs=38)
 */
 /*
 INSletpop()
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31824(line=581, offs=26) -- 31847(line=581, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 31949(line=582, offs=26) -- 31972(line=582, offs=49)
 */
-ATSINSmove_void(tmp1181, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1183, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31874(line=582, offs=26) -- 31895(line=582, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 31999(line=583, offs=26) -- 32020(line=583, offs=47)
 */
-ATSINSmove_void(tmp1182, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__15(tmp1091)) ;
+ATSINSmove_void(tmp1184, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__15(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31937(line=583, offs=41) -- 31960(line=583, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 32062(line=584, offs=41) -- 32085(line=584, offs=64)
 */
-ATSINSmove(tmp1184, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__9(tmp1155)) ;
+ATSINSmove(tmp1186, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__9(tmp1157)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31919(line=583, offs=23) -- 31925(line=583, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 32044(line=584, offs=23) -- 32050(line=584, offs=29)
 */
-ATSINSmove(tmp1186, ATSSELfltrec(tmp1184, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1188, ATSSELfltrec(tmp1186, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31927(line=583, offs=31) -- 31933(line=583, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 32052(line=584, offs=31) -- 32058(line=584, offs=37)
 */
-ATSINSmove(tmp1187, ATSSELfltrec(tmp1184, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1189, ATSSELfltrec(tmp1186, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32011(line=584, offs=50) -- 32021(line=584, offs=60)
-*/
-
-ATSINSmove_con0(tmp1189, 3) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 31993(line=584, offs=32) -- 32022(line=584, offs=61)
-*/
-ATSINSmove(tmp1188, build_057_src_057_helpers_056_sats__project_lock_take(tmp1189)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32052(line=585, offs=30) -- 32081(line=585, offs=59)
-*/
-ATSINSmove(tmp1191, build_057_src_057_helpers_056_sats__project_lock_refused(ATSPMVrefarg0(tmp1188))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32049(line=585, offs=27) -- 32554(line=592, offs=54)
-*/
-ATSif(
-tmp1191
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32088(line=585, offs=66) -- 32192(line=587, offs=56)
-*/
-/*
-letpush(beg)
-*/
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32121(line=586, offs=30) -- 32136(line=586, offs=45)
-*/
-ATSINSmove_void(tmp1192, build_057_src_057_helpers_056_sats__set_build_err()) ;
-
-/*
-letpush(end)
+emit_instr: loc0 = build/src/bin/bats.dats: 32136(line=585, offs=50) -- 32146(line=585, offs=60)
 */
 
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32158(line=587, offs=22) -- 32187(line=587, offs=51)
-*/
-ATSINSmove_void(tmp1190, build_057_src_057_helpers_056_sats__project_lock_release(tmp1188)) ;
+ATSINSmove_con0(tmp1191, 3) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32088(line=585, offs=66) -- 32192(line=587, offs=56)
+emit_instr: loc0 = build/src/bin/bats.dats: 32118(line=585, offs=32) -- 32147(line=585, offs=61)
 */
-/*
-INSletpop()
-*/
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32220(line=588, offs=28) -- 32233(line=588, offs=41)
-*/
-ATSINSmove(tmp1194, bin_package_220()) ;
+ATSINSmove(tmp1190, build_057_src_057_helpers_056_sats__project_lock_take(tmp1191)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32219(line=588, offs=27) -- 32233(line=588, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 32177(line=586, offs=30) -- 32206(line=586, offs=59)
 */
-ATSINSmove(tmp1193, atspre_neg_bool0(tmp1194)) ;
+ATSINSmove(tmp1193, build_057_src_057_helpers_056_sats__project_lock_refused(ATSPMVrefarg0(tmp1190))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32216(line=588, offs=24) -- 32554(line=592, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 32174(line=586, offs=27) -- 32679(line=593, offs=54)
 */
 ATSif(
 tmp1193
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32239(line=588, offs=47) -- 32268(line=588, offs=76)
+emit_instr: loc0 = build/src/bin/bats.dats: 32213(line=586, offs=66) -- 32317(line=588, offs=56)
 */
-ATSINSmove_void(tmp1190, build_057_src_057_helpers_056_sats__project_lock_release(tmp1188)) ;
-
-} ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32297(line=589, offs=28) -- 32328(line=589, offs=59)
+letpush(beg)
 */
-ATSINSmove(tmp1196, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1067), tmp1063)) ;
-
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32296(line=589, offs=27) -- 32328(line=589, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 32246(line=587, offs=30) -- 32261(line=587, offs=45)
 */
-ATSINSmove(tmp1195, atspre_neg_bool0(tmp1196)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32293(line=589, offs=24) -- 32554(line=592, offs=54)
-*/
-ATSif(
-tmp1195
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32334(line=589, offs=65) -- 32363(line=589, offs=94)
-*/
-ATSINSmove_void(tmp1190, build_057_src_057_helpers_056_sats__project_lock_release(tmp1188)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32391(line=590, offs=27) -- 32409(line=590, offs=45)
-*/
-ATSINSmove(tmp1197, build_057_src_057_lock_056_sats__validate_project()) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32388(line=590, offs=24) -- 32554(line=592, offs=54)
-*/
-ATSif(
-tmp1197
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32433(line=591, offs=19) -- 32500(line=591, offs=86)
-*/
-ATSINSmove_void(tmp1190, build_057_src_057_commands_056_sats__do_run(tmp1178, ATSPMVrefarg0(tmp1187), tmp1158, ATSPMVrefarg0(tmp1071), tmp851, tmp1188)) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32524(line=592, offs=24) -- 32553(line=592, offs=53)
-*/
-ATSINSmove_void(tmp1190, build_057_src_057_helpers_056_sats__project_lock_release(tmp1188)) ;
-
-} /* ATSendif */
-} /* ATSendif */
-} /* ATSendif */
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 32581(line=593, offs=26) -- 32610(line=593, offs=55)
-*/
-ATSINSmove_void(tmp1198, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__6(ATSPMVrefarg0(tmp1186), tmp1187)) ;
+ATSINSmove_void(tmp1194, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32642(line=594, offs=32) -- 32662(line=594, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 32283(line=588, offs=22) -- 32312(line=588, offs=51)
 */
-ATSINSmove(tmp1201, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__6(tmp1186)) ;
+ATSINSmove_void(tmp1192, build_057_src_057_helpers_056_sats__project_lock_release(tmp1190)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32628(line=594, offs=18) -- 32664(line=594, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 32213(line=586, offs=66) -- 32317(line=588, offs=56)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__16(tmp1201)) ;
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32345(line=589, offs=28) -- 32358(line=589, offs=41)
+*/
+ATSINSmove(tmp1196, bin_package_220()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 30900(line=564, offs=26) -- 32668(line=594, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 32344(line=589, offs=27) -- 32358(line=589, offs=41)
+*/
+ATSINSmove(tmp1195, atspre_neg_bool0(tmp1196)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32341(line=589, offs=24) -- 32679(line=593, offs=54)
+*/
+ATSif(
+tmp1195
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32364(line=589, offs=47) -- 32393(line=589, offs=76)
+*/
+ATSINSmove_void(tmp1192, build_057_src_057_helpers_056_sats__project_lock_release(tmp1190)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32422(line=590, offs=28) -- 32453(line=590, offs=59)
+*/
+ATSINSmove(tmp1198, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1069), tmp1065)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32421(line=590, offs=27) -- 32453(line=590, offs=59)
+*/
+ATSINSmove(tmp1197, atspre_neg_bool0(tmp1198)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32418(line=590, offs=24) -- 32679(line=593, offs=54)
+*/
+ATSif(
+tmp1197
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32459(line=590, offs=65) -- 32488(line=590, offs=94)
+*/
+ATSINSmove_void(tmp1192, build_057_src_057_helpers_056_sats__project_lock_release(tmp1190)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32516(line=591, offs=27) -- 32534(line=591, offs=45)
+*/
+ATSINSmove(tmp1199, build_057_src_057_lock_056_sats__validate_project()) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32513(line=591, offs=24) -- 32679(line=593, offs=54)
+*/
+ATSif(
+tmp1199
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32558(line=592, offs=19) -- 32625(line=592, offs=86)
+*/
+ATSINSmove_void(tmp1192, build_057_src_057_commands_056_sats__do_run(tmp1180, ATSPMVrefarg0(tmp1189), tmp1160, ATSPMVrefarg0(tmp1073), tmp853, tmp1190)) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32649(line=593, offs=24) -- 32678(line=593, offs=53)
+*/
+ATSINSmove_void(tmp1192, build_057_src_057_helpers_056_sats__project_lock_release(tmp1190)) ;
+
+} /* ATSendif */
+} /* ATSendif */
+} /* ATSendif */
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32706(line=594, offs=26) -- 32735(line=594, offs=55)
+*/
+ATSINSmove_void(tmp1200, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__6(ATSPMVrefarg0(tmp1188), tmp1189)) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32767(line=595, offs=32) -- 32787(line=595, offs=52)
+*/
+ATSINSmove(tmp1203, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__6(tmp1188)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 32753(line=595, offs=18) -- 32789(line=595, offs=54)
+*/
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__16(tmp1203)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 31025(line=565, offs=26) -- 32793(line=595, offs=58)
 */
 /*
 INSletpop()
@@ -23831,15 +23878,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32685(line=595, offs=17) -- 32691(line=595, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 32810(line=596, offs=17) -- 32816(line=596, offs=23)
 */
 ATSINSlab(__atstmplab121):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 5)) { ATSINSgoto(__atstmplab123) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 5)) { ATSINSgoto(__atstmplab123) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32691(line=595, offs=23) -- 32691(line=595, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 32816(line=596, offs=23) -- 32816(line=596, offs=23)
 */
 ATSINSlab(__atstmplab122):
 /*
@@ -23849,125 +23896,125 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32695(line=595, offs=27) -- 33431(line=609, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 32820(line=596, offs=27) -- 33556(line=610, offs=18)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32733(line=596, offs=35) -- 32758(line=596, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 32858(line=597, offs=35) -- 32883(line=597, offs=60)
 */
-ATSINSmove(tmp1203, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp958)) ;
+ATSINSmove(tmp1205, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp960)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32784(line=597, offs=26) -- 32807(line=597, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 32909(line=598, offs=26) -- 32932(line=598, offs=49)
 */
-ATSINSmove_void(tmp1204, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1206, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32845(line=599, offs=20) -- 32856(line=599, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 32970(line=600, offs=20) -- 32981(line=600, offs=31)
 */
-ATSINSmove(tmp1205, ATSLIB_056_prelude__gt_g0int_int__217__5(tmp1094, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1207, ATSLIB_056_prelude__gt_g0int_int__217__5(tmp1096, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32842(line=599, offs=17) -- 33413(line=608, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 32967(line=600, offs=17) -- 33538(line=609, offs=39)
 */
 ATSif(
-tmp1205
+tmp1207
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32862(line=599, offs=37) -- 33108(line=603, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 32987(line=600, offs=37) -- 33233(line=604, offs=59)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32906(line=600, offs=41) -- 32929(line=600, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 33031(line=601, offs=41) -- 33054(line=601, offs=64)
 */
-ATSINSmove(tmp1208, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__10(tmp1091)) ;
+ATSINSmove(tmp1210, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__10(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32890(line=600, offs=25) -- 32895(line=600, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 33015(line=601, offs=25) -- 33020(line=601, offs=30)
 */
-ATSINSmove(tmp1210, ATSSELfltrec(tmp1208, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1212, ATSSELfltrec(tmp1210, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32897(line=600, offs=32) -- 32902(line=600, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 33022(line=601, offs=32) -- 33027(line=601, offs=37)
 */
-ATSINSmove(tmp1211, ATSSELfltrec(tmp1208, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1213, ATSSELfltrec(tmp1210, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32958(line=601, offs=28) -- 32994(line=601, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 33083(line=602, offs=28) -- 33119(line=602, offs=64)
 */
-ATSINSmove_void(tmp1212, build_057_src_057_commands_056_sats__do_init(ATSPMVrefarg0(tmp1211), tmp1094, tmp1203)) ;
+ATSINSmove_void(tmp1214, build_057_src_057_commands_056_sats__do_init(ATSPMVrefarg0(tmp1213), tmp1096, tmp1205)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33022(line=602, offs=28) -- 33049(line=602, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 33147(line=603, offs=28) -- 33174(line=603, offs=55)
 */
-ATSINSmove_void(tmp1213, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__7(ATSPMVrefarg0(tmp1210), tmp1211)) ;
+ATSINSmove_void(tmp1215, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__7(ATSPMVrefarg0(tmp1212), tmp1213)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33083(line=603, offs=34) -- 33102(line=603, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 33208(line=604, offs=34) -- 33227(line=604, offs=53)
 */
-ATSINSmove(tmp1216, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__7(tmp1210)) ;
+ATSINSmove(tmp1218, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__7(tmp1212)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33069(line=603, offs=20) -- 33104(line=603, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 33194(line=604, offs=20) -- 33229(line=604, offs=55)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__17(tmp1216)) ;
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__17(tmp1218)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32862(line=599, offs=37) -- 33108(line=603, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 32987(line=600, offs=37) -- 33233(line=604, offs=59)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33130(line=604, offs=22) -- 33413(line=608, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 33255(line=605, offs=22) -- 33538(line=609, offs=39)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33161(line=605, offs=28) -- 33182(line=605, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 33286(line=606, offs=28) -- 33307(line=606, offs=49)
 */
-ATSINSmove_void(tmp1218, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__18(tmp1091)) ;
+ATSINSmove_void(tmp1220, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__18(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33211(line=606, offs=28) -- 33331(line=606, offs=148)
+emit_instr: loc0 = build/src/bin/bats.dats: 33336(line=607, offs=28) -- 33456(line=607, offs=148)
 */
-ATSINSmove_void(tmp1220, atspre_prerr_string(ATSPMVstring("error: specify 'binary' or 'library'\nusage: bats init binary [--claude]\n       bats init library [--claude]"))) ;
+ATSINSmove_void(tmp1222, atspre_prerr_string(ATSPMVstring("error: specify 'binary' or 'library'\nusage: bats init binary [--claude]\n       bats init library [--claude]"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33359(line=607, offs=28) -- 33374(line=607, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 33484(line=608, offs=28) -- 33499(line=608, offs=43)
 */
-ATSINSmove_void(tmp1221, atspre_prerr_newline()) ;
+ATSINSmove_void(tmp1223, atspre_prerr_newline()) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33394(line=608, offs=20) -- 33409(line=608, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 33519(line=609, offs=20) -- 33534(line=609, offs=35)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33130(line=604, offs=22) -- 33413(line=608, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 33255(line=605, offs=22) -- 33538(line=609, offs=39)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 32695(line=595, offs=27) -- 33431(line=609, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 32820(line=596, offs=27) -- 33556(line=610, offs=18)
 */
 /*
 INSletpop()
@@ -23976,15 +24023,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33448(line=610, offs=17) -- 33454(line=610, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 33573(line=611, offs=17) -- 33579(line=611, offs=23)
 */
 ATSINSlab(__atstmplab123):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 6)) { ATSINSgoto(__atstmplab125) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 6)) { ATSINSgoto(__atstmplab125) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33454(line=610, offs=23) -- 33454(line=610, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 33579(line=611, offs=23) -- 33579(line=611, offs=23)
 */
 ATSINSlab(__atstmplab124):
 /*
@@ -23994,146 +24041,146 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33458(line=610, offs=27) -- 34364(line=625, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 33583(line=611, offs=27) -- 34489(line=626, offs=58)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33561(line=612, offs=31) -- 33581(line=612, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 33686(line=613, offs=31) -- 33706(line=613, offs=51)
 */
-ATSINSmove(tmp1222, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__10(ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1224, build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__10(ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33612(line=613, offs=31) -- 33655(line=613, offs=74)
+emit_instr: loc0 = build/src/bin/bats.dats: 33737(line=614, offs=31) -- 33780(line=614, offs=74)
 */
-ATSINSmove(tmp1225, opt_string_copy_205(ATSPMVrefarg0(tmp1028), tmp1006, ATSPMVrefarg0(tmp1222), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1227, opt_string_copy_205(ATSPMVrefarg0(tmp1030), tmp1008, ATSPMVrefarg0(tmp1224), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33681(line=614, offs=26) -- 33704(line=614, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 33806(line=615, offs=26) -- 33829(line=615, offs=49)
 */
-ATSINSmove_void(tmp1226, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1228, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33731(line=615, offs=26) -- 33752(line=615, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 33856(line=616, offs=26) -- 33877(line=616, offs=47)
 */
-ATSINSmove_void(tmp1227, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__19(tmp1091)) ;
+ATSINSmove_void(tmp1229, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__19(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33794(line=616, offs=41) -- 33817(line=616, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 33919(line=617, offs=41) -- 33942(line=617, offs=64)
 */
-ATSINSmove(tmp1229, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__11(tmp1222)) ;
+ATSINSmove(tmp1231, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__11(tmp1224)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33776(line=616, offs=23) -- 33782(line=616, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 33901(line=617, offs=23) -- 33907(line=617, offs=29)
 */
-ATSINSmove(tmp1231, ATSSELfltrec(tmp1229, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1233, ATSSELfltrec(tmp1231, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33784(line=616, offs=31) -- 33790(line=616, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 33909(line=617, offs=31) -- 33915(line=617, offs=37)
 */
-ATSINSmove(tmp1232, ATSSELfltrec(tmp1229, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1234, ATSSELfltrec(tmp1231, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33932(line=618, offs=36) -- 33953(line=618, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 34057(line=619, offs=36) -- 34078(line=619, offs=57)
 */
-ATSINSmove(tmp1233, targets_of_89(tmp862)) ;
+ATSINSmove(tmp1235, targets_of_89(tmp864)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33985(line=619, offs=31) -- 34000(line=619, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 34110(line=620, offs=31) -- 34125(line=620, offs=46)
 */
-ATSINSmove(tmp1236, project_known_221()) ;
+ATSINSmove(tmp1238, project_known_221()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33984(line=619, offs=30) -- 34000(line=619, offs=46)
-*/
-ATSINSmove(tmp1235, atspre_neg_bool0(tmp1236)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 33981(line=619, offs=27) -- 34250(line=623, offs=26)
-*/
-ATSif(
-tmp1235
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 34006(line=619, offs=52) -- 34008(line=619, offs=54)
-*/
-ATSINSmove_void(tmp1234, ATSPMVempty()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 34036(line=620, offs=28) -- 34067(line=620, offs=59)
-*/
-ATSINSmove(tmp1238, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1067), tmp1063)) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 34035(line=620, offs=27) -- 34067(line=620, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 34109(line=620, offs=30) -- 34125(line=620, offs=46)
 */
 ATSINSmove(tmp1237, atspre_neg_bool0(tmp1238)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34032(line=620, offs=24) -- 34250(line=623, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 34106(line=620, offs=27) -- 34375(line=624, offs=26)
 */
 ATSif(
 tmp1237
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34073(line=620, offs=65) -- 34075(line=620, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 34131(line=620, offs=52) -- 34133(line=620, offs=54)
 */
-ATSINSmove_void(tmp1234, ATSPMVempty()) ;
+ATSINSmove_void(tmp1236, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34102(line=621, offs=27) -- 34120(line=621, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 34161(line=621, offs=28) -- 34192(line=621, offs=59)
 */
-ATSINSmove(tmp1239, build_057_src_057_lock_056_sats__validate_project()) ;
+ATSINSmove(tmp1240, build_057_src_057_lock_056_sats__resolve_deps(ATSPMVrefarg0(tmp1069), tmp1065)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34099(line=621, offs=24) -- 34250(line=623, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 34160(line=621, offs=27) -- 34192(line=621, offs=59)
+*/
+ATSINSmove(tmp1239, atspre_neg_bool0(tmp1240)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 34157(line=621, offs=24) -- 34375(line=624, offs=26)
 */
 ATSif(
 tmp1239
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34171(line=622, offs=46) -- 34196(line=622, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 34198(line=621, offs=65) -- 34200(line=621, offs=67)
 */
-ATSINSmove(tmp1240, makes_native_92(tmp1233)) ;
+ATSINSmove_void(tmp1236, ATSPMVempty()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 34227(line=622, offs=27) -- 34245(line=622, offs=45)
+*/
+ATSINSmove(tmp1241, build_057_src_057_lock_056_sats__validate_project()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34199(line=622, offs=74) -- 34222(line=622, offs=97)
+emit_instr: loc0 = build/src/bin/bats.dats: 34224(line=622, offs=24) -- 34375(line=624, offs=26)
 */
-ATSINSmove(tmp1241, makes_wasm_93(tmp1233)) ;
+ATSif(
+tmp1241
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 34296(line=623, offs=46) -- 34321(line=623, offs=71)
+*/
+ATSINSmove(tmp1242, makes_native_92(tmp1235)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34146(line=622, offs=21) -- 34224(line=622, offs=99)
+emit_instr: loc0 = build/src/bin/bats.dats: 34324(line=623, offs=74) -- 34347(line=623, offs=97)
 */
-ATSINSmove_void(tmp1234, build_057_src_057_commands_056_sats__do_test(ATSPMVrefarg0(tmp1232), tmp1225, tmp1240, tmp1241)) ;
+ATSINSmove(tmp1243, makes_wasm_93(tmp1235)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 34271(line=623, offs=21) -- 34349(line=623, offs=99)
+*/
+ATSINSmove_void(tmp1236, build_057_src_057_commands_056_sats__do_test(ATSPMVrefarg0(tmp1234), tmp1227, tmp1242, tmp1243)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34248(line=623, offs=24) -- 34250(line=623, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 34373(line=624, offs=24) -- 34375(line=624, offs=26)
 */
-ATSINSmove_void(tmp1234, ATSPMVempty()) ;
+ATSINSmove_void(tmp1236, ATSPMVempty()) ;
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34277(line=624, offs=26) -- 34306(line=624, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 34402(line=625, offs=26) -- 34431(line=625, offs=55)
 */
-ATSINSmove_void(tmp1242, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__8(ATSPMVrefarg0(tmp1231), tmp1232)) ;
+ATSINSmove_void(tmp1244, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__8(ATSPMVrefarg0(tmp1233), tmp1234)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34338(line=625, offs=32) -- 34358(line=625, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 34463(line=626, offs=32) -- 34483(line=626, offs=52)
 */
-ATSINSmove(tmp1245, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__8(tmp1231)) ;
+ATSINSmove(tmp1247, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__8(tmp1233)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34324(line=625, offs=18) -- 34360(line=625, offs=54)
+emit_instr: loc0 = build/src/bin/bats.dats: 34449(line=626, offs=18) -- 34485(line=626, offs=54)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__20(tmp1245)) ;
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__20(tmp1247)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 33458(line=610, offs=27) -- 34364(line=625, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 33583(line=611, offs=27) -- 34489(line=626, offs=58)
 */
 /*
 INSletpop()
@@ -24142,15 +24189,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34381(line=626, offs=17) -- 34387(line=626, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 34506(line=627, offs=17) -- 34512(line=627, offs=23)
 */
 ATSINSlab(__atstmplab125):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 7)) { ATSINSgoto(__atstmplab127) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 7)) { ATSINSgoto(__atstmplab127) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34387(line=626, offs=23) -- 34387(line=626, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 34512(line=627, offs=23) -- 34512(line=627, offs=23)
 */
 ATSINSlab(__atstmplab126):
 /*
@@ -24160,32 +24207,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34391(line=626, offs=27) -- 34523(line=629, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 34516(line=627, offs=27) -- 34648(line=630, offs=31)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34420(line=627, offs=26) -- 34443(line=627, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 34545(line=628, offs=26) -- 34568(line=628, offs=49)
 */
-ATSINSmove_void(tmp1247, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1249, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34470(line=628, offs=26) -- 34491(line=628, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 34595(line=629, offs=26) -- 34616(line=629, offs=47)
 */
-ATSINSmove_void(tmp1248, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__21(tmp1091)) ;
+ATSINSmove_void(tmp1250, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__21(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34510(line=629, offs=18) -- 34519(line=629, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 34635(line=630, offs=18) -- 34644(line=630, offs=27)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_commands_056_sats__do_tree()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_commands_056_sats__do_tree()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34391(line=626, offs=27) -- 34523(line=629, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 34516(line=627, offs=27) -- 34648(line=630, offs=31)
 */
 /*
 INSletpop()
@@ -24194,15 +24241,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34540(line=630, offs=17) -- 34548(line=630, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 34665(line=631, offs=17) -- 34673(line=631, offs=25)
 */
 ATSINSlab(__atstmplab127):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 8)) { ATSINSgoto(__atstmplab129) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 8)) { ATSINSgoto(__atstmplab129) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34548(line=630, offs=25) -- 34548(line=630, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 34673(line=631, offs=25) -- 34673(line=631, offs=25)
 */
 ATSINSlab(__atstmplab128):
 /*
@@ -24212,32 +24259,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34552(line=630, offs=29) -- 34703(line=633, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 34677(line=631, offs=29) -- 34828(line=634, offs=50)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34581(line=631, offs=26) -- 34604(line=631, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 34706(line=632, offs=26) -- 34729(line=632, offs=49)
 */
-ATSINSmove_void(tmp1250, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1252, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34631(line=632, offs=26) -- 34652(line=632, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 34756(line=633, offs=26) -- 34777(line=633, offs=47)
 */
-ATSINSmove_void(tmp1251, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__22(tmp1091)) ;
+ATSINSmove_void(tmp1253, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__22(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34671(line=633, offs=18) -- 34699(line=633, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 34796(line=634, offs=18) -- 34824(line=634, offs=46)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_commands_056_sats__do_upload(ATSPMVrefarg0(tmp1067), tmp1063)) ;
+ATSINSmove_void(tmp1101, build_057_src_057_commands_056_sats__do_upload(ATSPMVrefarg0(tmp1069), tmp1065)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34552(line=630, offs=29) -- 34703(line=633, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 34677(line=631, offs=29) -- 34828(line=634, offs=50)
 */
 /*
 INSletpop()
@@ -24246,15 +24293,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34720(line=634, offs=17) -- 34725(line=634, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 34845(line=635, offs=17) -- 34850(line=635, offs=22)
 */
 ATSINSlab(__atstmplab129):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 9)) { ATSINSgoto(__atstmplab131) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 9)) { ATSINSgoto(__atstmplab131) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34725(line=634, offs=22) -- 34725(line=634, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 34850(line=635, offs=22) -- 34850(line=635, offs=22)
 */
 ATSINSlab(__atstmplab130):
 /*
@@ -24264,115 +24311,115 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34729(line=634, offs=26) -- 35290(line=646, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 34854(line=635, offs=26) -- 35415(line=647, offs=18)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34758(line=635, offs=26) -- 34781(line=635, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 34883(line=636, offs=26) -- 34906(line=636, offs=49)
 */
-ATSINSmove_void(tmp1253, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1255, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34819(line=637, offs=20) -- 34830(line=637, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 34944(line=638, offs=20) -- 34955(line=638, offs=31)
 */
-ATSINSmove(tmp1254, ATSLIB_056_prelude__gt_g0int_int__217__6(tmp1094, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1256, ATSLIB_056_prelude__gt_g0int_int__217__6(tmp1096, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34816(line=637, offs=17) -- 35272(line=645, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 34941(line=638, offs=17) -- 35397(line=646, offs=93)
 */
 ATSif(
-tmp1254
+tmp1256
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34836(line=637, offs=37) -- 35104(line=642, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 34961(line=638, offs=37) -- 35229(line=643, offs=23)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34880(line=638, offs=41) -- 34903(line=638, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 35005(line=639, offs=41) -- 35028(line=639, offs=64)
 */
-ATSINSmove(tmp1257, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__12(tmp1091)) ;
+ATSINSmove(tmp1259, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__12(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34864(line=638, offs=25) -- 34869(line=638, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 34989(line=639, offs=25) -- 34994(line=639, offs=30)
 */
-ATSINSmove(tmp1259, ATSSELfltrec(tmp1257, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1261, ATSSELfltrec(tmp1259, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34871(line=638, offs=32) -- 34876(line=638, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 34996(line=639, offs=32) -- 35001(line=639, offs=37)
 */
-ATSINSmove(tmp1260, ATSSELfltrec(tmp1257, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1262, ATSSELfltrec(tmp1259, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34932(line=639, offs=28) -- 34963(line=639, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 35057(line=640, offs=28) -- 35088(line=640, offs=59)
 */
-ATSINSmove_void(tmp1261, build_057_src_057_commands_056_sats__do_add(ATSPMVrefarg0(tmp1260), ATSPMVi0nt(0), tmp1094, ATSPMVi0nt(4096))) ;
+ATSINSmove_void(tmp1263, build_057_src_057_commands_056_sats__do_add(ATSPMVrefarg0(tmp1262), ATSPMVi0nt(0), tmp1096, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34991(line=640, offs=28) -- 35018(line=640, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 35116(line=641, offs=28) -- 35143(line=641, offs=55)
 */
-ATSINSmove_void(tmp1262, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__9(ATSPMVrefarg0(tmp1259), tmp1260)) ;
+ATSINSmove_void(tmp1264, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__9(ATSPMVrefarg0(tmp1261), tmp1262)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35060(line=641, offs=42) -- 35079(line=641, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 35185(line=642, offs=42) -- 35204(line=642, offs=61)
 */
-ATSINSmove(tmp1265, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__9(tmp1259)) ;
+ATSINSmove(tmp1267, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__9(tmp1261)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35046(line=641, offs=28) -- 35081(line=641, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 35171(line=642, offs=28) -- 35206(line=642, offs=63)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__23(tmp1265)) ;
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__23(tmp1267)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34836(line=637, offs=37) -- 35104(line=642, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 34961(line=638, offs=37) -- 35229(line=643, offs=23)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35126(line=643, offs=22) -- 35272(line=645, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 35251(line=644, offs=22) -- 35397(line=646, offs=93)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35157(line=644, offs=28) -- 35178(line=644, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 35282(line=645, offs=28) -- 35303(line=645, offs=49)
 */
-ATSINSmove_void(tmp1267, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__24(tmp1091)) ;
+ATSINSmove_void(tmp1269, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__24(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35199(line=645, offs=20) -- 35268(line=645, offs=89)
+emit_instr: loc0 = build/src/bin/bats.dats: 35324(line=646, offs=20) -- 35393(line=646, offs=89)
 */
-ATSINSmove_void(tmp1269, atspre_print_string(ATSPMVstring("error: specify a package name\nusage: bats add <package>"))) ;
+ATSINSmove_void(tmp1271, atspre_print_string(ATSPMVstring("error: specify a package name\nusage: bats add <package>"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35199(line=645, offs=20) -- 35268(line=645, offs=89)
+emit_instr: loc0 = build/src/bin/bats.dats: 35324(line=646, offs=20) -- 35393(line=646, offs=89)
 */
-ATSINSmove_void(tmp1099, atspre_print_newline()) ;
+ATSINSmove_void(tmp1101, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35126(line=643, offs=22) -- 35272(line=645, offs=93)
+emit_instr: loc0 = build/src/bin/bats.dats: 35251(line=644, offs=22) -- 35397(line=646, offs=93)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 34729(line=634, offs=26) -- 35290(line=646, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 34854(line=635, offs=26) -- 35415(line=647, offs=18)
 */
 /*
 INSletpop()
@@ -24381,15 +24428,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35307(line=647, offs=17) -- 35315(line=647, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 35432(line=648, offs=17) -- 35440(line=648, offs=25)
 */
 ATSINSlab(__atstmplab131):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 10)) { ATSINSgoto(__atstmplab133) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 10)) { ATSINSgoto(__atstmplab133) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35315(line=647, offs=25) -- 35315(line=647, offs=25)
+emit_instr: loc0 = build/src/bin/bats.dats: 35440(line=648, offs=25) -- 35440(line=648, offs=25)
 */
 ATSINSlab(__atstmplab132):
 /*
@@ -24399,115 +24446,115 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35319(line=647, offs=29) -- 35886(line=659, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 35444(line=648, offs=29) -- 36011(line=660, offs=18)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35348(line=648, offs=26) -- 35371(line=648, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 35473(line=649, offs=26) -- 35496(line=649, offs=49)
 */
-ATSINSmove_void(tmp1270, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1272, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35409(line=650, offs=20) -- 35420(line=650, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 35534(line=651, offs=20) -- 35545(line=651, offs=31)
 */
-ATSINSmove(tmp1271, ATSLIB_056_prelude__gt_g0int_int__217__7(tmp1094, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1273, ATSLIB_056_prelude__gt_g0int_int__217__7(tmp1096, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35406(line=650, offs=17) -- 35868(line=658, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 35531(line=651, offs=17) -- 35993(line=659, offs=96)
 */
 ATSif(
-tmp1271
+tmp1273
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35426(line=650, offs=37) -- 35697(line=655, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 35551(line=651, offs=37) -- 35822(line=656, offs=23)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35470(line=651, offs=41) -- 35493(line=651, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 35595(line=652, offs=41) -- 35618(line=652, offs=64)
 */
-ATSINSmove(tmp1274, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__13(tmp1091)) ;
+ATSINSmove(tmp1276, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__13(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35454(line=651, offs=25) -- 35459(line=651, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 35579(line=652, offs=25) -- 35584(line=652, offs=30)
 */
-ATSINSmove(tmp1276, ATSSELfltrec(tmp1274, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1278, ATSSELfltrec(tmp1276, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35461(line=651, offs=32) -- 35466(line=651, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 35586(line=652, offs=32) -- 35591(line=652, offs=37)
 */
-ATSINSmove(tmp1277, ATSSELfltrec(tmp1274, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1279, ATSSELfltrec(tmp1276, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35522(line=652, offs=28) -- 35556(line=652, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 35647(line=653, offs=28) -- 35681(line=653, offs=62)
 */
-ATSINSmove_void(tmp1278, build_057_src_057_commands_056_sats__do_remove(ATSPMVrefarg0(tmp1277), ATSPMVi0nt(0), tmp1094, ATSPMVi0nt(4096))) ;
+ATSINSmove_void(tmp1280, build_057_src_057_commands_056_sats__do_remove(ATSPMVrefarg0(tmp1279), ATSPMVi0nt(0), tmp1096, ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35584(line=653, offs=28) -- 35611(line=653, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 35709(line=654, offs=28) -- 35736(line=654, offs=55)
 */
-ATSINSmove_void(tmp1279, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__10(ATSPMVrefarg0(tmp1276), tmp1277)) ;
+ATSINSmove_void(tmp1281, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__10(ATSPMVrefarg0(tmp1278), tmp1279)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35653(line=654, offs=42) -- 35672(line=654, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 35778(line=655, offs=42) -- 35797(line=655, offs=61)
 */
-ATSINSmove(tmp1282, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__10(tmp1276)) ;
+ATSINSmove(tmp1284, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__10(tmp1278)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35639(line=654, offs=28) -- 35674(line=654, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 35764(line=655, offs=28) -- 35799(line=655, offs=63)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__25(tmp1282)) ;
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__25(tmp1284)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35426(line=650, offs=37) -- 35697(line=655, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 35551(line=651, offs=37) -- 35822(line=656, offs=23)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35719(line=656, offs=22) -- 35868(line=658, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 35844(line=657, offs=22) -- 35993(line=659, offs=96)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35750(line=657, offs=28) -- 35771(line=657, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 35875(line=658, offs=28) -- 35896(line=658, offs=49)
 */
-ATSINSmove_void(tmp1284, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__26(tmp1091)) ;
+ATSINSmove_void(tmp1286, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__26(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35792(line=658, offs=20) -- 35864(line=658, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 35917(line=659, offs=20) -- 35989(line=659, offs=92)
 */
-ATSINSmove_void(tmp1286, atspre_print_string(ATSPMVstring("error: specify a package name\nusage: bats remove <package>"))) ;
+ATSINSmove_void(tmp1288, atspre_print_string(ATSPMVstring("error: specify a package name\nusage: bats remove <package>"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35792(line=658, offs=20) -- 35864(line=658, offs=92)
+emit_instr: loc0 = build/src/bin/bats.dats: 35917(line=659, offs=20) -- 35989(line=659, offs=92)
 */
-ATSINSmove_void(tmp1099, atspre_print_newline()) ;
+ATSINSmove_void(tmp1101, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35719(line=656, offs=22) -- 35868(line=658, offs=96)
+emit_instr: loc0 = build/src/bin/bats.dats: 35844(line=657, offs=22) -- 35993(line=659, offs=96)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35319(line=647, offs=29) -- 35886(line=659, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 35444(line=648, offs=29) -- 36011(line=660, offs=18)
 */
 /*
 INSletpop()
@@ -24516,15 +24563,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35903(line=660, offs=17) -- 35916(line=660, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 36028(line=661, offs=17) -- 36041(line=661, offs=30)
 */
 ATSINSlab(__atstmplab133):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 11)) { ATSINSgoto(__atstmplab135) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 11)) { ATSINSgoto(__atstmplab135) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35916(line=660, offs=30) -- 35916(line=660, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 36041(line=661, offs=30) -- 36041(line=661, offs=30)
 */
 ATSINSlab(__atstmplab134):
 /*
@@ -24534,32 +24581,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35920(line=660, offs=34) -- 36927(line=678, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 36045(line=661, offs=34) -- 37052(line=679, offs=18)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35949(line=661, offs=26) -- 35972(line=661, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 36074(line=662, offs=26) -- 36097(line=662, offs=49)
 */
-ATSINSmove_void(tmp1287, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1289, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36588(line=672, offs=35) -- 36621(line=672, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 36713(line=673, offs=35) -- 36746(line=673, offs=68)
 */
-ATSINSmove(tmp1310, check_shell_arg_317(ATSPMVrefarg0(tmp1091), tmp1094)) ;
+ATSINSmove(tmp1312, check_shell_arg_317(ATSPMVrefarg0(tmp1093), tmp1096)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36647(line=673, offs=26) -- 36668(line=673, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 36772(line=674, offs=26) -- 36793(line=674, offs=47)
 */
-ATSINSmove_void(tmp1311, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__27(tmp1091)) ;
+ATSINSmove_void(tmp1313, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__27(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36703(line=675, offs=17) -- 36909(line=677, offs=125)
+emit_instr: loc0 = build/src/bin/bats.dats: 36828(line=676, offs=17) -- 37034(line=678, offs=125)
 */
 ATScaseof_beg()
 /*
@@ -24567,25 +24614,25 @@ ATScaseof_beg()
 */
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36742(line=676, offs=19) -- 36758(line=676, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 36867(line=677, offs=19) -- 36883(line=677, offs=35)
 */
 ATSINSlab(__atstmplab145):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36588(line=672, offs=35) -- 36621(line=672, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 36713(line=673, offs=35) -- 36746(line=673, offs=68)
 */
-ATSifthen(ATSCKptrisnull(tmp1310)) { ATSINSgoto(__atstmplab148) ; } ;
+ATSifthen(ATSCKptrisnull(tmp1312)) { ATSINSgoto(__atstmplab148) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36758(line=676, offs=35) -- 36758(line=676, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 36883(line=677, offs=35) -- 36883(line=677, offs=35)
 */
 ATSINSlab(__atstmplab146):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36751(line=676, offs=28) -- 36757(line=676, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 36876(line=677, offs=28) -- 36882(line=677, offs=34)
 */
-ATSINSmove(tmp1313, ATSSELcon(tmp1310, postiats_tysum_3, atslab__0)) ;
+ATSINSmove(tmp1315, ATSSELcon(tmp1312, postiats_tysum_3, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36742(line=676, offs=19) -- 36784(line=676, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 36867(line=677, offs=19) -- 36909(line=677, offs=61)
 */
-ATSINSfreecon(tmp1310) ;
+ATSINSfreecon(tmp1312) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -24593,25 +24640,25 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36762(line=676, offs=39) -- 36783(line=676, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 36887(line=677, offs=39) -- 36908(line=677, offs=60)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_commands_056_sats__do_completions(tmp1313)) ;
+ATSINSmove_void(tmp1101, build_057_src_057_commands_056_sats__do_completions(tmp1315)) ;
 
 ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36803(line=677, offs=19) -- 36813(line=677, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 36928(line=678, offs=19) -- 36938(line=678, offs=29)
 */
 ATSINSlab(__atstmplab147):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36588(line=672, offs=35) -- 36621(line=672, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 36713(line=673, offs=35) -- 36746(line=673, offs=68)
 */
 #if(0)
-ATSifthen(ATSCKptriscons(tmp1310)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptriscons(tmp1312)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36813(line=677, offs=29) -- 36813(line=677, offs=29)
+emit_instr: loc0 = build/src/bin/bats.dats: 36938(line=678, offs=29) -- 36938(line=678, offs=29)
 */
 ATSINSlab(__atstmplab148):
 /*
@@ -24621,14 +24668,14 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36817(line=677, offs=33) -- 36909(line=677, offs=125)
+emit_instr: loc0 = build/src/bin/bats.dats: 36942(line=678, offs=33) -- 37034(line=678, offs=125)
 */
-ATSINSmove_void(tmp1314, atspre_print_string(ATSPMVstring("error: specify a shell (bash, zsh, fish)\nusage: bats completions bash|zsh|fish"))) ;
+ATSINSmove_void(tmp1316, atspre_print_string(ATSPMVstring("error: specify a shell (bash, zsh, fish)\nusage: bats completions bash|zsh|fish"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36817(line=677, offs=33) -- 36909(line=677, offs=125)
+emit_instr: loc0 = build/src/bin/bats.dats: 36942(line=678, offs=33) -- 37034(line=678, offs=125)
 */
-ATSINSmove_void(tmp1099, atspre_print_newline()) ;
+ATSINSmove_void(tmp1101, atspre_print_newline()) ;
 
 ATSbranch_end()
 
@@ -24638,7 +24685,7 @@ ATSbranch_end()
 ATScaseof_end()
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 35920(line=660, offs=34) -- 36927(line=678, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 36045(line=661, offs=34) -- 37052(line=679, offs=18)
 */
 /*
 INSletpop()
@@ -24647,15 +24694,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36944(line=679, offs=17) -- 36950(line=679, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 37069(line=680, offs=17) -- 37075(line=680, offs=23)
 */
 ATSINSlab(__atstmplab135):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 12)) { ATSINSgoto(__atstmplab137) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 12)) { ATSINSgoto(__atstmplab137) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36950(line=679, offs=23) -- 36950(line=679, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 37075(line=680, offs=23) -- 37075(line=680, offs=23)
 */
 ATSINSlab(__atstmplab136):
 /*
@@ -24665,168 +24712,220 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36954(line=679, offs=27) -- 38169(line=698, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 37079(line=680, offs=27) -- 39019(line=708, offs=18)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36991(line=680, offs=34) -- 37015(line=680, offs=58)
+emit_instr: loc0 = build/src/bin/bats.dats: 37116(line=681, offs=34) -- 37140(line=681, offs=58)
 */
-ATSINSmove(tmp1315, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1028), tmp982)) ;
+ATSINSmove(tmp1317, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__get_bool(ATSPMVrefarg0(tmp1030), tmp984)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37041(line=681, offs=26) -- 37064(line=681, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 37166(line=682, offs=26) -- 37189(line=682, offs=49)
 */
-ATSINSmove_void(tmp1316, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1318, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37543(line=688, offs=31) -- 37575(line=688, offs=63)
+emit_instr: loc0 = build/src/bin/bats.dats: 38014(line=693, offs=31) -- 38046(line=693, offs=63)
 */
-ATSINSmove(tmp1348, is_install_arg_326(ATSPMVrefarg0(tmp1091), tmp1094)) ;
+ATSINSmove(tmp1377, is_install_arg_326(ATSPMVrefarg0(tmp1093), tmp1096)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37601(line=689, offs=26) -- 37622(line=689, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 38076(line=694, offs=30) -- 38107(line=694, offs=61)
 */
-ATSINSmove_void(tmp1349, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__28(tmp1091)) ;
+ATSINSmove(tmp1378, is_marker_arg_335(ATSPMVrefarg0(tmp1093), tmp1096)) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38133(line=695, offs=26) -- 38154(line=695, offs=47)
+*/
+ATSINSmove_void(tmp1379, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__28(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37660(line=691, offs=20) -- 37692(line=691, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 38192(line=697, offs=20) -- 38224(line=697, offs=52)
 */
-ATSINSmove(tmp1352, ATSLIB_056_prelude__gt_g0int_int__217__8(tmp858, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp1382, ATSLIB_056_prelude__gt_g0int_int__217__8(tmp860, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37660(line=691, offs=20) -- 37692(line=691, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 38192(line=697, offs=20) -- 38224(line=697, offs=52)
 */
 ATSif(
-tmp1352
+tmp1382
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37660(line=691, offs=20) -- 37692(line=691, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 38192(line=697, offs=20) -- 38224(line=697, offs=52)
 */
-ATSINSmove(tmp1351, ATSPMVbool_true()) ;
+ATSINSmove(tmp1381, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37660(line=691, offs=20) -- 37692(line=691, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 38192(line=697, offs=20) -- 38224(line=697, offs=52)
 */
-ATSINSmove(tmp1351, ATSLIB_056_prelude__gt_g0int_int__217__9(tmp851, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1381, ATSLIB_056_prelude__gt_g0int_int__217__9(tmp853, ATSPMVi0nt(0))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37657(line=691, offs=17) -- 38151(line=697, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 38189(line=697, offs=17) -- 39001(line=707, offs=39)
 */
 ATSif(
-tmp1351
+tmp1381
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37698(line=691, offs=58) -- 37849(line=693, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 38230(line=697, offs=58) -- 38381(line=699, offs=39)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37729(line=692, offs=28) -- 37810(line=692, offs=109)
+emit_instr: loc0 = build/src/bin/bats.dats: 38261(line=698, offs=28) -- 38342(line=698, offs=109)
 */
-ATSINSmove_void(tmp1357, atspre_prerr_string(ATSPMVstring("error: unexpected extra argument\nusage: bats ats2 install [--force]\n"))) ;
+ATSINSmove_void(tmp1387, atspre_prerr_string(ATSPMVstring("error: unexpected extra argument\nusage: bats ats2 install [--force]\n"))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37830(line=693, offs=20) -- 37845(line=693, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 38362(line=699, offs=20) -- 38377(line=699, offs=35)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37698(line=691, offs=58) -- 37849(line=693, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 38230(line=697, offs=58) -- 38381(line=699, offs=39)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37871(line=694, offs=22) -- 38151(line=697, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 38403(line=700, offs=22) -- 39001(line=707, offs=39)
 */
 ATSif(
-tmp1348
+tmp1378
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37892(line=694, offs=43) -- 37955(line=694, offs=106)
+emit_instr: loc0 = build/src/bin/bats.dats: 38419(line=700, offs=38) -- 38661(line=703, offs=43)
 */
 ATSif(
-tmp1315
+tmp1317
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37911(line=694, offs=62) -- 37931(line=694, offs=82)
-*/
-ATSINSmove(tmp1358, build_057_src_057_ats2_056_sats__ats2_install_force()) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37949(line=694, offs=100) -- 37954(line=694, offs=105)
-*/
-
-ATSINSmove_con0(tmp1359, 0) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37937(line=694, offs=88) -- 37955(line=694, offs=106)
-*/
-ATSINSmove(tmp1358, build_057_src_057_ats2_056_sats__ats2_ensure(tmp1359)) ;
-
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37888(line=694, offs=39) -- 37985(line=694, offs=136)
-*/
-ATSif(
-tmp1358
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37962(line=694, offs=113) -- 37964(line=694, offs=115)
-*/
-ATSINSmove_void(tmp1099, ATSPMVempty()) ;
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37970(line=694, offs=121) -- 37985(line=694, offs=136)
-*/
-ATSINSmove_void(tmp1099, build_057_src_057_helpers_056_sats__set_build_err()) ;
-
-} /* ATSendif */
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 38008(line=695, offs=22) -- 38151(line=697, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 38438(line=700, offs=57) -- 38618(line=702, offs=41)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38039(line=696, offs=28) -- 38112(line=696, offs=101)
+emit_instr: loc0 = build/src/bin/bats.dats: 38471(line=701, offs=30) -- 38577(line=701, offs=136)
 */
-ATSINSmove_void(tmp1360, atspre_prerr_string(ATSPMVstring("error: specify 'install'\nusage: bats ats2 install [--force]\n"))) ;
+ATSINSmove_void(tmp1388, atspre_prerr_string(ATSPMVstring("error: --force is accepted once, and only by ats2 install\nusage: bats ats2 install [--force]\n"))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38132(line=697, offs=20) -- 38147(line=697, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 38599(line=702, offs=22) -- 38614(line=702, offs=37)
 */
-ATSINSmove_void(tmp1099, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38008(line=695, offs=22) -- 38151(line=697, offs=39)
+emit_instr: loc0 = build/src/bin/bats.dats: 38438(line=700, offs=57) -- 38618(line=702, offs=41)
+*/
+/*
+INSletpop()
+*/
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38642(line=703, offs=24) -- 38661(line=703, offs=43)
+*/
+ATSINSmove_void(tmp1101, build_057_src_057_ats2_056_sats__ats2_print_marker()) ;
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38684(line=704, offs=22) -- 39001(line=707, offs=39)
+*/
+ATSif(
+tmp1377
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38705(line=704, offs=43) -- 38768(line=704, offs=106)
+*/
+ATSif(
+tmp1317
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38724(line=704, offs=62) -- 38744(line=704, offs=82)
+*/
+ATSINSmove(tmp1389, build_057_src_057_ats2_056_sats__ats2_install_force()) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38762(line=704, offs=100) -- 38767(line=704, offs=105)
+*/
+
+ATSINSmove_con0(tmp1390, 0) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38750(line=704, offs=88) -- 38768(line=704, offs=106)
+*/
+ATSINSmove(tmp1389, build_057_src_057_ats2_056_sats__ats2_ensure(tmp1390)) ;
+
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38701(line=704, offs=39) -- 38798(line=704, offs=136)
+*/
+ATSif(
+tmp1389
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38775(line=704, offs=113) -- 38777(line=704, offs=115)
+*/
+ATSINSmove_void(tmp1101, ATSPMVempty()) ;
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38783(line=704, offs=121) -- 38798(line=704, offs=136)
+*/
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
+
+} /* ATSendif */
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38821(line=705, offs=22) -- 39001(line=707, offs=39)
+*/
+/*
+letpush(beg)
+*/
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38852(line=706, offs=28) -- 38962(line=706, offs=138)
+*/
+ATSINSmove_void(tmp1391, atspre_prerr_string(ATSPMVstring("error: specify 'install' or 'marker'\nusage: bats ats2 install [--force]\n       bats ats2 marker\n"))) ;
+
+/*
+letpush(end)
+*/
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38982(line=707, offs=20) -- 38997(line=707, offs=35)
+*/
+ATSINSmove_void(tmp1101, build_057_src_057_helpers_056_sats__set_build_err()) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 38821(line=705, offs=22) -- 39001(line=707, offs=39)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 } /* ATSendif */
+} /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36954(line=679, offs=27) -- 38169(line=698, offs=18)
+emit_instr: loc0 = build/src/bin/bats.dats: 37079(line=680, offs=27) -- 39019(line=708, offs=18)
 */
 /*
 INSletpop()
@@ -24835,15 +24934,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38186(line=699, offs=17) -- 38203(line=699, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 39036(line=709, offs=17) -- 39053(line=709, offs=34)
 */
 ATSINSlab(__atstmplab137):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 13)) { ATSINSgoto(__atstmplab139) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 13)) { ATSINSgoto(__atstmplab139) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38203(line=699, offs=34) -- 38203(line=699, offs=34)
+emit_instr: loc0 = build/src/bin/bats.dats: 39053(line=709, offs=34) -- 39053(line=709, offs=34)
 */
 ATSINSlab(__atstmplab138):
 /*
@@ -24853,128 +24952,128 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38207(line=699, offs=38) -- 38748(line=705, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 39057(line=709, offs=38) -- 39598(line=715, offs=57)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38236(line=700, offs=26) -- 38259(line=700, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 39086(line=710, offs=26) -- 39109(line=710, offs=49)
 */
-ATSINSmove_void(tmp1361, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1392, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38299(line=701, offs=39) -- 38322(line=701, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39149(line=711, offs=39) -- 39172(line=711, offs=62)
 */
-ATSINSmove(tmp1362, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__14(tmp1091)) ;
+ATSINSmove(tmp1393, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__14(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38283(line=701, offs=23) -- 38288(line=701, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 39133(line=711, offs=23) -- 39138(line=711, offs=28)
 */
-ATSINSmove(tmp1364, ATSSELfltrec(tmp1362, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1395, ATSSELfltrec(tmp1393, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38290(line=701, offs=30) -- 38295(line=701, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 39140(line=711, offs=30) -- 39145(line=711, offs=35)
 */
-ATSINSmove(tmp1365, ATSSELfltrec(tmp1362, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1396, ATSSELfltrec(tmp1393, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38353(line=702, offs=30) -- 38385(line=702, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39203(line=712, offs=30) -- 39235(line=712, offs=62)
 */
-ATSINSmove(tmp1368, ATSLIB_056_prelude__gt_g0int_int__217__10(tmp858, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp1399, ATSLIB_056_prelude__gt_g0int_int__217__10(tmp860, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38353(line=702, offs=30) -- 38385(line=702, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39203(line=712, offs=30) -- 39235(line=712, offs=62)
 */
 ATSif(
-tmp1368
+tmp1399
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38353(line=702, offs=30) -- 38385(line=702, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39203(line=712, offs=30) -- 39235(line=712, offs=62)
 */
-ATSINSmove(tmp1367, ATSPMVbool_true()) ;
+ATSINSmove(tmp1398, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38353(line=702, offs=30) -- 38385(line=702, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39203(line=712, offs=30) -- 39235(line=712, offs=62)
 */
-ATSINSmove(tmp1367, ATSLIB_056_prelude__gt_g0int_int__217__11(tmp851, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1398, ATSLIB_056_prelude__gt_g0int_int__217__11(tmp853, ATSPMVi0nt(0))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38350(line=702, offs=27) -- 38637(line=703, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 39200(line=712, offs=27) -- 39487(line=713, offs=107)
 */
 ATSif(
-tmp1367
+tmp1398
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38391(line=702, offs=68) -- 38530(line=702, offs=207)
+emit_instr: loc0 = build/src/bin/bats.dats: 39241(line=712, offs=68) -- 39380(line=712, offs=207)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38404(line=702, offs=81) -- 38507(line=702, offs=184)
+emit_instr: loc0 = build/src/bin/bats.dats: 39254(line=712, offs=81) -- 39357(line=712, offs=184)
 */
-ATSINSmove_void(tmp1373, atspre_prerr_string(ATSPMVstring("error: unexpected extra argument\nusage: bats clone-repository <commit> --repository <dir>\n"))) ;
+ATSINSmove_void(tmp1404, atspre_prerr_string(ATSPMVstring("error: unexpected extra argument\nusage: bats clone-repository <commit> --repository <dir>\n"))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38511(line=702, offs=188) -- 38526(line=702, offs=203)
+emit_instr: loc0 = build/src/bin/bats.dats: 39361(line=712, offs=188) -- 39376(line=712, offs=203)
 */
-ATSINSmove_void(tmp1366, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1397, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38391(line=702, offs=68) -- 38530(line=702, offs=207)
+emit_instr: loc0 = build/src/bin/bats.dats: 39241(line=712, offs=68) -- 39380(line=712, offs=207)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38557(line=703, offs=27) -- 38608(line=703, offs=78)
+emit_instr: loc0 = build/src/bin/bats.dats: 39407(line=713, offs=27) -- 39458(line=713, offs=78)
 */
-ATSINSmove(tmp1374, build_057_src_057_setup_056_sats__clone_repository(ATSPMVrefarg0(tmp1365), tmp1094, ATSPMVrefarg0(tmp1067), tmp1063)) ;
+ATSINSmove(tmp1405, build_057_src_057_setup_056_sats__clone_repository(ATSPMVrefarg0(tmp1396), tmp1096, ATSPMVrefarg0(tmp1069), tmp1065)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38554(line=703, offs=24) -- 38637(line=703, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 39404(line=713, offs=24) -- 39487(line=713, offs=107)
 */
 ATSif(
-tmp1374
+tmp1405
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38614(line=703, offs=84) -- 38616(line=703, offs=86)
+emit_instr: loc0 = build/src/bin/bats.dats: 39464(line=713, offs=84) -- 39466(line=713, offs=86)
 */
-ATSINSmove_void(tmp1366, ATSPMVempty()) ;
+ATSINSmove_void(tmp1397, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38622(line=703, offs=92) -- 38637(line=703, offs=107)
+emit_instr: loc0 = build/src/bin/bats.dats: 39472(line=713, offs=92) -- 39487(line=713, offs=107)
 */
-ATSINSmove_void(tmp1366, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1397, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38664(line=704, offs=26) -- 38691(line=704, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 39514(line=714, offs=26) -- 39541(line=714, offs=53)
 */
-ATSINSmove_void(tmp1375, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__11(ATSPMVrefarg0(tmp1364), tmp1365)) ;
+ATSINSmove_void(tmp1406, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__11(ATSPMVrefarg0(tmp1395), tmp1396)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38723(line=705, offs=32) -- 38742(line=705, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 39573(line=715, offs=32) -- 39592(line=715, offs=51)
 */
-ATSINSmove(tmp1378, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__11(tmp1364)) ;
+ATSINSmove(tmp1409, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__11(tmp1395)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38709(line=705, offs=18) -- 38744(line=705, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 39559(line=715, offs=18) -- 39594(line=715, offs=53)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__29(tmp1378)) ;
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__29(tmp1409)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38207(line=699, offs=38) -- 38748(line=705, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 39057(line=709, offs=38) -- 39598(line=715, offs=57)
 */
 /*
 INSletpop()
@@ -24983,15 +25082,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38765(line=706, offs=17) -- 38779(line=706, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 39615(line=716, offs=17) -- 39629(line=716, offs=31)
 */
 ATSINSlab(__atstmplab139):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 14)) { ATSINSgoto(__atstmplab141) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 14)) { ATSINSgoto(__atstmplab141) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38779(line=706, offs=31) -- 38779(line=706, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 39629(line=716, offs=31) -- 39629(line=716, offs=31)
 */
 ATSINSlab(__atstmplab140):
 /*
@@ -25001,128 +25100,128 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38783(line=706, offs=35) -- 39280(line=712, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 39633(line=716, offs=35) -- 40130(line=722, offs=57)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38812(line=707, offs=26) -- 38835(line=707, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 39662(line=717, offs=26) -- 39685(line=717, offs=49)
 */
-ATSINSmove_void(tmp1380, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1411, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38875(line=708, offs=39) -- 38898(line=708, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39725(line=718, offs=39) -- 39748(line=718, offs=62)
 */
-ATSINSmove(tmp1381, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__15(tmp1091)) ;
+ATSINSmove(tmp1412, build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__15(tmp1093)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38859(line=708, offs=23) -- 38864(line=708, offs=28)
+emit_instr: loc0 = build/src/bin/bats.dats: 39709(line=718, offs=23) -- 39714(line=718, offs=28)
 */
-ATSINSmove(tmp1383, ATSSELfltrec(tmp1381, postiats_tyrec_1, atslab__0)) ;
+ATSINSmove(tmp1414, ATSSELfltrec(tmp1412, postiats_tyrec_1, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38866(line=708, offs=30) -- 38871(line=708, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 39716(line=718, offs=30) -- 39721(line=718, offs=35)
 */
-ATSINSmove(tmp1384, ATSSELfltrec(tmp1381, postiats_tyrec_1, atslab__1)) ;
+ATSINSmove(tmp1415, ATSSELfltrec(tmp1412, postiats_tyrec_1, atslab__1)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38929(line=709, offs=30) -- 38961(line=709, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39779(line=719, offs=30) -- 39811(line=719, offs=62)
 */
-ATSINSmove(tmp1387, ATSLIB_056_prelude__gt_g0int_int__217__12(tmp858, ATSPMVi0nt(3))) ;
+ATSINSmove(tmp1418, ATSLIB_056_prelude__gt_g0int_int__217__12(tmp860, ATSPMVi0nt(3))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38929(line=709, offs=30) -- 38961(line=709, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39779(line=719, offs=30) -- 39811(line=719, offs=62)
 */
 ATSif(
-tmp1387
+tmp1418
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38929(line=709, offs=30) -- 38961(line=709, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39779(line=719, offs=30) -- 39811(line=719, offs=62)
 */
-ATSINSmove(tmp1386, ATSPMVbool_true()) ;
+ATSINSmove(tmp1417, ATSPMVbool_true()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38929(line=709, offs=30) -- 38961(line=709, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 39779(line=719, offs=30) -- 39811(line=719, offs=62)
 */
-ATSINSmove(tmp1386, ATSLIB_056_prelude__gt_g0int_int__217__13(tmp851, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1417, ATSLIB_056_prelude__gt_g0int_int__217__13(tmp853, ATSPMVi0nt(0))) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38926(line=709, offs=27) -- 39169(line=710, offs=85)
+emit_instr: loc0 = build/src/bin/bats.dats: 39776(line=719, offs=27) -- 40019(line=720, offs=85)
 */
 ATSif(
-tmp1386
+tmp1417
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38967(line=709, offs=68) -- 39084(line=709, offs=185)
+emit_instr: loc0 = build/src/bin/bats.dats: 39817(line=719, offs=68) -- 39934(line=719, offs=185)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38980(line=709, offs=81) -- 39061(line=709, offs=162)
+emit_instr: loc0 = build/src/bin/bats.dats: 39830(line=719, offs=81) -- 39911(line=719, offs=162)
 */
-ATSINSmove_void(tmp1392, atspre_prerr_string(ATSPMVstring("error: unexpected extra argument\nusage: bats record-commit <commit>\n"))) ;
+ATSINSmove_void(tmp1423, atspre_prerr_string(ATSPMVstring("error: unexpected extra argument\nusage: bats record-commit <commit>\n"))) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39065(line=709, offs=166) -- 39080(line=709, offs=181)
+emit_instr: loc0 = build/src/bin/bats.dats: 39915(line=719, offs=166) -- 39930(line=719, offs=181)
 */
-ATSINSmove_void(tmp1385, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1416, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38967(line=709, offs=68) -- 39084(line=709, offs=185)
+emit_instr: loc0 = build/src/bin/bats.dats: 39817(line=719, offs=68) -- 39934(line=719, offs=185)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39111(line=710, offs=27) -- 39140(line=710, offs=56)
+emit_instr: loc0 = build/src/bin/bats.dats: 39961(line=720, offs=27) -- 39990(line=720, offs=56)
 */
-ATSINSmove(tmp1393, build_057_src_057_setup_056_sats__record_commit(ATSPMVrefarg0(tmp1384), tmp1094)) ;
+ATSINSmove(tmp1424, build_057_src_057_setup_056_sats__record_commit(ATSPMVrefarg0(tmp1415), tmp1096)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39108(line=710, offs=24) -- 39169(line=710, offs=85)
+emit_instr: loc0 = build/src/bin/bats.dats: 39958(line=720, offs=24) -- 40019(line=720, offs=85)
 */
 ATSif(
-tmp1393
+tmp1424
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39146(line=710, offs=62) -- 39148(line=710, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 39996(line=720, offs=62) -- 39998(line=720, offs=64)
 */
-ATSINSmove_void(tmp1385, ATSPMVempty()) ;
+ATSINSmove_void(tmp1416, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39154(line=710, offs=70) -- 39169(line=710, offs=85)
+emit_instr: loc0 = build/src/bin/bats.dats: 40004(line=720, offs=70) -- 40019(line=720, offs=85)
 */
-ATSINSmove_void(tmp1385, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmp1416, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39196(line=711, offs=26) -- 39223(line=711, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 40046(line=721, offs=26) -- 40073(line=721, offs=53)
 */
-ATSINSmove_void(tmp1394, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__12(ATSPMVrefarg0(tmp1383), tmp1384)) ;
+ATSINSmove_void(tmp1425, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__12(ATSPMVrefarg0(tmp1414), tmp1415)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39255(line=712, offs=32) -- 39274(line=712, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 40105(line=722, offs=32) -- 40124(line=722, offs=51)
 */
-ATSINSmove(tmp1397, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__12(tmp1383)) ;
+ATSINSmove(tmp1428, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__12(tmp1414)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39241(line=712, offs=18) -- 39276(line=712, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 40091(line=722, offs=18) -- 40126(line=722, offs=53)
 */
-ATSINSmove_void(tmp1099, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__30(tmp1397)) ;
+ATSINSmove_void(tmp1101, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__30(tmp1428)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 38783(line=706, offs=35) -- 39280(line=712, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 39633(line=716, offs=35) -- 40130(line=722, offs=57)
 */
 /*
 INSletpop()
@@ -25131,15 +25230,15 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39297(line=713, offs=17) -- 39306(line=713, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 40147(line=723, offs=17) -- 40156(line=723, offs=26)
 */
 ATSINSlab(__atstmplab141):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
-ATSifnthen(ATSCKpat_con0(tmp1088, 15)) { ATSINSgoto(__atstmplab143) ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 15)) { ATSINSgoto(__atstmplab143) ; } ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39306(line=713, offs=26) -- 39306(line=713, offs=26)
+emit_instr: loc0 = build/src/bin/bats.dats: 40156(line=723, offs=26) -- 40156(line=723, offs=26)
 */
 ATSINSlab(__atstmplab142):
 /*
@@ -25149,37 +25248,37 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39310(line=713, offs=30) -- 39456(line=716, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 40160(line=723, offs=30) -- 40306(line=726, offs=45)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39339(line=714, offs=26) -- 39362(line=714, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 40189(line=724, offs=26) -- 40212(line=724, offs=49)
 */
-ATSINSmove_void(tmp1399, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1430, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39389(line=715, offs=26) -- 39410(line=715, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 40239(line=725, offs=26) -- 40260(line=725, offs=47)
 */
-ATSINSmove_void(tmp1400, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__31(tmp1091)) ;
+ATSINSmove_void(tmp1431, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__31(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39429(line=716, offs=18) -- 39452(line=716, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 40279(line=726, offs=18) -- 40302(line=726, offs=41)
 */
-ATSINSmove_void(tmp1402, atspre_print_string(ATSPMVstring("bats 0.1.0"))) ;
+ATSINSmove_void(tmp1433, atspre_print_string(ATSPMVstring("bats 0.1.0"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39429(line=716, offs=18) -- 39452(line=716, offs=41)
+emit_instr: loc0 = build/src/bin/bats.dats: 40279(line=726, offs=18) -- 40302(line=726, offs=41)
 */
-ATSINSmove_void(tmp1099, atspre_print_newline()) ;
+ATSINSmove_void(tmp1101, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39310(line=713, offs=30) -- 39456(line=716, offs=45)
+emit_instr: loc0 = build/src/bin/bats.dats: 40160(line=723, offs=30) -- 40306(line=726, offs=45)
 */
 /*
 INSletpop()
@@ -25188,17 +25287,17 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39473(line=717, offs=17) -- 39489(line=717, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 40323(line=727, offs=17) -- 40339(line=727, offs=33)
 */
 ATSINSlab(__atstmplab143):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27098(line=499, offs=36) -- 27128(line=499, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 27223(line=500, offs=36) -- 27253(line=500, offs=66)
 */
 #if(0)
-ATSifnthen(ATSCKpat_con0(tmp1088, 16)) { ATSINSdeadcode_fail() ; } ;
+ATSifnthen(ATSCKpat_con0(tmp1090, 16)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39489(line=717, offs=33) -- 39489(line=717, offs=33)
+emit_instr: loc0 = build/src/bin/bats.dats: 40339(line=727, offs=33) -- 40339(line=727, offs=33)
 */
 ATSINSlab(__atstmplab144):
 /*
@@ -25208,37 +25307,37 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39493(line=717, offs=37) -- 39773(line=720, offs=179)
+emit_instr: loc0 = build/src/bin/bats.dats: 40343(line=727, offs=37) -- 40623(line=730, offs=179)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39522(line=718, offs=26) -- 39545(line=718, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 40372(line=728, offs=26) -- 40395(line=728, offs=49)
 */
-ATSINSmove_void(tmp1403, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1028)) ;
+ATSINSmove_void(tmp1434, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_result_free(tmp1030)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39572(line=719, offs=26) -- 39593(line=719, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 40422(line=729, offs=26) -- 40443(line=729, offs=47)
 */
-ATSINSmove_void(tmp1404, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__32(tmp1091)) ;
+ATSINSmove_void(tmp1435, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__32(tmp1093)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39612(line=720, offs=18) -- 39769(line=720, offs=175)
+emit_instr: loc0 = build/src/bin/bats.dats: 40462(line=730, offs=18) -- 40619(line=730, offs=175)
 */
-ATSINSmove_void(tmp1406, atspre_print_string(ATSPMVstring("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|ats2|clone-repository|record-commit|completions> [--only debug|release]"))) ;
+ATSINSmove_void(tmp1437, atspre_print_string(ATSPMVstring("usage: bats <init|lock|add|remove|build|run|test|check|tree|upload|clean|ats2|clone-repository|record-commit|completions> [--only debug|release]"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39612(line=720, offs=18) -- 39769(line=720, offs=175)
+emit_instr: loc0 = build/src/bin/bats.dats: 40462(line=730, offs=18) -- 40619(line=730, offs=175)
 */
-ATSINSmove_void(tmp1099, atspre_print_newline()) ;
+ATSINSmove_void(tmp1101, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39493(line=717, offs=37) -- 39773(line=720, offs=179)
+emit_instr: loc0 = build/src/bin/bats.dats: 40343(line=727, offs=37) -- 40623(line=730, offs=179)
 */
 /*
 INSletpop()
@@ -25253,74 +25352,74 @@ ATScaseof_end()
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39799(line=721, offs=24) -- 39822(line=721, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 40649(line=731, offs=24) -- 40672(line=731, offs=47)
 */
-ATSINSmove_void(tmp1407, build_057_src_057_helpers_056_sats__project_lock_release(tmp1095)) ;
+ATSINSmove_void(tmp1438, build_057_src_057_helpers_056_sats__project_lock_release(tmp1097)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39847(line=722, offs=24) -- 39878(line=722, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 40697(line=732, offs=24) -- 40728(line=732, offs=55)
 */
-ATSINSmove_void(tmp1408, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__13(ATSPMVrefarg0(tmp1066), tmp1067)) ;
+ATSINSmove_void(tmp1439, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__13(ATSPMVrefarg0(tmp1068), tmp1069)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39916(line=723, offs=38) -- 39937(line=723, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 40766(line=733, offs=38) -- 40787(line=733, offs=59)
 */
-ATSINSmove(tmp1412, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__13(tmp1066)) ;
+ATSINSmove(tmp1443, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__13(tmp1068)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39902(line=723, offs=24) -- 39939(line=723, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 40752(line=733, offs=24) -- 40789(line=733, offs=61)
 */
-ATSINSmove_void(tmp1410, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__33(tmp1412)) ;
+ATSINSmove_void(tmp1441, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__33(tmp1443)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 39963(line=724, offs=24) -- 39996(line=724, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 40813(line=734, offs=24) -- 40846(line=734, offs=57)
 */
-ATSINSmove_void(tmp1414, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__14(ATSPMVrefarg0(tmp1070), tmp1071)) ;
+ATSINSmove_void(tmp1445, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__14(ATSPMVrefarg0(tmp1072), tmp1073)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40034(line=725, offs=38) -- 40056(line=725, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 40884(line=735, offs=38) -- 40906(line=735, offs=60)
 */
-ATSINSmove(tmp1418, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__14(tmp1070)) ;
+ATSINSmove(tmp1449, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__14(tmp1072)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40020(line=725, offs=24) -- 40058(line=725, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 40870(line=735, offs=24) -- 40908(line=735, offs=62)
 */
-ATSINSmove_void(tmp1416, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__34(tmp1418)) ;
+ATSINSmove_void(tmp1447, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__34(tmp1449)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40082(line=726, offs=24) -- 40109(line=726, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 40932(line=736, offs=24) -- 40959(line=736, offs=51)
 */
-ATSINSmove_void(tmp1420, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__15(ATSPMVrefarg0(tmp1082), tmp1083)) ;
+ATSINSmove_void(tmp1451, build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__15(ATSPMVrefarg0(tmp1084), tmp1085)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40147(line=727, offs=38) -- 40166(line=727, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 40997(line=737, offs=38) -- 41016(line=737, offs=57)
 */
-ATSINSmove(tmp1423, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__15(tmp1082)) ;
+ATSINSmove(tmp1454, build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__15(tmp1084)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40133(line=727, offs=24) -- 40168(line=727, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 40983(line=737, offs=24) -- 41018(line=737, offs=59)
 */
-ATSINSmove_void(tmpret835, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__35(tmp1423)) ;
+ATSINSmove_void(tmpret837, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__35(tmp1454)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 27676(line=508, offs=16) -- 40187(line=728, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 27801(line=509, offs=16) -- 41037(line=738, offs=19)
 */
 /*
 INSletpop()
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25275(line=469, offs=20) -- 40203(line=729, offs=16)
+emit_instr: loc0 = build/src/bin/bats.dats: 25400(line=470, offs=20) -- 41053(line=739, offs=16)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 25012(line=462, offs=26) -- 40207(line=729, offs=20)
+emit_instr: loc0 = build/src/bin/bats.dats: 25137(line=463, offs=26) -- 41057(line=739, offs=20)
 */
 /*
 INSletpop()
@@ -25329,27 +25428,27 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40220(line=730, offs=13) -- 40230(line=730, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 41070(line=740, offs=13) -- 41080(line=740, offs=23)
 */
 ATSINSlab(__atstmplab105):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 24816(line=457, offs=24) -- 24847(line=457, offs=55)
+emit_instr: loc0 = build/src/bin/bats.dats: 24941(line=458, offs=24) -- 24972(line=458, offs=55)
 */
 #if(0)
-ATSifnthen(ATSCKpat_con1(tmp1021, 1)) { ATSINSdeadcode_fail() ; } ;
+ATSifnthen(ATSCKpat_con1(tmp1023, 1)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40230(line=730, offs=23) -- 40230(line=730, offs=23)
+emit_instr: loc0 = build/src/bin/bats.dats: 41080(line=740, offs=23) -- 41080(line=740, offs=23)
 */
 ATSINSlab(__atstmplab106):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40228(line=730, offs=21) -- 40229(line=730, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 41078(line=740, offs=21) -- 41079(line=740, offs=22)
 */
-ATSINSmove(tmp1029, ATSSELcon(tmp1021, postiats_tysum_5, atslab__0)) ;
+ATSINSmove(tmp1031, ATSSELcon(tmp1023, postiats_tysum_5, atslab__0)) ;
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40220(line=730, offs=13) -- 40433(line=734, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 41070(line=740, offs=13) -- 41283(line=744, offs=64)
 */
-ATSINSfreecon(tmp1021) ;
+ATSINSfreecon(tmp1023) ;
 /*
 emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 */
@@ -25357,49 +25456,49 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40234(line=730, offs=27) -- 40433(line=734, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 41084(line=740, offs=27) -- 41283(line=744, offs=64)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40261(line=731, offs=24) -- 40283(line=731, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 41111(line=741, offs=24) -- 41133(line=741, offs=46)
 */
-ATSINSmove_void(tmp1425, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_error_free(tmp1029)) ;
+ATSINSmove_void(tmp1456, build_057_bats_modules_057_argparse_057_src_057_lib_056_sats__parse_error_free(tmp1031)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40308(line=732, offs=24) -- 40331(line=732, offs=47)
+emit_instr: loc0 = build/src/bin/bats.dats: 41158(line=742, offs=24) -- 41181(line=742, offs=47)
 */
-ATSINSmove_void(tmp1426, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__36(tmp844)) ;
+ATSINSmove_void(tmp1457, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__36(tmp846)) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40356(line=733, offs=24) -- 40369(line=733, offs=37)
+emit_instr: loc0 = build/src/bin/bats.dats: 41206(line=743, offs=24) -- 41219(line=743, offs=37)
 */
-ATSINSmove_void(tmp1428, print_usage_64()) ;
+ATSINSmove_void(tmp1459, print_usage_64()) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40386(line=734, offs=17) -- 40428(line=734, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 41236(line=744, offs=17) -- 41278(line=744, offs=59)
 */
 ATSif(
-tmp860
+tmp862
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40405(line=734, offs=36) -- 40420(line=734, offs=51)
+emit_instr: loc0 = build/src/bin/bats.dats: 41255(line=744, offs=36) -- 41270(line=744, offs=51)
 */
-ATSINSmove_void(tmpret835, build_057_src_057_helpers_056_sats__set_build_err()) ;
+ATSINSmove_void(tmpret837, build_057_src_057_helpers_056_sats__set_build_err()) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40426(line=734, offs=57) -- 40428(line=734, offs=59)
+emit_instr: loc0 = build/src/bin/bats.dats: 41276(line=744, offs=57) -- 41278(line=744, offs=59)
 */
-ATSINSmove_void(tmpret835, ATSPMVempty()) ;
+ATSINSmove_void(tmpret837, ATSPMVempty()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40234(line=730, offs=27) -- 40433(line=734, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 41084(line=740, offs=27) -- 41283(line=744, offs=64)
 */
 /*
 INSletpop()
@@ -25412,7 +25511,7 @@ ATSbranch_end()
 ATScaseof_end()
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19341(line=382, offs=27) -- 40445(line=735, offs=12)
+emit_instr: loc0 = build/src/bin/bats.dats: 19466(line=383, offs=27) -- 41295(line=745, offs=12)
 */
 /*
 INSletpop()
@@ -25421,17 +25520,17 @@ ATSbranch_end()
 
 ATSbranch_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40454(line=736, offs=9) -- 40464(line=736, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 41304(line=746, offs=9) -- 41314(line=746, offs=19)
 */
 ATSINSlab(__atstmplab101):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19262(line=379, offs=17) -- 19288(line=379, offs=43)
+emit_instr: loc0 = build/src/bin/bats.dats: 19387(line=380, offs=17) -- 19413(line=380, offs=43)
 */
 #if(0)
-ATSifthen(ATSCKptriscons(tmp841)) { ATSINSdeadcode_fail() ; } ;
+ATSifthen(ATSCKptriscons(tmp843)) { ATSINSdeadcode_fail() ; } ;
 #endif
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40464(line=736, offs=19) -- 40464(line=736, offs=19)
+emit_instr: loc0 = build/src/bin/bats.dats: 41314(line=746, offs=19) -- 41314(line=746, offs=19)
 */
 ATSINSlab(__atstmplab102):
 /*
@@ -25441,32 +25540,32 @@ emit_instr: loc0 = : 0(line=0, offs=0) -- 0(line=0, offs=0)
 ibranch-mbody:
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40468(line=736, offs=23) -- 40569(line=738, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 41318(line=746, offs=23) -- 41419(line=748, offs=57)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40491(line=737, offs=20) -- 40511(line=737, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 41341(line=747, offs=20) -- 41361(line=747, offs=40)
 */
-ATSINSmove_void(tmp1429, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__37(tmp836)) ;
+ATSINSmove_void(tmp1460, build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__37(tmp838)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40524(line=738, offs=12) -- 40565(line=738, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 41374(line=748, offs=12) -- 41415(line=748, offs=53)
 */
-ATSINSmove_void(tmp1431, atspre_print_string(ATSPMVstring("Cannot read the command line"))) ;
+ATSINSmove_void(tmp1462, atspre_print_string(ATSPMVstring("Cannot read the command line"))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40524(line=738, offs=12) -- 40565(line=738, offs=53)
+emit_instr: loc0 = build/src/bin/bats.dats: 41374(line=748, offs=12) -- 41415(line=748, offs=53)
 */
-ATSINSmove_void(tmpret835, atspre_print_newline()) ;
+ATSINSmove_void(tmpret837, atspre_print_newline()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40468(line=736, offs=23) -- 40569(line=738, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 41318(line=746, offs=23) -- 41419(line=748, offs=57)
 */
 /*
 INSletpop()
@@ -25479,13 +25578,13 @@ ATSbranch_end()
 ATScaseof_end()
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 19206(line=377, offs=25) -- 40573(line=739, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 19331(line=378, offs=25) -- 41423(line=749, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn_void(tmpret835) ;
+ATSreturn_void(tmpret837) ;
 } /* end of [bats_main_225] */
 
 #if(0)
@@ -25508,7 +25607,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25518,10 +25617,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837, PMVtmpltvar(_alloc_zeroed$4773(0)<S2Ecst(byte_t0ype)>)(arg0)) ;
+ATSINSmove(tmpret839, PMVtmpltvar(_alloc_zeroed$4773(0)<S2Ecst(byte_t0ype)>)(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837) ;
+ATSreturn(tmpret839) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226] */
 #endif // end of [TEMPLATE]
 
@@ -25544,7 +25643,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__1(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__1, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25554,10 +25653,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__1, _alloc_zeroed_228__228__1(arg0)) ;
+ATSINSmove(tmpret839__1, _alloc_zeroed_228__228__1(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__1) ;
+ATSreturn(tmpret839__1) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__1] */
 
 #if(0)
@@ -25575,7 +25674,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25585,10 +25684,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839, calloc(arg0, ATSPMVsizeof(atstyvar_type(a)))) ;
+ATSINSmove(tmpret841, calloc(arg0, ATSPMVsizeof(atstyvar_type(a)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839) ;
+ATSreturn(tmpret841) ;
 } /* end of [_alloc_zeroed_228__228] */
 #endif // end of [TEMPLATE]
 
@@ -25606,7 +25705,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__1(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__1, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__1, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25616,10 +25715,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__1, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__1, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__1) ;
+ATSreturn(tmpret841__1) ;
 } /* end of [_alloc_zeroed_228__228__1] */
 
 /*
@@ -25641,7 +25740,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__2(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__2, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25651,10 +25750,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__2, _alloc_zeroed_228__228__2(arg0)) ;
+ATSINSmove(tmpret839__2, _alloc_zeroed_228__228__2(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__2) ;
+ATSreturn(tmpret839__2) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__2] */
 
 /*
@@ -25671,7 +25770,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__2(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__2, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25681,10 +25780,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__2, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__2, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__2) ;
+ATSreturn(tmpret841__2) ;
 } /* end of [_alloc_zeroed_228__228__2] */
 
 /*
@@ -25706,8 +25805,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__20(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__20, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__20, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__20, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__20, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25717,15 +25816,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__20, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__20, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__20, atspre_g1int_gte_int(arg0, tmp281__20)) ;
+ATSINSmove(tmpret282__20, atspre_g1int_gte_int(arg0, tmp283__20)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__20) ;
+ATSreturn(tmpret282__20) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__20] */
 
 /*
@@ -25747,8 +25846,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gte_g1int_int__66__21(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret280__21, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp281__21, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret282__21, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp283__21, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25758,15 +25857,15 @@ ATSINSflab(__patsflab_gte_g1int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12784(line=663, offs=30) -- 12795(line=663, offs=41)
 */
-ATSINSmove(tmp281__21, atspre_g1int2int_int_int(arg1)) ;
+ATSINSmove(tmp283__21, atspre_g1int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12766(line=663, offs=12) -- 12797(line=663, offs=43)
 */
-ATSINSmove(tmpret280__21, atspre_g1int_gte_int(arg0, tmp281__21)) ;
+ATSINSmove(tmpret282__21, atspre_g1int_gte_int(arg0, tmp283__21)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret280__21) ;
+ATSreturn(tmpret282__21) ;
 } /* end of [ATSLIB_056_prelude__gte_g1int_int__66__21] */
 
 /*
@@ -25788,7 +25887,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__2(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__2, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__2, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25799,11 +25898,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__2, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__2, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__2, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__2, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__2) ;
+ATSreturn(tmpret800__2) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__2] */
 
 /*
@@ -25825,7 +25924,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__3(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__3, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__3, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25836,11 +25935,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__3, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__3, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__3, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__3, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__3) ;
+ATSreturn(tmpret800__3) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__3] */
 
 /*
@@ -25862,7 +25961,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__4(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__4, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__4, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25873,11 +25972,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__4, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__4, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__4, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__4, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__4) ;
+ATSreturn(tmpret800__4) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__4] */
 
 /*
@@ -25899,7 +25998,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__2(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__2) ;
+// ATStmpdec_void(tmpret806__2) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25909,9 +26008,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__2, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__2, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__2) ;
+ATSreturn_void(tmpret806__2) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__2] */
 
 /*
@@ -25933,7 +26032,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__2(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__2) ;
+// ATStmpdec_void(tmpret809__2) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25943,9 +26042,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__2, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__2, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__2) ;
+ATSreturn_void(tmpret809__2) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__2] */
 
 /*
@@ -25967,7 +26066,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__2(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__2, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__2, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -25977,9 +26076,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__2, arg0) ;
+ATSINSmove(tmpret812__2, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__2) ;
+ATSreturn(tmpret812__2) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__2] */
 
 /*
@@ -26001,7 +26100,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__3(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__3) ;
+// ATStmpdec_void(tmpret806__3) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26011,9 +26110,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__3, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__3, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__3) ;
+ATSreturn_void(tmpret806__3) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__3] */
 
 /*
@@ -26035,7 +26134,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__3(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__3) ;
+// ATStmpdec_void(tmpret809__3) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26045,9 +26144,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__3, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__3, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__3) ;
+ATSreturn_void(tmpret809__3) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__3] */
 
 /*
@@ -26069,7 +26168,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__3(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__3, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26079,9 +26178,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__3, arg0) ;
+ATSINSmove(tmpret812__3, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__3) ;
+ATSreturn(tmpret812__3) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__3] */
 
 /*
@@ -26103,7 +26202,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__4(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__4) ;
+// ATStmpdec_void(tmpret806__4) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26113,9 +26212,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__4, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__4, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__4) ;
+ATSreturn_void(tmpret806__4) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__4] */
 
 /*
@@ -26137,7 +26236,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__4(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__4) ;
+// ATStmpdec_void(tmpret809__4) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26147,9 +26246,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__4, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__4, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__4) ;
+ATSreturn_void(tmpret809__4) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__4] */
 
 /*
@@ -26171,7 +26270,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__4(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__4, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26181,9 +26280,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__4, arg0) ;
+ATSINSmove(tmpret812__4, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__4) ;
+ATSreturn(tmpret812__4) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__4] */
 
 /*
@@ -26205,7 +26304,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__5(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__5) ;
+// ATStmpdec_void(tmpret809__5) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26215,9 +26314,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__5, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__5, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__5) ;
+ATSreturn_void(tmpret809__5) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__5] */
 
 /*
@@ -26239,7 +26338,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__3(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__3, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26249,10 +26348,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__3, _alloc_zeroed_228__228__3(arg0)) ;
+ATSINSmove(tmpret839__3, _alloc_zeroed_228__228__3(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__3) ;
+ATSreturn(tmpret839__3) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__3] */
 
 /*
@@ -26269,7 +26368,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__3(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__3, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__3, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26279,10 +26378,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__3, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__3, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__3) ;
+ATSreturn(tmpret841__3) ;
 } /* end of [_alloc_zeroed_228__228__3] */
 
 /*
@@ -26304,7 +26403,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__5(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__5, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__5, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26315,11 +26414,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__5, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__5, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__5, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__5, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__5) ;
+ATSreturn(tmpret800__5) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__5] */
 
 #if(0)
@@ -26342,7 +26441,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_result_057_src_057_lib_056_sats__discard__250(atstype_boxed arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1052) ;
+// ATStmpdec_void(tmpret1054) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26382,7 +26481,7 @@ ibranch-mbody:
 /*
 emit_instr: loc0 = build/bats_modules/result/src/lib.dats: 1377(line=75, offs=26) -- 1379(line=75, offs=28)
 */
-ATSINSmove_void(tmpret1052, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1054, ATSPMVempty()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
@@ -26413,7 +26512,7 @@ ibranch-mbody:
 /*
 emit_instr: loc0 = build/bats_modules/result/src/lib.dats: 1393(line=75, offs=42) -- 1395(line=75, offs=44)
 */
-ATSINSmove_void(tmpret1052, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1054, ATSPMVempty()) ;
 ATSbranch_end()
 
 /*
@@ -26422,7 +26521,7 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn_void(tmpret1052) ;
+ATSreturn_void(tmpret1054) ;
 } /* end of [build_057_bats_modules_057_result_057_src_057_lib_056_sats__discard__250] */
 #endif // end of [TEMPLATE]
 
@@ -26445,7 +26544,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_result_057_src_057_lib_056_sats__discard__250__1(atstype_boxed arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1052__1) ;
+// ATStmpdec_void(tmpret1054__1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26485,7 +26584,7 @@ ibranch-mbody:
 /*
 emit_instr: loc0 = build/bats_modules/result/src/lib.dats: 1377(line=75, offs=26) -- 1379(line=75, offs=28)
 */
-ATSINSmove_void(tmpret1052__1, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1054__1, ATSPMVempty()) ;
 ATSbranch_end()
 
 ATSbranch_beg()
@@ -26516,7 +26615,7 @@ ibranch-mbody:
 /*
 emit_instr: loc0 = build/bats_modules/result/src/lib.dats: 1393(line=75, offs=42) -- 1395(line=75, offs=44)
 */
-ATSINSmove_void(tmpret1052__1, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1054__1, ATSPMVempty()) ;
 ATSbranch_end()
 
 /*
@@ -26525,7 +26624,7 @@ ATSbranch_end()
 ATScaseof_end()
 
 ATSfunbody_end()
-ATSreturn_void(tmpret1052__1) ;
+ATSreturn_void(tmpret1054__1) ;
 } /* end of [build_057_bats_modules_057_result_057_src_057_lib_056_sats__discard__250__1] */
 
 /*
@@ -26547,7 +26646,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__5(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__5) ;
+// ATStmpdec_void(tmpret806__5) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26557,9 +26656,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__5, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__5, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__5) ;
+ATSreturn_void(tmpret806__5) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__5] */
 
 /*
@@ -26581,7 +26680,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__6(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__6) ;
+// ATStmpdec_void(tmpret809__6) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26591,9 +26690,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__6, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__6, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__6) ;
+ATSreturn_void(tmpret809__6) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__6] */
 
 /*
@@ -26615,7 +26714,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__5(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__5, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26625,9 +26724,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__5, arg0) ;
+ATSINSmove(tmpret812__5, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__5) ;
+ATSreturn(tmpret812__5) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__5] */
 
 /*
@@ -26649,7 +26748,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__4(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__4, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26659,10 +26758,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__4, _alloc_zeroed_228__228__4(arg0)) ;
+ATSINSmove(tmpret839__4, _alloc_zeroed_228__228__4(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__4) ;
+ATSreturn(tmpret839__4) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__4] */
 
 /*
@@ -26679,7 +26778,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__4(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__4, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__4, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26689,10 +26788,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__4, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__4, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__4) ;
+ATSreturn(tmpret841__4) ;
 } /* end of [_alloc_zeroed_228__228__4] */
 
 /*
@@ -26714,7 +26813,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__6(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__6, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__6, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26725,11 +26824,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__6, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__6, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__6, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__6, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__6) ;
+ATSreturn(tmpret800__6) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__6] */
 
 /*
@@ -26751,7 +26850,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__7(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__7, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__7, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26762,11 +26861,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__7, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__7, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__7, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__7, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__7) ;
+ATSreturn(tmpret800__7) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__7] */
 
 /*
@@ -26788,7 +26887,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__5(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__5, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26798,10 +26897,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__5, _alloc_zeroed_228__228__5(arg0)) ;
+ATSINSmove(tmpret839__5, _alloc_zeroed_228__228__5(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__5) ;
+ATSreturn(tmpret839__5) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__5] */
 
 /*
@@ -26818,7 +26917,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__5(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__5, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__5, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26828,10 +26927,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__5, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__5, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__5) ;
+ATSreturn(tmpret841__5) ;
 } /* end of [_alloc_zeroed_228__228__5] */
 
 /*
@@ -26853,8 +26952,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__4(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__4, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__4, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__4, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__4, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26864,15 +26963,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__4, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__4, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__4, atspre_g0int_gt_int(arg0, tmp819__4)) ;
+ATSINSmove(tmpret820__4, atspre_g0int_gt_int(arg0, tmp821__4)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__4) ;
+ATSreturn(tmpret820__4) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__4] */
 
 /*
@@ -26894,7 +26993,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__8(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__8, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__8, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26905,11 +27004,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__8, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__8, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__8, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__8, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__8) ;
+ATSreturn(tmpret800__8) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__8] */
 
 /*
@@ -26931,7 +27030,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__6(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__6, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__6, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26941,10 +27040,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__6, _alloc_zeroed_228__228__6(arg0)) ;
+ATSINSmove(tmpret839__6, _alloc_zeroed_228__228__6(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__6) ;
+ATSreturn(tmpret839__6) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__6] */
 
 /*
@@ -26961,7 +27060,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__6(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__6, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__6, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -26971,10 +27070,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__6, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__6, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__6) ;
+ATSreturn(tmpret841__6) ;
 } /* end of [_alloc_zeroed_228__228__6] */
 
 /*
@@ -26996,7 +27095,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__7(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__7) ;
+// ATStmpdec_void(tmpret809__7) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27006,9 +27105,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__7, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__7, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__7) ;
+ATSreturn_void(tmpret809__7) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__7] */
 
 /*
@@ -27030,7 +27129,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__7(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__7, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__7, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27040,10 +27139,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__7, _alloc_zeroed_228__228__7(arg0)) ;
+ATSINSmove(tmpret839__7, _alloc_zeroed_228__228__7(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__7) ;
+ATSreturn(tmpret839__7) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__7] */
 
 /*
@@ -27060,7 +27159,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__7(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__7, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__7, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27070,10 +27169,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__7, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__7, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__7) ;
+ATSreturn(tmpret841__7) ;
 } /* end of [_alloc_zeroed_228__228__7] */
 
 /*
@@ -27095,7 +27194,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__8(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__8) ;
+// ATStmpdec_void(tmpret809__8) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27105,9 +27204,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__8, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__8, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__8) ;
+ATSreturn_void(tmpret809__8) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__8] */
 
 /*
@@ -27129,7 +27228,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__9(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__9) ;
+// ATStmpdec_void(tmpret809__9) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27139,9 +27238,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__9, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__9, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__9) ;
+ATSreturn_void(tmpret809__9) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__9] */
 
 /*
@@ -27163,7 +27262,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__10(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__10) ;
+// ATStmpdec_void(tmpret809__10) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27173,9 +27272,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__10, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__10, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__10) ;
+ATSreturn_void(tmpret809__10) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__10] */
 
 /*
@@ -27197,7 +27296,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__11(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__11) ;
+// ATStmpdec_void(tmpret809__11) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27207,9 +27306,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__11, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__11, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__11) ;
+ATSreturn_void(tmpret809__11) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__11] */
 
 /*
@@ -27231,7 +27330,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__12(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__12) ;
+// ATStmpdec_void(tmpret809__12) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27241,9 +27340,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__12, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__12, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__12) ;
+ATSreturn_void(tmpret809__12) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__12] */
 
 /*
@@ -27265,7 +27364,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__13(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__13) ;
+// ATStmpdec_void(tmpret809__13) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27275,9 +27374,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__13, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__13, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__13) ;
+ATSreturn_void(tmpret809__13) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__13] */
 
 /*
@@ -27299,7 +27398,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__8(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__8, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27309,10 +27408,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__8, _alloc_zeroed_228__228__8(arg0)) ;
+ATSINSmove(tmpret839__8, _alloc_zeroed_228__228__8(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__8) ;
+ATSreturn(tmpret839__8) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__8] */
 
 /*
@@ -27329,7 +27428,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__8(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__8, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27339,14 +27438,14 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__8, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__8, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__8) ;
+ATSreturn(tmpret841__8) ;
 } /* end of [_alloc_zeroed_228__228__8] */
 
 /*
-build/src/bin/bats.dats: 31164(line=569, offs=20) -- 31482(line=574, offs=31)
+build/src/bin/bats.dats: 31289(line=570, offs=20) -- 31607(line=575, offs=31)
 */
 /*
 local: 
@@ -27359,89 +27458,89 @@ atstype_boxed
 check_only_release_276(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1159, atstype_boxed) ;
-ATStmpdec(tmp1160, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1163, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1164, atstkind_t0ype(atstype_byte)) ;
-ATStmpdec(tmp1173, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret1161, atstype_boxed) ;
+ATStmpdec(tmp1162, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1165, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1166, atstkind_t0ype(atstype_byte)) ;
+ATStmpdec(tmp1175, atstkind_t0ype(atstype_bool)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31164(line=569, offs=20) -- 31482(line=574, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 31289(line=570, offs=20) -- 31607(line=575, offs=31)
 */
 ATSINSflab(__patsflab_check_only_release_276):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31282(line=571, offs=22) -- 31290(line=571, offs=30)
+emit_instr: loc0 = build/src/bin/bats.dats: 31407(line=572, offs=22) -- 31415(line=572, offs=30)
 */
-ATSINSmove(tmp1160, ATSLIB_056_prelude__eq_g0int_int__15__117(arg1, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp1162, ATSLIB_056_prelude__eq_g0int_int__15__117(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31279(line=571, offs=19) -- 31482(line=574, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 31404(line=572, offs=19) -- 31607(line=575, offs=31)
 */
 ATSif(
-tmp1160
+tmp1162
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31296(line=571, offs=36) -- 31451(line=573, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 31421(line=572, offs=36) -- 31576(line=574, offs=91)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31339(line=572, offs=40) -- 31359(line=572, offs=60)
+emit_instr: loc0 = build/src/bin/bats.dats: 31464(line=573, offs=40) -- 31484(line=573, offs=60)
 */
-ATSINSmove(tmp1164, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__1__3(ATSPMVrefarg0(arg0), ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1166, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__1__3(ATSPMVrefarg0(arg0), ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31329(line=572, offs=30) -- 31360(line=572, offs=61)
+emit_instr: loc0 = build/src/bin/bats.dats: 31454(line=573, offs=30) -- 31485(line=573, offs=61)
 */
-ATSINSmove(tmp1163, atspre_byte2int0(tmp1164)) ;
+ATSINSmove(tmp1165, atspre_byte2int0(tmp1166)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31386(line=573, offs=26) -- 31409(line=573, offs=49)
+emit_instr: loc0 = build/src/bin/bats.dats: 31511(line=574, offs=26) -- 31534(line=574, offs=49)
 */
-ATSINSmove(tmp1173, atspre_g0int_eq_int(tmp1163, ATSPMVi0nt(114))) ;
+ATSINSmove(tmp1175, atspre_g0int_eq_int(tmp1165, ATSPMVi0nt(114))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31383(line=573, offs=23) -- 31437(line=573, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 31508(line=574, offs=23) -- 31562(line=574, offs=77)
 */
 ATSif(
-tmp1173
+tmp1175
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31415(line=573, offs=55) -- 31424(line=573, offs=64)
+emit_instr: loc0 = build/src/bin/bats.dats: 31540(line=574, offs=55) -- 31549(line=574, offs=64)
 */
 
-ATSINSmove_con0(tmpret1159, 1) ;
+ATSINSmove_con0(tmpret1161, 1) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31430(line=573, offs=70) -- 31437(line=573, offs=77)
+emit_instr: loc0 = build/src/bin/bats.dats: 31555(line=574, offs=70) -- 31562(line=574, offs=77)
 */
 
-ATSINSmove_con0(tmpret1159, 0) ;
+ATSINSmove_con0(tmpret1161, 0) ;
 
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31296(line=571, offs=36) -- 31451(line=573, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 31421(line=572, offs=36) -- 31576(line=574, offs=91)
 */
 /*
 INSletpop()
 */
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 31475(line=574, offs=24) -- 31482(line=574, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 31600(line=575, offs=24) -- 31607(line=575, offs=31)
 */
 
-ATSINSmove_con0(tmpret1159, 0) ;
+ATSINSmove_con0(tmpret1161, 0) ;
 
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret1159) ;
+ATSreturn(tmpret1161) ;
 } /* end of [check_only_release_276] */
 
 /*
@@ -27683,7 +27782,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__9(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__9, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27693,10 +27792,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__9, _alloc_zeroed_228__228__9(arg0)) ;
+ATSINSmove(tmpret839__9, _alloc_zeroed_228__228__9(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__9) ;
+ATSreturn(tmpret839__9) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__9] */
 
 /*
@@ -27713,7 +27812,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__9(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__9, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27723,10 +27822,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__9, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__9, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__9) ;
+ATSreturn(tmpret841__9) ;
 } /* end of [_alloc_zeroed_228__228__9] */
 
 /*
@@ -27748,7 +27847,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__14(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__14) ;
+// ATStmpdec_void(tmpret809__14) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27758,9 +27857,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__14, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__14, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__14) ;
+ATSreturn_void(tmpret809__14) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__14] */
 
 /*
@@ -27782,7 +27881,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__15(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__15) ;
+// ATStmpdec_void(tmpret809__15) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27792,9 +27891,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__15, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__15, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__15) ;
+ATSreturn_void(tmpret809__15) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__15] */
 
 /*
@@ -27816,7 +27915,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__9(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__9, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__9, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27827,11 +27926,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__9, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__9, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__9, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__9, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__9) ;
+ATSreturn(tmpret800__9) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__9] */
 
 /*
@@ -27853,7 +27952,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__6(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__6) ;
+// ATStmpdec_void(tmpret806__6) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27863,9 +27962,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__6, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__6, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__6) ;
+ATSreturn_void(tmpret806__6) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__6] */
 
 /*
@@ -27887,7 +27986,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__16(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__16) ;
+// ATStmpdec_void(tmpret809__16) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27897,9 +27996,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__16, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__16, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__16) ;
+ATSreturn_void(tmpret809__16) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__16] */
 
 /*
@@ -27921,7 +28020,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__6(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__6, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__6, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27931,9 +28030,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__6, arg0) ;
+ATSINSmove(tmpret812__6, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__6) ;
+ATSreturn(tmpret812__6) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__6] */
 
 /*
@@ -27955,8 +28054,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__5(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__5, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__5, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__5, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__5, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -27966,15 +28065,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__5, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__5, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__5, atspre_g0int_gt_int(arg0, tmp819__5)) ;
+ATSINSmove(tmpret820__5, atspre_g0int_gt_int(arg0, tmp821__5)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__5) ;
+ATSreturn(tmpret820__5) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__5] */
 
 /*
@@ -27996,7 +28095,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__10(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__10, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__10, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28007,11 +28106,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__10, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__10, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__10, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__10, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__10) ;
+ATSreturn(tmpret800__10) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__10] */
 
 /*
@@ -28033,7 +28132,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__7(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__7) ;
+// ATStmpdec_void(tmpret806__7) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28043,9 +28142,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__7, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__7, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__7) ;
+ATSreturn_void(tmpret806__7) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__7] */
 
 /*
@@ -28067,7 +28166,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__17(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__17) ;
+// ATStmpdec_void(tmpret809__17) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28077,9 +28176,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__17, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__17, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__17) ;
+ATSreturn_void(tmpret809__17) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__17] */
 
 /*
@@ -28101,7 +28200,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__7(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__7, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__7, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28111,9 +28210,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__7, arg0) ;
+ATSINSmove(tmpret812__7, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__7) ;
+ATSreturn(tmpret812__7) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__7] */
 
 /*
@@ -28135,7 +28234,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__18(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__18) ;
+// ATStmpdec_void(tmpret809__18) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28145,9 +28244,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__18, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__18, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__18) ;
+ATSreturn_void(tmpret809__18) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__18] */
 
 /*
@@ -28169,7 +28268,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__10(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret837__10, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret839__10, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28179,10 +28278,10 @@ ATSINSflab(__patsflab_alloc):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14171(line=661, offs=28) -- 14192(line=661, offs=49)
 */
-ATSINSmove(tmpret837__10, _alloc_zeroed_228__228__10(arg0)) ;
+ATSINSmove(tmpret839__10, _alloc_zeroed_228__228__10(arg0)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret837__10) ;
+ATSreturn(tmpret839__10) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__alloc__226__10] */
 
 /*
@@ -28199,7 +28298,7 @@ atstkind_type(atstype_ptrk)
 _alloc_zeroed_228__228__10(atstkind_t0ype(atstype_int) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret839__10, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret841__10, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28209,10 +28308,10 @@ ATSINSflab(__patsflab__alloc_zeroed_228):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14121(line=659, offs=3) -- 14142(line=659, offs=24)
 */
-ATSINSmove(tmpret839__10, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
+ATSINSmove(tmpret841__10, calloc(arg0, ATSPMVsizeof(atstkind_t0ype(atstype_byte)))) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret839__10) ;
+ATSreturn(tmpret841__10) ;
 } /* end of [_alloc_zeroed_228__228__10] */
 
 /*
@@ -28234,7 +28333,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__19(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__19) ;
+// ATStmpdec_void(tmpret809__19) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28244,9 +28343,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__19, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__19, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__19) ;
+ATSreturn_void(tmpret809__19) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__19] */
 
 /*
@@ -28268,7 +28367,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__11(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__11, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__11, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28279,11 +28378,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__11, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__11, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__11, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__11, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__11) ;
+ATSreturn(tmpret800__11) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__11] */
 
 /*
@@ -28305,7 +28404,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__8(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__8) ;
+// ATStmpdec_void(tmpret806__8) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28315,9 +28414,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__8, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__8, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__8) ;
+ATSreturn_void(tmpret806__8) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__8] */
 
 /*
@@ -28339,7 +28438,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__20(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__20) ;
+// ATStmpdec_void(tmpret809__20) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28349,9 +28448,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__20, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__20, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__20) ;
+ATSreturn_void(tmpret809__20) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__20] */
 
 /*
@@ -28373,7 +28472,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__8(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__8, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__8, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28383,9 +28482,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__8, arg0) ;
+ATSINSmove(tmpret812__8, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__8) ;
+ATSreturn(tmpret812__8) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__8] */
 
 /*
@@ -28407,7 +28506,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__21(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__21) ;
+// ATStmpdec_void(tmpret809__21) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28417,9 +28516,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__21, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__21, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__21) ;
+ATSreturn_void(tmpret809__21) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__21] */
 
 /*
@@ -28441,7 +28540,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__22(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__22) ;
+// ATStmpdec_void(tmpret809__22) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28451,9 +28550,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__22, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__22, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__22) ;
+ATSreturn_void(tmpret809__22) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__22] */
 
 /*
@@ -28475,8 +28574,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__6(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__6, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__6, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__6, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__6, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28486,15 +28585,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__6, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__6, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__6, atspre_g0int_gt_int(arg0, tmp819__6)) ;
+ATSINSmove(tmpret820__6, atspre_g0int_gt_int(arg0, tmp821__6)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__6) ;
+ATSreturn(tmpret820__6) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__6] */
 
 /*
@@ -28516,7 +28615,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__12(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__12, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__12, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28527,11 +28626,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__12, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__12, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__12, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__12, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__12) ;
+ATSreturn(tmpret800__12) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__12] */
 
 /*
@@ -28553,7 +28652,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__9(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__9) ;
+// ATStmpdec_void(tmpret806__9) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28563,9 +28662,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__9, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__9, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__9) ;
+ATSreturn_void(tmpret806__9) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__9] */
 
 /*
@@ -28587,7 +28686,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__23(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__23) ;
+// ATStmpdec_void(tmpret809__23) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28597,9 +28696,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__23, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__23, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__23) ;
+ATSreturn_void(tmpret809__23) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__23] */
 
 /*
@@ -28621,7 +28720,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__9(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__9, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__9, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28631,9 +28730,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__9, arg0) ;
+ATSINSmove(tmpret812__9, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__9) ;
+ATSreturn(tmpret812__9) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__9] */
 
 /*
@@ -28655,7 +28754,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__24(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__24) ;
+// ATStmpdec_void(tmpret809__24) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28665,9 +28764,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__24, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__24, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__24) ;
+ATSreturn_void(tmpret809__24) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__24] */
 
 /*
@@ -28689,8 +28788,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__7(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__7, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__7, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__7, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__7, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28700,15 +28799,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__7, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__7, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__7, atspre_g0int_gt_int(arg0, tmp819__7)) ;
+ATSINSmove(tmpret820__7, atspre_g0int_gt_int(arg0, tmp821__7)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__7) ;
+ATSreturn(tmpret820__7) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__7] */
 
 /*
@@ -28730,7 +28829,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__13(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__13, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__13, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28741,11 +28840,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__13, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__13, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__13, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__13, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__13) ;
+ATSreturn(tmpret800__13) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__13] */
 
 /*
@@ -28767,7 +28866,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__10(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__10) ;
+// ATStmpdec_void(tmpret806__10) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28777,9 +28876,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__10, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__10, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__10) ;
+ATSreturn_void(tmpret806__10) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__10] */
 
 /*
@@ -28801,7 +28900,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__25(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__25) ;
+// ATStmpdec_void(tmpret809__25) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28811,9 +28910,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__25, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__25, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__25) ;
+ATSreturn_void(tmpret809__25) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__25] */
 
 /*
@@ -28835,7 +28934,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__10(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__10, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__10, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28845,9 +28944,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__10, arg0) ;
+ATSINSmove(tmpret812__10, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__10) ;
+ATSreturn(tmpret812__10) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__10] */
 
 /*
@@ -28869,7 +28968,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__26(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__26) ;
+// ATStmpdec_void(tmpret809__26) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -28879,13 +28978,13 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__26, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__26, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__26) ;
+ATSreturn_void(tmpret809__26) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__26] */
 
 /*
-build/src/bin/bats.dats: 36063(line=663, offs=20) -- 36553(line=671, offs=22)
+build/src/bin/bats.dats: 36188(line=664, offs=20) -- 36678(line=672, offs=22)
 */
 /*
 local: 
@@ -28898,174 +28997,174 @@ atstype_boxed
 check_shell_arg_317(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1288, atstype_boxed) ;
-ATStmpdec(tmp1289, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1294, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1295, atstkind_t0ype(atstype_byte)) ;
-ATStmpdec(tmp1304, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1305, atstype_boxed) ;
+ATStmpdec(tmpret1290, atstype_boxed) ;
+ATStmpdec(tmp1291, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1296, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1297, atstkind_t0ype(atstype_byte)) ;
 ATStmpdec(tmp1306, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1307, atstype_boxed) ;
 ATStmpdec(tmp1308, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1309, atstype_boxed) ;
+ATStmpdec(tmp1310, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1311, atstype_boxed) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36063(line=663, offs=20) -- 36553(line=671, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 36188(line=664, offs=20) -- 36678(line=672, offs=22)
 */
 ATSINSflab(__patsflab_check_shell_arg_317):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36189(line=665, offs=22) -- 36198(line=665, offs=31)
+emit_instr: loc0 = build/src/bin/bats.dats: 36314(line=666, offs=22) -- 36323(line=666, offs=31)
 */
-ATSINSmove(tmp1289, ATSLIB_056_prelude__lte_g0int_int__318__1(arg1, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1291, ATSLIB_056_prelude__lte_g0int_int__318__1(arg1, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36186(line=665, offs=19) -- 36553(line=671, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 36311(line=666, offs=19) -- 36678(line=672, offs=22)
 */
 ATSif(
-tmp1289
+tmp1291
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36204(line=665, offs=37) -- 36213(line=665, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 36329(line=666, offs=37) -- 36338(line=666, offs=46)
 */
 
-ATSINSmove_nil(tmpret1288) ;
+ATSINSmove_nil(tmpret1290) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36237(line=666, offs=24) -- 36553(line=671, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 36362(line=667, offs=24) -- 36678(line=672, offs=22)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36260(line=666, offs=47) -- 36280(line=666, offs=67)
+emit_instr: loc0 = build/src/bin/bats.dats: 36385(line=667, offs=47) -- 36405(line=667, offs=67)
 */
-ATSINSmove(tmp1295, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__1__4(ATSPMVrefarg0(arg0), ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1297, build_057_bats_modules_057_array_057_src_057_lib_056_sats__get__1__4(ATSPMVrefarg0(arg0), ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36250(line=666, offs=37) -- 36281(line=666, offs=68)
+emit_instr: loc0 = build/src/bin/bats.dats: 36375(line=667, offs=37) -- 36406(line=667, offs=68)
 */
-ATSINSmove(tmp1294, atspre_byte2int0(tmp1295)) ;
+ATSINSmove(tmp1296, atspre_byte2int0(tmp1297)) ;
 
 /*
 letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36308(line=667, offs=24) -- 36330(line=667, offs=46)
+emit_instr: loc0 = build/src/bin/bats.dats: 36433(line=668, offs=24) -- 36455(line=668, offs=46)
 */
-ATSINSmove(tmp1304, atspre_g0int_eq_int(tmp1294, ATSPMVi0nt(98))) ;
+ATSINSmove(tmp1306, atspre_g0int_eq_int(tmp1296, ATSPMVi0nt(98))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36305(line=667, offs=21) -- 36531(line=670, offs=35)
-*/
-ATSif(
-tmp1304
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 36344(line=667, offs=60) -- 36350(line=667, offs=66)
-*/
-
-ATSINSmove_con0(tmp1305, 0) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 36336(line=667, offs=52) -- 36351(line=667, offs=67)
-*/
-
-/*
-#LINCONSTATUS==0
-*/
-ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret1288, postiats_tysum_3) ;
-#if(0)
-ATSINSstore_con1_tag(tmpret1288, 0) ;
-#endif
-ATSINSstore_con1_ofs(tmpret1288, postiats_tysum_3, atslab__0, tmp1305) ;
-ATSINSmove_con1_end()
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 36380(line=668, offs=29) -- 36403(line=668, offs=52)
-*/
-ATSINSmove(tmp1306, atspre_g0int_eq_int(tmp1294, ATSPMVi0nt(122))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 36377(line=668, offs=26) -- 36531(line=670, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 36430(line=668, offs=21) -- 36656(line=671, offs=35)
 */
 ATSif(
 tmp1306
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36417(line=668, offs=66) -- 36422(line=668, offs=71)
+emit_instr: loc0 = build/src/bin/bats.dats: 36469(line=668, offs=60) -- 36475(line=668, offs=66)
 */
 
-ATSINSmove_con0(tmp1307, 1) ;
+ATSINSmove_con0(tmp1307, 0) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36409(line=668, offs=58) -- 36423(line=668, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 36461(line=668, offs=52) -- 36476(line=668, offs=67)
 */
 
 /*
 #LINCONSTATUS==0
 */
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret1288, postiats_tysum_3) ;
+ATSINSmove_con1_new(tmpret1290, postiats_tysum_3) ;
 #if(0)
-ATSINSstore_con1_tag(tmpret1288, 0) ;
+ATSINSstore_con1_tag(tmpret1290, 0) ;
 #endif
-ATSINSstore_con1_ofs(tmpret1288, postiats_tysum_3, atslab__0, tmp1307) ;
+ATSINSstore_con1_ofs(tmpret1290, postiats_tysum_3, atslab__0, tmp1307) ;
 ATSINSmove_con1_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36452(line=669, offs=29) -- 36475(line=669, offs=52)
+emit_instr: loc0 = build/src/bin/bats.dats: 36505(line=669, offs=29) -- 36528(line=669, offs=52)
 */
-ATSINSmove(tmp1308, atspre_g0int_eq_int(tmp1294, ATSPMVi0nt(102))) ;
+ATSINSmove(tmp1308, atspre_g0int_eq_int(tmp1296, ATSPMVi0nt(122))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36449(line=669, offs=26) -- 36531(line=670, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 36502(line=669, offs=26) -- 36656(line=671, offs=35)
 */
 ATSif(
 tmp1308
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36489(line=669, offs=66) -- 36495(line=669, offs=72)
+emit_instr: loc0 = build/src/bin/bats.dats: 36542(line=669, offs=66) -- 36547(line=669, offs=71)
 */
 
-ATSINSmove_con0(tmp1309, 2) ;
+ATSINSmove_con0(tmp1309, 1) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36481(line=669, offs=58) -- 36496(line=669, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 36534(line=669, offs=58) -- 36548(line=669, offs=72)
 */
 
 /*
 #LINCONSTATUS==0
 */
 ATSINSmove_con1_beg()
-ATSINSmove_con1_new(tmpret1288, postiats_tysum_3) ;
+ATSINSmove_con1_new(tmpret1290, postiats_tysum_3) ;
 #if(0)
-ATSINSstore_con1_tag(tmpret1288, 0) ;
+ATSINSstore_con1_tag(tmpret1290, 0) ;
 #endif
-ATSINSstore_con1_ofs(tmpret1288, postiats_tysum_3, atslab__0, tmp1309) ;
+ATSINSstore_con1_ofs(tmpret1290, postiats_tysum_3, atslab__0, tmp1309) ;
 ATSINSmove_con1_end()
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36522(line=670, offs=26) -- 36531(line=670, offs=35)
+emit_instr: loc0 = build/src/bin/bats.dats: 36577(line=670, offs=29) -- 36600(line=670, offs=52)
+*/
+ATSINSmove(tmp1310, atspre_g0int_eq_int(tmp1296, ATSPMVi0nt(102))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 36574(line=670, offs=26) -- 36656(line=671, offs=35)
+*/
+ATSif(
+tmp1310
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 36614(line=670, offs=66) -- 36620(line=670, offs=72)
 */
 
-ATSINSmove_nil(tmpret1288) ;
+ATSINSmove_con0(tmp1311, 2) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 36606(line=670, offs=58) -- 36621(line=670, offs=73)
+*/
+
+/*
+#LINCONSTATUS==0
+*/
+ATSINSmove_con1_beg()
+ATSINSmove_con1_new(tmpret1290, postiats_tysum_3) ;
+#if(0)
+ATSINSstore_con1_tag(tmpret1290, 0) ;
+#endif
+ATSINSstore_con1_ofs(tmpret1290, postiats_tysum_3, atslab__0, tmp1311) ;
+ATSINSmove_con1_end()
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 36647(line=671, offs=26) -- 36656(line=671, offs=35)
+*/
+
+ATSINSmove_nil(tmpret1290) ;
 
 } /* ATSendif */
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 36237(line=666, offs=24) -- 36553(line=671, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 36362(line=667, offs=24) -- 36678(line=672, offs=22)
 */
 /*
 INSletpop()
 */
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret1288) ;
+ATSreturn(tmpret1290) ;
 } /* end of [check_shell_arg_317] */
 
 #if(0)
@@ -29088,8 +29187,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__318(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1290, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1291, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret1292, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1293, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -29099,15 +29198,15 @@ ATSINSflab(__patsflab_lte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12046(line=621, offs=30) -- 12057(line=621, offs=41)
 */
-ATSINSmove(tmp1291, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7637))>)(arg1)) ;
+ATSINSmove(tmp1293, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7637))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12028(line=621, offs=12) -- 12059(line=621, offs=43)
 */
-ATSINSmove(tmpret1290, PMVtmpltcst(g0int_lte<S2Evar(tk(7637))>)(arg0, tmp1291)) ;
+ATSINSmove(tmpret1292, PMVtmpltcst(g0int_lte<S2Evar(tk(7637))>)(arg0, tmp1293)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret1290) ;
+ATSreturn(tmpret1292) ;
 } /* end of [ATSLIB_056_prelude__lte_g0int_int__318] */
 #endif // end of [TEMPLATE]
 
@@ -29130,8 +29229,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__lte_g0int_int__318__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1290__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1291__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1292__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1293__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -29141,15 +29240,15 @@ ATSINSflab(__patsflab_lte_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12046(line=621, offs=30) -- 12057(line=621, offs=41)
 */
-ATSINSmove(tmp1291__1, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp1293__1, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12028(line=621, offs=12) -- 12059(line=621, offs=43)
 */
-ATSINSmove(tmpret1290__1, atspre_g0int_lte_int(arg0, tmp1291__1)) ;
+ATSINSmove(tmpret1292__1, atspre_g0int_lte_int(arg0, tmp1293__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret1290__1) ;
+ATSreturn(tmpret1292__1) ;
 } /* end of [ATSLIB_056_prelude__lte_g0int_int__318__1] */
 
 /*
@@ -29350,7 +29449,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__27(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__27) ;
+// ATStmpdec_void(tmpret809__27) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -29360,13 +29459,13 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__27, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__27, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__27) ;
+ATSreturn_void(tmpret809__27) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__27] */
 
 /*
-build/src/bin/bats.dats: 37135(line=683, offs=20) -- 37512(line=687, offs=50)
+build/src/bin/bats.dats: 37260(line=684, offs=20) -- 37637(line=688, offs=50)
 */
 /*
 local: 
@@ -29379,188 +29478,188 @@ atstkind_t0ype(atstype_bool)
 is_install_arg_326(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1317, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1318, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1319, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmpret1319, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1320, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1321, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1322, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1323, atstkind_t0ype(atstype_bool)) ;
 ATStmpdec(tmp1324, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1329, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1332, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1335, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1338, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1341, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1344, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1347, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1325, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1326, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1331, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1334, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1337, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1340, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1343, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1346, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1349, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37135(line=683, offs=20) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37260(line=684, offs=20) -- 37637(line=688, offs=50)
 */
 ATSINSflab(__patsflab_is_install_arg_326):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1324, ATSLIB_056_prelude__eq_g0int_int__15__118(arg1, ATSPMVi0nt(7))) ;
+ATSINSmove(tmp1326, ATSLIB_056_prelude__eq_g0int_int__15__118(arg1, ATSPMVi0nt(7))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSif(
+tmp1326
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSINSmove(tmp1331, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSINSmove(tmp1325, ATSLIB_056_prelude__eq_g0int_int__15__119(tmp1331, ATSPMVi0nt(105))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSINSmove(tmp1325, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSif(
+tmp1325
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSINSmove(tmp1334, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(1), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSINSmove(tmp1324, ATSLIB_056_prelude__eq_g0int_int__15__120(tmp1334, ATSPMVi0nt(110))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
+*/
+ATSINSmove(tmp1324, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSif(
 tmp1324
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1329, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1337, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(2), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1323, ATSLIB_056_prelude__eq_g0int_int__15__119(tmp1329, ATSPMVi0nt(105))) ;
+ATSINSmove(tmp1323, ATSLIB_056_prelude__eq_g0int_int__15__121(tmp1337, ATSPMVi0nt(115))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSINSmove(tmp1323, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSif(
 tmp1323
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1332, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(1), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1340, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(3), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1322, ATSLIB_056_prelude__eq_g0int_int__15__120(tmp1332, ATSPMVi0nt(110))) ;
+ATSINSmove(tmp1322, ATSLIB_056_prelude__eq_g0int_int__15__122(tmp1340, ATSPMVi0nt(116))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSINSmove(tmp1322, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSif(
 tmp1322
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1335, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(2), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1343, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(4), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1321, ATSLIB_056_prelude__eq_g0int_int__15__121(tmp1335, ATSPMVi0nt(115))) ;
+ATSINSmove(tmp1321, ATSLIB_056_prelude__eq_g0int_int__15__123(tmp1343, ATSPMVi0nt(97))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSINSmove(tmp1321, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSif(
 tmp1321
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1338, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(3), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1346, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(5), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1320, ATSLIB_056_prelude__eq_g0int_int__15__122(tmp1338, ATSPMVi0nt(116))) ;
+ATSINSmove(tmp1320, ATSLIB_056_prelude__eq_g0int_int__15__124(tmp1346, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSINSmove(tmp1320, ATSPMVbool_false()) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
 ATSif(
 tmp1320
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1341, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(4), ATSPMVi0nt(4096))) ;
+ATSINSmove(tmp1349, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(6), ATSPMVi0nt(4096))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1319, ATSLIB_056_prelude__eq_g0int_int__15__123(tmp1341, ATSPMVi0nt(97))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSINSmove(tmp1319, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSif(
-tmp1319
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSINSmove(tmp1344, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(5), ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSINSmove(tmp1318, ATSLIB_056_prelude__eq_g0int_int__15__124(tmp1344, ATSPMVi0nt(108))) ;
+ATSINSmove(tmpret1319, ATSLIB_056_prelude__eq_g0int_int__15__125(tmp1349, ATSPMVi0nt(108))) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
+emit_instr: loc0 = build/src/bin/bats.dats: 37352(line=685, offs=19) -- 37637(line=688, offs=50)
 */
-ATSINSmove(tmp1318, ATSPMVbool_false()) ;
-} /* ATSendif */
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSif(
-tmp1318
-) ATSthen() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSINSmove(tmp1347, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(6), ATSPMVi0nt(4096))) ;
-
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSINSmove(tmpret1317, ATSLIB_056_prelude__eq_g0int_int__15__125(tmp1347, ATSPMVi0nt(108))) ;
-
-} ATSelse() {
-/*
-emit_instr: loc0 = build/src/bin/bats.dats: 37227(line=684, offs=19) -- 37512(line=687, offs=50)
-*/
-ATSINSmove(tmpret1317, ATSPMVbool_false()) ;
+ATSINSmove(tmpret1319, ATSPMVbool_false()) ;
 } /* ATSendif */
 ATSfunbody_end()
-ATSreturn(tmpret1317) ;
+ATSreturn(tmpret1319) ;
 } /* end of [is_install_arg_326] */
 
 /*
@@ -29892,6 +29991,467 @@ ATSreturn(tmpret30__125) ;
 } /* end of [ATSLIB_056_prelude__eq_g0int_int__15__125] */
 
 /*
+build/src/bin/bats.dats: 37657(line=689, offs=20) -- 37983(line=692, offs=82)
+*/
+/*
+local: 
+global: is_marker_arg_335$0(level=1)
+local: 
+global: 
+*/
+ATSstatic()
+atstkind_t0ype(atstype_bool)
+is_marker_arg_335(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret1350, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1351, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1352, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1353, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1354, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1355, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1356, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1361, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1364, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1367, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1370, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1373, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1376, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37657(line=689, offs=20) -- 37983(line=692, offs=82)
+*/
+ATSINSflab(__patsflab_is_marker_arg_335):
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1356, ATSLIB_056_prelude__eq_g0int_int__15__126(arg1, ATSPMVi0nt(6))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSif(
+tmp1356
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1361, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(0), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1355, ATSLIB_056_prelude__eq_g0int_int__15__127(tmp1361, ATSPMVi0nt(109))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1355, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSif(
+tmp1355
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1364, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(1), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1354, ATSLIB_056_prelude__eq_g0int_int__15__128(tmp1364, ATSPMVi0nt(97))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1354, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSif(
+tmp1354
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1367, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(2), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1353, ATSLIB_056_prelude__eq_g0int_int__15__129(tmp1367, ATSPMVi0nt(114))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1353, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSif(
+tmp1353
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1370, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(3), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1352, ATSLIB_056_prelude__eq_g0int_int__15__130(tmp1370, ATSPMVi0nt(107))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1352, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSif(
+tmp1352
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1373, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(4), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1351, ATSLIB_056_prelude__eq_g0int_int__15__131(tmp1373, ATSPMVi0nt(101))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1351, ATSPMVbool_false()) ;
+} /* ATSendif */
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSif(
+tmp1351
+) ATSthen() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmp1376, build_057_src_057_helpers_056_sats__peek_arr(ATSPMVrefarg0(arg0), ATSPMVi0nt(5), ATSPMVi0nt(4096))) ;
+
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmpret1350, ATSLIB_056_prelude__eq_g0int_int__15__132(tmp1376, ATSPMVi0nt(114))) ;
+
+} ATSelse() {
+/*
+emit_instr: loc0 = build/src/bin/bats.dats: 37748(line=690, offs=19) -- 37983(line=692, offs=82)
+*/
+ATSINSmove(tmpret1350, ATSPMVbool_false()) ;
+} /* ATSendif */
+ATSfunbody_end()
+ATSreturn(tmpret1350) ;
+} /* end of [is_marker_arg_335] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$126(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__126(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__126, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__126, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__126, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__126, atspre_g0int_eq_int(arg0, tmp31__126)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__126) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__126] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$127(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__127(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__127, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__127, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__127, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__127, atspre_g0int_eq_int(arg0, tmp31__127)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__127) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__127] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$128(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__128(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__128, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__128, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__128, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__128, atspre_g0int_eq_int(arg0, tmp31__128)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__128) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__128] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$129(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__129(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__129, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__129, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__129, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__129, atspre_g0int_eq_int(arg0, tmp31__129)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__129) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__129] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$130(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__130(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__130, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__130, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__130, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__130, atspre_g0int_eq_int(arg0, tmp31__130)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__130) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__130] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$131(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__131(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__131, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__131, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__131, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__131, atspre_g0int_eq_int(arg0, tmp31__131)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__131) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__131] */
+
+/*
+$(PATSHOME)/prelude/DATS/integer.dats: 12259(line=635, offs=3) -- 12298(line=635, offs=42)
+*/
+/*
+local: 
+global: eq_g0int_int$15$132(level=2)
+local: 
+global: 
+*/
+ATSstatic()
+/*
+imparg = tk(7640)
+tmparg = S2Evar(tk(7640))
+tmpsub = Some(tk(7640) -> S2Eextkind(atstype_int))
+*/
+atstkind_t0ype(atstype_bool)
+ATSLIB_056_prelude__eq_g0int_int__15__132(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+{
+/* tmpvardeclst(beg) */
+ATStmpdec(tmpret30__132, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp31__132, atstkind_t0ype(atstype_int)) ;
+/* tmpvardeclst(end) */
+ATSfunbody_beg()
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12244(line=634, offs=1) -- 12298(line=635, offs=42)
+*/
+ATSINSflab(__patsflab_eq_g0int_int):
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12285(line=635, offs=29) -- 12296(line=635, offs=40)
+*/
+ATSINSmove(tmp31__132, atspre_g0int2int_int_int(arg1)) ;
+
+/*
+emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12268(line=635, offs=12) -- 12298(line=635, offs=42)
+*/
+ATSINSmove(tmpret30__132, atspre_g0int_eq_int(arg0, tmp31__132)) ;
+
+ATSfunbody_end()
+ATSreturn(tmpret30__132) ;
+} /* end of [ATSLIB_056_prelude__eq_g0int_int__15__132] */
+
+/*
 build/bats_modules/array/src/lib.dats: 14464(line=669, offs=11) -- 14503(line=670, offs=32)
 */
 /*
@@ -29910,7 +30470,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__28(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__28) ;
+// ATStmpdec_void(tmpret809__28) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -29920,9 +30480,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__28, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__28, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__28) ;
+ATSreturn_void(tmpret809__28) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__28] */
 
 /*
@@ -29944,8 +30504,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__8(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__8, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__8, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__8, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__8, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -29955,15 +30515,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__8, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__8, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__8, atspre_g0int_gt_int(arg0, tmp819__8)) ;
+ATSINSmove(tmpret820__8, atspre_g0int_gt_int(arg0, tmp821__8)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__8) ;
+ATSreturn(tmpret820__8) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__8] */
 
 /*
@@ -29985,8 +30545,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__9(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__9, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__9, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__9, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__9, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -29996,15 +30556,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__9, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__9, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__9, atspre_g0int_gt_int(arg0, tmp819__9)) ;
+ATSINSmove(tmpret820__9, atspre_g0int_gt_int(arg0, tmp821__9)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__9) ;
+ATSreturn(tmpret820__9) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__9] */
 
 /*
@@ -30026,7 +30586,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__14(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__14, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__14, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30037,11 +30597,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__14, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__14, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__14, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__14, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__14) ;
+ATSreturn(tmpret800__14) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__14] */
 
 /*
@@ -30063,8 +30623,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__10(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__10, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__10, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__10, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__10, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30074,15 +30634,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__10, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__10, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__10, atspre_g0int_gt_int(arg0, tmp819__10)) ;
+ATSINSmove(tmpret820__10, atspre_g0int_gt_int(arg0, tmp821__10)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__10) ;
+ATSreturn(tmpret820__10) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__10] */
 
 /*
@@ -30104,8 +30664,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__11(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__11, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__11, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__11, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__11, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30115,15 +30675,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__11, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__11, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__11, atspre_g0int_gt_int(arg0, tmp819__11)) ;
+ATSINSmove(tmpret820__11, atspre_g0int_gt_int(arg0, tmp821__11)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__11) ;
+ATSreturn(tmpret820__11) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__11] */
 
 /*
@@ -30145,7 +30705,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__11(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__11) ;
+// ATStmpdec_void(tmpret806__11) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30155,9 +30715,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__11, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__11, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__11) ;
+ATSreturn_void(tmpret806__11) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__11] */
 
 /*
@@ -30179,7 +30739,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__29(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__29) ;
+// ATStmpdec_void(tmpret809__29) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30189,9 +30749,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__29, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__29, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__29) ;
+ATSreturn_void(tmpret809__29) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__29] */
 
 /*
@@ -30213,7 +30773,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__11(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__11, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__11, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30223,9 +30783,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__11, arg0) ;
+ATSINSmove(tmpret812__11, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__11) ;
+ATSreturn(tmpret812__11) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__11] */
 
 /*
@@ -30247,7 +30807,7 @@ postiats_tyrec_1
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__15(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret798__15, postiats_tyrec_1) ;
+ATStmpdec(tmpret800__15, postiats_tyrec_1) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30258,11 +30818,11 @@ ATSINSflab(__patsflab_freeze):
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17346(line=766, offs=24) -- 17357(line=766, offs=35)
 */
 ATSINSmove_fltrec_beg()
-ATSINSstore_fltrec_ofs(tmpret798__15, postiats_tyrec_1, atslab__0, arg0) ;
-ATSINSstore_fltrec_ofs(tmpret798__15, postiats_tyrec_1, atslab__1, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__15, postiats_tyrec_1, atslab__0, arg0) ;
+ATSINSstore_fltrec_ofs(tmpret800__15, postiats_tyrec_1, atslab__1, arg0) ;
 ATSINSmove_fltrec_end()
 ATSfunbody_end()
-ATSreturn(tmpret798__15) ;
+ATSreturn(tmpret800__15) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__freeze__207__15] */
 
 /*
@@ -30284,8 +30844,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__12(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__12, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__12, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__12, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__12, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30295,15 +30855,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__12, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__12, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__12, atspre_g0int_gt_int(arg0, tmp819__12)) ;
+ATSINSmove(tmpret820__12, atspre_g0int_gt_int(arg0, tmp821__12)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__12) ;
+ATSreturn(tmpret820__12) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__12] */
 
 /*
@@ -30325,8 +30885,8 @@ atstkind_t0ype(atstype_bool)
 ATSLIB_056_prelude__gt_g0int_int__217__13(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret818__13, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp819__13, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret820__13, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp821__13, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30336,15 +30896,15 @@ ATSINSflab(__patsflab_gt_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12126(line=626, offs=29) -- 12137(line=626, offs=40)
 */
-ATSINSmove(tmp819__13, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp821__13, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12109(line=626, offs=12) -- 12139(line=626, offs=42)
 */
-ATSINSmove(tmpret818__13, atspre_g0int_gt_int(arg0, tmp819__13)) ;
+ATSINSmove(tmpret820__13, atspre_g0int_gt_int(arg0, tmp821__13)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret818__13) ;
+ATSreturn(tmpret820__13) ;
 } /* end of [ATSLIB_056_prelude__gt_g0int_int__217__13] */
 
 /*
@@ -30366,7 +30926,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__12(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__12) ;
+// ATStmpdec_void(tmpret806__12) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30376,9 +30936,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__12, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__12, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__12) ;
+ATSreturn_void(tmpret806__12) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__12] */
 
 /*
@@ -30400,7 +30960,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__30(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__30) ;
+// ATStmpdec_void(tmpret809__30) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30410,9 +30970,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__30, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__30, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__30) ;
+ATSreturn_void(tmpret809__30) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__30] */
 
 /*
@@ -30434,7 +30994,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__12(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__12, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__12, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30444,9 +31004,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__12, arg0) ;
+ATSINSmove(tmpret812__12, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__12) ;
+ATSreturn(tmpret812__12) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__12] */
 
 /*
@@ -30468,7 +31028,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__31(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__31) ;
+// ATStmpdec_void(tmpret809__31) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30478,9 +31038,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__31, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__31, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__31) ;
+ATSreturn_void(tmpret809__31) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__31] */
 
 /*
@@ -30502,7 +31062,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__32(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__32) ;
+// ATStmpdec_void(tmpret809__32) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30512,9 +31072,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__32, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__32, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__32) ;
+ATSreturn_void(tmpret809__32) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__32] */
 
 /*
@@ -30536,7 +31096,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__13(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__13) ;
+// ATStmpdec_void(tmpret806__13) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30546,9 +31106,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__13, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__13, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__13) ;
+ATSreturn_void(tmpret806__13) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__13] */
 
 /*
@@ -30570,7 +31130,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__33(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__33) ;
+// ATStmpdec_void(tmpret809__33) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30580,9 +31140,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__33, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__33, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__33) ;
+ATSreturn_void(tmpret809__33) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__33] */
 
 /*
@@ -30604,7 +31164,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__13(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__13, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__13, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30614,9 +31174,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__13, arg0) ;
+ATSINSmove(tmpret812__13, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__13) ;
+ATSreturn(tmpret812__13) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__13] */
 
 /*
@@ -30638,7 +31198,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__14(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__14) ;
+// ATStmpdec_void(tmpret806__14) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30648,9 +31208,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__14, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__14, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__14) ;
+ATSreturn_void(tmpret806__14) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__14] */
 
 /*
@@ -30672,7 +31232,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__34(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__34) ;
+// ATStmpdec_void(tmpret809__34) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30682,9 +31242,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__34, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__34, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__34) ;
+ATSreturn_void(tmpret809__34) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__34] */
 
 /*
@@ -30706,7 +31266,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__14(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__14, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__14, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30716,9 +31276,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__14, arg0) ;
+ATSINSmove(tmpret812__14, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__14) ;
+ATSreturn(tmpret812__14) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__14] */
 
 /*
@@ -30740,7 +31300,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__15(atsrefarg0_type(atstkind_type(atstype_ptrk)) arg0, atstkind_type(atstype_ptrk) arg1)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret804__15) ;
+// ATStmpdec_void(tmpret806__15) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30750,9 +31310,9 @@ ATSINSflab(__patsflab_drop):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17472(line=775, offs=26) -- 17474(line=775, offs=28)
 */
-ATSINSmove_void(tmpret804__15, ATSPMVempty()) ;
+ATSINSmove_void(tmpret806__15, ATSPMVempty()) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret804__15) ;
+ATSreturn_void(tmpret806__15) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__drop__209__15] */
 
 /*
@@ -30774,7 +31334,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__35(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__35) ;
+// ATStmpdec_void(tmpret809__35) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30784,9 +31344,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__35, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__35, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__35) ;
+ATSreturn_void(tmpret809__35) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__35] */
 
 /*
@@ -30808,7 +31368,7 @@ atstkind_type(atstype_ptrk)
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__15(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret810__15, atstkind_type(atstype_ptrk)) ;
+ATStmpdec(tmpret812__15, atstkind_type(atstype_ptrk)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30818,9 +31378,9 @@ ATSINSflab(__patsflab_thaw):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 17391(line=769, offs=20) -- 17392(line=769, offs=21)
 */
-ATSINSmove(tmpret810__15, arg0) ;
+ATSINSmove(tmpret812__15, arg0) ;
 ATSfunbody_end()
-ATSreturn(tmpret810__15) ;
+ATSreturn(tmpret812__15) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__thaw__213__15] */
 
 /*
@@ -30842,7 +31402,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__36(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__36) ;
+// ATStmpdec_void(tmpret809__36) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30852,9 +31412,9 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__36, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__36, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__36) ;
+ATSreturn_void(tmpret809__36) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__36] */
 
 /*
@@ -30876,7 +31436,7 @@ atsvoid_t0ype
 build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__37(atstkind_type(atstype_ptrk) arg0)
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret807__37) ;
+// ATStmpdec_void(tmpret809__37) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -30886,17 +31446,17 @@ ATSINSflab(__patsflab_free):
 /*
 emit_instr: loc0 = build/bats_modules/array/src/lib.dats: 14475(line=670, offs=4) -- 14503(line=670, offs=32)
 */
-ATSINSmove_void(tmpret807__37, ATSextfcall(free, (arg0))) ;
+ATSINSmove_void(tmpret809__37, ATSextfcall(free, (arg0))) ;
 ATSfunbody_end()
-ATSreturn_void(tmpret807__37) ;
+ATSreturn_void(tmpret809__37) ;
 } /* end of [build_057_bats_modules_057_array_057_src_057_lib_056_sats__free__211__37] */
 
 /*
-build/src/bin/bats.dats: 40704(line=743, offs=24) -- 41205(line=752, offs=4)
+build/src/bin/bats.dats: 41554(line=753, offs=24) -- 42055(line=762, offs=4)
 */
 /*
 local: bats_main_225$0(level=0)
-global: dispatch_cmd_0$0(level=0), locks_project_62$0(level=0), heavy_of_63$0(level=0), print_usage_64$0(level=0), copy_extra_65$0(level=0), find_dashdash_80$0(level=0), profiles_of_88$0(level=0), targets_of_89$0(level=0), makes_debug_90$0(level=0), makes_release_91$0(level=0), makes_native_92$0(level=0), makes_wasm_93$0(level=0), only_add_94$0(level=0), scan_only_95$0(level=0), count_positionals_109$0(level=0), first_positional_127$0(level=0), command_word_144$0(level=0), count_force_150$0(level=0), is_setup_word_164$0(level=0), opt_string_copy_205$0(level=0), repository_from_env_206$0(level=0), repository_len_216$0(level=0), bin_package_220$0(level=0), project_known_221$0(level=0), force_misuse_222$0(level=0), bats_main_225$0(level=0), __BATS_main0$363$0(level=0)
+global: dispatch_cmd_0$0(level=0), locks_project_62$0(level=0), heavy_of_63$0(level=0), print_usage_64$0(level=0), copy_extra_65$0(level=0), find_dashdash_80$0(level=0), profiles_of_88$0(level=0), targets_of_89$0(level=0), makes_debug_90$0(level=0), makes_release_91$0(level=0), makes_native_92$0(level=0), makes_wasm_93$0(level=0), only_add_94$0(level=0), scan_only_95$0(level=0), count_positionals_109$0(level=0), first_positional_127$0(level=0), command_word_144$0(level=0), count_force_150$0(level=0), is_setup_word_164$0(level=0), opt_string_copy_205$0(level=0), repository_from_env_206$0(level=0), repository_len_216$0(level=0), bin_package_220$0(level=0), project_known_221$0(level=0), force_misuse_222$0(level=0), bats_main_225$0(level=0), __BATS_main0$371$0(level=0)
 local: 
 global: 
 */
@@ -30905,99 +31465,99 @@ atsvoid_t0ype
 build_057_src_057_bin_057_bats_056_sats____BATS_main0()
 {
 /* tmpvardeclst(beg) */
-// ATStmpdec_void(tmpret1432) ;
-// ATStmpdec_void(tmp1433) ;
-ATStmpdec(tmp1434, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1435, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1436, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1437, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1438, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1439, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1440, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1445, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1446, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1449, atstkind_t0ype(atstype_int)) ;
-ATStmpdec(tmp1450, atstkind_t0ype(atstype_int)) ;
+// ATStmpdec_void(tmpret1463) ;
+// ATStmpdec_void(tmp1464) ;
+ATStmpdec(tmp1465, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1466, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1467, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1468, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1469, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1470, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1471, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1476, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1477, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1480, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmp1481, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40691(line=743, offs=11) -- 41205(line=752, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 41541(line=753, offs=11) -- 42055(line=762, offs=4)
 */
 ATSINSflab(__patsflab___BATS_main0):
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40709(line=743, offs=29) -- 41205(line=752, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 41559(line=753, offs=29) -- 42055(line=762, offs=4)
 */
 /*
 letpush(beg)
 */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40893(line=747, offs=16) -- 40909(line=747, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 41743(line=757, offs=16) -- 41759(line=757, offs=32)
 */
-ATSINSmove(tmp1434, build_057_src_057_with_env_056_sats__with_env_main()) ;
+ATSINSmove(tmp1465, build_057_src_057_with_env_056_sats__with_env_main()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40890(line=747, offs=13) -- 41030(line=747, offs=153)
+emit_instr: loc0 = build/src/bin/bats.dats: 41740(line=757, offs=13) -- 41880(line=757, offs=153)
 */
 ATSif(
-tmp1434
+tmp1465
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40915(line=747, offs=38) -- 40917(line=747, offs=40)
+emit_instr: loc0 = build/src/bin/bats.dats: 41765(line=757, offs=38) -- 41767(line=757, offs=40)
 */
-ATSINSmove_void(tmp1433, ATSPMVempty()) ;
+ATSINSmove_void(tmp1464, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40926(line=747, offs=49) -- 40942(line=747, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 41776(line=757, offs=49) -- 41792(line=757, offs=65)
 */
-ATSINSmove(tmp1435, build_057_src_057_fixtures_056_sats__fixtures_main()) ;
+ATSINSmove(tmp1466, build_057_src_057_fixtures_056_sats__fixtures_main()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40923(line=747, offs=46) -- 41030(line=747, offs=153)
+emit_instr: loc0 = build/src/bin/bats.dats: 41773(line=757, offs=46) -- 41880(line=757, offs=153)
 */
 ATSif(
-tmp1435
+tmp1466
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40948(line=747, offs=71) -- 40950(line=747, offs=73)
+emit_instr: loc0 = build/src/bin/bats.dats: 41798(line=757, offs=71) -- 41800(line=757, offs=73)
 */
-ATSINSmove_void(tmp1433, ATSPMVempty()) ;
+ATSINSmove_void(tmp1464, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40959(line=747, offs=82) -- 40971(line=747, offs=94)
+emit_instr: loc0 = build/src/bin/bats.dats: 41809(line=757, offs=82) -- 41821(line=757, offs=94)
 */
-ATSINSmove(tmp1436, build_057_src_057_pins_056_sats__pins_main()) ;
+ATSINSmove(tmp1467, build_057_src_057_pins_056_sats__pins_main()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40956(line=747, offs=79) -- 41030(line=747, offs=153)
+emit_instr: loc0 = build/src/bin/bats.dats: 41806(line=757, offs=79) -- 41880(line=757, offs=153)
 */
 ATSif(
-tmp1436
+tmp1467
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40977(line=747, offs=100) -- 40979(line=747, offs=102)
+emit_instr: loc0 = build/src/bin/bats.dats: 41827(line=757, offs=100) -- 41829(line=757, offs=102)
 */
-ATSINSmove_void(tmp1433, ATSPMVempty()) ;
+ATSINSmove_void(tmp1464, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40988(line=747, offs=111) -- 41004(line=747, offs=127)
+emit_instr: loc0 = build/src/bin/bats.dats: 41838(line=757, offs=111) -- 41854(line=757, offs=127)
 */
-ATSINSmove(tmp1437, build_057_src_057_affected_056_sats__affected_main()) ;
+ATSINSmove(tmp1468, build_057_src_057_affected_056_sats__affected_main()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40985(line=747, offs=108) -- 41030(line=747, offs=153)
+emit_instr: loc0 = build/src/bin/bats.dats: 41835(line=757, offs=108) -- 41880(line=757, offs=153)
 */
 ATSif(
-tmp1437
+tmp1468
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41010(line=747, offs=133) -- 41012(line=747, offs=135)
+emit_instr: loc0 = build/src/bin/bats.dats: 41860(line=757, offs=133) -- 41862(line=757, offs=135)
 */
-ATSINSmove_void(tmp1433, ATSPMVempty()) ;
+ATSINSmove_void(tmp1464, ATSPMVempty()) ;
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41018(line=747, offs=141) -- 41030(line=747, offs=153)
+emit_instr: loc0 = build/src/bin/bats.dats: 41868(line=757, offs=141) -- 41880(line=757, offs=153)
 */
-ATSINSmove_void(tmp1433, bats_main_225()) ;
+ATSINSmove_void(tmp1464, bats_main_225()) ;
 
 } /* ATSendif */
 } /* ATSendif */
@@ -31008,90 +31568,90 @@ letpush(end)
 */
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41040(line=749, offs=6) -- 41056(line=749, offs=22)
+emit_instr: loc0 = build/src/bin/bats.dats: 41890(line=759, offs=6) -- 41906(line=759, offs=22)
 */
-ATSINSmove(tmp1438, build_057_src_057_helpers_056_sats__has_build_err()) ;
+ATSINSmove(tmp1469, build_057_src_057_helpers_056_sats__has_build_err()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41037(line=749, offs=3) -- 41201(line=751, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 41887(line=759, offs=3) -- 42051(line=761, offs=10)
 */
 ATSif(
-tmp1438
+tmp1469
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41076(line=749, offs=42) -- 41091(line=749, offs=57)
+emit_instr: loc0 = build/src/bin/bats.dats: 41926(line=759, offs=42) -- 41941(line=759, offs=57)
 */
-ATSINSmove(tmp1445, build_057_src_057_helpers_056_sats__get_cap_exit()) ;
+ATSINSmove(tmp1476, build_057_src_057_helpers_056_sats__get_cap_exit()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41076(line=749, offs=42) -- 41096(line=749, offs=62)
+emit_instr: loc0 = build/src/bin/bats.dats: 41926(line=759, offs=42) -- 41946(line=759, offs=62)
 */
-ATSINSmove(tmp1440, ATSLIB_056_prelude__neq_g0int_int__364__1(tmp1445, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1471, ATSLIB_056_prelude__neq_g0int_int__372__1(tmp1476, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41073(line=749, offs=39) -- 41124(line=749, offs=90)
+emit_instr: loc0 = build/src/bin/bats.dats: 41923(line=759, offs=39) -- 41974(line=759, offs=90)
 */
 ATSif(
-tmp1440
+tmp1471
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41102(line=749, offs=68) -- 41117(line=749, offs=83)
+emit_instr: loc0 = build/src/bin/bats.dats: 41952(line=759, offs=68) -- 41967(line=759, offs=83)
 */
-ATSINSmove(tmp1439, build_057_src_057_helpers_056_sats__get_cap_exit()) ;
+ATSINSmove(tmp1470, build_057_src_057_helpers_056_sats__get_cap_exit()) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41123(line=749, offs=89) -- 41124(line=749, offs=90)
+emit_instr: loc0 = build/src/bin/bats.dats: 41973(line=759, offs=89) -- 41974(line=759, offs=90)
 */
-ATSINSmove(tmp1439, ATSPMVi0nt(1)) ;
+ATSINSmove(tmp1470, ATSPMVi0nt(1)) ;
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41062(line=749, offs=28) -- 41125(line=749, offs=91)
+emit_instr: loc0 = build/src/bin/bats.dats: 41912(line=759, offs=28) -- 41975(line=759, offs=91)
 */
-ATSINSmove_void(tmpret1432, atspre_exit_void(tmp1439)) ;
+ATSINSmove_void(tmpret1463, atspre_exit_void(tmp1470)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41136(line=750, offs=11) -- 41152(line=750, offs=27)
+emit_instr: loc0 = build/src/bin/bats.dats: 41986(line=760, offs=11) -- 42002(line=760, offs=27)
 */
-ATSINSmove(tmp1449, build_057_src_057_helpers_056_sats__get_exit_code()) ;
+ATSINSmove(tmp1480, build_057_src_057_helpers_056_sats__get_exit_code()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41136(line=750, offs=11) -- 41157(line=750, offs=32)
+emit_instr: loc0 = build/src/bin/bats.dats: 41986(line=760, offs=11) -- 42007(line=760, offs=32)
 */
-ATSINSmove(tmp1446, ATSLIB_056_prelude__neq_g0int_int__364__2(tmp1449, ATSPMVi0nt(0))) ;
+ATSINSmove(tmp1477, ATSLIB_056_prelude__neq_g0int_int__372__2(tmp1480, ATSPMVi0nt(0))) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41133(line=750, offs=8) -- 41201(line=751, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 41983(line=760, offs=8) -- 42051(line=761, offs=10)
 */
 ATSif(
-tmp1446
+tmp1477
 ) ATSthen() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41174(line=750, offs=49) -- 41190(line=750, offs=65)
+emit_instr: loc0 = build/src/bin/bats.dats: 42024(line=760, offs=49) -- 42040(line=760, offs=65)
 */
-ATSINSmove(tmp1450, build_057_src_057_helpers_056_sats__get_exit_code()) ;
+ATSINSmove(tmp1481, build_057_src_057_helpers_056_sats__get_exit_code()) ;
 
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41163(line=750, offs=38) -- 41191(line=750, offs=66)
+emit_instr: loc0 = build/src/bin/bats.dats: 42013(line=760, offs=38) -- 42041(line=760, offs=66)
 */
-ATSINSmove_void(tmpret1432, atspre_exit_void(tmp1450)) ;
+ATSINSmove_void(tmpret1463, atspre_exit_void(tmp1481)) ;
 
 } ATSelse() {
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 41199(line=751, offs=8) -- 41201(line=751, offs=10)
+emit_instr: loc0 = build/src/bin/bats.dats: 42049(line=761, offs=8) -- 42051(line=761, offs=10)
 */
-ATSINSmove_void(tmpret1432, ATSPMVempty()) ;
+ATSINSmove_void(tmpret1463, ATSPMVempty()) ;
 } /* ATSendif */
 } /* ATSendif */
 /*
-emit_instr: loc0 = build/src/bin/bats.dats: 40709(line=743, offs=29) -- 41205(line=752, offs=4)
+emit_instr: loc0 = build/src/bin/bats.dats: 41559(line=753, offs=29) -- 42055(line=762, offs=4)
 */
 /*
 INSletpop()
 */
 ATSfunbody_end()
-ATSreturn_void(tmpret1432) ;
+ATSreturn_void(tmpret1463) ;
 } /* end of [build_057_src_057_bin_057_bats_056_sats____BATS_main0] */
 
 #if(0)
@@ -31100,7 +31660,7 @@ $(PATSHOME)/prelude/DATS/integer.dats: 12337(line=639, offs=3) -- 12377(line=639
 */
 /*
 local: 
-global: neq_g0int_int$364$0(level=0)
+global: neq_g0int_int$372$0(level=0)
 local: 
 global: 
 */
@@ -31111,11 +31671,11 @@ tmparg = S2Evar(tk(7641))
 tmpsub = None()
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__neq_g0int_int__364(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__neq_g0int_int__372(atstkind_t0ype(atstyvar_type(tk)) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1441, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1442, atstkind_t0ype(atstyvar_type(tk))) ;
+ATStmpdec(tmpret1472, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1473, atstkind_t0ype(atstyvar_type(tk))) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -31125,16 +31685,16 @@ ATSINSflab(__patsflab_neq_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12364(line=639, offs=30) -- 12375(line=639, offs=41)
 */
-ATSINSmove(tmp1442, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7641))>)(arg1)) ;
+ATSINSmove(tmp1473, PMVtmpltcst(g0int2int<S2Eextkind(atstype_int), S2Evar(tk(7641))>)(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12346(line=639, offs=12) -- 12377(line=639, offs=43)
 */
-ATSINSmove(tmpret1441, PMVtmpltcst(g0int_neq<S2Evar(tk(7641))>)(arg0, tmp1442)) ;
+ATSINSmove(tmpret1472, PMVtmpltcst(g0int_neq<S2Evar(tk(7641))>)(arg0, tmp1473)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret1441) ;
-} /* end of [ATSLIB_056_prelude__neq_g0int_int__364] */
+ATSreturn(tmpret1472) ;
+} /* end of [ATSLIB_056_prelude__neq_g0int_int__372] */
 #endif // end of [TEMPLATE]
 
 /*
@@ -31142,7 +31702,7 @@ $(PATSHOME)/prelude/DATS/integer.dats: 12337(line=639, offs=3) -- 12377(line=639
 */
 /*
 local: 
-global: neq_g0int_int$364$1(level=1)
+global: neq_g0int_int$372$1(level=1)
 local: 
 global: 
 */
@@ -31153,11 +31713,11 @@ tmparg = S2Evar(tk(7641))
 tmpsub = Some(tk(7641) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__neq_g0int_int__364__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__neq_g0int_int__372__1(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1441__1, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1442__1, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1472__1, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1473__1, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -31167,23 +31727,23 @@ ATSINSflab(__patsflab_neq_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12364(line=639, offs=30) -- 12375(line=639, offs=41)
 */
-ATSINSmove(tmp1442__1, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp1473__1, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12346(line=639, offs=12) -- 12377(line=639, offs=43)
 */
-ATSINSmove(tmpret1441__1, atspre_g0int_neq_int(arg0, tmp1442__1)) ;
+ATSINSmove(tmpret1472__1, atspre_g0int_neq_int(arg0, tmp1473__1)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret1441__1) ;
-} /* end of [ATSLIB_056_prelude__neq_g0int_int__364__1] */
+ATSreturn(tmpret1472__1) ;
+} /* end of [ATSLIB_056_prelude__neq_g0int_int__372__1] */
 
 /*
 $(PATSHOME)/prelude/DATS/integer.dats: 12337(line=639, offs=3) -- 12377(line=639, offs=43)
 */
 /*
 local: 
-global: neq_g0int_int$364$2(level=1)
+global: neq_g0int_int$372$2(level=1)
 local: 
 global: 
 */
@@ -31194,11 +31754,11 @@ tmparg = S2Evar(tk(7641))
 tmpsub = Some(tk(7641) -> S2Eextkind(atstype_int))
 */
 atstkind_t0ype(atstype_bool)
-ATSLIB_056_prelude__neq_g0int_int__364__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
+ATSLIB_056_prelude__neq_g0int_int__372__2(atstkind_t0ype(atstype_int) arg0, atstkind_t0ype(atstype_int) arg1)
 {
 /* tmpvardeclst(beg) */
-ATStmpdec(tmpret1441__2, atstkind_t0ype(atstype_bool)) ;
-ATStmpdec(tmp1442__2, atstkind_t0ype(atstype_int)) ;
+ATStmpdec(tmpret1472__2, atstkind_t0ype(atstype_bool)) ;
+ATStmpdec(tmp1473__2, atstkind_t0ype(atstype_int)) ;
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
@@ -31208,16 +31768,16 @@ ATSINSflab(__patsflab_neq_g0int_int):
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12364(line=639, offs=30) -- 12375(line=639, offs=41)
 */
-ATSINSmove(tmp1442__2, atspre_g0int2int_int_int(arg1)) ;
+ATSINSmove(tmp1473__2, atspre_g0int2int_int_int(arg1)) ;
 
 /*
 emit_instr: loc0 = $(PATSHOME)/prelude/DATS/integer.dats({$PATSPRE}/DATS/integer.dats): 12346(line=639, offs=12) -- 12377(line=639, offs=43)
 */
-ATSINSmove(tmpret1441__2, atspre_g0int_neq_int(arg0, tmp1442__2)) ;
+ATSINSmove(tmpret1472__2, atspre_g0int_neq_int(arg0, tmp1473__2)) ;
 
 ATSfunbody_end()
-ATSreturn(tmpret1441__2) ;
-} /* end of [ATSLIB_056_prelude__neq_g0int_int__364__2] */
+ATSreturn(tmpret1472__2) ;
+} /* end of [ATSLIB_056_prelude__neq_g0int_int__372__2] */
 
 /*
 ** for initialization(dynloading)
