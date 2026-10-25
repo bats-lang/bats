@@ -8,7 +8,7 @@ staload "list/src/lib.dats"
 staload "process/src/lib.dats"
 staload "result/src/lib.dats"
 staload "sha256/src/lib.dats"
-(* fixtures -- bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>]
+(* fixtures -- bats fixtures <dir> [--only <member>]... [--bless] [--cold] [--work <dir>]
    [--memo <dir>] [--prune] [--repository <dir>] (bats-lang/bats#267, item 4: quire's static-test
    runner, tests/static/run.sh and expect.py, folded into bats).
 
@@ -52,6 +52,10 @@ staload "sha256/src/lib.dats"
 
    --only <member> (repeatable; accept/<name> or reject/<name>) runs only
    those. The exit status is 1 when anything failed, 2 for a usage error.
+
+   --bless (fixtures bless) writes each reject's expect from the error
+   patsopt gave instead of judging it, and refuses what has no error to
+   write; the new expects are read in the PR diff.
 
    The memo (below, "the memo") keeps the result of a fixture's check, so a
    second run does not run patsopt on what it already said; --cold reads
@@ -763,6 +767,64 @@ fn judge {lv_cap:pos}{ev_cap:pos}{sv_cap:pos}{mv_cap:pos} {l1,l2,l3,l4:agz}{llen
 in judge_in(lv, llen, ev, elen, sv, slen, mv, mlen, first, problem) end
 
 (* ============================================================
+   --bless: the expect a reject fixture's observed error gives (fixtures bless)
+   ============================================================ *)
+
+(* The line (of the project's module) of the first patsopt error of the log
+   from p, ~1 when it has none *)
+fun first_error_line {lv_cap:pos} {l:agz}{len:nat | len <= lv_cap}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, lv_cap), len: int len, p: int p): int = let
+  val e = line_end(bv, len, p, true)
+  val @(is_header, path_end, lineno, msg) = header_parse(bv, len, p, e)
+in
+  if is_header then lineno
+  else if e >= len then ~1
+  else first_error_line(bv, len, next_line(bv, len, e, true))
+end
+
+(* The expect for the log lv[0, llen) of a reject fixture: appended to out,
+   "function <the snippet's declaration at the first error's line>", "line
+   <n>", then patsopt's errors with their variable numbers as "_" (the form
+   the matcher compares; a renumbering of patsopt's changes nothing in the
+   diff). The problem is appended to problem, and out is left empty, when the
+   log has no patsopt error, an error is not in the module `file` or not at
+   the line of the first, or that line is in no declaration. *)
+fn bless_in {lv_cap:pos}{sv_cap:pos}{mv_cap:pos} {l1,l3,l4:agz}{llen:nat | llen <= lv_cap}{slen:nat | slen <= sv_cap}{mlen:nat | mlen <= mv_cap}
+  (lv: !$A.borrow(byte, l1, lv_cap), llen: int llen,
+   sv: !$A.borrow(byte, l3, sv_cap), slen: int slen,
+   mv: !$A.borrow(byte, l4, mv_cap), mlen: int mlen, first: int,
+   problem: !$B.builder_v >> $B.builder_v, out: !$B.builder_v >> $B.builder_v): void = let
+  val header_line = first_error_line(lv, llen, 0)
+  val want = header_line - first + 1
+  var raw : $B.builder_v = $B.create()
+  var norm : $B.builder_v = $B.create()
+  val count = walk_log(lv, llen, 0, false, 0, mv, mlen, first, want, raw, norm, problem)
+  val () = (if bytes_in(problem) = 0 && count = 0 then bput_v(problem, "no error of patsopt's") else ())
+  val @(ds, de) = enclosing(sv, slen, 0, 1, want, ~1, ~1)
+  val ds1 = g1ofg0(ds)
+  val de1 = g1ofg0(de)
+  val named = (ds1 >= 0 && ds1 <= slen): bool
+  val () = (if bytes_in(problem) = 0 && ~named then let
+      val () = bput_v(problem, "line ")
+      val () = put_int_v(problem, want)
+    in bput_v(problem, " of its snippet is in no declaration") end
+    else ())
+  val @(na, nl) = $B.into_arr(norm)
+  val @(ra, rl) = $B.into_arr(raw)
+  val @(fz_n, bv_n) = $A.freeze<byte>(na)
+  val () = (if bytes_in(problem) = 0 then (if ds1 >= 0 then (if ds1 <= slen then let
+        val () = bput_v(out, "function ")
+        val () = put_range(sv, slen, ds1, de1, out)
+        val () = bput_v(out, "\nline ")
+        val () = put_int_v(out, want)
+        val () = put_char_v(out, 10)
+      in put_range(bv_n, nl, 0, nl, out) end else ()) else ()) else ())
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+  val () = $A.free<byte>(ra)
+in end
+
+(* ============================================================
    Running sh for what only the system does: copying a tree, running
    bats check with its output in a file, and putting a snippet in
    ============================================================ *)
@@ -790,7 +852,10 @@ in rc end
    The settings of a run, as NUL-terminated strings in one buffer
    ============================================================ *)
 
-typedef settings = @{program= xi, directory= xi, work= xi, repository= xi, memo= xi, cold= int, prune= int}
+(* Whether a run judges the rejects' expects or writes them (--bless): fixtures bless *)
+datatype fixtures_mode = FixturesVerify | FixturesBless
+
+typedef settings = @{program= xi, directory= xi, work= xi, repository= xi, memo= xi, cold= int, prune= int, mode= fixtures_mode}
 
 (* The string at s of cfg (up to its NUL) appended to out *)
 fun put_cfg_from {cfg_cap:pos} {l:agz}{cfg_len:nat | cfg_len <= cfg_cap}{s:nat | s <= cfg_len} .<cfg_len - s>.
@@ -2012,11 +2077,95 @@ fn fail_member {mv_cap:pos} {lm:agz}{mv_len:nat | mv_len <= mv_cap}{a:nat | a <=
   val () = print! ("FAIL ")
 in say_member(mv, mv_len, a, e) end
 
+val g_wrote = ref<int>(0)
+val g_left = ref<int>(0)
+
+(* A reject fixture under --bless (fixtures bless): the expect its observed
+   error gives, written to the fixture's expect unless the expect it has
+   already passes the matcher against that error (left as it was, so a bless
+   changes only what the PR's diff must show). The expect is never taken from
+   the memo: the memo holds the log, and the new expect is made from the log
+   at every run. Refused, and the run fails, when the check passed, or
+   bless_in has a problem, or the expect it made does not pass the matcher. *)
+fn bless_member {cfg_cap:pos}{mv_cap:pos}{lv_cap:pos}{xv_cap:pos}{sv_cap:pos}{fv_cap:pos}
+  {l:agz}{lm:agz}{l1,l2,l3,l4:agz}{cfg_len:nat | cfg_len <= cfg_cap}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}
+  {llen:nat | llen <= lv_cap}{xlen:nat | xlen <= xv_cap}{slen:nat | slen <= sv_cap}{mlen:nat | mlen <= fv_cap}
+  (cfg: !$A.borrow(byte, l, cfg_cap), cfg_len: int cfg_len, w: settings,
+   mv: !$A.borrow(byte, lm, mv_cap), mv_len: int mv_len, a: int a, e: int e,
+   lv: !$A.borrow(byte, l1, lv_cap), llen: int llen,
+   xv: !$A.borrow(byte, l2, xv_cap), xlen: int xlen,
+   sv: !$A.borrow(byte, l3, sv_cap), slen: int slen,
+   fv: !$A.borrow(byte, l4, fv_cap), mlen: int mlen,
+   at: int, rc: int, hit: bool, elapsed: int): void = let
+  var problem : $B.builder_v = $B.create()
+  var out : $B.builder_v = $B.create()
+  val () = (if rc = 0 then bput_v(problem, "it type-checks, so there is no error to write")
+    else bless_in(lv, llen, sv, slen, fv, mlen, at, problem, out))
+  val @(pa, pn) = $B.into_arr(problem)
+  val @(oa, on) = $B.into_arr(out)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  (* the new expect against the log, and the old one *)
+  var fresh : $B.builder_v = $B.create()
+  val () = (if pn = 0 then judge(lv, llen, bv_o, on, sv, slen, fv, mlen, at, fresh) else ())
+  var old : $B.builder_v = $B.create()
+  val () = (if pn = 0 then judge(lv, llen, xv, xlen, sv, slen, fv, mlen, at, old) else ())
+  val @(ga, gn) = $B.into_arr(fresh)
+  val @(da, dn) = $B.into_arr(old)
+  val @(fz_g, bv_g) = $A.freeze<byte>(ga)
+  val marker = (if hit then " [memo]" else ""): string
+  val () = (if pn > 0 then let
+      val () = fail_member(mv, mv_len, a, e)
+      val () = print! (": not blessed: ")
+      val () = print_borrow(bv_p, 0, pn, pn)
+      val () = println! ()
+    in say_failed_lines(lv, llen) end
+    else if gn > 0 then let
+      val () = fail_member(mv, mv_len, a, e)
+      val () = print! (": not blessed: the expect it would write does not pass: ")
+      val () = print_borrow(bv_g, 0, gn, gn)
+      val () = println! ()
+    in say_failed_lines(lv, llen) end
+    else if dn = 0 then let
+      val () = !g_passed := !g_passed + 1
+      val () = !g_left := !g_left + 1
+      val () = (if hit then !g_memo := !g_memo + 1 else ())
+      val () = print! ("left  ")
+      val () = say_member(mv, mv_len, a, e)
+    in println! (" (", elapsed, " s)", marker) end
+    else let
+      var content : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(bv_o, 0, on, on, content)
+      val written = path_write(fixture_path(cfg, cfg_len, w, mv, mv_len, a, e, "expect"), content)
+    in
+      if written then let
+        val () = !g_passed := !g_passed + 1
+        val () = !g_wrote := !g_wrote + 1
+        val () = (if hit then !g_memo := !g_memo + 1 else ())
+        val () = print! ("wrote ")
+        val () = say_member(mv, mv_len, a, e)
+      in println! (" (", elapsed, " s)", marker) end
+      else let
+        val () = fail_member(mv, mv_len, a, e)
+      in println! (": not blessed: its expect cannot be written") end
+    end)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_g, bv_g)
+  val () = $A.free<byte>($A.thaw<byte>(fz_g))
+  val () = $A.free<byte>(da)
+in end
+
 (* Runs the fixture whose name is mv[a, e) (accept/<name> or reject/<name>)
    in the checked copy, and says how it went *)
 fn run_member {cfg_cap:pos}{mv_cap:pos} {l:agz}{lm:agz}{cfg_len:nat | cfg_len <= cfg_cap}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}
   (cfg: !$A.borrow(byte, l, cfg_cap), cfg_len: int cfg_len, w: settings, mv: !$A.borrow(byte, lm, mv_cap), mv_len: int mv_len, a: int a, e: int e): void = let
   val is_accept = text_has(mv, e, a, "accept/")
+  val is_bless = (case+ w.mode of
+    | FixturesBless() => true
+    | FixturesVerify() => false): bool
   (* the module and the line the snippet goes before *)
   val @(fa, flen, file_read) = read_file_text(fixture_path(cfg, cfg_len, w, mv, mv_len, a, e, "file"))
   val @(ba, blen1, before_read) = read_file_text(fixture_path(cfg, cfg_len, w, mv, mv_len, a, e, "before"))
@@ -2034,7 +2183,7 @@ fn run_member {cfg_cap:pos}{mv_cap:pos} {l:agz}{lm:agz}{cfg_len:nat | cfg_len <=
   val @(fz_x, bv_x) = $A.freeze<byte>(xa)
   (* `before`, as the shell reads it, without its trailing line feeds *)
   val blen = trim_feeds(bv_b, blen1)
-  val missing = (~file_read || ~before_read || ~snippet_read || (~expect_read && ~is_accept)): bool
+  val missing = (~file_read || ~before_read || ~snippet_read || (~expect_read && ~is_accept && ~is_bless)): bool
 in
   if missing then let
     val () = fail_member(mv, mv_len, a, e)
@@ -2121,6 +2270,8 @@ in
               val () = fail_member(mv, mv_len, a, e)
               val () = println! (": should type-check")
             in say_failed_lines(bv_l, llen) end)
+        else if is_bless then
+          bless_member(cfg, cfg_len, w, mv, mv_len, a, e, bv_l, llen, bv_x, xlen, bv_s, slen, bv_f, mlen, at, rc, hit, elapsed)
         else
           (if rc = 0 then let
               val () = fail_member(mv, mv_len, a, e)
@@ -2189,37 +2340,37 @@ fn arg_is {l:agz}{sl:nat} (bv: !$A.borrow(byte, l, 4096), a: xi, e: xi, s: strin
    option that is not one of ours, 2: an option with no value, 3: a second
    directory), as a span *)
 typedef options = @{dir_s= xi, dir_e= xi, work_s= xi, work_e= xi, repo_s= xi, repo_e= xi,
-  memo_s= xi, memo_e= xi, cold= int, prune= int, only= int,
+  memo_s= xi, memo_e= xi, cold= int, prune= int, only= int, mode= fixtures_mode,
   bad_kind= int, bad_s= xi, bad_e= xi}
 
 fn opt_dir (o: options, s: xi, e: xi): options =
   @{dir_s= s, dir_e= e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
-    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only, mode= o.mode,
     bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
 
 fn opt_work (o: options, s: xi, e: xi): options =
   @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= s, work_e= e, repo_s= o.repo_s, repo_e= o.repo_e,
-    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only, mode= o.mode,
     bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
 
 fn opt_repo (o: options, s: xi, e: xi): options =
   @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= s, repo_e= e,
-    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only, mode= o.mode,
     bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
 
 fn opt_memo (o: options, s: xi, e: xi): options =
   @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
-    memo_s= s, memo_e= e, cold= o.cold, prune= o.prune, only= o.only,
+    memo_s= s, memo_e= e, cold= o.cold, prune= o.prune, only= o.only, mode= o.mode,
     bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
 
-fn opt_flags (o: options, cold: int, prune: int, only: int): options =
+fn opt_flags (o: options, cold: int, prune: int, only: int, mode: fixtures_mode): options =
   @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
-    memo_s= o.memo_s, memo_e= o.memo_e, cold= cold, prune= prune, only= only,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= cold, prune= prune, only= only, mode= mode,
     bad_kind= o.bad_kind, bad_s= o.bad_s, bad_e= o.bad_e}
 
 fn opt_bad (o: options, kind: int, s: xi, e: xi): options =
   @{dir_s= o.dir_s, dir_e= o.dir_e, work_s= o.work_s, work_e= o.work_e, repo_s= o.repo_s, repo_e= o.repo_e,
-    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only,
+    memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only, mode= o.mode,
     bad_kind= kind, bad_s= s, bad_e= e}
 
 fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
@@ -2233,10 +2384,13 @@ fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
       || arg_is(bv, p, e, "--memo")): bool
   in
     if arg_is(bv, p, e, "--cold") then let
-      val o2 = opt_flags(o, 1, o.prune, o.only)
+      val o2 = opt_flags(o, 1, o.prune, o.only, o.mode)
     in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
     else if arg_is(bv, p, e, "--prune") then let
-      val o2 = opt_flags(o, o.cold, 1, o.only)
+      val o2 = opt_flags(o, o.cold, 1, o.only, o.mode)
+    in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
+    else if arg_is(bv, p, e, "--bless") then let
+      val o2 = opt_flags(o, o.cold, o.prune, o.only, FixturesBless())
     in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
     else if valued then
       (if nxt >= t then opt_bad(o, 2, p, e)
@@ -2245,7 +2399,7 @@ fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
         val o2 = (if arg_is(bv, p, e, "--work") then opt_work(o, nxt, ve)
           else if arg_is(bv, p, e, "--repository") then opt_repo(o, nxt, ve)
           else if arg_is(bv, p, e, "--memo") then opt_memo(o, nxt, ve)
-          else if arg_is(bv, p, e, "--only") then opt_flags(o, o.cold, o.prune, 1)
+          else if arg_is(bv, p, e, "--only") then opt_flags(o, o.cold, o.prune, 1, o.mode)
           else o): options
       in
         if ve + 1 <= t then parse_options(bv, t, ve + 1, o2) else o2
@@ -2371,7 +2525,7 @@ in prerr_builder(b) end
 fn prerr_args {l:agz} (bv: !$A.borrow(byte, l, 4096), s: xi, e: xi): void = prerr_seg(bv, s, e, 4096)
 
 fn usage (): void = let
-  val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]\n")
+  val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--bless] [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]\n")
 in set_exit_code(2) end
 
 (* Runs the fixtures: the chosen ones of <dir> against a copy of the
@@ -2443,6 +2597,9 @@ fn fixtures_with {cfg_cap:pos} {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t
         val () = path_remove(work_text(cfg, cfg_len, w, "memo-used"))
         val ran = members_loop(cfg, cfg_len, w, bv_m, mlen, 0, bv, t, o, true, 0)
         val () = (if w.prune <> 0 then memo_prune(cfg, cfg_len, w) else ())
+        val () = (case+ w.mode of
+          | FixturesBless() => println! ("bless: ", !g_wrote, " written, ", !g_left, " left as they were")
+          | FixturesVerify() => ())
         val () = print! ("fixtures: ", !g_passed, " ok, ", !g_failed, " failed")
         val () = (if !g_memo > 0 then print! (" (", !g_memo, " from the memo)") else ())
         val () = println! ()
@@ -2470,7 +2627,7 @@ fn fixtures_run {l:agz}{t:nat | t <= 4096} (bv: !$A.borrow(byte, l, 4096), t: in
   val a1 = a0 + 1
   val a1e = (if a1 <= t then word_stop(bv, t, a1) else t): [r:nat | r <= t] int r
   val none = @{dir_s= ~1, dir_e= ~1, work_s= ~1, work_e= ~1, repo_s= ~1, repo_e= ~1,
-    memo_s= ~1, memo_e= ~1, cold= 0, prune= 0, only= 0, bad_kind= 0, bad_s= ~1, bad_e= ~1}: options
+    memo_s= ~1, memo_e= ~1, cold= 0, prune= 0, only= 0, mode= FixturesVerify(), bad_kind= 0, bad_s= ~1, bad_e= ~1}: options
   val o = (if a1e + 1 <= t then parse_options(bv, t, a1e + 1, none) else none): options
 in
   if o.bad_kind <> 0 then let
@@ -2525,7 +2682,7 @@ in
       val () = $A.drop<byte>(fz_cw, bv_cw)
       val () = $A.free<byte>($A.thaw<byte>(fz_cw))
       val w = @{program= 0, directory= off_dir, work= off_work, repository= (if has_repo then off_repo else ~1),
-        memo= off_memo, cold= o.cold, prune= o.prune}: settings
+        memo= off_memo, cold= o.cold, prune= o.prune, mode= o.mode}: settings
       val @(ca, cfg_len) = $B.into_arr(cb)
       val @(fz_c, bv_c) = $A.freeze<byte>(ca)
       val () = (if a1e + 1 <= t then fixtures_with(bv_c, cfg_len, w, bv, t, a1e + 1) else fixtures_with(bv_c, cfg_len, w, bv, t, t))
