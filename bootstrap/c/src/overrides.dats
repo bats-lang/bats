@@ -500,6 +500,18 @@ fun scan_code {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<
           val inst = instance_after(bv, mx, ne, e)
           val f = RawImplements(live, @(p, q), @(ns, ns), @(ns, ne), inst)
         in scan_code(bv, mx, ne, e, live, raw_facts_cons(f, acc), awaiting, false) end
+        else if byte2int0($A.read<byte>(bv, ns)) = 36 then let
+          (* $alias.member in the code itself: inside a $UNSAFE block the lexer makes no span of it *)
+          val ae = ident_stop(bv, mx, ns + 1, e)
+        in
+          if ae >= e then scan_code(bv, mx, q, e, live, acc, awaiting, false)
+          else if byte2int0($A.read<byte>(bv, ae)) <> 46 then scan_code(bv, mx, q, e, live, acc, awaiting, false)
+          else let
+            val me = ident_stop(bv, mx, ae + 1, e)
+            val inst = instance_after(bv, mx, me, e)
+            val f = RawImplements(live, @(p, q), @(ns + 1, ae), @(ae + 1, me), inst)
+          in scan_code(bv, mx, me, e, live, raw_facts_cons(f, acc), awaiting, false) end
+        end
         else scan_code(bv, mx, q, e, live, acc, awaiting, false)
       end
       else scan_code(bv, mx, q, e, live, acc, awaiting, false)
@@ -646,6 +658,10 @@ fn scan_one {l:agz}{n:pos}{k,j:nat}
     if restricted then @(acc, false, awaiting)
     else let val acc2 = pub_first(bv, mx, cs, e, live, acc) in @(acc2, false, awaiting) end
   | SStaload(s, e) => let val acc2 = staload_fact(bv, mx, s, e, live, acc) in @(acc2, false, awaiting) end
+  | SUnsafeBlock(_, _, cs, ce) =>
+    (* the contents of $UNSAFE begin ... end are code the lexer makes no spans of *)
+    if cs <= ce then scan_code(bv, mx, cs, ce, live, acc, awaiting, false)
+    else @(acc, false, awaiting)
   | SQual(_, _, as0, ae, ms, me) =>
     if waiting then let
       val inst = (case+ next of
