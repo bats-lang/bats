@@ -1,0 +1,12 @@
+error: error: 'implement word32_rotr_inline' replaces what the package 'arith' implements: it declares word32_rotr_inline and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents
+ --> m.bats:6:1
+   |
+ 6 | implement{} $A.word32_rotr_inline (x) = x + 2
+   | ^
+
+error: 'implement barr_get_inline' replaces what the package 'array' implements: it declares barr_get_inline and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents
+ --> m.bats:8:1
+   |
+ 8 | implement{} $AR.barr_get_inline (x) = x + 3
+   | ^
+

@@ -19,16 +19,20 @@
    package, which opens that file's names unqualified.
 
    Names declared there are the #pub declarations of the target file alone
-   (a module that file staloads is not reached through the alias, E5). An implement is a hit when: the name is declared
-   there, the package that declares it also implements that name (so a name
-   it leaves for its dependents to implement, like promise's dispose, is an
-   extension point and not a hit) with no instance, or with the same
-   instance as the implement (the instance is the text of the <...> after the
-   name with its blanks removed; a type spelled another way is not matched),
-   and the implement, the binding, the declaration and that implement of the
-   declarer are all live in one of the four builds (native or wasm, test or
-   not: a #target or $UNITTEST block the emitter blanks, next_state, is not
-   live), so a use the build loads nothing for creates no rejection. *)
+   (a module that file staloads is not reached through the alias, E5).
+
+   An implement is a hit when the name is declared there, and the package
+   that declares it also implements that name (so a name it leaves for its
+   dependents to implement, like promise's dispose, is an extension point
+   and not a hit) with no instance, or with the same instance as the implement
+   (the instance is the text of the <...> after the name with its blanks
+   removed; a type spelled another way is not matched).
+
+   The implement, the binding, the declaration and that implement of the
+   declarer must also be live in one build of the four (native or wasm, test
+   or not): a #target or $UNITTEST block that the emitter blanks (next_state)
+   holds no live fact, so a use the build loads nothing for creates no
+   rejection. *)
 
 #include "share/atspre_staload.hats"
 

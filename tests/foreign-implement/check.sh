@@ -43,10 +43,14 @@ dependency() {
   mkdir -p "$TMP/$1/bats_modules/$2/src"
   printf '[package]\nname = "%s"\nkind = "lib"\n' "$2" > "$TMP/$1/bats_modules/$2/bats.toml"
   if [ "${3:-}" = unsafe ]; then printf 'unsafe = true\n' >> "$TMP/$1/bats_modules/$2/bats.toml"; fi
-  cat > "$TMP/$1/bats_modules/$2/src/lib.bats"
+  printf '#include "share/atspre_staload.hats"\n\n' > "$TMP/$1/bats_modules/$2/src/lib.bats"
+  cat >> "$TMP/$1/bats_modules/$2/src/lib.bats"
 }
 # main <case>: the source of src/bin/m.bats is on stdin
-main() { cat > "$TMP/$1/src/bin/m.bats"; }
+main() {
+  printf '#include "share/atspre_staload.hats"\n\n' > "$TMP/$1/src/bin/m.bats"
+  cat >> "$TMP/$1/src/bin/m.bats"
+}
 
 reject() { # <case> <text each of the errors must hold>...
   c=$1; shift
@@ -155,7 +159,7 @@ main transitive <<'X'
 
 implement main0 () = println! ($M.mid_rotr (1))
 X
-reject transitive "'implement rotr' replaces what the package 'arith' implements" "bats_modules/mid/src/lib.bats"
+reject transitive "'implement rotr' replaces what the package 'arith' implements" "--> lib.bats:7:1"
 
 project unsafe_dependency bin
 dependency unsafe_dependency arith <<'X'
@@ -177,7 +181,7 @@ main unsafe_dependency <<'X'
 
 implement main0 () = println! ($S.shim_rotr (1))
 X
-reject unsafe_dependency "'implement rotr' replaces what the package 'arith' implements" "bats_modules/shim/src/lib.bats"
+reject unsafe_dependency "'implement rotr' replaces what the package 'arith' implements" "--> lib.bats:7:1"
 
 project unsafe_package bin unsafe
 dependency unsafe_package arith <<'X'
@@ -295,6 +299,7 @@ accept disjoint_targets
 # ---- the record of the names ----
 lexed() { grep -ac '^  ~ facts lexed ' "$1" || true; }
 cd "$TMP/own_template"
+"$BATS" check > "$TMP/prime.log" 2>&1 || { echo "FAIL: the priming check"; cat "$TMP/prime.log"; exit 1; }   # a record never makes build/: the second check writes them
 "$BATS" -v check > "$TMP/m1.log" 2>&1 || { echo "FAIL: the second check"; cat "$TMP/m1.log"; exit 1; }
 [ "$(lexed "$TMP/m1.log")" = 0 ] || { echo "FAIL: a check in which nothing changed lexed $(lexed "$TMP/m1.log") files for their names"; cat "$TMP/m1.log"; exit 1; }
 set -- build/.bats_valid/facts*

@@ -1,0 +1,6 @@
+error: error: 'implement rotr' replaces what the package 'arith' implements: it declares rotr and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents
+ --> m.bats:6:1
+   |
+ 6 | implement{} $A.rotr (x) = x + 2
+   | ^
+
