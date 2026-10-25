@@ -401,6 +401,22 @@ implement uses_same (p, pm, key) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_a))
 in same end
 
+(* DESIGN CHECK (bats#421, overrides.md): the names of a file are kept as
+   the 'uses' of a file are, by the same record format (uses_hit reads and
+   uses_write writes it), under a key and a slot of their own *)
+
+(* The key of the .bats file at the NUL-terminated path p for its names
+   ('bats-facts 1 file'), as uses_key says *)
+#pub fn facts_key {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
+  : @(bool, [lk:agz] $A.arr(byte, lk, 64))
+
+#pub fn facts_same {lp,lk:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
+  (p: !$A.borrow(byte, lp, np), pm: int pm, key: !$A.borrow(byte, lk, 64)): bool
+
+(* build/.bats_valid/facts <path>, NUL-terminated *)
+#pub fn facts_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
+
 (* build/.bats_valid/uses <path>, NUL-terminated: where the record of the
    file at p is *)
 #pub fn uses_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
