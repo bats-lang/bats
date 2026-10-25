@@ -1,29 +1,30 @@
 #!/bin/sh
-# bats ats2 install (bats-lang/bats#283): the pinned ATS2 (src/ats2.bats)
-# downloaded, checked against its SHA-256, built and put in ~/.bats/ats2,
-# once. A private HOME per case; curl and make are stand-ins on the PATH
-# (curl serves the real pinned tarball, fetched once with the real curl,
-# or junk, or fails; make writes a patsopt, or fails like a build without
-# libgmp), so a case takes a second and patsopt is not built.
+# bats ats2 install (bats-lang/bats#283, #264): the pinned ATS2 (src/ats2.bats)
+# downloaded, checked against its SHA-256, built in ~/.bats/ats2-temp with its
+# marker inside, and moved to ~/.bats/ats2 with one rename. A private HOME per
+# case; curl and make are stand-ins on the PATH (curl serves the real pinned
+# tarball, fetched once with the real curl, or junk, or fails; make writes a
+# patsopt, or fails like a build without libgmp), so a case takes a second and
+# patsopt is not built.
 #  * a download whose SHA-256 is not the pin's is refused, named, removed
-#  * a failed download, and a failed build, install nothing and leave
-#    nothing (no ats2, no ats2.new, no tarball)
-#  * a good install leaves bin/patsopt and the marker of the pin
-#  * the second run does nothing (no curl, the marker untouched)
-#  * a toolchain bats did not make is used as it is, never replaced
-#  * a marker of another pin is replaced; what a killed run left is cleared
-#  * a marker that cannot be written fails the install, with bats's write line,
-#    and leaves no toolchain (the marker is written by bats after the move),
-#    whether the write fails before it made a file (a directory at its place)
-#    or after it did (a file-size limit on bats's own writes): the message
-#    says the removal only when the toolchain is gone
-#  * the removal after a failed marker write is two steps (marker, then tree)
-#    with a status each; a stand-in rm fails each, and the unmarked toolchain a
-#    failed tree removal or a bats killed after the move leaves is used as it is
-#  * a link to another pin's toolchain is refused before any download or build
-#  * a marker with no patsopt (half made) is replaced
-#  * no HOME is an error
-#  * the pin is in src/ats2.bats alone
+#  * a failed download, and a failed build, install nothing and leave nothing
+#  * a good install leaves bin/patsopt and the marker of the pin; the second
+#    run does nothing
+#  * the marker is inside the directory that is renamed (a stand-in mv reads it
+#    just before the rename); a run killed right before the rename leaves no
+#    ~/.bats/ats2 and the next install clears ats2-temp and installs; a run
+#    killed right after leaves a complete marked toolchain
+#  * a leftover ats2-temp and ats2-download.* are cleared
+#  * a marker that cannot be written fails the install and leaves no ats2
+#  * for build, check, test, run and ats2 install: a ~/.bats/ats2 with no marker,
+#    another pin's marker, or the pin's marker and no bin/patsopt fails with the
+#    error and nothing is deleted; the pin's marker is used; an absent one is
+#    installed
+#  * ats2 install --force replaces a toolchain with no marker, another pin's, a
+#    directory with other files and a link (its target untouched), installs again
+#    over the pin's own, and a build that fails leaves what was there; --force
+#    elsewhere, twice, with another word or option is a usage error (exit 1)
+#  * no HOME is an error; the pin is in src/ats2.bats alone
 # usage: tests/ats2-install/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -65,7 +66,7 @@ SH
 chmod +x "$FAKE/curl" "$FAKE/make"
 newhome() { H="$TMP/home-$1"; rm -rf "$H"; mkdir -p "$H"; : > "$TMP/calls"; }
 run() { HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1; }
-leftovers() { [ ! -e "$H/.bats/ats2.new" ] && [ ! -e "$H/.bats/ats2.tgz.part" ] && [ -z "$(ls -d "$H"/.bats/ats2-download.* 2>/dev/null)" ]; }
+leftovers() { [ ! -e "$H/.bats/ats2-temp" ] && [ -z "$(ls -d "$H"/.bats/ats2-download.* 2>/dev/null)" ]; }
 
 # a valid tarball of the same ATS2 with one file changed
 mkdir "$TMP/unpacked"; tar -xzf "$TMP/real.tgz" -C "$TMP/unpacked"
@@ -135,78 +136,160 @@ grep -q "already installed" "$TMP/out" || fail "the second run does not say so"
 [ "$stamp" = "$(ls -l --time-style=full-iso "$H/.bats/ats2/.bats-ats2")" ] || fail "the marker changed"
 ok "the second run does nothing"
 
-newhome foreign
-mkdir -p "$H/.bats/ats2/bin"; printf '#!/bin/sh\n' > "$H/.bats/ats2/bin/patsopt"; chmod +x "$H/.bats/ats2/bin/patsopt"
-run || fail "a foreign toolchain failed"
-grep -q "was not installed by bats" "$TMP/out" || fail "a foreign toolchain is not said"
-HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install 2>&1 >/dev/null | grep -q "bats#264" || fail "the warning is not on stderr"
-[ ! -s "$TMP/calls" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "a foreign toolchain was touched"
-ok "a toolchain bats did not make is used as it is"
+# --- what is at ~/.bats/ats2 is bats's own, whole, or it is not used (#264) ---
+PROJ=$TMP/proj
+mkdir -p "$PROJ/src/bin"
+printf '[package]\nname = "app"\nkind = "bin"\n' > "$PROJ/bats.toml"
+printf 'implement main0 () = ()\n' > "$PROJ/src/bin/app.bats"
+printf '#include "share/atspre_staload.hats"\n\n$UNITTEST.run begin\nfn test_one (): bool = 1 + 1 = 2\nend\n' > "$PROJ/src/unit.bats"
+pinmark="$name $sha"
+othermark="ATS2-Postiats-gmp-0.0.1 0000"
+cmd() { ( cd "$PROJ" && HOME="$H" PATH="$FAKE:$PATH" "$BATS" "$@" ) > "$TMP/out" 2>&1; }
+sig() { ( cd "$H/.bats" && { [ -L ats2 ] && echo "link $(readlink ats2)"; find ats2/ -print | sort; find ats2/ -type f -exec cksum {} + | sort; } 2>/dev/null ); }
+# a stand-in patsopt that records that it was used
+stub() { mkdir -p "$1/bin"; printf '#!/bin/sh\necho used >> "%s"\nexit 1\n' "$TMP/patsopt-used" > "$1/bin/patsopt"; chmod +x "$1/bin/patsopt"; }
+nostub_used() { [ ! -e "$TMP/patsopt-used" ]; }
+echo real > "$TMP/curl-mode"; echo ok > "$TMP/make-mode"
 
-newhome stale
-mkdir -p "$H/.bats/ats2/bin"; printf '#!/bin/sh\nold\n' > "$H/.bats/ats2/bin/patsopt"; chmod +x "$H/.bats/ats2/bin/patsopt"
-echo "ATS2-Postiats-gmp-0.0.1 0000" > "$H/.bats/ats2/.bats-ats2"
-mkdir -p "$H/.bats/ats2.new/x" "$H/.bats/ats2-download.old"; echo half > "$H/.bats/ats2.tgz.part"
-run || { cat "$TMP/out"; fail "replacing an older pin failed"; }
-[ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$name $sha" ] || fail "the older pin stayed"
-leftovers || fail "what a killed run left stayed"
-ok "an older pin is replaced and a killed run's files are cleared"
+# a toolchain with no marker (a developer's own, an -int build): every command fails
+# with the error, and nothing is deleted or downloaded
+for c in build check test run "ats2 install"; do
+  newhome nomarker; rm -f "$TMP/patsopt-used"
+  stub "$H/.bats/ats2"; echo precious > "$H/.bats/ats2/notes"
+  before=$(sig); rc=0
+  cmd $c || rc=$?
+  [ "$rc" -ne 0 ] || { cat "$TMP/out"; fail "$c: a toolchain with no marker was used"; }
+  grep -q "has no marker .bats-ats2" "$TMP/out" || { cat "$TMP/out"; fail "$c: the error does not say there is no marker"; }
+  grep -q "bats never deletes what is at ~/.bats/ats2 by itself" "$TMP/out" || { cat "$TMP/out"; fail "$c: the error does not say bats deletes nothing"; }
+  grep -q "bats ats2 install --force" "$TMP/out" || { cat "$TMP/out"; fail "$c: the error does not name --force"; }
+  [ "$before" = "$(sig)" ] || fail "$c: a toolchain with no marker was touched"
+  [ ! -s "$TMP/calls" ] && nostub_used || fail "$c: a toolchain with no marker was downloaded over or run"
+done
+ok "build, check, test, run and ats2 install fail on a toolchain with no marker, and delete nothing"
 
-# anything bats did not make is replaced never: a directory with other files, a
-# link, and what a killed run of an older bats left
-newhome precious
-mkdir -p "$H/.bats/ats2/work"; echo precious > "$H/.bats/ats2/work/notes"
-before=$(cd "$H/.bats" && find ats2 | sort; cd ats2 && cksum work/notes)
-run && fail "a directory with other files was replaced"
-grep -q "does not replace" "$TMP/out" || { cat "$TMP/out"; fail "the refusal does not say why"; }
-after=$(cd "$H/.bats" && find ats2 | sort; cd ats2 && cksum work/notes)
-[ "$before" = "$after" ] || fail "the directory was touched"
-[ ! -s "$TMP/calls" ] || fail "something was downloaded or built for a directory that is not replaced"
-newhome link
-mkdir -p "$H/.bats" "$TMP/linked-target"; echo precious > "$TMP/linked-target/notes"; ln -s "$TMP/linked-target" "$H/.bats/ats2"
-run && fail "a link was replaced"
-[ -L "$H/.bats/ats2" ] && [ "$(cat "$TMP/linked-target/notes")" = precious ] || fail "the link or its target was touched"
-newhome emptydir
-mkdir -p "$H/.bats/ats2"
-run || { cat "$TMP/out"; fail "an empty directory was refused"; }
-[ -x "$H/.bats/ats2/bin/patsopt" ] || fail "an empty directory was not installed into"
-ok "a directory bats did not make is never replaced (checked before and after), an empty one is"
+# an empty directory, a directory with other files and a link have no marker either
+for kind in emptydir files link; do
+  newhome "no-marker-$kind"
+  case $kind in
+    emptydir) mkdir -p "$H/.bats/ats2" ;;
+    files) mkdir -p "$H/.bats/ats2/work"; echo precious > "$H/.bats/ats2/work/notes" ;;
+    link) mkdir -p "$H/.bats" "$TMP/linked-$kind"; echo precious > "$TMP/linked-$kind/notes"; ln -s "$TMP/linked-$kind" "$H/.bats/ats2" ;;
+  esac
+  before=$(sig); rc=0
+  cmd ats2 install || rc=$?
+  [ "$rc" -ne 0 ] && grep -q "has no marker" "$TMP/out" || { cat "$TMP/out"; fail "$kind: not refused"; }
+  [ "$before" = "$(sig)" ] && [ ! -s "$TMP/calls" ] || fail "$kind: touched"
+done
+ok "an empty directory, a directory with other files and a link are refused and left as they were"
 
-# a link to a toolchain of another pin is refused before anything is downloaded or built
-newhome linkforeign
-mkdir -p "$H/.bats" "$TMP/linked-foreign/bin"; printf '#!/bin/sh\n' > "$TMP/linked-foreign/bin/patsopt"; chmod +x "$TMP/linked-foreign/bin/patsopt"
-echo "ATS2-Postiats-gmp-0.0.1 0000" > "$TMP/linked-foreign/.bats-ats2"; ln -s "$TMP/linked-foreign" "$H/.bats/ats2"
-run && fail "a link to another pin's toolchain was replaced"
-grep -q "does not replace" "$TMP/out" || { cat "$TMP/out"; fail "the refusal does not say why"; }
-[ ! -s "$TMP/calls" ] || { cat "$TMP/calls"; fail "a link to another pin's toolchain downloaded or built before it was refused"; }
-[ -L "$H/.bats/ats2" ] && [ "$(cat "$TMP/linked-foreign/.bats-ats2")" = "ATS2-Postiats-gmp-0.0.1 0000" ] || fail "the link or its toolchain was touched"
-ok "a link to another pin's toolchain is refused before anything is downloaded"
+# another pin's marker: the error names both pins; nothing is deleted
+for c in build check test run "ats2 install"; do
+  newhome otherpin; rm -f "$TMP/patsopt-used"
+  stub "$H/.bats/ats2"; echo "$othermark" > "$H/.bats/ats2/.bats-ats2"
+  before=$(sig); rc=0
+  cmd $c || rc=$?
+  [ "$rc" -ne 0 ] || { cat "$TMP/out"; fail "$c: another pin's toolchain was used"; }
+  grep -qF "the marker '$othermark' and this bats needs '$pinmark'" "$TMP/out" || { cat "$TMP/out"; fail "$c: the error does not name both pins"; }
+  grep -q "bats ats2 install --force" "$TMP/out" || fail "$c: the error does not name --force"
+  [ "$before" = "$(sig)" ] && [ ! -s "$TMP/calls" ] && nostub_used || fail "$c: another pin's toolchain was touched or run"
+done
+ok "build, check, test, run and ats2 install fail on another pin's marker, naming both, and delete nothing"
 
-# a marker with no patsopt is what a killed or half-made install left: replaced
+# the pin's marker with no bin/patsopt is not a whole toolchain
 newhome markeronly
-mkdir -p "$H/.bats/ats2"; echo "ATS2-Postiats-gmp-0.0.1 0000" > "$H/.bats/ats2/.bats-ats2"
-run || { cat "$TMP/out"; fail "a marker with no patsopt was not replaced"; }
-[ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$name $sha" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] || fail "the install over a marker with no patsopt is wrong"
-ok "a marker with no patsopt is replaced"
+mkdir -p "$H/.bats/ats2"; echo "$pinmark" > "$H/.bats/ats2/.bats-ats2"
+before=$(sig); rc=0
+cmd ats2 install || rc=$?
+[ "$rc" -ne 0 ] && grep -q "no bin/patsopt" "$TMP/out" && [ "$before" = "$(sig)" ] && [ ! -s "$TMP/calls" ] || { cat "$TMP/out"; fail "the pin's marker with no patsopt was not refused"; }
+ok "the pin's marker with no bin/patsopt is refused and left as it was"
 
-# the marker is bats's write, after the move (bats-lang/bats#372): a directory at
-# its place (the move brings it in) fails the install with the write's own line,
-# and leaves no toolchain that could pass for a foreign one
+# the pin's marker: used, nothing downloaded
+for c in build check test run "ats2 install"; do
+  newhome pinned; rm -f "$TMP/patsopt-used"
+  stub "$H/.bats/ats2"; echo "$pinmark" > "$H/.bats/ats2/.bats-ats2"
+  cmd $c || true
+  grep -q "marker" "$TMP/out" && { cat "$TMP/out"; fail "$c: the pin's toolchain was refused"; }
+  [ ! -s "$TMP/calls" ] || fail "$c: the pin's toolchain was downloaded over"
+  # past the toolchain's marker, the build reads the toolchain itself (the stand-in has no prelude)
+  case $c in build|check) grep -q "has no prelude" "$TMP/out" || { cat "$TMP/out"; fail "$c: the build did not go on with the pin's toolchain"; } ;; esac
+done
+grep -q "already installed" "$TMP/out" || fail "ats2 install does not say it is installed"
+ok "build, check, test, run and ats2 install use a toolchain with the pin's marker"
+
+# nothing at ~/.bats/ats2: installed, then used
+for c in build check test run "ats2 install"; do
+  newhome absent
+  cmd $c || true
+  [ "$(grep -c '^curl' "$TMP/calls")" = 1 ] || { cat "$TMP/out"; fail "$c: an absent toolchain was not installed once"; }
+  [ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$pinmark" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] && leftovers || fail "$c: the install is wrong"
+done
+ok "build, check, test, run and ats2 install install an absent toolchain"
+
+# the stand-in mv: reads what is inside the directory it renames, then (by flag)
+# kills bats and its shell right before or right after the rename
+MVBIN=$TMP/mv-bin
+mkdir -p "$MVBIN"
+cat > "$MVBIN/mv" <<SH
+#!/bin/sh
+last=
+for a in "\$@"; do last=\$a; done
+case \$last in
+  */.bats/ats2)
+    cat "\$1/.bats-ats2" > "$TMP/mv-saw" 2>/dev/null
+    bats_pid=\$(ps -o ppid= -p \$PPID | tr -d ' ')
+    if [ -f "$TMP/kill-before" ]; then kill -KILL \$PPID "\$bats_pid"; exit 1; fi
+    "$(command -v mv)" "\$@" || exit \$?
+    if [ -f "$TMP/kill-after" ]; then kill -KILL \$PPID "\$bats_pid"; exit 1; fi
+    exit 0 ;;
+esac
+exec "$(command -v mv)" "\$@"
+SH
+chmod +x "$MVBIN/mv"
+mvrun() { HOME="$H" PATH="$MVBIN:$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1; }
+
+rm -f "$TMP/mv-saw"
+touch "$TMP/kill-before"
+newhome killbefore
+mvrun && fail "a bats killed before the rename succeeded"
+[ "$(cat "$TMP/mv-saw")" = "$pinmark" ] || fail "the marker was not inside the directory that is renamed"
+[ ! -e "$H/.bats/ats2" ] && [ ! -L "$H/.bats/ats2" ] || fail "a run killed before the rename left ~/.bats/ats2"
+[ -d "$H/.bats/ats2-temp" ] || fail "the kill did not happen between the build and the rename"
+rm -f "$TMP/kill-before"; : > "$TMP/calls"
+mvrun || { cat "$TMP/out"; fail "the install after a run killed before the rename failed"; }
+[ "$(grep -c '^curl' "$TMP/calls")" = 1 ] && [ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$pinmark" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] && leftovers || fail "the next install did not clear ats2-temp and install"
+ok "a run killed right before the rename leaves no ats2, and the next install clears ats2-temp and installs"
+
+touch "$TMP/kill-after"
+newhome killafter
+mvrun && fail "a bats killed after the rename succeeded"
+rm -f "$TMP/kill-after"
+[ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$pinmark" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] && [ ! -e "$H/.bats/ats2-temp" ] || { cat "$TMP/out"; fail "a run killed after the rename did not leave a complete marked toolchain"; }
+: > "$TMP/calls"
+run || fail "the run after a kill after the rename failed"
+grep -q "already installed" "$TMP/out" && [ ! -s "$TMP/calls" ] || fail "the toolchain a run killed after the rename left is not used"
+ok "a run killed right after the rename leaves a complete marked toolchain"
+
+# what a killed run left is cleared
+newhome leftover
+mkdir -p "$H/.bats/ats2-temp/x" "$H/.bats/ats2-download.old"; echo half > "$H/.bats/ats2-temp/.bats-ats2"
+run || { cat "$TMP/out"; fail "the install over a leftover ats2-temp failed"; }
+leftovers && [ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$pinmark" ] || fail "a leftover ats2-temp stayed"
+ok "a leftover ats2-temp and ats2-download.* are cleared"
+
+# the marker is bats's write, inside ats2-temp (a directory at its place): the
+# install fails with the write's own line and leaves no ats2
 echo real > "$TMP/curl-mode"; echo marker-dir > "$TMP/make-mode"
 newhome markerdir
 run && fail "an install whose marker could not be written succeeded"
-grep -qxF "error: cannot write '$H/.bats/ats2/.bats-ats2': Is a directory (os error 21)" "$TMP/out" || { cat "$TMP/out"; fail "the marker's write is not said as a write is"; }
+grep -qxF "error: cannot write '$H/.bats/ats2-temp/.bats-ats2': Is a directory (os error 21)" "$TMP/out" || { cat "$TMP/out"; fail "the marker's write is not said as a write is"; }
 [ ! -e "$H/.bats/ats2" ] && leftovers || { cat "$TMP/out"; fail "an install whose marker failed left a toolchain or files"; }
 echo ok > "$TMP/make-mode"
 ok "a marker that cannot be written fails the install with the write's line and leaves no toolchain"
 
-# a marker write that leaves a FILE behind (bats#372): a file-size limit of 0
-# on bats's own writes (SIGXFSZ ignored, so a write past it fails with EFBIG
-# and the file it opened is left, empty). The programs bats starts lift the
-# limit for themselves (curl, make, tar and cp write the download and the
-# toolchain, and are wrappers here), so the first write that fails is the
-# marker's. The install must fail with the write's line, remove the toolchain
-# it moved, and say it did; the message and the disk must agree.
+# a marker write that leaves a FILE behind (bats#372): a file-size limit of 0 on
+# bats's own writes (SIGXFSZ ignored, so a write past it fails with EFBIG). The
+# programs bats starts lift the limit for themselves (wrappers here), so the
+# first write that fails is the marker's.
 WRAP=$TMP/limit-bin
 mkdir -p "$WRAP"
 for t in curl make; do
@@ -216,80 +299,70 @@ for t in tar cp; do
   printf '#!/bin/sh\nulimit -S -f unlimited\nexec "%s" "$@"\n' "$(command -v $t)" > "$WRAP/$t"
 done
 chmod +x "$WRAP"/*
-echo real > "$TMP/curl-mode"; echo ok > "$TMP/make-mode"
 newhome markerfile
 ( trap '' XFSZ; ulimit -S -f 0; st=0; HOME="$H" PATH="$WRAP:$FAKE:$PATH" "$BATS" ats2 install 2>&1 || st=$?; echo "rc=$st" ) | cat > "$TMP/out"
 grep -qxF "rc=1" "$TMP/out" || { cat "$TMP/out"; fail "an install whose marker write failed did not end with status 1"; }
-grep -qxF "error: cannot write '$H/.bats/ats2/.bats-ats2': File too large (os error 27)" "$TMP/out" || { cat "$TMP/out"; fail "the marker's write is not said as a write is"; }
-grep -qF "was removed again" "$TMP/out" || { cat "$TMP/out"; fail "the removal of the toolchain is not said"; }
-[ ! -e "$H/.bats/ats2" ] || { cat "$TMP/out"; fail "the message says the toolchain was removed, and it is still there"; }
-leftovers || fail "a marker write that left a file left other files"
-ok "a marker write that leaves a file: the toolchain is removed, and the message says so"
+grep -qxF "error: cannot write '$H/.bats/ats2-temp/.bats-ats2': File too large (os error 27)" "$TMP/out" || { cat "$TMP/out"; fail "the marker's write is not said as a write is"; }
+[ ! -e "$H/.bats/ats2" ] && leftovers || { cat "$TMP/out"; fail "a marker write that left a file left a toolchain or files"; }
+ok "a marker write that leaves a file: no toolchain, no ats2-temp"
 
-# the removal after a failed marker write has two steps with a status each
-# (MOVED_CLEAR, bats#372): the marker first, then the tree. A stand-in rm on the
-# PATH (kept in $RMFAIL: marker, tree) fails the step asked, without removing
-# anything, so it works as root and on macOS; a real rm that fails part way
-# through a tree is not played. The write fails as in the case above.
-RMBIN=$TMP/rm-bin
-mkdir -p "$RMBIN"
-cat > "$RMBIN/rm" <<SH
-#!/bin/sh
-last=
-for a in "\$@"; do last=\$a; done
-case \$(cat "$TMP/rm-fail" 2>/dev/null) in
-  marker) case \$last in */ats2/.bats-ats2) echo "rm: cannot remove '\$last': stand-in" >&2; exit 1 ;; esac ;;
-  tree) case \$last in */.bats/ats2) echo "rm: cannot remove '\$last': stand-in" >&2; exit 1 ;; esac ;;
-esac
-exec "$(command -v rm)" "\$@"
-SH
-chmod +x "$RMBIN/rm"
-failed_write() { ( trap '' XFSZ; ulimit -S -f 0; st=0; HOME="$H" PATH="$RMBIN:$WRAP:$FAKE:$PATH" "$BATS" ats2 install 2>&1 || st=$?; echo "rc=$st" ) | cat > "$TMP/out"; }
-echo real > "$TMP/curl-mode"; echo ok > "$TMP/make-mode"
+# --- ats2 install --force ---
+frun() { HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install --force > "$TMP/out" 2>&1; }
+replaced() { [ "$(cat "$H/.bats/ats2/.bats-ats2")" = "$pinmark" ] && [ -x "$H/.bats/ats2/bin/patsopt" ] && [ ! -L "$H/.bats/ats2" ] && [ ! -e "$H/.bats/ats2/notes" ] && [ ! -e "$H/.bats/ats2/work" ] && leftovers; }
+for kind in nomarker otherpin files link ownpin; do
+  newhome "force-$kind"
+  case $kind in
+    nomarker) stub "$H/.bats/ats2"; echo precious > "$H/.bats/ats2/notes" ;;
+    otherpin) stub "$H/.bats/ats2"; echo "$othermark" > "$H/.bats/ats2/.bats-ats2"; echo precious > "$H/.bats/ats2/notes" ;;
+    files) mkdir -p "$H/.bats/ats2/work"; echo precious > "$H/.bats/ats2/work/notes" ;;
+    link) mkdir -p "$H/.bats" "$TMP/force-target"; stub "$TMP/force-target"; echo precious > "$TMP/force-target/notes"; echo "$othermark" > "$TMP/force-target/.bats-ats2"
+          ln -s "$TMP/force-target" "$H/.bats/ats2" ;;
+    ownpin) frun; : > "$TMP/calls"; echo precious > "$H/.bats/ats2/notes" ;;
+  esac
+  frun || { cat "$TMP/out"; fail "--force over $kind failed"; }
+  replaced || { cat "$TMP/out"; fail "--force over $kind did not replace it"; }
+  [ "$(grep -c '^curl' "$TMP/calls")" = 1 ] || fail "--force over $kind did not install again"
+  if [ $kind = link ]; then
+    [ "$(cat "$TMP/force-target/notes")" = precious ] && [ "$(cat "$TMP/force-target/.bats-ats2")" = "$othermark" ] && [ -x "$TMP/force-target/bin/patsopt" ] || fail "--force touched the target of the link"
+  fi
+done
+ok "--force replaces no marker, another pin's marker, a directory with other files and a link (its target untouched), and installs again over the pin's own"
 
-echo marker > "$TMP/rm-fail"
-newhome rmmarker
-failed_write
-grep -qxF "rc=1" "$TMP/out" || { cat "$TMP/out"; fail "an install whose marker and its removal failed did not end with status 1"; }
-grep -qF "may still be there and claim a complete install" "$TMP/out" || { cat "$TMP/out"; fail "a marker that could not be removed is not said to be possibly there"; }
-grep -qF "was removed" "$TMP/out" && fail "the marker's removal failed and the toolchain is said removed"
-[ -x "$H/.bats/ats2/bin/patsopt" ] && [ -e "$H/.bats/ats2/.bats-ats2" ] || fail "the tree was removed although the marker's removal failed"
-ok "a marker that cannot be removed: the message says it may still be there, and the tree is not touched"
+# a build that fails under --force leaves what was there
+echo fail > "$TMP/make-mode"
+for kind in nomarker ownpin; do
+  newhome "force-fail-$kind"
+  if [ $kind = nomarker ]; then stub "$H/.bats/ats2"; echo precious > "$H/.bats/ats2/notes"; else echo ok > "$TMP/make-mode"; frun; echo fail > "$TMP/make-mode"; : > "$TMP/calls"; fi
+  before=$(sig)
+  frun && fail "--force with a failed build succeeded"
+  grep -q "libgmp" "$TMP/out" || fail "a failed build under --force does not mention libgmp"
+  [ "$before" = "$(sig)" ] && leftovers || fail "a failed build under --force touched ~/.bats/ats2"
+done
+echo ok > "$TMP/make-mode"
+ok "a build that fails under --force leaves ~/.bats/ats2 as it was"
 
-echo tree > "$TMP/rm-fail"
-newhome rmtree
-failed_write
-grep -qxF "rc=1" "$TMP/out" || { cat "$TMP/out"; fail "an install whose tree could not be removed did not end with status 1"; }
-grep -qF "it is still there with no marker" "$TMP/out" || { cat "$TMP/out"; fail "a tree that could not be removed is not said to be there"; }
-[ -x "$H/.bats/ats2/bin/patsopt" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "the marker stayed, or the tree went, although the tree's removal failed"
-# what it leaves is a toolchain bats did not make: used as it is, never replaced
-: > "$TMP/rm-fail"; : > "$TMP/calls"
-run || { cat "$TMP/out"; fail "the run after a tree that could not be removed failed"; }
-grep -q "was not installed by bats" "$TMP/out" || { cat "$TMP/out"; fail "the unmarked toolchain is not used as it is"; }
-[ ! -s "$TMP/calls" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "the unmarked toolchain was downloaded over or marked"
-ok "a tree that cannot be removed: the marker is gone, and the next run uses the unmarked toolchain as it is"
-
-# the accepted window: bats killed between the move and the marker's write. A
-# stand-in mv does the move, then kills bats (the parent of the shell running it).
-MVBIN=$TMP/mv-bin
-mkdir -p "$MVBIN"
-cat > "$MVBIN/mv" <<SH
-#!/bin/sh
-"$(command -v mv)" "\$@" || exit \$?
-last=
-for a in "\$@"; do last=\$a; done
-case \$last in */.bats/ats2) kill -KILL "\$(ps -o ppid= -p \$PPID | tr -d ' ')" ;; esac
-SH
-chmod +x "$MVBIN/mv"
-: > "$TMP/rm-fail"
-newhome killed
-HOME="$H" PATH="$MVBIN:$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1 && fail "a bats killed after the move succeeded"
-[ -x "$H/.bats/ats2/bin/patsopt" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || { cat "$TMP/out"; fail "the kill did not happen between the move and the marker"; }
-: > "$TMP/calls"
-run || { cat "$TMP/out"; fail "the run after a killed install failed"; }
-grep -q "was not installed by bats" "$TMP/out" || { cat "$TMP/out"; fail "the toolchain a killed run left is not used as it is"; }
-[ ! -s "$TMP/calls" ] && [ ! -e "$H/.bats/ats2/.bats-ats2" ] || fail "the toolchain a killed run left was replaced or marked"
-ok "a bats killed between the move and the marker leaves an unmarked toolchain that is used as it is"
+# usage errors: exit 1, nothing downloaded or installed
+usage() { # <bats arguments>
+  newhome usage
+  rc=0
+  ( cd "$PROJ" && HOME="$H" PATH="$FAKE:$PATH" "$BATS" "$@" ) > "$TMP/out" 2>&1 || rc=$?
+  [ "$rc" -eq 1 ] || { cat "$TMP/out"; fail "bats $*: exit status $rc, not 1"; }
+  [ ! -s "$TMP/calls" ] && [ ! -e "$H/.bats/ats2" ] || fail "bats $*: installed or downloaded"
+}
+usage ats2 install --force --force
+usage ats2 install --force extra
+usage ats2 install --release
+usage ats2 install --force --release
+usage ats2 install --force -- extra
+usage build --force
+usage check --force
+usage test --force
+usage run --force
+usage lock --force
+usage clone-repository --force
+usage record-commit --force
+usage --force build
+ok "--force on any other command, twice, with another word or another option is a usage error (exit 1)"
 
 newhome extra
 HOME="$H" PATH="$FAKE:$PATH" "$BATS" ats2 install extra > "$TMP/out" 2>&1 && fail "an extra argument was accepted"
@@ -304,6 +377,10 @@ ok "an extra argument, an unknown option, words after --, and a near miss of the
 env -u HOME PATH="$FAKE:$PATH" "$BATS" ats2 install > "$TMP/out" 2>&1 && fail "no HOME was accepted"
 grep -q "HOME" "$TMP/out" || fail "no HOME is not said"
 ok "no HOME is an error"
+
+[ "$("$BATS" ats2 marker)" = "$name $sha" ] || fail "ats2 marker is not the pin's name and SHA-256"
+"$BATS" ats2 marker --force > "$TMP/out" 2>&1 && fail "ats2 marker --force was accepted"
+ok "ats2 marker prints the pin's marker text, the one the tests write into their toolchains"
 
 if grep -rIlE "$sha|ATS2-Postiats-gmp" "$ROOT/.github" "$ROOT/scripts" > "$TMP/dups" 2>/dev/null && [ -s "$TMP/dups" ]; then
   cat "$TMP/dups"; fail "the pin is named outside src/ats2.bats"

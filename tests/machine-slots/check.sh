@@ -27,7 +27,6 @@ LOG=$TMP/runs
 NESTED=$TMP/nested
 cat > "$H/.bats/ats2/bin/patsopt" <<SH
 #!/bin/sh
-case "\$*" in *ats2-probe*) exec "$REAL/bin/patsopt" "\$@" ;; esac
 owner=\$PPID
 echo "start \$owner" >> "$LOG"
 # the kill case: a run waits here until the test has killed the bats that
@@ -46,6 +45,7 @@ echo "end \$owner" >> "$LOG"
 exit \$rc
 SH
 chmod +x "$H/.bats/ats2/bin/patsopt"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 project() {
   mkdir -p "$TMP/$1/src/bin"
   printf '[package]\nname = "%s"\nkind = "bin"\n' "$1" > "$TMP/$1/bats.toml"

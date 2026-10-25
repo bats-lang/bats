@@ -43,13 +43,6 @@ staload R = "result/src/lib.sats"
 
 
 
-
-
-
-
-
-
-
 staload "helpers.sats"
 
 
@@ -58,188 +51,6 @@ staload "helpers.sats"
 
 
 datatype ats2_talk = Say | Quiet
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -510,7 +321,18 @@ fn ats2_ensure (talk: ats2_talk): bool
 
 
 
+fn ats2_install_force (): bool
 
+
+
+
+
+
+
+
+
+
+fn ats2_print_marker (): void
 
 
 
