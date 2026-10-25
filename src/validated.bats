@@ -407,14 +407,14 @@ in same end
 
 (* The key of the .bats file at the NUL-terminated path p for its names
    ('bats-facts 1 file'), as uses_key says *)
-#pub fn facts_key {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
+#pub fn facts_key {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288} (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
   : @(bool, [lk:agz] $A.arr(byte, lk, 64))
 
-#pub fn facts_same {lp,lk:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
-  (p: !$A.borrow(byte, lp, np), pm: int pm, key: !$A.borrow(byte, lk, 64)): bool
+#pub fn facts_same {lp,lk:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288}
+  (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length, key: !$A.borrow(byte, lk, 64)): bool
 
 (* build/.bats_valid/facts <path>, NUL-terminated *)
-#pub fn facts_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
+#pub fn facts_slot {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288} (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
   : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
 
 (* build/.bats_valid/uses <path>, NUL-terminated: where the record of the
