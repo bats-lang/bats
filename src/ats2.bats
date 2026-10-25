@@ -290,7 +290,10 @@ end
    control failed, patsopt died without an answer, ended by a signal, or
    exited with a status other than 1); 24 no answer within the cap, kept as
    22. A patsopt that is past the cap is sent TERM at 20 s and KILL at 25 s,
-   and a status of 143 or 137 is taken for that; 23: no temporary
+   and the watcher writes a marker file (NAME.fired in the probe's directory)
+   before it sends TERM: a status of 143 or 137 is the cap only when the
+   marker is there, else it is a death that is not ours (the system's OOM
+   kill of a runaway GMP build, bats#371) and is no answer, not kept; 23: no temporary
    directory. An answer of 20 or 21, and 22 for a probe past the cap, is
    kept in ~/.bats/ats2.solver as "<cksum of bin/patsopt> <20|21|22>" (the
    bytes, not the path, so a toolchain is probed once and a renamed one is
@@ -310,7 +313,7 @@ end
 
 (* patsopt on the control, then on the false statement in $2, each capped; its
    status is the answer (see above). Its output is dropped, as a probe's is. *)
-#define PROBE_RUN "P=\"$1/ats2/bin/patsopt\"\nexport PATSHOME=\"$1/ats2\"\ncapped() {\n  \"$P\" -tc -d \"$1\" > /dev/null 2>&1 &\n  p=$!\n  ( sleep 20; kill -TERM \"$p\" 2>/dev/null; sleep 5; kill -KILL \"$p\" 2>/dev/null ) 2>&- &\n  w=$!\n  wait \"$p\"\n  r=$?\n  kill \"$w\" 2>/dev/null\n  wait \"$w\" 2>/dev/null\n  case $r in 137|143) return 124 ;; esac\n  return $r\n}\ncapped \"$2/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$2/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then exit 20; fi\nif [ $f -eq 124 ]; then exit 24; fi\nif [ $f -eq 1 ]; then exit 21; fi\nexit 22\n"
+#define PROBE_RUN "P=\"$1/ats2/bin/patsopt\"\nexport PATSHOME=\"$1/ats2\"\ncapped() {\n  m=\"$1.fired\"\n  \"$P\" -tc -d \"$1\" > /dev/null 2>&1 &\n  p=$!\n  ( sleep 20; : > \"$m\"; kill -TERM \"$p\" 2>/dev/null; sleep 5; kill -KILL \"$p\" 2>/dev/null ) 2>&- &\n  w=$!\n  wait \"$p\"\n  r=$?\n  kill \"$w\" 2>/dev/null\n  wait \"$w\" 2>/dev/null\n  case $r in 137|143) if [ -f \"$m\" ]; then return 124; fi; return 125 ;; esac\n  return $r\n}\ncapped \"$2/control.dats\"\nif [ $? -ne 0 ]; then exit 22; fi\ncapped \"$2/false.dats\"\nf=$?\nif [ $f -eq 0 ]; then exit 20; fi\nif [ $f -eq 124 ]; then exit 24; fi\nif [ $f -eq 1 ]; then exit 21; fi\nexit 22\n"
 
 #define PROBE_CLEAR "rm -rf \"$1\"\n"
 
