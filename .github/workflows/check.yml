@@ -22,7 +22,7 @@ jobs:
     steps:
       # two commits deep: a pull request's checkout is a merge, and HEAD^1 is the
       # base it is merged into
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 2
 
@@ -76,7 +76,7 @@ jobs:
       - name: The cheap job passed
         run: test "${{ needs.affected.result }}" = success
 
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       # A failing test script keeps its temp directory there (tests/keep-on-fail.sh,
       # bats#478) and the last step uploads it
@@ -170,7 +170,7 @@ jobs:
         run: test "${{ needs.affected.result }}" = success
 
       # two commits deep: a pull request's head is the merge's second parent
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 2
 

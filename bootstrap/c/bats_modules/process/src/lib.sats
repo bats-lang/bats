@@ -94,7 +94,33 @@ dataprop NUL_AT($A.cells, int, int) =
 
 
 
+
+
+
+
+
+
+datavtype child_outcome =
+  | child_exited of (int)
+  | child_signaled of (int)
+  | child_wait_failed of (int)
+  | child_wait_unexpected of (int)
+
+
+datavtype child_poll =
+  | child_running of ()
+  | child_ended of (child_outcome)
+
+
+fn child_wait_outcome(c: child): child_outcome
+
+
+
+fn child_try_wait_outcome(c: !child): child_poll
+
+
 fn child_wait(c: child): $R.result(int, int)
+
 
 fn child_try_wait(c: !child): $R.option(int)
 
@@ -203,6 +229,30 @@ fn spawn_inherit_env_proved
    stdout_cfg: stream_config(sout),
    stderr_cfg: stream_config(serr))
   : $R.result(spawn_pipes(sin, sout, serr), int)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
