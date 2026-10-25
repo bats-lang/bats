@@ -37,11 +37,7 @@ esac
 exit 1
 SH2
 chmod +x "$H/.bats/ats2/bin/patsopt"
-# The solver of a stand-in patsopt is known (bats-lang/bats#264): bats probes a
-# toolchain it did not install by running patsopt on two small files, which
-# would be runs this test counts, so the answer is written first (the cksum of
-# patsopt's bytes and 21, as src/ats2.bats keeps it).
-printf '%s 21\n' "$(cksum < "$H/.bats/ats2/bin/patsopt")" > "$H/.bats/ats2.solver"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 
 # the stand-in df: the Available column is FREE_KIB (the 1024-byte blocks), in
 # the form DF names: a file system name with a blank in it, a df that fails,

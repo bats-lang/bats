@@ -2550,11 +2550,6 @@ staload "recursion.sats"
 
 
 
-
-
-
-
-
 fn fixtures_main (): bool
 
 

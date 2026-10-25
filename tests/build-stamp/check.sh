@@ -29,12 +29,8 @@ printf '#include "share/atspre_staload.hats"\n\n#pub fn f (): int\n\nimplement f
 printf '#include "share/atspre_staload.hats"\n\n#pub fn g (): int\n\nimplement g () = 2\n' > "$P/src/n.bats"
 printf '#include "share/atspre_staload.hats"\nstaload "m.sats"\nstaload "n.sats"\nimplement main0 () = println! (f () + g ())\n' > "$P/src/bin/bs.bats"
 
-# bats probes a toolchain it did not install with a false statement
-# (bats-lang/bats#264), which the GMP build takes 20 s to not answer; the
-# toolchains made below are known (the cksum of patsopt's bytes and 21, as
-# src/ats2.bats keeps it), so they are not probed, and a toolchain changed is
-# written again
-known() { printf '%s 21\n' "$(cksum < "$1/.bats/ats2/bin/patsopt")" > "$1/.bats/ats2.solver"; }
+# a toolchain made here is marked as one bats made (src/ats2.bats)
+known() { mkdir -p "$1/.bats/ats2" && "$BATS" ats2 marker > "$1/.bats/ats2/.bats-ats2"; }
 
 # Freshness is by whole-second mtimes: each run ends a second on, so the
 # next finds what this one made older than now

@@ -60,6 +60,7 @@ H=$TMP/home
 mkdir -p "$H/.bats/ats2"
 for d in bin prelude libats share ccomp; do cp -R "$HOME/.bats/ats2/$d" "$H/.bats/ats2/"; done
 printf '\n(* another toolchain *)\n' >> "$H/.bats/ats2/prelude/basics_pre.sats"
+mkdir -p "$H/.bats/ats2" && "$BATS" ats2 marker > "$H/.bats/ats2/.bats-ats2"
 C=$TMP/c
 mkdir -p "$C"
 cp -R "$A/bats.toml" "$A/src" "$C/"
