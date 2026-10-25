@@ -389,6 +389,34 @@ staload "./lib.sats"
 
 
 
+(* APPEND_SIZED(first, second, both, n): both is first and then second, first being n cells; the n is what a lemma's termination metric reads (keyword: append) *)
+
+
+
+
+(* APPEND(first, second, both): both is the cells first and then the cells second (keyword: append).
+   Made by APPEND_nil and APPEND_cons below: a recursive proof function needs a termination metric, which an
+   index-free relation does not give, so the relation holds the size of first beside it. *)
+
+
+
+
+
+primplement APPEND_nil {second} () = APPEND_made(APPEND_SIZED_nil())
+
+
+
+primplement APPEND_cons {x}{first,second,both} (p) =
+  (case+ p of APPEND_made(s) => APPEND_made(APPEND_SIZED_cons(s)))
+
+(* CELLS_EQ(first, second): first and second are the same cells; its one constructor is the only way to have it (keyword: append) *)
+
+
+
+(* HOLDS(buffer, chunk): the borrowed buffer's cells begin with the chunk, the rest being whatever follows (keyword: append) *)
+
+
+
 (* ============================================================
    What the cells of an array are, proved
    ============================================================ *)
@@ -445,6 +473,101 @@ prfun _nth_functional {cs:cells}{i:nat}{v,w:int} .<i>. (p: NTH(cs, i, v), q: NTH
   | NTH_there(p1) => (case+ q of NTH_there(q1) => _nth_functional(p1, q1))
 
 primplement nth_functional {cs}{i}{v,w} (p, q) = _nth_functional(p, q)
+
+(* The cells first and second have one concatenation (keyword: append) *)
+
+
+prfun _append_sized_functional {first,second,both,other:cells}{n,m:nat} .<n>.
+  (p: APPEND_SIZED(first, second, both, n), q: APPEND_SIZED(first, second, other, m)): CELLS_EQ(both, other) =
+  case+ p of
+  | APPEND_SIZED_nil() => (case+ q of APPEND_SIZED_nil() => CELLS_EQ_refl())
+  | APPEND_SIZED_cons(p1) =>
+    (case+ q of
+     | APPEND_SIZED_cons(q1) =>
+       (case+ _append_sized_functional(p1, q1) of CELLS_EQ_refl() => CELLS_EQ_refl()))
+
+prfn _append_functional {first,second,both,other:cells} (p: APPEND(first, second, both), q: APPEND(first, second, other)): CELLS_EQ(both, other) =
+  case+ p of APPEND_made(ps) => (case+ q of APPEND_made(qs) => _append_sized_functional(ps, qs))
+
+primplement append_functional {first,second,both,other} (p, q) = _append_functional(p, q)
+
+(* ============================================================
+   Cells that are ints, with a bound (bats-lang/array#49)
+   ============================================================ *)
+
+(* ALLIN(cs, lo, hi): every cell of cs is at least lo and at most hi *)
+
+
+
+
+(* ZEROS(cs, n): cs is n cells, each 0 (what a zeroed allocation holds) *)
+
+
+
+
+(* A cell of cells that are all within the bound is within it *)
+
+
+prfun _allin_nth {cs:cells}{lo,hi:int}{i:nat}{v:int} .<i>. (a: ALLIN(cs, lo, hi), p: NTH(cs, i, v)): [lo <= v; v <= hi] void =
+  case+ p of
+  | NTH_here() => (case+ a of ALLIN_cons(_) => ())
+  | NTH_there(p1) => (case+ a of ALLIN_cons(a1) => _allin_nth(a1, p1))
+
+primplement allin_nth {cs}{lo,hi}{i}{v} (a, p) = _allin_nth(a, p)
+
+(* Setting a cell to a value within the bound keeps every cell within it *)
+
+
+
+prfun _allin_setc {cs,cs2:cells}{lo,hi:int}{i:nat}{v:int | lo <= v; v <= hi} .<i>.
+  (a: ALLIN(cs, lo, hi), s: SETC(cs, i, v, cs2)): ALLIN(cs2, lo, hi) =
+  case+ s of
+  | SETC_here() => (case+ a of ALLIN_cons(a1) => ALLIN_cons(a1))
+  | SETC_there(s1) => (case+ a of ALLIN_cons(a1) => ALLIN_cons(_allin_setc(a1, s1)))
+
+primplement allin_setc {cs,cs2}{lo,hi}{i}{v} (a, s) = _allin_setc(a, s)
+
+(* A bound is kept by a wider one *)
+
+
+
+prfun _allin_widen {cs:cells}{lo,hi,lo2,hi2:int | lo2 <= lo; hi <= hi2}{n:nat} .<n>.
+  (a: ALLIN(cs, lo, hi), l: CLEN(cs, n)): ALLIN(cs, lo2, hi2) =
+  case+ l of
+  | CLEN_nil() => ALLIN_nil()
+  | CLEN_cons(l1) => (case+ a of ALLIN_cons(a1) => ALLIN_cons(_allin_widen(a1, l1)))
+
+primplement allin_widen {cs}{lo,hi,lo2,hi2}{n} (a, l) = _allin_widen(a, l)
+
+(* Cells that are all 0 are within any bound that holds 0 *)
+
+
+prfun _allin_zeros {cs:cells}{lo,hi:int | lo <= 0; 0 <= hi}{n:nat} .<n>. (z: ZEROS(cs, n)): ALLIN(cs, lo, hi) =
+  case+ z of
+  | ZEROS_nil() => ALLIN_nil()
+  | ZEROS_cons(z1) => ALLIN_cons(_allin_zeros(z1))
+
+primplement allin_zeros {cs}{lo,hi}{n} (z) = _allin_zeros(z)
+
+(* A cell of cells that are all 0 is 0 *)
+
+
+prfun _zeros_nth {cs:cells}{i:nat}{v:int}{n:nat} .<i>. (z: ZEROS(cs, n), p: NTH(cs, i, v)): [v == 0] void =
+  case+ p of
+  | NTH_here() => (case+ z of ZEROS_cons(_) => ())
+  | NTH_there(p1) => (case+ z of ZEROS_cons(z1) => _zeros_nth(z1, p1))
+
+primplement zeros_nth {cs}{i}{v}{n} (z, p) = _zeros_nth(z, p)
+
+(* Zeroed cells are as many as their number says *)
+
+
+prfun _zeros_len {cs:cells}{n:nat} .<n>. (z: ZEROS(cs, n)): CLEN(cs, n) =
+  case+ z of
+  | ZEROS_nil() => CLEN_nil()
+  | ZEROS_cons(z1) => CLEN_cons(_zeros_len(z1))
+
+primplement zeros_len {cs}{n} (z) = _zeros_len(z)
 
 (* ============================================================
    The array
@@ -560,6 +683,45 @@ primplement nth_functional {cs}{i}{v,w} (p, q) = _nth_functional(p, q)
 
 
 (* ============================================================
+   Int arrays that know their contents (bats-lang/array#49)
+   ============================================================ *)
+
+(* n C ints at l holding the cells cs. Element width: an int is 32 bits
+   (keyword: iarr width), so a cell is within [-2147483648, 2147483647];
+   the names, spans and table entries of the dependents (bats's with-env
+   table: positions of a file under 65537 bytes, entry numbers under 1025)
+   fit with room to spare, and a 64-bit element is not made until a
+   dependent needs one. *)
+
+
+(* n zeroed ints: the cells are all 0, as calloc leaves them *)
+
+
+
+
+
+(* Cell i, with the proof that it is cell i of the cells *)
+
+
+
+(* Cell i set to v: the cells that are left, with the proof that they are *)
+
+
+
+
+(* Cell i of cells that are all within [lo, hi]: the value is indexed by
+   the bound, so the caller needs no clamp. Not trusted: iarr_get and
+   allin_nth. *)
+
+
+
+(* Cell i set to a value within [lo, hi]: the cells are all within it still.
+   Not trusted: iarr_set and allin_setc. *)
+
+
+
+
+(* ============================================================
    C runtime helpers
    ============================================================ *)
 
@@ -637,6 +799,7 @@ local
   assume borrow(a, l, n) = ptr l
   assume cfrozen(l, n, k, cs) = ptr l
   assume cborrow(l, n, cs) = ptr l
+  assume iarr(l, n, cs) = ptr l
   assume arrx_lent(l, n, o) = unit_v
   assume text(n) = ptr
   assume text_builder(n, i) = ptr
@@ -749,6 +912,39 @@ implement cborrow_get {l}{n,i}{cs} (b, i) =
   
     $UNSAFE.cast{[v:int | 0 <= v; v < 256] (NTH(cs, i, v) | int v)}(byte2int0($UNSAFE.ptr0_get<byte>(ptr_add<byte>(b, i))))
   
+
+(* -- Int arrays that know their contents -- *)
+
+implement iarr_alloc {n} (n) =
+  
+    $UNSAFE.castvwtp0{[l:agz][cs:cells] (CLEN(cs, n), ZEROS(cs, n) | iarr(l, n, cs))}(_calloc(n, sizeof<int>))
+  
+
+implement iarr_free {l}{n}{cs} (a) =
+   $extfcall(void, "free", a) 
+
+implement iarr_get {l}{n,i}{cs} (a, i) =
+  
+    $UNSAFE.cast{[v:int | ~2147483648 <= v; v <= 2147483647] (NTH(cs, i, v) | int v)}($UNSAFE.ptr0_get<int>(ptr_add<int>(a, i)))
+  
+
+implement iarr_set {l}{n,i}{cs}{v} (a, i, v) = let
+  val () =  $UNSAFE.ptr0_set<int>(ptr_add<int>(a, i), v) 
+in
+   $UNSAFE.castvwtp0{[cs2:cells] (SETC(cs, i, v, cs2) | iarr(l, n, cs2))}(a) 
+end
+
+(* Not trusted: iarr_get with the bound the proof gives *)
+implement iarr_get_in {l}{n,i}{cs}{lo,hi} (pf | a, i) = let
+  val (p | v) = iarr_get{l}{n,i}{cs}(a, i)
+  prval () = allin_nth(pf, p)
+in v end
+
+(* Not trusted: iarr_set with the proof kept *)
+implement iarr_set_in {l}{n,i}{cs}{lo,hi}{v} (pf | a, i, v) = let
+  val (s | a2) = iarr_set{l}{n,i}{cs}{v}(a, i, v)
+  prval pf2 = allin_setc(pf, s)
+in (pf2 | a2) end
 
 (* -- Element access -- *)
 
