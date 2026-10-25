@@ -4320,6 +4320,55 @@ fn sats_stamp_end (saved: whole_file, back: bool): void
 
 
 
+fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed
+
+
+
+
+fn write_sats_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed
+
+
+
+
+
+fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: $B.builder_v): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

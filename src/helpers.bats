@@ -4278,6 +4278,55 @@ implement sats_stamp_end (saved, back) =
       in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
 
 
+(* bv[0, n) as a builder *)
+fn builder_of {l:agz}{nb:pos}{n:nat | n <= nb} (bv: !$A.borrow(byte, l, nb), n: int n): $B.builder_v = let
+  var b : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(bv, 0, n, n, b)
+in b end
+
+(* Writes b to the path when it differs, the .sats stamp first when stamp is set (stamp, write errors); b is consumed *)
+fn write_changed_gen {sn:nat | sn < $B.BUILDER_CAP} (stamp: bool, path: string sn, b: $B.builder_v): file_changed = let
+  val @(p, pl) = str_into_arr(path)
+  val @(fz_p, bv_p) = $A.freeze<byte>(p)
+  val @(ba, bl) = $B.into_arr(b)
+  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
+  val same = file_has_bytes_m(bv_p, pl, bv_b, bl)
+  val again = builder_of(bv_b, bl)
+  val () = $A.drop<byte>(fz_b, bv_b)
+  val () = $A.free<byte>($A.thaw<byte>(fz_b))
+  val wrote = (if same then let
+      val () = $B.builder_free(again)
+    in FileSame() end
+    else (if (if stamp then touch_sats_stamp() = 0 else true) then
+      (if write_settle(bv_p, pl, write_file_from_builder_m(bv_p, pl, again)) = 0 then FileWritten()
+        else FileNotWritten())
+      else let
+        val () = $B.builder_free(again)
+      in FileNotWritten() end)): file_changed
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in wrote end
+
+#pub fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed
+
+implement write_changed (path, b) = write_changed_gen(false, path, b)
+
+(* write_changed for a .sats: the stamp first, like build.bats (stamp, write errors) *)
+#pub fn write_sats_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed
+
+implement write_sats_changed (path, b) = write_changed_gen(true, path, b)
+
+(* The .dats of the .sats just written: written when that .sats is in place
+   (sats_ok), else b is given back, so nothing follows a failed write *)
+#pub fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: $B.builder_v): void
+
+implement dats_when (sats_ok, path, b) =
+  if sats_ok then let
+    val _ = write_changed(path, b)
+  in end
+  else $B.builder_free(b)
+
+
 (* ============================================================
    A .sats that only moved: its declarations the same, at other lines
    ============================================================ *)

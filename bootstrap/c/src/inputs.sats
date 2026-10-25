@@ -160,43 +160,7 @@ staload "helpers.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fn write_inputs (): void
-
-
 
 
 

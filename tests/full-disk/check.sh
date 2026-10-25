@@ -163,9 +163,10 @@ try "no file with a byte in it fits" 0 - many
 # A write that fails at the stamp (bats-lang/bats#335): build/.sats_changed is
 # a directory, so the stamp cannot be written (EISDIR). No size limit singles
 # it out, since it is smaller than any .sats. A project that staloads
-# _bats_inputs.sats or _bats_facts.sats writes that .sats, then the stamp, then
-# its .dats: the check must fail (status 1), its first error naming the stamp,
-# and write no .dats after it; the next check, with the directory gone, is the
+# _bats_inputs.sats or _bats_facts.sats writes the stamp, then that .sats, then
+# its .dats, the order of build.bats (bats-lang/bats#400): the check must fail
+# (status 1), its first error naming the stamp, and write no .sats or .dats;
+# the next check, with the directory gone, is the
 # clean build's, file for file.
 stamp_case() { # <name> <the staloaded file> <its module> <expression>
   d="$TMP/stamp-$1"
@@ -188,6 +189,10 @@ stamp_case() { # <name> <the staloaded file> <its module> <expression>
   if [ -e "$d/build/src/$3.dats" ]; then
     echo "FAIL: $1: the $3.dats was written after the stamp failed"; cat "$TMP/stamp-$1.log"; exit 1
   fi
+  # the stamp comes before the .sats (bats-lang/bats#400): no .sats after a stamp that failed
+  if [ -e "$d/build/src/$3.sats" ]; then
+    echo "FAIL: $1: the $3.sats was written before the stamp, which failed"; cat "$TMP/stamp-$1.log"; exit 1
+  fi
   rmdir "$d/build/.sats_changed"
   run "$d" "$TMP/stamp-$1.next.log" - || { echo "FAIL: $1: the check after it failed"; cat "$TMP/stamp-$1.next.log"; exit 1; }
   ref="$TMP/stamp-$1-ref"
@@ -202,6 +207,32 @@ stamp_case() { # <name> <the staloaded file> <its module> <expression>
 }
 stamp_case inputs _bats_inputs.sats _bats_inputs '$X.bats_inputs_sha256 ()'
 stamp_case facts _bats_facts.sats _bats_facts '$X.bats_commit_short ()'
+
+# The same for build.bats's own writer (bats-lang/bats#400): a module with a
+# #pub declaration has its .sats written after the stamp, and neither it nor
+# its .dats is written when the stamp cannot be.
+module_dir="$TMP/stamp-module"
+mkdir -p "$module_dir/src" "$module_dir/build/.sats_changed"
+printf '[package]\nname = "stampmodule"\nkind = "lib"\n' > "$module_dir/bats.toml"
+printf '#include "share/atspre_staload.hats"\n#pub fun one (): int\nimplement one () = 1\n' > "$module_dir/src/lib.bats"
+status=0
+run "$module_dir" "$TMP/stamp-module.log" - || status=$?
+if [ "$status" != 1 ]; then
+  echo "FAIL: a module: a stamp that cannot be written: the check ended with status $status, not 1"; cat "$TMP/stamp-module.log"; exit 1
+fi
+line=$(grep -a '^error: ' "$TMP/stamp-module.log" | head -1)
+case "$line" in
+  "error: cannot write 'build/.sats_changed': "*"(os error "*")") ;;
+  *) echo "FAIL: a module: the first error does not name the stamp:"; cat "$TMP/stamp-module.log"; exit 1;;
+esac
+if [ -e "$module_dir/build/src/lib.sats" ] || [ -e "$module_dir/build/src/lib.dats" ]; then
+  echo "FAIL: a module: its .sats or .dats was written although the stamp failed"; cat "$TMP/stamp-module.log"; exit 1
+fi
+rmdir "$module_dir/build/.sats_changed"
+run "$module_dir" "$TMP/stamp-module.next.log" - || { echo "FAIL: a module: the check after it failed"; cat "$TMP/stamp-module.next.log"; exit 1; }
+[ -f "$module_dir/build/src/lib.sats" ] && [ -f "$module_dir/build/src/lib.dats" ] || {
+  echo "FAIL: a module: the check after it did not make the .sats and .dats"; exit 1; }
+echo "ok   a stamp that cannot be written: a module's own .sats"
 
 # A write that fails at the target marker (bats-lang/bats#367): build/.bats_target
 # is a directory (EISDIR). The marker is one byte, so no size limit singles it

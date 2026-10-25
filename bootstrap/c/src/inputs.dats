@@ -39,40 +39,6 @@ staload SHA = "sha256/src/lib.sats"
 
 staload "helpers.sats"
 
-(* bv[0, n) as a builder *)
-fn builder_of {l:agz}{nb:pos}{n:nat | n <= nb} (bv: !$A.borrow(byte, l, nb), n: int n): $B.builder_v = let
-  var b : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(bv, 0, n, n, b)
-in b end
-
-(* Writes b to the path when the file does not hold exactly its bytes:
-   what became of it (file_changed); b is consumed *)
-fn write_changed {sn:nat | sn < $B.BUILDER_CAP} (path: string sn, b: $B.builder_v): file_changed = let
-  val @(p, pl) = str_into_arr(path)
-  val @(fz_p, bv_p) = $A.freeze<byte>(p)
-  val @(ba, bl) = $B.into_arr(b)
-  val @(fz_b, bv_b) = $A.freeze<byte>(ba)
-  val same = file_has_bytes_m(bv_p, pl, bv_b, bl)
-  val again = builder_of(bv_b, bl)
-  val () = $A.drop<byte>(fz_b, bv_b)
-  val () = $A.free<byte>($A.thaw<byte>(fz_b))
-  val wrote = (if same then let
-      val () = $B.builder_free(again)
-    in FileSame() end
-    else (if write_settle(bv_p, pl, write_file_from_builder_m(bv_p, pl, again)) = 0 then FileWritten()
-      else FileNotWritten())): file_changed
-  val () = $A.drop<byte>(fz_p, bv_p)
-  val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in wrote end
-
-(* The .dats of the .sats just written: written when that .sats is in place
-   (sats_ok), else b is given back, so nothing follows a failed write *)
-fn dats_when {sn:nat | sn < $B.BUILDER_CAP} (sats_ok: bool, path: string sn, b: $B.builder_v): void =
-  if sats_ok then let
-    val _ = write_changed(path, b)
-  in end
-  else $B.builder_free(b)
-
 (* sh -c script with the arguments: its exit status *)
 fn sh_run {sn:nat} (script: string sn, args: $L.listv($P.arg_entry)): int = let
   val (nul_x | exec) = $P.path_of_string_proved("sh")
@@ -192,7 +158,7 @@ in @(read && whole, hex) end
 
 (* Writes build/src/_bats_inputs.sats and .dats when a module names
    them (each only when its bytes change; the .sats, which never
-   changes, stamps a .sats change the first time), or removes them, with
+   changes, stamps a .sats change the first time, before it is written), or removes them, with
    their C and object, when none does (a stale object would be linked).
    A file that cannot be read is an error, which says so. *)
 
@@ -214,15 +180,13 @@ implement write_inputs () =
       val () = bput_v(sats, "   (bats-lang/bats#267); never edited: it is the same for every input *)\n\n")
       val () = bput_v(sats, "(* the sha256 of bats.toml, bats.lock and every src/**.bats, 64 hex digits *)\n")
       val () = bput_v(sats, "fun bats_inputs_sha256 (): string 64\n")
-      val sats_new = write_changed("build/src/_bats_inputs.sats", sats)
-      (* the stamp of a changed .sats, and the .dats only once the .sats is in
-         place: a stamp that cannot be written is said by touch_sats_stamp
-         (write_settle, which fails the build), and nothing after a failed
-         write is written (a failed write is reported, never ignored: write errors) *)
+      val sats_new = write_sats_changed("build/src/_bats_inputs.sats", sats)
+      (* the stamp, then the .sats, then the .dats, as build.bats (stamp, write errors): a write
+         that fails is said and stops the module, so nothing after it is written *)
       val sats_ok = (case+ sats_new of
-        | FileWritten() => touch_sats_stamp() = 0
+        | FileWritten() => true
         | FileSame() => true
-        (* said by write_changed *)
+        (* said by write_sats_changed *)
         | FileNotWritten() => false): bool
       var dats : $B.builder_v = $B.create()
       val () = bput_v(dats, "(* _bats_inputs -- written by bats from the inputs it names *)\n\n")
