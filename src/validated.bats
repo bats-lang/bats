@@ -168,14 +168,21 @@ fn keep {ls,lk:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
   (* the directories are not there yet: made, and the write tried again *)
   | ~NotWritten($F.NotFound()) => let
       val () = make_directories()
-      val _ = write_settle(slot, sm, write_file_from_builder_m(slot, sm, key_text(key)))
+      val () = (case+ write_settled(slot, sm, write_file_from_builder_m(slot, sm, key_text(key))) of
+        | ~Settled() => ()
+        (* said, and the build failed; the record is then none, which is a record to make again *)
+        | ~Failed() => ())
     in end
   (* anything else is said, and the build fails *)
   | ~NotWritten(e) => let
-      val _ = write_settle(slot, sm, NotWritten(e))
+      val () = (case+ write_settled(slot, sm, NotWritten(e)) of
+        | ~Settled() => ()
+        | ~Failed() => ())
     in end
   | ~WriteTooLarge() => let
-      val _ = write_settle(slot, sm, WriteTooLarge())
+      val () = (case+ write_settled(slot, sm, WriteTooLarge()) of
+        | ~Settled() => ()
+        | ~Failed() => ())
     in end
 
 (* Whether a[0, 64) and b[0, 64) are the same key *)
@@ -467,10 +474,14 @@ fn put_record {ls:agz}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
   (* no build/.bats_valid/: no record, by design (above) *)
   | ~NotWritten($F.NotFound()) => ()
   | ~NotWritten(e) => let
-      val _ = write_settle(slot, sm, NotWritten(e))
+      val () = (case+ write_settled(slot, sm, NotWritten(e)) of
+        | ~Settled() => ()
+        | ~Failed() => ())
     in end
   | ~WriteTooLarge() => let
-      val _ = write_settle(slot, sm, WriteTooLarge())
+      val () = (case+ write_settled(slot, sm, WriteTooLarge()) of
+        | ~Settled() => ()
+        | ~Failed() => ())
     in end
 
 (* Writes the record at slot for the key and the body (of len bytes), unless

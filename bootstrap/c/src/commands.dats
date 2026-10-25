@@ -420,7 +420,10 @@ fn finish_sidecar {lz:agz}{nz:pos}{zm:nat | zm <= nz; zm <= 524288}
     val @(spa, spl) = $B.into_arr(sp)
     val @(fz_sp, bv_sp) = $A.freeze<byte>(spa)
     (* said, and the build failed, if the sidecar cannot be written *)
-    val _ = write_settle(bv_sp, spl, write_file_from_builder_m(bv_sp, spl, line))
+    val () = (case+ write_settled(bv_sp, spl, write_file_from_builder_m(bv_sp, spl, line)) of
+      | ~Settled() => ()
+      (* nothing follows the sidecar *)
+      | ~Failed() => ())
     val () = $A.drop<byte>(fz_sp, bv_sp)
     val () = $A.free<byte>($A.thaw<byte>(fz_sp))
   in end
@@ -1132,7 +1135,10 @@ implement write_claude_rules() = let
   val () = $B.bput(rb, "- No semicolons at end of expressions\n")
   val @(rp, rp_len) = str_into_arr(".claude/rules/bats.md")
   val @(fz_rp, bv_rp) = $A.freeze<byte>(rp)
-  val _ = write_settle(bv_rp, rp_len, write_file_from_builder_m(bv_rp, rp_len, rb))
+  val () = (case+ write_settled(bv_rp, rp_len, write_file_from_builder_m(bv_rp, rp_len, rb)) of
+    | ~Settled() => ()
+    (* nothing follows the rules file *)
+    | ~Failed() => ())
   val () = $A.drop<byte>(fz_rp, bv_rp)
   val () = $A.free<byte>($A.thaw<byte>(fz_rp))
 in end

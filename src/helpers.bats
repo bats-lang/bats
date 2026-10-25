@@ -1055,11 +1055,25 @@ fn put_os_error (e: $F.io_error, b: !$B.builder_v >> $B.builder_v): void = let
   val () = put_int_v(b, errno)
 in bput_v(b, ")") end
 
+(* What a settled write came to (bats-lang/bats#367). It is linear, so a
+   caller matches it: dropping it is a type error, and a caller whose next
+   step needs the file (or whose next writes would only pile on a failed
+   one) takes the Failed arm and goes no further. The flag that fails the
+   build (set_build_err) is still set, but nothing rests on it being read
+   later. *)
+#pub datavtype settled =
+  | Settled of ()   (* the file was written whole *)
+  | Failed of ()    (* said, with the reason, and the build failed *)
+
 (* Says why path_bv[0, m) was not written, and fails the build: "error:
    cannot write 'path': <the system's reason> (os error n)", and for a
    disk with no room (bats-lang/bats#314) the free space of build/ as a
-   fact, as a patsopt that fails and prints nothing says it. 0 when it was
-   written. Consumes r. *)
+   fact, as a patsopt that fails and prints nothing says it. Settled when
+   it was written, else Failed. Consumes r. *)
+#pub fn write_settled {lp:agz}{n:pos}{m:nat | m <= n}
+  (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): settled
+
+(* deprecated (write-errors): kept one version beside write_settled; removed by bats-lang/bats#518 *)
 #pub fn write_settle {lp:agz}{n:pos}{m:nat | m <= n}
   (path_bv: !$A.borrow(byte, lp, n), m: int m, r: write_result): int
 
@@ -1410,8 +1424,11 @@ implement key_record(kind, out_bv, om, in_bv, im) = let
   (* a key that cannot be written is said, and the build fails; none is
      kept as a whole one: a key cut short is not the inputs' (it makes the
      output again) *)
-  val _ = (if ok then write_settle(bv_k, kl, write_file_from_builder_m(bv_k, kl, tbv))
-    else let val () = $B.builder_free(tbv) in 0 end): int
+  val () = (if ok then (case+ write_settled(bv_k, kl, write_file_from_builder_m(bv_k, kl, tbv)) of
+      | ~Settled() => ()
+      (* nothing follows the key, and no key is the output made again *)
+      | ~Failed() => ())
+    else $B.builder_free(tbv))
   val () = $A.drop<byte>(fz_k, bv_k)
   val () = $A.free<byte>($A.thaw<byte>(fz_k))
 in end
@@ -2588,8 +2605,13 @@ fn disk_free_kib (): int = let
 in v end
 
 implement write_settle (path_bv, m, r) =
+  (case+ write_settled(path_bv, m, r) of
+   | ~Settled() => 0
+   | ~Failed() => ~1)
+
+implement write_settled (path_bv, m, r) =
   case+ r of
-  | ~Wrote() => 0
+  | ~Wrote() => Settled()
   | ~NotWritten(e) => let
       var msg : $B.builder_v = $B.create()
       val () = bput_v(msg, "error: cannot write '")
@@ -2610,7 +2632,7 @@ implement write_settle (path_bv, m, r) =
       val () = bput_v(msg, "\n")
       val () = prerr_builder(msg)
       val () = set_build_err()
-    in ~1 end
+    in Failed() end
   | ~WriteTooLarge() => let
       var msg : $B.builder_v = $B.create()
       val () = bput_v(msg, "error: the output for '")
@@ -2618,7 +2640,7 @@ implement write_settle (path_bv, m, r) =
       val () = bput_v(msg, "' is larger than 524288 bytes, the most bats can write\n")
       val () = prerr_builder(msg)
       val () = set_build_err()
-    in ~1 end
+    in Failed() end
 
 (* A patsopt run that failed and printed nothing on stderr: the module,
    the status, the free space of build/ when df said it, and stdout
@@ -3880,6 +3902,27 @@ fn test_no_slot_is_not_refused (): bool = let
 in (if refused then false else true) end
 end
 
+(* A write that came to Wrote is Settled by the new form and 0 by the old
+   form, which stays beside it for one version (bats#367) *)
+$UNITTEST.run begin
+fn test_wrote_is_settled (): bool = let
+  val @(pa, pl) = str_into_arr("x")
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val ok = (case+ write_settled(bv_p, pl, Wrote()) of
+    | ~Settled() => true
+    | ~Failed() => false): bool
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in ok end
+fn test_wrote_is_zero_by_the_old_form (): bool = let
+  val @(pa, pl) = str_into_arr("x")
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val rc = write_settle(bv_p, pl, Wrote())
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in rc = 0 end
+end
+
 (* ============================================================
    File I/O
    ============================================================ *)
@@ -4219,7 +4262,10 @@ implement sats_stamp_end (saved, back) =
           val @(fz_p, bv_p) = $A.freeze<byte>(pa)
           (* said, and the build fails, if it cannot: the stamp then holds
              what it held or less, which no key's file names *)
-          val _ = write_settle(bv_p, pal, write_file_from_builder_m(bv_p, pal, cb))
+          val () = (case+ write_settled(bv_p, pal, write_file_from_builder_m(bv_p, pal, cb)) of
+            | ~Settled() => ()
+            (* the stamp is left as it was or less, and nothing follows it *)
+            | ~Failed() => ())
           val () = $A.drop<byte>(fz_p, bv_p)
         in $A.free<byte>($A.thaw<byte>(fz_p)) end else ())
       val () = $A.drop<byte>(fz_c, bv_c)
