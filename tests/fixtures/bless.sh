@@ -47,7 +47,11 @@ fixture() {
 run() { # <log> args...: bats fixtures in the project, its status in $rc
   l=$1; shift
   (cd "$P" && "$BATS" fixtures "$@") > "$l" 2>&1; rc=$?
+  # BLESS_SHOW=1 prints each run as a terminal would (the command, its output, its status)
+  [ -z "${BLESS_SHOW:-}" ] || { echo "\$ bats fixtures $*"; cat "$l"; echo "exit status $rc"; }
 }
+# expects <dir>: with BLESS_SHOW=1, the expect files of a directory of fixtures
+expects() { [ -z "${BLESS_SHOW:-}" ] || for f in "$1"/reject/*/expect; do echo "\$ cat $f"; cat "$f"; done; }
 said() { grep -aqxF -- "$2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: no line: $2"; }; }
 saidpart() { grep -aqF -- "$2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: no text: $2"; }; }
 notsaid() { ! grep -aqF -- "$2" "$1" || { echo "--- $1"; cat "$1"; fail "$3: unexpected text: $2"; }; }
@@ -103,6 +107,7 @@ done
 line "$TMP/bless1.log" "ok  " "accept/ok" bless
 said "$TMP/bless1.log" "bless: 8 written, 0 left as they were" bless
 saidpart "$TMP/bless1.log" "fixtures: 9 ok, 0 failed" bless
+expects "$G"
 # the form: function, line, then the error with its variable numbers as _
 head -n 2 "$G/reject/function-name/expect" | tr '\n' ' ' | grep -qx 'function h line 2 ' || { cat "$G/reject/function-name/expect"; fail "function-name: not 'function h' / 'line 2'"; }
 head -n 2 "$G/reject/line-three/expect" | tr '\n' ' ' | grep -qx 'function h line 3 ' || fail "line-three: not 'function h' / 'line 3'"
@@ -196,6 +201,7 @@ for m in passes other-module two-lines no-declaration no-patsopt-error; do
   same "$B/reject/$m/expect" "$TMP/bad-before/reject/$m/expect" refusals
 done
 for f in file before snippet.bats; do same "$B/accept/does-not-check/$f" "$TMP/bad-before/accept/does-not-check/$f" refusals; done
+expects "$B"
 
 # ---- --only: the named member, and no other
 O=$TMP/only
@@ -227,6 +233,7 @@ run "$TMP/m2.log" "$M" --bless --memo "$MEMO"
 [ $rc = 0 ] || { cat "$TMP/m2.log"; fail "memo bless: status $rc"; }
 line "$TMP/m2.log" wrote "reject/stale" "memo bless"
 saidpart "$TMP/m2.log" "reject/stale (0 s) [memo]" "memo bless: the log was not the memo's"
+expects "$M"
 run "$TMP/m3.log" "$M" --memo "$MEMO"
 [ $rc = 0 ] || { cat "$TMP/m3.log"; fail "memo after bless: status $rc"; }
 saidpart "$TMP/m3.log" "ok   reject/stale (0 s) [memo]" "memo after bless"
