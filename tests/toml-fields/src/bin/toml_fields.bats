@@ -65,7 +65,7 @@ fn join {sd,sr:nat} (dir: string sd, rest: string sr): $B.builder_v = let
 in b end
 
 (* ============================================================
-   Failure: the message, the work directory removed, status 1
+   Failure: the message, the work directory kept (keep-on-fail), status 1
    ============================================================ *)
 
 (* The exact copy of b followed by a NUL, in an array of its size *)
@@ -514,14 +514,14 @@ fn case_unsafe (t: !tool): void = let
   val () = build_ok(t, "unsafe_project", "unsafe_again.log", "")
 in prints("unsafe_project", "1\n", "unsafe again") end
 
-(* a manifest over 8192 bytes: emission reads `unsafe = true` as validation does *)
+(* large-manifest: emission reads `unsafe = true` from the whole manifest, as validation does *)
 fn case_large_manifest (t: !tool): void = let
   val () = unsafe_module("large_project", padded(YES_UNSAFE))
   val () = (if size_of(builder_of("large_project/bats.toml")) > 8192 then () else die("the manifest is not large", ""))
   val () = build_ok(t, "large_project", "large_manifest.log", "")
 in prints("large_project", "1\n", "large manifest") end
 
-(* large-library: a manifest over 8192 bytes with [package] after the padding is read whole by upload and the docs *)
+(* large-library: upload and the docs read the whole manifest, with [package] after the padding *)
 fn case_large_library (t: !tool): void = let
   val () = setup(builder_of("rm\n-rf\nlarge_library\nlarge_repository"), "rm large")
   val () = setup(builder_of("mkdir\n-p\nlarge_library/src\nlarge_repository"), "mkdir large")
@@ -618,7 +618,7 @@ fn case_path_dependency (t: !tool): void = let
   val () = build_ok(t, "path_dependency/app", "path_dependency2.log", "")
 in prints("path_dependency/app", "8\n", "path dependency two") end
 
-(* The manifest of 65536 or 65537 bytes: comment lines, then YES_UNSAFE, then a blank line when the bytes call for it *)
+(* toml-limit: comment lines, then YES_UNSAFE, then a blank line when the size needs one *)
 fn limit_manifest {sn,sb:nat} (lines: int sn, blank: string sb): $B.builder_v = let
   var b : $B.builder_v = $B.create()
   val () = put_times(b, "#\n", lines)
@@ -626,7 +626,7 @@ fn limit_manifest {sn,sb:nat} (lines: int sn, blank: string sb): $B.builder_v = 
   val () = put(b, blank)
 in b end
 
-(* toml-limit: a manifest of exactly 65536 bytes is read to its end, one byte more is refused, never parsed cut *)
+(* toml-limit: a manifest at the limit is read to its end, one byte over it is refused, never parsed cut *)
 fn case_limit (t: !tool): void = let
   val () = unsafe_module("limit_project", builder_of(YES_UNSAFE))
   val () = put_file("limit_project", "/bats.toml", limit_manifest(32743, "\n"))
@@ -682,7 +682,7 @@ fn case_remove (t: !tool): void = let
   val () = has("remove_absent.log", "^error: package 'absent' not found in \\[dependencies\\]$", "bats remove of an absent package said")
 in manifest_is("remove_project", tail_of(add_before(), "\"added-too\" = \"\"\n"), "bats remove of an absent package changed the manifest") end
 
-(* remove-cases: no final newline, a second table, an empty file, over 65536 bytes *)
+(* remove-cases: no final newline, a second table, an empty file, a manifest over the limit *)
 fn case_remove_shapes (t: !tool): void = let
   val () = module("remove_no_newline", builder_of(BASE))
   val () = put_file("remove_no_newline", "/bats.toml", builder_of("[dependencies]\n\"other\" = \"\"\n\"added\" = \"\""))

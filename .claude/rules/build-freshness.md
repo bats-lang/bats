@@ -74,7 +74,7 @@ A `build/` is restored by content, so what matters of `bats.toml` is whether a f
 
 Research: Go's `testscript` runs each script in a fresh working directory with `exec`, `cmp`, `grep` and `exists` as its commands and `stdout`/`stderr` as files to compare (pkg.go.dev/github.com/rogpeppe/go-internal/testscript); rustc's run-make tests are `rmake.rs` programs, "small programs allowing arbitrary Rust code such as `rustc` invocations", compiled and run by compiletest (rustc-dev-guide, tests/compiletest); Zig's standalone tests are directories each with its own `build.zig` that the main build runs (`test/standalone/build.zig.zon`). All three run the compiler as a child process from a test program written in the compiler's own language, in a directory of the test's own, and compare files with a tool or a built-in: this test does the same, with the platform's tools as the comparison.
 
-Failure keeps the work directory (`tests/toml-fields/work`, keep-on-fail.md), which `check.yml` uploads, and prints the log that explains it. Each class the test covers was made to fail by a stand-in compiler with that one fault, and the large manifest by compilers older than bats#429 (the PR of bats#446).
+Failure keeps the work directory (`tests/toml-fields/work`, keep-on-fail.md), which `check.yml` uploads, and prints the log that explains it. Each class the test covers fails on a stand-in compiler, the real bats run with that one fault injected.
 
 ### Every reader of `bats.toml`
 
