@@ -15,64 +15,22 @@ staload S = "str/src/lib.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 staload "helpers.sats"
 staload "lexer.sats"
 staload "validated.sats"
 
 
-
 datatype listing = OwnListing | DependencyListing
-
-
 
 
 typedef path_offset = spos(524288)
 
 
-
-
 typedef package_number(np:int) = [i:nat | i < np] int i
 
 
-
-
 datavtype name_bytes =
-  | {l:agz}{m:pos | m <= 524288} NameBytes of ($A.arr(byte, l, m), int m)
-
+  | {l:agz}{m:pos | m <= 1048576} NameBytes of ($A.arr(byte, l, m), int m)
 
 
 typedef variants_live = @{native= bool, native_test= bool, wasm= bool, wasm_test= bool}
@@ -84,11 +42,9 @@ fn variants_meet (a: variants_live, b: variants_live): variants_live
 fn variants_any (live: variants_live): bool
 
 
-
 datavtype qualifier =
   | Unqualified of ()
   | QualifiedBy of name_bytes
-
 
 
 datavtype instance_text =
@@ -103,8 +59,7 @@ datavtype maybe_name =
 fn name_bytes_free (name: name_bytes): void
 
 
-
-fn name_of_range {l:agz}{n:pos}{mb:nat | mb <= n}{s,e:nat | s <= mb; e <= mb}
+fn name_of_range {l:agz}{n:pos}{mb:nat | mb <= n}{s,e:nat | s <= e; e <= mb; e - s <= 1048576}
   (source_bytes: !$A.borrow(byte, l, n), source_size: int mb, s: int s, e: int e, squeeze: bool): maybe_name
 
 
@@ -117,6 +72,7 @@ datavtype file_fact =
   | UsesPackage of (variants_live, name_bytes (* the root *), name_bytes (* the alias *)) (* #use P as A *)
   | AliasesFile of (variants_live, name_bytes (* the alias *), name_bytes (* the path as written *)) (* staload A = "path" *)
   | StaloadsFile of (variants_live, name_bytes (* the path as written *)) (* an unaliased staload "path" *)
+  | OversizedName of (variants_live) (* a name too long to hold *)
 
 datavtype file_facts(int) =
   | file_facts_nil(0) of ()
@@ -125,20 +81,14 @@ datavtype file_facts(int) =
 fun file_facts_free {k:nat} (facts: file_facts(k)): void
 
 
-
 fn facts_of_source {l:agz}{n:pos}{source_length:nat | source_length <= n}
   (source_bytes: !$A.borrow(byte, l, n), source_length: int source_length, source_size: int n)
   : [k:nat] file_facts(k)
 
 
-
-
-
 fn facts_of_file {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288}
   (reuse: bool, path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
   : [k:nat] file_facts(k)
-
-
 
 
 datavtype project_file(np:int) =
@@ -148,9 +98,6 @@ datavtype project_file(np:int) =
 datavtype project_files(np:int, k:int) =
   | project_files_nil(np, 0) of ()
   | {j:nat} project_files_cons(np, j + 1) of (project_file(np), project_files(np, j))
-
-
-
 
 
 datavtype package_root(np:int) =
@@ -173,10 +120,7 @@ fun project_free {np:pos} (whole: project(np)): void
 fn project_package_count {np:pos} (whole: !project(np)): int np
 
 
-
 fn project_add_package {np:pos} (whole: project(np), root: name_bytes): project(np + 1)
-
-
 
 
 fn project_add_file {np:pos}{k:nat}
@@ -184,12 +128,22 @@ fn project_add_file {np:pos}{k:nat}
    path_in_package: name_bytes, facts: file_facts(k)): project(np)
 
 
+fn project_add_own_file {np:pos}{k:nat}
+  (whole: project(np), file_offset: path_offset, path: name_bytes, facts: file_facts(k)): project(np)
+
+
+fn project_add_dependency {np:pos} (whole: project(np), path: !name_bytes): [np2:pos] @(bool, project(np2))
+
+
+fn project_add_dependency_file {np:pos}{k:nat}
+  (whole: project(np), owner: package_number(np), file_offset: path_offset, path: name_bytes, facts: file_facts(k)): project(np)
+
+
 datavtype package_lookup(np:int) =
   | PackageFound(np) of package_number(np)
   | PackageMissing(np) of ()
 
 fn package_of_root {np:pos} (whole: !project(np), root: !name_bytes): package_lookup(np)
-
 
 
 fn root_of_package {np:pos} (whole: !project(np), package: package_number(np)): name_bytes
@@ -205,15 +159,8 @@ datavtype file_refs(np:int, k:int) =
 fun file_refs_free {np:int}{k:nat} (refs: file_refs(np, k)): void
 
 
-
-
-
-
-
-
 fn files_reached {np:pos} (whole: !project(np), by: !file_ref(np), through: !qualifier)
   : [k:nat] file_refs(np, k)
-
 
 
 datavtype foreign_hit(np:int) =
@@ -227,9 +174,10 @@ datavtype foreign_hits(np:int, k:int) =
 fun foreign_hits_free {np:int}{k:nat} (hits: foreign_hits(np, k)): void
 
 
+fn oversized_files_of {np:pos} (whole: !project(np)): [k:nat] file_refs(np, k)
+
 
 fn foreign_hits_of {np:pos} (whole: !project(np)): [k:nat] foreign_hits(np, k)
-
 
 
 datavtype implement_site =
@@ -241,9 +189,73 @@ datavtype implement_sites(int) =
 
 fun implement_sites_free {k:nat} (sites: implement_sites(k)): void
 
-fn implement_sites_of {l,la:agz}{n:pos}{source_length:nat | source_length <= n}{m:pos | m <= 524288}
+fn implement_sites_of {l,la:agz}{n:pos}{source_length:nat | source_length <= n}{m:pos | m <= 1048576}
   (source_bytes: !$A.borrow(byte, l, n), source_length: int source_length, source_size: int n,
    wanted: !$A.arr(byte, la, m), wanted_length: int m): [k:nat] implement_sites(k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

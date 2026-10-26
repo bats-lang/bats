@@ -3603,6 +3603,59 @@ fn read_unsafe_flag(): bool
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn validate_project (): bool
 
 
