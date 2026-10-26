@@ -150,6 +150,7 @@ jobs:
           name: bootstrap-c-regenerated-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/regen
           include-hidden-files: true
+          # bootstrap-c-artifact: kept until a worker commits the tree; a stale tree is useless after the next push (runtime-header.md)
           retention-days: 14
           if-no-files-found: error
 

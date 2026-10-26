@@ -23,7 +23,7 @@ dist/debug/bats build --repository /home/moshez/src/bats-lang/repository-prototy
 cp -R bootstrap/c /tmp/seed && make -C /tmp/seed debug/bats
 ```
 
-Every change to `src/` or `bats.lock` must commit a regenerated `bootstrap/c` in the same PR. A worker does not run the local regeneration (about twelve minutes, a long run, which is a CI job): it pushes the change, and when the step "Verify bootstrap/c matches sources" fails, the run uploads the tree it regenerated as the artifact `bootstrap-c-regenerated-<head sha>`. Download it, copy it over `bootstrap/c`, commit and push; the next run verifies it (`.claude/rules/runtime-header.md`, "Getting the regenerated tree from CI"):
+Every change to `src/` or `bats.lock` must commit a regenerated `bootstrap/c` in the same PR. A worker does not run the local regeneration (a long run, which is a CI job): it pushes the change, and when the step "Verify bootstrap/c matches sources" fails, the run uploads the tree it regenerated as the artifact `bootstrap-c-regenerated-<head sha>`. Download it, copy it over `bootstrap/c`, commit and push; the next run verifies it (`.claude/rules/runtime-header.md`, "Getting the regenerated tree from CI"):
 
 ```bash
 gh run download <run id> --name bootstrap-c-regenerated-<head sha> --dir /tmp/bootstrap-c-new
