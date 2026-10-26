@@ -37,6 +37,21 @@ alloc
   (n: int n)
   : [l:agz] arr(a, l, n)
 
+
+
+
+datavtype alloc_made(a:t@ype, n:int) =
+  | {l:agz} alloc_some(a, n) of arr(a, l, n)
+  | alloc_none(a, n) of ()
+
+
+
+fun{a:t@ype}
+alloc_checked
+  {n:pos | n <= 1048576}
+  (n: int n)
+  : alloc_made(a, n)
+
 fun{a:t@ype}
 free
   {l:agz}{n:nat}
@@ -719,6 +734,23 @@ fun iarr_get_in {l:agz}{n,i:nat | i < n}{cs:cells}{lo,hi:int | ~2147483648 <= lo
 fun iarr_set_in {l:agz}{n,i:nat | i < n}{cs:cells}{lo,hi:int | ~2147483648 <= lo; hi <= 2147483647}{v:int | lo <= v; v <= hi}
   (pf: ALLIN(cs, lo, hi) | a: iarr(l, n, cs), i: int i, v: int v)
   : [cs2:cells] (ALLIN(cs2, lo, hi) | iarr(l, n, cs2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
