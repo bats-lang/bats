@@ -16,6 +16,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 unset BATS_CACHE_DIR
 # The variables the C compiler and the wasm linker read (put_cc_environment,
 # bats-lang/bats#322) are unset here, so each case sets its own
@@ -65,7 +66,7 @@ rebuilt() { # <log> <cold count> <what>: patsopt ran again for every module
 }
 edit() { # <stamp file> <name> <new value>: the line `name value` rewritten
   grep -q "^$2 " "$1" || { echo "FAIL: no line $2 in $1"; cat "$1"; exit 1; }
-  sed -e "s|^$2 .*|$2 $3|" "$1" > "$1.edit" && mv -f "$1.edit" "$1"
+  text_edit "$1" text_set_by_prefix "$2 " "$2 $3"
 }
 
 # A cold build writes the stamp, with no path in it
@@ -76,7 +77,7 @@ COLD=$(ran "$TMP/cold.log")
 settle "$P"
 S=$P/build/.bats_stamp
 [ -f "$S" ] || { echo "FAIL: no build/.bats_stamp"; exit 1; }
-[ "$(sed -n 1p "$S")" = "bats-stamp 2" ] || { echo "FAIL: the stamp's first line"; cat "$S"; exit 1; }
+[ "$(text_line 1 < "$S")" = "bats-stamp 2" ] || { echo "FAIL: the stamp's first line"; cat "$S"; exit 1; }
 for n in bats patsopt cc libs link flags mark; do
   [ "$(grep -c "^$n " "$S")" = 1 ] || { echo "FAIL: the stamp has not one line $n"; cat "$S"; exit 1; }
 done
@@ -90,7 +91,7 @@ grep -q '^flags .*\$(PATSHOME)' "$S" || { echo "FAIL: flags do not write PATSHOM
 grep -q '^flags .*runtime; pre clang -E -P -frewrite-includes -H -o OUT\.i WRAP ' \
   "$S" ||
   { echo "FAIL: flags do not name the preprocess arguments of the cc"; cat "$S"; exit 1; }
-[ "$(sed -n 's/^mark //p' "$S")" = 0 ] || { echo "FAIL: mark of a native build is not 0"; cat "$S"; exit 1; }
+[ "$(text_after_prefix 'mark ' < "$S")" = 0 ] || { echo "FAIL: mark of a native build is not 0"; cat "$S"; exit 1; }
 if grep -q -e "$P" -e "$HOME" -e "$TMP" "$S"; then echo "FAIL: the stamp holds a path"; cat "$S"; exit 1; fi
 cp "$S" "$TMP/stamp.good"
 [ "$("$P/dist/debug/bs")" = 3 ] || { echo "FAIL: the binary"; exit 1; }
@@ -124,7 +125,7 @@ say "$TMP/mark.log" "mark differs"
 rebuilt "$TMP/mark.log" "$COLD" "a build with another mark"
 
 # The format's line and an unknown line count too
-printf 'bats-stamp 1\n' > "$TMP/f"; sed -n '2,$p' "$S" >> "$TMP/f"; cp "$TMP/f" "$S"
+printf 'bats-stamp 1\n' > "$TMP/f"; tail -n +2 "$S" >> "$TMP/f"; cp "$TMP/f" "$S"
 build "$P" "$TMP/format.log"
 say "$TMP/format.log" "the stamp format differs"
 rebuilt "$TMP/format.log" "$COLD" "a build with another format"
@@ -346,8 +347,8 @@ check "$C" "$TMP/check.log"
 CHK=$(ran "$TMP/check.log")
 [ "$CHK" -ge 3 ] || { echo "FAIL: a cold check ran patsopt $CHK times"; cat "$TMP/check.log"; exit 1; }
 [ "$(dropped "$TMP/check.log")" = 0 ] || { echo "FAIL: a cold check dropped build/"; cat "$TMP/check.log"; exit 1; }
-[ "$(sed -n 's/^mark //p' "$C/build/.bats_stamp")" = 3 ] || { echo "FAIL: check's build/ is not mark 3"; cat "$C/build/.bats_stamp"; exit 1; }
-[ "$(sed -n 's/^mark //p' "$C/build/.stash/2/.bats_stamp")" = 2 ] || { echo "FAIL: check's stash is not mark 2"; ls -a "$C/build/.stash/2"; exit 1; }
+[ "$(text_after_prefix 'mark ' < "$C/build/.bats_stamp")" = 3 ] || { echo "FAIL: check's build/ is not mark 3"; cat "$C/build/.bats_stamp"; exit 1; }
+[ "$(text_after_prefix 'mark ' < "$C/build/.stash/2/.bats_stamp")" = 2 ] || { echo "FAIL: check's stash is not mark 2"; ls -a "$C/build/.stash/2"; exit 1; }
 settle_check "$C"
 check "$C" "$TMP/check.same.log"
 kept "$TMP/check.same.log" "a second check"

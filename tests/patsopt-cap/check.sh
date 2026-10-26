@@ -23,6 +23,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -111,20 +112,20 @@ if grep -q "PATSOPT" "$TMP/plain.log"; then fail "with no cap, bats spoke of one
 run empty env BATS_PATSOPT_TIMEOUT_S= BATS_PATSOPT_MEM_MB=
 [ $rc = 0 ] || fail "check with empty caps" empty
 is_sh "$(parent_of_last)" && fail "with empty caps, patsopt was started by sh, not bats" empty
-sed 's/empty/plain/g' "$TMP/empty.log" | cmp -s - "$TMP/plain.log" || { echo "FAIL: empty caps said something unset caps do not"; diff "$TMP/plain.log" "$TMP/empty.log"; exit 1; }
+text_replace_all empty plain < "$TMP/empty.log" | cmp -s - "$TMP/plain.log" || { echo "FAIL: empty caps said something unset caps do not"; diff "$TMP/plain.log" "$TMP/empty.log"; exit 1; }
 
 # generous caps: the same C, no timer left behind (it would hold the
 # project's lock and the stderr pipe until its seconds were up)
 (cd "$TMP/plain" && HOME="$H" "$BATS" build --only debug --only native > "$TMP/plain-build.log" 2>&1) || fail "build with no cap" plain-build
 # patsopt writes the minute it started in the first lines of its C: not a difference of the C (it failed in CI when a minute passed between the two builds)
-cs_plain=$(cd "$TMP/plain/build" && find . -name '*.c' | sort | xargs cat | sed '/^\*\* The starting compilation time is:/d' | cksum)
+cs_plain=$(cd "$TMP/plain/build" && find . -name '*.c' | sort | xargs cat | grep -av '^\*\* The starting compilation time is:' | cksum)
 run generous env BATS_PATSOPT_TIMEOUT_S=600 BATS_PATSOPT_MEM_MB=8192
 [ $rc = 0 ] || fail "check with generous caps" generous
 [ $secs -lt 120 ] || fail "check with generous caps took ${secs}s: a timer outlived patsopt" generous
 is_sh "$(parent_of_last)" || fail "with caps, patsopt was not started by sh ($(parent_of_last))" generous
 if grep -q "waiting" "$TMP/generous.log"; then fail "waited" generous; fi
 (cd "$TMP/generous" && HOME="$H" BATS_PATSOPT_TIMEOUT_S=600 BATS_PATSOPT_MEM_MB=8192 "$BATS" build --only debug --only native > "$TMP/generous-build.log" 2>&1) || fail "build with generous caps" generous-build
-cs_generous=$(cd "$TMP/generous/build" && find . -name '*.c' | sort | xargs cat | sed '/^\*\* The starting compilation time is:/d' | cksum)
+cs_generous=$(cd "$TMP/generous/build" && find . -name '*.c' | sort | xargs cat | grep -av '^\*\* The starting compilation time is:' | cksum)
 [ "$cs_plain" = "$cs_generous" ] || {
   echo "FAIL: the C differs under a cap"; echo "$cs_plain / $cs_generous"
   (cd "$TMP/plain/build" && find . -name '*.c' | sort) > "$TMP/c-plain.list"
