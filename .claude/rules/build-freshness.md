@@ -64,6 +64,18 @@ A `build/` is restored by content, so what matters of `bats.toml` is whether a f
 | `[dependencies]` `{ path = ... }` | the directory is copied afresh into `bats_modules/<name>` before each build | only through those sources | content |
 | any other key or table (`[build]`, `[test]`) | none: bats reads none | no | n/a |
 
+### The test is written in bats (toml-fields, bats#446)
+
+`tests/toml-fields` is a bats binary project (`src/bin/toml_fields.bats`, built by `check.yml` with the seed and run with the absolute path of the compiler under test), not a shell script. What the shell script's header named as missing, each settled:
+
+* **A runner that spawns the compiler in a working directory.** The process package has no working directory, so the test enters the directory itself (`file_chdir` of the file package) and the child inherits it, then returns. Each command is a text of lines (the first is the program), its stdout and stderr go to files opened before the directory is entered, and the answer is the exit status. Tools used as they are: `rm`, `mkdir`, `cp`, `cmp`, `grep`, `diff`, `git`, `unzip` and `env -u` (to run bats without `BATS_CACHE_DIR`); the test holds no shell.
+* **A walk and byte comparison of two `build/` trees.** `diff -r` with the excluded names (records, stash, graph, objects) does both; a walk in bats would be a second implementation of what `diff` is for.
+* **Where the test lives.** A binary project beside the other fixtures that `check.yml` builds and runs after the fixture loop, because `bats test` runs a project's own `$UNITTEST` tests in-process and cannot run the built compiler on a project it plants, and no compiler module has a `$UNITTEST` block.
+
+Research: Go's `testscript` runs each script in a fresh working directory with `exec`, `cmp`, `grep` and `exists` as its commands and `stdout`/`stderr` as files to compare (pkg.go.dev/github.com/rogpeppe/go-internal/testscript); rustc's run-make tests are `rmake.rs` programs, "small programs allowing arbitrary Rust code such as `rustc` invocations", compiled and run by compiletest (rustc-dev-guide, tests/compiletest); Zig's standalone tests are directories each with its own `build.zig` that the main build runs (`test/standalone/build.zig.zon`). All three run the compiler as a child process from a test program written in the compiler's own language, in a directory of the test's own, and compare files with a tool or a built-in: this test does the same, with the platform's tools as the comparison.
+
+Failure keeps the work directory (`tests/toml-fields/work`, keep-on-fail.md), which `check.yml` uploads, and prints the log that explains it. Each class the test covers fails on a stand-in compiler, the real bats run with that one fault injected.
+
 ### Every reader of `bats.toml`
 
 | reader | where (the search that finds it) | serves | bytes read | does | fields judged |
