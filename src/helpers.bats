@@ -1,3 +1,4 @@
+(* scratch-532: stale bootstrap/c probe, never merged *)
 (* helpers -- shared utilities for the bats compiler *)
 
 #include "share/atspre_staload.hats"
