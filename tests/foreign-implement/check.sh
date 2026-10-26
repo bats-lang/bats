@@ -6,8 +6,8 @@
 # bats check. This plays, each in a project of its own with its dependencies in
 # bats_modules:
 #  * rejected, with the function and the package named, and no build/ made (patsopt did not
-#    run): arith's template (word32_rotr_inline) and array's (barr_get_inline) in one
-#    project; an ordinary function (word32_rotr: it failed only at link before); a concrete
+#    run): arith's template (word32_rotr_inline) and array's (barr_get_inline), each in a
+#    project of its own; an ordinary function (word32_rotr: it failed only at link before); a concrete
 #    instance against the template the package implements itself; the same instance of a name
 #    that the package implements only for that instance; a dependency that replaces the
 #    implement of its own dependency (transitive); the replacement in an unsafe dependency and
@@ -21,7 +21,7 @@
 #    #target blocks for different targets (no build loads both);
 #  * the names of a file are recorded under build/.bats_valid (facts <path>): a check in
 #    which nothing changed lexes no file for them, and a record that holds the key of other
-#    bats inputs (another compiler's stamp), garbled or cut short is not trusted.
+#    bats inputs (another compiler's stamp), garbled, empty or cut short is not trusted.
 # The expected text of a rejection is tests/foreign-implement/expected/<case>.txt;
 # BLESS=1 writes it from the run, to be read before it is committed.
 # Why this is a shell script (quire#646, CLAUDE.md "we do not write shell scripts"): the claims are about
@@ -37,8 +37,12 @@
 # project, which runs library code, not the compiler on a project). bats#284 (a test driver in bats for
 # tests/*/check.sh) is the open ticket that builds what is missing; until it lands a command-level test
 # follows the existing check.sh style (tests/fixtures/bless.sh names the same avenues).
-# usage: tests/foreign-implement/check.sh <bats-binary> <repository-dir>
-set -eu
+# Every case is its own: a failed case prints one FAIL line with its reason and the run goes on, a
+# passing case prints one ok line, and the run exits 1 at the end when a case failed. The third
+# argument selects cases (names separated by commas); an unknown name is exit 2, so a misspelt name
+# never passes by running nothing. VERBOSE=1 prints the details of a failed case.
+# usage: tests/foreign-implement/check.sh <bats-binary> <repository-dir> [<case>,...]
+set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 HERE=$(cd "$(dirname "$0")" && pwd)
 . "$(dirname "$0")/../keep-on-fail.sh"
@@ -66,50 +70,90 @@ main() {
   cat >> "$TMP/$1/src/bin/m.bats"
 }
 
+CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings other_instance disjoint_targets record_unchanged record_other_key record_garbled record_empty record_cut"
+SELECT=${3:-}
+if [ -n "$SELECT" ]; then
+  for want_name in $(printf '%s' "$SELECT" | tr ',' ' '); do
+    case " $CASES " in *" $want_name "*) ;; *) echo "foreign-implement: unknown case $want_name"; exit 2 ;; esac
+  done
+fi
+FAILED=0
+RAN=0
+want() { # <case>: whether the case is selected
+  [ -z "$SELECT" ] && return 0
+  case ",$SELECT," in *",$1,"*) return 0 ;; esac
+  return 1
+}
+fail_case() { # <case> <reason>: the details are in $TMP/detail
+  FAILED=$((FAILED + 1))
+  echo "FAIL $1: $2"
+  if [ -n "${VERBOSE:-}" ]; then cat "$TMP/detail"; fi
+}
+pass_case() { echo "ok $1"; }
+
 reject() { # <case> <text each of the errors must hold>...
   c=$1; shift
+  want "$c" || return 0
+  RAN=$((RAN + 1))
   rc=0
   (cd "$TMP/$c" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
   # the notice of a busy machine slot (BATS_SLOTS) is not what the error says
   grep -av '^waiting for another bats' "$TMP/err" > "$TMP/err.only" || true
   mv "$TMP/err.only" "$TMP/err"
-  [ "$rc" = 1 ] || { echo "FAIL: $c: status $rc (expected 1)"; cat "$TMP/err"; exit 1; }
-  [ ! -d "$TMP/$c/build" ] || { echo "FAIL: $c: patsopt ran (build/ was made)"; exit 1; }
+  cp "$TMP/err" "$TMP/detail"
+  if [ "$rc" != 1 ]; then fail_case "$c" "status $rc (expected 1)"; return 0; fi
+  if [ -d "$TMP/$c/build" ]; then fail_case "$c" "patsopt ran (build/ was made)"; return 0; fi
   for t in "$@"; do
-    grep -aqF -- "$t" "$TMP/err" || { echo "FAIL: $c: the error lacks: $t"; cat "$TMP/err"; exit 1; }
+    if ! grep -aqF -- "$t" "$TMP/err"; then fail_case "$c" "the error lacks: $t"; return 0; fi
   done
   if [ -n "${BLESS:-}" ]; then mkdir -p "$HERE/expected"; cp "$TMP/err" "$HERE/expected/$c.txt"; fi
-  cmp -s "$TMP/err" "$HERE/expected/$c.txt" || { echo "FAIL: $c: the error differs from expected/$c.txt"; diff "$HERE/expected/$c.txt" "$TMP/err"; exit 1; }
+  if ! cmp -s "$HERE/expected/$c.txt" "$TMP/err"; then
+    diff "$HERE/expected/$c.txt" "$TMP/err" > "$TMP/detail" 2>&1
+    fail_case "$c" "the error differs from expected/$c.txt"; return 0
+  fi
+  pass_case "$c"
 }
 accept() { # <case>
-  (cd "$TMP/$1" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || { echo "FAIL: $1: the check failed"; cat "$TMP/out" "$TMP/err"; exit 1; }
-  grep -aq 'check passed' "$TMP/err" || { echo "FAIL: $1: no 'check passed'"; cat "$TMP/err"; exit 1; }
+  want "$1" || return 0
+  RAN=$((RAN + 1))
+  rc=0
+  (cd "$TMP/$1" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
+  cat "$TMP/out" "$TMP/err" > "$TMP/detail"
+  if [ "$rc" != 0 ]; then fail_case "$1" "the check failed (status $rc)"; return 0; fi
+  if ! grep -aq 'check passed' "$TMP/err"; then fail_case "$1" "no check passed line"; return 0; fi
+  pass_case "$1"
 }
 
 # ---- rejected ----
-project override bin
-dependency override arith <<'X'
+project override_arith bin
+dependency override_arith arith <<'X'
 #pub fun{} word32_rotr_inline (x: int): int
 
 implement{} word32_rotr_inline (x) = x + 1
 X
-dependency override array <<'X'
+main override_arith <<'X'
+#use arith as A
+
+implement{} $A.word32_rotr_inline (x) = x + 2
+
+implement main0 () = println! ($A.word32_rotr_inline (1))
+X
+reject override_arith "'implement word32_rotr_inline' replaces what the package 'arith' implements"
+
+project override_array bin
+dependency override_array array <<'X'
 #pub fun{} barr_get_inline (x: int): int
 
 implement{} barr_get_inline (x) = x + 1
 X
-main override <<'X'
-#use arith as A
+main override_array <<'X'
 #use array as AR
-
-implement{} $A.word32_rotr_inline (x) = x + 2
 
 implement{} $AR.barr_get_inline (x) = x + 3
 
-implement main0 () = println! ($A.word32_rotr_inline (1), " ", $AR.barr_get_inline (1))
+implement main0 () = println! ($AR.barr_get_inline (1))
 X
-reject override "'implement word32_rotr_inline' replaces what the package 'arith' implements" \
-  "'implement barr_get_inline' replaces what the package 'array' implements"
+reject override_array "'implement barr_get_inline' replaces what the package 'array' implements"
 
 project ordinary bin
 dependency ordinary arith <<'X'
@@ -341,31 +385,60 @@ accept disjoint_targets
 
 # ---- the record of the names ----
 lexed() { grep -ac '^  ~ facts lexed ' "$1" || true; }
-cd "$TMP/own_template"
-"$BATS" check > "$TMP/prime.log" 2>&1 || { echo "FAIL: the priming check"; cat "$TMP/prime.log"; exit 1; }   # a record never makes build/: the second check writes them
-"$BATS" -v check > "$TMP/m1.log" 2>&1 || { echo "FAIL: the second check"; cat "$TMP/m1.log"; exit 1; }
-[ "$(lexed "$TMP/m1.log")" = 0 ] || { echo "FAIL: a check in which nothing changed lexed $(lexed "$TMP/m1.log") files for their names"; cat "$TMP/m1.log"; exit 1; }
-set -- build/.bats_valid/facts*
-[ -f "$1" ] || { echo "FAIL: no record of names under build/.bats_valid"; ls -A build/.bats_valid; exit 1; }
-rec=$1
-tamper() { # <what> <command that rewrites $rec from a copy in $TMP/rec>
+# record_case <case> <what>: a project of its own, checked twice so that the record exists (a record is
+# never the first check's), then the step of the case
+record_case() {
+  c=$1; what=$2
+  want "$c" || return 0
+  RAN=$((RAN + 1))
+  project "$c" bin
+  main "$c" <<'X'
+#pub fun{} twice (x: int): int
+
+implement{} twice (x) = x + x
+
+implement main0 () = println! (twice (2))
+X
+  cd "$TMP/$c" || return 1
+  : > "$TMP/detail"
+  if ! "$BATS" check > "$TMP/detail" 2>&1 || ! "$BATS" check >> "$TMP/detail" 2>&1; then fail_case "$c" "a priming check failed"; return 0; fi
+  if [ "$what" = unchanged ]; then
+    "$BATS" -v check > "$TMP/m.log" 2>&1
+    cp "$TMP/m.log" "$TMP/detail"
+    n=$(lexed "$TMP/m.log")
+    if [ "$n" != 0 ]; then fail_case "$c" "lexed $n files for their names in a check in which nothing changed"; return 0; fi
+    pass_case "$c"; return 0
+  fi
+  set -- build/.bats_valid/facts*
+  if [ ! -f "$1" ]; then ls -A build/.bats_valid > "$TMP/detail" 2>&1; fail_case "$c" "no record under build/.bats_valid after the priming checks"; return 0; fi
+  rec=$1
   cp "$rec" "$TMP/rec"
-  "$@"
-}
-check_lexed() { # <what>: the next check lexes the file for its names, and records them again
-  "$BATS" -v check > "$TMP/m.log" 2>&1 || { echo "FAIL: $1: the check failed"; cat "$TMP/m.log"; exit 1; }
-  [ "$(lexed "$TMP/m.log")" = 1 ] || { echo "FAIL: $1: $(lexed "$TMP/m.log") files lexed (expected 1)"; cat "$TMP/m.log"; exit 1; }
+  case "$what" in
+    # the key of other bats inputs: what another compiler's stamp would have written
+    other_key) { printf '%064d\n' 0; tail -n +2 "$TMP/rec"; } > "$rec" ;;
+    garbled) printf 'garbled\n' > "$rec" ;;
+    empty) : > "$rec" ;;
+    cut) head -c 100 "$TMP/rec" > "$rec" ;;
+  esac
+  # the next check lexes the file for its names and records them again
   "$BATS" -v check > "$TMP/m.log" 2>&1
-  [ "$(lexed "$TMP/m.log")" = 0 ] || { echo "FAIL: $1: the record was not written again"; cat "$TMP/m.log"; exit 1; }
+  cp "$TMP/m.log" "$TMP/detail"
+  n=$(lexed "$TMP/m.log")
+  if [ "$n" != 1 ]; then fail_case "$c" "$n files lexed (expected 1)"; return 0; fi
+  "$BATS" -v check > "$TMP/m.log" 2>&1
+  cp "$TMP/m.log" "$TMP/detail"
+  n=$(lexed "$TMP/m.log")
+  if [ "$n" != 0 ]; then fail_case "$c" "the record was not written again ($n files lexed)"; return 0; fi
+  pass_case "$c"
 }
-cp "$rec" "$TMP/rec"
-# the key of other bats inputs: what another compiler's stamp would have written
-{ printf '%064d\n' 0; tail -n +2 "$TMP/rec"; } > "$rec"
-check_lexed "a record under the key of other bats inputs"
-{ printf 'garbled\n'; } > "$rec"
-check_lexed "a garbled record"
-: > "$rec"
-check_lexed "an empty record"
-head -c 100 "$TMP/rec" > "$rec"
-check_lexed "a record cut short"
-echo "foreign-implement: ok"
+record_case record_unchanged unchanged
+record_case record_other_key other_key
+record_case record_garbled garbled
+record_case record_empty empty
+record_case record_cut cut
+
+if [ "$FAILED" != 0 ]; then
+  echo "foreign-implement: $FAILED of $RAN cases failed"
+  exit 1
+fi
+echo "foreign-implement: ok ($RAN cases)"
