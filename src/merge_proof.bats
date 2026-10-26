@@ -29,7 +29,7 @@ fn wrapped_arg {lb:agz}{pn,sn:nat}
   val () = bput_v(b, ending)
 in mk_arg(b) end
 
-(* The file of a diff in the git directory dir[0, dir_to): lead, dir, "/merge-proof-", the commit sha[sha_at, sha_to) and ending *)
+(* A file of a diff in the git directory (keyword: merge-proof) *)
 fn diff_file_arg {ld,ls:agz}{pn,sn:nat}
   (lead: string pn, dir: !$A.borrow(byte, ld, 4096), dir_to: int,
    ids: !$A.borrow(byte, ls, 4096), sha_at: pos_t, sha_to: int, ending: string sn): $P.arg_entry = let
@@ -41,14 +41,14 @@ fn diff_file_arg {ld,ls:agz}{pn,sn:nat}
   val () = bput_v(b, ending)
 in mk_arg(b) end
 
-(* The paths of a diff: the whole tree, but bootstrap/c, which the regenerated copy judges *)
+(* The paths of the pull request's diff: the whole tree but bootstrap/c, which the regenerated copy judges *)
 fn tree_pathspecs (): $L.listv($P.arg_entry) =
   word("--", word(":/", word(":(top,exclude)bootstrap/c", $L.list_vt_nil())))
 
 (* ------------------------------------------------------------------ *)
 (* Running tools (keyword: merge-proof) *)
 
-(* Runs a tool, keeping the first 4096 bytes of its stdout in out; the status is its exit status, or ~1 when it did not run or its output could not be read, and the length is what was kept *)
+(* Runs a tool and keeps what its stdout fits (keyword: merge-proof) *)
 fn tool_capture {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 4096))
   : @(int, [k:nat | k <= 4096] int k) = let
@@ -66,7 +66,7 @@ fn tool_capture {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
   val () = $A.barr_free($A.barr_thaw(fz_tool))
 in result end
 
-(* The exit status of a tool whose stdout is not wanted *)
+(* A tool whose stdout is not wanted (keyword: merge-proof) *)
 fn tool_status {sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, rest: $L.listv($P.arg_entry)): int = let
   val out = $A.alloc<byte>(4096)
@@ -74,7 +74,7 @@ fn tool_status {sn:nat | sn < $B.BUILDER_CAP}
   val () = $A.free<byte>(out)
 in status end
 
-(* Runs git with this process's own stdout and stderr, so what it prints is this command's output; the exit status, or ~1 when it did not run *)
+(* Runs git on this process's own stdout, so its output is ours (keyword: merge-proof) *)
 fn git_show (rest: $L.listv($P.arg_entry)): int = let
   val (nul_git | git_exec) = $P.path_of_string_proved("git")
   val @(fz_git, bv_git) = $A.barr_freeze(git_exec)
@@ -86,14 +86,14 @@ fn git_show (rest: $L.listv($P.arg_entry)): int = let
   val () = $A.barr_free($A.barr_thaw(fz_git))
 in status end
 
-(* Runs git with the arguments given and keeps its first 4096 bytes of output in out *)
+(* Runs git and keeps what its stdout fits (keyword: merge-proof) *)
 fn git_capture {lo:agz}
   (rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 4096)): @(int, [k:nat | k <= 4096] int k) =
   tool_capture("git", rest, out)
 
 fn git_status (rest: $L.listv($P.arg_entry)): int = tool_status("git", rest)
 
-(* Runs a program of the checkout with its stdout discarded and its stderr shared; the exit status, or ~1 when it did not run *)
+(* Runs a program of the checkout with its stdout discarded (keyword: merge-proof) *)
 fn script_status {sn:nat | sn < $B.BUILDER_CAP}
   (path: string sn, rest: $L.listv($P.arg_entry)): int = let
   val (nul_script | script_exec) = $P.path_of_string_proved(path)
@@ -119,14 +119,14 @@ in status end
 (* ------------------------------------------------------------------ *)
 (* Reading what git answered (keyword: merge-proof) *)
 
-(* The first newline at or after p of bv[0, 4096), or 4096 *)
+(* The first newline at or after p (keyword: merge-proof) *)
 fun newline_at {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   (bv: !$A.borrow(byte, l, 4096), p: int p): [r:nat | p <= r; r <= 4096] int r =
   if p >= 4096 then p
   else if byte2int0($A.read<byte>(bv, p)) = 10 then p
   else newline_at(bv, p + 1)
 
-(* Whether x[a, a + len) and y[b, b + len) hold the same bytes, from the byte i on *)
+(* Whether two spans hold the same bytes (keyword: merge-proof) *)
 fun span_equal {lx,ly:agz}{a,b,len,i:nat | a + len <= 4096; b + len <= 4096; i <= len} .<len - i>.
   (x: !$A.borrow(byte, lx, 4096), a: int a, y: !$A.borrow(byte, ly, 4096), b: int b,
    len: int len, i: int i): bool =
@@ -135,7 +135,7 @@ fun span_equal {lx,ly:agz}{a,b,len,i:nat | a + len <= 4096; b + len <= 4096; i <
     span_equal(x, a, y, b, len, i + 1)
   else false
 
-(* Prints bv[a, a + len) from the byte i on *)
+(* Prints a span (keyword: merge-proof) *)
 fun print_span {l:agz}{a,len,i:nat | a + len <= 4096; i <= len} .<len - i>.
   (bv: !$A.borrow(byte, l, 4096), a: int a, len: int len, i: int i): void =
   if i >= len then ()
@@ -144,7 +144,7 @@ fun print_span {l:agz}{a,len,i:nat | a + len <= 4096; i <= len} .<len - i>.
   in print_span(bv, a, len, i + 1) end
 
 (* ------------------------------------------------------------------ *)
-(* The verdicts: OK on stdout with exit 0, NOT OK and its reason on stdout with exit 1, a git that did not answer on stderr with exit 2 *)
+(* The verdicts and their exit statuses (keyword: merge-proof) *)
 
 fn not_ok (why: string): void = let
   val () = println! ("NOT OK: ", why)
@@ -158,7 +158,7 @@ in set_exit_code(2) end
 (* ------------------------------------------------------------------ *)
 (* The proofs, one after another; each later one runs only when the earlier ones held (keyword: merge-proof) *)
 
-(* The repository the regeneration builds against: --repository, else BATS_REPOSITORY *)
+(* The repository the regeneration builds against (keyword: merge-proof) *)
 fn repository_known (repo_at: pos_t): bool =
   if repo_at >= 0 then true
   else let
@@ -175,7 +175,7 @@ fn repository_arg {lc:agz}
     else let val _ = env_value("BATS_REPOSITORY", b) in () end)
 in mk_arg(b) end
 
-(* Whether the one line git printed for HEAD is the head sha[at, at + len) *)
+(* Whether git names the checked-out commit as the head (keyword: merge-proof) *)
 fn checked_out {ls:agz}{l:nat | 2 * l + 2 <= 4096}
   (ids: !$A.borrow(byte, ls, 4096), head_at: int (l + 1), len: int l): bool = let
   val buf = $A.alloc<byte>(4096)
@@ -186,7 +186,7 @@ fn checked_out {ls:agz}{l:nat | 2 * l + 2 <= 4096}
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in same end
 
-(* The last proof: regenerating bootstrap/c from the head's sources leaves no change in it. The checkout must be the head, with no tracked file changed, since the script writes into it *)
+(* The bootstrap proof: regenerating leaves bootstrap/c unchanged (keyword: merge-proof) *)
 fn bootstrap_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
    ids: !$A.borrow(byte, ls, 4096), len: int l,
@@ -225,7 +225,7 @@ fn bootstrap_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 40
     end
   end
 
-(* The arguments of the git that writes the diff of the head or the reviewed head (rev_at) against main into a file named by the head *)
+(* The git that writes a diff against main into a file (keyword: merge-proof) *)
 fn write_diff_args {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}{sn:nat}
   (dir: !$A.borrow(byte, ld, 4096), dir_to: int, ids: !$A.borrow(byte, ls, 4096),
    len: int l, rev_at: pos_t, ending: string sn): $L.listv($P.arg_entry) =
@@ -233,7 +233,7 @@ fn write_diff_args {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}{sn:nat}
     $L.list_vt_cons(diff_file_arg("--output=", dir, dir_to, ids, len + 1, 2 * len + 1, ending),
     $L.list_vt_cons(wrapped_arg("origin/main...", ids, rev_at, rev_at + len, ""), tree_pathspecs())))))
 
-(* The arguments of the git that compares the two diff files, the index lines of the two left out *)
+(* The git that compares the two diff files without their index lines (keyword: merge-proof) *)
 fn compare_diff_args {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}
   (dir: !$A.borrow(byte, ld, 4096), dir_to: int, ids: !$A.borrow(byte, ls, 4096), len: int l)
   : $L.listv($P.arg_entry) =
@@ -241,7 +241,7 @@ fn compare_diff_args {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}
     $L.list_vt_cons(diff_file_arg("", dir, dir_to, ids, len + 1, 2 * len + 1, "-reviewed.diff"),
     $L.list_vt_cons(diff_file_arg("", dir, dir_to, ids, len + 1, 2 * len + 1, "-head.diff"), $L.list_vt_nil()))))))))
 
-(* Removes the two diff files *)
+(* Removes the two diff files (keyword: merge-proof) *)
 fn remove_diff_files {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}
   (dir: !$A.borrow(byte, ld, 4096), dir_to: int, ids: !$A.borrow(byte, ls, 4096), len: int l): void = let
   val _ = tool_status("rm", word("-f", word("--",
@@ -249,7 +249,7 @@ fn remove_diff_files {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}
     $L.list_vt_cons(diff_file_arg("", dir, dir_to, ids, len + 1, 2 * len + 1, "-head.diff"), $L.list_vt_nil())))))
 in () end
 
-(* The pull request's own diff against main is the same at the head as at the reviewed head, byte for byte but for the index lines *)
+(* The diff proof: the pull request's diff is unchanged (keyword: merge-proof) *)
 fn diff_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
    ids: !$A.borrow(byte, ls, 4096), len: int l,
@@ -285,26 +285,29 @@ fn diff_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
   val () = $A.free<byte>($A.thaw<byte>(fz_dir))
 in () end
 
-(* A merge with a hand-resolved conflict prints its resolved hunks and nothing else; any other merge goes on *)
+(* The git that shows the hunks that differ from both parents (keyword: merge-proof) *)
+fn combined_args {ls:agz}{l:nat | 2 * l + 2 <= 4096}
+  (ids: !$A.borrow(byte, ls, 4096), len: int l): $L.listv($P.arg_entry) =
+  word("diff-tree", word("--cc", word("--no-commit-id", word("--no-ext-diff", word("--no-color", word("-p",
+    $L.list_vt_cons(wrapped_arg("", ids, len + 1, 2 * len + 1, ""), word("--", word(":/", $L.list_vt_nil())))))))))
+
+(* The conflict proof: resolved hunks are printed alone (keyword: merge-proof) *)
 fn conflict_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
    ids: !$A.borrow(byte, ls, 4096), len: int l,
    parents: !$A.borrow(byte, lp, 4096), other_at: int o): void = let
-  fn combined (ids: !$A.borrow(byte, ls, 4096), len: int l): $L.listv($P.arg_entry) =
-    word("diff-tree", word("--cc", word("--no-commit-id", word("--no-ext-diff", word("--no-color", word("-p",
-      $L.list_vt_cons(wrapped_arg("", ids, len + 1, 2 * len + 1, ""), tree_pathspecs())))))))
   val buf = $A.alloc<byte>(4096)
-  val @(status, kept) = git_capture(combined(ids, len), buf)
+  val @(status, kept) = git_capture(combined_args(ids, len), buf)
   val () = $A.free<byte>(buf)
 in
   if status <> 0 then git_error("git did not answer for the combined diff of the merge")
   else if kept > 0 then let
-    val _ = git_show(combined(ids, len))
+    val _ = git_show(combined_args(ids, len))
   in set_exit_code(1) end
   else diff_proof(cmd, argv0_to, repo_at, repo_to, ids, len, parents, other_at)
 end
 
-(* The other parent is a commit of main *)
+(* The main proof: the other parent is a commit of main (keyword: merge-proof) *)
 fn main_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
    ids: !$A.borrow(byte, ls, 4096), len: int l,
@@ -318,7 +321,7 @@ in
   else git_error("git did not answer for the ancestry of the other parent")
 end
 
-(* The head has exactly two parents, and one of them is the reviewed head *)
+(* The parents proof: two parents, one the reviewed head (keyword: merge-proof) *)
 fn parents_proof {lc,ls:agz}{l:nat | 2 * l + 2 <= 4096}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
    ids: !$A.borrow(byte, ls, 4096), len: int l): void = let
@@ -348,7 +351,7 @@ in
   in () end
 end
 
-(* Resolves the two revisions to their commits: line 0 of ids is the reviewed head, line 1 the head *)
+(* Resolves both revisions to commits (keyword: merge-proof) *)
 fn prove {lc:agz}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, reviewed_at: pos_t, reviewed_to: int,
    head_at: pos_t, head_to: int, repo_at: pos_t, repo_to: int): void = let
@@ -374,7 +377,7 @@ fn usage_error (): void = let
   val () = prerr_newline()
 in set_exit_code(2) end
 
-(* Reads the arguments after merge-proof, cmd[first, total): two revisions, then optionally --repository and a directory *)
+(* Reads the arguments after the command name (keyword: merge-proof) *)
 fn run_merge_proof {l:agz}{first:nat | first <= 4096}
   (cmd: !$A.borrow(byte, l, 4096), argv0_to: int, first: int first, total: int): void = let
   val reviewed_to = find_nul(cmd, first)
@@ -410,7 +413,7 @@ in
   end
 end
 
-(* Where the arguments after merge-proof start, or ~1 when argv[1] is not merge-proof *)
+(* Where the arguments start (keyword: merge-proof) *)
 fn arguments_at {l:agz}
   (cmd: !$A.borrow(byte, l, 4096)): [r:int | r == ~1 || (0 <= r && r <= 4096)] int r = let
   val a = find_nul(cmd, 0) + 1
@@ -426,7 +429,7 @@ in
   end
 end
 
-(* Runs bats merge-proof when that is the command given and answers true; false for any other command *)
+(* Runs the command when it is the one given (keyword: merge-proof) *)
 #pub fn merge_proof_main (): bool
 
 implement merge_proof_main () = let

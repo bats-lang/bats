@@ -91,16 +91,18 @@ git_in checkout -q pr; git_in merge -q --no-edit main > /dev/null 2>&1
 edit_a "RESOLVED BY HAND"; regenerate; git_in commit -q -a -m resolved; head=$(git_in rev-parse HEAD)
 git_in cat-file -p "$head" | grep -c '^parent ' | grep -qx 2 || fail "conflict: the fixture's head is not a merge"
 prove "$reviewed" "$head" --repository unused
-expect hand-resolved-conflict 1 "diff --cc src/a.txt"
+expect hand-resolved-conflict 1 "diff --cc"
+contains hand-resolved-conflict "diff --cc src/a.txt"
+contains hand-resolved-conflict "++RESOLVED BY HAND"
 contains hand-resolved-conflict "RESOLVED BY HAND"
 grep -q '^OK\|^NOT OK' "$TMP/out" && fail "conflict: a verdict was printed"
 [ ! -s "$TMP/err" ] || fail "conflict: wrote to stderr"
 
-# 4. a stale bootstrap/c
+# 4. a stale bootstrap/c: main changed src and did not regenerate, so the clean merge is stale
 start; git_in update-ref refs/remotes/origin/main HEAD
-pr_commit "PR CHANGE"; main_commit edit_b "MAIN CHANGE"
-git_in checkout -q pr; git_in merge -q --no-edit main > /dev/null
-echo stale >> "$TMP/repo/bootstrap/c/generated"; git_in commit -q -a --amend --no-edit; head=$(git_in rev-parse HEAD)
+pr_commit "PR CHANGE"
+git_in checkout -q main; edit_b "MAIN CHANGE"; git_in commit -q -a -m "main, not regenerated"; git_in update-ref refs/remotes/origin/main HEAD
+git_in checkout -q pr; git_in merge -q --no-edit main > /dev/null; head=$(git_in rev-parse HEAD)
 prove "$reviewed" "$head" --repository unused
 expect stale-bootstrap 1 "NOT OK: bootstrap/c is stale"
 contains stale-bootstrap "bootstrap/c/generated"
