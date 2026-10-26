@@ -34,3 +34,5 @@ uploads nothing.
 
 Shell: the scripts are existing shell tests (the test driver in bats is quire#646's
 ticket); the helper stays in them.
+
+The manifest test (`tests/toml-fields`) is written in bats (build-freshness.md); on a failure it keeps `tests/toml-fields/work` and says so with the same `kept:` line, and `check.yml` uploads that directory too.

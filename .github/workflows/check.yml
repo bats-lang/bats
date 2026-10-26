@@ -132,6 +132,15 @@ jobs:
             "$t" dist/debug/bats ~/repository
           done
 
+      # The manifest test is written in bats (bats#446): built, then run on the compiler under test
+      - name: Build the toml-fields test
+        working-directory: tests/toml-fields
+        run: ~/bats-bin/bats build --repository ~/repository
+
+      - name: Fixture test toml-fields
+        working-directory: tests/toml-fields
+        run: dist/debug/toml_fields ${{ github.workspace }}/dist/debug/bats
+
       - name: Verify bootstrap/c matches sources
         run: |
           scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen
@@ -155,7 +164,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: kept-check
-          path: ${{ runner.temp }}/kept
+          path: |
+            ${{ runner.temp }}/kept
+            tests/toml-fields/work
           include-hidden-files: true
           if-no-files-found: ignore
 
