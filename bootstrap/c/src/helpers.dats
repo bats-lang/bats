@@ -12,6 +12,7 @@ staload "result/src/lib.dats"
 staload "str/src/lib.dats"
 staload "sha256/src/lib.dats"
 staload "toml/src/lib.dats"
+(* scratch-532: stale bootstrap/c probe, never merged *)
 (* helpers -- shared utilities for the bats compiler *)
 
 #include "share/atspre_staload.hats"
