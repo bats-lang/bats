@@ -81,6 +81,12 @@ Do not use bats-old unless it's an emergency. The self-hosting compiler is the p
 
 Fix problems regardless of size. Never say "too large for this session" or defer work. Do the work.
 
+## We write bats, not shell
+
+Our own code is bats. The only non-bats code is what is impossible in bats (the `make` of `bootstrap/c`), a dependency's own format, or a third-party tool used as it is. A workflow `run:` step that does more than call one bats subcommand or one third-party tool is code we wrote.
+
+Review question: a PR that adds non-bats code of ours (a shell script, or a workflow `run:` step that is more than one call) is rejected unless it names the avenue it exhausted.
+
 ## Task Rules
 
 A task should never be more than one thing: if it requires the word "and", for example, it should be broken up. If it refers to plurals, it should be broken up. If it has a comma, it should be broken up.
