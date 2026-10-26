@@ -57,6 +57,9 @@ reject() { # <case> <text each of the errors must hold>...
   c=$1; shift
   rc=0
   (cd "$TMP/$c" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
+  # the notice of a busy machine slot (BATS_SLOTS) is not part of the error
+  grep -av '^waiting for another bats' "$TMP/err" > "$TMP/err.only" || true
+  mv "$TMP/err.only" "$TMP/err"
   [ "$rc" = 1 ] || { echo "FAIL: $c: status $rc (expected 1)"; cat "$TMP/err"; exit 1; }
   [ ! -d "$TMP/$c/build" ] || { echo "FAIL: $c: patsopt ran (build/ was made)"; exit 1; }
   for t in "$@"; do
