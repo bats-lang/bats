@@ -142,6 +142,7 @@ jobs:
         run: dist/debug/toml_fields ${{ github.workspace }}/dist/debug/bats
 
       - name: Verify bootstrap/c matches sources
+        id: verify-bootstrap
         run: |
           scripts/bootstrap-c.sh dist/debug/bats ~/repository /tmp/regen
           if ! diff -r bootstrap/c /tmp/regen > /tmp/bootstrap.diff; then
@@ -149,6 +150,18 @@ jobs:
             echo "::error::bootstrap/c is stale. Run: scripts/bootstrap-c.sh dist/debug/bats <repository> and commit bootstrap/c"
             exit 1
           fi
+
+      # bootstrap-c-artifact: a stale tree is handed back to the worker (runtime-header.md)
+      - name: Upload the regenerated bootstrap/c
+        if: ${{ always() && steps.verify-bootstrap.outcome == 'failure' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: bootstrap-c-regenerated-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/regen
+          include-hidden-files: true
+          # bootstrap-c-artifact: kept until a worker commits the tree; a stale tree is useless after the next push (runtime-header.md)
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Verify fixpoint (compiler built by itself emits the same C)
         run: |

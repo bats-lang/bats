@@ -23,12 +23,14 @@ dist/debug/bats build --repository /home/moshez/src/bats-lang/repository-prototy
 cp -R bootstrap/c /tmp/seed && make -C /tmp/seed debug/bats
 ```
 
-Every change to `src/` or `bats.lock` must regenerate and commit it in the same PR:
+Every change to `src/` or `bats.lock` must commit a regenerated `bootstrap/c` in the same PR. A worker does not run the local regeneration (a long run, which is a CI job): it pushes the change, and when the step "Verify bootstrap/c matches sources" fails, the run uploads the tree it regenerated as the artifact `bootstrap-c-regenerated-<head sha>`. Download it, copy it over `bootstrap/c`, commit and push; the next run verifies it (`.claude/rules/runtime-header.md`, "Getting the regenerated tree from CI"):
 
 ```bash
-dist/debug/bats build --repository ../repository-prototype
-scripts/bootstrap-c.sh dist/debug/bats ../repository-prototype
+gh run download <run id> --name bootstrap-c-regenerated-<head sha> --dir /tmp/bootstrap-c-new
+rm -rf bootstrap/c && cp -R /tmp/bootstrap-c-new bootstrap/c
 ```
+
+`scripts/bootstrap-c.sh dist/debug/bats ../repository-prototype` is the command the artifact is made by.
 
 CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result differs. It also checks the fixpoint (the compiler built by itself emits the same C). Never edit `bootstrap/c/` by hand.
 
