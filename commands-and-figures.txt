@@ -1,0 +1,130 @@
+$ bats merge-proof 19b41a923218e9a1786b3240c94734878e3cfdb4 689f78e874f4f880d8b64c086e5419b7fb9f921e --repository /root/repository   (bats#384, in a checkout of the head)
+exit=1
+$ wc -c < stdout; wc -c < stderr; grep -c '^diff --cc' stdout; grep -c '^OK\|^NOT OK' stdout
+stdout_bytes=505862 stderr_bytes=0 diff--cc_headers=4 verdict_lines=0
+$ git diff-tree --cc --no-commit-id --no-ext-diff --no-color -p 689f78e874f4f880d8b64c086e5419b7fb9f921e -- :/ | cmp - stdout
+cmp: identical (39c4671f23896261c6e5feae834006f12d52d5f946cf3d299f5fc9d5fa0ebb9e sha256 of stdout)
+$ grep '^diff --cc' stdout
+diff --cc bootstrap/c/src/_bats_inputs.dats
+diff --cc bootstrap/c/src/_bats_inputs_dats.c
+diff --cc bootstrap/c/src/cache.dats.src
+diff --cc bootstrap/c/src/cache_dats.c
+
+$ bats merge-proof 4f74c24fbc31a1a7bfcc79eae2e2359d6e91347e b2399af136e58080a49ce60426e691f6c8afabb4 --repository /root/repository   (bats#523, in a checkout of the head)
+exit=1
+$ wc -c < stdout; wc -c < stderr; grep -c '^diff --cc' stdout; grep -c '^OK\|^NOT OK' stdout
+stdout_bytes=732112 stderr_bytes=0 diff--cc_headers=4 verdict_lines=0
+$ git diff-tree --cc --no-commit-id --no-ext-diff --no-color -p b2399af136e58080a49ce60426e691f6c8afabb4 -- :/ | cmp - stdout
+cmp: identical (827ca8b302ec6667e311232aff90df811eebc2ab93c6cd2e7b0ddee8f40fc884 sha256 of stdout)
+$ grep '^diff --cc' stdout
+diff --cc bootstrap/c/src/_bats_inputs.dats
+diff --cc bootstrap/c/src/_bats_inputs_dats.c
+diff --cc bootstrap/c/src/bin/bats_dats.c
+diff --cc bootstrap/c/src/fixtures_dats.c
+
+$ bats merge-proof 350a5a44d138dcb23a5a34b2844d9bd4e46ac670 2aae988fe28cdfa93887c6f22d228068647e501e --repository /root/repository   (bats#520, in a checkout of the head)
+exit=1
+$ wc -c < stdout; wc -c < stderr; grep -c '^diff --cc' stdout; grep -c '^OK\|^NOT OK' stdout
+stdout_bytes=389905 stderr_bytes=0 diff--cc_headers=5 verdict_lines=0
+$ git diff-tree --cc --no-commit-id --no-ext-diff --no-color -p 2aae988fe28cdfa93887c6f22d228068647e501e -- :/ | cmp - stdout
+cmp: identical (7dbac91ec63884096ce6534733735c280327471977e77b53ba9b8735480a0b3c sha256 of stdout)
+$ grep '^diff --cc' stdout
+diff --cc bootstrap/c/src/_bats_inputs.dats
+diff --cc bootstrap/c/src/_bats_inputs_dats.c
+diff --cc bootstrap/c/src/ats2_dats.c
+diff --cc bootstrap/c/src/bin/bats_dats.c
+diff --cc bootstrap/c/src/fixtures_dats.c
+
+$ bats merge-proof 8138bbd546616277f3d5470ca3a8637f28c4dab4 ff4af103a1a952de3c77ce9284d5308a7bdaa315 --repository /root/repository   (bats#433, in a checkout of the head)
+exit=1
+$ wc -c < stdout; wc -c < stderr; grep -c '^diff --cc' stdout; grep -c '^OK\|^NOT OK' stdout
+stdout_bytes=2153765 stderr_bytes=0 diff--cc_headers=7 verdict_lines=0
+$ git diff-tree --cc --no-commit-id --no-ext-diff --no-color -p ff4af103a1a952de3c77ce9284d5308a7bdaa315 -- :/ | cmp - stdout
+cmp: identical (3235c9d3956051615814e4b037dabeafdb20850eb65f2f9b272084e2dce35213 sha256 of stdout)
+$ grep '^diff --cc' stdout
+diff --cc bootstrap/c/src/_bats_inputs.dats
+diff --cc bootstrap/c/src/_bats_inputs_dats.c
+diff --cc bootstrap/c/src/fixtures.dats
+diff --cc bootstrap/c/src/fixtures.dats.src
+diff --cc bootstrap/c/src/fixtures.sats
+diff --cc bootstrap/c/src/fixtures_dats.c
+diff --cc src/fixtures.bats
+
+$ bats merge-proof c96402e0e2e70f538be53f18b47cb8d5e14d687a 0d90fe507352f731f3618fc939eca99da034d6c0 --repository /root/repository   (bats#423, in a checkout of the head)
+exit=1
+$ wc -c < stdout; wc -c < stderr; grep -c '^diff --cc' stdout; grep -c '^OK\|^NOT OK' stdout
+stdout_bytes=19838980 stderr_bytes=0 diff--cc_headers=39 verdict_lines=0
+$ git diff-tree --cc --no-commit-id --no-ext-diff --no-color -p 0d90fe507352f731f3618fc939eca99da034d6c0 -- :/ | cmp - stdout
+cmp: identical (e65625dbf8e559dd827e3bd9c5e5ad7f970d168d5d9b1d39340677ae0185103a sha256 of stdout)
+$ grep '^diff --cc' stdout
+diff --cc .claude/rules/validated.md
+diff --cc bootstrap/c/src/_bats_inputs.dats
+diff --cc bootstrap/c/src/_bats_inputs_dats.c
+diff --cc bootstrap/c/src/ats2_dats.c
+diff --cc bootstrap/c/src/bin/bats_dats.c
+diff --cc bootstrap/c/src/build.dats.src
+diff --cc bootstrap/c/src/build_dats.c
+diff --cc bootstrap/c/src/cache_dats.c
+diff --cc bootstrap/c/src/closure_dats.c
+diff --cc bootstrap/c/src/commands.dats
+diff --cc bootstrap/c/src/commands.dats.src
+diff --cc bootstrap/c/src/commands_dats.c
+diff --cc bootstrap/c/src/docs.dats.src
+diff --cc bootstrap/c/src/docs_dats.c
+diff --cc bootstrap/c/src/emitter_dats.c
+diff --cc bootstrap/c/src/facts_dats.c
+diff --cc bootstrap/c/src/fixtures_dats.c
+diff --cc bootstrap/c/src/helpers.dats
+diff --cc bootstrap/c/src/helpers.dats.src
+diff --cc bootstrap/c/src/helpers.sats
+diff --cc bootstrap/c/src/helpers_dats.c
+diff --cc bootstrap/c/src/inputs_dats.c
+diff --cc bootstrap/c/src/lexer_dats.c
+diff --cc bootstrap/c/src/lock.dats.src
+diff --cc bootstrap/c/src/lock.sats
+diff --cc bootstrap/c/src/lock_dats.c
+diff --cc bootstrap/c/src/pins.dats
+diff --cc bootstrap/c/src/pins.dats.src
+diff --cc bootstrap/c/src/pins_dats.c
+diff --cc bootstrap/c/src/recursion_dats.c
+diff --cc bootstrap/c/src/setup_dats.c
+diff --cc bootstrap/c/src/stamp_dats.c
+diff --cc bootstrap/c/src/validated_dats.c
+diff --cc bootstrap/c/src/with_env_dats.c
+diff --cc src/commands.bats
+diff --cc src/helpers.bats
+diff --cc src/pins.bats
+diff --cc tests/capture-outcome/check.sh
+diff --cc tests/capture-outcome/driver.bats
+
+$ bats merge-proof 4c8c89b98c51838a642f50ba760eee5a3136ac8f fa841766ac2507e25afe5133dfc6cc00ec88185e --repository /root/repository   (bats#462, in a checkout of the head)
+exit=1
+$ wc -c < stdout; wc -c < stderr; grep -c '^diff --cc' stdout; grep -c '^OK\|^NOT OK' stdout
+stdout_bytes=6746757 stderr_bytes=0 diff--cc_headers=23 verdict_lines=0
+$ git diff-tree --cc --no-commit-id --no-ext-diff --no-color -p fa841766ac2507e25afe5133dfc6cc00ec88185e -- :/ | cmp - stdout
+cmp: identical (708417f68c5763a385ac7974b204dc095b5dcfa6a461319770cb3f524becf20c sha256 of stdout)
+$ grep '^diff --cc' stdout
+diff --cc bootstrap/c/src/_bats_inputs.dats
+diff --cc bootstrap/c/src/_bats_inputs_dats.c
+diff --cc bootstrap/c/src/ats2_dats.c
+diff --cc bootstrap/c/src/bin/bats_dats.c
+diff --cc bootstrap/c/src/build_dats.c
+diff --cc bootstrap/c/src/cache_dats.c
+diff --cc bootstrap/c/src/closure_dats.c
+diff --cc bootstrap/c/src/commands_dats.c
+diff --cc bootstrap/c/src/docs_dats.c
+diff --cc bootstrap/c/src/emitter_dats.c
+diff --cc bootstrap/c/src/facts_dats.c
+diff --cc bootstrap/c/src/fixtures_dats.c
+diff --cc bootstrap/c/src/helpers.dats.src
+diff --cc bootstrap/c/src/helpers_dats.c
+diff --cc bootstrap/c/src/inputs_dats.c
+diff --cc bootstrap/c/src/lexer_dats.c
+diff --cc bootstrap/c/src/lock_dats.c
+diff --cc bootstrap/c/src/pins_dats.c
+diff --cc bootstrap/c/src/recursion_dats.c
+diff --cc bootstrap/c/src/setup_dats.c
+diff --cc bootstrap/c/src/stamp_dats.c
+diff --cc bootstrap/c/src/validated_dats.c
+diff --cc bootstrap/c/src/with_env_dats.c
+
