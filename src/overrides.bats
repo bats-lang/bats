@@ -1,38 +1,4 @@
-(* overrides -- no implement that replaces what another package implements (bats#421)
-
-   DESIGN CHECK, round 4: declarations only, no bodies (overrides.md).
-
-   A dependency's #pub template is meant to be instantiated by a
-   dependent, not replaced by it: 'implement{} $A.word32_rotr_inline ...'
-   with another body of the same type passes patsopt, and the body it wrote
-   runs at its own call sites (the arith and array repros of bats#421). This
-   finds those implements.
-
-   What the build does (experiment, overrides.md): the dats of a file loads a
-   dependency's lib.dats without an alias, and that opens none of its names,
-   so a bare 'implement{} name' binds only to a declaration of the file's own
-   package, never to a dependency's (a dependent may declare and implement a
-   name its dependency declares too). What reaches a dependency's name is a
-   qualified implement, 'implement{} $A.name', with A bound in the same file
-   by '#use P as A' (the sats of the lib file of P), or by 'staload A =
-   "<root>/src/m.sats"', or an unaliased staload of a file of another
-   package, which opens that file's names unqualified.
-
-   Names declared there are the #pub declarations of the target file alone
-   (a module that file staloads is not reached through the alias, E5).
-
-   An implement is a hit when the name is declared there, and the package
-   that declares it also implements that name (so a name it leaves for its
-   dependents to implement, like promise's dispose, is an extension point
-   and not a hit) with no instance, or with the same instance as the implement
-   (the instance is the text of the <...> after the name with its blanks
-   removed; a type spelled another way is not matched).
-
-   The implement, the binding, the declaration and that implement of the
-   declarer must also be live in one build of the four (native or wasm, test
-   or not): a #target or $UNITTEST block that the emitter blanks (next_state)
-   holds no live fact, so a use the build loads nothing for creates no
-   rejection. *)
+(* overrides: no implement replaces what another package implements (overrides.md) *)
 
 #include "share/atspre_staload.hats"
 
@@ -47,28 +13,20 @@ staload "helpers.sats"
 staload "lexer.sats"
 staload "validated.sats"
 
-(* Which of the two listings of the project a file is in: the package's
-   own files, or those of ./bats_modules *)
+(* the listing a file is in: the package's own or ./bats_modules (overrides.md) *)
 #pub datatype listing = OwnListing | DependencyListing
 
-(* The offset of a path in a NUL-separated file list of at most 524288
-   bytes (what recursion.bats's cycle_hits carries), so the driver indexes
-   the list with a bound proved by the type *)
+(* the offset of a path in a file list, proved in range by its type (overrides.md) *)
 #pub typedef path_offset = spos(524288)
 
-(* The number of a package among the np of the project: 0 is the package
-   itself, 1 and on the packages of ./bats_modules in the order of the
-   listing (their files are together) *)
+(* a package's number among the project's, proved below their count (overrides.md) *)
 #pub typedef package_number(np:int) = [i:nat | i < np] int i
 
-(* The bytes of a name, in full: a name of m bytes, 1 <= m <= 524288, the
-   most a source of the listing can hold. Names are compared in full, since
-   a hit is a hard error and a shared prefix must not cause one *)
+(* the bytes of a name, compared in full; the length bound is the array allocation's (overrides.md) *)
 #pub datavtype name_bytes =
-  | {l:agz}{m:pos | m <= 524288} NameBytes of ($A.arr(byte, l, m), int m)
+  | {l:agz}{m:pos | m <= 1048576} NameBytes of ($A.arr(byte, l, m), int m)
 
-(* The builds a fact is live in: a #target or $UNITTEST block the emitter
-   blanks for a build (next_state) holds no live fact there *)
+(* the builds a fact is live in, as the emitter blanks them (overrides.md) *)
 #pub typedef variants_live = @{native= bool, native_test= bool, wasm= bool, wasm_test= bool}
 
 (* The builds both of a and b are live in *)
@@ -77,14 +35,12 @@ staload "validated.sats"
 (* Whether any build is live *)
 #pub fn variants_any (live: variants_live): bool
 
-(* A qualifier of an implement's name: none ('implement{} name') or an alias
-   ('implement{} $A.name') *)
+(* the qualifier of an implement's name (overrides.md) *)
 #pub datavtype qualifier =
   | Unqualified of ()
   | QualifiedBy of name_bytes
 
-(* The instance of an implement's name: the text of the <...> after it with
-   its blanks removed, or none for the template itself *)
+(* the instance of an implement's name, blanks removed (overrides.md) *)
 #pub datavtype instance_text =
   | NoInstance of ()
   | InstanceText of name_bytes
@@ -96,9 +52,8 @@ staload "validated.sats"
 
 #pub fn name_bytes_free (name: name_bytes): void
 
-(* The name made of the bytes source_bytes[s, e), the blanks left out when
-   squeeze *)
-#pub fn name_of_range {l:agz}{n:pos}{mb:nat | mb <= n}{s,e:nat | s <= mb; e <= mb}
+(* a name made of source bytes, none when empty or oversized (overrides.md) *)
+#pub fn name_of_range {l:agz}{n:pos}{mb:nat | mb <= n}{s,e:nat | s <= e; e <= mb; e - s <= 1048576}
   (source_bytes: !$A.borrow(byte, l, n), source_size: int mb, s: int s, e: int e, squeeze: bool): maybe_name
 
 (* A name's bytes appended to a builder *)
@@ -111,6 +66,7 @@ staload "validated.sats"
   | UsesPackage of (variants_live, name_bytes (* the root *), name_bytes (* the alias *)) (* #use P as A *)
   | AliasesFile of (variants_live, name_bytes (* the alias *), name_bytes (* the path as written *)) (* staload A = "path" *)
   | StaloadsFile of (variants_live, name_bytes (* the path as written *)) (* an unaliased staload "path" *)
+  | OversizedName of (variants_live) (* a name too long to hold *)
 
 #pub datavtype file_facts(int) =
   | file_facts_nil(0) of ()
@@ -118,23 +74,17 @@ staload "validated.sats"
 
 #pub fun file_facts_free {k:nat} (facts: file_facts(k)): void
 
-(* The facts of the source source_bytes[0, source_length), read from its spans:
-   a function of the bytes, so the same source gives the same facts *)
+(* the facts of a source, read from its spans (overrides.md) *)
 #pub fn facts_of_source {l:agz}{n:pos}{source_length:nat | source_length <= n}
   (source_bytes: !$A.borrow(byte, l, n), source_length: int source_length, source_size: int n)
   : [k:nat] file_facts(k)
 
-(* The facts of the file at the NUL-terminated path path_bytes[0, path_length): the record
-   'facts <path>' of build/.bats_valid/ when reuse is true and it holds the
-   file's key (validated.bats), else facts_of_source, recorded when the file
-   still has the key it was read under; empty for a file that cannot be read *)
+(* the facts of a file, from its record when the key holds (overrides.md) *)
 #pub fn facts_of_file {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288}
   (reuse: bool, path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
   : [k:nat] file_facts(k)
 
-(* A file of the project: its package, its listing, the offset of its path
-   in that listing, its path from the package's root (src/lib.bats) and its
-   facts *)
+(* a file of the project with its facts (overrides.md) *)
 #pub datavtype project_file(np:int) =
   | {k:nat} ProjectFile(np) of (package_number(np), listing, path_offset,
                             name_bytes (* path from the package's root *), file_facts(k))
@@ -143,10 +93,7 @@ staload "validated.sats"
   | project_files_nil(np, 0) of ()
   | {j:nat} project_files_cons(np, j + 1) of (project_file(np), project_files(np, j))
 
-(* The packages of the project: number 0 is the package itself (root
-   empty); the others are the packages of ./bats_modules, each with its root
-   (the directory between ./bats_modules/ and /src/, which is the name its
-   '#use' lines give). np packages, numbered 0 .. np - 1 *)
+(* the packages of the project, numbered from the package itself (overrides.md) *)
 #pub datavtype package_root(np:int) =
   | PackageRoot(np) of (package_number(np), name_bytes)
 
@@ -166,16 +113,24 @@ staload "validated.sats"
 (* The number of packages of the project *)
 #pub fn project_package_count {np:pos} (whole: !project(np)): int np
 
-(* whole with a package of ./bats_modules of the given root added; its
-   number is the np the project had *)
+(* add a package of ./bats_modules by its root (overrides.md) *)
 #pub fn project_add_package {np:pos} (whole: project(np), root: name_bytes): project(np + 1)
 
-(* whole with one file added, which belongs to the package number owner, is
-   in file_listing at file_offset, and has the path from its package's root
-   and the facts given *)
+(* add a file of a package, by its path from the package's root (overrides.md) *)
 #pub fn project_add_file {np:pos}{k:nat}
   (whole: project(np), owner: package_number(np), file_listing: listing, file_offset: path_offset,
    path_in_package: name_bytes, facts: file_facts(k)): project(np)
+
+(* add the package's own file by its path (overrides.md) *)
+#pub fn project_add_own_file {np:pos}{k:nat}
+  (whole: project(np), file_offset: path_offset, path: name_bytes, facts: file_facts(k)): project(np)
+
+(* add the package of ./bats_modules a file path names, false when it names none (overrides.md) *)
+#pub fn project_add_dependency {np:pos} (whole: project(np), path: !name_bytes): [np2:pos] @(bool, project(np2))
+
+(* add a dependency's file by its path (overrides.md) *)
+#pub fn project_add_dependency_file {np:pos}{k:nat}
+  (whole: project(np), owner: package_number(np), file_offset: path_offset, path: name_bytes, facts: file_facts(k)): project(np)
 
 (* The package of a root, as a '#use' line gives it *)
 #pub datavtype package_lookup(np:int) =
@@ -184,8 +139,7 @@ staload "validated.sats"
 
 #pub fn package_of_root {np:pos} (whole: !project(np), root: !name_bytes): package_lookup(np)
 
-(* The root of a package (empty for the package itself), for the message
-   that names the declaring package *)
+(* the root of a package, for the message (overrides.md) *)
 #pub fn root_of_package {np:pos} (whole: !project(np), package: package_number(np)): name_bytes
 
 (* A file of the project named by its package, listing and offset *)
@@ -198,18 +152,11 @@ staload "validated.sats"
 
 #pub fun file_refs_free {np:int}{k:nat} (refs: file_refs(np, k)): void
 
-(* The files whose #pub declarations a name written in the file by reaches,
-   with the qualifier given: for QualifiedBy A, the one file A is bound to in
-   by (the lib file of P for '#use P as A', or the file of 'staload A =
-   "root/src/m.sats"'); for Unqualified, the files of the unaliased staloads
-   of by that leave its package. Only those files: a module that file
-   staloads is not reached (E5 of the experiment), so there is no walk to
-   end. A binding or a path with no file in the project reaches none *)
+(* the files whose #pub names a qualifier reaches (overrides.md) *)
 #pub fn files_reached {np:pos} (whole: !project(np), by: !file_ref(np), through: !qualifier)
   : [k:nat] file_refs(np, k)
 
-(* An implement that replaces what another package implements: the
-   implementing file, the declaring file and the name *)
+(* an implement that replaces what another package implements (overrides.md) *)
 #pub datavtype foreign_hit(np:int) =
   | ForeignHit(np) of (file_ref(np) (* implementing file *), file_ref(np) (* declaring file *),
                    name_bytes (* the name *))
@@ -220,12 +167,13 @@ staload "validated.sats"
 
 #pub fun foreign_hits_free {np:int}{k:nat} (hits: foreign_hits(np, k)): void
 
-(* The hits of whole, as the comment at the top says (borrowed: the message
-   asks root_of_package for the declaring package's name) *)
+(* the files with a name too long to hold, which the check cannot compare (overrides.md) *)
+#pub fn oversized_files_of {np:pos} (whole: !project(np)): [k:nat] file_refs(np, k)
+
+(* the hits of a project (overrides.md) *)
 #pub fn foreign_hits_of {np:pos} (whole: !project(np)): [k:nat] foreign_hits(np, k)
 
-(* Where an implement of a name is in a source: the keyword's start, the
-   name's start and end, for the error that points to each *)
+(* where an implement of a name is in a source (overrides.md) *)
 #pub datavtype implement_site =
   | ImplementSite of (pos_t (* keyword start *), pos_t (* name start *), pos_t (* name end *))
 
@@ -235,13 +183,11 @@ staload "validated.sats"
 
 #pub fun implement_sites_free {k:nat} (sites: implement_sites(k)): void
 
-#pub fn implement_sites_of {l,la:agz}{n:pos}{source_length:nat | source_length <= n}{m:pos | m <= 524288}
+#pub fn implement_sites_of {l,la:agz}{n:pos}{source_length:nat | source_length <= n}{m:pos | m <= 1048576}
   (source_bytes: !$A.borrow(byte, l, n), source_length: int source_length, source_size: int n,
    wanted: !$A.arr(byte, la, m), wanted_length: int m): [k:nat] implement_sites(k)
 
-(* ============================================================
-   Builds: which of the four a fact is live in
-   ============================================================ *)
+(* builds (overrides.md) *)
 
 implement variants_meet (a, b) =
   @{native= a.native && b.native, native_test= a.native_test && b.native_test,
@@ -249,8 +195,7 @@ implement variants_meet (a, b) =
 
 implement variants_any (live) = live.native || live.native_test || live.wasm || live.wasm_test
 
-(* The blanking state of a source in each of the four builds (the emitter's
-   ts: above 0 inside a block it blanks) *)
+(* the blanking state of a source in each build (overrides.md) *)
 typedef block_states = @{native= int, native_test= int, wasm= int, wasm_test= int}
 
 fn states_start (): block_states = @{native= 0, native_test= 0, wasm= 0, wasm_test= 0}
@@ -258,8 +203,7 @@ fn states_start (): block_states = @{native= 0, native_test= 0, wasm= 0, wasm_te
 fn states_live (st: block_states): variants_live =
   @{native= st.native <= 0, native_test= st.native_test <= 0, wasm= st.wasm <= 0, wasm_test= st.wasm_test <= 0}
 
-(* The state after sp in one build whose target is target and which is a test
-   build when testing: the emitter's next_state *)
+(* the state after a span in one build, as the emitter's next_state (overrides.md) *)
 fn state_next {n:int} (sp: !span(n), ts: int, build_target: target, testing: bool): int =
   case+ sp of
   | STargetBegin(_, _, t) =>
@@ -275,9 +219,7 @@ fn states_next {n:int} (sp: !span(n), st: block_states): block_states =
     wasm= state_next(sp, st.wasm, Wasm(), false),
     wasm_test= state_next(sp, st.wasm_test, Wasm(), true)}
 
-(* ============================================================
-   Names
-   ============================================================ *)
+(* names (overrides.md) *)
 
 implement name_bytes_free (name) = let
   val+ ~NameBytes(a, _) = name
@@ -300,11 +242,12 @@ implement file_facts_free {k} (facts) = let
           | ~AliasesFile(_, alias, path) => let
               val () = name_bytes_free(alias)
             in name_bytes_free(path) end
-          | ~StaloadsFile(_, path) => name_bytes_free(path)): void
+          | ~StaloadsFile(_, path) => name_bytes_free(path)
+          | ~OversizedName(_) => ()): void
       in loop(tl) end
 in loop(facts) end
 
-(* Whether two names hold the same bytes *)
+(* whether names a and b hold the same bytes (overrides.md) *)
 fun bytes_equal {la,lb:agz}{ma,mb:pos}{i:nat | i <= ma} .<ma - i>.
   (a: !$A.arr(byte, la, ma), ma: int ma, b: !$A.arr(byte, lb, mb), mb: int mb, i: int i): bool =
   if ma <> mb then false
@@ -322,8 +265,9 @@ fn name_equal (a: !name_bytes, b: !name_bytes): bool = let
 in r end
 
 
-fun count_kept {l:agz}{n:pos}{mb:nat | mb <= n}{p:nat | p <= n}{e:nat | e <= mb}{kept:int} .<n - p>.
-  (bv: !$A.borrow(byte, l, n), mx: int mb, p: int p, e: int e, squeeze: bool, kept: int kept): [r:int] int r =
+fun count_kept {l:agz}{n:pos}{mb:nat | mb <= n}{p,e:nat | p <= e; e <= mb}{kept:nat} .<e - p>.
+  (bv: !$A.borrow(byte, l, n), mx: int mb, p: int p, e: int e, squeeze: bool, kept: int kept)
+  : [r:int | r <= kept + (e - p)] int r =
   if p >= e then kept
   else let
     val c = byte2int0($A.read<byte>(bv, p))
@@ -351,25 +295,19 @@ fun fill_kept {l:agz}{n:pos}{mb:nat | mb <= n}{p:nat | p <= n}{e:nat | e <= mb}{
 
 implement name_of_range (bv, mx, s, e, squeeze) = let
   val c = count_kept(bv, mx, s, e, squeeze, 0)
-  val size = (if c >= 1 then (if c > 524288 then 524288 else c) else 0): [z:nat | z <= 524288] int z
 in
-  if size >= 1 then let
-    val a = $A.alloc<byte>(size)
-    val () = fill_kept(bv, mx, s, e, squeeze, a, size, 0)
-  in NameHere(NameBytes(a, size)) end
+  if c >= 1 then let
+    val a = $A.alloc<byte>(c)
+    val () = fill_kept(bv, mx, s, e, squeeze, a, c, 0)
+  in NameHere(NameBytes(a, c)) end
   else NameAbsent()
 end
 
-(* ============================================================
-   Reading the facts of a source
-   ============================================================ *)
+(* reading the facts of a source (overrides.md) *)
 
 typedef range(n:int) = @(spos(n), spos(n))
 
-(* What a span says, as ranges of the source: a #pub name, an implement
-   (its keyword, qualifying alias, name and instance; an alias or instance
-   that is not there is the empty range), a #use (package, alias), a
-   staload with an alias (alias, path) and one without (path) *)
+(* what a span says, as ranges of the source (overrides.md) *)
 datavtype raw_fact(n:int) =
   | RawDeclares(n) of (variants_live, range(n))
   | RawImplements(n) of (variants_live, range(n), range(n), range(n), range(n))
@@ -427,8 +365,7 @@ fn word_spells {l:agz}{n:pos}{m:nat | m <= n}{p,q:nat | p <= q; q <= m}{k:pos | 
   (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, q: int q, lit: &(@[char][k]), k: int k): bool =
   if q - p <> k then false else lit_at(bv, p, mx, lit, k)
 
-(* Whether src[p, q) is a word that begins an implement: implement,
-   primplement, implmnt or primplmnt *)
+(* whether a word begins an implement (overrides.md) *)
 fn implement_word {l:agz}{n:pos}{m:nat | m <= n}{p,q:nat | p <= q; q <= m}
   (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, q: int q): bool = let
   var w1 = @[char][9]('i', 'm', 'p', 'l', 'e', 'm', 'e', 'n', 't')
@@ -438,8 +375,7 @@ fn implement_word {l:agz}{n:pos}{m:nat | m <= n}{p,q:nat | p <= q; q <= m}
 in word_spells(bv, mx, p, q, w1, 9) || word_spells(bv, mx, p, q, w2, 11)
    || word_spells(bv, mx, p, q, w3, 7) || word_spells(bv, mx, p, q, w4, 9) end
 
-(* The position past the '>' that closes the '<' at p (within [p, e)), or
-   p when none does *)
+(* the end of the '<' group that starts at p (overrides.md) *)
 fun angle_end {l:agz}{n:pos}{m:nat | m <= n}{q,e:nat | q <= e; e <= m} .<e - q>.
   (bv: !$A.borrow(byte, l, n), mx: int m, q: int q, e: int e, depth: int): [r:nat | r <= e] int r =
   if q >= e then 0
@@ -451,9 +387,7 @@ fun angle_end {l:agz}{n:pos}{m:nat | m <= n}{q,e:nat | q <= e; e <= m} .<e - q>.
     else angle_end(bv, mx, q + 1, e, depth)
   end
 
-(* The instance after a name that ends at ne within [ne, e): the text
-   between the '<' (after blanks) and its '>', as a range; the empty range
-   at ne when none *)
+(* the instance after a name (overrides.md) *)
 fn instance_after {l:agz}{n:pos}{m:nat | m <= n}{ne,e:nat | ne <= e; e <= m}
   (bv: !$A.borrow(byte, l, n), mx: int m, ne: int ne, e: int e): range(n) = let
   val p = blank_skip(bv, mx, ne, e)
@@ -466,9 +400,7 @@ in
   else @(ne, ne)
 end
 
-(* The facts of the code src[p, e) with live builds live: the implements
-   whose names are in it. Whether the code ends where a name is awaited (an
-   implement keyword, then blanks and braces), with the keyword's range *)
+(* the implements in a code range, with the builds they are live in (overrides.md) *)
 fun scan_code {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<e - p>.
   (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, e: int e, live: variants_live,
    acc: raw_facts(n, k), awaiting: range(n), waiting: bool)
@@ -534,10 +466,7 @@ fun line_end {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m} .<e - p>.
   else if byte2int0($A.read<byte>(bv, p)) = 10 then p
   else line_end(bv, mx, p + 1, e)
 
-(* The names a #pub declaration src[p, e) declares, as ranges: the one after
-   its first word when that is fun, fn, fnx, prfun or prfn, and the one after
-   each 'and' word of its group. Comments and strings are skipped; inside
-   a comment depth is counted *)
+(* the names a #pub declaration declares (overrides.md) *)
 fun pub_names {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<e - p>.
   (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, e: int e, live: variants_live,
    comment: int, acc: raw_facts(n, k)): [k2:nat] raw_facts(n, k2) =
@@ -571,8 +500,7 @@ fun pub_names {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<
     end
   end
 
-(* The first name of a #pub declaration whose contents start at cs: after its
-   first word when that is one of fun, fn, fnx, prfun, prfn *)
+(* the first name of a #pub declaration (overrides.md) *)
 fn pub_first {l:agz}{n:pos}{m:nat | m <= n}{cs,e:nat | cs <= e; e <= m}{k:nat}
   (bv: !$A.borrow(byte, l, n), mx: int m, cs: int cs, e: int e, live: variants_live, acc: raw_facts(n, k))
   : [k2:nat] raw_facts(n, k2) = let
@@ -596,8 +524,7 @@ in
   in raw_facts_cons(first, rest) end
 end
 
-(* The path of the string literal at q (a quote) within [q, e): its contents
-   as a range; the empty range at q when there is none *)
+(* the contents of a string literal (overrides.md) *)
 fn string_contents {l:agz}{n:pos}{m:nat | m <= n}{q,e:nat | q <= e; e <= m}
   (bv: !$A.borrow(byte, l, n), mx: int m, q: int q, e: int e): range(n) =
   if q < e then
@@ -607,8 +534,7 @@ fn string_contents {l:agz}{n:pos}{m:nat | m <= n}{q,e:nat | q <= e; e <= m}
      else @(q, q))
   else @(q, q)
 
-(* The fact of the staload line src[s, e): 'staload "path"' loads without an
-   alias, 'staload A = "path"' with one *)
+(* the fact of a staload line (overrides.md) *)
 fn staload_fact {l:agz}{n:pos}{m:nat | m <= n}{s,e:nat | s <= m; e <= m}{k:nat}
   (bv: !$A.borrow(byte, l, n), mx: int m, s: int s, e: int e, live: variants_live, acc: raw_facts(n, k))
   : [k2:nat] raw_facts(n, k2) =
@@ -634,9 +560,7 @@ fn staload_fact {l:agz}{n:pos}{m:nat | m <= n}{s,e:nat | s <= m; e <= m}{k:nat}
     else acc
   end
 
-(* What one span adds to the facts: acc, whether the span ends where an
-   implement's name is awaited, and the keyword's range. next is the span
-   after it, where a qualified implement's instance starts *)
+(* what one span adds to the facts (overrides.md) *)
 fn scan_one {l:agz}{n:pos}{k,j:nat}
   (bv: !$A.borrow(byte, l, n), mx: int n, sp: !span(n), next: !spans(n, j), live: variants_live,
    waiting: bool, awaiting: range(n), acc: raw_facts(n, k))
@@ -676,40 +600,66 @@ fun scan_spans {l:agz}{n:pos}{k,j:nat} .<j>.
       val @(acc2, waiting2, awaiting2) = scan_one(bv, mx, sp, tl, states_live(states), waiting, awaiting, acc)
     in scan_spans(bv, mx, tl, states_next(sp, states), waiting2, awaiting2, acc2) end
 
-(* The name src[r] holds, with its blanks kept *)
-fn name_in {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), mx: int n, r: range(n)): maybe_name =
-  name_of_range(bv, mx, r.0, r.1, false)
+(* a name read from a range: none, one, or one too long to hold (overrides.md) *)
+datavtype read_name =
+  | ReadNone of ()
+  | ReadHere of name_bytes
+  | ReadOversized of ()
 
-(* The fact xs makes when its names are there, added to acc *)
+fn read_name_of {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), mx: int n, r: range(n), squeeze: bool): read_name = let
+  val @(s, e) = r
+in
+  if s >= e then ReadNone()
+  else if e - s > 1048576 then ReadOversized()
+  else (case+ name_of_range(bv, mx, s, e, squeeze) of
+    | ~NameAbsent() => ReadNone()
+    | ~NameHere(x) => ReadHere(x))
+end
+
+fn finish_implement {l:agz}{n:pos}{k:nat}
+  (bv: !$A.borrow(byte, l, n), mx: int n, live: variants_live, q: qualifier, nm: name_bytes, inst: range(n),
+   acc: file_facts(k)): [k2:nat] file_facts(k2) =
+  case+ read_name_of(bv, mx, inst, true) of
+  | ~ReadNone() => file_facts_cons(ImplementsName(live, q, nm, NoInstance()), acc)
+  | ~ReadHere(t) => file_facts_cons(ImplementsName(live, q, nm, InstanceText(t)), acc)
+  | ~ReadOversized() => let
+      val () = (case+ q of ~Unqualified() => () | ~QualifiedBy(a) => name_bytes_free(a))
+      val () = name_bytes_free(nm)
+    in file_facts_cons(OversizedName(live), acc) end
+
+(* the facts a raw fact makes, added to acc; a name too long to hold is a fact of its own (overrides.md) *)
 fn materialize {l:agz}{n:pos}{k:nat}
   (bv: !$A.borrow(byte, l, n), mx: int n, f: raw_fact(n), acc: file_facts(k)): [k2:nat] file_facts(k2) =
   case+ f of
-  | ~RawDeclares(live, r) => (case+ name_in(bv, mx, r) of
-      | ~NameAbsent() => acc
-      | ~NameHere(name) => file_facts_cons(DeclaresName(live, name), acc))
-  | ~RawImplements(live, _, alias, name, inst) => (case+ name_in(bv, mx, name) of
-      | ~NameAbsent() => acc
-      | ~NameHere(nm) => let
-          val q = (case+ name_in(bv, mx, alias) of
-            | ~NameAbsent() => Unqualified()
-            | ~NameHere(a) => QualifiedBy(a)): qualifier
-          val i = (case+ name_of_range(bv, mx, inst.0, inst.1, true) of
-            | ~NameAbsent() => NoInstance()
-            | ~NameHere(t) => InstanceText(t)): instance_text
-        in file_facts_cons(ImplementsName(live, q, nm, i), acc) end)
-  | ~RawUses(live, pkg, alias) => (case+ name_in(bv, mx, pkg) of
-      | ~NameAbsent() => acc
-      | ~NameHere(root) => (case+ name_in(bv, mx, alias) of
-          | ~NameAbsent() => let val () = name_bytes_free(root) in acc end
-          | ~NameHere(a) => file_facts_cons(UsesPackage(live, root, a), acc)))
-  | ~RawAliases(live, alias, path) => (case+ name_in(bv, mx, alias) of
-      | ~NameAbsent() => acc
-      | ~NameHere(a) => (case+ name_in(bv, mx, path) of
-          | ~NameAbsent() => let val () = name_bytes_free(a) in acc end
-          | ~NameHere(p) => file_facts_cons(AliasesFile(live, a, p), acc)))
-  | ~RawStaloads(live, path) => (case+ name_in(bv, mx, path) of
-      | ~NameAbsent() => acc
-      | ~NameHere(p) => file_facts_cons(StaloadsFile(live, p), acc))
+  | ~RawDeclares(live, r) => (case+ read_name_of(bv, mx, r, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(name) => file_facts_cons(DeclaresName(live, name), acc))
+  | ~RawImplements(live, _, alias, name, inst) => (case+ read_name_of(bv, mx, name, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(nm) => (case+ read_name_of(bv, mx, alias, false) of
+          | ~ReadNone() => finish_implement(bv, mx, live, Unqualified(), nm, inst, acc)
+          | ~ReadOversized() => let val () = name_bytes_free(nm) in file_facts_cons(OversizedName(live), acc) end
+          | ~ReadHere(a) => finish_implement(bv, mx, live, QualifiedBy(a), nm, inst, acc)))
+  | ~RawUses(live, pkg, alias) => (case+ read_name_of(bv, mx, pkg, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(root) => (case+ read_name_of(bv, mx, alias, false) of
+          | ~ReadNone() => let val () = name_bytes_free(root) in acc end
+          | ~ReadOversized() => let val () = name_bytes_free(root) in file_facts_cons(OversizedName(live), acc) end
+          | ~ReadHere(a) => file_facts_cons(UsesPackage(live, root, a), acc)))
+  | ~RawAliases(live, alias, path) => (case+ read_name_of(bv, mx, alias, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(a) => (case+ read_name_of(bv, mx, path, false) of
+          | ~ReadNone() => let val () = name_bytes_free(a) in acc end
+          | ~ReadOversized() => let val () = name_bytes_free(a) in file_facts_cons(OversizedName(live), acc) end
+          | ~ReadHere(p) => file_facts_cons(AliasesFile(live, a, p), acc)))
+  | ~RawStaloads(live, path) => (case+ read_name_of(bv, mx, path, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(p) => file_facts_cons(StaloadsFile(live, p), acc))
 
 fun materialize_all {l:agz}{n:pos}{j,k:nat} .<j>.
   (bv: !$A.borrow(byte, l, n), mx: int n, xs: raw_facts(n, j), acc: file_facts(k)): [k2:nat] file_facts(k2) =
@@ -765,12 +715,9 @@ implement implement_sites_of (source_bytes, source_length, source_size, wanted, 
   val () = spans_free(xs)
 in sites_in(source_bytes, source_size, raws, wanted, wanted_length, implement_sites_nil()) end
 
-(* ============================================================
-   The record of a file's facts (validated.bats, the 'facts' records)
-   ============================================================ *)
+(* the record of a file's facts (validated.md, overrides.md) *)
 
-(* The builds a fact is live in, as the byte a record keeps them in: the
-   sum of 1 (native), 2 (native test), 4 (wasm) and 8 (wasm test), plus 'a' *)
+(* the builds of a fact as a record byte (overrides.md) *)
 fn bit_of (on: bool, value: int): int = if on then value else 0
 
 fn live_byte (live: variants_live): int =
@@ -818,8 +765,7 @@ fn put_implement (live: variants_live, q: !qualifier, name: !name_bytes, inst: !
   val () = put_name_nul(name, out)
 in (case+ inst of NoInstance() => put_empty_nul(out) | InstanceText(t) => put_name_nul(t, out)) end
 
-(* The record body of the facts: for each, its tag, its builds and its
-   fields, each field NUL-ended *)
+(* the record body of the facts (overrides.md) *)
 fn put_fact (f: !file_fact, out: !$B.builder_v >> $B.builder_v): void =
   case+ f of
   | DeclaresName(live, name) => let
@@ -841,6 +787,9 @@ fn put_fact (f: !file_fact, out: !$B.builder_v >> $B.builder_v): void =
       val () = put_char_v(out, 83)
       val () = put_char_v(out, live_byte(live))
     in put_name_nul(path, out) end
+  | OversizedName(live) => let
+      val () = put_char_v(out, 79)
+    in put_char_v(out, live_byte(live)) end
 
 fun put_facts {k:nat} .<k>. (facts: !file_facts(k), out: !$B.builder_v >> $B.builder_v): void =
   case+ facts of
@@ -850,19 +799,17 @@ fun put_facts {k:nat} .<k>. (facts: !file_facts(k), out: !$B.builder_v >> $B.bui
     in put_facts(tl, out) end
 
 (* What a record's tag byte stands for *)
-datatype fact_tag = TagDeclares | TagImplements | TagUses | TagAliases | TagStaloads | TagUnknown
+datatype fact_tag = TagDeclares | TagImplements | TagUses | TagAliases | TagStaloads | TagOversized | TagUnknown
 
 fn tag_of (b: int): fact_tag =
   if b = 68 then TagDeclares() else if b = 73 then TagImplements()
   else if b = 85 then TagUses() else if b = 65 then TagAliases()
-  else if b = 83 then TagStaloads() else TagUnknown()
+  else if b = 83 then TagStaloads() else if b = 79 then TagOversized() else TagUnknown()
 
 fn free_maybe (f: maybe_name): void =
   case+ f of ~NameAbsent() => () | ~NameHere(a) => name_bytes_free(a)
 
-(* The field of the record body bv[0, len) that starts at off: its bytes
-   (none when empty) and where the next field starts, which is past off; no
-   field when it has no NUL *)
+(* a field of the record body (overrides.md) *)
 datavtype field_result(off:int, len:int) =
   | FieldMissing(off, len) of ()
   | {nx:nat | off < nx; nx <= len} FieldHere(off, len) of (maybe_name, int nx)
@@ -872,6 +819,7 @@ fn field_at {l:agz}{n:pos}{m:nat | m <= n}{len:nat | len <= m}{off:nat | off <= 
   val e = nul_in(bv, off, len)
 in
   if e >= len then FieldMissing()
+  else if e - off > 1048576 then FieldMissing()
   else FieldHere(name_of_range(bv, mx, off, e, false), e + 1)
 end
 
@@ -882,8 +830,7 @@ fn qualifier_of (f: maybe_name): qualifier =
 fn instance_of (f: maybe_name): instance_text =
   case+ f of ~NameAbsent() => NoInstance() | ~NameHere(t) => InstanceText(t)
 
-(* The facts of the record body bv[0, len) from off, added to acc in order
-   read; false when the rest is not a body of facts *)
+(* the facts of a record body, false when it is not one (overrides.md) *)
 fun parse_facts {l:agz}{n:pos}{m:nat | m <= n}{len:nat | len <= m}{off:nat | off <= len}{k:nat} .<len - off>.
   (bv: !$A.borrow(byte, l, n), mx: int m, len: int len, off: int off, acc: file_facts(k))
   : [k2:nat] @(bool, file_facts(k2)) =
@@ -895,6 +842,7 @@ fun parse_facts {l:agz}{n:pos}{m:nat | m <= n}{len:nat | len <= m}{off:nat | off
   in
     case+ fact_kind of
     | TagUnknown() => @(false, acc)
+    | TagOversized() => parse_facts(bv, mx, len, start, file_facts_cons(OversizedName(live), acc))
     | TagDeclares() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ f1 of
@@ -945,8 +893,7 @@ fn facts_of_held (body: $B.builder_v): [k:nat] @(bool, file_facts(k)) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
 in @(ok, facts) end
 
-(* The facts of the file at the NUL-terminated path, read and lexed; they are
-   recorded at slot under key when usable and the file still has that key *)
+(* the facts of a file, read and lexed, recorded when the key holds (overrides.md) *)
 fn lex_facts {lp,lk,ls:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{ns:pos}{sm:nat | sm <= ns; sm <= 524288}
   (p: !$A.borrow(byte, lp, np), pm: int pm, usable: bool, key: !$A.borrow(byte, lk, 64),
    slot: !$A.borrow(byte, ls, ns), sm: int sm): [k:nat] file_facts(k) =
@@ -988,9 +935,7 @@ implement facts_of_file (reuse, path_bytes, path_length) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_k))
 in result end
 
-(* ============================================================
-   The project
-   ============================================================ *)
+(* the project (overrides.md) *)
 
 fn listing_same (a: listing, b: listing): bool =
   case+ (a, b) of
@@ -1046,8 +991,7 @@ implement project_free {np} (whole) = let
   val () = roots_free(roots)
 in files_free(files) end
 
-(* roots, with each package number allowed np + 1 packages; the order
-   reversed onto acc *)
+(* widen the package numbers by one (overrides.md) *)
 fun roots_widen {np:pos}{k,j:nat} .<k>.
   (xs: package_roots(np, k), acc: package_roots(np + 1, j)): package_roots(np + 1, j + k) =
   case+ xs of
@@ -1161,8 +1105,7 @@ fn src_start (path: !name_bytes): [r:int] int r = let
   prval () = fold@(path)
 in if idx >= 0 then idx + 1 else ~1 end
 
-(* Whether the file's path from its package's root is text[from, end), the
-   extension .sats standing for .bats *)
+(* a file's path from its root against a staload path, .sats for .bats (overrides.md) *)
 fun same_tail {la,lb:agz}{m,z:pos}{from:nat}{i:nat | i <= m} .<m - i>.
   (a: !$A.arr(byte, la, m), m: int m, b: !$A.arr(byte, lb, z), z: int z, from: int from, i: int i): bool =
   if i >= m then true
@@ -1196,8 +1139,7 @@ fun find_file {np:int}{k:nat}{from:int} .<k>.
         if owner = pkg && path_is(path, text, from) then FoundFile(FileRef(owner, lst, off))
         else find_file(tl, pkg, text, from))
 
-(* The file a path as written in a staload names: the file of the package
-   whose root comes before its /src/ *)
+(* the file a staload path names (overrides.md) *)
 fn resolve_text {np:int}{k,j:nat}
   (roots: !package_roots(np, k), files: !project_files(np, j), text: !name_bytes): found_file(np) =
   case+ root_before_src(text) of
@@ -1231,9 +1173,7 @@ fn variants_union (a: variants_live, b: variants_live): variants_live =
   @{native= a.native || b.native, native_test= a.native_test || b.native_test,
     wasm= a.wasm || b.wasm, wasm_test= a.wasm_test || b.wasm_test}
 
-(* A way a file reaches another: '#use root as alias', 'staload alias =
-   "path"' or an unaliased staload "path". Copies of the facts, so that the
-   lists of the project need not be borrowed twice *)
+(* a way a file reaches another, as copies of its facts (overrides.md) *)
 datavtype binding =
   | BindUse of (variants_live, name_bytes (* alias *), name_bytes (* root *))
   | BindAlias of (variants_live, name_bytes (* alias *), name_bytes (* path *))
@@ -1262,6 +1202,7 @@ fun file_bindings {k,j:nat} .<k>. (facts: !file_facts(k), acc: bindings(j)): [j2
         | UsesPackage(live, root, alias) => bindings_cons(BindUse(live, name_copy(alias), name_copy(root)), acc)
         | AliasesFile(live, alias, path) => bindings_cons(BindAlias(live, name_copy(alias), name_copy(path)), acc)
         | StaloadsFile(live, path) => bindings_cons(BindOpen(live, name_copy(path)), acc)
+        | OversizedName(_) => acc
         | DeclaresName(_, _) => acc | ImplementsName(_, _, _, _) => acc): [j2:nat] bindings(j2)
     in file_bindings(tl, acc2) end
 
@@ -1275,8 +1216,7 @@ fun bindings_of_file {np:int}{k:nat} .<k>.
         if owner = own && listing_same(l2, lst) && o2 = off then file_bindings(facts, bindings_nil())
         else bindings_of_file(tl, own, lst, off))
 
-(* The bindings of all that a name with the qualifier through reaches (a
-   copy), and the builds they are live in, added to the builds in live *)
+(* the bindings a qualifier reaches, with the builds they are live in (overrides.md) *)
 fun select_bindings {k,j:nat} .<k>.
   (all: !bindings(k), through: !qualifier, live: variants_live, acc: bindings(j))
   : [j2:nat] @(bindings(j2), variants_live) =
@@ -1321,9 +1261,7 @@ implement files_reached {np} (whole, by, through) = let
   prval () = fold@(whole)
 in refs end
 
-(* Whether the implement of a package with instance inst is a replacement of
-   an implement whose instance is other: other is the template itself, or
-   the same instance *)
+(* whether an implement replaces the declarer's by instance (overrides.md) *)
 fn replaces (other: !instance_text, inst: !instance_text): bool =
   case+ other of
   | NoInstance() => true
@@ -1341,11 +1279,11 @@ fun implements_in_facts {k:nat} .<k>.
             | Unqualified() => name_equal(nm, name) && variants_any(variants_meet(common, live)) && replaces(other, inst)
             | QualifiedBy(_) => false)
         | DeclaresName(_, _) => false | UsesPackage(_, _, _) => false
-        | AliasesFile(_, _, _) => false | StaloadsFile(_, _) => false): bool
+        | AliasesFile(_, _, _) => false | StaloadsFile(_, _) => false
+        | OversizedName(_) => false): bool
     in if here then true else implements_in_facts(tl, name, inst, common) end
 
-(* Whether a file of the package number pkg implements name with a
-   replaced instance in a build of common *)
+(* whether a package implements a name in a build (overrides.md) *)
 fun package_implements {np:int}{k:nat} .<k>.
   (files: !project_files(np, k), pkg: int, name: !name_bytes, inst: !instance_text, common: variants_live): bool =
   case+ files of
@@ -1356,13 +1294,87 @@ fun package_implements {np:int}{k:nat} .<k>.
     in if here then true else package_implements(tl, pkg, name, inst, common) end
 
 
-(* ============================================================
-   The hits
-   ============================================================ *)
+fn slice_name {from,upto:int} (path: !name_bytes, from: int from, upto: int upto): maybe_name = let
+  val+ @NameBytes(a, m) = path
+  val r = (if from < 0 then NameAbsent()
+           else if from >= upto then NameAbsent()
+           else if upto > m then NameAbsent()
+           else let
+             val z = upto - from
+             val b = $A.alloc<byte>(z)
+             val () = slice_copy(a, b, from, z, 0)
+           in NameHere(NameBytes(b, z)) end): maybe_name
+  prval () = fold@(path)
+in r end
 
-(* An implement with the bindings that reach its name, and the builds it and
-   they are live in; what one pass over the files collects, so that the
-   answers need no list borrowed twice *)
+fn path_length (path: !name_bytes): [m:pos] int m = let
+  val+ @NameBytes(a, m) = path
+  val n = m
+  prval () = fold@(path)
+in n end
+
+implement project_add_own_file (whole, file_offset, path, facts) = let
+  val m = path_length(path)
+  val rel = slice_name(path, 2, m)
+  val () = name_bytes_free(path)
+in
+  case+ rel of
+  | ~NameAbsent() => let val () = file_facts_free(facts) in whole end
+  | ~NameHere(r) => project_add_file(whole, 0, OwnListing(), file_offset, r, facts)
+end
+
+fn marker_in (path: !name_bytes): [r:int] int r = let
+  val+ @NameBytes(a, m) = path
+  val idx = src_marker(a, m, 0)
+  prval () = fold@(path)
+in idx end
+
+implement project_add_dependency (whole, path) = let
+  val idx = marker_in(path)
+in
+  case+ slice_name(path, 15, idx) of
+  | ~NameAbsent() => @(false, whole)
+  | ~NameHere(root) => let val whole2 = project_add_package(whole, root) in @(true, whole2) end
+end
+
+implement project_add_dependency_file (whole, owner, file_offset, path, facts) = let
+  val idx = marker_in(path)
+  val m = path_length(path)
+  val rel = slice_name(path, idx + 1, m)
+  val () = name_bytes_free(path)
+in
+  case+ rel of
+  | ~NameAbsent() => let val () = file_facts_free(facts) in whole end
+  | ~NameHere(r) => project_add_file(whole, owner, DependencyListing(), file_offset, r, facts)
+end
+
+fun has_oversized {k:nat} .<k>. (facts: !file_facts(k)): bool =
+  case+ facts of
+  | file_facts_nil() => false
+  | file_facts_cons(f, tl) => (case+ f of
+      | OversizedName(_) => true
+      | DeclaresName(_, _) => has_oversized(tl) | ImplementsName(_, _, _, _) => has_oversized(tl)
+      | UsesPackage(_, _, _) => has_oversized(tl) | AliasesFile(_, _, _) => has_oversized(tl)
+      | StaloadsFile(_, _) => has_oversized(tl))
+
+fun oversized_scan {np:int}{k:nat}{j:nat} .<k>.
+  (scan: !project_files(np, k), acc: file_refs(np, j)): [j2:nat] file_refs(np, j2) =
+  case+ scan of
+  | project_files_nil() => acc
+  | project_files_cons(f, tl) => (case+ f of
+      | ProjectFile(owner, lst, off, _, facts) =>
+        if has_oversized(facts) then oversized_scan(tl, file_refs_cons(FileRef(owner, lst, off), acc))
+        else oversized_scan(tl, acc))
+
+implement oversized_files_of {np} (whole) = let
+  val+ @Project(_, files) = whole
+  val r = oversized_scan(files, file_refs_nil())
+  prval () = fold@(whole)
+in r end
+
+(* the hits (overrides.md) *)
+
+(* an implement with the bindings that reach its name (overrides.md) *)
 datavtype query(np:int) =
   | {j:nat} Query(np) of (package_number(np), listing, path_offset, variants_live,
                           name_bytes, instance_text, bindings(j))
@@ -1390,8 +1402,7 @@ fn qualifier_copy (q: !qualifier): qualifier =
   | Unqualified() => Unqualified()
   | QualifiedBy(a) => QualifiedBy(name_copy(a))
 
-(* The queries of the implements among the facts of the file (owner, lst,
-   off), whose bindings are all *)
+(* the queries of the implements among the facts of a file (overrides.md) *)
 fun queries_of_facts {np:int}{k,kb,j:nat} .<k>.
   (facts: !file_facts(k), all: !bindings(kb), owner: package_number(np), lst: listing, off: path_offset,
    acc: queries(np, j)): [j2:nat] queries(np, j2) =
@@ -1410,7 +1421,8 @@ fun queries_of_facts {np:int}{k,kb,j:nat} .<k>.
           end
           else acc
         | DeclaresName(_, _) => acc | UsesPackage(_, _, _) => acc
-        | AliasesFile(_, _, _) => acc | StaloadsFile(_, _) => acc): [j2:nat] queries(np, j2)
+        | AliasesFile(_, _, _) => acc | StaloadsFile(_, _) => acc
+        | OversizedName(_) => acc): [j2:nat] queries(np, j2)
     in queries_of_facts(tl, all, owner, lst, off, acc2) end
 
 fun queries_of_files {np:int}{k,j:nat} .<k>.
@@ -1432,7 +1444,8 @@ fun declared_in_facts {k:nat} .<k>. (facts: !file_facts(k), name: !name_bytes, a
       val acc2 = (case+ f of
         | DeclaresName(live, nm) => if name_equal(nm, name) then variants_union(acc, live) else acc
         | ImplementsName(_, _, _, _) => acc | UsesPackage(_, _, _) => acc
-        | AliasesFile(_, _, _) => acc | StaloadsFile(_, _) => acc): variants_live
+        | AliasesFile(_, _, _) => acc | StaloadsFile(_, _) => acc
+        | OversizedName(_) => acc): variants_live
     in declared_in_facts(tl, name, acc2) end
 
 (* The builds in which the file (target, lst, off) declares name *)
@@ -1445,8 +1458,7 @@ fun declared_live {np:int}{k:nat} .<k>.
         if owner = target && listing_same(l2, lst) && o2 = off then declared_in_facts(facts, name, acc)
         else declared_live(tl, target, lst, off, name, acc))
 
-(* hits, with the replacements that the query makes of what the files it
-   reaches declare *)
+(* the replacements a query makes (overrides.md) *)
 fun answer_refs {np:int}{kf,k,h:nat} .<k>.
   (refs: !file_refs(np, k), files: !project_files(np, kf), owner: package_number(np), lst: listing, off: path_offset,
    common: variants_live, name: !name_bytes, inst: !instance_text, acc: foreign_hits(np, h))

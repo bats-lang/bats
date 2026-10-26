@@ -3345,21 +3345,9 @@ fun check_dep_cycles {lf,lx:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat 
    An implement that replaces another package's (overrides.bats, overrides.md)
    ============================================================ *)
 
-(* v clamped to [0, fm] *)
-fn clamp_to {v:int}{fm:nat} (v: int v, fm: int fm): [t:nat | t <= fm] int t =
-  if v < 0 then 0 else if v > fm then fm else v
-
-(* The name of the bytes files[s, e) (clamped to the list) *)
-fn range_name {lf:agz}{nf:pos}{fm:nat | fm <= nf}{s,e:int}
-  (files: !$A.borrow(byte, lf, nf), fm: int fm, s: int s, e: int e): maybe_name =
-  name_of_range(files, fm, clamp_to(s, fm), clamp_to(e, fm), false)
-
-(* whole with the file at the NUL-terminated path files[off, e), which is in
-   package owner and listing lst, and whose path from its package's root
-   starts at off + from *)
-fn add_foreign_file {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{e,from:int}{np:pos}
-  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, e: int e,
-   owner: package_number(np), lst: listing, from: int from, whole: project(np)): project(np) = let
+(* the facts of the file at the NUL-terminated path files[off, e) *)
+fn foreign_facts_at {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{e:nat | off <= e; e <= fm}
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, e: int e): [k:nat] file_facts(k) = let
   var pb : $B.builder_v = $B.create()
   val () = copy_to_builder_v(files, off, e + 1, fm, pb)
   val @(pa, pal) = $B.into_arr(pb)
@@ -3367,24 +3355,55 @@ fn add_foreign_file {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | of
   val facts = facts_of_file(reuse, bv_p, pal)
   val () = $A.drop<byte>(fz_p, bv_p)
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in
-  case+ range_name(files, fm, off + from, e) of
-  | ~NameAbsent() => let val () = file_facts_free(facts) in whole end
-  | ~NameHere(rel) => project_add_file(whole, owner, lst, off, rel, facts)
-end
+in facts end
 
-(* whole with each file of the NUL-separated list files[off, len) *)
-fun add_foreign_files {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{from:int}{np:pos} .<fm - off>.
-  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int,
-   owner: package_number(np), lst: listing, from: int from, whole: project(np)): project(np) =
+(* whole with each file of the NUL-separated list files[off, len), the package's own (overrides.md) *)
+fun add_own_files {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{np:pos} .<fm - off>.
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int, whole: project(np)): project(np) =
   if off >= len then whole
   else let
     val e = nul_in(files, off, fm)
-    val whole2 = add_foreign_file(reuse, files, fm, off, e, owner, lst, from, whole)
+    val facts = foreign_facts_at(reuse, files, fm, off, e)
+    val whole2 = (case+ name_of_range(files, fm, off, e, false) of
+      | ~NameAbsent() => let val () = file_facts_free(facts) in whole end
+      | ~NameHere(path) => project_add_own_file(whole, off, path, facts)): project(np)
   in
     if e >= fm then whole2
-    else add_foreign_files(reuse, files, fm, e + 1, len, owner, lst, from, whole2)
+    else add_own_files(reuse, files, fm, e + 1, len, whole2)
   end
+
+(* whole with each file of the NUL-separated list files[off, len), all of the package number owner *)
+fun add_dependency_files {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{np:pos} .<fm - off>.
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, len: int,
+   owner: package_number(np), whole: project(np)): project(np) =
+  if off >= len then whole
+  else let
+    val e = nul_in(files, off, fm)
+    val facts = foreign_facts_at(reuse, files, fm, off, e)
+    val whole2 = (case+ name_of_range(files, fm, off, e, false) of
+      | ~NameAbsent() => let val () = file_facts_free(facts) in whole end
+      | ~NameHere(path) => project_add_dependency_file(whole, owner, off, path, facts)): project(np)
+  in
+    if e >= fm then whole2
+    else add_dependency_files(reuse, files, fm, e + 1, len, owner, whole2)
+  end
+
+(* whole with the package of the file at files[off, e) and the files of the list files[off, stop) (overrides.md) *)
+fn add_one_package {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat | off <= fm}{e:nat | off <= e; e <= fm}{np:pos}
+  (reuse: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, off: int off, e: int e, stop: int, whole: project(np))
+  : [np2:pos] project(np2) = let
+  val @(added, whole2) = (case+ name_of_range(files, fm, off, e, false) of
+    | ~NameAbsent() => @(false, whole)
+    | ~NameHere(path) => let
+        val r = project_add_dependency(whole, path)
+        val () = name_bytes_free(path)
+      in r end): [np3:pos] @(bool, project(np3))
+in
+  if added then let
+    val number = project_package_count(whole2)
+  in add_dependency_files(reuse, files, fm, off, stop, number - 1, whole2) end
+  else whole2
+end
 
 (* whole with each package of ./bats_modules among the files files[off, len),
    each package's files being together in the list *)
@@ -3402,23 +3421,12 @@ fun add_foreign_packages {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat
     val k = dep_root_end(bv_p, pal, 15, e - off) + 1
     val () = $A.drop<byte>(fz_p, bv_p)
     val () = $A.free<byte>($A.thaw<byte>(fz_p))
-    val number = project_package_count(whole)
   in
-    if e >= fm then (case+ range_name(files, fm, off + 15, off + k - 1) of
-      | ~NameAbsent() => whole
-      | ~NameHere(root) => let
-          val whole2 = project_add_package(whole, root)
-        in add_foreign_files(reuse, files, fm, off, e, number, DependencyListing(), k, whole2) end)
+    if e >= fm then add_one_package(reuse, files, fm, off, e, e, whole)
     else let
       val ge = group_end(files, fm, e + 1, len, off, k)
-    in
-      case+ range_name(files, fm, off + 15, off + k - 1) of
-      | ~NameAbsent() => (if ge >= fm then whole else add_foreign_packages(reuse, files, fm, ge, len, whole))
-      | ~NameHere(root) => let
-          val whole2 = project_add_package(whole, root)
-          val whole3 = add_foreign_files(reuse, files, fm, off, ge, number, DependencyListing(), k, whole2)
-        in if ge >= fm then whole3 else add_foreign_packages(reuse, files, fm, ge, len, whole3) end
-    end
+      val whole2 = add_one_package(reuse, files, fm, off, e, ge, whole)
+    in if ge >= fm then whole2 else add_foreign_packages(reuse, files, fm, ge, len, whole2) end
   end
 
 (* "'implement NAME' replaces what PKG implements: ..." *)
@@ -3517,6 +3525,48 @@ fun report_foreign_hits {np:pos}{k:nat}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}
       val c = report_hit(h, whole, sfiles, fm, dfiles, dm, cnt, errs)
     in report_foreign_hits(tl, whole, sfiles, fm, dfiles, dm, c, errs) end
 
+(* cnt, with the error for a file whose name is too long to compare, at the NUL-terminated path files[fi, NUL) *)
+fn oversized_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
+  (files: !$A.borrow(byte, lf, nf), fm: int fm, fi: pos_t, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+  val e = find_null_bv_from(files, fi, fm)
+  var pb : $B.builder_v = $B.create()
+  val () = copy_to_builder_v(files, fi, e + 1, fm, pb)
+  val pl = e - fi
+  val @(pa, pal) = $B.into_arr(pb)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val c = (case+ read_whole_m(bv_p, pal) of
+    | ~whole_err(_) => cnt
+    | ~whole_ok(ar, piece, sm, n) => let
+        val @(fz_s, bv_s) = $A.freeze<byte>(piece)
+        var m : $B.builder_v = $B.create()
+        val () = bput_v(m, "a name in this file is too long to compare with the names of other packages, so what it implements is not checked; shorten it")
+        var fy : $B.builder_v = $B.create()
+        val () = put_fancy(bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, 0, m, fy)
+        val c1 = add_error(cnt, fy, errs)
+        val () = $A.drop<byte>(fz_s, bv_s)
+        val () = whole_free(ar, $A.thaw<byte>(fz_s))
+      in c1 end): int
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in c end
+
+fn report_oversized_one {np:pos}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd}
+  (r: !file_ref(np), sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ r of
+  | FileRef(_, il, io) => (case+ il of
+      | OwnListing() => oversized_error_in(sfiles, fm, io, cnt, errs)
+      | DependencyListing() => oversized_error_in(dfiles, dm, io, cnt, errs))
+
+fun report_oversized {np:pos}{k:nat}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd} .<k>.
+  (refs: !file_refs(np, k), sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  case+ refs of
+  | file_refs_nil() => cnt
+  | file_refs_cons(r, tl) => let
+      val c = report_oversized_one(r, sfiles, fm, dfiles, dm, cnt, errs)
+    in report_oversized(tl, sfiles, fm, dfiles, dm, c, errs) end
+
 (* cnt, with the errors for the implements, in the package's files
    sfiles[0, fm) and in those of its dependencies dfiles[0, dm), that replace
    what another package implements *)
@@ -3524,11 +3574,14 @@ fn check_foreign {lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf; fm <= VMAX}{dm:nat | 
   (reuse: bool, sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
    dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
   val whole0 = project_new()
-  val whole1 = add_foreign_files(reuse, sfiles, fm, 0, fm, 0, OwnListing(), 2, whole0)
+  val whole1 = add_own_files(reuse, sfiles, fm, 0, fm, whole0)
   val whole2 = add_foreign_packages(reuse, dfiles, dm, 0, dm, whole1)
   val hits = foreign_hits_of(whole2)
-  val c = report_foreign_hits(hits, whole2, sfiles, fm, dfiles, dm, cnt, errs)
+  val c1 = report_foreign_hits(hits, whole2, sfiles, fm, dfiles, dm, cnt, errs)
   val () = foreign_hits_free(hits)
+  val big = oversized_files_of(whole2)
+  val c = report_oversized(big, sfiles, fm, dfiles, dm, c1, errs)
+  val () = file_refs_free(big)
   val () = project_free(whole2)
 in c end
 

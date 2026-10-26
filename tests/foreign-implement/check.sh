@@ -12,7 +12,7 @@
 #    that the package implements only for that instance; a dependency that replaces the
 #    implement of its own dependency (transitive); the replacement in an unsafe dependency and
 #    in an unsafe package, and inside its $UNSAFE begin ... end block
-#    (the lexer makes no spans of it); the replacement in a #target block that the build keeps;
+#    (the lexer makes no spans of it); the replacement in a #target block that the build keeps; a name longer than a name can be;
 #  * accepted, and checked by patsopt: a package that declares and implements the name a
 #    dependency declares too (toml's and array's get); a template defined and used in one
 #    package; two dependencies that do not use each other and declare the same name; an
@@ -24,6 +24,19 @@
 #    bats inputs (another compiler's stamp), garbled or cut short is not trusted.
 # The expected text of a rejection is tests/foreign-implement/expected/<case>.txt;
 # BLESS=1 writes it from the run, to be read before it is committed.
+# Why this is a shell script (quire#646, CLAUDE.md "we do not write shell scripts"): the claims are about
+# the built compiler run on planted projects (the status, the error text, no build/ made, the records
+# under build/.bats_valid), and a bats test for that would have to plant the projects, run the built
+# `bats` in each, read its streams and remove its temp directories. Searched: `bats test` ($UNITTEST
+# blocks run in-process and link only src/'s modules, never the built binary; the logic they could reach
+# is the project API of src/overrides.bats, but not the command); the file package (file_mkdir,
+# file_chdir, file_exists, file_mode, file_chmod and file_open/read/write exist; no unlink, rmdir,
+# rename or mktemp, so a test's directories could not be removed); the process package (spawn
+# and spawn_inherit_env; a child cannot be given a working directory, only the process-wide
+# file_chdir); tests/capture-outcome (a bats driver built as a second binary of a copy of the compiler's
+# project, which runs library code, not the compiler on a project). bats#284 (a test driver in bats for
+# tests/*/check.sh) is the open ticket that builds what is missing; until it lands a command-level test
+# follows the existing check.sh style (tests/fixtures/bless.sh names the same avenues).
 # usage: tests/foreign-implement/check.sh <bats-binary> <repository-dir>
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
@@ -57,7 +70,7 @@ reject() { # <case> <text each of the errors must hold>...
   c=$1; shift
   rc=0
   (cd "$TMP/$c" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
-  # the notice of a busy machine slot (BATS_SLOTS) is not part of the error
+  # the notice of a busy machine slot (BATS_SLOTS) is not what the error says
   grep -av '^waiting for another bats' "$TMP/err" > "$TMP/err.only" || true
   mv "$TMP/err.only" "$TMP/err"
   [ "$rc" = 1 ] || { echo "FAIL: $c: status $rc (expected 1)"; cat "$TMP/err"; exit 1; }
@@ -237,6 +250,13 @@ end
 implement main0 () = ()
 X
 reject native_block "'implement rotr' replaces what the package 'arith' implements"
+
+project oversized bin
+main oversized <<'X'
+implement main0 () = ()
+X
+{ printf 'implement{} '; head -c 1100000 /dev/zero | tr '\000' a; printf ' (x) = x\n'; } >> "$TMP/oversized/src/bin/m.bats"
+reject oversized "a name in this file is too long to compare"
 
 # ---- accepted ----
 project own_beside bin

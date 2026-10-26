@@ -1,0 +1,6 @@
+error: error: a name in this file is too long to compare with the names of other packages, so what it implements is not checked; shorten it
+ --> m.bats:1:1
+   |
+ 1 | #include "share/atspre_staload.hats"
+   | ^
+
