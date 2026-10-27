@@ -1,0 +1,6 @@
+error: error: 'implement put' replaces what the package 'box' implements: it declares put and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents
+ --> m.bats:5:1
+   |
+ 5 | implement $B.put<int> (v) = 2
+   | ^
+
