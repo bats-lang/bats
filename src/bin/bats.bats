@@ -100,13 +100,13 @@ fn print_usage(): void = let
   val () = println! ("                               Remove a dependency")
   val () = println! ("  lock [--dev] [--dry-run] --repository <dir>")
   val () = println! ("                               Generate bats.lock")
-  val () = println! ("  build [--only debug|release|native|wasm] [--repository <dir>]")
+  val () = println! ("  build [--only debug|release|native|wasm] [-j|--jobs <n>|cores] [--repository <dir>]")
   val () = println! ("                               Build the project")
   val () = println! ("  run [--only debug|release] [--bin <name>] [--repository <dir>] [-- args...]")
   val () = println! ("                               Build and run a binary")
   val () = println! ("  test [--only native|wasm] [--filter <name>] [--repository <dir>]")
   val () = println! ("                               Run tests")
-  val () = println! ("  check [--cold] [--repository <dir>]")
+  val () = println! ("  check [--cold] [-j|--jobs <n>|cores] [--repository <dir>]")
   val () = println! ("                               Type-check the project (no linking); --cold (or BATS_COLD) checks every module again")
   val () = println! ("  tree [--repository <dir>]    Show dependency tree")
   val () = println! ("  upload --repository <dir>    Package and upload a library")
@@ -218,7 +218,7 @@ fun scan_only {l:agz}{p:nat | p <= 4096} .<4096 - p>.
 
 (* The words of the command line that are neither options nor an option's
    value: the command and its arguments. An option that takes a value is one
-   of --repository, --run-in, --only, --bin, --to-c and --filter. *)
+   of --repository, --run-in, --only, --bin, --to-c, --filter and --jobs (-j). *)
 fun count_positionals {l:agz}{p:nat | p <= 4096} .<4096 - p>.
   (buf: !$A.arr(byte, l, 4096), pos: int p, len: int, count: int): int =
   if pos >= len then count
@@ -229,8 +229,9 @@ fun count_positionals {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     val c1 = peek_arr(buf, min(pos + 1, 4095), 4096)
     val c2 = peek_arr(buf, min(pos + 2, 4095), 4096)
     val c3 = peek_arr(buf, min(pos + 3, 4095), 4096)
-    val valued = dash && c1 = 45
-      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || (c2 = 102 && c3 = 105))
+    val valued = dash && ((c1 = 45
+      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || (c2 = 102 && c3 = 105)
+          || (c2 = 106 && c3 = 111))) || (c1 = 106 && c2 = 0))
   in
     if next >= 4096 then (if dash then count else count + 1)
     else if valued then let
@@ -261,8 +262,9 @@ fun first_positional {l:agz}{p:nat | p <= 4096} .<4096 - p>.
     val c1 = peek_arr(buf, min(pos + 1, 4095), 4096)
     val c2 = peek_arr(buf, min(pos + 2, 4095), 4096)
     val c3 = peek_arr(buf, min(pos + 3, 4095), 4096)
-    val valued = dash && c1 = 45
-      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || (c2 = 102 && c3 = 105))
+    val valued = dash && ((c1 = 45
+      && ((c2 = 114 && (c3 = 101 || c3 = 117)) || c2 = 111 || c2 = 98 || c2 = 116 || (c2 = 102 && c3 = 105)
+          || (c2 = 106 && c3 = 111))) || (c1 = 106 && c2 = 0))
   in
     if ~dash then pos
     else if next >= 4096 then ~1
@@ -431,6 +433,9 @@ in
           var apn9 = @[char][7]('d', 'r', 'y', '-', 'r', 'u', 'n')
           var aph9 = @[char][12]('d', 'r', 'y', ' ', 'r', 'u', 'n', ' ', 'm', 'o', 'd', 'e')
           val @(p, h_dry_run) = ap_flag(p, apn9, 7, $R.none(), aph9, 12)
+          var apn16 = @[char][4]('j', 'o', 'b', 's')
+          var aph16 = @[char][17]('p', 'a', 'r', 'a', 'l', 'l', 'e', 'l', ' ', 'c', 'o', 'm', 'p', 'i', 'l', 'e', 's')
+          val @(p, h_jobs) = ap_string_opt(p, apn16, 4, $R.some(106), aph16, 17)
           var apn15 = @[char][5]('f', 'o', 'r', 'c', 'e')
           var aph15 = @[char][12]('r', 'e', 'p', 'l', 'a', 'c', 'e', ' ', 'A', 'T', 'S', '2')
           val @(p, h_force) = ap_flag(p, apn15, 5, $R.none(), aph15, 12)
@@ -498,13 +503,25 @@ in
               (* The project's lock, for the commands that write
                  build/, dist/ or bats_modules/ (run takes its own, and
                  releases it before the program runs) *)
-              val lk = (if locks_project(chosen_command) then project_lock_take(heavy_of(chosen_command))
+              (* build-jobs: --jobs is a number from 1 or the word cores, else nothing is run *)
+              val jobs_buf = $A.alloc<byte>(4096)
+              val jobs_len = opt_string_copy(r, h_jobs, jobs_buf, 4096)
+              val jobs_taken = jobs_option(jobs_buf, jobs_len)
+              val jobs_ok = (if $AP.is_present(r, h_jobs) then jobs_taken else true): bool
+              val () = $A.free<byte>(jobs_buf)
+              val lk = (if ~jobs_ok then ProjectUnlocked(SlotNone())
+                else if locks_project(chosen_command) then project_lock_take(heavy_of(chosen_command))
                 else ProjectUnlocked(SlotNone())): project_lock
             in let val () = (
               (* machine-slots: a refused slot runs nothing (bats#464) *)
               if project_lock_refused(lk) then let
                 val () = $AP.parse_result_free(r)
                 val () = $A.free<byte>(arg_buf)
+                val () = set_build_err()
+              in end else if ~jobs_ok then let
+                val () = $AP.parse_result_free(r)
+                val () = $A.free<byte>(arg_buf)
+                val () = prerr! ("error: --jobs takes a number from 1 or the word cores\n")
                 val () = set_build_err()
               in end else if force_misuse(chosen_command, force_count, $AP.get_bool(r, h_force)) then let
                 val () = $AP.parse_result_free(r)
