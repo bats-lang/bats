@@ -2,8 +2,8 @@
    A compile (-c, not -E) appends "S <C file>" to the file CC_LOG; one of a module (a C file
    named *_dats.c) then waits until the log has had CC_WAIT_FOR compiles running at once (3 s
    at most), so the compiles that overlap are the ones the caller starts together, and holds
-   0.3 s (1.8 s for the C file whose name ends with CC_SLOW); it then either fails (a C file whose name ends with
-   CC_FAIL_A or CC_FAIL_B: a message on stderr, and 200000 more bytes when the name ends with CC_BIG,
+   0.3 s (1.8 s for the C file whose name ends with CC_SLOW); it then, when the name ends with CC_NOISY, writes 200000 bytes to stderr and succeeds, or either fails (a C file whose name ends with
+   CC_FAIL_A or CC_FAIL_B: a message on stderr, and, 0.5 s later, 200000 more bytes when the name ends with CC_BIG,
    "F <C file>" in the log, status 1, no object)
    or runs the real clang with the very arguments and appends "E <C file>"; every other call
    (the preprocess, the link, -print-resource-dir) runs the real clang at once. The real clang
@@ -344,6 +344,7 @@ implement main0 () = let
   val fail_b = named_by(args, cs, ce, "CC_FAIL_B")
   val fails = (fail_a || fail_b): bool
   val big = named_by(args, cs, ce, "CC_BIG")
+  val noisy = named_by(args, cs, ce, "CC_NOISY")
   val path_e = log_path(lbuf, lk_compile)
   val text_e = log_text(args, cs, ce, "E ", "\n")
   val path_f = log_path(lbuf, lk_compile)
@@ -361,10 +362,11 @@ implement main0 () = let
         val () = $B.builder_free(text_e)
         val () = $B.builder_free(path_e)
         val () = prerr_text(message)
-        val () = (if big then err_x(200000) else ())
+        val () = (if big then let val () = sleep_for("0.5") in err_x(200000) end else ())
         val () = append_line(path_f, text_f)
       in 1 end
       else let
+        val () = (if noisy then err_x(200000) else ())
         val st = run_inherit(real, run_args)
         val () = append_line(path_e, text_e)
         val () = $B.builder_free(text_f)

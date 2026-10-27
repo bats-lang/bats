@@ -642,6 +642,10 @@ fn case_jobs_stderr (t: !tool): void = let
   val found = run_split("", builder_of("grep\n-aq\n--\n^x\\{32767\\}x\\{32726\\}error: cc failed for src module m1_dats.c$\nstderr_big.out"), "grep.out", "grep.err")
 in (if found = 0 then () else die("the first 65536 bytes of the compiler's messages, then the note, are not in stderr_big.out", "")) end
 
+(* jobs-noisy: a compile that succeeds and writes far more than a pipe holds to stderr is a success (the pipe is read to its end, not closed under the writer) *)
+fn case_jobs_noisy (t: !tool): void =
+  overlaps(t, "noisy", "CC_LOG=../noisy.log\nCC_NOISY=m1_dats.c\nCC_WAIT_FOR=2\n", "build\n--only\ndebug\n--only\nnative\n--jobs\n2", "noisy.log", 2, "a successful compile with 200000 bytes on stderr")
+
 fn run_all (t: !tool): void = let
   val () = case_jobs_count(t)
   val () = case_jobs_short(t)
@@ -651,7 +655,8 @@ fn run_all (t: !tool): void = let
   val () = case_jobs_same(t)
   val () = case_jobs_invalid(t)
   val () = case_jobs_failure(t)
-in case_jobs_stderr(t) end
+  val () = case_jobs_stderr(t)
+in case_jobs_noisy(t) end
 
 implement main0 () = let
   val given = tool_of_args()
