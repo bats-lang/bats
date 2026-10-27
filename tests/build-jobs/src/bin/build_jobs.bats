@@ -646,6 +646,21 @@ in (if found = 0 then () else die("the first 65536 bytes of the compiler's messa
 fn case_jobs_noisy (t: !tool): void =
   overlaps(t, "noisy", "CC_LOG=../noisy.log\nCC_NOISY=m1_dats.c\nCC_WAIT_FOR=2\n", "build\n--only\ndebug\n--only\nnative\n--jobs\n2", "noisy.log", 2, "a successful compile with 200000 bytes on stderr")
 
+(* A project whose binary is a wasm one: two compiles of C files of the project (the entry and the binary), then wasm-ld *)
+fn wasm_project {sd:nat} (dir: string sd): void = let
+  val () = setup(dir_command("rm\n-rf\n", dir, ""), "rm project")
+  val () = setup(dir_command("mkdir\n-p\n", dir, "/src/bin"), "mkdir project")
+  val () = put_file(dir, "/bats.toml", builder_of("[package]\nname = \"wz\"\nkind = \"bin\"\n"))
+in put_file(dir, "/src/bin/web.bats", builder_of("#target wasm binary\n\nimplement main0 () = ()\n")) end
+
+(* jobs-wasm: the two wasm compiles run at once and have ended before wasm-ld reads their objects (the drain before wasm-ld) *)
+fn case_jobs_wasm (t: !tool): void = let
+  val () = wasm_project("wasm_two")
+  val status = bats_split(t, "wasm_two", "CC_LOG=../wasm_two.log\nCC_WAIT_FOR=2\n", "build\n--only\ndebug\n--only\nwasm\n--jobs\n2", "wasm_two.out", "wasm_two.err")
+  val () = (if status = 0 then () else die_file("--only wasm --jobs 2: the build failed", "", "wasm_two.out"))
+  val () = overlap_is("wasm_two.log", 2, "--only wasm --jobs 2")
+in (if path_exists(join("wasm_two", "/dist/debug/web.wasm")) then () else die("--only wasm --jobs 2: no dist/debug/web.wasm", "")) end
+
 fn run_all (t: !tool): void = let
   val () = case_jobs_count(t)
   val () = case_jobs_short(t)
@@ -656,7 +671,8 @@ fn run_all (t: !tool): void = let
   val () = case_jobs_invalid(t)
   val () = case_jobs_failure(t)
   val () = case_jobs_stderr(t)
-in case_jobs_noisy(t) end
+  val () = case_jobs_noisy(t)
+in case_jobs_wasm(t) end
 
 implement main0 () = let
   val given = tool_of_args()
