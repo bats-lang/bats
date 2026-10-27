@@ -3439,6 +3439,7 @@ fn preprocess_wasm {lph:agz}{li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; 
 
 
 
+
 fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
   {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
@@ -3447,12 +3448,327 @@ fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
    rel: profile): int
 
 
+fn run_cc_noted {lph:agz}{lo:agz}{li:agz}{ln:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}{nn:pos}{nm:nat | nm <= nn; nm <= 524288}
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im,
+   rel: profile,
+   note_bv: !$A.borrow(byte, ln, nn), note_len: int nm): int
+
+
+fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524288}{om:nat | om <= no; om <= 524288}
+  (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om): int
+
+
 fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
   {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    rel: profile): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn jobs_option {l:agz} (buf: !$A.arr(byte, l, 4096), len: int): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn jobs_effective (): [j:pos | j <= 256] int j
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn cc_pool_drain (): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3563,33 +3879,6 @@ fn machine_slot_take (heavy: heavy_command): machine_slot
 fn machine_slot_release (slot: machine_slot): void
 
 fn machine_slot_refused (slot: !machine_slot): bool
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
