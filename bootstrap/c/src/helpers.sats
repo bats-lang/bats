@@ -1008,7 +1008,17 @@ fn wbw_loop {l:agz}{n:pos}{m:nat | m <= n}
 
 
 
-fn writer_finish (bw: $F.buf_writer, r: write_result): write_result
+
+fn writer_close (bw: $F.buf_writer, r: write_result): write_result
+
+
+
+
+
+
+
+
+
 
 
 
