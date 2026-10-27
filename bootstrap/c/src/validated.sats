@@ -409,6 +409,43 @@ fn uses_same {lp,lk:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}
 
 
 
+fn facts_key {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288} (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
+  : @(bool, [lk:agz] $A.arr(byte, lk, 64))
+
+fn facts_same {lp,lk:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288}
+  (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length, key: !$A.borrow(byte, lk, 64)): bool
+
+fn facts_slot {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288} (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn uses_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
   : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
 

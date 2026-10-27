@@ -401,6 +401,43 @@ implement uses_same (p, pm, key) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_a))
 in same end
 
+(* the facts of a file are kept as its uses are, under a key and a slot of their own (overrides.md) *)
+
+#pub fn facts_key {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288} (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
+  : @(bool, [lk:agz] $A.arr(byte, lk, 64))
+
+#pub fn facts_same {lp,lk:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288}
+  (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length, key: !$A.borrow(byte, lk, 64)): bool
+
+#pub fn facts_slot {lp:agz}{np:pos}{path_length:nat | path_length <= np; path_length <= 524288} (path_bytes: !$A.borrow(byte, lp, np), path_length: int path_length)
+  : [cap:pos | cap <= 524288][k:nat | k <= cap][l:agz] @($A.arr(byte, l, cap), int k)
+
+implement facts_key (path_bytes, path_length) = let
+  var t : $B.builder_v = $B.create()
+  val () = bput_v(t, "bats-facts 1 file\nbats ")
+  val () = bput_v(t, bats_inputs_sha256())
+  val () = put_char_v(t, 10)
+  val () = copy_to_builder_v(path_bytes, 0, find_null_bv_from(path_bytes, 0, path_length), path_length, t)
+  val () = put_char_v(t, 10)
+  val found = put_file_sha256_m(path_bytes, path_length, t)
+  val () = put_char_v(t, 10)
+  val whole = ($B.length(t) < 524288): bool
+in @(found && whole, key_of(t)) end
+
+implement facts_same (path_bytes, path_length, key) = let
+  val @(usable, again) = facts_key(path_bytes, path_length)
+  val @(fz_a, bv_a) = $A.freeze<byte>(again)
+  val same = (if usable then same_keys(bv_a, key) else false): bool
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+in same end
+
+implement facts_slot (path_bytes, path_length) = let
+  var name : $B.builder_v = $B.create()
+  val () = bput_v(name, "facts ")
+  val () = copy_to_builder_v(path_bytes, 0, find_null_bv_from(path_bytes, 0, path_length), path_length, name)
+in valid_slot(name) end
+
 (* build/.bats_valid/uses <path>, NUL-terminated: where the record of the
    file at p is *)
 #pub fn uses_slot {lp:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288} (p: !$A.borrow(byte, lp, np), pm: int pm)
