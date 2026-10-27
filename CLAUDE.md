@@ -23,19 +23,21 @@ dist/debug/bats build --repository /home/moshez/src/bats-lang/repository-prototy
 cp -R bootstrap/c /tmp/seed && make -C /tmp/seed debug/bats
 ```
 
-Every change to `src/` or `bats.lock` must regenerate and commit it in the same PR:
+Every change to `src/` or `bats.lock` must commit a regenerated `bootstrap/c` in the same PR. A worker does not run the local regeneration (a long run, which is a CI job): it pushes the change, and when the step "Verify bootstrap/c matches sources" fails, the run uploads the tree it regenerated as the artifact `bootstrap-c-regenerated-<head sha>`. Download it, copy it over `bootstrap/c`, commit and push; the next run verifies it (`.claude/rules/runtime-header.md`, "Getting the regenerated tree from CI"):
 
 ```bash
-dist/debug/bats build --repository ../repository-prototype
-scripts/bootstrap-c.sh dist/debug/bats ../repository-prototype
+gh run download <run id> --name bootstrap-c-regenerated-<head sha> --dir /tmp/bootstrap-c-new
+rm -rf bootstrap/c && cp -R /tmp/bootstrap-c-new bootstrap/c
 ```
+
+`scripts/bootstrap-c.sh dist/debug/bats ../repository-prototype` is the command the artifact is made by.
 
 CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result differs. It also checks the fixpoint (the compiler built by itself emits the same C). Never edit `bootstrap/c/` by hand.
 
 ## Architecture
 
 Entry point: `src/bin/bats.bats`
-Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/overrides.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`, `src/pins.bats`, `src/affected.bats`
+Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/overrides.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`, `src/pins.bats`, `src/affected.bats`, `src/merge_proof.bats`
 
 Dependencies: argparse, array, arith, builder, env, file, path, process, result, sha256, str, toml
 
@@ -78,6 +80,12 @@ Do not assume Linux. Code must be portable (macOS, Linux, BSDs). Do not use `/pr
 Do not use bats-old unless it's an emergency. The self-hosting compiler is the primary build tool.
 
 Fix problems regardless of size. Never say "too large for this session" or defer work. Do the work.
+
+## We write bats, not shell
+
+Our own code is bats. The only non-bats code is what is impossible in bats (the `make` of `bootstrap/c`), a dependency's own format, or a third-party tool used as it is. A workflow `run:` step that does more than call one bats subcommand or one third-party tool is code we wrote.
+
+Review question: a PR that adds non-bats code of ours (a shell script, or a workflow `run:` step that is more than one call) is rejected unless it names the avenue it exhausted.
 
 ## Task Rules
 
@@ -139,4 +147,5 @@ A comment states its reason in one line and names the area by keyword; the detai
 | `.claude/rules/check-pins.md` | bats check-pins: floating CI inputs (#390) |
 | `.claude/rules/capture.md` | Captured runs: the outcome of a child whose output is longer than the buffer (#444) |
 | `.claude/rules/affected.md` | The affected rule: which jobs of check.yml a change runs (#481) |
+| `.claude/rules/merge-proof.md` | The main-merge ruling as a command: bats merge-proof (#530) |
 | `.claude/rules/keep-on-fail.md` | Test temp directories: `tests/keep-on-fail.sh` (#478) |
