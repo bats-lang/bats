@@ -135,6 +135,7 @@
 set -u
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 unset BATS_CACHE_DIR BATS_COMMIT BATS_COLD BATS_MEMO_DIR XDG_CACHE_HOME
 ONLY=${3:-}
 T_START=$(date +%s)
@@ -320,7 +321,7 @@ printf '(* not in the module *)\n' > "$B/accept/no-such-line/before"
 # a number that is not a variable's stays: n(2) is a variable, 2 is not
 fixture "$B" reject number-kept "$SNORM" "function h
 line 1
-$(printf '%s' "$ENORM" | sed -e 's/Eintinf(1)/Eintinf(7)/')"
+$(printf '%s\n' "$ENORM" | text_replace 'Eintinf(1)' 'Eintinf(7)')"
 # the binder's name is still compared, and so is a number that is not digits
 fixture "$B" reject exi-other-name "$SEXI" "$(exi_expect m 14465)"
 fixture "$B" reject exi-number-not-digits "$SEXI" "$(exi_expect n 14x65)"
@@ -512,9 +513,9 @@ memoed() { # <log> <n>: exactly n of its ok lines are from the memo
   [ "$n" = "$2" ] || { echo "--- $1"; cat "$1"; fail "$3: $n lines from the memo, not $2"; }
 }
 # a .res file made right again after an edit: its last line is the sha256 of the rest
-resum() { sed '$d' "$1" > "$1.b"; { cat "$1.b"; printf '%s\n' "$(sum256 < "$1.b")"; } > "$1"; rm -f "$1.b"; }
+resum() { text_drop_last < "$1" > "$1.b"; { cat "$1.b"; printf '%s\n' "$(sum256 < "$1.b")"; } > "$1"; rm -f "$1.b"; }
 keyof() { # <member>: the path (less .key/.res) of a fixture's entry, from the last run of the whole set
-  i=$(grep -nx "$1" "$MW/members" | cut -d: -f1); k=$(sed -n "${i}p" "$MW/memo-used")
+  i=$(grep -nx "$1" "$MW/members" | cut -d: -f1); k=$(text_line "$i" < "$MW/memo-used")
   echo "$M/$(printf '%s' "$k" | cut -c1-2)/$k"
 }
 bad_run() { # <log> <label> <modules that must have been checked: 111 style> args...
@@ -570,13 +571,13 @@ mrun "$TMP/m4.log"
 memoed "$TMP/m4.log" 2 "memo unrelated"
 [ "$(ranfx unrelated)$(ranfx other)" = 11 ] && [ "$(ranfx lib)" = 0 ] || fail "memo: a change in a module the fixture does not read, or in the body of one that reads its interface: $(cat "$PLOG")"
 # the module itself changes: its fixtures run again, the others' do not
-sed -i.bak 's/^implement f (x) = x + 1/implement f (x) = x + 2/' "$MP/src/lib.bats"
+text_edit "$MP/src/lib.bats" text_replace_prefix 'implement f (x) = x + 1' 'implement f (x) = x + 2'
 mrun "$TMP/m6.log"
 [ $rc = 0 ] || { cat "$TMP/m6.log"; fail "memo: module: status $rc"; }
 memoed "$TMP/m6.log" 2 "memo module"
 [ "$(ranfx lib)" = 1 ] && [ "$(ranfx other)$(ranfx unrelated)" = 00 ] || fail "memo: a changed module: $(cat "$PLOG")"
 # a staloaded .sats changes, to one of the same size: the module that reads it runs again
-sed -i.bak 's/#pub stadef spare = 1/#pub stadef spare = 2/' "$MP/src/lib.bats"
+text_edit "$MP/src/lib.bats" text_replace '#pub stadef spare = 1' '#pub stadef spare = 2'
 mrun "$TMP/m7.log"
 [ $rc = 0 ] || { cat "$TMP/m7.log"; fail "memo: .sats: status $rc"; }
 [ "$(ranfx other)" = 1 ] && [ "$(ranfx unrelated)" = 0 ] || fail "memo: a changed staloaded .sats of the same size: $(cat "$PLOG")"
@@ -636,7 +637,7 @@ saidpart "$TMP/m12.log" "FAIL reject/lib-bad: rejected, but not as its expect sa
 cp "$TMP/expect.good" "$MF/reject/lib-bad/expect"
 # the log the memo holds is what is judged: change a word of it (with a sum that is right)
 E=$(keyof reject/lib-bad)
-sed 's/pattern match is nonexhaustive/pattern match is nonexhaustiv3/' "$E.res" > "$E.x" && mv "$E.x" "$E.res" && resum "$E.res"
+text_edit "$E.res" text_replace 'pattern match is nonexhaustive' 'pattern match is nonexhaustiv3' && resum "$E.res"
 mrun "$TMP/m14.log" --only reject/lib-bad
 [ $rc = 1 ] || { cat "$TMP/m14.log"; fail "memo: a stored log of another word: status $rc"; }
 saidpart "$TMP/m14.log" "FAIL reject/lib-bad: rejected, but not as its expect says" "memo stored log judged"
@@ -684,22 +685,22 @@ E1=$(keyof accept/lone-ok); E2=$(keyof accept/lib-ok); E3=$(keyof accept/other-o
 # 1. a .res cut in half; a .res with a byte changed (its sum is wrong); a .key cut in half;
 #    a log with a word changed and the sum left as it was (the sum is what says the log is whole)
 head -c $(( $(wc -c < "$E1.res") / 2 )) "$E1.res" > "$E1.x" && mv "$E1.x" "$E1.res"
-sed 's/^pass$/pasz/' "$E3.res" > "$E3.x" && mv "$E3.x" "$E3.res"
+text_edit "$E3.res" text_replace_line pass pasz
 head -c $(( $(wc -c < "$E2.key") / 2 )) "$E2.key" > "$E2.x" && mv "$E2.x" "$E2.key"
-sed 's/pattern match is nonexhaustive/pattern match is nonexhaustiv3/' "$E4.res" > "$E4.x" && mv "$E4.x" "$E4.res"
+text_edit "$E4.res" text_replace 'pattern match is nonexhaustive' 'pattern match is nonexhaustiv3'
 bad_run "$TMP/t1.log" "torn" 111 --only accept/lone-ok --only accept/lib-ok --only accept/other-ok --only reject/lib-bad
 [ "$(wc -c < "$E1.res")" -gt 200 ] || fail "memo: the torn .res was not written whole again"
 # 2. another format with a right sum; another fixture's .res (a right sum, another key); a .key of another text;
 #    an accept's .res put under the reject's key, its key line and sum made right (a reject is not served a pass)
-cp "$E1.res" "$E4.res"; sed "2s/.*/$(basename "$E4")/" "$E4.res" > "$E4.x" && mv "$E4.x" "$E4.res"; resum "$E4.res"
-sed 's/^bats-fixture-result 2$/bats-fixture-result 3/' "$E1.res" > "$E1.x" && mv "$E1.x" "$E1.res"; resum "$E1.res"
+cp "$E1.res" "$E4.res"; text_edit "$E4.res" text_set_line 2 "$(basename "$E4")"; resum "$E4.res"
+text_edit "$E1.res" text_replace_line 'bats-fixture-result 2' 'bats-fixture-result 3'; resum "$E1.res"
 cp "$E3.res" "$E2.res"
-sed 's/^bats-memo 1$/bats-memo 2/' "$E3.key" > "$E3.x" && mv "$E3.x" "$E3.key"
+text_edit "$E3.key" text_replace_line 'bats-memo 1' 'bats-memo 2'
 bad_run "$TMP/t2.log" "garbled" 111 --only accept/lone-ok --only accept/lib-ok --only accept/other-ok --only reject/lib-bad
 # 3. the closure's digest the .res names is not the .key's (a right sum); a line dropped from the middle (a right sum);
 #    an empty .res; a missing .key
-sed '4s/.*/0000000000000000000000000000000000000000000000000000000000000000/' "$E1.res" > "$E1.x" && mv "$E1.x" "$E1.res"; resum "$E1.res"
-sed '3d' "$E2.res" > "$E2.x" && mv "$E2.x" "$E2.res"; resum "$E2.res"
+text_edit "$E1.res" text_set_line 4 0000000000000000000000000000000000000000000000000000000000000000; resum "$E1.res"
+text_edit "$E2.res" text_delete_line 3; resum "$E2.res"
 : > "$E3.res"; rm -f "$E4.key"
 bad_run "$TMP/t3.log" "closure digest" 111 --only accept/lone-ok --only accept/lib-ok --only accept/other-ok --only reject/lib-bad
 mrun "$TMP/t6.log"
@@ -876,7 +877,7 @@ MQ=$TMP/memo-q
 rm -rf "$MQ"
 mrunx "$MP" "$MF" "$MW" "$MQ" "$TMP/q1.log" --only accept/lone-ok
 [ $rc = 0 ] || { cat "$TMP/q1.log"; fail "memo truncated key: first run: status $rc"; }
-qkey=$(sed -n 1p "$MW/memo-used")
+qkey=$(text_line 1 < "$MW/memo-used")
 qdir=$MQ/$(printf '%s' "$qkey" | cut -c1-2)
 cp "$qdir/$qkey.key" "$TMP/q.whole"
 rm -f "$qdir/$qkey.key" "$qdir/$qkey.res"

@@ -21,6 +21,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -28,6 +29,7 @@ mkdir -p "$H/.bats/ats2/bin" "$TMP/raw"
 for d in prelude libats share ccomp; do ln -s "$REAL/$d" "$H/.bats/ats2/$d"; done
 PREFIX='** The starting compilation time is: '
 FIXED="${PREFIX}left out"
+TEXT_SH=$(cd "$(dirname "$0")/.." && pwd)/text.sh # the stand-in sources it
 
 # the stand-in: the real patsopt, then (FAKE) the 4th line of its C shaped;
 # the C it hands to bats is kept in $TMP/raw (its name is the key)
@@ -37,6 +39,7 @@ for a in "\$@"; do
   if [ "\$a" = --depgen ]; then exec "$REAL/bin/patsopt" "\$@"; fi
 done
 "$REAL/bin/patsopt" "\$@" || exit \$?
+. "$TEXT_SH"
 prev=
 out=
 for a in "\$@"; do
@@ -46,11 +49,10 @@ done
 [ -n "\$out" ] || exit 0
 t="\$out.shaped"
 case "\${FAKE:-}" in
-  padded) sed -e '4s/.*/${PREFIX}2026-01-02:  0h: 1m/' "\$out" > "\$t" ;;
-  removed) sed -e '4d' "\$out" > "\$t" ;;
-  moved) sed -e '3a\\
-**' "\$out" > "\$t" ;;
-  lookalike) sed -e '4s/.*/** The starting compilation time is:2026-01-02: 0h: 1m/' "\$out" > "\$t" ;;
+  padded) text_set_line 4 '${PREFIX}2026-01-02:  0h: 1m' < "\$out" > "\$t" ;;
+  removed) text_delete_line 4 < "\$out" > "\$t" ;;
+  moved) text_insert_after 3 '**' < "\$out" > "\$t" ;;
+  lookalike) text_set_line 4 '** The starting compilation time is:2026-01-02: 0h: 1m' < "\$out" > "\$t" ;;
   plain|*) cp "\$out" "\$t" ;;
 esac
 cp "\$t" "$TMP/raw/\$(basename "\$out" .raw)"
@@ -79,7 +81,7 @@ play() { # <case>
   done
   [ "$made" -ge 1 ] || fail "$1: no C was made"
 }
-line4() { sed -n '4p' "$1"; }
+line4() { text_line 4 < "$1"; }
 # the two files have as many lines
 same_lines() { # <made> <raw> <case>
   a=$(awk 'END { print NR }' "$1")
@@ -100,7 +102,7 @@ check_removed() {
   same_lines "$1" "$2" removed
 }
 check_moved() {
-  [ "$(sed -n '5p' "$1")" = "$(sed -n '5p' "$2")" ] || fail "moved: the dating line at line 5 was changed: $(sed -n '5p' "$1")"
+  [ "$(text_line 5 < "$1")" = "$(text_line 5 < "$2")" ] || fail "moved: the dating line at line 5 was changed: $(text_line 5 < "$1")"
   grep -aq "^$PREFIX.*[0-9]h" "$1" || fail "moved: the line was changed"
   grep -aqx "${PREFIX}left out" "$1" && fail "moved: a line not at line 4 was made 'left out'"
   same_lines "$1" "$2" moved

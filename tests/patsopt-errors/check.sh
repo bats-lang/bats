@@ -11,13 +11,14 @@ set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 HERE=$(cd "$(dirname "$0")" && pwd)
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 case_() { # <name> <command>
   p=$TMP/$1
   rc=0
   (cd "$p" && NO_COLOR=1 "$BATS" $2) > "$TMP/out" 2> "$TMP/err" || rc=$?
   [ "$rc" = 1 ] || { echo "FAIL: $1: rc $rc"; cat "$TMP/err"; exit 1; }
   [ ! -s "$TMP/out" ] || { echo "FAIL: $1: stdout"; cat "$TMP/out"; exit 1; }
-  sed "s|$p|X|g" "$TMP/err" > "$TMP/err.x"
+  text_replace_all "$p" X < "$TMP/err" > "$TMP/err.x"
   cmp -s "$TMP/err.x" "$HERE/$1.txt" || { echo "FAIL: $1"; diff "$HERE/$1.txt" "$TMP/err.x"; exit 1; }
 }
 mkdir -p "$TMP/lib/src" "$TMP/bin/src/bin" "$TMP/dep/src" "$TMP/dep/bats_modules/dq/src" "$TMP/mod/src/bin"

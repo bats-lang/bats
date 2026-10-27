@@ -35,6 +35,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 unset BATS_CACHE_DIR BATS_COLD
 mkdir -p "$TMP/app/src/bin" "$TMP/plain/src"
 printf '[package]\nname = "app"\nkind = "bin"\n\n[dependencies]\n"plain" = { path = "../plain" }\n' > "$TMP/app/bats.toml"
@@ -324,7 +325,7 @@ k=build/src/other_dats.c.key
 [ -f "$k" ] || k=$(ls build/.stash/*/src/other_dats.c.key | head -n 1)
 [ -f "$k" ] || { echo "FAIL: no key of other"; find build -name '*.key' | head; exit 1; }
 head -n 1 "$k" | grep -aqx 'bats-memo 1' || { echo "FAIL: the key does not begin with its format"; cat "$k"; exit 1; }
-sed -n 2p "$k" | grep -aq '^names [0-9a-f]\{64\}$' || { echo "FAIL: the key has no names line"; cat "$k"; exit 1; }
+text_line 2 < "$k" | grep -aq '^names [0-9a-f]\{64\}$' || { echo "FAIL: the key has no names line"; cat "$k"; exit 1; }
 grep -aqx -- '--' "$k" || { echo "FAIL: the key has no rule"; cat "$k"; exit 1; }
 good=$TMP/key.good
 cp "$k" "$good"
@@ -341,14 +342,14 @@ printf 'garbled\n' > "$k"; again "a garbled key"
 : > "$k"; again "an empty key"
 rm -f "$k"; again "a missing key"
 head -c 100 "$good" > "$k"; again "a key cut short"
-sed '$d' "$good" > "$k"; again "a key short of its last line"
+text_drop_last < "$good" > "$k"; again "a key short of its last line"
 printf '%s\n%s\n' "$(sha256sum "$TMP/app/src/other.bats" | cut -d' ' -f1)" "$(sha256sum build/.sats_changed | cut -d' ' -f1)" > "$k"; again "a key of the old format"
-sed '1s/.*/bats-memo 2/' "$good" > "$k"; again "a key of another format"
+text_set_line 1 'bats-memo 2' < "$good" > "$k"; again "a key of another format"
 last=$(tail -n 2 "$good" | head -n 1)
-sed "s/$last/0000000000000000000000000000000000000000000000000000000000000000/" "$good" > "$k"; again "a key with a hash changed"
+text_replace "$last" 0000000000000000000000000000000000000000000000000000000000000000 < "$good" > "$k"; again "a key with a hash changed"
 # a size changed
 n=$(grep -an -- '^--$' "$good" | cut -d: -f1)
-sed "$((n + 1))s/.*/1/" "$good" > "$k"; again "a key with a size changed"
+text_set_line $((n + 1)) 1 < "$good" > "$k"; again "a key with a size changed"
 # a C that is gone, its key still there
 c=${k%.key}
 rm -f "$c"; again "a C that is gone"

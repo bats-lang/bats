@@ -49,7 +49,7 @@ sleep 1
 commit "2026-10-03T00:00:07Z" second
 build "$TMP/2.log"
 expect 1790985607 2026.10.3.7 "$(git rev-parse HEAD)"
-ran=$(grep -a -- '+ patsopt' "$TMP/2.log" | grep -av '(cached)' | sed -e 's/.*-d //' -e 's/[^a-zA-Z0-9_./].*//' | sort | tr '\n' ' ')
+ran=$(grep -a -- '+ patsopt' "$TMP/2.log" | grep -av '(cached)' | while IFS= read -r l; do printf '%s\n' "${l##*-d }" | grep -ao '^[a-zA-Z0-9_./]*'; done | sort | tr '\n' ' ')
 [ "$ran" = "build/src/_bats_facts.dats " ] || { echo "FAIL: a new commit ran patsopt on: $ran"; cat "$TMP/2.log"; exit 1; }
 # BATS_COMMIT names another commit
 BATS_COMMIT="$first" "$BATS" build --only debug --only native > "$TMP/3.log" 2>&1 || { echo "FAIL: build with BATS_COMMIT"; cat "$TMP/3.log"; exit 1; }

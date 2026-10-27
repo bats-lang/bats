@@ -18,6 +18,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 unset BATS_CACHE_DIR BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_PATSOPT_TIMEOUT_S BATS_PATSOPT_MEM_MB
 REAL=$HOME/.bats/ats2
 H=$TMP/home
@@ -102,7 +103,7 @@ grep -q "^error: patsopt on src/bin/p.bats failed with status 1 and printed noth
 run long long
 [ $rc = 1 ] || fail "a patsopt with a long stdout: status $rc" long
 grep -q "stdout was: " "$TMP/long.log" || fail "a long stdout was not said" long
-digits=$(sed -n 's/.*stdout was: //p' "$TMP/long.log" | tr -cd '0-9' | wc -c)
+digits=$(text_after_last 'stdout was: ' < "$TMP/long.log" | tr -cd '0-9' | wc -c)
 [ "$digits" = 4096 ] || fail "stdout said $digits digits, not 4096 (the cap)" long
 grep -q "\[cut\]" "$TMP/long.log" || fail "a cut stdout was not marked [cut]" long
 

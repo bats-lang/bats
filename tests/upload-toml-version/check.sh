@@ -8,6 +8,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 case_toml() { # <name> <bats.toml content> <expected archived bats.toml, with V for the version>
   d="$TMP/$1"; r="$TMP/$1-repo"; mkdir -p "$d/src" "$r"
   printf '%b' "$2" > "$d/bats.toml"
@@ -18,7 +19,7 @@ case_toml() { # <name> <bats.toml content> <expected archived bats.toml, with V 
    "$BATS" upload --repository "$r" > "$TMP/$1.log" 2>&1) || { echo "FAIL: $1: upload"; cat "$TMP/$1.log"; exit 1; }
   arc=$(ls "$r"/*/*.bats)
   v=$(basename "$arc" .bats); v=${v##*_}
-  printf '%b' "$3" | sed "s/V/$v/" > "$TMP/$1.want"
+  printf '%b' "$3" | text_replace V "$v" > "$TMP/$1.want"
   unzip -p "$arc" bats.toml > "$TMP/$1.got"
   diff "$TMP/$1.want" "$TMP/$1.got" || { echo "FAIL: $1: archived bats.toml"; exit 1; }
 }

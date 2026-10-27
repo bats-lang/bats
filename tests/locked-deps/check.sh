@@ -16,6 +16,7 @@
 set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 mkdir -p "$TMP/repo"
 publish() { # <name> <commit date> [<used package>]
   rm -rf "$TMP/p"; mkdir -p "$TMP/p/src"
@@ -31,7 +32,7 @@ publish() { # <name> <commit date> [<used package>]
    "$BATS" upload --repository "$TMP/repo" > "$TMP/up.log" 2>&1) || { echo "FAIL: upload $1"; cat "$TMP/up.log"; exit 1; }
 }
 version_of() { # <package>: the version bats_modules holds
-  sed -n 's/^version = "\(.*\)"$/\1/p' "$TMP/app/bats_modules/$1/bats.toml"
+  text_after_prefix 'version = "' < "$TMP/app/bats_modules/$1/bats.toml" | while IFS= read -r v; do printf '%s\n' "${v%\"}"; done
 }
 fails_with() { # <what> <expected stderr line>
   rc=0; (cd "$TMP/app" && "$BATS" check --repository "$TMP/repo") > /dev/null 2> "$TMP/err" || rc=$?
@@ -69,10 +70,10 @@ rc=0; "$BATS" check > /dev/null 2> "$TMP/err" || rc=$?
 [ "$rc" != 0 ] && grep -qx "error: bats.lock locks lm v2026.1.2.2, which is not in bats_modules. Use --repository <dir> to fetch it." "$TMP/err" ||
   { echo "FAIL: no repository"; cat "$TMP/err"; exit 1; }
 # A locked version the repository does not have fails loudly
-sed 's/^ld 2026.1.1.1 /ld 2025.1.1.1 /' "$TMP/old.lock" > bats.lock
+text_replace_prefix 'ld 2026.1.1.1 ' 'ld 2025.1.1.1 ' < "$TMP/old.lock" > bats.lock
 fails_with "missing locked version" "error: bats.lock locks ld v2025.1.1.1, which is not in repository '$TMP/repo'"
 # as does an archive whose sha256 is not the lock's
-sed 's/^\(ld 2026.1.1.1\) .*/\1 0000/' "$TMP/old.lock" > bats.lock
+text_set_by_prefix 'ld 2026.1.1.1 ' 'ld 2026.1.1.1 0000' < "$TMP/old.lock" > bats.lock
 fails_with "sha256" "error: bats.lock locks ld v2026.1.1.1, but its archive '$TMP/repo/ld/ld_2026.1.1.1.bats' does not have the sha256 bats.lock gives"
 # #321: the lock's sha256 of a package bats_modules already holds is compared
 # with the archive the copy was unpacked from. State: bats_modules holds the
@@ -80,11 +81,12 @@ fails_with "sha256" "error: bats.lock locks ld v2026.1.1.1, but its archive '$TM
 cp "$TMP/old.lock" bats.lock
 rm -rf bats_modules
 "$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: refill"; cat "$TMP/err"; exit 1; }
-[ "$(sed -n 2p bats_modules/ld/.bats-version)" = "$(sed -n 's/^ld [^ ]* //p' "$TMP/old.lock")" ] ||
+locked_sha() { text_after_prefix 'ld ' < "$TMP/old.lock" | while IFS= read -r r; do printf '%s\n' "${r#* }"; done; }
+[ "$(text_line 2 < bats_modules/ld/.bats-version)" = "$(locked_sha)" ] ||
   { echo "FAIL: fetch did not record the archive's sha256"; cat bats_modules/ld/.bats-version; exit 1; }
 # a changed sha256 of an installed package is an error, with the repository
 # (the new sha256 is checked at the fetch) and without it
-sed 's/^\(ld 2026.1.1.1\) .*/\1 0000/' "$TMP/old.lock" > bats.lock
+text_set_by_prefix 'ld 2026.1.1.1 ' 'ld 2026.1.1.1 0000' < "$TMP/old.lock" > bats.lock
 fails_with "installed, other sha256" "error: bats.lock locks ld v2026.1.1.1, but its archive '$TMP/repo/ld/ld_2026.1.1.1.bats' does not have the sha256 bats.lock gives"
 rc=0; "$BATS" build --only debug --only native > /dev/null 2> "$TMP/err" || rc=$?
 [ "$rc" != 0 ] && grep -qx "error: bats.lock locks ld v2026.1.1.1, which is not in bats_modules. Use --repository <dir> to fetch it." "$TMP/err" ||
@@ -106,7 +108,7 @@ rm bats_modules/ld/.bats-version
 "$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: no stamp"; cat "$TMP/err"; exit 1; }
 grep -qx "fetched ld v2026.1.1.1" "$TMP/err" || { echo "FAIL: no stamp was not refetched"; cat "$TMP/err"; exit 1; }
 # the stamp of another archive's sha256 is a copy of another archive
-sed -i '2s/.*/0000/' bats_modules/lm/.bats-version
+text_edit bats_modules/lm/.bats-version text_set_line 2 0000
 "$BATS" check --repository "$TMP/repo" > /dev/null 2> "$TMP/err" || { echo "FAIL: other recorded sha256"; cat "$TMP/err"; exit 1; }
 grep -qx "fetched lm v2026.1.2.2" "$TMP/err" || { echo "FAIL: other recorded sha256 was not refetched"; cat "$TMP/err"; exit 1; }
 # a package not installed is fetched, as before

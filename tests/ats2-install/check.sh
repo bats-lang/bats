@@ -30,11 +30,16 @@ set -eu
 BATS=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 . "$(dirname "$0")/../keep-on-fail.sh"
+. "$(dirname "$0")/../text.sh"
 fail() { echo "FAIL: $1"; exit 1; }
 ok() { echo "ok   $1"; }
-name=$(sed -n 's/^#define ATS2_NAME "\(.*\)"$/\1/p' "$ROOT/src/ats2.bats")
-sha=$(sed -n 's/^#define ATS2_SHA256 "\(.*\)"$/\1/p' "$ROOT/src/ats2.bats")
-url=$(sed -n 's/^#define ATS2_URL "\(.*\)"$/\1/p' "$ROOT/src/ats2.bats")
+pin() { # <name>: the quoted value of the pin's #define
+  v=$(text_after_prefix "#define $1 \"" < "$ROOT/src/ats2.bats")
+  printf '%s' "${v%\"}"
+}
+name=$(pin ATS2_NAME)
+sha=$(pin ATS2_SHA256)
+url=$(pin ATS2_URL)
 [ ${#sha} -eq 64 ] || fail "the pin's sha256 is '$sha'"
 case $url in https://*"/$name.tgz") ;; *) fail "the pin's url is '$url'" ;; esac
 unset BATS_SLOTS BATS_LOCK_DIR BATS_SLOT_HELD BATS_CACHE_DIR
