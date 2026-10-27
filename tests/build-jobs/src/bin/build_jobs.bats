@@ -485,7 +485,7 @@ in put_file(dir, "/src/bin/tf.bats", builder_of("#include \"share/atspre_staload
 fn overlaps {sd,se,sw,sg,sl:nat} (t: !tool, dir: string sd, env: string se, words: string sw, log: string sg, expected: int, label: string sl): void = let
   val () = project(dir)
   val status = bats_split(t, dir, env, words, "build.out", "build.err")
-  val () = (if status = 0 then () else die_file(label, ": the build failed", "build.err"))
+  val () = (if status = 0 then () else die_file(label, ": the build failed", "build.out"))
   val () = overlap_is(log, expected, label)
 in prints(dir, "21\n", label) end
 
@@ -639,7 +639,8 @@ fn case_jobs_stderr (t: !tool): void = let
   val () = small_project("stderr_big")
   val s = bats_split(t, "stderr_big", "CC_FAIL_A=m1_dats.c\nCC_BIG=m1_dats.c\n", "build\n--only\ndebug\n--only\nnative\n--jobs\n2", "stderr_big.out", "stderr_big.err")
   val () = (if s = 1 then () else die_file("a failing compile of 200000 bytes did not fail with 1", "", "stderr_big.out"))
-in has("stderr_big.out", "^x\\{65493\\}error: cc failed for src module m1_dats.c$", "the first 65536 bytes of the compiler's messages, then the note") end
+  val found = run_split("", builder_of("grep\n-aq\n--\n^x\\{32767\\}x\\{32726\\}error: cc failed for src module m1_dats.c$\nstderr_big.out"), "grep.out", "grep.err")
+in (if found = 0 then () else die("the first 65536 bytes of the compiler's messages, then the note, are not in stderr_big.out", "")) end
 
 fn run_all (t: !tool): void = let
   val () = case_jobs_count(t)
