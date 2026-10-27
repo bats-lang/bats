@@ -298,7 +298,7 @@ fn relative_c {lr,lo:agz}{nr,no:pos}{rm:nat | rm <= nr; rm <= 524288}{om:nat | o
             | ~$R.ok(fd) => let
                 val bw = $F.buf_writer_create(fd)
                 val r = put_c(bv_c, n, m, bv_p, pl, pl - 6, bv_m, ml, ml - 10, pl, ml, bw)
-              in writer_finish(bw, r) end
+              in writer_close(bw, r) end
             | ~$R.err(e) => NotWritten(e)): write_result
           val said = write_settle(bv_n, nl, written)
           val () = $A.drop<byte>(fz_c, bv_c)

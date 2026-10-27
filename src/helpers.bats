@@ -992,29 +992,39 @@ end
 implement wbw_loop(bw, bv, i, lim, m) = wbw_range(bw, bv, i, lim, m)
 
 (* The writer closed after r, the result of what was written to it: r
-   when that failed, else the flush's, else the close's. The file
-   package's buf_writer_close drops its own flush's error, so the flush
-   is asked for here, where its result is kept. Consumes bw and r. *)
-#pub fn writer_finish (bw: $F.buf_writer, r: write_result): write_result
+   when that failed, else the final flush's error, else the close's. The
+   file package's buf_writer_close_checked answers each of the flush and
+   the close (keyword: write-errors); the writer is closed in every case.
+   Consumes bw and r. *)
+#pub fn writer_close (bw: $F.buf_writer, r: write_result): write_result
 
-implement writer_finish (bw, r) =
+implement writer_close (bw, r) = let
+  val closed = $F.buf_writer_close_checked(bw)
+in
   case+ r of
   | ~Wrote() =>
-    (case+ $F.buf_flush(bw) of
-     | ~$R.ok(_) =>
-       (case+ $F.buf_writer_close(bw) of
-        | ~$R.ok(_) => Wrote()
-        | ~$R.err(e) => NotWritten(e))
-     | ~$R.err(e) => let
-         (* the close is for the descriptor; the flush's error is the answer *)
-         val () = $R.discard<int><$F.io_error>($F.buf_writer_close(bw))
-       in NotWritten(e) end)
+    (case+ closed of
+     | ~$F.Closed() => Wrote()
+     | ~$F.FlushFailed(flush_e) => NotWritten(flush_e)
+     | ~$F.CloseFailed(close_e) => NotWritten(close_e)
+     (* the flush's error is the answer; the close's is the lesser one *)
+     | ~$F.FlushAndCloseFailed(flush_e, _) => NotWritten(flush_e))
   | ~NotWritten(e) => let
-      val () = $R.discard<int><$F.io_error>($F.buf_writer_close(bw))
+      (* r is the first error; the close is for the descriptor *)
+      val () = (case+ closed of
+        | ~$F.Closed() => ()
+        | ~$F.FlushFailed(_) => ()
+        | ~$F.CloseFailed(_) => ()
+        | ~$F.FlushAndCloseFailed(_, _) => ())
     in NotWritten(e) end
   | ~WriteTooLarge() => let
-      val () = $R.discard<int><$F.io_error>($F.buf_writer_close(bw))
+      val () = (case+ closed of
+        | ~$F.Closed() => ()
+        | ~$F.FlushFailed(_) => ()
+        | ~$F.CloseFailed(_) => ()
+        | ~$F.FlushAndCloseFailed(_, _) => ())
     in WriteTooLarge() end
+end
 
 (* What became of a file that is written only when it differs from what
    it holds: it held these bytes already, it was written, or it could not
@@ -3627,7 +3637,7 @@ fn note_write (p: $B.builder_v, b: $B.builder_v): void =
       val () = $A.drop<byte>(fz_b, bv_b)
       val () = $A.free<byte>($A.thaw<byte>(fz_b))
     in
-      (case+ writer_finish(bw, r) of
+      (case+ writer_close(bw, r) of
        | ~Wrote() => ()
        | ~NotWritten(_) => ()
        | ~WriteTooLarge() => ())
@@ -3944,7 +3954,7 @@ fn write_opened {l:agz}{n:pos}{k:nat | k <= n}
       val r = wbw_range(bw, bv_c, 0, content_len, content_len)
       val () = $A.drop<byte>(fz_c, bv_c)
       val () = $A.free<byte>($A.thaw<byte>(fz_c))
-    in writer_finish(bw, r) end
+    in writer_close(bw, r) end
   | ~$R.err(e) => let val () = $A.free<byte>(content_arr) in NotWritten(e) end
 
 implement write_file_from_builder(path_bv, path_len, content_b) = let
