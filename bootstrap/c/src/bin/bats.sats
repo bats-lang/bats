@@ -32,7 +32,10 @@ staload "with_env.sats"
 staload "fixtures.sats"
 staload "pins.sats"
 staload "affected.sats"
+staload "merge_proof.sats"
 staload "_bats_inputs.sats"
+
+
 
 
 

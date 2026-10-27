@@ -37,7 +37,7 @@ CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result 
 ## Architecture
 
 Entry point: `src/bin/bats.bats`
-Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`, `src/pins.bats`, `src/affected.bats`
+Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`, `src/pins.bats`, `src/affected.bats`, `src/merge_proof.bats`
 
 Dependencies: argparse, array, arith, builder, env, file, path, process, result, sha256, str, toml
 
@@ -146,4 +146,5 @@ A comment states its reason in one line and names the area by keyword; the detai
 | `.claude/rules/check-pins.md` | bats check-pins: floating CI inputs (#390) |
 | `.claude/rules/capture.md` | Captured runs: the outcome of a child whose output is longer than the buffer (#444) |
 | `.claude/rules/affected.md` | The affected rule: which jobs of check.yml a change runs (#481) |
+| `.claude/rules/merge-proof.md` | The main-merge ruling as a command: bats merge-proof (#530) |
 | `.claude/rules/keep-on-fail.md` | Test temp directories: `tests/keep-on-fail.sh` (#478) |
