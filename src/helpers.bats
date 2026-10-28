@@ -1904,30 +1904,30 @@ datavtype capture_end =
   | CaptureEndFailed of ($F.io_error)
 
 (* chunk[i, m) put at out[filled + i] (capture area) *)
-fun capture_put {lo:agz}{lc:agz}{f:nat}{m:nat | m <= 4096; f + m <= 4096}{i:nat | i <= m} .<m - i>.
-  (out: !$A.arr(byte, lo, 4096), filled: int f,
+fun capture_put {lo:agz}{lc:agz}{cap:pos}{f:nat}{m:nat | m <= 4096; f + m <= cap}{i:nat | i <= m} .<m - i>.
+  (out: !$A.arr(byte, lo, cap), filled: int f,
    chunk: !$A.arr(byte, lc, 4096), m: int m, i: int i): int(f + m) =
   if i >= m then filled + m
   else let
     val () = $A.set<byte>(out, filled + i, $A.get<byte>(chunk, i))
   in capture_put(out, filled, chunk, m, i + 1) end
 
-(* Reads fd to its end, keeping the first 4096 bytes in out; stops at
-   1 GiB (capture area) *)
-fun capture_read {lo:agz}{lc:agz}{f:nat | f <= 4096}{t:nat | t <= 1073741824}
+(* Reads fd to its end, keeping the first cap bytes in out (cap is out's size);
+   stops at 1 GiB (capture area) *)
+fun capture_read {lo:agz}{lc:agz}{cap:pos}{f:nat | f <= cap}{t:nat | t <= 1073741824}
   .<1073741824 - t>.
-  (fd: !$F.fd, out: !$A.arr(byte, lo, 4096), chunk: !$A.arr(byte, lc, 4096),
+  (fd: !$F.fd, out: !$A.arr(byte, lo, cap), cap: int cap, chunk: !$A.arr(byte, lc, 4096),
    filled: int f, total: int t)
-  : @([g:nat | g <= 4096] int g, [u:nat] int u, capture_end) =
+  : @([g:nat | g <= cap] int g, [u:nat] int u, capture_end) =
   case+ $F.file_read(fd, chunk, 4096) of
   | ~$R.err(e) => @(filled, total, CaptureEndFailed(e))
   | ~$R.ok(k) =>
     if k <= 0 then @(filled, total, CaptureEnded())
     else if total + k > 1073741824 then @(filled, 1073741824, CaptureEnded())
     else let
-      val kept = (if filled + k <= 4096 then capture_put(out, filled, chunk, k, 0)
-                  else capture_put(out, filled, chunk, 4096 - filled, 0)): [g:nat | g <= 4096] int g
-    in capture_read(fd, out, chunk, kept, total + k) end
+      val kept = (if filled + k <= cap then capture_put(out, filled, chunk, k, 0)
+                  else capture_put(out, filled, chunk, cap - filled, 0)): [g:nat | g <= cap] int g
+    in capture_read(fd, out, cap, chunk, kept, total + k) end
 
 (* As run_cmd_capture, with the outcome a type: stdout is read to its end,
    stderr goes to /dev/null, and a longer output is its own constructor *)
@@ -1948,7 +1948,7 @@ in
       val () = $P.pipe_end_close(serr_p)
       val+ ~$P.pipe_fd(out_fd) = sout_p
       val chunk = $A.alloc<byte>(4096)
-      val @(kept, total, ended) = capture_read(out_fd, outbuf, chunk, 0, 0)
+      val @(kept, total, ended) = capture_read(out_fd, outbuf, 4096, chunk, 0, 0)
       val () = $A.free<byte>(chunk)
       val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
       val status = (case+ $P.child_wait(child) of
@@ -3426,12 +3426,27 @@ in
   in rc end
 end
 
+(* build-jobs: the compile is queued (cc_pool_drain ends the queue), so 0 means started, not made; ~1 when it could not be started *)
 #pub fn run_cc {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
   {ni:pos}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im,
    rel: profile): int
+
+(* build-jobs: run_cc, with the note (note_bv[0, note_len)) printed after the compiler's messages if the compile fails *)
+#pub fn run_cc_noted {lph:agz}{lo:agz}{li:agz}{ln:agz}{no:pos}{om:nat | om <= no; om <= 524288}
+  {ni:pos}{im:nat | im <= ni; im <= 524288}{nn:pos}{nm:nat | nm <= nn; nm <= 524288}
+  (ph: !$A.borrow(byte, lph, 12288), phlen: int,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om,
+   in_bv: !$A.borrow(byte, li, ni), in_len: int im,
+   rel: profile,
+   note_bv: !$A.borrow(byte, ln, nn), note_len: int nm): int
+
+(* build-jobs: the wasm compile of in_bv to out_bv, queued like run_cc's; its key is written when it ends well *)
+#pub fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni; im <= 524288}{om:nat | om <= no; om <= 524288}
+  (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
+   out_bv: !$A.borrow(byte, lo, no), out_len: int om): int
 
 (* The preprocessed text of an object's C in <out>.i, digested in its key (preprocess keyword) *)
 #pub fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 524288}
@@ -3467,20 +3482,272 @@ in
   in rc end
 end
 
-implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
+(* ============================================================
+   Parallel compiles (keyword: build-jobs; .claude/rules/build-jobs.md)
+   ============================================================ *)
+
+(* BATS_SLOTS: 0 when it is not set or empty, -1 when it is not a number
+   from 1 up, else the number, at most 64 *)
+fn slots_wanted (): int = let
+  var b : $B.builder_v = $B.create()
+  val set = env_value("BATS_SLOTS", b)
+  val @(a, k) = $B.into_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  fun digits {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
+    (bv: !$A.borrow(byte, l, n), i: int i, k: int k, acc: int): int =
+    if i >= k then acc
+    else let
+      val c = byte2int0($A.read<byte>(bv, i))
+    in
+      if c < 48 then ~1
+      else if c > 57 then ~1
+      else digits(bv, i + 1, k, (if acc > 64 then 65 else acc * 10 + (c - 48)))
+    end
+  val n = (if set then digits(bv, 0, k, 0) else 0): int
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in
+  if ~set then 0
+  else if n < 1 then ~1
+  else if n > 64 then 64
+  else n
+end
+
+(* build-jobs: v as an index, at most 256 *)
+fun jobs_clamp {i:nat | i <= 256} .<256 - i>. (i: int i, v: int): [r:nat | r <= 256] int r =
+  if i >= 256 then 256
+  else if i >= v then i
+  else jobs_clamp(i + 1, v)
+
+(* build-jobs: v as an index from 1 to 256 *)
+fn jobs_pos (v: int): [r:pos | r <= 256] int r = let
+  val c = jobs_clamp(0, v)
+in if c >= 1 then c else 1 end
+
+(* build-jobs: buf[p, len) read as a decimal number, ~1 when a byte is not a digit; more than 100000 stays 100000 *)
+fun jobs_digits {l:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (buf: !$A.arr(byte, l, 4096), p: int p, len: int, acc: int): int =
+  if p >= len then acc
+  else if p >= 4096 then acc
+  else let
+    val c = byte2int0($A.get<byte>(buf, p))
+  in
+    if c < 48 then ~1
+    else if c > 57 then ~1
+    else jobs_digits(buf, p + 1, len, (if acc > 100000 then 100000 else acc * 10 + (c - 48)))
+  end
+
+(* build-jobs: whether buf[0, len) is the word cores *)
+fn jobs_is_cores {l:agz} (buf: !$A.arr(byte, l, 4096), len: int): bool =
+  len = 5 && peek_arr(buf, 0, 4096) = 99 && peek_arr(buf, 1, 4096) = 111
+  && peek_arr(buf, 2, 4096) = 114 && peek_arr(buf, 3, 4096) = 101 && peek_arr(buf, 4, 4096) = 115
+
+(* build-jobs: the value of --jobs: ~1 when it is refused, 0 for the word cores, else the number, at most 256 *)
+fn jobs_parse {l:agz} (buf: !$A.arr(byte, l, 4096), len: int): [r:int | ~1 <= r; r <= 256] int r =
+  if jobs_is_cores(buf, len) then 0
+  else if len < 1 then ~1
+  else let
+    val v = jobs_digits(buf, 0, len, 0)
+  in if v < 1 then ~1 else jobs_clamp(0, v) end
+
+(* build-jobs: what --jobs asked (0: cores) and the cores counted (0: not asked yet) *)
+val g_jobs_asked = ref<int>(0)
+val g_jobs_cores = ref<int>(0)
+
+(* build-jobs: takes the value of --jobs; false (nothing taken) when it is not a number from 1 or the word cores *)
+#pub fn jobs_option {l:agz} (buf: !$A.arr(byte, l, 4096), len: int): bool
+
+implement jobs_option (buf, len) = let
+  val r = jobs_parse(buf, len)
+in
+  if r < 0 then false
+  else let val () = !g_jobs_asked := r in true end
+end
+
+(* build-jobs: the online processors, asked of getconf once per run; 1 (said once) when it gives no number from 1 up *)
+fn jobs_cores_ask (): int = let
+  val (nul_exec | exec) = $P.path_of_string_proved("getconf")
+  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
+  var b1 : $B.builder_v = $B.create()
+  val () = bput_v(b1, "getconf")
+  var b2 : $B.builder_v = $B.create()
+  val () = bput_v(b2, "_NPROCESSORS_ONLN")
+  val argv = $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2), $L.list_vt_nil()))
+  val out = $A.alloc<byte>(4096)
+  val outcome = run_cmd_capture_outcome(nul_exec | bv_exec, argv, out)
+  val len = (case+ outcome of
+    | ~CaptureFits(len) => len
+    | ~CaptureFailed(_, _) => 0
+    | ~CaptureLonger(_, _) => 0
+    | ~CaptureReadFailed(_, _, _) => 0
+    | ~CaptureNotRun(_) => 0): [k:nat | k <= 4096] int k
+  val last = peek_arr(out, len - 1, 4096)
+  val stop = (if len >= 1 && last = 10 then len - 1 else len): int
+  val n = jobs_digits(out, 0, stop, 0)
+  val () = $A.free<byte>(out)
+  val () = $A.cborrow_drop(fz_exec, bv_exec)
+  val () = $A.barr_free($A.barr_thaw(fz_exec))
+  val () = (if n < 1 then prerr! ("warning: getconf _NPROCESSORS_ONLN gave no number from 1 up, so --jobs cores is 1\n") else ())
+in (if n < 1 then 1 else n) end
+
+fn jobs_cores (): [r:pos | r <= 256] int r = let
+  val known = !g_jobs_cores
+in
+  if known >= 1 then jobs_pos(known)
+  else let
+    val n = jobs_cores_ask()
+    val () = !g_jobs_cores := n
+  in jobs_pos(n) end
+end
+
+(* build-jobs: the quotient of r by s, at least 1 (q is what is already counted) *)
+fun jobs_div {r:nat | r <= 256}{s:pos}{q:nat | q + r <= 256} .<r>.
+  (r: int r, s: int s, q: int q): [j:pos | j <= 256] int j =
+  if r < s then (if q >= 1 then q else 1)
+  else jobs_div(r - s, s, q + 1)
+
+(* build-jobs: how many compiles run at once: what --jobs asked (else the cores)
+   divided by the machine slots BATS_SLOTS names, at least 1, at most 256 *)
+#pub fn jobs_effective (): [j:pos | j <= 256] int j
+
+implement jobs_effective () = let
+  val asked = !g_jobs_asked
+  val req = (if asked >= 1 then jobs_pos(asked) else jobs_cores()): [r:pos | r <= 256] int r
+  val slots = jobs_pos(slots_wanted())
+in jobs_div(req, slots, 0) end
+
+(* build-jobs: the kind of a compile; its constructor says which step runs after it succeeded *)
+datavtype cc_kind =
+  | CcNative of (profile)
+  | CcWasm of ()
+
+(* build-jobs: a spawned compile, its stderr pipe's read end, its object's and C's paths and the note printed when it fails *)
+datavtype cc_job =
+  | {lo,li,ln:agz}{no,ni,nn:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}{nm:nat | nm <= nn; nm <= 524288}
+    cc_job_mk of (cc_kind, $P.child, $F.fd, $A.arr(byte, lo, no), int om, $A.arr(byte, li, ni), int im, $A.arr(byte, ln, nn), int nm)
+
+(* build-jobs: the queue, oldest first; the count is in the type, at most 256 *)
+datavtype cc_pool =
+  | {n:nat | n <= 256} cc_pool_mk of (int n, $L.list_vt(cc_job, n))
+
+val g_pool = ref<cc_pool>(cc_pool_mk(0, $L.list_vt_nil()))
+
+(* build-jobs: a job ends: stderr read to its end (the first 65536 bytes kept), the child waited for, then in order the verbose line, the stderr text, the note and the build error, or the key of its object *)
+fn cc_job_end (job: cc_job): void = let
+  val+ ~cc_job_mk(kind, child, fd, oa, om, ia, im, na, nm) = job
+  val eb = $A.alloc<byte>(65536)
+  val chunk = $A.alloc<byte>(4096)
+  val @(elen, _total, ended) = capture_read(fd, eb, 65536, chunk, 0, 0)
+  val () = $A.free<byte>(chunk)
+  val () = (case+ ended of
+    | ~CaptureEnded() => ()
+    | ~CaptureEndFailed(_) => ())
+  val () = $R.discard<int><$F.io_error>($F.file_close(fd))
+  val ec = (case+ $P.child_wait(child) of
+    | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val @(fz_i, bv_i) = $A.freeze<byte>(ia)
+  val @(fz_n, bv_n) = $A.freeze<byte>(na)
+  val @(fz_e, bv_e) = $A.freeze<byte>(eb)
+  val () = (case+ kind of
+    | ~CcNative(rel) => let
+        val () = (if is_verbose() then let
+          val () = print! ("  + cc -c -o ")
+          val () = print_borrow(bv_o, 0, om, om)
+          val () = print! (" ")
+          val () = print_borrow(bv_i, 0, im, im)
+        in print_newline() end else ())
+      in
+        if ec <> 0 then let
+          val () = print_borrow(bv_e, 0, elen, 65536)
+        in (if nm > 0 then let
+              val () = set_build_err()
+            in print_borrow(bv_n, 0, nm, nm) end
+            else ()) end
+        else native_object_record(rel, bv_o, om, bv_i, im)
+      end
+    | ~CcWasm() =>
+      if ec <> 0 then let
+        val () = print_borrow(bv_e, 0, elen, 65536)
+      in set_build_err() end
+      else wasm_object_record(bv_o, om, bv_i, im))
+  val () = $A.drop<byte>(fz_e, bv_e)
+  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+  val () = $A.drop<byte>(fz_n, bv_n)
+  val () = $A.free<byte>($A.thaw<byte>(fz_n))
+  val () = $A.drop<byte>(fz_i, bv_i)
+  val () = $A.free<byte>($A.thaw<byte>(fz_i))
+  val () = $A.drop<byte>(fz_o, bv_o)
+in $A.free<byte>($A.thaw<byte>(fz_o)) end
+
+(* build-jobs: ends the oldest jobs until fewer than j are left; the count left and the jobs, oldest first *)
+fun cc_make_room {n:nat | n <= 256}{j:pos | j <= 256} .<n>.
+  (xs: $L.list_vt(cc_job, n), n: int n, j: int j): [m:nat | m < j] @(int m, $L.list_vt(cc_job, m)) =
+  if n < j then @(n, xs)
+  else (case+ xs of
+    | ~$L.list_vt_nil() => @(0, $L.list_vt_nil())
+    | ~$L.list_vt_cons(job, rest) => let
+        val () = cc_job_end(job)
+      in cc_make_room(rest, n - 1, j) end)
+
+(* build-jobs: the job after the newest *)
+fun cc_push_last {n:nat} .<n>. (xs: $L.list_vt(cc_job, n), job: cc_job): $L.list_vt(cc_job, n + 1) =
+  case+ xs of
+  | ~$L.list_vt_nil() => $L.list_vt_cons(job, $L.list_vt_nil())
+  | ~$L.list_vt_cons(x, tl) => $L.list_vt_cons(x, cc_push_last(tl, job))
+
+(* build-jobs: every job ended, oldest first *)
+fun cc_drain_list {n:nat} .<n>. (xs: $L.list_vt(cc_job, n)): void =
+  case+ xs of
+  | ~$L.list_vt_nil() => ()
+  | ~$L.list_vt_cons(job, tl) => let
+      val () = cc_job_end(job)
+    in cc_drain_list(tl) end
+
+fn cc_pool_take (): cc_pool = let
+  var taken : cc_pool = cc_pool_mk(0, $L.list_vt_nil())
+  val () = ref_exch_elt<cc_pool>(g_pool, taken)
+in taken end
+
+fn cc_pool_put (pool: cc_pool): void = let
+  var back : cc_pool = pool
+  val () = ref_exch_elt<cc_pool>(g_pool, back)
+in
+  case+ back of
+  | ~cc_pool_mk(_, xs) => cc_drain_list(xs)
+end
+
+(* build-jobs: the job joins the queue after the oldest jobs ended that left no room for it *)
+fn cc_pool_submit (job: cc_job): void = let
+  val j = jobs_effective()
+  val+ ~cc_pool_mk(n, xs) = cc_pool_take()
+  val @(m, ys) = cc_make_room(xs, n, j)
+in cc_pool_put(cc_pool_mk(m + 1, cc_push_last(ys, job))) end
+
+(* build-jobs: room for one more child: the oldest jobs end until fewer than j are running, before the next one is started *)
+fn cc_pool_room (): void = let
+  val j = jobs_effective()
+  val+ ~cc_pool_mk(n, xs) = cc_pool_take()
+  val @(m, ys) = cc_make_room(xs, n, j)
+in cc_pool_put(cc_pool_mk(m, ys)) end
+
+(* build-jobs: the barrier; every job ended, so every object is there and its key written *)
+#pub fn cc_pool_drain (): void
+
+implement cc_pool_drain () = let
+  val+ ~cc_pool_mk(_, xs) = cc_pool_take()
+in cc_drain_list(xs) end
+
+(* build-jobs: starts clang with argv and queues the job; 0, or ~1 when it cannot be started (the queue is ended first, so the messages stay in order) *)
+fn cc_start {lo,li,ln:agz}{no,ni,nn:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}{nm:nat | nm <= nn; nm <= 524288}
+  (kind: cc_kind, argv: $L.listv($P.arg_entry),
+   out_bv: !$A.borrow(byte, lo, no), om: int om,
+   in_bv: !$A.borrow(byte, li, ni), im: int im,
+   note_bv: !$A.borrow(byte, ln, nn), nm: int nm): int = let
   val (nul_exec | exec) = $P.path_of_string_proved("clang")
   val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
-  val argv = native_cc_argv(ph, phlen, out_bv, out_len, in_bv, in_len, rel, false)
-  val () = key_drop(out_bv, out_len)
-  (* the text the object is made from, before cc reads the headers (preprocess keyword) *)
-  val _ = preprocess_native(ph, phlen, out_bv, out_len, in_bv, in_len, rel)
-  val _verbose = if is_verbose() then 1 else 0
-  val () = (if $AR.gt_int_int(_verbose, 0) then let
-    val () = print! ("  + cc -c -o ")
-    val () = print_borrow(out_bv, 0, out_len, out_len)
-    val () = print! (" ")
-    val () = print_borrow(in_bv, 0, in_len, in_len)
-  in print_newline() end else ())
+  (* the oldest jobs end first, so no more than j children run (the job queued below is the j-th) *)
+  val () = cc_pool_room()
   val sr = spawn_child(nul_exec | bv_exec, argv,
     $P.dev_null(), $P.dev_null(), $P.pipe_new())
   val () = $A.cborrow_drop(fz_exec, bv_exec)
@@ -3492,31 +3759,80 @@ in
       val () = $P.pipe_end_close(sin_p)
       val () = $P.pipe_end_close(sout_p)
       val+ ~$P.pipe_fd(err_fd) = serr_p
-      (* Read stderr BEFORE waiting — prevents deadlock if child
-         writes more than PIPE_BUF (64KB) to stderr *)
-      val eb = $A.alloc<byte>(65536)
-      val err_r = $F.file_read(err_fd, eb, 65536)
-      val elen = (case+ err_r of
-        | ~$R.ok(n) => n | ~$R.err(_) => 0): int
-      val ecr = $F.file_close(err_fd)
-      val () = $R.discard<int><$F.io_error>(ecr)
-      val wr = $P.child_wait(child)
-      val ec = (case+ wr of
-        | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
-    in
-      if ec <> 0 then let
-        val @(fz_eb2, bv_eb2) = $A.freeze<byte>(eb)
-        val () = print_borrow(bv_eb2, 0, elen, 65536)
-        val () = $A.drop<byte>(fz_eb2, bv_eb2)
-        val () = $A.free<byte>($A.thaw<byte>(fz_eb2))
-      in ec end
-      else let
-        val () = $A.free<byte>(eb)
-        val () = native_object_record(rel, out_bv, out_len, in_bv, in_len)
-      in 0 end
-    end
-  | ~$R.err(_) => ~1
+      (* the job owns copies of the paths and the note, so no borrow of the caller outlives its call *)
+      var ob : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(out_bv, 0, om, om, ob)
+      val @(oa, ol) = $B.into_arr(ob)
+      var ib : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(in_bv, 0, im, im, ib)
+      val @(ia, il) = $B.into_arr(ib)
+      var nb : $B.builder_v = $B.create()
+      val () = copy_to_builder_v(note_bv, 0, nm, nm, nb)
+      val @(na, nl) = $B.into_arr(nb)
+      val () = cc_pool_submit(cc_job_mk(kind, child, err_fd, oa, ol, ia, il, na, nl))
+    in 0 end
+  | ~$R.err(_) => let
+      val () = (case+ kind of ~CcNative(_) => () | ~CcWasm() => ())
+      val () = cc_pool_drain()
+    in ~1 end
 end
+
+(* build-jobs: the division of the count by the slots and the value of --jobs *)
+$UNITTEST.run begin
+fn parse_text {sn:nat | sn <= 4096} (s: string sn): int = let
+  val a = $A.alloc<byte>(4096)
+  fun fill {l:agz}{sn:nat | sn <= 4096}{i:nat | i <= sn} .<sn - i>.
+    (a: !$A.arr(byte, l, 4096), s: string sn, n: int sn, i: int i): void =
+    if i >= n then ()
+    else let
+      val () = $A.set<byte>(a, i, $A.int2byte($AR.low_byte(char2int0(string_get_at(s, i)))))
+    in fill(a, s, n, i + 1) end
+  val n = g1u2i(string1_length(s))
+  val () = fill(a, s, n, 0)
+  val r = jobs_parse(a, n)
+  val () = $A.free<byte>(a)
+in r end
+fn test_jobs_number (): bool = parse_text("4") = 4
+fn test_jobs_leading_zeros (): bool = parse_text("007") = 7
+fn test_jobs_word_cores (): bool = parse_text("cores") = 0
+fn test_jobs_over_256_is_256 (): bool = parse_text("300") = 256
+fn test_jobs_huge_is_256 (): bool = parse_text("99999999999999999999") = 256
+fn test_jobs_zero_is_refused (): bool = parse_text("0") = ~1
+fn test_jobs_empty_is_refused (): bool = parse_text("") = ~1
+fn test_jobs_word_is_refused (): bool = parse_text("many") = ~1
+fn test_jobs_digits_then_letter_is_refused (): bool = parse_text("2x") = ~1
+fn test_jobs_negative_is_refused (): bool = parse_text("-1") = ~1
+fn test_jobs_cores_in_capitals_is_refused (): bool = parse_text("CORES") = ~1
+fn test_jobs_div_rounds_down (): bool = jobs_div(7, 2, 0) = 3
+fn test_jobs_div_of_a_multiple (): bool = jobs_div(8, 2, 0) = 4
+fn test_jobs_div_is_at_least_one (): bool = jobs_div(1, 4, 0) = 1
+fn test_jobs_div_by_one (): bool = jobs_div(256, 1, 0) = 256
+fn test_jobs_div_by_more_than_the_count (): bool = jobs_div(3, 64, 0) = 1
+end
+
+implement run_cc_noted(ph, phlen, out_bv, out_len, in_bv, in_len, rel, note_bv, note_len) = let
+  val argv = native_cc_argv(ph, phlen, out_bv, out_len, in_bv, in_len, rel, false)
+  val () = key_drop(out_bv, out_len)
+  (* the text the object is made from, before cc reads the headers (preprocess keyword) *)
+  val _ = preprocess_native(ph, phlen, out_bv, out_len, in_bv, in_len, rel)
+in cc_start(CcNative(rel), argv, out_bv, out_len, in_bv, in_len, note_bv, note_len) end
+
+implement run_cc(ph, phlen, out_bv, out_len, in_bv, in_len, rel) = let
+  val none = $A.alloc<byte>(1)
+  val @(fz_none, bv_none) = $A.freeze<byte>(none)
+  val rc = run_cc_noted(ph, phlen, out_bv, out_len, in_bv, in_len, rel, bv_none, 0)
+  val () = $A.drop<byte>(fz_none, bv_none)
+  val () = $A.free<byte>($A.thaw<byte>(fz_none))
+in rc end
+
+implement run_wasm_cc(in_bv, in_len, out_bv, out_len) = let
+  val argv = wasm_cc_argv(in_bv, in_len, out_bv, out_len, false)
+  val none = $A.alloc<byte>(1)
+  val @(fz_none, bv_none) = $A.freeze<byte>(none)
+  val rc = cc_start(CcWasm(), argv, out_bv, out_len, in_bv, in_len, bv_none, 0)
+  val () = $A.drop<byte>(fz_none, bv_none)
+  val () = $A.free<byte>($A.thaw<byte>(fz_none))
+in rc end
 
 (* ============================================================
    The machine's slots (bats-lang/bats#252)
@@ -3550,33 +3866,6 @@ end
 #pub fn machine_slot_release (slot: machine_slot): void
 
 #pub fn machine_slot_refused (slot: !machine_slot): bool
-
-(* BATS_SLOTS: 0 when it is not set or empty, -1 when it is not a number
-   from 1 up, else the number, at most 64 *)
-fn slots_wanted (): int = let
-  var b : $B.builder_v = $B.create()
-  val set = env_value("BATS_SLOTS", b)
-  val @(a, k) = $B.into_arr(b)
-  val @(fz, bv) = $A.freeze<byte>(a)
-  fun digits {l:agz}{n:pos}{k:nat | k <= n}{i:nat | i <= k} .<k - i>.
-    (bv: !$A.borrow(byte, l, n), i: int i, k: int k, acc: int): int =
-    if i >= k then acc
-    else let
-      val c = byte2int0($A.read<byte>(bv, i))
-    in
-      if c < 48 then ~1
-      else if c > 57 then ~1
-      else digits(bv, i + 1, k, (if acc > 64 then 65 else acc * 10 + (c - 48)))
-    end
-  val n = (if set then digits(bv, 0, k, 0) else 0): int
-  val () = $A.drop<byte>(fz, bv)
-  val () = $A.free<byte>($A.thaw<byte>(fz))
-in
-  if ~set then 0
-  else if n < 1 then ~1
-  else if n > 64 then 64
-  else n
-end
 
 (* Opens the file at the path b holds (b is consumed) *)
 fn open_built (b: $B.builder_v, acc: $F.access, how: $F.opening): $R.result($F.fd, $F.io_error) = let

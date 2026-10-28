@@ -1,0 +1,13 @@
+[package]
+name = "build-jobs"
+kind = "bin"
+
+[dependencies]
+"array" = ""
+"arith" = ""
+"builder" = ""
+"env" = ""
+"file" = ""
+"list" = ""
+"process" = ""
+"result" = ""
