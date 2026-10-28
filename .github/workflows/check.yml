@@ -150,6 +150,15 @@ jobs:
         working-directory: tests/toml-fields
         run: dist/debug/toml_fields ${{ github.workspace }}/dist/debug/bats
 
+      # The --jobs test is written in bats (bats#554): built, then run on the compiler under test
+      - name: Build the build-jobs test
+        working-directory: tests/build-jobs
+        run: ~/bats-bin/bats build --repository ~/repository
+
+      - name: Fixture test build-jobs
+        working-directory: tests/build-jobs
+        run: dist/debug/build_jobs ${{ github.workspace }}/dist/debug/bats
+
       - name: Verify bootstrap/c matches sources
         id: verify-bootstrap
         run: |
@@ -189,6 +198,7 @@ jobs:
           path: |
             ${{ runner.temp }}/kept
             tests/toml-fields/work
+            tests/build-jobs/work
           include-hidden-files: true
           if-no-files-found: ignore
 

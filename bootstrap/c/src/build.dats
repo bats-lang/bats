@@ -700,17 +700,6 @@ fn compile_wasm_runtime(): int = let
   val () = $A.barr_free($A.barr_thaw(fz_exec))
 in rc end
 
-fn run_wasm_cc {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om <= no}
-  (in_bv: !$A.borrow(byte, li, ni), in_len: int im,
-   out_bv: !$A.borrow(byte, lo, no), out_len: int om): int = let
-  val (nul_exec | exec) = $P.path_of_string_proved("clang")
-  val @(fz_exec, bv_exec) = $A.barr_freeze(exec)
-  val argv = wasm_cc_argv(in_bv, in_len, out_bv, out_len, false)
-  val rc = run_cmd(nul_exec | bv_exec, argv)
-  val () = $A.cborrow_drop(fz_exec, bv_exec)
-  val () = $A.barr_free($A.barr_thaw(fz_exec))
-in rc end
-
 fn wasm_cc_file {lph:agz}{l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    path: !$A.borrow(byte, l, n), path_len: int m): int = let
@@ -735,7 +724,7 @@ fn wasm_cc_file {lph:agz}{l:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   (* the text the object is made from, before cc reads the headers (preprocess keyword) *)
   val _ = (if wasm_fresh then 0 else preprocess_wasm(ph, phlen, path, path_len, bv_o, ol)): int
   val rc = (if wasm_fresh then 0 else run_wasm_cc(path, path_len, bv_o, ol)): int
-  val () = (if rc = 0 && ~wasm_fresh then wasm_object_record(bv_o, ol, path, path_len) else ())
+  (* build-jobs: the key is written when the queued compile ends well (cc_job_end) *)
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in rc end
@@ -2571,7 +2560,15 @@ in
                                   val () = put_char_v(ci_b, 0)
                                   val @(ci_a, ci_len) = $B.into_arr(ci_b)
                                   val @(fz_ci, bv_ci) = $A.freeze<byte>(ci_a)
-                                  val rc = run_cc(ph, phlen, bv_co, co_len, bv_ci, ci_len, rr)
+                                  var dep_note : $B.builder_v = $B.create()
+                                  val () = bput_v(dep_note, "error: cc failed for dep ")
+                                  val () = copy_to_builder_v(bv_de, 0, dlen, 1024, dep_note)
+                                  val () = bput_v(dep_note, "\n")
+                                  val @(dna, dnl) = $B.into_arr(dep_note)
+                                  val @(fz_dn, bv_dn) = $A.freeze<byte>(dna)
+                                  val rc = run_cc_noted(ph, phlen, bv_co, co_len, bv_ci, ci_len, rr, bv_dn, dnl)
+                                  val () = $A.drop<byte>(fz_dn, bv_dn)
+                                  val () = $A.free<byte>($A.thaw<byte>(fz_dn))
                                   val () = $A.drop<byte>(fz_co, bv_co)
                                   val () = $A.free<byte>($A.thaw<byte>(fz_co))
                                   val () = $A.drop<byte>(fz_ci, bv_ci)
@@ -2651,7 +2648,15 @@ in
                                                     val () = put_char_v(xi, 0)
                                                     val @(xia, xi_len) = $B.into_arr(xi)
                                                     val @(fz_xi, bv_xi) = $A.freeze<byte>(xia)
-                                                    val rc4 = run_cc(ph2, ph2len, bv_xo, xo_len, bv_xi, xi_len, rr2)
+                                                    var ext_note : $B.builder_v = $B.create()
+                                                    val () = bput_v(ext_note, "error: cc failed for extra ")
+                                                    val () = copy_to_builder_v(bv_d4, 0, dl4, 1024, ext_note)
+                                                    val () = bput_v(ext_note, "\n")
+                                                    val @(ena, enl) = $B.into_arr(ext_note)
+                                                    val @(fz_en, bv_en) = $A.freeze<byte>(ena)
+                                                    val rc4 = run_cc_noted(ph2, ph2len, bv_xo, xo_len, bv_xi, xi_len, rr2, bv_en, enl)
+                                                    val () = $A.drop<byte>(fz_en, bv_en)
+                                                    val () = $A.free<byte>($A.thaw<byte>(fz_en))
                                                     val () = $A.drop<byte>(fz_xo, bv_xo)
                                                     val () = $A.free<byte>($A.thaw<byte>(fz_xo))
                                                     val () = $A.drop<byte>(fz_xi, bv_xi)
@@ -2735,7 +2740,15 @@ in
                                     val () = put_char_v(xi_sm, 0)
                                     val @(xia_sm, xi_sm_len) = $B.into_arr(xi_sm)
                                     val @(fz_xism, bv_xism) = $A.freeze<byte>(xia_sm)
-                                    val rc_csm = run_cc(ph_cm, ph_cm_len, bv_xosm, xo_sm_len, bv_xism, xi_sm_len, rr_cm)
+                                    var src_note : $B.builder_v = $B.create()
+                                    val () = bput_v(src_note, "error: cc failed for src module ")
+                                    val () = copy_to_builder_v(bv_dcsm, 0, dl_csm, 1024, src_note)
+                                    val () = bput_v(src_note, "\n")
+                                    val @(sna, snl) = $B.into_arr(src_note)
+                                    val @(fz_sn, bv_sn) = $A.freeze<byte>(sna)
+                                    val rc_csm = run_cc_noted(ph_cm, ph_cm_len, bv_xosm, xo_sm_len, bv_xism, xi_sm_len, rr_cm, bv_sn, snl)
+                                    val () = $A.drop<byte>(fz_sn, bv_sn)
+                                    val () = $A.free<byte>($A.thaw<byte>(fz_sn))
                                     val () = $A.drop<byte>(fz_xosm, bv_xosm)
                                     val () = $A.free<byte>($A.thaw<byte>(fz_xosm))
                                     val () = $A.drop<byte>(fz_xism, bv_xism)
@@ -2893,6 +2906,8 @@ in
                       val (nul_wld | wld_exec) = $P.path_of_string_proved("wasm-ld")
                       val @(fz_wld, bv_wld) = $A.barr_freeze(wld_exec)
                       val wl_list = split_null_to_list(wl)
+                      (* build-jobs: every compile ended before the link reads an object *)
+                      val () = cc_pool_drain()
                       val wlr = run_cmd(nul_wld | bv_wld, wl_list)
                       val () = $A.cborrow_drop(fz_wld, bv_wld)
                       val () = $A.barr_free($A.barr_thaw(fz_wld))
@@ -2969,6 +2984,9 @@ in
                     val () = $A.drop<byte>(fz_cei, bv_cei)
                     val () = $A.free<byte>($A.thaw<byte>(fz_cei))
                     in end)
+
+                    (* build-jobs: every compile ended before anything reads an object *)
+                    val () = cc_pool_drain()
 
                     (* Step 8: Link to .new then atomic rename *)
                     var link : $B.builder_v = $B.create()

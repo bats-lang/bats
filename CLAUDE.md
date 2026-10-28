@@ -146,6 +146,7 @@ A comment states its reason in one line and names the area by keyword; the detai
 | `.claude/rules/setup-action.md` | The setup step other bats repositories call (#274) |
 | `.claude/rules/check-pins.md` | bats check-pins: floating CI inputs (#390) |
 | `.claude/rules/capture.md` | Captured runs: the outcome of a child whose output is longer than the buffer (#444) |
+| `.claude/rules/build-jobs.md` | Parallel compiles: `--jobs`, the pool, the barrier (#554) |
 | `.claude/rules/affected.md` | The affected rule: which jobs of check.yml a change runs (#481) |
 | `.claude/rules/merge-proof.md` | The main-merge ruling as a command: bats merge-proof (#530) |
 | `.claude/rules/keep-on-fail.md` | Test temp directories: `tests/keep-on-fail.sh` (#478) |
