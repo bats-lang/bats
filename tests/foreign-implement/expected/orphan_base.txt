@@ -1,0 +1,5 @@
+warning: 'implement dispose<int>' of the template dispose of the package 'pr' names the type 'int', which is a base or prelude type, or one that this package does not declare: a template of another package is implemented only for a type of the implementing package; use a type that this package declares, a wrapper type of its own, or ask the package that owns the type (or the template, 'pr') to implement it
+ --> m.bats:5:1
+   |
+ 5 | implement $P.dispose<int> (_) = ()
+   | ^

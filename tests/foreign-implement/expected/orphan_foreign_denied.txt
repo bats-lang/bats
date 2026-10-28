@@ -1,0 +1,6 @@
+error: error: 'implement dispose<$T.stored>' of the template dispose of the package 'pr' names the type '$T.stored', a type of the package 'ty': a template of another package is implemented only for a type of the implementing package; use a type that this package declares, a wrapper type of its own, or ask the package that owns the type (or the template, 'pr') to implement it
+ --> m.bats:6:1
+   |
+ 6 | implement $P.dispose<$T.stored> (_) = ()
+   | ^
+

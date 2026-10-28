@@ -5192,17 +5192,24 @@ fn file_starts_with {lp:agz}{lb:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{nb
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 fn is_cold (): bool
 
 
 
 
 
-
-
-
-
-
+fn is_orphan_error (): bool
 
 
 

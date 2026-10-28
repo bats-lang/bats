@@ -81,6 +81,8 @@ staload "validated.sats"
 
 
 
+
+
 (* the facts of a source, read from its spans (overrides.md) *)
 
 
@@ -163,7 +165,16 @@ staload "validated.sats"
 
 
 
-(* an implement that replaces what another package implements (overrides.md) *)
+(* why an implement of another package's name is refused (overrides.md) *)
+
+
+
+
+
+
+
+(* an implement of another package's name that is refused (overrides.md) *)
+
 
 
 
@@ -239,6 +250,8 @@ implement file_facts_free {k} (facts) = let
     | ~file_facts_cons(f, tl) => let
         val () = (case+ f of
           | ~DeclaresName(_, name) => name_bytes_free(name)
+          | ~DeclaresTemplate(_, name) => name_bytes_free(name)
+          | ~DeclaresType(_, name) => name_bytes_free(name)
           | ~ImplementsName(_, q, name, inst) => let
               val () = (case+ q of ~Unqualified() => () | ~QualifiedBy(a) => name_bytes_free(a))
               val () = name_bytes_free(name)
@@ -317,6 +330,8 @@ typedef range(n:int) = @(spos(n), spos(n))
 (* what a span says, as ranges of the source (overrides.md) *)
 datavtype raw_fact(n:int) =
   | RawDeclares(n) of (variants_live, range(n))
+  | RawTemplate(n) of (variants_live, range(n))
+  | RawTypeDecl(n) of (variants_live, range(n))
   | RawImplements(n) of (variants_live, range(n), range(n), range(n), range(n))
   | RawUses(n) of (variants_live, range(n), range(n))
   | RawAliases(n) of (variants_live, range(n), range(n))
@@ -331,7 +346,8 @@ fun raw_facts_free {n:int}{k:nat} .<k>. (xs: raw_facts(n, k)): void =
   | ~raw_facts_nil() => ()
   | ~raw_facts_cons(f, tl) => let
       val () = (case+ f of
-        | ~RawDeclares(_, _) => () | ~RawImplements(_, _, _, _, _) => ()
+        | ~RawDeclares(_, _) => () | ~RawTemplate(_, _) => () | ~RawTypeDecl(_, _) => ()
+        | ~RawImplements(_, _, _, _, _) => ()
         | ~RawUses(_, _, _) => () | ~RawAliases(_, _, _) => () | ~RawStaloads(_, _) => ())
     in raw_facts_free(tl) end
 
@@ -407,46 +423,119 @@ in
   else @(ne, ne)
 end
 
-(* the implements in a code range, with the builds they are live in (overrides.md) *)
+(* whether braces come before the name that follows p: fun{a:t@ype} f is a template, fun f {n:nat} is not (overrides.md) *)
+fn template_before {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}
+  (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, e: int e): bool = let
+  val b = blank_skip(bv, mx, p, e)
+in b < e && byte2int0($A.read<byte>(bv, b)) = 123 end
+
+(* whether src[p, q) is a type keyword, and where it ends: datatype, datavtype, abstype, abst@ype and their kin (overrides.md) *)
+fn type_keyword_end {l:agz}{n:pos}{m:nat | m <= n}{p,q,e:nat | p <= q; q <= e; e <= m}
+  (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, q: int q, e: int e): [r:nat | q <= r; r <= e] @(bool, int r) = let
+  var w1 = @[char][8]('d', 'a', 't', 'a', 't', 'y', 'p', 'e')
+  var w2 = @[char][9]('d', 'a', 't', 'a', 'v', 't', 'y', 'p', 'e')
+  var w3 = @[char][12]('d', 'a', 't', 'a', 'v', 'i', 'e', 'w', 't', 'y', 'p', 'e')
+  var w4 = @[char][7]('a', 'b', 's', 't', 'y', 'p', 'e')
+  var w5 = @[char][8]('a', 'b', 's', 'v', 't', 'y', 'p', 'e')
+  var w6 = @[char][11]('a', 'b', 's', 'v', 'i', 'e', 'w', 't', 'y', 'p', 'e')
+  var a1 = @[char][4]('a', 'b', 's', 't')
+  var a2 = @[char][5]('a', 'b', 's', 'v', 't')
+  var a3 = @[char][8]('a', 'b', 's', 'v', 'i', 'e', 'w', 't')
+  var at = @[char][4]('@', 'y', 'p', 'e')
+in
+  if word_spells(bv, mx, p, q, w1, 8) || word_spells(bv, mx, p, q, w2, 9) || word_spells(bv, mx, p, q, w3, 12)
+     || word_spells(bv, mx, p, q, w4, 7) || word_spells(bv, mx, p, q, w5, 8) || word_spells(bv, mx, p, q, w6, 11)
+  then @(true, q)
+  else if (word_spells(bv, mx, p, q, a1, 4) || word_spells(bv, mx, p, q, a2, 5) || word_spells(bv, mx, p, q, a3, 8))
+  then (if q + 4 <= e then (if lit_at(bv, q, mx, at, 4) then @(true, q + 4) else @(false, q)) else @(false, q))
+  else @(false, q)
+end
+
+(* whether a word ends a type group, so that an 'and' after it joins no datatype (overrides.md) *)
+fn group_ends {l:agz}{n:pos}{m:nat | m <= n}{p,q:nat | p <= q; q <= m}
+  (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, q: int q): bool = let
+  var w1 = @[char][3]('f', 'u', 'n')
+  var w2 = @[char][2]('f', 'n')
+  var w3 = @[char][3]('f', 'n', 'x')
+  var w4 = @[char][3]('v', 'a', 'l')
+  var w5 = @[char][3]('v', 'a', 'r')
+  var w6 = @[char][5]('p', 'r', 'f', 'u', 'n')
+  var w7 = @[char][4]('p', 'r', 'f', 'n')
+  var w8 = @[char][6]('s', 't', 'a', 'l', 'o', 'a')
+  var w9 = @[char][6]('e', 'x', 't', 'e', 'r', 'n')
+  var w10 = @[char][7]('t', 'y', 'p', 'e', 'd', 'e', 'f')
+  var w11 = @[char][8]('v', 't', 'y', 'p', 'e', 'd', 'e', 'f')
+  var w12 = @[char][5]('l', 'o', 'c', 'a', 'l')
+in
+  implement_word(bv, mx, p, q) || word_spells(bv, mx, p, q, w1, 3) || word_spells(bv, mx, p, q, w2, 2)
+  || word_spells(bv, mx, p, q, w3, 3) || word_spells(bv, mx, p, q, w4, 3) || word_spells(bv, mx, p, q, w5, 3)
+  || word_spells(bv, mx, p, q, w6, 5) || word_spells(bv, mx, p, q, w7, 4) || word_spells(bv, mx, p, q, w8, 6)
+  || word_spells(bv, mx, p, q, w9, 6) || word_spells(bv, mx, p, q, w10, 7) || word_spells(bv, mx, p, q, w11, 8)
+  || word_spells(bv, mx, p, q, w12, 5)
+end
+
+(* the implements and the types in a code range, with the builds they are live in (overrides.md) *)
 fun scan_code {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<e - p>.
   (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, e: int e, live: variants_live,
-   acc: raw_facts(n, k), awaiting: range(n), waiting: bool)
+   acc: raw_facts(n, k), awaiting: range(n), waiting: bool, group: bool)
   : [k2:nat] @(raw_facts(n, k2), bool, range(n)) =
   if p >= e then @(acc, waiting, awaiting)
   else let
     val c = byte2int0($A.read<byte>(bv, p))
   in
-    if ~is_ident_first(c) then scan_code(bv, mx, p + 1, e, live, acc, awaiting, false)
+    if ~is_ident_first(c) then scan_code(bv, mx, p + 1, e, live, acc, awaiting, false, group)
     else let
       val q = ident_stop(bv, mx, p + 1, e)
       val before = (if p = 0 then 0 else byte2int0($A.read<byte>(bv, p - 1))): int
       val joined = (p > 0) && (is_ident_byte(before) || before = 39 || before = 46 || before = 36)
+      var and_w = @[char][3]('a', 'n', 'd')
+      val @(is_type, type_end) = type_keyword_end(bv, mx, p, q, e)
     in
-      if joined then scan_code(bv, mx, q, e, live, acc, awaiting, false)
+      if joined then scan_code(bv, mx, q, e, live, acc, awaiting, false, group)
+      else if is_type then let
+        val tns = blank_skip(bv, mx, type_end, e)
+      in
+        if tns >= e then scan_code(bv, mx, tns, e, live, acc, awaiting, false, true)
+        else if is_ident_first(byte2int0($A.read<byte>(bv, tns))) then let
+          val tne = ident_stop(bv, mx, tns + 1, e)
+          val f = RawTypeDecl(live, @(tns, tne))
+        in scan_code(bv, mx, tne, e, live, raw_facts_cons(f, acc), awaiting, false, true) end
+        else scan_code(bv, mx, tns, e, live, acc, awaiting, false, true)
+      end
+      else if group && word_spells(bv, mx, p, q, and_w, 3) then let
+        val tns = blank_skip(bv, mx, q, e)
+      in
+        if tns >= e then scan_code(bv, mx, tns, e, live, acc, awaiting, false, true)
+        else if is_ident_first(byte2int0($A.read<byte>(bv, tns))) then let
+          val tne = ident_stop(bv, mx, tns + 1, e)
+          val f = RawTypeDecl(live, @(tns, tne))
+        in scan_code(bv, mx, tne, e, live, raw_facts_cons(f, acc), awaiting, false, true) end
+        else scan_code(bv, mx, tns, e, live, acc, awaiting, false, true)
+      end
       else if implement_word(bv, mx, p, q) then let
         val ns = head_skip(bv, mx, q, e, 0)
       in
         if ns >= e then @(acc, true, @(p, q))
         else if is_ident_first(byte2int0($A.read<byte>(bv, ns))) then let
           val ne = ident_stop(bv, mx, ns + 1, e)
-          val inst = instance_after(bv, mx, ne, e)
+          val inst = instance_after(bv, mx, ne, mx)
           val f = RawImplements(live, @(p, q), @(ns, ns), @(ns, ne), inst)
-        in scan_code(bv, mx, ne, e, live, raw_facts_cons(f, acc), awaiting, false) end
+        in scan_code(bv, mx, ne, e, live, raw_facts_cons(f, acc), awaiting, false, false) end
         else if byte2int0($A.read<byte>(bv, ns)) = 36 then let
           (* $alias.member in the code itself: inside a $UNSAFE block the lexer makes no span of it *)
           val ae = ident_stop(bv, mx, ns + 1, e)
         in
-          if ae >= e then scan_code(bv, mx, q, e, live, acc, awaiting, false)
-          else if byte2int0($A.read<byte>(bv, ae)) <> 46 then scan_code(bv, mx, q, e, live, acc, awaiting, false)
+          if ae >= e then scan_code(bv, mx, q, e, live, acc, awaiting, false, false)
+          else if byte2int0($A.read<byte>(bv, ae)) <> 46 then scan_code(bv, mx, q, e, live, acc, awaiting, false, false)
           else let
             val me = ident_stop(bv, mx, ae + 1, e)
-            val inst = instance_after(bv, mx, me, e)
+            val inst = instance_after(bv, mx, me, mx)
             val f = RawImplements(live, @(p, q), @(ns + 1, ae), @(ae + 1, me), inst)
-          in scan_code(bv, mx, me, e, live, raw_facts_cons(f, acc), awaiting, false) end
+          in scan_code(bv, mx, me, e, live, raw_facts_cons(f, acc), awaiting, false, false) end
         end
-        else scan_code(bv, mx, q, e, live, acc, awaiting, false)
+        else scan_code(bv, mx, q, e, live, acc, awaiting, false, false)
       end
-      else scan_code(bv, mx, q, e, live, acc, awaiting, false)
+      else scan_code(bv, mx, q, e, live, acc, awaiting, false, (if group_ends(bv, mx, p, q) then false else group))
     end
   end
 
@@ -475,19 +564,19 @@ fun line_end {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m} .<e - p>.
 
 (* the names a #pub declaration declares (overrides.md) *)
 fun pub_names {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<e - p>.
-  (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, e: int e, live: variants_live,
+  (bv: !$A.borrow(byte, l, n), mx: int m, p: int p, e: int e, live: variants_live, types: bool,
    comment: int, acc: raw_facts(n, k)): [k2:nat] raw_facts(n, k2) =
   if p >= e then acc
   else let
     val c = byte2int0($A.read<byte>(bv, p))
     val d = (if p + 1 < e then byte2int0($A.read<byte>(bv, p + 1)) else 0): int
   in
-    if c = 40 && d = 42 then pub_names(bv, mx, after_two(p, e), e, live, comment + 1, acc)
-    else if comment > 0 && c = 42 && d = 41 then pub_names(bv, mx, after_two(p, e), e, live, comment - 1, acc)
-    else if comment > 0 then pub_names(bv, mx, p + 1, e, live, comment, acc)
-    else if c = 34 then pub_names(bv, mx, string_past(bv, mx, p + 1, e), e, live, comment, acc)
-    else if c = 47 && d = 47 then pub_names(bv, mx, line_end(bv, mx, after_two(p, e), e), e, live, comment, acc)
-    else if ~is_ident_first(c) then pub_names(bv, mx, p + 1, e, live, comment, acc)
+    if c = 40 && d = 42 then pub_names(bv, mx, after_two(p, e), e, live, types, comment + 1, acc)
+    else if comment > 0 && c = 42 && d = 41 then pub_names(bv, mx, after_two(p, e), e, live, types, comment - 1, acc)
+    else if comment > 0 then pub_names(bv, mx, p + 1, e, live, types, comment, acc)
+    else if c = 34 then pub_names(bv, mx, string_past(bv, mx, p + 1, e), e, live, types, comment, acc)
+    else if c = 47 && d = 47 then pub_names(bv, mx, line_end(bv, mx, after_two(p, e), e), e, live, types, comment, acc)
+    else if ~is_ident_first(c) then pub_names(bv, mx, p + 1, e, live, types, comment, acc)
     else let
       val q = ident_stop(bv, mx, p + 1, e)
       val before = (if p = 0 then 0 else byte2int0($A.read<byte>(bv, p - 1))): int
@@ -497,13 +586,17 @@ fun pub_names {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<
       if ~joined && word_spells(bv, mx, p, q, and_w, 3) then let
         val ns = head_skip(bv, mx, q, e, 0)
       in
-        if ns >= e then pub_names(bv, mx, q, e, live, comment, acc)
-        else if ~is_ident_first(byte2int0($A.read<byte>(bv, ns))) then pub_names(bv, mx, q, e, live, comment, acc)
+        if ns >= e then pub_names(bv, mx, q, e, live, types, comment, acc)
+        else if ~is_ident_first(byte2int0($A.read<byte>(bv, ns))) then pub_names(bv, mx, q, e, live, types, comment, acc)
         else let
           val ne = ident_stop(bv, mx, ns + 1, e)
-        in pub_names(bv, mx, ne, e, live, comment, raw_facts_cons(RawDeclares(live, @(ns, ne)), acc)) end
+          val name_range = @(ns, ne): range(n)
+          val acc2 = (if types then raw_facts_cons(RawTypeDecl(live, name_range), acc)
+                      else if template_before(bv, mx, q, e) then raw_facts_cons(RawTemplate(live, name_range), raw_facts_cons(RawDeclares(live, name_range), acc))
+                      else raw_facts_cons(RawDeclares(live, name_range), acc)): [k2:nat] raw_facts(n, k2)
+        in pub_names(bv, mx, ne, e, live, types, comment, acc2) end
       end
-      else pub_names(bv, mx, q, e, live, comment, acc)
+      else pub_names(bv, mx, q, e, live, types, comment, acc)
     end
   end
 
@@ -520,15 +613,25 @@ fn pub_first {l:agz}{n:pos}{m:nat | m <= n}{cs,e:nat | cs <= e; e <= m}{k:nat}
   val declares = word_spells(bv, mx, cs, q, w_fun, 3) || word_spells(bv, mx, cs, q, w_fn, 2)
                  || word_spells(bv, mx, cs, q, w_fnx, 3) || word_spells(bv, mx, cs, q, w_prfun, 5)
                  || word_spells(bv, mx, cs, q, w_prfn, 4)
+  val @(is_type, type_end) = type_keyword_end(bv, mx, cs, q, e)
 in
-  if ~declares then acc
+  if is_type then let
+    val tns = blank_skip(bv, mx, type_end, e)
+    val tstop = (if tns < e then (if is_ident_first(byte2int0($A.read<byte>(bv, tns))) then ident_stop(bv, mx, tns + 1, e) else tns) else tns): [r:nat | r <= e] int r
+    val first = RawTypeDecl(live, @(tns, tstop)): raw_fact(n)
+  in raw_facts_cons(first, pub_names(bv, mx, tstop, e, live, true, 0, acc)) end
+  else if ~declares then acc
   else let
     val ns = head_skip(bv, mx, q, e, 0)
     val first = (if ns < e then (if is_ident_first(byte2int0($A.read<byte>(bv, ns))) then
                    RawDeclares(live, @(ns, ident_stop(bv, mx, ns + 1, e)))
                  else RawDeclares(live, @(ns, ns))) else RawDeclares(live, @(ns, ns))): raw_fact(n)
-    val rest = pub_names(bv, mx, q, e, live, 0, acc)
-  in raw_facts_cons(first, rest) end
+    val rest = pub_names(bv, mx, q, e, live, false, 0, acc)
+    val rest2 = (if template_before(bv, mx, q, e) then
+                   (if ns < e then (if is_ident_first(byte2int0($A.read<byte>(bv, ns))) then
+                      raw_facts_cons(RawTemplate(live, @(ns, ident_stop(bv, mx, ns + 1, e))), rest) else rest) else rest)
+                 else rest): [k2:nat] raw_facts(n, k2)
+  in raw_facts_cons(first, rest2) end
 end
 
 (* the contents of a string literal (overrides.md) *)
@@ -575,7 +678,7 @@ fn scan_one {l:agz}{n:pos}{k,j:nat}
   case+ sp of
   | SPass(s, e, verbatim) =>
     if verbatim then @(acc, false, awaiting)
-    else scan_code(bv, mx, s, e, live, acc, awaiting, false)
+    else scan_code(bv, mx, s, e, live, acc, awaiting, false, false)
   | SUse(_, _, _, ps, pe, as0, ae) =>
     @(raw_facts_cons(RawUses(live, @(ps, pe), @(as0, ae)), acc), false, awaiting)
   | SPub(_, e, restricted, cs) =>
@@ -584,15 +687,12 @@ fn scan_one {l:agz}{n:pos}{k,j:nat}
   | SStaload(s, e) => let val acc2 = staload_fact(bv, mx, s, e, live, acc) in @(acc2, false, awaiting) end
   | SUnsafeBlock(_, _, cs, ce) =>
     (* the contents of $UNSAFE begin ... end are code the lexer makes no spans of *)
-    if cs <= ce then scan_code(bv, mx, cs, ce, live, acc, awaiting, false)
+    if cs <= ce then scan_code(bv, mx, cs, ce, live, acc, awaiting, false, false)
     else @(acc, false, awaiting)
   | SQual(_, _, as0, ae, ms, me) =>
     if waiting then let
-      val inst = (case+ next of
-        | spans_cons(nx, _) => (case+ nx of
-            | SPass(s2, e2, v2) => (if v2 then @(ms, ms) else instance_after(bv, mx, s2, e2))
-            | _ => @(ms, ms))
-        | spans_nil() => @(ms, ms)): range(n)
+      (* the instance may hold a qualified name, which is a span of its own: read it from the source *)
+      val inst = instance_after(bv, mx, me, mx)
       val f = RawImplements(live, awaiting, @(as0, ae), @(ms, me), inst)
     in @(raw_facts_cons(f, acc), false, awaiting) end
     else @(acc, false, awaiting)
@@ -642,6 +742,14 @@ fn materialize {l:agz}{n:pos}{k:nat}
       | ~ReadNone() => acc
       | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
       | ~ReadHere(name) => file_facts_cons(DeclaresName(live, name), acc))
+  | ~RawTemplate(live, r) => (case+ read_name_of(bv, mx, r, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(name) => file_facts_cons(DeclaresTemplate(live, name), acc))
+  | ~RawTypeDecl(live, r) => (case+ read_name_of(bv, mx, r, false) of
+      | ~ReadNone() => acc
+      | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
+      | ~ReadHere(name) => file_facts_cons(DeclaresType(live, name), acc))
   | ~RawImplements(live, _, alias, name, inst) => (case+ read_name_of(bv, mx, name, false) of
       | ~ReadNone() => acc
       | ~ReadOversized() => file_facts_cons(OversizedName(live), acc)
@@ -694,33 +802,61 @@ fun range_holds {l:agz}{n:pos}{la:agz}{m:pos}{s:nat | s + m <= n}{i:nat | i <= m
   else if byte2int0($A.read<byte>(bv, s + i)) = byte2int0($A.get<byte>(a, i)) then range_holds(bv, mx, s, a, m, i + 1)
   else false
 
+(* Whether src[p, e), blanks left out, holds the m bytes of a from index i *)
+fun squeezed_holds {l:agz}{n:pos}{la:agz}{m:pos}{p,e:nat | p <= e; e <= n}{i:nat | i <= m} .<e - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, a: !$A.arr(byte, la, m), m: int m, i: int i): bool =
+  if p >= e then i >= m
+  else let
+    val c = byte2int0($A.read<byte>(bv, p))
+  in
+    if c = 32 || c = 9 || c = 10 || c = 13 then squeezed_holds(bv, p + 1, e, a, m, i)
+    else if i >= m then false
+    else if c = byte2int0($A.get<byte>(a, i)) then squeezed_holds(bv, p + 1, e, a, m, i + 1)
+    else false
+  end
+
+(* whether the instance range of an implement spells the wanted instance *)
+fn instance_range_is {l:agz}{n:pos} (bv: !$A.borrow(byte, l, n), r: range(n), wanted: !instance_text): bool = let
+  val @(s, e) = r
+in
+  case+ wanted of
+  | NoInstance() => s >= e
+  | InstanceText(t) => let
+      val+ @NameBytes(a, z) = t
+      val ok = (if s <= e then squeezed_holds(bv, s, e, a, z, 0) else false): bool
+      prval () = fold@(t)
+    in ok end
+end
+
 fun sites_in {l:agz}{n:pos}{la:agz}{m:pos}{j,k:nat} .<j>.
   (bv: !$A.borrow(byte, l, n), mx: int n, xs: raw_facts(n, j), a: !$A.arr(byte, la, m), m: int m,
-   acc: implement_sites(k)): [k2:nat] implement_sites(k2) =
+   wanted_instance: !instance_text, acc: implement_sites(k)): [k2:nat] implement_sites(k2) =
   case+ xs of
   | ~raw_facts_nil() => acc
   | ~raw_facts_cons(f, tl) => let
       val acc2 = (case+ f of
-        | ~RawImplements(live, kw, _, name, _) => let
+        | ~RawImplements(live, kw, _, name, inst_range) => let
             val @(kw_start, _) = kw
             val @(name_start, name_end) = name
           in
             if ~variants_any(live) then acc
+            else if ~instance_range_is(bv, inst_range, wanted_instance) then acc
             else if name_end - name_start <> m then acc
             else if name_start + m > mx then acc
             else if range_holds(bv, mx, name_start, a, m, 0)
             then implement_sites_cons(ImplementSite(kw_start, name_start, name_end), acc)
             else acc
           end
-        | ~RawDeclares(_, _) => acc | ~RawUses(_, _, _) => acc
+        | ~RawDeclares(_, _) => acc | ~RawTemplate(_, _) => acc | ~RawTypeDecl(_, _) => acc
+        | ~RawUses(_, _, _) => acc
         | ~RawAliases(_, _, _) => acc | ~RawStaloads(_, _) => acc): [k2:nat] implement_sites(k2)
-    in sites_in(bv, mx, tl, a, m, acc2) end
+    in sites_in(bv, mx, tl, a, m, wanted_instance, acc2) end
 
-implement implement_sites_of (source_bytes, source_length, source_size, wanted, wanted_length) = let
+implement implement_sites_of (source_bytes, source_length, source_size, wanted, wanted_length, wanted_instance) = let
   val xs = lex_spans(source_bytes, source_length, source_size)
   val raws = scan_spans(source_bytes, source_size, xs, states_start(), false, @(0, 0), raw_facts_nil())
   val () = spans_free(xs)
-in sites_in(source_bytes, source_size, raws, wanted, wanted_length, implement_sites_nil()) end
+in sites_in(source_bytes, source_size, raws, wanted, wanted_length, wanted_instance, implement_sites_nil()) end
 
 (* the record of a file's facts (validated.md, overrides.md) *)
 
@@ -779,6 +915,14 @@ fn put_fact (f: !file_fact, out: !$B.builder_v >> $B.builder_v): void =
       val () = put_char_v(out, 68)
       val () = put_char_v(out, live_byte(live))
     in put_name_nul(name, out) end
+  | DeclaresTemplate(live, name) => let
+      val () = put_char_v(out, 84)
+      val () = put_char_v(out, live_byte(live))
+    in put_name_nul(name, out) end
+  | DeclaresType(live, name) => let
+      val () = put_char_v(out, 89)
+      val () = put_char_v(out, live_byte(live))
+    in put_name_nul(name, out) end
   | ImplementsName(live, q, name, inst) => put_implement(live, q, name, inst, out)
   | UsesPackage(live, root, alias) => let
       val () = put_char_v(out, 85)
@@ -806,10 +950,11 @@ fun put_facts {k:nat} .<k>. (facts: !file_facts(k), out: !$B.builder_v >> $B.bui
     in put_facts(tl, out) end
 
 (* What a record's tag byte stands for *)
-datatype fact_tag = TagDeclares | TagImplements | TagUses | TagAliases | TagStaloads | TagOversized | TagUnknown
+datatype fact_tag = TagTemplate | TagType | TagDeclares | TagImplements | TagUses | TagAliases | TagStaloads | TagOversized | TagUnknown
 
 fn tag_of (b: int): fact_tag =
-  if b = 68 then TagDeclares() else if b = 73 then TagImplements()
+  if b = 68 then TagDeclares() else if b = 84 then TagTemplate() else if b = 89 then TagType()
+  else if b = 73 then TagImplements()
   else if b = 85 then TagUses() else if b = 65 then TagAliases()
   else if b = 83 then TagStaloads() else if b = 79 then TagOversized() else TagUnknown()
 
@@ -855,6 +1000,16 @@ fun parse_facts {l:agz}{n:pos}{m:nat | m <= n}{len:nat | len <= m}{off:nat | off
         | ~FieldHere(f1, n1) => (case+ f1 of
             | ~NameAbsent() => @(false, acc)
             | ~NameHere(name) => parse_facts(bv, mx, len, n1, file_facts_cons(DeclaresName(live, name), acc))))
+    | TagTemplate() => (case+ field_at(bv, mx, len, start) of
+        | ~FieldMissing() => @(false, acc)
+        | ~FieldHere(f1, n1) => (case+ f1 of
+            | ~NameAbsent() => @(false, acc)
+            | ~NameHere(name) => parse_facts(bv, mx, len, n1, file_facts_cons(DeclaresTemplate(live, name), acc))))
+    | TagType() => (case+ field_at(bv, mx, len, start) of
+        | ~FieldMissing() => @(false, acc)
+        | ~FieldHere(f1, n1) => (case+ f1 of
+            | ~NameAbsent() => @(false, acc)
+            | ~NameHere(name) => parse_facts(bv, mx, len, n1, file_facts_cons(DeclaresType(live, name), acc))))
     | TagStaloads() => (case+ field_at(bv, mx, len, start) of
         | ~FieldMissing() => @(false, acc)
         | ~FieldHere(f1, n1) => (case+ f1 of
@@ -1065,15 +1220,6 @@ implement file_refs_free {np}{k} (refs) = let
     | ~file_refs_cons(~FileRef(_, _, _), tl) => loop(tl)
 in loop(refs) end
 
-implement foreign_hits_free {np}{k} (hits) = let
-  fun loop {k:nat} .<k>. (hits: foreign_hits(np, k)): void =
-    case+ hits of
-    | ~foreign_hits_nil() => ()
-    | ~foreign_hits_cons(~ForeignHit(~FileRef(_, _, _), ~FileRef(_, _, _), name), tl) => let
-        val () = name_bytes_free(name)
-      in loop(tl) end
-in loop(hits) end
-
 (* The index of the first "/src/" in a[i, m), else ~1 *)
 fun src_marker {la:agz}{m:pos}{i:nat | i <= m} .<m - i>.
   (a: !$A.arr(byte, la, m), m: int m, i: int i): [r:int] int r =
@@ -1210,7 +1356,8 @@ fun file_bindings {k,j:nat} .<k>. (facts: !file_facts(k), acc: bindings(j)): [j2
         | AliasesFile(live, alias, path) => bindings_cons(BindAlias(live, name_copy(alias), name_copy(path)), acc)
         | StaloadsFile(live, path) => bindings_cons(BindOpen(live, name_copy(path)), acc)
         | OversizedName(_) => acc
-        | DeclaresName(_, _) => acc | ImplementsName(_, _, _, _) => acc): [j2:nat] bindings(j2)
+        | DeclaresName(_, _) => acc | DeclaresTemplate(_, _) => acc | DeclaresType(_, _) => acc
+        | ImplementsName(_, _, _, _) => acc): [j2:nat] bindings(j2)
     in file_bindings(tl, acc2) end
 
 (* The bindings of the file (own, lst, off) of the files scan *)
@@ -1285,7 +1432,8 @@ fun implements_in_facts {k:nat} .<k>.
         | ImplementsName(live, q, nm, other) => (case+ q of
             | Unqualified() => name_equal(nm, name) && variants_any(variants_meet(common, live)) && replaces(other, inst)
             | QualifiedBy(_) => false)
-        | DeclaresName(_, _) => false | UsesPackage(_, _, _) => false
+        | DeclaresName(_, _) => false | DeclaresTemplate(_, _) => false | DeclaresType(_, _) => false
+        | UsesPackage(_, _, _) => false
         | AliasesFile(_, _, _) => false | StaloadsFile(_, _) => false
         | OversizedName(_) => false): bool
     in if here then true else implements_in_facts(tl, name, inst, common) end
@@ -1361,6 +1509,7 @@ fun has_oversized {k:nat} .<k>. (facts: !file_facts(k)): bool =
   | file_facts_cons(f, tl) => (case+ f of
       | OversizedName(_) => true
       | DeclaresName(_, _) => has_oversized(tl) | ImplementsName(_, _, _, _) => has_oversized(tl)
+      | DeclaresTemplate(_, _) => has_oversized(tl) | DeclaresType(_, _) => has_oversized(tl)
       | UsesPackage(_, _, _) => has_oversized(tl) | AliasesFile(_, _, _) => has_oversized(tl)
       | StaloadsFile(_, _) => has_oversized(tl))
 
@@ -1381,10 +1530,10 @@ in r end
 
 (* the hits (overrides.md) *)
 
-(* an implement with the bindings that reach its name (overrides.md) *)
+(* an implement with the bindings that reach its name, and all the bindings of its file (overrides.md) *)
 datavtype query(np:int) =
-  | {j:nat} Query(np) of (package_number(np), listing, path_offset, variants_live,
-                          name_bytes, instance_text, bindings(j))
+  | {j,ja:nat} Query(np) of (package_number(np), listing, path_offset, variants_live,
+                             name_bytes, instance_text, bindings(j), bindings(ja))
 
 datavtype queries(np:int, k:int) =
   | queries_nil(np, 0) of ()
@@ -1393,10 +1542,11 @@ datavtype queries(np:int, k:int) =
 fun queries_free {np:int}{k:nat} .<k>. (qs: queries(np, k)): void =
   case+ qs of
   | ~queries_nil() => ()
-  | ~queries_cons(~Query(_, _, _, _, name, inst, bs), tl) => let
+  | ~queries_cons(~Query(_, _, _, _, name, inst, bs, all), tl) => let
       val () = name_bytes_free(name)
       val () = (case+ inst of ~NoInstance() => () | ~InstanceText(t) => name_bytes_free(t))
       val () = bindings_free(bs)
+      val () = bindings_free(all)
     in queries_free(tl) end
 
 fn instance_copy (inst: !instance_text): instance_text =
@@ -1408,6 +1558,17 @@ fn qualifier_copy (q: !qualifier): qualifier =
   case+ q of
   | Unqualified() => Unqualified()
   | QualifiedBy(a) => QualifiedBy(name_copy(a))
+
+(* A copy of the bindings, added to acc *)
+fun bindings_copy {k,j:nat} .<k>. (bs: !bindings(k), acc: bindings(j)): [j2:nat] bindings(j2) =
+  case+ bs of
+  | bindings_nil() => acc
+  | bindings_cons(b, tl) => let
+      val acc2 = (case+ b of
+        | BindUse(l, a, r) => bindings_cons(BindUse(l, name_copy(a), name_copy(r)), acc)
+        | BindAlias(l, a, p) => bindings_cons(BindAlias(l, name_copy(a), name_copy(p)), acc)
+        | BindOpen(l, p) => bindings_cons(BindOpen(l, name_copy(p)), acc)): [j2:nat] bindings(j2)
+    in bindings_copy(tl, acc2) end
 
 (* the queries of the implements among the facts of a file (overrides.md) *)
 fun queries_of_facts {np:int}{k,kb,j:nat} .<k>.
@@ -1423,11 +1584,13 @@ fun queries_of_facts {np:int}{k,kb,j:nat} .<k>.
             val common = variants_meet(live, bound)
           in
             if variants_any(common)
-            then queries_cons(Query(owner, lst, off, common, name_copy(name), instance_copy(inst), selected), acc)
+            then queries_cons(Query(owner, lst, off, common, name_copy(name), instance_copy(inst), selected,
+                                    bindings_copy(all, bindings_nil())), acc)
             else let val () = bindings_free(selected) in acc end
           end
           else acc
-        | DeclaresName(_, _) => acc | UsesPackage(_, _, _) => acc
+        | DeclaresName(_, _) => acc | DeclaresTemplate(_, _) => acc | DeclaresType(_, _) => acc
+        | UsesPackage(_, _, _) => acc
         | AliasesFile(_, _, _) => acc | StaloadsFile(_, _) => acc
         | OversizedName(_) => acc): [j2:nat] queries(np, j2)
     in queries_of_facts(tl, all, owner, lst, off, acc2) end
@@ -1443,67 +1606,363 @@ fun queries_of_files {np:int}{k,j:nat} .<k>.
           val () = bindings_free(all)
         in queries_of_files(tl, acc2) end)
 
-(* The builds in which the facts declare name, added to acc *)
-fun declared_in_facts {k:nat} .<k>. (facts: !file_facts(k), name: !name_bytes, acc: variants_live): variants_live =
+(* The builds in which the facts declare name (as a template when template is set), added to acc *)
+fun declared_in_facts {k:nat} .<k>.
+  (facts: !file_facts(k), name: !name_bytes, template: bool, acc: variants_live): variants_live =
   case+ facts of
   | file_facts_nil() => acc
   | file_facts_cons(f, tl) => let
       val acc2 = (case+ f of
-        | DeclaresName(live, nm) => if name_equal(nm, name) then variants_union(acc, live) else acc
+        | DeclaresName(live, nm) => if ~template && name_equal(nm, name) then variants_union(acc, live) else acc
+        | DeclaresTemplate(live, nm) => if template && name_equal(nm, name) then variants_union(acc, live) else acc
         | ImplementsName(_, _, _, _) => acc | UsesPackage(_, _, _) => acc
+        | DeclaresType(_, _) => acc
         | AliasesFile(_, _, _) => acc | StaloadsFile(_, _) => acc
         | OversizedName(_) => acc): variants_live
-    in declared_in_facts(tl, name, acc2) end
+    in declared_in_facts(tl, name, template, acc2) end
 
 (* The builds in which the file (target, lst, off) declares name *)
 fun declared_live {np:int}{k:nat} .<k>.
-  (scan: !project_files(np, k), target: int, lst: listing, off: int, name: !name_bytes, acc: variants_live): variants_live =
+  (scan: !project_files(np, k), target: int, lst: listing, off: int, name: !name_bytes, template: bool,
+   acc: variants_live): variants_live =
   case+ scan of
   | project_files_nil() => acc
   | project_files_cons(f, tl) => (case+ f of
       | ProjectFile(owner, l2, o2, _, facts) =>
-        if owner = target && listing_same(l2, lst) && o2 = off then declared_in_facts(facts, name, acc)
-        else declared_live(tl, target, lst, off, name, acc))
+        if owner = target && listing_same(l2, lst) && o2 = off then declared_in_facts(facts, name, template, acc)
+        else declared_live(tl, target, lst, off, name, template, acc))
 
-(* the replacements a query makes (overrides.md) *)
-fun answer_refs {np:int}{kf,k,h:nat} .<k>.
-  (refs: !file_refs(np, k), files: !project_files(np, kf), owner: package_number(np), lst: listing, off: path_offset,
-   common: variants_live, name: !name_bytes, inst: !instance_text, acc: foreign_hits(np, h))
-  : [h2:nat] foreign_hits(np, h2) =
+(* whether the facts declare a type of that name in a build of common *)
+fun type_in_facts {k:nat} .<k>. (facts: !file_facts(k), name: !name_bytes, common: variants_live): bool =
+  case+ facts of
+  | file_facts_nil() => false
+  | file_facts_cons(f, tl) => let
+      val here = (case+ f of
+        | DeclaresType(live, nm) => name_equal(nm, name) && variants_any(variants_meet(common, live))
+        | DeclaresName(_, _) => false | DeclaresTemplate(_, _) => false
+        | ImplementsName(_, _, _, _) => false | UsesPackage(_, _, _) => false
+        | AliasesFile(_, _, _) => false | StaloadsFile(_, _) => false
+        | OversizedName(_) => false): bool
+    in if here then true else type_in_facts(tl, name, common) end
+
+(* whether a file of the package number pkg declares a type of that name (overrides.md) *)
+fun package_has_type {np:int}{k:nat} .<k>.
+  (files: !project_files(np, k), pkg: int, name: !name_bytes, common: variants_live): bool =
+  case+ files of
+  | project_files_nil() => false
+  | project_files_cons(f, tl) => let
+      val here = (case+ f of
+        | ProjectFile(owner, _, _, _, facts) => owner = pkg && type_in_facts(facts, name, common)): bool
+    in if here then true else package_has_type(tl, pkg, name, common) end
+
+(* whether the file (target, lst, off) declares a type of that name *)
+fun file_has_type {np:int}{k:nat} .<k>.
+  (scan: !project_files(np, k), target: int, lst: listing, off: int, name: !name_bytes, common: variants_live): bool =
+  case+ scan of
+  | project_files_nil() => false
+  | project_files_cons(f, tl) => (case+ f of
+      | ProjectFile(owner, l2, o2, _, facts) =>
+        if owner = target && listing_same(l2, lst) && o2 = off then type_in_facts(facts, name, common)
+        else file_has_type(tl, target, lst, off, name, common))
+
+(* whether a file of the package number owner among the files refs reaches declares the type *)
+fun refs_have_type {np:int}{kf,kr:nat} .<kr>.
+  (refs: !file_refs(np, kr), files: !project_files(np, kf), owner: int, name: !name_bytes, common: variants_live): bool =
   case+ refs of
-  | file_refs_nil() => acc
+  | file_refs_nil() => false
   | file_refs_cons(r, tl) => let
-      val acc2 = (case+ r of
+      val here = (case+ r of
+        | FileRef(target, tlst, toff) => target = owner && file_has_type(files, target, tlst, toff, name, common)): bool
+    in if here then true else refs_have_type(tl, files, owner, name, common) end
+
+(* the root of the package a '#use' or a staload path among the bindings names, when there is one *)
+fun use_root {k:nat} .<k>. (bs: !bindings(k)): maybe_name =
+  case+ bs of
+  | bindings_nil() => NameAbsent()
+  | bindings_cons(b, tl) => (case+ b of
+      | BindUse(_, _, root) => NameHere(name_copy(root))
+      | BindAlias(_, _, path) => (case+ root_before_src(path) of
+          | ~NameHere(root) => NameHere(root)
+          | ~NameAbsent() => use_root(tl))
+      | BindOpen(_, _) => use_root(tl))
+
+(* what the type an instance names is, to the package that implements it (overrides.md) *)
+datavtype ownership =
+  | OwnedType of ()
+  | NotOwned of (name_bytes (* the type as written *), maybe_name (* the root of the package that owns it, if one does *))
+  | NoTypeNamed of ()
+
+fn ownership_free (o: ownership): void =
+  case+ o of
+  | ~OwnedType() => ()
+  | ~NotOwned(t, r) => let val () = name_bytes_free(t) in free_maybe(r) end
+  | ~NoTypeNamed() => ()
+
+(* the verdict of an instance: owned when any argument is, else the first that names something *)
+fn ownership_join (acc: ownership, v: ownership): ownership =
+  case+ acc of
+  | ~OwnedType() => let val () = ownership_free(v) in OwnedType() end
+  | ~NoTypeNamed() => v
+  | ~NotOwned(t, r) => (case+ v of
+      | ~OwnedType() => let val () = name_bytes_free(t) val () = free_maybe(r) in OwnedType() end
+      | ~NoTypeNamed() => NotOwned(t, r)
+      | ~NotOwned(t2, r2) => let val () = name_bytes_free(t2) val () = free_maybe(r2) in NotOwned(t, r) end)
+
+(* the byte i of a name, 0 outside it *)
+fn byte_at {i:int} (t: !name_bytes, i: int i): int = let
+  val+ @NameBytes(a, m) = t
+  val r = (if i >= 0 then (if i < m then byte2int0($A.get<byte>(a, i)) else 0) else 0): int
+  prval () = fold@(t)
+in r end
+
+(* the end of the identifier that starts at i *)
+fun ident_end_in {m:pos}{i:nat | i <= m} .<m - i>. (t: !name_bytes, m: int m, i: int i): [r:nat | i <= r; r <= m] int r =
+  if i >= m then i
+  else let
+    val c = byte_at(t, i)
+  in if is_ident_byte(c) || c = 39 then ident_end_in(t, m, i + 1) else i end
+
+(* the type the argument t[s, e) of an instance names (overrides.md) *)
+fn argument_verdict {np:int}{kr,kf,ka:nat}{m:pos}{s,e:int}
+  (roots: !package_roots(np, kr), files: !project_files(np, kf), owner: package_number(np), common: variants_live,
+   all: !bindings(ka), t: !name_bytes, m: int m, s: int s, e: int e): ownership = let
+  val first = byte_at(t, s)
+in
+  if s < 0 then NoTypeNamed()
+  else if s >= m then NoTypeNamed()
+  else if first = 36 then let
+    val dot = ident_end_in(t, m, s + 1)
+  in
+    if dot >= m then NoTypeNamed()
+    else if byte_at(t, dot) <> 46 then NoTypeNamed()
+    else let
+      val head_end = ident_end_in(t, m, dot + 1)
+    in
+      case+ slice_name(t, s + 1, dot) of
+      | ~NameAbsent() => NoTypeNamed()
+      | ~NameHere(alias) => (case+ slice_name(t, dot + 1, head_end) of
+          | ~NameAbsent() => let val () = name_bytes_free(alias) in NoTypeNamed() end
+          | ~NameHere(head) => (case+ slice_name(t, s, head_end) of
+              | ~NameAbsent() => let val () = name_bytes_free(alias) val () = name_bytes_free(head) in NoTypeNamed() end
+              | ~NameHere(text) => let
+                  val q = QualifiedBy(alias)
+                  val @(selected, _) = select_bindings(all, q, @{native= false, native_test= false, wasm= false, wasm_test= false}, bindings_nil())
+                  val refs = resolve_bindings(roots, files, selected, file_refs_nil())
+                  val owned = refs_have_type(refs, files, owner, head, common)
+                  val root = use_root(selected)
+                  val () = file_refs_free(refs)
+                  val () = bindings_free(selected)
+                  val () = (case+ q of ~QualifiedBy(a) => name_bytes_free(a) | ~Unqualified() => ())
+                  val () = name_bytes_free(head)
+                in
+                  if owned then let val () = name_bytes_free(text) val () = free_maybe(root) in OwnedType() end
+                  else NotOwned(text, root)
+                end))
+    end
+  end
+  else if is_ident_first(first) then let
+    val head_end = ident_end_in(t, m, s + 1)
+  in
+    case+ slice_name(t, s, head_end) of
+    | ~NameAbsent() => NoTypeNamed()
+    | ~NameHere(head) =>
+      if package_has_type(files, owner, head, common) then let val () = name_bytes_free(head) in OwnedType() end
+      else NotOwned(head, NameAbsent())
+  end
+  else NoTypeNamed()
+end
+
+(* the verdicts of the arguments of an instance, split at its commas outside brackets *)
+fun arguments_verdict {np:int}{kr,kf,ka:nat}{m:pos}{i:nat | i <= m}{st:int} .<m - i>.
+  (roots: !package_roots(np, kr), files: !project_files(np, kf), owner: package_number(np), common: variants_live,
+   all: !bindings(ka), t: !name_bytes, m: int m, i: int i, start: int st, depth: int, acc: ownership): ownership =
+  if i >= m then ownership_join(acc, argument_verdict(roots, files, owner, common, all, t, m, start, m))
+  else let
+    val c = byte_at(t, i)
+  in
+    if c = 40 || c = 91 || c = 123 || c = 60
+    then arguments_verdict(roots, files, owner, common, all, t, m, i + 1, start, depth + 1, acc)
+    else if c = 41 || c = 93 || c = 125 || c = 62
+    then arguments_verdict(roots, files, owner, common, all, t, m, i + 1, start, (if depth > 0 then depth - 1 else 0), acc)
+    else if c = 44 && depth = 0
+    then arguments_verdict(roots, files, owner, common, all, t, m, i + 1, i + 1, 0,
+           ownership_join(acc, argument_verdict(roots, files, owner, common, all, t, m, start, i)))
+    else arguments_verdict(roots, files, owner, common, all, t, m, i + 1, start, depth, acc)
+  end
+
+(* what the orphan rule says of an instance (overrides.md) *)
+datavtype orphan_answer =
+  | OrphanOk of ()
+  | OrphanRefused of refusal
+
+fn orphan_check {np:int}{kr,kf,ka:nat}
+  (roots: !package_roots(np, kr), files: !project_files(np, kf), owner: package_number(np), common: variants_live,
+   all: !bindings(ka), inst: !instance_text): orphan_answer =
+  case+ inst of
+  | NoInstance() => OrphanRefused(GivesNoInstance())
+  | InstanceText(t) => let
+      val m = path_length(t)
+      val v = arguments_verdict(roots, files, owner, common, all, t, m, 0, 0, 0, NoTypeNamed())
+    in
+      case+ v of
+      | ~OwnedType() => OrphanOk()
+      | ~NoTypeNamed() => OrphanRefused(NamesNoType())
+      | ~NotOwned(ty, root) => OrphanRefused(NotOwnType(ty, root))
+    end
+
+fn refusal_tag (why: !refusal): int =
+  case+ why of
+  | ReplacesImplement() => 1 | GivesNoInstance() => 2 | NamesNoType() => 3
+  | NotOwnType(_, _) => 4 | ImplementedTwice() => 5
+
+fn refusal_free (why: refusal): void =
+  case+ why of
+  | ~ReplacesImplement() => () | ~GivesNoInstance() => () | ~NamesNoType() => () | ~ImplementedTwice() => ()
+  | ~NotOwnType(ty, root) => let val () = name_bytes_free(ty) in free_maybe(root) end
+
+implement foreign_hits_free {np}{k} (hits) = let
+  fun loop {k:nat} .<k>. (hits: foreign_hits(np, k)): void =
+    case+ hits of
+    | ~foreign_hits_nil() => ()
+    | ~foreign_hits_cons(~ForeignHit(~FileRef(_, _, _), ~FileRef(_, _, _), name, inst, why, _), tl) => let
+        val () = name_bytes_free(name)
+        val () = (case+ inst of ~NoInstance() => () | ~InstanceText(t) => name_bytes_free(t))
+        val () = refusal_free(why)
+      in loop(tl) end
+in loop(hits) end
+
+fn instance_same (a: !instance_text, b: !instance_text): bool =
+  case+ a of
+  | NoInstance() => (case+ b of NoInstance() => true | InstanceText(_) => false)
+  | InstanceText(x) => (case+ b of NoInstance() => false | InstanceText(y) => name_equal(x, y))
+
+fn file_ref_same {np:int} (a: !file_ref(np), b: !file_ref(np)): bool =
+  case+ a of FileRef(p1, l1, o1) => (case+ b of FileRef(p2, l2, o2) => p1 = p2 && listing_same(l1, l2) && o1 = o2)
+
+(* whether the hits hold the same finding already *)
+fun hit_present {np:int}{k:nat} .<k>.
+  (hits: !foreign_hits(np, k), impl: !file_ref(np), target: int, name: !name_bytes, inst: !instance_text, tag: int): bool =
+  case+ hits of
+  | foreign_hits_nil() => false
+  | foreign_hits_cons(h, tl) => let
+      val here = (case+ h of
+        | ForeignHit(i2, d2, n2, inst2, why2, _) =>
+          (case+ d2 of FileRef(t2, _, _) =>
+            t2 = target && refusal_tag(why2) = tag && file_ref_same(impl, i2) && name_equal(n2, name) && instance_same(inst, inst2))): bool
+    in if here then true else hit_present(tl, impl, target, name, inst, tag) end
+
+(* acc, with the finding added once: the implementing file, the file that declares the name, the name, the instance *)
+fn add_hit {np:int}{h:nat}
+  (acc: foreign_hits(np, h), owner: package_number(np), lst: listing, off: path_offset, target: package_number(np),
+   tlst: listing, toff: path_offset, name: !name_bytes, inst: !instance_text, why: refusal, is_error: bool)
+  : [h2:nat] foreign_hits(np, h2) = let
+  val impl = FileRef(owner, lst, off)
+  val tag = refusal_tag(why)
+  val present = hit_present(acc, impl, target, name, inst, tag)
+  val () = (case+ impl of ~FileRef(_, _, _) => ())
+in
+  if present then let val () = refusal_free(why) in acc end
+  else foreign_hits_cons(ForeignHit(FileRef(owner, lst, off), FileRef(target, tlst, toff), name_copy(name),
+                                    instance_copy(inst), why, is_error), acc)
+end
+
+(* the instances of foreign templates already accepted, for the one-module rule (overrides.md) *)
+datavtype accepted(np:int, k:int) =
+  | accepted_nil(np, 0) of ()
+  | {j:nat} accepted_cons(np, j + 1) of (package_number(np), int (* the package that declares the template *),
+                                         name_bytes, instance_text, variants_live, accepted(np, j))
+
+fun accepted_free {np:int}{k:nat} .<k>. (xs: accepted(np, k)): void =
+  case+ xs of
+  | ~accepted_nil() => ()
+  | ~accepted_cons(_, _, name, inst, _, tl) => let
+      val () = name_bytes_free(name)
+      val () = (case+ inst of ~NoInstance() => () | ~InstanceText(t) => name_bytes_free(t))
+    in accepted_free(tl) end
+
+fun accepted_has {np:int}{k:nat} .<k>.
+  (xs: !accepted(np, k), owner: int, target: int, name: !name_bytes, inst: !instance_text, common: variants_live): bool =
+  case+ xs of
+  | accepted_nil() => false
+  | accepted_cons(o2, t2, n2, i2, live2, tl) =>
+    if o2 = owner && t2 = target && name_equal(n2, name) && instance_same(i2, inst) && variants_any(variants_meet(common, live2))
+    then true else accepted_has(tl, owner, target, name, inst, common)
+
+(* the findings of a query for one file its name reaches (overrides.md) *)
+fn answer_ref {np:int}{kr,kf,ka,h,ac:nat}
+  (roots: !package_roots(np, kr), files: !project_files(np, kf), all: !bindings(ka), deny: bool, owner: package_number(np),
+   lst: listing, off: path_offset, common: variants_live, name: !name_bytes, inst: !instance_text,
+   target: package_number(np), tlst: listing, toff: path_offset, acc: foreign_hits(np, h), seen: accepted(np, ac))
+  : [h2,ac2:nat] @(foreign_hits(np, h2), accepted(np, ac2)) = let
+  val none = @{native= false, native_test= false, wasm= false, wasm_test= false}: variants_live
+  val declared = declared_live(files, target, tlst, toff, name, false, none)
+  val both = variants_meet(common, declared)
+in
+  if ~variants_any(both) then @(acc, seen)
+  else let
+    val replaces = package_implements(files, target, name, inst, both)
+    val templated = variants_any(variants_meet(both, declared_live(files, target, tlst, toff, name, true, none)))
+  in
+    if ~templated then
+      (if replaces then let
+         val found = add_hit(acc, owner, lst, off, target, tlst, toff, name, inst, ReplacesImplement(), true)
+       in @(found, seen) end
+       else @(acc, seen))
+    else (case+ orphan_check(roots, files, owner, both, all, inst) of
+      | ~OrphanRefused(why) => let
+          val found = add_hit(acc, owner, lst, off, target, tlst, toff, name, inst, why, false)
+        in
+          (* the replacement bats#421 refuses stays an error for one version; with the orphan error it is said once *)
+          if replaces && ~deny then let
+            val found2 = add_hit(found, owner, lst, off, target, tlst, toff, name, inst, ReplacesImplement(), true)
+          in @(found2, seen) end
+          else @(found, seen)
+        end
+      | ~OrphanOk() =>
+        if replaces then let
+          val found = add_hit(acc, owner, lst, off, target, tlst, toff, name, inst, ReplacesImplement(), true)
+        in @(found, seen) end
+        else if accepted_has(seen, owner, target, name, inst, both) then let
+          val found = add_hit(acc, owner, lst, off, target, tlst, toff, name, inst, ImplementedTwice(), false)
+        in @(found, seen) end
+        else @(acc, accepted_cons(owner, target, name_copy(name), instance_copy(inst), both, seen)))
+  end
+end
+
+fun answer_refs {np:int}{kr,kf,ka,k,h,ac:nat} .<k>.
+  (roots: !package_roots(np, kr), files: !project_files(np, kf), all: !bindings(ka), deny: bool, refs: !file_refs(np, k),
+   owner: package_number(np), lst: listing, off: path_offset, common: variants_live, name: !name_bytes,
+   inst: !instance_text, acc: foreign_hits(np, h), seen: accepted(np, ac))
+  : [h2,ac2:nat] @(foreign_hits(np, h2), accepted(np, ac2)) =
+  case+ refs of
+  | file_refs_nil() => @(acc, seen)
+  | file_refs_cons(r, tl) => let
+      val @(acc2, seen2) = (case+ r of
         | FileRef(target, tlst, toff) =>
-          if target = owner then acc
-          else let
-            val declared = declared_live(files, target, tlst, toff, name, @{native= false, native_test= false, wasm= false, wasm_test= false})
-            val both = variants_meet(common, declared)
-          in
-            if variants_any(both) && package_implements(files, target, name, inst, both)
-            then foreign_hits_cons(ForeignHit(FileRef(owner, lst, off), FileRef(target, tlst, toff), name_copy(name)), acc)
-            else acc
-          end): [h2:nat] foreign_hits(np, h2)
-    in answer_refs(tl, files, owner, lst, off, common, name, inst, acc2) end
+          if target = owner then @(acc, seen)
+          else answer_ref(roots, files, all, deny, owner, lst, off, common, name, inst, target, tlst, toff, acc, seen)
+        ): [h2,ac2:nat] @(foreign_hits(np, h2), accepted(np, ac2))
+    in answer_refs(roots, files, all, deny, tl, owner, lst, off, common, name, inst, acc2, seen2) end
 
-fun answer_queries {np:int}{kr,kf,k,h:nat} .<k>.
-  (qs: !queries(np, k), roots: !package_roots(np, kr), files: !project_files(np, kf), acc: foreign_hits(np, h))
-  : [h2:nat] foreign_hits(np, h2) =
+fun answer_queries {np:int}{kr,kf,k,h,ac:nat} .<k>.
+  (qs: !queries(np, k), roots: !package_roots(np, kr), files: !project_files(np, kf), deny: bool, acc: foreign_hits(np, h),
+   seen: accepted(np, ac)): [h2,ac2:nat] @(foreign_hits(np, h2), accepted(np, ac2)) =
   case+ qs of
-  | queries_nil() => acc
+  | queries_nil() => @(acc, seen)
   | queries_cons(q, tl) => let
-      val acc2 = (case+ q of
-        | Query(owner, lst, off, common, name, inst, bs) => let
+      val @(acc2, seen2) = (case+ q of
+        | Query(owner, lst, off, common, name, inst, bs, all) => let
             val refs = resolve_bindings(roots, files, bs, file_refs_nil())
-            val hits = answer_refs(refs, files, owner, lst, off, common, name, inst, acc)
+            val r = answer_refs(roots, files, all, deny, refs, owner, lst, off, common, name, inst, acc, seen)
             val () = file_refs_free(refs)
-          in hits end): [h2:nat] foreign_hits(np, h2)
-    in answer_queries(tl, roots, files, acc2) end
+          in r end): [h2,ac2:nat] @(foreign_hits(np, h2), accepted(np, ac2))
+    in answer_queries(tl, roots, files, deny, acc2, seen2) end
 
-implement foreign_hits_of {np} (whole) = let
+implement foreign_hits_of {np} (whole, deny) = let
   val+ @Project(roots, files) = whole
   val qs = queries_of_files(files, queries_nil())
-  val hits = answer_queries(qs, roots, files, foreign_hits_nil())
+  val @(hits, seen) = answer_queries(qs, roots, files, deny, foreign_hits_nil(), accepted_nil())
+  val () = accepted_free(seen)
   val () = queries_free(qs)
   prval () = fold@(whole)
 in hits end

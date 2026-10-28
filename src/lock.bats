@@ -789,6 +789,8 @@ fn use_color (): bool =
 (* Rust's ANSI escapes, or nothing when c is false *)
 fn put_red (out: !$B.builder_v >> $B.builder_v, c: bool): void =
   if c then bput_v(out, "\033[1;31m") else bput_v(out, "")
+fn put_yellow (out: !$B.builder_v >> $B.builder_v, c: bool): void =
+  if c then bput_v(out, "\033[1;33m") else bput_v(out, "")
 fn put_blue (out: !$B.builder_v >> $B.builder_v, c: bool): void =
   if c then bput_v(out, "\033[1;34m") else bput_v(out, "")
 fn put_reset (out: !$B.builder_v >> $B.builder_v, c: bool): void =
@@ -2567,18 +2569,18 @@ fun line_start {ls:agz}{ns:pos}{i:int} .<max(i, 0)>. (src: !$A.borrow(byte, ls, 
   else if peek(src, i - 1, sm) = 10 then i
   else line_start(src, sm, i - 1)
 
-(* Rust's display_fancy of the error msg at offset off of src[0, n), a
+(* Rust's display_fancy of the error msg (a warning when warning is set) at offset off of src[0, n), a
    file labeled lab[l0, l1), appended to out; consumes msg *)
 fn put_fancy {ll,ls:agz}{ln:pos}{lm:nat | lm <= ln}{ns:pos}
-  (lab: !$A.borrow(byte, ll, ln), lm: int lm, l0: pos_t, l1: int, src: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
+  (warning: bool, lab: !$A.borrow(byte, ll, ln), lm: int lm, l0: pos_t, l1: int, src: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
    off: pos_t, msg: $B.builder_v, out: !$B.builder_v >> $B.builder_v): void = let
   val c = use_color()
   val @(line, col) = line_col(src, sm, 0, off, 1, 1)
   val pad = digits(line)
   val ls = line_start(src, sm, off)
   val le = find_byte(src, sm, off, n, 10)
-  val () = put_red(out, c)
-  val () = bput_v(out, "error:")
+  val () = (if warning then put_yellow(out, c) else put_red(out, c))
+  val () = (if warning then bput_v(out, "warning:") else bput_v(out, "error:"))
   val () = put_reset(out, c)
   val () = put_char_v(out, 32)
   val () = append_builder(out, msg)
@@ -2783,7 +2785,7 @@ fn add_missing {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,ls,ll:agz}{ns:pos}{
     val () = copy_to_builder_v(lib, 0, lbl, lm, m)
     val () = put_char_v(m, 41)
     var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, pm, 0, pl, src, sm, n, ss, m, fy)
+    val () = put_fancy(false, p, pm, 0, pl, src, sm, n, ss, m, fy)
   in add_error(cnt, fy, errs) end
 
 (* Rust's "dependency '<pkg>' not found (expected <lib.bats>)" for each
@@ -2829,7 +2831,7 @@ fn unsafe_block_error {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,ls:agz}{ns:p
       var m : $B.builder_v = $B.create()
       val () = bput_v(m, "$UNSAFE requires `unsafe = true` in bats.toml")
       var fy : $B.builder_v = $B.create()
-      val () = put_fancy(p, pm, 0, pl, src, sm, n, ss, m, fy)
+      val () = put_fancy(false, p, pm, 0, pl, src, sm, n, ss, m, fy)
     in add_error(cnt, fy, errs) end
   | _ => cnt
 
@@ -2853,7 +2855,7 @@ fn add_construct {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,ls:agz}{ns:pos}
     var m : $B.builder_v = $B.create()
     val () = (if want_pf then prfun_msg(src, sm, ws, se, m) else construct_msg(src, sm, rejected, ws, se, m)): void
     var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, pm, b0, pl, src, sm, n, ss, m, fy)
+    val () = put_fancy(false, p, pm, b0, pl, src, sm, n, ss, m, fy)
   in add_error(cnt, fy, errs) end
 
 (* The unsafe constructs, restricted keywords and extcode blocks outside
@@ -2954,7 +2956,7 @@ fn add_alias_error {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,ls:agz}{ns:pos}
     val () = copy_to_builder_v(src, as0, ae, sm, m)
     val () = bput_v(m, "' in qualified access")
     var fy : $B.builder_v = $B.create()
-    val () = put_fancy(p, pm, b0, pl, src, sm, n, ss, m, fy)
+    val () = put_fancy(false, p, pm, b0, pl, src, sm, n, ss, m, fy)
   in add_error(cnt, fy, errs) end
 
 (* Rust's "unknown alias '<a>' in qualified access" for each $a.member
@@ -3010,7 +3012,7 @@ fn add_lex_error {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,ls:agz}{ns:pos}
           if run then bput_v(m, "unterminated $UNITTEST.run begin...end block")
           else bput_v(m, "unterminated $UNITTEST begin...end block")): void
       var fy : $B.builder_v = $B.create()
-      val () = put_fancy(p, pm, b0, pl, src, sm, n, off, m, fy)
+      val () = put_fancy(false, p, pm, b0, pl, src, sm, n, off, m, fy)
     in add_error(cnt, fy, errs) end
   | _ => cnt
 
@@ -3214,7 +3216,7 @@ fn add_cycle_error {lf:agz}{nf:pos}{fm:nat | fm <= nf}
         val () = copy_to_builder_v(bv_s, ns, ne, sm, m)
         val () = bput_v(m, "' calls itself, directly or through other functions, and an implement has no termination metric; recurse in a local 'fun' with '.< metric >.'")
         var fy : $B.builder_v = $B.create()
-        val () = put_fancy(bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, kw, m, fy)
+        val () = put_fancy(false, bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, kw, m, fy)
         val () = $A.drop<byte>(fz_s, bv_s)
         val () = whole_free(ar, $A.thaw<byte>(fz_s))
       in add_error(cnt, fy, errs) end): int
@@ -3429,49 +3431,115 @@ fun add_foreign_packages {lf:agz}{nf:pos}{fm:nat | fm <= nf; fm <= VMAX}{off:nat
     in if ge >= fm then whole2 else add_foreign_packages(reuse, files, fm, ge, len, whole2) end
   end
 
-(* "'implement NAME' replaces what PKG implements: ..." *)
-fn put_foreign_message (name: !name_bytes, declared_by_root: !name_bytes, in_package: bool,
-                        out: !$B.builder_v >> $B.builder_v): void = let
+(* "this package" or "the package 'ROOT'" *)
+fn put_package_phrase (root: !name_bytes, in_package: bool, out: !$B.builder_v >> $B.builder_v): void =
+  if in_package then bput_v(out, "this package")
+  else let
+    val () = bput_v(out, "the package '")
+    val () = put_name_bytes(root, out)
+  in bput_v(out, "'") end
+
+(* "'implement NAME<INSTANCE>' of the template NAME of the package 'DECLARER'" *)
+fn put_template_head (name: !name_bytes, inst: !instance_text, declarer: !name_bytes, out: !$B.builder_v >> $B.builder_v): void = let
   val () = bput_v(out, "'implement ")
   val () = put_name_bytes(name, out)
-  val () = bput_v(out, "' replaces what ")
-  val () = (if in_package then bput_v(out, "this package")
-            else let
-              val () = bput_v(out, "the package '")
-              val () = put_name_bytes(declared_by_root, out)
-            in bput_v(out, "'") end)
-  val () = bput_v(out, " implements: it declares ")
+  val () = (case+ inst of
+    | NoInstance() => ()
+    | InstanceText(t) => let
+        val () = put_char_v(out, 60)
+        val () = put_name_bytes(t, out)
+      in put_char_v(out, 62) end)
+  val () = bput_v(out, "' of the template ")
   val () = put_name_bytes(name, out)
-  val () = bput_v(out, " and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents")
-in end
+  val () = bput_v(out, " of the package '")
+  val () = put_name_bytes(declarer, out)
+in bput_v(out, "'") end
 
-(* The implements of name in a source of n bytes (a buffer of sm) *)
+(* what to do, at the end of an orphan finding *)
+fn put_orphan_advice (implementer: !name_bytes, in_package: bool, declarer: !name_bytes, out: !$B.builder_v >> $B.builder_v): void = let
+  val () = bput_v(out, ": a template of another package is implemented only for a type of the implementing package; use a type that ")
+  val () = put_package_phrase(implementer, in_package, out)
+  val () = bput_v(out, " declares, a wrapper type of its own, or ask the package that owns the type (or the template, '")
+  val () = put_name_bytes(declarer, out)
+in bput_v(out, "') to implement it") end
+
+(* who owns a type an instance names *)
+fn put_type_owner (root: !maybe_name, implementer: !name_bytes, implementer_is_this: bool,
+                   out: !$B.builder_v >> $B.builder_v): void =
+  case+ root of
+  | NameHere(r) => let
+      val () = bput_v(out, "a type of the package '")
+      val () = put_name_bytes(r, out)
+    in bput_v(out, "'") end
+  | NameAbsent() => let
+      val () = bput_v(out, "which is a base or prelude type, or one that ")
+      val () = put_package_phrase(implementer, implementer_is_this, out)
+    in bput_v(out, " does not declare") end
+
+(* the finding of a refused implement, for the message of its sites (overrides.md) *)
+fn put_foreign_message (why: !refusal, name: !name_bytes, inst: !instance_text, declarer: !name_bytes,
+                        implementer: !name_bytes, implementer_is_this: bool, declarer_is_this: bool,
+                        out: !$B.builder_v >> $B.builder_v): void =
+  case+ why of
+  | ReplacesImplement() => let
+      val () = bput_v(out, "'implement ")
+      val () = put_name_bytes(name, out)
+      val () = bput_v(out, "' replaces what ")
+      val () = put_package_phrase(declarer, declarer_is_this, out)
+      val () = bput_v(out, " implements: it declares ")
+      val () = put_name_bytes(name, out)
+    in bput_v(out, " and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents") end
+  | GivesNoInstance() => let
+      val () = put_template_head(name, inst, declarer, out)
+      val () = bput_v(out, " gives no type, so it would implement the template for every type")
+    in put_orphan_advice(implementer, implementer_is_this, declarer, out) end
+  | NamesNoType() => let
+      val () = put_template_head(name, inst, declarer, out)
+      val () = bput_v(out, " names no type")
+    in put_orphan_advice(implementer, implementer_is_this, declarer, out) end
+  | NotOwnType(ty, root) => let
+      val () = put_template_head(name, inst, declarer, out)
+      val () = bput_v(out, " names the type '")
+      val () = put_name_bytes(ty, out)
+      val () = bput_v(out, "', ")
+      val () = put_type_owner(root, implementer, implementer_is_this, out)
+    in put_orphan_advice(implementer, implementer_is_this, declarer, out) end
+  | ImplementedTwice() => let
+      val () = put_template_head(name, inst, declarer, out)
+      val () = bput_v(out, " is implemented more than once by ")
+      val () = put_package_phrase(implementer, implementer_is_this, out)
+    in bput_v(out, ": an instance is implemented in one module only; keep one of them") end
+
+(* The implements of name, for the instance inst, in a source of n bytes (a buffer of sm) *)
 fn sites_of_name {ls:agz}{ns:pos}{n:nat | n <= ns}
-  (bv_s: !$A.borrow(byte, ls, ns), n: int n, sm: int ns, name: !name_bytes): [k:nat] implement_sites(k) = let
+  (bv_s: !$A.borrow(byte, ls, ns), n: int n, sm: int ns, name: !name_bytes, inst: !instance_text): [k:nat] implement_sites(k) = let
   val+ @NameBytes(wa, wm) = name
-  val sites = implement_sites_of(bv_s, n, sm, wa, wm)
+  val sites = implement_sites_of(bv_s, n, sm, wa, wm, inst)
   prval () = fold@(name)
 in sites end
 
 fun add_site_errors {lp,ls:agz}{np:pos}{pm:nat | pm <= np; pm <= 524288}{ns:pos}{k:nat}{pl:int} .<k>.
-  (bv_p: !$A.borrow(byte, lp, np), pal: int pm, pl: int pl, bv_s: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
-   sites: !implement_sites(k), name: !name_bytes, root: !name_bytes, in_package: bool,
+  (warning: bool, bv_p: !$A.borrow(byte, lp, np), pal: int pm, pl: int pl, bv_s: !$A.borrow(byte, ls, ns), sm: int ns, n: pos_t,
+   sites: !implement_sites(k), why: !refusal, name: !name_bytes, inst: !instance_text, declarer: !name_bytes,
+   implementer: !name_bytes, implementer_is_this: bool, declarer_is_this: bool,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
   case+ sites of
   | implement_sites_nil() => cnt
   | implement_sites_cons(site, tl) => let
       val kw = (case+ site of ImplementSite(kw, _, _) => kw): pos_t
       var m : $B.builder_v = $B.create()
-      val () = put_foreign_message(name, root, in_package, m)
+      val () = put_foreign_message(why, name, inst, declarer, implementer, implementer_is_this, declarer_is_this, m)
       var fy : $B.builder_v = $B.create()
-      val () = put_fancy(bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, kw, m, fy)
+      val () = put_fancy(warning, bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, kw, m, fy)
       val c = add_error(cnt, fy, errs)
-    in add_site_errors(bv_p, pal, pl, bv_s, sm, n, tl, name, root, in_package, c, errs) end
+    in add_site_errors(warning, bv_p, pal, pl, bv_s, sm, n, tl, why, name, inst, declarer, implementer,
+                       implementer_is_this, declarer_is_this, c, errs) end
 
-(* cnt, with the errors for the implements of name in the file at the
+(* cnt, with the findings for the implements of name in the file at the
    NUL-terminated path files[fi, NUL) *)
 fn foreign_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
-  (files: !$A.borrow(byte, lf, nf), fm: int fm, fi: pos_t, name: !name_bytes, root: !name_bytes, in_package: bool,
+  (warning: bool, files: !$A.borrow(byte, lf, nf), fm: int fm, fi: pos_t, why: !refusal, name: !name_bytes,
+   inst: !instance_text, declarer: !name_bytes, implementer: !name_bytes, implementer_is_this: bool, declarer_is_this: bool,
    cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
   val e = find_null_bv_from(files, fi, fm)
   var pb : $B.builder_v = $B.create()
@@ -3483,8 +3551,9 @@ fn foreign_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
     | ~whole_err(_) => cnt
     | ~whole_ok(ar, piece, sm, n) => let
         val @(fz_s, bv_s) = $A.freeze<byte>(piece)
-        val sites = sites_of_name(bv_s, n, sm, name)
-        val c1 = add_site_errors(bv_p, pal, pl, bv_s, sm, n, sites, name, root, in_package, cnt, errs)
+        val sites = sites_of_name(bv_s, n, sm, name, inst)
+        val c1 = add_site_errors(warning, bv_p, pal, pl, bv_s, sm, n, sites, why, name, inst, declarer, implementer,
+                                 implementer_is_this, declarer_is_this, cnt, errs)
         val () = implement_sites_free(sites)
         val () = $A.drop<byte>(fz_s, bv_s)
         val () = whole_free(ar, $A.thaw<byte>(fz_s))
@@ -3493,37 +3562,41 @@ fn foreign_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in c end
 
-(* cnt, with the errors for one implement of name: the implementing file impl,
-   and the file decl that declares it *)
-fn report_one {np:pos}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd}
-  (whole: !project(np), impl: !file_ref(np), decl: !file_ref(np), name: !name_bytes,
-   sfiles: !$A.borrow(byte, lf, nf), fm: int fm, dfiles: !$A.borrow(byte, ld, nd), dm: int dm,
-   cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
-  case+ impl of
-  | FileRef(_, il, io) => (case+ decl of
-      | FileRef(declaring, _, _) => let
-          val root = root_of_package(whole, declaring)
-          val in_package = (declaring = 0): bool
-          val c1 = (case+ il of
-            | OwnListing() => foreign_error_in(sfiles, fm, io, name, root, in_package, cnt, errs)
-            | DependencyListing() => foreign_error_in(dfiles, dm, io, name, root, in_package, cnt, errs)): int
-          val () = name_bytes_free(root)
-        in c1 end)
-
+(* the findings of one hit go to errs when it is an error (or BATS_ORPHAN_ERROR is set), else to warns *)
 fn report_hit {np:pos}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd}
-  (h: !foreign_hit(np), whole: !project(np), sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
-   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  (h: !foreign_hit(np), whole: !project(np), deny: bool, sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v,
+   wcnt: int, warns: !$B.builder_v >> $B.builder_v): @(int, int) =
   case+ h of
-  | ForeignHit(impl, decl, name) => report_one(whole, impl, decl, name, sfiles, fm, dfiles, dm, cnt, errs)
+  | ForeignHit(impl, decl, name, inst, why, is_error) => (case+ impl of
+      | FileRef(implementing, il, io) => (case+ decl of
+          | FileRef(declaring, _, _) => let
+              val declarer = root_of_package(whole, declaring)
+              val implementer = root_of_package(whole, implementing)
+              val as_error = (is_error || deny): bool
+              val fi = io
+              val c1 = (if as_error then
+                (case+ il of
+                 | OwnListing() => foreign_error_in(false, sfiles, fm, fi, why, name, inst, declarer, implementer, (implementing = 0), (declaring = 0), cnt, errs)
+                 | DependencyListing() => foreign_error_in(false, dfiles, dm, fi, why, name, inst, declarer, implementer, (implementing = 0), (declaring = 0), cnt, errs))
+                else cnt): int
+              val w1 = (if as_error then wcnt else
+                (case+ il of
+                 | OwnListing() => foreign_error_in(true, sfiles, fm, fi, why, name, inst, declarer, implementer, (implementing = 0), (declaring = 0), wcnt, warns)
+                 | DependencyListing() => foreign_error_in(true, dfiles, dm, fi, why, name, inst, declarer, implementer, (implementing = 0), (declaring = 0), wcnt, warns))): int
+              val () = name_bytes_free(declarer)
+              val () = name_bytes_free(implementer)
+            in @(c1, w1) end))
 
 fun report_foreign_hits {np:pos}{k:nat}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm:nat | dm <= nd} .<k>.
-  (hits: !foreign_hits(np, k), whole: !project(np), sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
-   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int =
+  (hits: !foreign_hits(np, k), whole: !project(np), deny: bool, sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v,
+   wcnt: int, warns: !$B.builder_v >> $B.builder_v): @(int, int) =
   case+ hits of
-  | foreign_hits_nil() => cnt
+  | foreign_hits_nil() => @(cnt, wcnt)
   | foreign_hits_cons(h, tl) => let
-      val c = report_hit(h, whole, sfiles, fm, dfiles, dm, cnt, errs)
-    in report_foreign_hits(tl, whole, sfiles, fm, dfiles, dm, c, errs) end
+      val @(c, w) = report_hit(h, whole, deny, sfiles, fm, dfiles, dm, cnt, errs, wcnt, warns)
+    in report_foreign_hits(tl, whole, deny, sfiles, fm, dfiles, dm, c, errs, w, warns) end
 
 (* cnt, with the error for a file whose name is too long to compare, at the NUL-terminated path files[fi, NUL) *)
 fn oversized_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
@@ -3541,7 +3614,7 @@ fn oversized_error_in {lf:agz}{nf:pos}{fm:nat | fm <= nf}
         var m : $B.builder_v = $B.create()
         val () = bput_v(m, "a name in this file is too long to compare with the names of other packages, so what it implements is not checked; shorten it")
         var fy : $B.builder_v = $B.create()
-        val () = put_fancy(bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, 0, m, fy)
+        val () = put_fancy(false, bv_p, pal, base_start(bv_p, pal, pl), pl, bv_s, sm, n, 0, m, fy)
         val c1 = add_error(cnt, fy, errs)
         val () = $A.drop<byte>(fz_s, bv_s)
         val () = whole_free(ar, $A.thaw<byte>(fz_s))
@@ -3572,12 +3645,14 @@ fun report_oversized {np:pos}{k:nat}{lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf}{dm
    what another package implements *)
 fn check_foreign {lf,ld:agz}{nf,nd:pos}{fm:nat | fm <= nf; fm <= VMAX}{dm:nat | dm <= nd; dm <= VMAX}
   (reuse: bool, sfiles: !$A.borrow(byte, lf, nf), fm: int fm,
-   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v): int = let
+   dfiles: !$A.borrow(byte, ld, nd), dm: int dm, cnt: int, errs: !$B.builder_v >> $B.builder_v,
+   warns: !$B.builder_v >> $B.builder_v): int = let
   val whole0 = project_new()
   val whole1 = add_own_files(reuse, sfiles, fm, 0, fm, whole0)
   val whole2 = add_foreign_packages(reuse, dfiles, dm, 0, dm, whole1)
-  val hits = foreign_hits_of(whole2)
-  val c1 = report_foreign_hits(hits, whole2, sfiles, fm, dfiles, dm, cnt, errs)
+  val deny = is_orphan_error()
+  val hits = foreign_hits_of(whole2, deny)
+  val @(c1, _) = report_foreign_hits(hits, whole2, deny, sfiles, fm, dfiles, dm, cnt, errs, 0, warns)
   val () = foreign_hits_free(hits)
   val big = oversized_files_of(whole2)
   val c = report_oversized(big, sfiles, fm, dfiles, dm, c1, errs)
@@ -3604,7 +3679,7 @@ fn record_passed (passed: bool, pend: $B.builder_v): void =
 (* The errors Rust's preprocess_all finds in the package's modules, its
    dependencies, src/lib.bats and its binaries, in that order, collected
    into errs; how many. What passed is recorded when nothing failed *)
-fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
+fn validate_collect (errs: !$B.builder_v >> $B.builder_v, warns: !$B.builder_v >> $B.builder_v): int = let
   val own_unsafe = read_unsafe_flag()
   (* The listings of ./src and ./bats_modules, once each: the checks of
      the files and of the call cycles read the same ones, and the context
@@ -3632,7 +3707,7 @@ fn validate_collect (errs: !$B.builder_v >> $B.builder_v): int = let
   val c4 = check_dir(bv_x, reuse, "./src/bin", EveryFile(), own_unsafe, c3, errs, pend)
   val c5 = check_dep_cycles(bv_x, reuse, bv_d, dlen, 0, dlen, c4, errs, pend)
   val c6 = check_cycles(bv_x, reuse, cycles_name_src(), bv_s, slen, 0, slen, c5, errs, pend)
-  val c7 = check_foreign(reuse, bv_s, slen, bv_d, dlen, c6, errs)
+  val c7 = check_foreign(reuse, bv_s, slen, bv_d, dlen, c6, errs, warns)
   val () = $A.drop<byte>(fz_d, bv_d)
   val () = $A.free<byte>($A.thaw<byte>(fz_d))
   val () = $A.drop<byte>(fz_s, bv_s)
@@ -3650,7 +3725,10 @@ in c7 end
 
 implement validate_project () = let
   var errs : $B.builder_v = $B.create()
-  val c = validate_collect(errs)
+  var warns : $B.builder_v = $B.create()
+  val c = validate_collect(errs, warns)
+  (* the orphan findings that are warnings (overrides.md), before the errors *)
+  val () = prerr_builder(warns)
 in
   report_errors(c, errs)
 end
@@ -3663,7 +3741,9 @@ end
 
 implement validate_clean () = let
   var errs : $B.builder_v = $B.create()
-  val c = validate_collect(errs)
+  var warns : $B.builder_v = $B.create()
+  val c = validate_collect(errs, warns)
+  val () = $B.builder_free(warns)
   val () = $B.builder_free(errs)
 in c <= 0 end
 

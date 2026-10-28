@@ -61,7 +61,7 @@ Each divergence is kept with the notes of the area it is in, in `.claude/rules/`
 
 ## Safety Enforcement
 
-Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun`, `fnx`, a `fun` group's `and` member or `fix` without termination metric (the `fun` of an arrow, `=<fun>`, is a function kind, not a declaration), `val rec`, `#pub prfun`/`prfn` without `primplement`, and what allocates without being linear: a `datatype` whose constructor carries data, a boxed tuple, record or list, a `cloref` or `cloptr` closure, a `lam` whose arrow does not make it a plain function or a linear closure, a `ref` made inside a function, a prelude word that builds a non-linear list, option or stream, libats/ML) are detected by the lexer (`SConstruct`, or a rejected `SPub`) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`), as are the rules that no `implement` is on a call cycle (`src/recursion.bats`) and that no `implement` replaces what another package implements (`src/overrides.bats`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
+Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun`, `fnx`, a `fun` group's `and` member or `fix` without termination metric (the `fun` of an arrow, `=<fun>`, is a function kind, not a declaration), `val rec`, `#pub prfun`/`prfn` without `primplement`, and what allocates without being linear: a `datatype` whose constructor carries data, a boxed tuple, record or list, a `cloref` or `cloptr` closure, a `lam` whose arrow does not make it a plain function or a linear closure, a `ref` made inside a function, a prelude word that builds a non-linear list, option or stream, libats/ML) are detected by the lexer (`SConstruct`, or a rejected `SPub`) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`), as are the rules that no `implement` is on a call cycle (`src/recursion.bats`) that no `implement` replaces what another package implements, and that an `implement` of another package's template is for a type of the implementing package, a warning until `BATS_ORPHAN_ERROR` (`src/overrides.bats`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
 
 ## Problem Resolution
 
@@ -126,7 +126,7 @@ A comment states its reason in one line and names the area by keyword; the detai
 | `.claude/rules/wasm-prelude.md` | The wasm prelude |
 | `.claude/rules/test-command.md` | bats test |
 | `.claude/rules/recursion.md` | Implement call cycles |
-| `.claude/rules/overrides.md` | An implement that replaces another package's implementation (#421) |
+| `.claude/rules/overrides.md` | An implement that replaces another package's implementation (#421), the orphan rule for templates (#565) |
 | `.claude/rules/lock.md` | The lock and locked packages |
 | `.claude/rules/build-freshness.md` | Build freshness |
 | `.claude/rules/check-memo.md` | The check memo |

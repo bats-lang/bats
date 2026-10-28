@@ -1,3 +1,8 @@
+warning: 'implement put<int>' of the template put of the package 'box' names the type 'int', which is a base or prelude type, or one that this package does not declare: a template of another package is implemented only for a type of the implementing package; use a type that this package declares, a wrapper type of its own, or ask the package that owns the type (or the template, 'box') to implement it
+ --> m.bats:5:1
+   |
+ 5 | implement $B.put< int > (v) = 2
+   | ^
 error: error: 'implement put' replaces what the package 'box' implements: it declares put and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents
  --> m.bats:5:1
    |
