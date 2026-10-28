@@ -3,12 +3,20 @@ name: check
 on:
   push:
     branches: [main]
+  # ready_for_review starts the check on the head when a draft is marked ready
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
   # The daily relock dispatches it on its relock/<date> branch: a pull
   # request opened with GITHUB_TOKEN starts no workflow by itself
   workflow_dispatch:
 
+# A draft pull request runs no job (draft-ci, bats#552, repository-prototype#525): every
+# job carries "github.event_name != 'pull_request' || !github.event.pull_request.draft",
+# so push, workflow_dispatch and any other event run unchanged, and the required `check`
+# is reported as skipped (counted as passed by the branch rules), never missing.
+# `check` and `setup-action` use always(), which would run them after a skipped
+# `affected`, so they repeat the condition themselves.
 jobs:
   # The cheap job: what every change runs. It asks `bats affected` whether the
   # change touches nothing the later jobs build or test (only *.md files outside
@@ -16,6 +24,7 @@ jobs:
   # are skipped on its answer, a skipped job counting as passed where the branch
   # rules require `check` (bats#481, .claude/rules/affected.md)
   affected:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     runs-on: ubuntu-24.04
     outputs:
       inert: ${{ steps.rule.outputs.inert }}
@@ -69,7 +78,7 @@ jobs:
 
   check:
     needs: affected
-    if: ${{ always() && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
+    if: ${{ always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
     runs-on: ubuntu-24.04
     steps:
       # the required check must not pass because the cheap job failed
@@ -197,7 +206,7 @@ jobs:
   # (bats-lang/bats#274), run on a tiny project from the commit under test
   setup-action:
     needs: affected
-    if: ${{ always() && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
+    if: ${{ always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
     runs-on: ubuntu-24.04
     steps:
       - name: The cheap job passed
