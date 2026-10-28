@@ -21,7 +21,7 @@ mkdir -p "$P/src/bin"
 printf '[package]\nname = "facts"\nkind = "bin"\n' > "$P/bats.toml"
 printf 'build/\ndist/\n' > "$P/.gitignore"
 printf '#include "share/atspre_staload.hats"\n\n#pub fn h (): int\n\nimplement h () = 1\n' > "$P/src/other.bats"
-printf '#include "share/atspre_staload.hats"\nstaload F = "_bats_facts.sats"\nstaload "other.sats"\nimplement main0 () = let\n  val () = println! ($F.bats_commit_time ())\n  val () = println! ($F.bats_commit_version ())\n  val () = println! ($F.bats_commit_short ())\n  val () = println! ($F.bats_commit_sha ())\nin println! (h ()) end\n' > "$P/src/bin/facts.bats"
+printf '#include "share/atspre_staload.hats"\nstaload F = "_bats_facts.sats"\nstaload "other.sats"\nimplement main0 () = let\n  val () = println! ($F.bats_commit_time ())\n  val () = println! ($F.bats_commit_version ())\n  val () = println! ($F.bats_commit_short ())\n  val () = println! ($F.bats_commit_sha ())\n  val () = (case+ $F.bats_commit_count () of\n    | ~$F.CommitCounted (n) => println! ("count ", n)\n    | ~$F.CommitHistoryShallow () => println! ("shallow"))\nin println! (h ()) end\n' > "$P/src/bin/facts.bats"
 cd "$P"
 git init -q -b main .
 commit() { # <committer date> <message>
@@ -32,28 +32,44 @@ commit "2026-10-02T17:02:53Z" first
 build() { # <log>
   "$BATS" -v build --only debug --only native > "$1" 2>&1 || { echo "FAIL: build"; cat "$1"; exit 1; }
 }
-expect() { # <time> <version> <sha>
-  printf '%s\n%s\n%s\n%s\n1\n' "$1" "$2" "$(printf '%s' "$3" | cut -c1-7)" "$3" > "$TMP/want"
+expect() { # <time> <version> <sha> <count line>
+  printf '%s\n%s\n%s\n%s\n%s\n1\n' "$1" "$2" "$(printf '%s' "$3" | cut -c1-7)" "$3" "$4" > "$TMP/want"
   ./dist/debug/facts > "$TMP/got"
   diff -u "$TMP/want" "$TMP/got" || { echo "FAIL: the facts are not the commit's"; exit 1; }
 }
 build "$TMP/1.log"
 first=$(git rev-parse HEAD)
-expect 1790960573 2026.10.2.61373 "$first"
+expect 1790960573 2026.10.2.61373 "$first" "count 1"
 # the same under another clock's zone, from scratch
 rm -rf build dist
 TZ=Pacific/Kiritimati "$BATS" build --only debug --only native > "$TMP/tz.log" 2>&1 || { echo "FAIL: build under TZ"; cat "$TMP/tz.log"; exit 1; }
-expect 1790960573 2026.10.2.61373 "$first"
+expect 1790960573 2026.10.2.61373 "$first" "count 1"
 # a new commit: only the facts module is compiled again
 sleep 1
 commit "2026-10-03T00:00:07Z" second
 build "$TMP/2.log"
-expect 1790985607 2026.10.3.7 "$(git rev-parse HEAD)"
+expect 1790985607 2026.10.3.7 "$(git rev-parse HEAD)" "count 2"
 ran=$(grep -a -- '+ patsopt' "$TMP/2.log" | grep -av '(cached)' | while IFS= read -r l; do printf '%s\n' "${l##*-d }" | grep -ao '^[a-zA-Z0-9_./]*'; done | sort | tr '\n' ' ')
 [ "$ran" = "build/src/_bats_facts.dats " ] || { echo "FAIL: a new commit ran patsopt on: $ran"; cat "$TMP/2.log"; exit 1; }
 # BATS_COMMIT names another commit
 BATS_COMMIT="$first" "$BATS" build --only debug --only native > "$TMP/3.log" 2>&1 || { echo "FAIL: build with BATS_COMMIT"; cat "$TMP/3.log"; exit 1; }
-expect 1790960573 2026.10.2.61373 "$first"
+expect 1790960573 2026.10.2.61373 "$first" "count 1"
+# the count is the commits reachable from the commit: a third commit gives 3, the same commit
+# the same number from another clone with full history
+commit "2026-10-04T00:00:00Z" third
+build "$TMP/3b.log"
+expect 1791072000 2026.10.4.0 "$(git rev-parse HEAD)" "count 3"
+full=$TMP/full
+git clone -q "file://$P" "$full"
+(cd "$full" && "$BATS" build --only debug --only native > "$TMP/3c.log" 2>&1) || { echo "FAIL: build of a full clone"; cat "$TMP/3c.log"; exit 1; }
+(cd "$full" && ./dist/debug/facts | sed -n 5p) > "$TMP/fullcount"
+[ "$(cat "$TMP/fullcount")" = "count 3" ] || { echo "FAIL: a full clone does not count 3"; cat "$TMP/fullcount"; exit 1; }
+# a shallow clone is refused with its own constructor, never given a wrong number
+shallow=$TMP/shallow
+git clone -q --depth 1 "file://$P" "$shallow"
+(cd "$shallow" && "$BATS" build --only debug --only native > "$TMP/3d.log" 2>&1) || { echo "FAIL: build of a shallow clone"; cat "$TMP/3d.log"; exit 1; }
+(cd "$shallow" && ./dist/debug/facts | sed -n 5p) > "$TMP/shallowcount"
+[ "$(cat "$TMP/shallowcount")" = "shallow" ] || { echo "FAIL: a shallow clone was not refused"; cat "$TMP/shallowcount"; exit 1; }
 if BATS_COMMIT=no-such-commit "$BATS" build --only debug --only native > "$TMP/4.log" 2>&1; then
   echo "FAIL: an unknown BATS_COMMIT built"; exit 1
 fi

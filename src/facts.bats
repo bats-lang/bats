@@ -10,6 +10,13 @@
                                          as bats versions a package
      fun bats_commit_short (): string 7  the first 7 hex digits of its SHA
      fun bats_commit_sha (): string 40
+     fun bats_commit_count (): commit_count
+                                         the number of commits reachable from
+                                         it (bats-lang/bats#574, keyword:
+                                         commit-count): CommitCounted of n >= 1,
+                                         or CommitHistoryShallow when the clone
+                                         is shallow, so a number that is wrong
+                                         is never given
 
    The commit is BATS_COMMIT when set (any revision git takes; CI names a
    pull request's head with it), else HEAD. The values are the commit's,
@@ -105,6 +112,13 @@ implement write_facts () =
     val out = $A.alloc<byte>(4096)
     val @(rc, k) = sh_capture("git log -1 --format='%ct%n%H' \"${BATS_COMMIT:-HEAD}\" -- 2>/dev/null", out)
     val seconds = parse_decimal(out, k, 4096)
+    (* the count of commits reachable from it, or "shallow" (commit-count) *)
+    val out2 = $A.alloc<byte>(4096)
+    val @(rc2, k2) = sh_capture("s=$(git rev-parse --is-shallow-repository 2>/dev/null) || exit 1; if [ \"$s\" = true ]; then echo shallow; else git rev-list --count \"${BATS_COMMIT:-HEAD}\" -- 2>/dev/null; fi", out2)
+    val total = parse_decimal(out2, k2, 4096)
+    val @(fz_o2, bv_o2) = $A.freeze<byte>(out2)
+    val shallow = (k2 > 0 && peek(bv_o2, 0, 4096) = 115): bool
+    val counted = (rc2 = 0) && (shallow || total > 0)
     val @(fz_o, bv_o) = $A.freeze<byte>(out)
     val e1 = line_end(bv_o, 0, k, 4096)
     val s0 = e1 + 1
@@ -114,7 +128,16 @@ implement write_facts () =
     if ~good then let
       val () = $A.drop<byte>(fz_o, bv_o)
       val () = $A.free<byte>($A.thaw<byte>(fz_o))
+      val () = $A.drop<byte>(fz_o2, bv_o2)
+      val () = $A.free<byte>($A.thaw<byte>(fz_o2))
       val () = prerr! ("error: src/ staloads _bats_facts.sats, the commit the build is made from, but git names no commit here (BATS_COMMIT, else HEAD): build from a git repository, or set BATS_COMMIT to a commit of one\n")
+    in set_build_err() end
+    else if ~counted then let
+      val () = $A.drop<byte>(fz_o, bv_o)
+      val () = $A.free<byte>($A.thaw<byte>(fz_o))
+      val () = $A.drop<byte>(fz_o2, bv_o2)
+      val () = $A.free<byte>($A.thaw<byte>(fz_o2))
+      val () = prerr! ("error: src/ staloads _bats_facts.sats, but git cannot count the commits reachable from the commit the build is made from\n")
     in set_build_err() end
     else let
       val @(year, month, day, secs) = timestamp_to_calver(seconds)
@@ -128,7 +151,10 @@ implement write_facts () =
       val () = bput_v(sats, "(* the first 7 hex digits of the commit's SHA *)\n")
       val () = bput_v(sats, "fun bats_commit_short (): string 7\n\n")
       val () = bput_v(sats, "(* the commit's SHA, 40 hex digits *)\n")
-      val () = bput_v(sats, "fun bats_commit_sha (): string 40\n")
+      val () = bput_v(sats, "fun bats_commit_sha (): string 40\n\n")
+      val () = bput_v(sats, "(* the commits reachable from the commit, or that the clone is shallow and cannot say *)\n")
+      val () = bput_v(sats, "datavtype commit_count =\n  | {n:pos} CommitCounted of int n\n  | CommitHistoryShallow of ()\n\n")
+      val () = bput_v(sats, "fun bats_commit_count (): commit_count\n")
       val sats_new = write_sats_changed("build/src/_bats_facts.sats", sats)
       (* the stamp, then the .sats, then the .dats, as build.bats (stamp, write errors): a write
          that fails is said and stops the module, so nothing after it is written *)
@@ -155,8 +181,15 @@ implement write_facts () =
       val () = copy_to_builder_v(bv_o, s0, s0 + 7, 4096, dats)
       val () = bput_v(dats, "\"\nimplement bats_commit_sha () = \"")
       val () = copy_to_builder_v(bv_o, s0, e2, 4096, dats)
-      val () = bput_v(dats, "\"\n")
+      val () = bput_v(dats, "\"\nimplement bats_commit_count () = ")
+      val () = (if shallow then bput_v(dats, "CommitHistoryShallow ()") else let
+          val () = bput_v(dats, "CommitCounted (")
+          val () = put_int_v(dats, total)
+        in bput_v(dats, ")") end)
+      val () = put_char_v(dats, 10)
       val () = dats_when(sats_ok, "build/src/_bats_facts.dats", dats)
       val () = $A.drop<byte>(fz_o, bv_o)
+      val () = $A.drop<byte>(fz_o2, bv_o2)
+      val () = $A.free<byte>($A.thaw<byte>(fz_o2))
     in $A.free<byte>($A.thaw<byte>(fz_o)) end
   end
