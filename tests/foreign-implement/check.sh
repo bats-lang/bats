@@ -22,6 +22,13 @@
 #  * the names of a file are recorded under build/.bats_valid (facts <path>): a check in
 #    which nothing changed lexes no file for them, and a record that holds the key of other
 #    bats inputs (another compiler's stamp), garbled, empty or cut short is not trusted.
+# bats#565: an implement of another package's template is for a type of the implementing package (the
+# orphan rule, overrides.md). In the first compiler version that has it the finding is a warning, and
+# BATS_ORPHAN_ERROR=1 makes it an error; the cases whose names start with orphan_ play it: accepted for
+# an own type; a warning for a foreign type, a base type, a type the dependency does not implement, a
+# generic instance and no instance; the error (denied) for the same, for a typedef, and for the same
+# instance in two modules of one package; and the same finding, word for word, whether the dependency
+# implements the instance or leaves it out (orphan_dep_without, orphan_dep_with).
 # The expected text of a rejection is tests/foreign-implement/expected/<case>.txt;
 # BLESS=1 writes it from the run, to be read before it is committed.
 # Why this is a shell script (quire#646, CLAUDE.md "we do not write shell scripts"): the claims are about
@@ -70,7 +77,7 @@ main() {
   cat >> "$TMP/$1/src/bin/m.bats"
 }
 
-CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings other_instance disjoint_targets record_unchanged record_other_key record_garbled record_empty record_cut"
+CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings disjoint_targets orphan_own orphan_foreign orphan_base orphan_unimplemented orphan_generic orphan_no_instance orphan_foreign_denied orphan_base_denied orphan_unimplemented_denied orphan_generic_denied orphan_no_instance_denied orphan_typedef_denied orphan_twice_denied orphan_dep_without orphan_dep_with orphan_dep_with_default orphan_dep_same record_unchanged record_other_key record_garbled record_empty record_cut"
 SELECT=${3:-}
 if [ -n "$SELECT" ]; then
   for want_name in $(printf '%s' "$SELECT" | tr ',' ' '); do
@@ -96,7 +103,7 @@ reject() { # <case> <text each of the errors must hold>...
   want "$c" || return 0
   RAN=$((RAN + 1))
   rc=0
-  (cd "$TMP/$c" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
+  (cd "$TMP/$c" && env $ORPHAN "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
   # the notice of a busy machine slot (BATS_SLOTS) is not what the error says
   grep -av '^waiting for another bats' "$TMP/err" > "$TMP/err.only" || true
   mv "$TMP/err.only" "$TMP/err"
@@ -117,12 +124,41 @@ accept() { # <case>
   want "$1" || return 0
   RAN=$((RAN + 1))
   rc=0
-  (cd "$TMP/$1" && "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
+  (cd "$TMP/$1" && env $ORPHAN "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
   cat "$TMP/out" "$TMP/err" > "$TMP/detail"
   if [ "$rc" != 0 ]; then fail_case "$1" "the check failed (status $rc)"; return 0; fi
   if ! grep -aq 'check passed' "$TMP/err"; then fail_case "$1" "no check passed line"; return 0; fi
+  if grep -aq '^warning:' "$TMP/err"; then fail_case "$1" "a warning was printed"; return 0; fi
   pass_case "$1"
 }
+# warns <case> <text>...: the check passes, and what it printed besides the pass line is expected/<case>.txt
+warns() {
+  c=$1; shift
+  want "$c" || return 0
+  RAN=$((RAN + 1))
+  rc=0
+  (cd "$TMP/$c" && env $ORPHAN "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
+  grep -av '^waiting for another bats' "$TMP/err" > "$TMP/err.only" || true
+  mv "$TMP/err.only" "$TMP/err"
+  cat "$TMP/out" "$TMP/err" > "$TMP/detail"
+  if [ "$rc" != 0 ]; then fail_case "$c" "the check failed (status $rc)"; return 0; fi
+  if ! grep -aq 'check passed' "$TMP/err"; then fail_case "$c" "no check passed line"; return 0; fi
+  for t in "$@"; do
+    if ! grep -aqF -- "$t" "$TMP/err"; then fail_case "$c" "the output lacks: $t"; return 0; fi
+  done
+  grep -aq '^warning:' "$TMP/err" || { fail_case "$c" "no warning was printed"; return 0; }
+  grep -av 'check passed' "$TMP/err" > "$TMP/err.warn"
+  cp "$TMP/err.warn" "$TMP/err"
+  if [ -n "${BLESS:-}" ]; then mkdir -p "$HERE/expected"; cp "$TMP/err" "$HERE/expected/$c.txt"; fi
+  if ! cmp -s "$HERE/expected/$c.txt" "$TMP/err"; then
+    diff "$HERE/expected/$c.txt" "$TMP/err" > "$TMP/detail" 2>&1
+    fail_case "$c" "the output differs from expected/$c.txt"; return 0
+  fi
+  pass_case "$c"
+}
+ORPHAN="BATS_ORPHAN_ERROR=0"
+denied() { ORPHAN="BATS_ORPHAN_ERROR=1"; }
+default_env() { ORPHAN="BATS_ORPHAN_ERROR=0"; }
 
 # ---- rejected ----
 project override_arith bin
@@ -349,21 +385,6 @@ implement main0 () = println! ($SA.sget (), " ", $SB.sget ())
 X
 accept siblings
 
-project other_instance bin
-dependency other_instance pr <<'X'
-#pub fun{a:t@ype} dispose (v: a): void
-
-implement dispose<int> (v) = ()
-X
-main other_instance <<'X'
-#use pr as P
-
-implement $P.dispose<bool> (v) = ()
-
-implement main0 () = $P.dispose<bool> (true)
-X
-accept other_instance
-
 project disjoint_targets bin
 dependency disjoint_targets arith <<'X'
 #pub fun{} rotr (x: int): int
@@ -382,6 +403,163 @@ end
 implement main0 () = ()
 X
 accept disjoint_targets
+
+# ---- the orphan rule (bats#565) ----
+# a template nobody implements, a template implemented for int only, a package with an abstract type
+orphan_deps() { # <case>
+  dependency "$1" pr <<'X'
+#pub fun{a:t@ype} dispose (v: a): void
+#pub fun{} hook (): void
+X
+  dependency "$1" ty <<'X'
+#pub abstype stored
+X
+}
+project orphan_own bin
+orphan_deps orphan_own
+main orphan_own <<'X'
+#use pr as P
+
+datatype mine = MineA | MineB
+
+implement $P.dispose<mine> (_) = ()
+
+implement main0 () = $P.dispose<mine> (MineA)
+X
+accept orphan_own
+
+orphan_foreign_main() { # <case>
+  main "$1" <<'X'
+#use pr as P
+#use ty as T
+
+implement $P.dispose<$T.stored> (_) = ()
+
+implement main0 () = ()
+X
+}
+orphan_base_main() {
+  main "$1" <<'X'
+#use pr as P
+
+implement $P.dispose<int> (_) = ()
+
+implement main0 () = ()
+X
+}
+orphan_unimplemented_main() {
+  main "$1" <<'X'
+#use pr as P
+
+implement $P.dispose<bool> (_) = ()
+
+implement main0 () = ()
+X
+}
+orphan_generic_main() {
+  main "$1" <<'X'
+#use pr as P
+
+implement{a} $P.dispose<a> (_) = ()
+
+implement main0 () = ()
+X
+}
+orphan_no_instance_main() {
+  main "$1" <<'X'
+#use pr as P
+
+implement{} $P.hook () = ()
+
+implement main0 () = ()
+X
+}
+for kind in foreign base unimplemented generic no_instance; do
+  for mode in warn denied; do
+    if [ "$mode" = warn ]; then c=orphan_$kind; else c=orphan_${kind}_denied; fi
+    project $c bin
+    orphan_deps $c
+    if [ "$kind" = unimplemented ]; then
+      dependency $c pr <<'X'
+#pub fun{a:t@ype} dispose (v: a): void
+#pub fun{} hook (): void
+
+implement dispose<int> (v) = ()
+X
+    fi
+    orphan_${kind}_main $c
+  done
+done
+default_env
+warns orphan_foreign "warning: 'implement dispose<\$T.stored>' of the template dispose of the package 'pr'"
+warns orphan_base "names the type 'int'"
+warns orphan_unimplemented "names the type 'bool'"
+warns orphan_generic "names the type 'a'"
+warns orphan_no_instance "gives no type"
+denied
+reject orphan_foreign_denied "error: 'implement dispose<\$T.stored>' of the template dispose of the package 'pr'" "a type of the package 'ty'"
+reject orphan_base_denied "names the type 'int'"
+reject orphan_unimplemented_denied "names the type 'bool'"
+reject orphan_generic_denied "names the type 'a'"
+reject orphan_no_instance_denied "gives no type"
+default_env
+
+project orphan_typedef_denied bin
+orphan_deps orphan_typedef_denied
+main orphan_typedef_denied <<'X'
+#use pr as P
+
+typedef alias = int
+
+implement $P.dispose<alias> (_) = ()
+
+implement main0 () = ()
+X
+denied
+reject orphan_typedef_denied "names the type 'alias'"
+default_env
+
+project orphan_twice_denied bin
+orphan_deps orphan_twice_denied
+mkdir -p "$TMP/orphan_twice_denied/src"
+printf '#include "share/atspre_staload.hats"\n#use pr as P\n\n#pub datatype mine = MineA\n\nimplement $P.dispose<mine> (_) = ()\n' > "$TMP/orphan_twice_denied/src/other.bats"
+main orphan_twice_denied <<'X'
+#use pr as P
+
+implement $P.dispose<mine> (_) = ()
+
+implement main0 () = ()
+X
+denied
+reject orphan_twice_denied "is implemented more than once by this package"
+default_env
+
+# the dependency implements the instance or leaves it out: the same orphan finding either way
+for c in orphan_dep_without orphan_dep_with orphan_dep_with_default; do
+  project $c bin
+  if [ "$c" = orphan_dep_without ]; then
+    dependency $c pr <<'X'
+#pub fun{a:t@ype} dispose (v: a): void
+X
+  else
+    dependency $c pr <<'X'
+#pub fun{a:t@ype} dispose (v: a): void
+
+implement dispose<bool> (v) = ()
+X
+  fi
+  orphan_unimplemented_main $c
+done
+denied
+reject orphan_dep_without "names the type 'bool'"
+reject orphan_dep_with "names the type 'bool'"
+default_env
+reject orphan_dep_with_default "warning: 'implement dispose<bool>' of the template dispose of the package 'pr'" "error: 'implement dispose' replaces what the package 'pr' implements"
+if want orphan_dep_same; then
+  RAN=$((RAN + 1))
+  if cmp -s "$HERE/expected/orphan_dep_without.txt" "$HERE/expected/orphan_dep_with.txt"; then pass_case orphan_dep_same
+  else diff "$HERE/expected/orphan_dep_without.txt" "$HERE/expected/orphan_dep_with.txt" > "$TMP/detail" 2>&1; fail_case orphan_dep_same "the finding differs with what the dependency implements"; fi
+fi
 
 # ---- the record of the names ----
 lexed() { grep -ac '^  ~ facts lexed ' "$1" || true; }

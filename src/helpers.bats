@@ -5177,21 +5177,28 @@ implement kept_hash(p, m, out) = digest_entry(p, m, true, out)
 
 implement file_starts_with(path_bv, pm, bv, len) = file_has_prefix(path_bv, pm, bv, len)
 
+(* Whether the environment variable name is set to anything but "0" *)
+fn env_flag_on {sn:nat | sn < $B.BUILDER_CAP} (name: string sn): bool = let
+  var b : $B.builder_v = $B.create()
+  val set = env_value(name, b)
+  val @(a, k) = $B.into_arr(b)
+  val @(fz, bv) = $A.freeze<byte>(a)
+  val zero = (k = 1 && peek(bv, 0, k) = 48): bool
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in set && ~zero end
+
 (* BATS_COLD: set to anything but "0", or --cold: the check memo is
    ignored (and written again) *)
 #pub fn is_cold (): bool
 
-implement is_cold () =
-  if !g_cold then true
-  else let
-    var b : $B.builder_v = $B.create()
-    val set = env_value("BATS_COLD", b)
-    val @(a, k) = $B.into_arr(b)
-    val @(fz, bv) = $A.freeze<byte>(a)
-    val zero = (k = 1 && peek(bv, 0, k) = 48): bool
-    val () = $A.drop<byte>(fz, bv)
-    val () = $A.free<byte>($A.thaw<byte>(fz))
-  in set && ~zero end
+implement is_cold () = if !g_cold then true else env_flag_on("BATS_COLD")
+
+(* BATS_ORPHAN_ERROR: set to anything but "0": an implement of another package's template that the
+   orphan rule refuses is an error, as it is a warning without it (overrides.md, bats#565) *)
+#pub fn is_orphan_error (): bool
+
+implement is_orphan_error () = env_flag_on("BATS_ORPHAN_ERROR")
 
 
 (* s and its NUL in the builder's own array, and their number: a path to open, test or hash (the *_m functions) *)
