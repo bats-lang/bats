@@ -661,6 +661,30 @@ in
   else walk_log(bv, len, next_line(bv, len, e, true), still, count2, mv, mlen, first, want, raw, norm, problem)
 end
 
+(* What the unmatched constructors of a log say about one named (fixtures among) *)
+datatype unmatched_answer = UnmatchedFound | UnmatchedAbsent | UnmatchedNotList
+
+(* patsopt names each unmatched constructor in an error of its own, a line
+   "pattern match is nonexhaustive:" and the constructor's line. Whether the
+   constructor cv[c, c + la) is the line of one of the errors of nv[p, nlen),
+   all of which must be of that form *)
+fun unmatched_scan {nv_cap:pos}{cv_cap:pos} {l:agz}{m:agz}{nlen:nat | nlen <= nv_cap}{clen:nat | clen <= cv_cap}{p:nat | p <= nlen}{la:nat} .<nlen - p>.
+  (nv: !$A.borrow(byte, l, nv_cap), nlen: int nlen, p: int p,
+   cv: !$A.borrow(byte, m, cv_cap), clen: int clen, c: xi, la: int la): unmatched_answer =
+  if p >= nlen then UnmatchedAbsent()
+  else let
+    val q = step_text(nv, nlen, p, "pattern match is nonexhaustive:\n")
+  in
+    if q < 0 then UnmatchedNotList()
+    else let
+      val e = line_end(nv, nlen, q, false)
+    in
+      if e - q = la && same_range(nv, nlen, q, cv, clen, c, la, 0) then UnmatchedFound()
+      else if e >= nlen then UnmatchedAbsent()
+      else unmatched_scan(nv, nlen, next_line(nv, nlen, e, false), cv, clen, c, la)
+    end
+  end
+
 (* Whether bv[a, ae) is the text "kw" followed by the rest, and the rest's
    start; ~1 if not *)
 fn after_word {bv_cap:pos} {l:agz}{kl:nat}{len:nat | len <= bv_cap} (bv: !$A.borrow(byte, l, bv_cap), len: int len, a: xi, kw: string kl): xi =
@@ -735,7 +759,27 @@ fn judge_in {lv_cap:pos}{ev_cap:pos}{sv_cap:pos}{mv_cap:pos} {l1,l2,l3,l4:agz}{e
   val @(fz_w, bv_w) = $A.freeze<byte>(wa)
   val @(fz_r, bv_r) = $A.freeze<byte>(ra)
   val equal = (nl = wl && same_range(bv_n, nl, 0, bv_w, wl, 0, nl, 0)): bool
-  val () = (if bytes_in(problem) = 0 && ~equal then let
+  (* the expect's rest may be the two lines "pattern match is nonexhaustive:" and
+     "among <Constructor>" (fixtures among): the constructor is one of the unmatched ones *)
+  val ap = step_text(ev, elen, s3, "pattern match is nonexhaustive:\namong ")
+  val cs = (if ap >= 0 then skip_space(ev, elen, ap, elen) else 0): [r:nat | r <= elen] int r
+  val ce = (if ap >= 0 then trim_end(ev, elen, cs, elen) else 0): [r:nat | r <= elen] int r
+  val among_form = (ap >= 0 && ce > cs): bool
+  val answer = (if among_form then (if ce >= cs then unmatched_scan(bv_n, nl, 0, ev, elen, cs, ce - cs) else UnmatchedNotList())
+    else UnmatchedNotList()): unmatched_answer
+  val () = (if bytes_in(problem) > 0 then ()
+    else if among_form then
+      (case+ answer of
+       | UnmatchedFound() => ()
+       | UnmatchedAbsent() => let
+           val () = bput_v(problem, "its error does not leave ")
+           val () = put_range(ev, elen, cs, ce, problem)
+           val () = bput_v(problem, " among the unmatched constructors; patsopt listed:\n")
+         in put_range(bv_r, rl, 0, rl, problem) end
+       | UnmatchedNotList() => let
+           val () = bput_v(problem, "its error is not the one expected:\n")
+         in put_range(bv_r, rl, 0, rl, problem) end)
+    else if ~equal then let
       val () = bput_v(problem, "its error is not the one expected:\n")
     in put_range(bv_r, rl, 0, rl, problem) end
     else ())
