@@ -245,6 +245,25 @@ fixture "$G" reject exi-suffix "$SEXI_COPY" "$(exi_copy_expect 'a$7001' 15000)"
 fixture "$G" reject exi-suffix-binders "$SEXI_COPY_LIST" "$(exi_copy_list_expect 'b$7002' 15001)"
 # the number of a variable with no arrow is other than patsopt's
 fixture "$G" reject evar-bare "$SEVAR" "$(evar_expect 7101)"
+# a nonexhaustive match leaves two constructors: patsopt names each in an error of its own
+# (bats-lang/bats#573). The old form lists them line for line; "among" names one of them.
+SAMONG='datatype ab = A | B | C
+
+fn h (x: ab): int = case+ x of A() => 1'
+fixture "$G" reject among-first "$SAMONG" 'function h
+line 3
+pattern match is nonexhaustive:
+among B()'
+fixture "$G" reject among-last "$SAMONG" 'function h
+line 3
+pattern match is nonexhaustive:
+among C()'
+fixture "$G" reject among-old-form "$SAMONG" 'function h
+line 3
+pattern match is nonexhaustive:
+B()
+pattern match is nonexhaustive:
+C()'
 run "$TMP/good.log" "$G" --cold
 [ $rc = 0 ] || { cat "$TMP/good.log"; fail "good fixtures: status $rc"; }
 okline "$TMP/good.log" accept/ok good
@@ -257,7 +276,10 @@ okline "$TMP/good.log" reject/exi-binders good
 okline "$TMP/good.log" reject/exi-suffix good
 okline "$TMP/good.log" reject/exi-suffix-binders good
 okline "$TMP/good.log" reject/evar-bare good
-said "$TMP/good.log" "fixtures: 10 ok, 0 failed" good
+okline "$TMP/good.log" reject/among-first good
+okline "$TMP/good.log" reject/among-last good
+okline "$TMP/good.log" reject/among-old-form good
+said "$TMP/good.log" "fixtures: 13 ok, 0 failed" good
 nofail "$TMP/good.log" good
 [ -z "$(ls "$TMP/tmp")" ] || fail "the run left a temporary directory: $(ls "$TMP/tmp")"
 # the project is as it was
@@ -334,6 +356,20 @@ fixture "$B" reject exi-suffix-binders-other-name "$SEXI_COPY_LIST" "$(exi_copy_
 # a bare S2EVar's number is digits, not letters or a mix
 fixture "$B" reject evar-bare-not-digits "$SEVAR" "$(evar_expect 71x1)"
 fixture "$B" reject evar-bare-name "$SEVAR" "$(evar_expect name)"
+# the constructor is not among the unmatched ones; or none is named; or the error is another one
+fixture "$B" reject among-absent "$SAMONG" 'function h
+line 3
+pattern match is nonexhaustive:
+among A()'
+fixture "$B" reject among-none "$SAMONG" 'function h
+line 3
+pattern match is nonexhaustive:
+among '
+fixture "$B" reject among-other-error 'fn h (x: int): int = x + true
+' 'function h
+line 1
+pattern match is nonexhaustive:
+among B()'
 run "$TMP/bad.log" "$B"
 [ $rc = 1 ] || { cat "$TMP/bad.log"; fail "bad fixtures: status $rc, not 1"; }
 L=$TMP/bad.log
@@ -359,7 +395,13 @@ saidpart "$L" "FAIL reject/no-patsopt-error: rejected, but not as its expect say
 saidpart "$L" "FAIL reject/other-module: rejected, but not as its expect says: an error is in " bad
 saidpart "$L" "/src/other.bats, not src/lib.bats: unsolved constraint" bad
 saidpart "$L" "FAIL accept/no-such-line: no line \"(* not in the module *)\" in src/lib.bats" bad
-said "$L" "fixtures: 0 ok, 26 failed" bad
+said "$L" "fixtures: 0 ok, 29 failed" bad
+# the constructors patsopt did list are named, and nothing else is accepted
+grep -aA4 "^FAIL reject/among-absent" "$L" > "$TMP/among-absent.txt"
+printf 'FAIL reject/among-absent: rejected, but not as its expect says: its error does not leave A() among the unmatched constructors; patsopt listed:\npattern match is nonexhaustive:\nB()\npattern match is nonexhaustive:\nC()\n' > "$TMP/among-absent.want"
+[ "$(cat "$TMP/among-absent.txt")" = "$(cat "$TMP/among-absent.want")" ] || { cat "$TMP/among-absent.txt"; fail "among-absent: the message is not the exact one"; }
+saidpart "$L" "FAIL reject/among-none: rejected, but not as its expect says: its error is not the one expected:" bad
+saidpart "$L" "FAIL reject/among-other-error: rejected, but not as its expect says: its error is not the one expected:" bad
 # the raw error is shown for a mismatch, so the reader can fix the expect
 saidpart "$L" "pattern match is nonexhaustive:" bad
 
