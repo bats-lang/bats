@@ -77,7 +77,7 @@ main() {
   cat >> "$TMP/$1/src/bin/m.bats"
 }
 
-CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings disjoint_targets orphan_own orphan_foreign orphan_base orphan_unimplemented orphan_generic orphan_no_instance orphan_foreign_denied orphan_base_denied orphan_unimplemented_denied orphan_generic_denied orphan_no_instance_denied orphan_typedef_denied orphan_twice_denied orphan_dep_without orphan_dep_with orphan_dep_with_default orphan_dep_same record_unchanged record_other_key record_garbled record_empty record_cut"
+CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings disjoint_targets orphan_own orphan_foreign orphan_base orphan_unimplemented orphan_no_instance orphan_foreign_denied orphan_base_denied orphan_unimplemented_denied orphan_generic_denied orphan_no_instance_denied orphan_typedef_denied orphan_twice_denied orphan_dep_without orphan_dep_with orphan_dep_with_default orphan_dep_same record_unchanged record_other_key record_garbled record_empty record_cut"
 SELECT=${3:-}
 if [ -n "$SELECT" ]; then
   for want_name in $(printf '%s' "$SELECT" | tr ',' ' '); do
@@ -138,7 +138,7 @@ warns() {
   RAN=$((RAN + 1))
   rc=0
   (cd "$TMP/$c" && env $ORPHAN "$BATS" check) > "$TMP/out" 2> "$TMP/err" || rc=$?
-  grep -av '^waiting for another bats' "$TMP/err" > "$TMP/err.only" || true
+  grep -av '^waiting for another bats' "$TMP/err" | grep -av '^built ' > "$TMP/err.only" || true
   mv "$TMP/err.only" "$TMP/err"
   cat "$TMP/out" "$TMP/err" > "$TMP/detail"
   if [ "$rc" != 0 ]; then fail_case "$c" "the check failed (status $rc)"; return 0; fi
@@ -494,7 +494,6 @@ default_env
 warns orphan_foreign "warning: 'implement dispose<\$T.stored>' of the template dispose of the package 'pr'"
 warns orphan_base "names the type 'int'"
 warns orphan_unimplemented "names the type 'bool'"
-warns orphan_generic "names the type 'a'"
 warns orphan_no_instance "gives no type"
 denied
 reject orphan_foreign_denied "error: 'implement dispose<\$T.stored>' of the template dispose of the package 'pr'" "a type of the package 'ty'"

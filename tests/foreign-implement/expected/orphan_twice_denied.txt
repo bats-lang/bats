@@ -1,0 +1,6 @@
+error: error: 'implement dispose<mine>' of the template dispose of the package 'pr' is implemented more than once by this package: an instance is implemented in one module only; keep one of them
+ --> other.bats:6:1
+   |
+ 6 | implement $P.dispose<mine> (_) = ()
+   | ^
+

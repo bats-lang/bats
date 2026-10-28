@@ -1,3 +1,8 @@
+warning: 'implement barr_get_inline' of the template barr_get_inline of the package 'array' gives no type, so it would implement the template for every type: a template of another package is implemented only for a type of the implementing package; use a type that this package declares, a wrapper type of its own, or ask the package that owns the type (or the template, 'array') to implement it
+ --> m.bats:5:1
+   |
+ 5 | implement{} $AR.barr_get_inline (x) = x + 3
+   | ^
 error: error: 'implement barr_get_inline' replaces what the package 'array' implements: it declares barr_get_inline and implements it itself, and an implement of another package would replace its body; implement only what your own package declares, or a name its package leaves unimplemented for its dependents
  --> m.bats:5:1
    |

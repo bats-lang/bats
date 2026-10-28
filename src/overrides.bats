@@ -511,7 +511,7 @@ fun scan_code {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<
         if ns >= e then @(acc, true, @(p, q))
         else if is_ident_first(byte2int0($A.read<byte>(bv, ns))) then let
           val ne = ident_stop(bv, mx, ns + 1, e)
-          val inst = instance_after(bv, mx, ne, e)
+          val inst = instance_after(bv, mx, ne, mx)
           val f = RawImplements(live, @(p, q), @(ns, ns), @(ns, ne), inst)
         in scan_code(bv, mx, ne, e, live, raw_facts_cons(f, acc), awaiting, false, false) end
         else if byte2int0($A.read<byte>(bv, ns)) = 36 then let
@@ -522,7 +522,7 @@ fun scan_code {l:agz}{n:pos}{m:nat | m <= n}{p,e:nat | p <= e; e <= m}{k:nat} .<
           else if byte2int0($A.read<byte>(bv, ae)) <> 46 then scan_code(bv, mx, q, e, live, acc, awaiting, false, false)
           else let
             val me = ident_stop(bv, mx, ae + 1, e)
-            val inst = instance_after(bv, mx, me, e)
+            val inst = instance_after(bv, mx, me, mx)
             val f = RawImplements(live, @(p, q), @(ns + 1, ae), @(ae + 1, me), inst)
           in scan_code(bv, mx, me, e, live, raw_facts_cons(f, acc), awaiting, false, false) end
         end
@@ -620,7 +620,11 @@ in
                    RawDeclares(live, @(ns, ident_stop(bv, mx, ns + 1, e)))
                  else RawDeclares(live, @(ns, ns))) else RawDeclares(live, @(ns, ns))): raw_fact(n)
     val rest = pub_names(bv, mx, q, e, live, false, 0, acc)
-  in raw_facts_cons(first, rest) end
+    val rest2 = (if template_before(bv, mx, q, e) then
+                   (if ns < e then (if is_ident_first(byte2int0($A.read<byte>(bv, ns))) then
+                      raw_facts_cons(RawTemplate(live, @(ns, ident_stop(bv, mx, ns + 1, e))), rest) else rest) else rest)
+                 else rest): [k2:nat] raw_facts(n, k2)
+  in raw_facts_cons(first, rest2) end
 end
 
 (* the contents of a string literal (overrides.md) *)
@@ -680,11 +684,8 @@ fn scan_one {l:agz}{n:pos}{k,j:nat}
     else @(acc, false, awaiting)
   | SQual(_, _, as0, ae, ms, me) =>
     if waiting then let
-      val inst = (case+ next of
-        | spans_cons(nx, _) => (case+ nx of
-            | SPass(s2, e2, v2) => (if v2 then @(ms, ms) else instance_after(bv, mx, s2, e2))
-            | _ => @(ms, ms))
-        | spans_nil() => @(ms, ms)): range(n)
+      (* the instance may hold a qualified name, which is a span of its own: read it from the source *)
+      val inst = instance_after(bv, mx, me, mx)
       val f = RawImplements(live, awaiting, @(as0, ae), @(ms, me), inst)
     in @(raw_facts_cons(f, acc), false, awaiting) end
     else @(acc, false, awaiting)
@@ -1551,6 +1552,17 @@ fn qualifier_copy (q: !qualifier): qualifier =
   | Unqualified() => Unqualified()
   | QualifiedBy(a) => QualifiedBy(name_copy(a))
 
+(* A copy of the bindings, added to acc *)
+fun bindings_copy {k,j:nat} .<k>. (bs: !bindings(k), acc: bindings(j)): [j2:nat] bindings(j2) =
+  case+ bs of
+  | bindings_nil() => acc
+  | bindings_cons(b, tl) => let
+      val acc2 = (case+ b of
+        | BindUse(l, a, r) => bindings_cons(BindUse(l, name_copy(a), name_copy(r)), acc)
+        | BindAlias(l, a, p) => bindings_cons(BindAlias(l, name_copy(a), name_copy(p)), acc)
+        | BindOpen(l, p) => bindings_cons(BindOpen(l, name_copy(p)), acc)): [j2:nat] bindings(j2)
+    in bindings_copy(tl, acc2) end
+
 (* the queries of the implements among the facts of a file (overrides.md) *)
 fun queries_of_facts {np:int}{k,kb,j:nat} .<k>.
   (facts: !file_facts(k), all: !bindings(kb), owner: package_number(np), lst: listing, off: path_offset,
@@ -1566,7 +1578,7 @@ fun queries_of_facts {np:int}{k,kb,j:nat} .<k>.
           in
             if variants_any(common)
             then queries_cons(Query(owner, lst, off, common, name_copy(name), instance_copy(inst), selected,
-                                    file_bindings(facts, bindings_nil())), acc)
+                                    bindings_copy(all, bindings_nil())), acc)
             else let val () = bindings_free(selected) in acc end
           end
           else acc
