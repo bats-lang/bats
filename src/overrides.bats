@@ -1668,13 +1668,15 @@ fun refs_have_type {np:int}{kf,kr:nat} .<kr>.
         | FileRef(target, tlst, toff) => target = owner && file_has_type(files, target, tlst, toff, name, common)): bool
     in if here then true else refs_have_type(tl, files, owner, name, common) end
 
-(* the root a '#use' among the bindings gives, when there is one *)
+(* the root of the package a '#use' or a staload path among the bindings names, when there is one *)
 fun use_root {k:nat} .<k>. (bs: !bindings(k)): maybe_name =
   case+ bs of
   | bindings_nil() => NameAbsent()
   | bindings_cons(b, tl) => (case+ b of
       | BindUse(_, _, root) => NameHere(name_copy(root))
-      | BindAlias(_, _, _) => use_root(tl)
+      | BindAlias(_, _, path) => (case+ root_before_src(path) of
+          | ~NameHere(root) => NameHere(root)
+          | ~NameAbsent() => use_root(tl))
       | BindOpen(_, _) => use_root(tl))
 
 (* what the type an instance names is, to the package that implements it (overrides.md) *)

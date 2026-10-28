@@ -77,7 +77,7 @@ main() {
   cat >> "$TMP/$1/src/bin/m.bats"
 }
 
-CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings disjoint_targets orphan_own orphan_foreign orphan_base orphan_unimplemented orphan_no_instance orphan_foreign_denied orphan_base_denied orphan_unimplemented_denied orphan_generic_denied orphan_no_instance_denied orphan_typedef_denied orphan_twice_denied orphan_dep_without orphan_dep_with orphan_dep_with_default orphan_dep_same record_unchanged record_other_key record_garbled record_empty record_cut"
+CASES="override_arith override_array ordinary concrete same_instance transitive unsafe_dependency unsafe_package unsafe_block native_block oversized own_beside own_template siblings disjoint_targets orphan_own orphan_foreign orphan_base orphan_unimplemented orphan_no_instance orphan_foreign_denied orphan_base_denied orphan_unimplemented_denied orphan_generic_denied orphan_no_instance_denied orphan_staload_denied orphan_typedef_denied orphan_twice_denied orphan_dep_without orphan_dep_with orphan_dep_with_default orphan_dep_same record_unchanged record_other_key record_garbled record_empty record_cut"
 SELECT=${3:-}
 if [ -n "$SELECT" ]; then
   for want_name in $(printf '%s' "$SELECT" | tr ',' ' '); do
@@ -501,6 +501,20 @@ reject orphan_base_denied "names the type 'int'"
 reject orphan_unimplemented_denied "names the type 'bool'"
 reject orphan_generic_denied "names the type 'a'"
 reject orphan_no_instance_denied "gives no type"
+default_env
+
+project orphan_staload_denied bin
+orphan_deps orphan_staload_denied
+main orphan_staload_denied <<'X'
+#use pr as P
+staload T = "ty/src/lib.sats"
+
+implement $P.dispose<$T.stored> (_) = ()
+
+implement main0 () = ()
+X
+denied
+reject orphan_staload_denied "a type of the package 'ty'"
 default_env
 
 project orphan_typedef_denied bin
