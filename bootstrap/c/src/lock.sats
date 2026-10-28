@@ -2345,6 +2345,8 @@ staload "validated.sats"
 
 
 
+
+
 fn project_kind (): $R.option(package_kind)
 
 
@@ -3656,6 +3658,79 @@ fn read_unsafe_flag(): bool
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn validate_project (): bool
 
 
@@ -3669,7 +3744,12 @@ fn validate_project (): bool
 
 
 
+
+
+
 fn validate_clean (): bool
+
+
 
 
 
