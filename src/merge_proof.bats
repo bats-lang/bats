@@ -15,10 +15,11 @@ staload "pins.sats"
 (* ------------------------------------------------------------------ *)
 (* Arguments for the process package (keyword: merge-proof) *)
 
-(* A word of the command, then the rest *)
-fn word {sn:nat | sn < $B.BUILDER_CAP}
-  (s: string sn, rest: $L.listv($P.arg_entry)): $L.listv($P.arg_entry) =
-  $L.list_vt_cons(literal_arg(s), rest)
+(* A word of the command, then the rest (public: bats pins-check builds its git commands so) *)
+#pub fn word {sn:nat | sn < $B.BUILDER_CAP}
+  (s: string sn, rest: $L.listv($P.arg_entry)): $L.listv($P.arg_entry)
+
+implement word (s, rest) = $L.list_vt_cons(literal_arg(s), rest)
 
 (* lead, bv[from, to) and ending as one argument *)
 fn wrapped_arg {lb:agz}{pn,sn:nat}

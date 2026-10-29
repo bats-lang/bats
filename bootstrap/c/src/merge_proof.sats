@@ -22,7 +22,8 @@ staload "pins.sats"
 
 
 
-
+fn word {sn:nat | sn < $B.BUILDER_CAP}
+  (s: string sn, rest: $L.listv($P.arg_entry)): $L.listv($P.arg_entry)
 
 
 

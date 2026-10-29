@@ -72,7 +72,8 @@ in result end
    The sidecar is read from that commit (git show), never from the files the clone has checked
    out. No bats command compares a lock's sha256 without building the app. *)
 
-datatype locks_result =
+(* public: bats pins-check reads the answer of one entry (keyword: pins-check) *)
+#pub datatype locks_result =
   | LocksPassed
   | LocksPinUnreadable
   | LocksPinNotCommit
@@ -86,8 +87,10 @@ datatype locks_result =
   | LocksDiffers
   | LocksGitFailed
 
-(* git's exit status for rest (its stdout is not wanted) *)
-fn git_status (rest: $L.listv($P.arg_entry)): int = let
+(* git's exit status for rest (its stdout is not wanted; public: bats pins-check runs git so) *)
+#pub fn git_status (rest: $L.listv($P.arg_entry)): int
+
+implement git_status (rest) = let
   val out = $A.alloc<byte>(4096)
   val @(status, _) = tool_output("git", rest, out)
   val () = $A.free<byte>(out)
@@ -138,11 +141,14 @@ fun same64 {l,lo:agz}{m:pos}{i:nat}{k:nat | k <= 64} .<64 - k>.
   else false
 
 (* The entry <package> <version> <sha256> of one line against the repository at the pin: the sidecar
-   `<package>/<package with / as _>_<version>.bats.sha256` of the pin's commit *)
-fn check_entry {ll,lp,lc:agz}{m:pos}{na,nt,va,vt,sa:nat | na <= nt; nt <= m}
+   `<package>/<package with / as _>_<version>.bats.sha256` of the pin's commit (public: bats pins-check checks the
+   entries a diff adds so) *)
+#pub fn check_entry {ll,lp,lc:agz}{m:pos}{na,nt,va,vt,sa:nat | na <= nt; nt <= m}
   (lock: !$A.borrow(byte, ll, m), name_at: int na, name_to: int nt, version_at: int va, version_to: int vt, sha_at: int sa, m: int m,
    pin: !$A.borrow(byte, lp, 4096),
-   cmd: !$A.borrow(byte, lc, 4096), repo_at: pos_t, repo_to: int): locks_result = let
+   cmd: !$A.borrow(byte, lc, 4096), repo_at: pos_t, repo_to: int): locks_result
+
+implement check_entry (lock, name_at, name_to, version_at, version_to, sha_at, m, pin, cmd, repo_at, repo_to) = let
   var spec : $B.builder_v = $B.create()
   val () = copy_to_builder_v(pin, 0, 40, 4096, spec)
   val () = put_char_v(spec, 58)

@@ -2003,6 +2003,42 @@ fn tool_output {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
 
 
 
+fn tool_output_wide {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 65536))
+  : @(int, [k:nat | k <= 65536] int k, bool)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

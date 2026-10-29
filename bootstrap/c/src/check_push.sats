@@ -80,8 +80,22 @@ staload "_bats_built.sats"
 
 
 
+datatype locks_result =
+  | LocksPassed
+  | LocksPinUnreadable
+  | LocksPinNotCommit
+  | LocksNoRepository
+  | LocksRepositoryLacksPin
+  | LocksListingFailed
+  | LocksListingTooLong
+  | LocksUnreadable
+  | LocksMalformed
+  | LocksNotInRepository
+  | LocksDiffers
+  | LocksGitFailed
 
 
+fn git_status (rest: $L.listv($P.arg_entry)): int
 
 
 
@@ -136,18 +150,10 @@ staload "_bats_built.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+fn check_entry {ll,lp,lc:agz}{m:pos}{na,nt,va,vt,sa:nat | na <= nt; nt <= m}
+  (lock: !$A.borrow(byte, ll, m), name_at: int na, name_to: int nt, version_at: int va, version_to: int vt, sha_at: int sa, m: int m,
+   pin: !$A.borrow(byte, lp, 4096),
+   cmd: !$A.borrow(byte, lc, 4096), repo_at: pos_t, repo_to: int): locks_result
 
 
 
