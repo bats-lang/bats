@@ -62,13 +62,13 @@ expect 1791072000 2026.10.4.0 "$(git rev-parse HEAD)" "count 3"
 full=$TMP/full
 git clone -q "file://$P" "$full"
 (cd "$full" && "$BATS" build --only debug --only native > "$TMP/3c.log" 2>&1) || { echo "FAIL: build of a full clone"; cat "$TMP/3c.log"; exit 1; }
-(cd "$full" && ./dist/debug/facts | sed -n 5p) > "$TMP/fullcount"
+(cd "$full" && ./dist/debug/facts | head -n 5 | tail -n 1) > "$TMP/fullcount"
 [ "$(cat "$TMP/fullcount")" = "count 3" ] || { echo "FAIL: a full clone does not count 3"; cat "$TMP/fullcount"; exit 1; }
 # a shallow clone is refused with its own constructor, never given a wrong number
 shallow=$TMP/shallow
 git clone -q --depth 1 "file://$P" "$shallow"
 (cd "$shallow" && "$BATS" build --only debug --only native > "$TMP/3d.log" 2>&1) || { echo "FAIL: build of a shallow clone"; cat "$TMP/3d.log"; exit 1; }
-(cd "$shallow" && ./dist/debug/facts | sed -n 5p) > "$TMP/shallowcount"
+(cd "$shallow" && ./dist/debug/facts | head -n 5 | tail -n 1) > "$TMP/shallowcount"
 [ "$(cat "$TMP/shallowcount")" = "shallow" ] || { echo "FAIL: a shallow clone was not refused"; cat "$TMP/shallowcount"; exit 1; }
 if BATS_COMMIT=no-such-commit "$BATS" build --only debug --only native > "$TMP/4.log" 2>&1; then
   echo "FAIL: an unknown BATS_COMMIT built"; exit 1
