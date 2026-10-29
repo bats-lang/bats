@@ -129,7 +129,7 @@
 #     else false): bool`, and `hashed` for `wrote_key` in the `if` that follows
 #     killed by: "memo truncated key"
 #
-# --bless is tests/fixtures/bless.sh, run at the end of this script.
+# --bless is tests/fixtures/bless.sh and --list-affected tests/fixtures/list.sh, run at the end of this script.
 #
 # usage: tests/fixtures/check.sh <bats-binary> <repository-dir> [memo]
 set -u
@@ -1037,6 +1037,9 @@ rm -rf "$MPS" "$MWS" "$MS"
 
 # ---- --bless (bats-lang/bats#522): its own script
 "$(dirname "$0")/bless.sh" "$BATS" "${2:-}" || fail "bless.sh"
+
+# ---- --list-affected (bats-lang/bats#570): its own script
+"$(dirname "$0")/list.sh" "$BATS" "${2:-}" || fail "list.sh"
 
 [ -z "${TIMES:-}" ] || cat "$TMP/times"
 echo "ok"
