@@ -19,6 +19,10 @@ PATSHOME_DIR=${PATSHOME:-$HOME/.bats/ats2}
 
 . "$(dirname "$0")/../tests/keep-on-fail.sh"
 
+# The seed is the same for every commit: a commit cannot name itself, so the compiler built from it
+# is unnamed (src/built.bats, keyword: built-commit) whatever BATS_COMMIT the caller has set
+unset BATS_COMMIT
+
 "$BATS" build --to-c "$TMP/c" --repository "$REPO" >/dev/null
 
 find "$TMP/c" -name '*.o' -exec rm -f {} +

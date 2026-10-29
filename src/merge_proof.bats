@@ -51,20 +51,7 @@ fn tree_pathspecs (): $L.listv($P.arg_entry) =
 (* Runs a tool and keeps what its stdout fits (keyword: merge-proof) *)
 fn tool_capture {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 4096))
-  : @(int, [k:nat | k <= 4096] int k) = let
-  val (nul_tool | tool_exec) = $P.path_of_string_proved(name)
-  val @(fz_tool, bv_tool) = $A.barr_freeze(tool_exec)
-  val argv = word(name, rest)
-  val outcome = run_cmd_capture_outcome(nul_tool | bv_tool, argv, out)
-  val result = (case+ outcome of
-    | ~CaptureFits(n) => @(0, n)
-    | ~CaptureFailed(status, n) => @(status, n)
-    | ~CaptureLonger(status, _) => @(status, 4096)
-    | ~CaptureReadFailed(_, _, _) => @(~1, 0)
-    | ~CaptureNotRun(_) => @(~1, 0)): @(int, [k:nat | k <= 4096] int k)
-  val () = $A.cborrow_drop(fz_tool, bv_tool)
-  val () = $A.barr_free($A.barr_thaw(fz_tool))
-in result end
+  : @(int, [k:nat | k <= 4096] int k) = tool_output(name, rest, out)
 
 (* A tool whose stdout is not wanted (keyword: merge-proof) *)
 fn tool_status {sn:nat | sn < $B.BUILDER_CAP}
@@ -158,8 +145,11 @@ in set_exit_code(2) end
 (* ------------------------------------------------------------------ *)
 (* The proofs, one after another; each later one runs only when the earlier ones held (keyword: merge-proof) *)
 
-(* The repository the regeneration builds against (keyword: merge-proof) *)
-fn repository_known (repo_at: pos_t): bool =
+(* Whether a repository is named: by the command line (repo_at >= 0) or by BATS_REPOSITORY
+   (keyword: merge-proof; public: bats check-push reads the repository so) *)
+#pub fn repository_known (repo_at: pos_t): bool
+
+implement repository_known (repo_at) =
   if repo_at >= 0 then true
   else let
     var b : $B.builder_v = $B.create()
@@ -168,8 +158,11 @@ fn repository_known (repo_at: pos_t): bool =
     val () = $A.free<byte>(text)
   in has end
 
-fn repository_arg {lc:agz}
-  (cmd: !$A.borrow(byte, lc, 4096), repo_at: pos_t, repo_to: int): $P.arg_entry = let
+(* The repository as an argument: cmd[repo_at, repo_to), else BATS_REPOSITORY (public as repository_known is) *)
+#pub fn repository_arg {lc:agz}
+  (cmd: !$A.borrow(byte, lc, 4096), repo_at: pos_t, repo_to: int): $P.arg_entry
+
+implement repository_arg (cmd, repo_at, repo_to) = let
   var b : $B.builder_v = $B.create()
   val () = (if repo_at >= 0 then copy_to_builder_v(cmd, repo_at, repo_to, 4096, b)
     else let val _ = env_value("BATS_REPOSITORY", b) in () end)
