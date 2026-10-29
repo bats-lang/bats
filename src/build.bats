@@ -17,6 +17,7 @@ staload "helpers.sats"
 staload "cache.sats"
 staload "facts.sats"
 staload "inputs.sats"
+staload "built.sats"
 staload "stamp.sats"
 staload "ats2.sats"
 staload "lexer.sats"
@@ -1722,6 +1723,8 @@ in
       val () = write_facts()
       (* and the digest of its inputs *)
       val () = write_inputs()
+      (* and the commit it is built from, for a project that names it (bats#575) *)
+      val () = write_built()
       (* Step 3b: Preprocess src/*.bats shared modules *)
       val @(sm_arr, sm_arr_len) = str_into_arr("src")
       val @(fz_sm, bv_sm) = $A.freeze<byte>(sm_arr)

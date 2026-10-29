@@ -136,7 +136,7 @@ mainats_0_void() ;
 #endif // end of [QUALIFIED]
 
 /*
-build/_bats_entry_bats.dats: 1311(line=39, offs=17) -- 1331(line=39, offs=37)
+build/_bats_entry_bats.dats: 1403(line=42, offs=17) -- 1423(line=42, offs=37)
 */
 /*
 local: 
@@ -153,11 +153,11 @@ mainats_0_void()
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/_bats_entry_bats.dats: 1305(line=39, offs=11) -- 1331(line=39, offs=37)
+emit_instr: loc0 = build/_bats_entry_bats.dats: 1397(line=42, offs=11) -- 1423(line=42, offs=37)
 */
 ATSINSflab(__patsflab_main_0_void):
 /*
-emit_instr: loc0 = build/_bats_entry_bats.dats: 1316(line=39, offs=22) -- 1331(line=39, offs=37)
+emit_instr: loc0 = build/_bats_entry_bats.dats: 1408(line=42, offs=22) -- 1423(line=42, offs=37)
 */
 ATSINSmove_void(tmpret0, build_057_src_057_bin_057_bats_056_sats____BATS_main0()) ;
 
@@ -217,6 +217,10 @@ ATSdynloadflag_init(build_057_bats_modules_057_path_057_src_057_lib_056_dats__dy
 ATSextern()
 atsvoid_t0ype
 build_057_bats_modules_057_path_057_src_057_lib_056_dats__dynload(/*void*/) ;
+ATSdynloadflag_init(build_057_src_057__bats_built_056_dats__dynloadflag) ;
+ATSextern()
+atsvoid_t0ype
+build_057_src_057__bats_built_056_dats__dynload(/*void*/) ;
 ATSdynloadflag_init(build_057_src_057__bats_inputs_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
@@ -233,10 +237,18 @@ ATSdynloadflag_init(build_057_src_057_build_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
 build_057_src_057_build_056_dats__dynload(/*void*/) ;
+ATSdynloadflag_init(build_057_src_057_built_056_dats__dynloadflag) ;
+ATSextern()
+atsvoid_t0ype
+build_057_src_057_built_056_dats__dynload(/*void*/) ;
 ATSdynloadflag_init(build_057_src_057_cache_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
 build_057_src_057_cache_056_dats__dynload(/*void*/) ;
+ATSdynloadflag_init(build_057_src_057_check_push_056_dats__dynloadflag) ;
+ATSextern()
+atsvoid_t0ype
+build_057_src_057_check_push_056_dats__dynload(/*void*/) ;
 ATSdynloadflag_init(build_057_src_057_closure_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
@@ -351,11 +363,14 @@ ATSdynloadfcall(build_057_bats_modules_057_list_057_src_057_lib_056_dats__dynloa
 ATSdynloadfcall(build_057_bats_modules_057_toml_057_src_057_lib_056_dats__dynload) ;
 ATSdynloadfcall(build_057_bats_modules_057_sha256_057_src_057_lib_056_dats__dynload) ;
 ATSdynloadfcall(build_057_bats_modules_057_path_057_src_057_lib_056_dats__dynload) ;
+ATSdynloadfcall(build_057_src_057__bats_built_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057__bats_inputs_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_affected_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_ats2_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_build_056_dats__dynload) ;
+ATSdynloadfcall(build_057_src_057_built_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_cache_056_dats__dynload) ;
+ATSdynloadfcall(build_057_src_057_check_push_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_closure_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_commands_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_docs_056_dats__dynload) ;

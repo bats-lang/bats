@@ -277,6 +277,27 @@ for kind in absent empty; do
 done
 ok "three runs at once for one target, absent or empty: all succeed, one clone, nothing nested, no sibling left"
 
+# the target is looked at as a directory and read for its mode, and in between another run
+# can take it (bats#580: ls failed, the mode was empty, and the run took every permission
+# from its own sibling, which it then could not remove). A stand-in ls, for the mode read
+# only, fails the way it does when a rival run has taken the target (the empty directory is
+# gone), and then a directory with a file in it is there. The run must refuse (exit 1, said), leave the rival's directory as it is and
+# leave no sibling, and the sibling's mode must still let it be removed.
+mkdir -p "$TMP/lsfake" "$TMP/lsrace/target"
+cat > "$TMP/lsfake/ls" <<SH
+#!/bin/sh
+if [ "\$1" = -ld ] && [ -d "\$3" ] && [ -z "\$(\$REAL_LS -A -- "\$3")" ]; then
+  rmdir -- "\$3"; rc=0; \$REAL_LS "\$@" 2>/dev/null || rc=\$?; mkdir -- "\$3"; echo rival > "\$3/f"; exit \$rc
+fi
+exec \$REAL_LS "\$@"
+SH
+chmod +x "$TMP/lsfake/ls"
+REAL_LS=$(command -v ls) PATH="$TMP/lsfake:$PATH" "$BATS" clone-repository "$first" --repository "$TMP/lsrace/target" > /dev/null 2> "$TMP/lsrace/err" && fail "a target taken by a rival while its mode was read was replaced"
+grep -q "Permission denied\|cannot access" "$TMP/lsrace/err" && { cat "$TMP/lsrace/err"; fail "a rival taking the target printed a system error"; }
+[ "$(cat "$TMP/lsrace/target/f")" = rival ] || fail "the rival's directory was changed"
+[ -z "$(ls -A "$TMP/lsrace" | grep '\.new\.')" ] || fail "a rival taking the target left a sibling: $(ls -A "$TMP/lsrace")"
+ok "a target taken while its mode is read: refused, said, the rival's directory kept, no sibling left"
+
 "$BATS" clone-repository "$first" extra --repository "$TMP/x1" > /dev/null 2>&1 && fail "an extra argument was accepted"
 [ ! -e "$TMP/x1" ] || fail "an extra argument cloned"
 "$BATS" clone-repository "$first" --repository "$TMP/x2" -- extra > /dev/null 2>&1 && fail "words after -- were accepted"
