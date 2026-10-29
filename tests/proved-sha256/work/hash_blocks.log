@@ -1,0 +1,4 @@
+error: patsopt error:
+/home/claude/bats-502/tests/proved-sha256/work/hash_blocks/src/lib.bats: 22(line=1, offs=1) -- 222(line=1, offs=201): error(parsing): the token is discarded.
+exit(ATS): uncaught exception: _2tmp_2ATS_2dPostiats_2src_2pats_error_2esats__FatalErrorExn(1025)
+

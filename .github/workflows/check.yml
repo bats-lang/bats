@@ -159,6 +159,15 @@ jobs:
         working-directory: tests/build-jobs
         run: dist/debug/build_jobs ${{ github.workspace }}/dist/debug/bats
 
+      # The digest test is written in bats (bats#502): built, then run on the compiler under test
+      - name: Build the proved-sha256 test
+        working-directory: tests/proved-sha256
+        run: ~/bats-bin/bats build --repository ~/repository
+
+      - name: Fixture test proved-sha256
+        working-directory: tests/proved-sha256
+        run: dist/debug/proved_sha256 ${{ github.workspace }}/dist/debug/bats
+
       - name: Verify bootstrap/c matches sources
         id: verify-bootstrap
         run: |
@@ -199,6 +208,7 @@ jobs:
             ${{ runner.temp }}/kept
             tests/toml-fields/work
             tests/build-jobs/work
+            tests/proved-sha256/work
           include-hidden-files: true
           if-no-files-found: ignore
 

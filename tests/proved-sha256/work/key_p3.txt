@@ -1,0 +1,1 @@
+patsopt -IATS build -IATS build/src -IATS build/bats_modules -o build/src/lib_dats.c -d build/src/lib.dats

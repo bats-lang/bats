@@ -1,0 +1,5 @@
+bats 3b344f8fa86c6eb06b2fd0bf1ae074ac3e477e01bfffd158a2d1ef7b65cdd462
+toolchain 45bf0f5eae89f0a44a41480569471d2b26995174860f018f322269b57c8661d1
+patsopt -IATS build -IATS build/src -IATS build/bats_modules -o build/src/lib_dats.c -d build/src/lib.dats
+build/src/lib.dats 9606a4767861372f0d6dd42e0d88f645d1b82cfbf82f2d3652ea8b34c262ab7a
+build/src/lib.sats 775e702c206adf480f2cc08ddc7e2bdb211aa98b42fdf54121b0f6d158dda89b

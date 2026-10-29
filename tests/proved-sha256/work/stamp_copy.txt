@@ -1,0 +1,8 @@
+bats-stamp 2
+bats 3b344f8fa86c6eb06b2fd0bf1ae074ac3e477e01bfffd158a2d1ef7b65cdd462
+patsopt 45bf0f5eae89f0a44a41480569471d2b26995174860f018f322269b57c8661d1
+cc ba4dc8a220156cf105cf95fb1a7a4ee9aba39dae6e301d38842a914d3df158c7
+libs 049fd50a9ea796a1022dc5da86976998c13242486908f222eef6626d164ff305
+link 0a280ea947d9519e98c355b4d520ebc689c736d83d9eb09e587a288be36c1b09
+flags patsopt -IATS build -IATS build/src -IATS build/bats_modules -o OUT -d IN; cc clang -c -o OUT IN [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; pre clang -E -P -frewrite-includes -H -o OUT.i WRAP [-O2 | -g -O0] -I$(PATSHOME) -I$(PATSHOME)/ccomp/runtime; wasm cc clang --target=wasm32 -O2 -nostdlib -ffreestanding -fvisibility=default -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include build/_bats_wasm_runtime.h -I build/_bats_wasm_stubs -Wno-implicit-function-declaration -Wno-int-conversion -c -o OUT IN; wasm pre the wasm cc with -E -P -frewrite-includes -H -o OUT.i WRAP in place of -c -o OUT; link wasm-ld --no-entry --allow-undefined --lto-O2 -z stack-size=1048576 --initial-memory=16777216 --max-memory=268435456 --export=bats_dynload --export=mainats_0_void --export=malloc -o OUT OBJECTS
+mark 3
