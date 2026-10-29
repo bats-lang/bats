@@ -4575,8 +4575,24 @@ fn whole_free {la,l:agz}{m:pos}
 
 
 
+
+
+datavtype toml_failure =
+  | Toml_unreadable of ($F.io_error)
+  | Toml_too_many_bytes of ()
+  | Toml_too_many_entries of ()
+
+fn toml_failure_free (f: toml_failure): void
+
+
+
+
+
+
+
+
 fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m)
-  : $R.result($T.toml_doc, $F.io_error)
+  : $R.result($T.toml_doc, toml_failure)
 
 
 
@@ -4600,11 +4616,7 @@ fn read_toml {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, 
 
 
 
-
-
-
-
-fn read_manifest (): $R.result($T.toml_doc, $F.io_error)
+fn read_manifest (): $R.result($T.toml_doc, toml_failure)
 
 
 

@@ -4575,7 +4575,23 @@ implement whole_free (ar, p) = let
   val () = $A.arena_return<byte>(ar, p)
 in $A.arena_destroy<byte>(ar) end
 
-(* Reads a TOML file whole, FileTooLarge over the parser's limit, never cut (manifest) *)
+(* Why a TOML file did not give a document (manifest, toml-parse-whole): the file could not be read, or
+   toml's parse_whole said the text does not fit (more than TOML_MAX_BUF bytes, or more than TOML_MAX_ENTRIES
+   entries), each its own case, never a cut copy. Linear: matched with case+ and freed by toml_failure_free *)
+
+
+
+
+
+
+
+implement toml_failure_free (f) =
+  case+ f of
+  | ~Toml_unreadable(_) => ()
+  | ~Toml_too_many_bytes() => ()
+  | ~Toml_too_many_entries() => ()
+
+(* Reads a TOML file whole and parses it with parse_whole, a text over the parser's limits is its own failure (manifest) *)
 
 
 
@@ -4586,21 +4602,17 @@ implement read_toml (pa, m) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_path))
 in
   case+ whole of
-  | ~whole_err(e) => $R.err(e)
-  | ~whole_ok(ar, piece, size, length) =>
-    if length > 65536 then let
-      val () = whole_free(ar, piece)
-    in $R.err($F.FileTooLarge()) end
-    else let
+  | ~whole_err(e) => $R.err(Toml_unreadable(e))
+  | ~whole_ok(ar, piece, size, length) => let
       val @(fz_text, bv_text) = $A.freeze<byte>(piece)
-      val parsed = $T.parse(bv_text, length)
+      val parsed = $T.parse_whole(bv_text, length)
       val () = $A.drop<byte>(fz_text, bv_text)
       val () = whole_free(ar, $A.thaw<byte>(fz_text))
     in
       case+ parsed of
-      | ~$R.ok(doc) => $R.ok(doc)
-      (* unparsable text is InvalidInput (manifest) *)
-      | ~$R.err(_) => $R.err($F.InvalidInput())
+      | ~$T.Whole(doc) => $R.ok(doc)
+      | ~$T.Too_many_bytes() => $R.err(Toml_too_many_bytes())
+      | ~$T.Too_many_entries() => $R.err(Toml_too_many_entries())
     end
 end
 

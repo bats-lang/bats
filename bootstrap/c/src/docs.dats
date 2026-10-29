@@ -565,4 +565,4 @@ implement generate_lib_docs() =
       val () = $A.drop<byte>(fz_nb, bv_nb)
       val () = $A.free<byte>($A.thaw<byte>(fz_nb))
     in rc end
-  | ~$R.err(_) => NotLibrary()
+  | ~$R.err(f) => let val () = toml_failure_free(f) in NotLibrary() end

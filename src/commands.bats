@@ -670,7 +670,7 @@ fn package_value {lk:agz}{nk:pos}
           val () = $A.free<byte>(vbuf)
         in $R.none() end): $R.option(filled_arr)
     end
-  | ~$R.err(_) => $R.none()): $R.option(filled_arr)
+  | ~$R.err(f) => let val () = toml_failure_free(f) in $R.none() end): $R.option(filled_arr)
 
 (* [package] trunk from bats.toml with its length *)
 fn read_trunk (): filled_arr = let
@@ -1063,10 +1063,11 @@ implement do_upload {lr} (repo, rplen) =
       | ~$R.err(failure) => let
           val () = set_build_err()
         in
-          (* unparsable text is InvalidInput (manifest) *)
+          (* each failure of read_toml is its own message (manifest, toml-parse-whole) *)
           case+ failure of
-          | $F.InvalidInput() => prerr! ("error: parse error in './bats.toml'\n")
-          | _ => prerr! ("error: cannot read './bats.toml'\n")
+          | ~Toml_unreadable(_) => prerr! ("error: cannot read './bats.toml'\n")
+          | ~Toml_too_many_bytes() => prerr! ("error: './bats.toml' is over 65536 bytes\n")
+          | ~Toml_too_many_entries() => prerr! ("error: './bats.toml' has more than 256 entries (a [section] header is an entry)\n")
         end
 
 (* ============================================================

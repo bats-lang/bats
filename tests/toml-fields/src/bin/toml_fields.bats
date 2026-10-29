@@ -638,8 +638,17 @@ fn case_limit (t: !tool): void = let
   val () = setup(builder_of("rm\n-rf\nlimit_project/build\nlimit_project/dist"), "rm limit build")
   val status = build_plain(t, "limit_project", "", "limit_over.out", "limit_over.err")
   val () = (if status = 1 then () else die_file("a manifest of 65537 bytes built", "", "limit_over.err"))
-  val () = has("limit_over.err", "bats.toml", "a manifest of 65537 bytes")
-in (if path_exists(builder_of("limit_project/dist/debug/tf")) then die("a manifest of 65537 bytes left a program", "") else ()) end
+  val () = has("limit_over.err", "it is over 65536 bytes", "a manifest of 65537 bytes")
+  val () = (if path_exists(builder_of("limit_project/dist/debug/tf")) then die("a manifest of 65537 bytes left a program", "") else ())
+  (* toml-parse-whole: 257 entries is its own refusal (the [package] header and three keys, then 260 more) *)
+  var entries : $B.builder_v = $B.create()
+  val () = put(entries, YES_UNSAFE)
+  val () = put_times(entries, "k = \"v\"\n", 260)
+  val () = put_file("limit_project", "/bats.toml", entries)
+  val status2 = build_plain(t, "limit_project", "", "limit_entries.out", "limit_entries.err")
+  val () = (if status2 = 1 then () else die_file("a manifest of 260 entries built", "", "limit_entries.err"))
+  val () = has("limit_entries.err", "it has more than 256 entries", "a manifest of 260 entries")
+in (if path_exists(builder_of("limit_project/dist/debug/tf")) then die("a manifest of 260 entries left a program", "") else ()) end
 
 (* add and remove: the manifest is kept whole *)
 fn add_before (): $B.builder_v = padded("[package]\nname = \"tf\"\nkind = \"bin\"\n\n[dependencies]\n\"existing\" = \"\"\n")
