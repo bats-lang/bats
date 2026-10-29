@@ -1904,12 +1904,30 @@ fn run_cmd_capture {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
 
 
 
+
+
+
+
+
+
 datavtype capture_outcome =
   | CaptureFits of ([k:nat | k <= 4096] int k)
   | CaptureFailed of (int, [k:nat | k <= 4096] int k)
-  | CaptureLonger of (int, int)
-  | CaptureReadFailed of (int, [k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureLonger of (int, int, int)
+  | CaptureReadFailed of ([k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureWaitFailed of ([k:nat | k <= 4096] int k, int, int)
   | CaptureNotRun of (int)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1979,9 +1997,14 @@ fn run_cmd_capture_outcome {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
 
 
 
+
+
+
+
 fn tool_output {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
   (name: string sn, rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 4096))
   : @(int, [k:nat | k <= 4096] int k)
+
 
 
 
@@ -2329,6 +2352,7 @@ fn tool_output_wide {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
 
 fn check_emitted_flaws {lo,li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (out_bv: !$A.borrow(byte, lo, no), out_len: int om, in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
+
 
 
 
@@ -3461,6 +3485,7 @@ fn wasm_cc_argv {li:agz}{lo:agz}{ni:pos}{no:pos}{im:nat | im <= ni}{om:nat | om 
 
 
 
+
 fn ask_roots {l:agz}(ph: !$A.arr(byte, l, 12288), phlen: int): void
 
 
@@ -3635,6 +3660,7 @@ fn preprocess_native {lph:agz}{lo:agz}{li:agz}{no:pos}{om:nat | om <= no; om <= 
 
 
 fn jobs_option {l:agz} (buf: !$A.arr(byte, l, 4096), len: int): bool
+
 
 
 

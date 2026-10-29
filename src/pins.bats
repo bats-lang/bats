@@ -1170,12 +1170,13 @@ fn discover (): int = let
   val @(fz_out, bv_out) = $A.freeze<byte>(out)
   (* each outcome of the run is its own message (capture area, bats#444): git's output is read to its end, so a status is never the cause of a long list *)
   val status = (case+ outcome of
-    | ~CaptureLonger(_, _) => let
+    | ~CaptureLonger(_, _, _) => let
         val () = prerr! ("error: bats check-pins --discover: the files are listed in more than 4096 bytes")
         val () = prerr_newline()
       in 2 end
     | ~CaptureFailed(_, _) => git_failed()
-    | ~CaptureReadFailed(_, _, _) => git_failed()
+    | ~CaptureReadFailed(_, _) => git_failed()
+    | ~CaptureWaitFailed(_, _, _) => git_failed()
     | ~CaptureNotRun(_) => git_failed()
     | ~CaptureFits(listed) =>
       if listed = 0 then let

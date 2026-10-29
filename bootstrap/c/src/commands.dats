@@ -610,8 +610,9 @@ fn git_dir_rc (): int = let
   val rc = (case+ outcome of
     | ~CaptureFits(_) => 0
     | ~CaptureFailed(status, _) => status
-    | ~CaptureLonger(status, _) => status
-    | ~CaptureReadFailed(_, _, _) => ~1
+    | ~CaptureLonger(status, _, _) => status
+    | ~CaptureReadFailed(_, _) => ~1
+    | ~CaptureWaitFailed(_, _, _) => ~1
     | ~CaptureNotRun(e) => 0 - e): int
   val () = $A.free<byte>(out)
   val () = $A.cborrow_drop(fz_ge, bv_ge)
@@ -636,8 +637,9 @@ fn git_tree_dirty (): bool = let
   val dirty = (case+ outcome of
     | ~CaptureFits(n) => n > 0
     | ~CaptureFailed(_, n) => n > 0
-    | ~CaptureLonger(_, _) => true
-    | ~CaptureReadFailed(_, n, _) => n > 0
+    | ~CaptureLonger(_, _, _) => true
+    | ~CaptureReadFailed(n, _) => n > 0
+    | ~CaptureWaitFailed(n, _, _) => n > 0
     | ~CaptureNotRun(_) => false): bool
   val () = $A.free<byte>(out)
   val () = $A.cborrow_drop(fz_ge, bv_ge)
@@ -725,8 +727,9 @@ fn usable_len (outcome: capture_outcome): [k:nat | k <= 4096] int k =
   case+ outcome of
   | ~CaptureFits(n) => n
   | ~CaptureFailed(_, n) => n
-  | ~CaptureLonger(_, _) => 0
-  | ~CaptureReadFailed(_, _, _) => 0
+  | ~CaptureLonger(_, _, _) => 0
+  | ~CaptureReadFailed(_, _) => 0
+  | ~CaptureWaitFailed(_, _, _) => 0
   | ~CaptureNotRun(_) => 0
 
 (* The version from git: the last commit's date and seconds since
