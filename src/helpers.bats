@@ -1887,15 +1887,22 @@ end
    SIGPIPE, no race on the exit status); the first 4096 bytes are kept.
    CaptureFits: exit 0, the output fits (its length). CaptureFailed: a
    non-zero status, the output fits. CaptureLonger: more than the buffer,
-   the child's own status and the bytes it wrote (at least that many past
-   1 GiB, where reading stops). CaptureReadFailed: a read failed, with
-   what was kept. CaptureNotRun: the errno of the failure to run it.
-   Linear: a caller matches every constructor. *)
+   the child's own status and the exact number of bytes it wrote, as
+   mebibytes and a remainder (bytes = mebibytes * 1048576 + remainder, the
+   remainder under 1048576). CaptureReadFailed: a read failed, with what was
+   kept (the status is not told: a child whose output could not be read to
+   its end is not known to have ended). CaptureWaitFailed: the output was
+   read to its end but child_wait gave no exit status (a failed wait, or a
+   child ended by a signal, which process's child_wait does not tell apart),
+   with the length kept and the bytes written as in CaptureLonger.
+   CaptureNotRun: the errno of the failure to run it. No constructor holds
+   a status of -1. Linear: a caller matches every constructor. *)
 #pub datavtype capture_outcome =
   | CaptureFits of ([k:nat | k <= 4096] int k)
   | CaptureFailed of (int, [k:nat | k <= 4096] int k)
-  | CaptureLonger of (int, int)
-  | CaptureReadFailed of (int, [k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureLonger of (int, int, int)
+  | CaptureReadFailed of ([k:nat | k <= 4096] int k, $F.io_error)
+  | CaptureWaitFailed of ([k:nat | k <= 4096] int k, int, int)
   | CaptureNotRun of (int)
 
 (* Where a read of the child's output ended (capture area) *)
@@ -1912,22 +1919,33 @@ fun capture_put {lo:agz}{lc:agz}{cap:pos}{f:nat}{m:nat | m <= 4096; f + m <= cap
     val () = $A.set<byte>(out, filled + i, $A.get<byte>(chunk, i))
   in capture_put(out, filled, chunk, m, i + 1) end
 
-(* Reads fd to its end, keeping the first cap bytes in out (cap is out's size);
-   stops at 1 GiB (capture area) *)
-fun capture_read {lo:agz}{lc:agz}{cap:pos}{f:nat | f <= cap}{t:nat | t <= 1073741824}
-  .<1073741824 - t>.
+(* The count of bytes read is mebibytes (at most 67108863, 64 TiB) and a
+   remainder under 1048576, so it is exact for any stream and its lexicographic
+   growth is the loop's metric (capture area) *)
+fn capture_add {g,r:nat | r < 1048576; g < 67108864}{k:pos | k <= 4096}
+  (mebi: int g, rest: int r, k: int k)
+  : [g2,r2:nat | r2 < 1048576; g2 <= 67108864; g2 > g || (g2 == g && r2 > r)] @(int g2, int r2) =
+  if rest + k >= 1048576 then @(mebi + 1, rest + k - 1048576)
+  else @(mebi, rest + k)
+
+(* Reads fd to its end, keeping the first cap bytes in out (cap is out's size) and
+   counting every byte exactly; a stream of 64 TiB or more is a failed read,
+   FileTooLarge (capture area) *)
+fun capture_read {lo:agz}{lc:agz}{cap:pos}{f:nat | f <= cap}{g,r:nat | r < 1048576; g <= 67108864}
+  .<67108864 - g, 1048576 - r>.
   (fd: !$F.fd, out: !$A.arr(byte, lo, cap), cap: int cap, chunk: !$A.arr(byte, lc, 4096),
-   filled: int f, total: int t)
-  : @([g:nat | g <= cap] int g, [u:nat] int u, capture_end) =
-  case+ $F.file_read(fd, chunk, 4096) of
-  | ~$R.err(e) => @(filled, total, CaptureEndFailed(e))
+   filled: int f, mebi: int g, rest: int r)
+  : @([h:nat | h <= cap] int h, [u:nat] int u, [v:nat] int v, capture_end) =
+  if mebi >= 67108864 then @(filled, mebi, rest, CaptureEndFailed($F.FileTooLarge()))
+  else case+ $F.file_read(fd, chunk, 4096) of
+  | ~$R.err(e) => @(filled, mebi, rest, CaptureEndFailed(e))
   | ~$R.ok(k) =>
-    if k <= 0 then @(filled, total, CaptureEnded())
-    else if total + k > 1073741824 then @(filled, 1073741824, CaptureEnded())
+    if k <= 0 then @(filled, mebi, rest, CaptureEnded())
     else let
       val kept = (if filled + k <= cap then capture_put(out, filled, chunk, k, 0)
-                  else capture_put(out, filled, chunk, cap - filled, 0)): [g:nat | g <= cap] int g
-    in capture_read(fd, out, cap, chunk, kept, total + k) end
+                  else capture_put(out, filled, chunk, cap - filled, 0)): [h:nat | h <= cap] int h
+      val @(mebi2, rest2) = capture_add(mebi, rest, k)
+    in capture_read(fd, out, cap, chunk, kept, mebi2, rest2) end
 
 (* As run_cmd_capture, with the outcome a type: stdout is read to its end,
    stderr goes to /dev/null, and a longer output is its own constructor *)
@@ -1948,18 +1966,22 @@ in
       val () = $P.pipe_end_close(serr_p)
       val+ ~$P.pipe_fd(out_fd) = sout_p
       val chunk = $A.alloc<byte>(4096)
-      val @(kept, total, ended) = capture_read(out_fd, outbuf, 4096, chunk, 0, 0)
+      val @(kept, mebi, rest, ended) = capture_read(out_fd, outbuf, 4096, chunk, 0, 0, 0)
       val () = $A.free<byte>(chunk)
       val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
-      val status = (case+ $P.child_wait(child) of
-        | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+      val waited = $P.child_wait(child)
     in
       case+ ended of
-      | ~CaptureEndFailed(e) => CaptureReadFailed(status, kept, e)
+      | ~CaptureEndFailed(e) => let
+          val () = $R.discard<int><int>(waited)
+        in CaptureReadFailed(kept, e) end
       | ~CaptureEnded() =>
-        if total > 4096 then CaptureLonger(status, total)
-        else if status = 0 then CaptureFits(kept)
-        else CaptureFailed(status, kept)
+        (case+ waited of
+        | ~$R.err(_) => CaptureWaitFailed(kept, mebi, rest)
+        | ~$R.ok(status) =>
+          if mebi > 0 || rest > 4096 then CaptureLonger(status, mebi, rest)
+          else if status = 0 then CaptureFits(kept)
+          else CaptureFailed(status, kept))
     end
 end
 
@@ -1980,8 +2002,9 @@ implement tool_output (name, rest, out) = let
   val result = (case+ outcome of
     | ~CaptureFits(n) => @(0, n)
     | ~CaptureFailed(status, n) => @(status, n)
-    | ~CaptureLonger(status, _) => @(status, 4096)
-    | ~CaptureReadFailed(_, _, _) => @(~1, 0)
+    | ~CaptureLonger(status, _, _) => @(status, 4096)
+    | ~CaptureReadFailed(_, _) => @(~1, 0)
+    | ~CaptureWaitFailed(_, _, _) => @(~1, 0)
     | ~CaptureNotRun(_) => @(~1, 0)): @(int, [k:nat | k <= 4096] int k)
   val () = $A.cborrow_drop(fz_tool, bv_tool)
   val () = $A.barr_free($A.barr_thaw(fz_tool))
@@ -2009,7 +2032,7 @@ implement tool_output_wide (name, rest, out) = let
         val () = $P.pipe_end_close(serr_p)
         val+ ~$P.pipe_fd(out_fd) = sout_p
         val chunk = $A.alloc<byte>(4096)
-        val @(kept, total, ended) = capture_read(out_fd, out, 65536, chunk, 0, 0)
+        val @(kept, mebi, rest, ended) = capture_read(out_fd, out, 65536, chunk, 0, 0, 0)
         val () = $A.free<byte>(chunk)
         val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
         val status = (case+ $P.child_wait(child) of
@@ -2017,7 +2040,7 @@ implement tool_output_wide (name, rest, out) = let
       in
         case+ ended of
         | ~CaptureEndFailed(_) => @(~1, 0, false)
-        | ~CaptureEnded() => @(status, kept, total > 65536)
+        | ~CaptureEnded() => @(status, kept, mebi > 0 || rest > 65536)
       end): @(int, [k:nat | k <= 65536] int k, bool)
   val () = $A.cborrow_drop(fz_tool, bv_tool)
   val () = $A.barr_free($A.barr_thaw(fz_tool))
@@ -2671,8 +2694,9 @@ fn disk_free_kib (): int = let
   val v = (case+ outcome of
     | ~CaptureFits(k) => df_available(bv_o, k)
     | ~CaptureFailed(_, _) => ~1
-    | ~CaptureLonger(_, _) => ~1
-    | ~CaptureReadFailed(_, _, _) => ~1
+    | ~CaptureLonger(_, _, _) => ~1
+    | ~CaptureReadFailed(_, _) => ~1
+    | ~CaptureWaitFailed(_, _, _) => ~1
     | ~CaptureNotRun(_) => ~1): int
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
@@ -3409,8 +3433,9 @@ fn judge_root {lo:agz}{l:agz}
   | ~CaptureFits(n) =>
     (if which = 0 then take_root(out, n, ph, 4096) else take_root(out, n, ph, 8192))
   | ~CaptureFailed(_, _) => 1
-  | ~CaptureLonger(_, _) => 2
-  | ~CaptureReadFailed(_, _, _) => 3
+  | ~CaptureLonger(_, _, _) => 2
+  | ~CaptureReadFailed(_, _) => 3
+  | ~CaptureWaitFailed(_, _, _) => 3
   | ~CaptureNotRun(_) => 4
 
 fn ask_one {l:agz}(ph: !$A.arr(byte, l, 12288), which: int): void = let
@@ -3644,8 +3669,9 @@ fn jobs_cores_ask (): int = let
   val len = (case+ outcome of
     | ~CaptureFits(len) => len
     | ~CaptureFailed(_, _) => 0
-    | ~CaptureLonger(_, _) => 0
-    | ~CaptureReadFailed(_, _, _) => 0
+    | ~CaptureLonger(_, _, _) => 0
+    | ~CaptureReadFailed(_, _) => 0
+    | ~CaptureWaitFailed(_, _, _) => 0
     | ~CaptureNotRun(_) => 0): [k:nat | k <= 4096] int k
   val last = peek_arr(out, len - 1, 4096)
   val stop = (if len >= 1 && last = 10 then len - 1 else len): int
@@ -3703,7 +3729,7 @@ fn cc_job_end (job: cc_job): void = let
   val+ ~cc_job_mk(kind, child, fd, oa, om, ia, im, na, nm) = job
   val eb = $A.alloc<byte>(65536)
   val chunk = $A.alloc<byte>(4096)
-  val @(elen, _total, ended) = capture_read(fd, eb, 65536, chunk, 0, 0)
+  val @(elen, _mebi, _rest, ended) = capture_read(fd, eb, 65536, chunk, 0, 0, 0)
   val () = $A.free<byte>(chunk)
   val () = (case+ ended of
     | ~CaptureEnded() => ()

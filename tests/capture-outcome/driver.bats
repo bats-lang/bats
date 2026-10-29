@@ -29,8 +29,9 @@ in
   case+ outcome of
   | ~CaptureFits(n) => println! (name, ": fits ", n)
   | ~CaptureFailed(status, n) => println! (name, ": failed status=", status, " kept=", n)
-  | ~CaptureLonger(status, written) => println! (name, ": longer status=", status, " written=", written)
-  | ~CaptureReadFailed(status, n, _) => println! (name, ": read-failed status=", status, " kept=", n)
+  | ~CaptureLonger(status, mebi, rest) => println! (name, ": longer status=", status, " written=", mebi, "*1048576+", rest)
+  | ~CaptureReadFailed(n, _) => println! (name, ": read-failed kept=", n)
+  | ~CaptureWaitFailed(n, mebi, rest) => println! (name, ": wait-failed kept=", n, " written=", mebi, "*1048576+", rest)
   | ~CaptureNotRun(errno) => println! (name, ": not-run")
 end
 
@@ -64,4 +65,7 @@ implement main0 () = let
   val () = play("longer-failed", "head -c 10000 /dev/zero; exit 5")
   val () = play("pipe-full", "head -c 300000 /dev/zero; sleep 0.2; exit 0")
   val () = play("stderr-heavy", "head -c 300000 /dev/zero >&2; printf ok")
+  val () = play("killed", "printf abc; kill -9 $$")
+  val () = play("killed-longer", "head -c 5000 /dev/zero; kill -9 $$")
+  val () = play("past-1gib", "head -c 1073746824 /dev/zero")
 in end
