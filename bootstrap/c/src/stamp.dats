@@ -240,23 +240,23 @@ in r.0 = 0 end
    this list is bats's own. *)
 
 (* The bytes of a builder, hashed into c; the builder is consumed *)
-fn hash_builder (c: !$SHA.ctx, b: $B.builder_v): void = let
+fn hash_builder (c: !$SHA.proved_ctx, b: $B.builder_v): void = let
   val @(ba, bl) = $B.into_arr(b)
-  val () = $SHA.update(c, ba, bl)
+  val () = $SHA.proved_update(c, ba, bl)
   val () = $A.free<byte>(ba)
 in end
 
 (* A variable that is not set, into c: its name, then " unset" (so unset and
    empty differ). *)
 fn hash_env_unset {sn:nat | sn < $B.BUILDER_CAP}
-  (name: string sn, c: !$SHA.ctx): void = let
+  (name: string sn, c: !$SHA.proved_ctx): void = let
   var h : $B.builder_v = $B.create()
   val () = bput_v(h, name)
   val () = bput_v(h, " unset\n")
 in hash_builder(c, h) end
 
 fn hash_env_set {sn:nat | sn < $B.BUILDER_CAP}{l:agz}
-  (name: string sn, bv: !$A.borrow(byte, l, 131072), k: int, c: !$SHA.ctx): void = let
+  (name: string sn, bv: !$A.borrow(byte, l, 131072), k: int, c: !$SHA.proved_ctx): void = let
   var h : $B.builder_v = $B.create()
   val () = bput_v(h, name)
   val () = bput_v(h, " ")
@@ -273,7 +273,7 @@ in hash_builder(c, h) end
    written (exec refuses a string that long, so this is for an environment
    changed inside the process). *)
 fn hash_env_var {sn:nat | sn < $B.BUILDER_CAP}
-  (name: string sn, c: !$SHA.ctx): bool = let
+  (name: string sn, c: !$SHA.proved_ctx): bool = let
   val na = str_to_exact_arr(name)
   val buf = $A.alloc<byte>(131072)
   val got = $E.get_cstr(na, g1u2i(string1_length(name)) + 1, buf, 131072)
@@ -301,7 +301,7 @@ in ok end
    above hash_builder gives), hashed into c in this order. One list, for
    both marks: a native build with one of the wasm mark's set (the same
    list) is dropped, which costs a rebuild and never a wrong object. *)
-fn put_cc_environment (c: !$SHA.ctx): bool =
+fn put_cc_environment (c: !$SHA.proved_ctx): bool =
   hash_env_var("CPATH", c)
   && hash_env_var("C_INCLUDE_PATH", c)
   && hash_env_var("CPLUS_INCLUDE_PATH", c)
@@ -345,11 +345,11 @@ fn put_cc_environment (c: !$SHA.ctx): bool =
 fn put_cc_digest (out: !$B.builder_v >> $B.builder_v): bool = let
   var lst : $B.builder_v = $B.create()
   val listed = put_file_digest("build/.bats_cc", lst)
-  val c = $SHA.init()
+  val c = $SHA.proved_init()
   val () = hash_builder(c, lst)
   val env = put_cc_environment(c)
   val digest = $A.alloc<byte>(64)
-  val () = $SHA.finish(c, digest)
+  val () = $SHA.proved_finish(c, digest)
   val @(fz_d, bv_d) = $A.freeze<byte>(digest)
   val () = copy_to_builder_v(bv_d, 0, 64, 64, out)
   val () = $A.drop<byte>(fz_d, bv_d)
