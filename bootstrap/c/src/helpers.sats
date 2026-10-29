@@ -2787,6 +2787,12 @@ fn check_emitted_flaws {lo,li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:p
 
 
 
+
+
+
+
+
+
 fn cap_secs_now (): int
 
 

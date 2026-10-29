@@ -1145,15 +1145,19 @@ in
   else named_file(cmd, first, z, "--discover", 10)
 end
 
+(* The message and status of a git ls-files that did not give its list *)
+fn git_failed (): int = let
+  val () = prerr! ("error: bats check-pins --discover: git ls-files failed: is the current directory in a git repository?")
+  val () = prerr_newline()
+in 2 end
+
 (* bats check-pins --discover: the files of CI inputs of the repository of the
    current directory (git ls-files, tracked or untracked and not ignored: a
    planted file is read, bats_modules/ and build/ are not), checked as if named.
-   Its list is read into the buffer the arguments are (4096 bytes; the file
-   package's read goes on to the buffer's end or the pipe's), so a list that fills
-   it is refused, never cut, and that is said before git's status is read: git,
-   its pipe closed with the list unread, ends on SIGPIPE, which is no failure of
-   git. The status as check-pins: 0, 1, or 2 for no file, a git that fails or a
-   list too long *)
+   Its list is read to its end by run_cmd_capture_outcome and the first 4096 bytes
+   are kept: a longer list is its own outcome (refused, never cut) and git's status
+   is never the cause of it (capture area, bats#444). The status as check-pins: 0,
+   1, or 2 for no file, a git that fails or a list too long *)
 fn discover (): int = let
   val (nul_git | git_exec) = $P.path_of_string_proved("git")
   val @(fz_git, bv_git) = $A.barr_freeze(git_exec)
@@ -1169,21 +1173,23 @@ fn discover (): int = let
     $L.list_vt_cons(literal_arg(":(glob)**/ats2.bats"),
     $L.list_vt_cons(literal_arg(":(glob)**/check-pins-fixture"), $L.list_vt_nil()))))))))))))))
   val out = $A.alloc<byte>(4096)
-  val @(rc, listed) = run_cmd_capture(nul_git | bv_git, argv, out)
+  val outcome = run_cmd_capture_outcome(nul_git | bv_git, argv, out)
   val @(fz_out, bv_out) = $A.freeze<byte>(out)
-  val status = (if listed >= 4096 then let
-      val () = prerr! ("error: bats check-pins --discover: the files are listed in 4095 bytes or more")
-      val () = prerr_newline()
-    in 2 end
-    else if rc <> 0 then let
-      val () = prerr! ("error: bats check-pins --discover: git ls-files failed: is the current directory in a git repository?")
-      val () = prerr_newline()
-    in 2 end
-    else if listed = 0 then let
-      val () = prerr! ("error: bats check-pins --discover: the repository has no workflow, action, package.json or ats2.bats to check")
-      val () = prerr_newline()
-    in 2 end
-    else check_files(bv_out, 0, listed, ats2_among(bv_out, 0, listed), 0, 0)): int
+  (* each outcome of the run is its own message (capture area, bats#444): git's output is read to its end, so a status is never the cause of a long list *)
+  val status = (case+ outcome of
+    | ~CaptureLonger(_, _) => let
+        val () = prerr! ("error: bats check-pins --discover: the files are listed in more than 4096 bytes")
+        val () = prerr_newline()
+      in 2 end
+    | ~CaptureFailed(_, _) => git_failed()
+    | ~CaptureReadFailed(_, _, _) => git_failed()
+    | ~CaptureNotRun(_) => git_failed()
+    | ~CaptureFits(listed) =>
+      if listed = 0 then let
+        val () = prerr! ("error: bats check-pins --discover: the repository has no workflow, action, package.json or ats2.bats to check")
+        val () = prerr_newline()
+      in 2 end
+      else check_files(bv_out, 0, listed, ats2_among(bv_out, 0, listed), 0, 0)): int
   val () = $A.drop<byte>(fz_out, bv_out)
   val () = $A.free<byte>($A.thaw<byte>(fz_out))
   val () = $A.cborrow_drop(fz_git, bv_git)

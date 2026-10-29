@@ -48,8 +48,15 @@ fn sh_capture {sn:nat}{lo:agz} (script: string sn, out: !$A.arr(byte, lo, 4096))
   val () = bput_v(b2, "-c")
   var b3 = $B.create()
   val () = bput_v(b3, script)
-  val r = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
+  (* a longer output is a failure with none of it kept: these scripts print a few lines (capture area) *)
+  val r = (case+ outcome of
+    | ~CaptureFits(n) => @(0, n)
+    | ~CaptureFailed(status, n) => @(status, n)
+    | ~CaptureLonger(_, _) => @(~1, 0)
+    | ~CaptureReadFailed(_, _, _) => @(~1, 0)
+    | ~CaptureNotRun(e) => @(0 - e, 0)): @(int, [k:nat | k <= 4096] int k)
   val () = $A.cborrow_drop(fz_x, bv_x)
   val () = $A.barr_free($A.barr_thaw(fz_x))
 in r end

@@ -105,14 +105,21 @@ fn project_root (root: !$B.builder_v >> $B.builder_v): bool = let
   var b3 = $B.create()
   val () = bput_v(b3, "pwd -P")
   val cwd = $A.alloc<byte>(4096)
-  val @(rc, k) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), cwd)
+  (* a directory name is what pwd -P printed and it succeeded: any other outcome has none (capture area) *)
+  val k = (case+ outcome of
+    | ~CaptureFits(n) => n
+    | ~CaptureFailed(_, _) => 0
+    | ~CaptureLonger(_, _) => 0
+    | ~CaptureReadFailed(_, _, _) => 0
+    | ~CaptureNotRun(_) => 0): [k:nat | k <= 4096] int k
   val () = $A.cborrow_drop(fz_x, bv_x)
   val () = $A.barr_free($A.barr_thaw(fz_x))
   (* without its newline *)
   val @(fz_o, bv_o) = $A.freeze<byte>(cwd)
   val e = (if k > 0 then (if peek(bv_o, k - 1, 4096) = 10 then k - 1 else k) else 0): int
-  val ok = (rc = 0 && e > 1)
+  val ok = (e > 1)
   val () = (if ok then copy_to_builder_v(bv_o, 0, e, 4096, root) else bput_v(root, ""))
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))

@@ -1,6 +1,14 @@
 ---
 paths:
   - src/helpers.bats
+  - src/pins.bats
+  - src/facts.bats
+  - src/stamp.bats
+  - src/setup.bats
+  - src/ats2.bats
+  - src/cache.bats
+  - src/fixtures.bats
+  - src/commands.bats
   - tests/capture-outcome/**
 ---
 
@@ -13,3 +21,5 @@ Why: bats#440 read git's file list with one 4096-byte read, closed the pipe whil
 Research (bats#444 comment): Rust `Command::output` and Python `capture_output` read everything and have no limit case; Go keeps a prefix and suffix of a long stderr and says so in the text; Node `execFile` `maxBuffer` makes it an error but terminates the child; `popen` leaves it to the caller. This form drains like Rust and makes the limit a constructor like Node, without killing the child.
 
 `tests/capture-outcome/check.sh` builds a copy of the project with `driver.bats` as a second binary and plays real `sh` children (output in pieces with pauses, exactly 4096 and 4097 bytes, 300000 bytes, a non-zero exit with little and with much output, 300000 bytes of stderr), and checks a caller without `CaptureLonger` does not compile. The old `run_cmd_capture` stays one version beside the new form (repository-prototype#381; removal: bats#461); the driver calls it.
+
+The callers (bats#444 done-when; all moved, each matches every constructor with `case+`; the old form has none left but its driver): `src/facts.bats` `sh_capture` (longer: failure, no bytes), `src/stamp.bats` `sh_capture` (longer: the child's status, first 4096 bytes), `src/setup.bats` `sh_exec` (same), `src/ats2.bats` `install_now` (longer: failure, a directory name is not that long), `src/cache.bats` `project_root` and `src/fixtures.bats` `make_work_dir` (only Fits has a directory name), `src/commands.bats` `git_dir_rc` (status), `git_tree_dirty` (longer is dirty) and `git_version` (`usable_len`: longer is no bytes), `src/helpers.bats` `disk_free_kib` (only Fits), `src/pins.bats` `discover` (the #440 reorder is gone: Longer is "more than 4096 bytes", the other failures are git's), and the two already on the new form (`src/affected.bats`, `tool_output`). Removal of the old form: bats#461.

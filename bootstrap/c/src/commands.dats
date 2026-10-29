@@ -606,7 +606,13 @@ fn git_dir_rc (): int = let
   val argv = $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
-  val @(rc, _) = run_cmd_capture(nul_ge | bv_ge, argv, out)
+  val outcome = run_cmd_capture_outcome(nul_ge | bv_ge, argv, out)
+  val rc = (case+ outcome of
+    | ~CaptureFits(_) => 0
+    | ~CaptureFailed(status, _) => status
+    | ~CaptureLonger(status, _) => status
+    | ~CaptureReadFailed(_, _, _) => ~1
+    | ~CaptureNotRun(e) => 0 - e): int
   val () = $A.free<byte>(out)
   val () = $A.cborrow_drop(fz_ge, bv_ge)
   val () = $A.barr_free($A.barr_thaw(fz_ge))
@@ -625,11 +631,18 @@ fn git_tree_dirty (): bool = let
   val argv = $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil())))
   val out = $A.alloc<byte>(4096)
-  val @(_, olen) = run_cmd_capture(nul_ge | bv_ge, argv, out)
+  val outcome = run_cmd_capture_outcome(nul_ge | bv_ge, argv, out)
+  (* dirty when git printed anything, a longer output included; one that did not run says nothing (capture area) *)
+  val dirty = (case+ outcome of
+    | ~CaptureFits(n) => n > 0
+    | ~CaptureFailed(_, n) => n > 0
+    | ~CaptureLonger(_, _) => true
+    | ~CaptureReadFailed(_, n, _) => n > 0
+    | ~CaptureNotRun(_) => false): bool
   val () = $A.free<byte>(out)
   val () = $A.cborrow_drop(fz_ge, bv_ge)
   val () = $A.barr_free($A.barr_thaw(fz_ge))
-in olen > 0 end
+in dirty end
 
 (* Whether a[0, t) and b[0, t) hold the same bytes *)
 fun same_bytes {la,lb:agz}{na,nb:pos}{t:nat | t <= na; t <= nb}{i:nat | i <= t} .<t - i>.
@@ -706,6 +719,16 @@ end
    came from [package] version (true) or from git (false) *)
 vtypedef version_arr = [l:agz][n:pos][m:nat | m <= n] @($A.arr(byte, l, n), int m, int, bool)
 
+(* The bytes of a git answer a caller may read: what fits; none when the output was longer than
+   the buffer or could not be read, since a timestamp or a branch name is not that long (capture area) *)
+fn usable_len (outcome: capture_outcome): [k:nat | k <= 4096] int k =
+  case+ outcome of
+  | ~CaptureFits(n) => n
+  | ~CaptureFailed(_, n) => n
+  | ~CaptureLonger(_, _) => 0
+  | ~CaptureReadFailed(_, _, _) => 0
+  | ~CaptureNotRun(_) => 0
+
 (* The version from git: the last commit's date and seconds since
    midnight, with dev1 off the trunk (Rust: resolve_version) *)
 fn git_version (): version_arr = let
@@ -725,7 +748,7 @@ fn git_version (): version_arr = let
     $L.list_vt_cons(mk_arg(ts_b2), $L.list_vt_cons(mk_arg(ts_b3),
     $L.list_vt_cons(mk_arg(ts_b4), $L.list_vt_nil()))))
   val ts_out = $A.alloc<byte>(4096)
-  val @(ts_rc, ts_len) = run_cmd_capture(nul_ge | bv_ge, ts_argv, ts_out)
+  val ts_len = usable_len(run_cmd_capture_outcome(nul_ge | bv_ge, ts_argv, ts_out))
   val ts = parse_decimal(ts_out, ts_len, 4096)
   val () = $A.free<byte>(ts_out)
   val @(yr, mo, dy, secs) = timestamp_to_calver(ts)
@@ -742,7 +765,7 @@ fn git_version (): version_arr = let
     $L.list_vt_cons(mk_arg(br_b2), $L.list_vt_cons(mk_arg(br_b3),
     $L.list_vt_cons(mk_arg(br_b4), $L.list_vt_nil()))))
   val br_out = $A.alloc<byte>(4096)
-  val @(br_rc, br_len) = run_cmd_capture(nul_ge | bv_ge, br_argv, br_out)
+  val br_len = usable_len(run_cmd_capture_outcome(nul_ge | bv_ge, br_argv, br_out))
   val @(trunk, _, tlen) = read_trunk()
   val is_main = on_trunk(br_out, br_len, trunk, tlen)
   val () = $A.free<byte>(trunk)

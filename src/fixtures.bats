@@ -2795,13 +2795,20 @@ fn make_work_dir (out: !$B.builder_v >> $B.builder_v): void = let
   var b3 = $B.create()
   val () = bput_v(b3, "mktemp -d")
   val cap = $A.alloc<byte>(4096)
-  val @(rc, k) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), cap)
+  (* a directory name is what mktemp printed and it succeeded: any other outcome has none (capture area) *)
+  val k = (case+ outcome of
+    | ~CaptureFits(n) => n
+    | ~CaptureFailed(_, _) => 0
+    | ~CaptureLonger(_, _) => 0
+    | ~CaptureReadFailed(_, _, _) => 0
+    | ~CaptureNotRun(_) => 0): [k:nat | k <= 4096] int k
   val () = $A.cborrow_drop(fz_x, bv_x)
   val () = $A.barr_free($A.barr_thaw(fz_x))
   val @(fz_o, bv_o) = $A.freeze<byte>(cap)
   val stop = (if k > 0 then (if peek(bv_o, k - 1, 4096) = 10 then k - 1 else k) else 0): xi
-  val () = (if rc = 0 && stop > 0 then copy_to_builder_v(bv_o, 0, stop, 4096, out) else ())
+  val () = (if stop > 0 then copy_to_builder_v(bv_o, 0, stop, 4096, out) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
 in end

@@ -231,9 +231,16 @@ fn install_now (mode: ats2_install_mode): bool = let
   val () = bput_v(s3, FETCH)
   var s4 = $B.create()
   val () = bput_v(s4, "sh")
-  val @(rc, k) = run_cmd_capture(nul_fetch | fbv, $L.list_vt_cons(mk_arg(s1), $L.list_vt_cons(mk_arg(s2),
+  val outcome = run_cmd_capture_outcome(nul_fetch | fbv, $L.list_vt_cons(mk_arg(s1), $L.list_vt_cons(mk_arg(s2),
     $L.list_vt_cons(mk_arg(s3), $L.list_vt_cons(mk_arg(s4),
     $L.list_vt_cons(mk_arg(base_arg()), $L.list_vt_cons(mk_arg(text_arg(ATS2_URL)), $L.list_vt_nil())))))), out)
+  (* the script prints one directory name on success: a longer output is a failure (its first 4096 bytes said), never a directory (capture area) *)
+  val @(rc, k) = (case+ outcome of
+    | ~CaptureFits(n) => @(0, n)
+    | ~CaptureFailed(status, n) => @(status, n)
+    | ~CaptureLonger(status, _) => @((if status = 0 then ~1 else status), 4096)
+    | ~CaptureReadFailed(_, n, _) => @(~1, n)
+    | ~CaptureNotRun(e) => @(0 - e, 0)): @(int, [k:nat | k <= 4096] int k)
   val () = $A.cborrow_drop(fexec, fbv)
   val () = $A.barr_free($A.barr_thaw(fexec))
   val @(fz_o, bv_o) = $A.freeze<byte>(out)

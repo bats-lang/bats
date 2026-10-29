@@ -1860,7 +1860,7 @@ implement timestamp_to_calver(ts) = let
   val y2 = (if m <= 2 then $AR.add_int_int(y, 1) else y): int
 in @(y2, m, d, secs_of_day) end
 
-(* Run a command and capture stdout into outbuf. Returns @(exit_code,
+(* Deprecated (capture area): the output longer than the buffer is not told from one that fits; removal bats#461. Run a command and capture stdout into outbuf. Returns @(exit_code,
    stdout_len); the exit code is -errno when the command could not be
    run (Rust: Command::output's Err). *)
 
@@ -2678,10 +2678,16 @@ fn disk_free_kib (): int = let
   var b3 : $B.builder_v = $B.create()
   val () = bput_v(b3, "build")
   val out = $A.alloc<byte>(4096)
-  val @(rc, k) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1),
     $L.list_vt_cons(mk_arg(b2), $L.list_vt_cons(mk_arg(b3), $L.list_vt_nil()))), out)
   val @(fz_o, bv_o) = $A.freeze<byte>(out)
-  val v = (if rc = 0 then df_available(bv_o, k) else ~1): int
+  (* df's one table that fits: any other outcome gives none (capture area) *)
+  val v = (case+ outcome of
+    | ~CaptureFits(k) => df_available(bv_o, k)
+    | ~CaptureFailed(_, _) => ~1
+    | ~CaptureLonger(_, _) => ~1
+    | ~CaptureReadFailed(_, _, _) => ~1
+    | ~CaptureNotRun(_) => ~1): int
   val () = $A.drop<byte>(fz_o, bv_o)
   val () = $A.free<byte>($A.thaw<byte>(fz_o))
   val () = $A.cborrow_drop(fz_x, bv_x)
