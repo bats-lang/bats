@@ -27,6 +27,7 @@ staload "helpers.sats"
 staload "cache.sats"
 staload "facts.sats"
 staload "inputs.sats"
+staload "built.sats"
 staload "stamp.sats"
 staload "ats2.sats"
 staload "lexer.sats"
@@ -1172,6 +1173,8 @@ fn do_build {lt:agz}
 
 
 fn do_build_plain(release: profile, build_target: target): void
+
+
 
 
 

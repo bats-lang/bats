@@ -153,6 +153,7 @@ staload "pins.sats"
 
 
 
+fn repository_known (repo_at: pos_t): bool
 
 
 
@@ -164,16 +165,8 @@ staload "pins.sats"
 
 
 
-
-
-
-
-
-
-
-
-
-
+fn repository_arg {lc:agz}
+  (cmd: !$A.borrow(byte, lc, 4096), repo_at: pos_t, repo_to: int): $P.arg_entry
 
 
 

@@ -1979,6 +1979,30 @@ fn run_cmd_capture_outcome {le:agz}{lo:agz}{ne:pos}{cs:$A.cells}{k:nat | k < ne}
 
 
 
+fn tool_output {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 4096))
+  : @(int, [k:nat | k <= 4096] int k)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1977,6 +1977,30 @@ in
     end
 end
 
+(* Runs the tool `name` of PATH (argv[0] is `name`, `rest` follows) and keeps what its stdout fits
+   in out: its exit status (-1 when it did not run or its output could not be read) and the length
+   kept (public: bats check-push and the built-commit module run git so) *)
+
+
+
+
+implement tool_output (name, rest, out) = let
+  val (nul_tool | tool_exec) = $P.path_of_string_proved(name)
+  val @(fz_tool, bv_tool) = $A.barr_freeze(tool_exec)
+  var name_builder : $B.builder_v = $B.create()
+  val () = bput_v(name_builder, name)
+  val argv = $L.list_vt_cons(mk_arg(name_builder), rest)
+  val outcome = run_cmd_capture_outcome(nul_tool | bv_tool, argv, out)
+  val result = (case+ outcome of
+    | ~CaptureFits(n) => @(0, n)
+    | ~CaptureFailed(status, n) => @(status, n)
+    | ~CaptureLonger(status, _) => @(status, 4096)
+    | ~CaptureReadFailed(_, _, _) => @(~1, 0)
+    | ~CaptureNotRun(_) => @(~1, 0)): @(int, [k:nat | k <= 4096] int k)
+  val () = $A.cborrow_drop(fz_tool, bv_tool)
+  val () = $A.barr_free($A.barr_thaw(fz_tool))
+in result end
+
 (* The prelude line count in <in>.pre, written next to the .dats
    in[0, il) by preprocess_one; 0 when there is none *)
 fun digits_val {lb:agz}{i,k:nat | i <= k; k <= 16} .<k - i>.
