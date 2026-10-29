@@ -35,6 +35,13 @@ staload R = "result/src/lib.sats"
 
 
 
+
+
+
+
+
+
+
 staload "helpers.sats"
 
 
@@ -89,6 +96,32 @@ staload "helpers.sats"
 
 
 fn write_facts (): void
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
