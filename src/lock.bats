@@ -1140,13 +1140,20 @@ fn put_cannot_read (failure: $F.io_error, err: !$B.builder_v >> $B.builder_v): v
   val () = put_int_v(err, e)
 in bput_v(err, ")") end
 
+(* Why bats.toml gave no document, appended to err and consumed (manifest, toml-parse-whole) *)
+fn put_toml_failure (failure: toml_failure, err: !$B.builder_v >> $B.builder_v): void =
+  case+ failure of
+  | ~Toml_unreadable(e) => put_cannot_read(e, err)
+  | ~Toml_too_many_bytes() => bput_v(err, "cannot read './bats.toml': it is over 65536 bytes")
+  | ~Toml_too_many_entries() => bput_v(err, "cannot read './bats.toml': it has more than 256 entries (a [section] header is an entry)")
+
 (* The constraints of the project's bats.toml, from its [package] name:
    @(1, them), or @(~1, none) after writing Rust's message to err, as
    when bats.toml cannot be read (Rust: cmd_lock's config::load) *)
 fn project_cons (err: !$B.builder_v >> $B.builder_v): [n:nat] @(int, cons(n)) =
   case+ read_manifest() of
   | ~$R.err(e) => let
-      val () = put_cannot_read(e, err)
+      val () = put_toml_failure(e, err)
     in @(~1, cons_nil()) end
   | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
@@ -1178,7 +1185,7 @@ fn dep_cons {la:agz} (a: !$A.arr(byte, la, 256), k: nlen): [n:nat] cons(n) = let
   val @(pa, pal) = $B.into_arr(p)
 in
   case+ read_toml(pa, pal) of
-  | ~$R.err(_) => cons_nil()
+  | ~$R.err(f) => let val () = toml_failure_free(f) in cons_nil() end
   | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
       val @(st, cs) = config_cons(doc, a, k, err)
@@ -1415,7 +1422,7 @@ fn toml_version_is {la:agz} (a: !$A.arr(byte, la, 256), k: nlen, v: !cand): bool
   val @(pa, pal) = $B.into_arr(p)
 in
   case+ read_toml(pa, pal) of
-  | ~$R.err(_) => false
+  | ~$R.err(f) => let val () = toml_failure_free(f) in false end
   | ~$R.ok(doc) => let
       var section_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
       val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(section_c, 7))
@@ -2162,7 +2169,7 @@ in ds end
 (* The project's path dependencies; none when bats.toml cannot be read *)
 fn project_pdeps (): [n:nat] pdeps(n) =
   case+ read_manifest() of
-  | ~$R.err(_) => pd_nil()
+  | ~$R.err(f) => let val () = toml_failure_free(f) in pd_nil() end
   | ~$R.ok(doc) => let
       val ds = doc_pdeps(doc)
       val () = $T.toml_free(doc)
@@ -2190,7 +2197,7 @@ fn pdep_cons {la,lp:agz}
   val @(ba, bal) = $B.into_arr(b)
 in
   case+ read_toml(ba, bal) of
-  | ~$R.err(_) => cons_nil()
+  | ~$R.err(f) => let val () = toml_failure_free(f) in cons_nil() end
   | ~$R.ok(doc) => let
       var err : $B.builder_v = $B.create()
       val @(st, cs) = config_cons(doc, a, k, err)
@@ -2344,7 +2351,7 @@ implement project_kind () = let
   val () = bput_v(err, "error: ")
   val kind = (case+ read_manifest() of
     | ~$R.err(e) => let
-        val () = put_cannot_read(e, err)
+        val () = put_toml_failure(e, err)
       in $R.none() end
     | ~$R.ok(doc) => let
         val nb = $A.alloc<byte>(256)
@@ -3090,7 +3097,7 @@ fn check_file {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,lx:agz}
    unsafe = true *)
 fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m): bool =
   case+ read_toml(pa, m) of
-  | ~$R.err(_) => false
+  | ~$R.err(f) => let val () = toml_failure_free(f) in false end
   | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
       val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
