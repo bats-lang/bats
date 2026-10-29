@@ -1,6 +1,0 @@
-error: patsopt error:
-/home/claude/bats-502/tests/proved-sha256/work/memo_work/app/src/lib.bats: 130(line=8, offs=22) -- 147(line=8, offs=39): error(3): pattern match is nonexhaustive:
-[^0]
-typechecking has failed: there are some unsolved constraints: please inspect the above reported error message(s) for information.
-exit(ATS): uncaught exception: _2tmp_2ATS_2dPostiats_2src_2pats_error_2esats__FatalErrorExn(1025)
-

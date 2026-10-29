@@ -1,4 +1,0 @@
-function h
-line 2
-pattern match is nonexhaustive:
-[^0]
