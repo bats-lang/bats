@@ -1987,6 +1987,42 @@ implement tool_output (name, rest, out) = let
   val () = $A.barr_free($A.barr_thaw(fz_tool))
 in result end
 
+(* As tool_output with a buffer of 65536 bytes: the status (-1 when it did not run or its output could not be read),
+   the length kept and whether the output was longer than the buffer (keyword: pins-check; public: bats pins-check reads
+   a diff so) *)
+#pub fn tool_output_wide {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
+  (name: string sn, rest: $L.listv($P.arg_entry), out: !$A.arr(byte, lo, 65536))
+  : @(int, [k:nat | k <= 65536] int k, bool)
+
+implement tool_output_wide (name, rest, out) = let
+  val (nul_tool | tool_exec) = $P.path_of_string_proved(name)
+  val @(fz_tool, bv_tool) = $A.barr_freeze(tool_exec)
+  var name_builder : $B.builder_v = $B.create()
+  val () = bput_v(name_builder, name)
+  val argv = $L.list_vt_cons(mk_arg(name_builder), rest)
+  val sr = spawn_child(nul_tool | bv_tool, argv, $P.dev_null(), $P.pipe_new(), $P.dev_null())
+  val result = (case+ sr of
+    | ~$R.err(_) => @(~1, 0, false)
+    | ~$R.ok(sp) => let
+        val+ ~$P.spawn_pipes_mk(child, sin_p, sout_p, serr_p) = sp
+        val () = $P.pipe_end_close(sin_p)
+        val () = $P.pipe_end_close(serr_p)
+        val+ ~$P.pipe_fd(out_fd) = sout_p
+        val chunk = $A.alloc<byte>(4096)
+        val @(kept, total, ended) = capture_read(out_fd, out, 65536, chunk, 0, 0)
+        val () = $A.free<byte>(chunk)
+        val () = $R.discard<int><$F.io_error>($F.file_close(out_fd))
+        val status = (case+ $P.child_wait(child) of
+          | ~$R.ok(n) => n | ~$R.err(_) => ~1): int
+      in
+        case+ ended of
+        | ~CaptureEndFailed(_) => @(~1, 0, false)
+        | ~CaptureEnded() => @(status, kept, total > 65536)
+      end): @(int, [k:nat | k <= 65536] int k, bool)
+  val () = $A.cborrow_drop(fz_tool, bv_tool)
+  val () = $A.barr_free($A.barr_thaw(fz_tool))
+in result end
+
 (* The prelude line count in <in>.pre, written next to the .dats
    in[0, il) by preprocess_one; 0 when there is none *)
 fun digits_val {lb:agz}{i,k:nat | i <= k; k <= 16} .<k - i>.
