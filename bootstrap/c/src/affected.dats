@@ -69,8 +69,9 @@ fn changed_by_pass {lc:agz}
   val answer = (case+ outcome of
     | ~CaptureFits(n) => (if n = 0 then 0 else 1)
     | ~CaptureFailed(_, _) => 2
-    | ~CaptureLonger(status, _) => (if status = 0 then 1 else 2)
-    | ~CaptureReadFailed(_, _, _) => 2
+    | ~CaptureLonger(status, _, _) => (if status = 0 then 1 else 2)
+    | ~CaptureReadFailed(_, _) => 2
+    | ~CaptureWaitFailed(_, _, _) => 2
     | ~CaptureNotRun(_) => 2): int
   val () = $A.free<byte>(out)
   val () = $A.cborrow_drop(fz_git, bv_git)

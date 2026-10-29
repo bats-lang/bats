@@ -50,8 +50,9 @@ fn sh_exec {sn:nat}
   val @(rc, k) = (case+ outcome of
     | ~CaptureFits(n) => @(0, n)
     | ~CaptureFailed(status, n) => @(status, n)
-    | ~CaptureLonger(status, _) => @(status, 4096)
-    | ~CaptureReadFailed(_, n, _) => @(~1, n)
+    | ~CaptureLonger(status, _, _) => @(status, 4096)
+    | ~CaptureReadFailed(n, _) => @(~1, n)
+    | ~CaptureWaitFailed(n, _, _) => @(~1, n)
     | ~CaptureNotRun(e) => @(0 - e, 0)): @(int, [k:nat | k <= 4096] int k)
   val @(fz_o, bv_o) = $A.freeze<byte>(out)
   val () = (if rc <> 0 && k > 0 then prerr_seg(bv_o, 0, k, 4096) else ())

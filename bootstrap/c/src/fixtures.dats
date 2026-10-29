@@ -2811,8 +2811,9 @@ fn make_work_dir (out: !$B.builder_v >> $B.builder_v): void = let
   val k = (case+ outcome of
     | ~CaptureFits(n) => n
     | ~CaptureFailed(_, _) => 0
-    | ~CaptureLonger(_, _) => 0
-    | ~CaptureReadFailed(_, _, _) => 0
+    | ~CaptureLonger(_, _, _) => 0
+    | ~CaptureReadFailed(_, _) => 0
+    | ~CaptureWaitFailed(_, _, _) => 0
     | ~CaptureNotRun(_) => 0): [k:nat | k <= 4096] int k
   val () = $A.cborrow_drop(fz_x, bv_x)
   val () = $A.barr_free($A.barr_thaw(fz_x))

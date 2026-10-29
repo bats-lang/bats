@@ -245,8 +245,9 @@ fn install_now (mode: ats2_install_mode): bool = let
   val @(rc, k) = (case+ outcome of
     | ~CaptureFits(n) => @(0, n)
     | ~CaptureFailed(status, n) => @(status, n)
-    | ~CaptureLonger(status, _) => @((if status = 0 then ~1 else status), 4096)
-    | ~CaptureReadFailed(_, n, _) => @(~1, n)
+    | ~CaptureLonger(status, _, _) => @((if status = 0 then ~1 else status), 4096)
+    | ~CaptureReadFailed(n, _) => @(~1, n)
+    | ~CaptureWaitFailed(n, _, _) => @(~1, n)
     | ~CaptureNotRun(e) => @(0 - e, 0)): @(int, [k:nat | k <= 4096] int k)
   val () = $A.cborrow_drop(fexec, fbv)
   val () = $A.barr_free($A.barr_thaw(fexec))
