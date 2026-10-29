@@ -133,8 +133,15 @@ fn sh_capture {sn:nat}{lo:agz}
   val () = bput_v(b3, script)
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
-  val r = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4), args)))), out)
+  (* a longer output keeps its first 4096 bytes and the child's own status (capture area) *)
+  val r = (case+ outcome of
+    | ~CaptureFits(n) => @(0, n)
+    | ~CaptureFailed(status, n) => @(status, n)
+    | ~CaptureLonger(status, _) => @(status, 4096)
+    | ~CaptureReadFailed(_, n, _) => @(~1, n)
+    | ~CaptureNotRun(e) => @(0 - e, 0)): @(int, [k:nat | k <= 4096] int k)
   val () = $A.cborrow_drop(fz_x, bv_x)
   val () = $A.barr_free($A.barr_thaw(fz_x))
 in r end

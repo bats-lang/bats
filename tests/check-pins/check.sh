@@ -499,8 +499,8 @@ grep -q "git repository" "$TMP/out" || fail "outside a repository does not say s
 for i in $(seq 1 200); do
   d="$G/directory-with-a-long-name-$i"; mkdir -p "$d"; printf '{\n  "name": "x"\n}\n' > "$d/package.json"
 done
-discover; [ $? -eq 2 ] || fail "a list over 4095 bytes is not 2"
-grep -q "4095 bytes" "$TMP/out" || fail "a long list does not say so"
+discover; [ $? -eq 2 ] || fail "a list over 4096 bytes is not 2"
+grep -q "more than 4096 bytes" "$TMP/out" || fail "a long list does not say so"
 rm -rf "$G"/directory-with-a-long-name-*
 echo "ok   discover (no file, no repository, too long)"
 # a list git writes in pieces is read to its end (the floating file named in the second
@@ -516,7 +516,7 @@ chmod +x "$TMP/stub/git"
 grep -q "^late.yml:4: " "$TMP/out" || fail "the file of the second piece is not named"
 printf '#!/bin/sh\ni=0\nwhile [ $i -lt 8 ]; do head -c 600 /dev/zero | tr "\\0" "a"; printf "\\0"; sleep 0.2; i=$((i+1)); done\n' > "$TMP/stub/git"
 (cd "$G" && PATH="$TMP/stub:$PATH" "$BATS" check-pins --discover) > "$TMP/out" 2>&1; [ $? -eq 2 ] || fail "a long list written in pieces is not 2"
-grep -q "4095 bytes" "$TMP/out" || fail "a long list written in pieces does not say so"
+grep -q "more than 4096 bytes" "$TMP/out" || fail "a long list written in pieces does not say so"
 rm -f "$G/late.yml" "$G/early.yml"
 echo "ok   discover (a list written in pieces)"
 # --discover beside a file, or twice, is a file name and unreadable: 2

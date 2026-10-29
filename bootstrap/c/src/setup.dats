@@ -42,10 +42,17 @@ fn sh_exec {sn:nat}
   var b4 = $B.create()
   val () = bput_v(b4, "sh")
   val out = $A.alloc<byte>(4096)
-  val @(rc, k) = run_cmd_capture(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
+  val outcome = run_cmd_capture_outcome(nul_x | bv_x, $L.list_vt_cons(mk_arg(b1), $L.list_vt_cons(mk_arg(b2),
     $L.list_vt_cons(mk_arg(b3), $L.list_vt_cons(mk_arg(b4),
     $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2),
     $L.list_vt_cons(mk_arg(a3), $L.list_vt_nil()))))))), out)
+  (* a longer output keeps its first 4096 bytes, said on a failure, and the child's own status (capture area) *)
+  val @(rc, k) = (case+ outcome of
+    | ~CaptureFits(n) => @(0, n)
+    | ~CaptureFailed(status, n) => @(status, n)
+    | ~CaptureLonger(status, _) => @(status, 4096)
+    | ~CaptureReadFailed(_, n, _) => @(~1, n)
+    | ~CaptureNotRun(e) => @(0 - e, 0)): @(int, [k:nat | k <= 4096] int k)
   val @(fz_o, bv_o) = $A.freeze<byte>(out)
   val () = (if rc <> 0 && k > 0 then prerr_seg(bv_o, 0, k, 4096) else ())
   val () = $A.drop<byte>(fz_o, bv_o)
