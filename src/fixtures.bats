@@ -886,8 +886,9 @@ in rc end
    The settings of a run, as NUL-terminated strings in one buffer
    ============================================================ *)
 
-(* Whether a run judges the rejects' expects or writes them (--bless): fixtures bless *)
-datatype fixtures_mode = FixturesVerify | FixturesBless
+(* Whether a run judges the rejects' expects, writes them (--bless: fixtures bless) or lists the
+   fixtures a change reaches (--list-affected: fixtures list-affected) *)
+datatype fixtures_mode = FixturesVerify | FixturesBless | FixturesList
 
 typedef settings = @{program= xi, directory= xi, work= xi, repository= xi, memo= xi, cold= int, prune= int, mode= fixtures_mode}
 
@@ -2192,6 +2193,178 @@ fn bless_member {cfg_cap:pos}{mv_cap:pos}{lv_cap:pos}{xv_cap:pos}{sv_cap:pos}{fv
   val () = $A.free<byte>(da)
 in end
 
+(* ============================================================
+   --list-affected (bats-lang/bats#570, keyword: list-affected)
+   ============================================================ *)
+
+(* The position after the "./" that begin bv[p, len) *)
+fun skip_dot {bv_cap:pos} {l:agz}{len:nat | len <= bv_cap}{p:nat | p <= len} .<len - p>.
+  (bv: !$A.borrow(byte, l, bv_cap), len: int len, p: int p): [r:nat | p <= r; r <= len] int r =
+  if p + 1 < len then
+    (if peek(bv, p, len) = 46 && peek(bv, p + 1, len) = 47 then skip_dot(bv, len, p + 2) else p)
+  else p
+
+(* bv[0, len) as a path of the project: without a leading "./", and without the
+   current directory cwd[0, cn) and its slash when it begins with them *)
+fn norm_into {bv_cap:pos}{cc:pos} {l:agz}{lc:agz}{len:nat | len <= bv_cap}{cn:nat | cn <= cc}
+  (bv: !$A.borrow(byte, l, bv_cap), len: int len, cwd: !$A.borrow(byte, lc, cc), cn: int cn,
+   out: !$B.builder_v >> $B.builder_v): void = let
+  val p0 = skip_dot(bv, len, 0)
+  val p1 = (if cn > 0 then
+      (if p0 + cn + 1 <= len then
+        (if same_range(bv, len, p0, cwd, cn, 0, cn, 0) && byte_at(bv, len, p0 + cn) = 47 then p0 + cn + 1 else p0)
+      else p0)
+    else p0): [r:nat | r <= len] int r
+in put_range(bv, len, p1, len, out) end
+
+(* The path raw as norm_into writes it; consumes raw *)
+fn norm_builder {cc:pos} {lc:agz}{cn:nat | cn <= cc}
+  (raw: $B.builder_v, cwd: !$A.borrow(byte, lc, cc), cn: int cn): $B.builder_v = let
+  val @(ra, rn) = $B.into_arr(raw)
+  val @(fz, bv) = $A.freeze<byte>(ra)
+  var out : $B.builder_v = $B.create()
+  val () = norm_into(bv, rn, cwd, cn, out)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in out end
+
+(* Whether a line of chg[0, clen), from p on, is exactly nv[0, n) *)
+fun line_listed {chg_cap:pos}{nc:pos} {lg:agz}{ln:agz}{clen:nat | clen <= chg_cap}{p:nat | p <= clen}{n:nat | n <= nc} .<clen - p>.
+  (chg: !$A.borrow(byte, lg, chg_cap), clen: int clen, p: int p, nv: !$A.borrow(byte, ln, nc), n: int n): bool = let
+  val e = line_end(chg, clen, p, false)
+in
+  if e - p = n && n > 0 && same_range(chg, clen, p, nv, n, 0, n, 0) then true
+  else if e >= clen then false
+  else line_listed(chg, clen, next_line(chg, clen, e, false), nv, n)
+end
+
+(* Whether the path nb is a line of chg[0, clen); consumes nb *)
+fn listed_builder {chg_cap:pos} {lg:agz}{clen:nat | clen <= chg_cap}
+  (chg: !$A.borrow(byte, lg, chg_cap), clen: int clen, nb: $B.builder_v): bool = let
+  val @(na, nn) = $B.into_arr(nb)
+  val @(fz, nv) = $A.freeze<byte>(na)
+  val r = line_listed(chg, clen, 0, nv, nn)
+  val () = $A.drop<byte>(fz, nv)
+in ($A.free<byte>($A.thaw<byte>(fz)); r) end
+
+(* Whether the path kb[p, e) of a memo key is a changed path: the line chg[q, ...) of the
+   changed paths is it, or is the module src/X.bats whose build/src/X.sats it is *)
+fun read_matches {kb_cap:pos}{chg_cap:pos} {l:agz}{lg:agz}{len:nat | len <= kb_cap}{clen:nat | clen <= chg_cap}{p:nat}{e:nat | p <= e; e <= len}{q:nat | q <= clen} .<clen - q>.
+  (kb: !$A.borrow(byte, l, kb_cap), len: int len, p: int p, e: int e,
+   chg: !$A.borrow(byte, lg, chg_cap), clen: int clen, q: int q): bool = let
+  val f = line_end(chg, clen, q, false)
+  val same = (f - q = e - p && e - p > 0 && same_range(kb, len, p, chg, clen, q, e - p, 0)): bool
+  val built = (if f - q > 5 then
+      (if f - q + 6 = e - p then (text_has(chg, clen, f - 5, ".bats") && text_has(kb, len, p, "build/")
+        && text_has(kb, len, e - 5, ".sats") && same_range(kb, len, p + 6, chg, clen, q, f - q - 5, 0)) else false)
+    else false): bool
+in
+  if same || built then true
+  else if f >= clen then false
+  else read_matches(kb, len, p, e, chg, clen, next_line(chg, clen, f, false))
+end
+
+(* Whether a path of the key kb[0, len), from line p to its rule "--", is a changed path *)
+fun reads_changed {kb_cap:pos}{chg_cap:pos} {l:agz}{lg:agz}{len:nat | len <= kb_cap}{clen:nat | clen <= chg_cap}{p:nat | p <= len} .<len - p>.
+  (kb: !$A.borrow(byte, l, kb_cap), len: int len, p: int p, chg: !$A.borrow(byte, lg, chg_cap), clen: int clen): bool = let
+  val e = line_end(kb, len, p, false)
+in
+  if e - p = 2 && text_has(kb, len, p, "--") then false
+  else if clen > 0 && read_matches(kb, len, p, e, chg, clen, 0) then true
+  else if e >= len then false
+  else reads_changed(kb, len, next_line(kb, len, e, false), chg, clen)
+end
+
+(* Whether one of the fixture's own files (file, before, snippet.bats, expect) or its module is a
+   changed path *)
+fn own_changed {cfg_cap:pos}{mv_cap:pos}{bv_f_cap:pos}{chg_cap:pos}{cc:pos} {l:agz}{lm:agz}{lx:agz}{lg:agz}{lc:agz}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}{cfg_len:nat | cfg_len <= cfg_cap}{mlen:nat | mlen <= bv_f_cap}{clen:nat | clen <= chg_cap}{cn:nat | cn <= cc}
+  (cfg: !$A.borrow(byte, l, cfg_cap), cfg_len: int cfg_len, w: settings, mv: !$A.borrow(byte, lm, mv_cap), mv_len: int mv_len, a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, bv_f_cap), mlen: int mlen,
+   chg: !$A.borrow(byte, lg, chg_cap), clen: int clen, cwd: !$A.borrow(byte, lc, cc), cn: int cn): bool = let
+  var module : $B.builder_v = $B.create()
+  val () = put_range(bv_f, mlen, 0, mlen, module)
+in
+  listed_builder(chg, clen, norm_builder(module, cwd, cn))
+  || listed_builder(chg, clen, norm_builder(fixture_text(cfg, cfg_len, w, mv, mv_len, a, e, "file"), cwd, cn))
+  || listed_builder(chg, clen, norm_builder(fixture_text(cfg, cfg_len, w, mv, mv_len, a, e, "before"), cwd, cn))
+  || listed_builder(chg, clen, norm_builder(fixture_text(cfg, cfg_len, w, mv, mv_len, a, e, "snippet.bats"), cwd, cn))
+  || listed_builder(chg, clen, norm_builder(fixture_text(cfg, cfg_len, w, mv, mv_len, a, e, "expect"), cwd, cn))
+end
+
+(* In the app (the current directory), the snippet in: whether the fixture's memo entry (its key
+   as the run would ask for it) reads a changed path; true when there is no entry, or it is not
+   whole (it cannot be known, so it is listed) *)
+fn list_in_app {cfg_cap:pos}{mv_cap:pos}{bv_f_cap:pos}{chg_cap:pos} {l:agz}{lm:agz}{lx:agz}{lg:agz}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}{cfg_len:nat | cfg_len <= cfg_cap}{mlen:nat | mlen <= bv_f_cap}{clen:nat | clen <= chg_cap}
+  (cfg: !$A.borrow(byte, l, cfg_cap), cfg_len: int cfg_len, w: settings, mv: !$A.borrow(byte, lm, mv_cap), mv_len: int mv_len, a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, bv_f_cap), mlen: int mlen, chg: !$A.borrow(byte, lg, chg_cap), clen: int clen): bool = let
+  var md0 : $B.builder_v = $B.create()
+  val have_dir = memo_dir_into(cfg, cfg_len, w, md0)
+  val md = md0
+in
+  if ~have_dir then let val () = $B.builder_free(md) in true end
+  else let
+    var t0 : $B.builder_v = $B.create()
+    val ok = key_text(cfg, cfg_len, w, mv, mv_len, a, e, bv_f, mlen, t0)
+    val t = t0
+  in
+    if ~ok then let
+      val () = $B.builder_free(t)
+      val () = $B.builder_free(md)
+    in true end
+    else let
+      val @(ta, tn) = $B.into_arr(t)
+      val @(fz_t, bv_t) = $A.freeze<byte>(ta)
+      var kh : $B.builder_v = $B.create()
+      val () = put_sha_range(bv_t, tn, 0, tn, kh)
+      val @(ka, kn) = $B.into_arr(kh)
+      val @(fz_k, bv_k) = $A.freeze<byte>(ka)
+      val @(ma, mn) = $B.into_arr(md)
+      val @(fz_m, bv_m) = $A.freeze<byte>(ma)
+      val @(ya, yn, yok) = path_read(entry_path(bv_m, mn, bv_k, kn, ".key"))
+      val @(fz_y, bv_y) = $A.freeze<byte>(ya)
+      val whole = (yok && path_exists(entry_path(bv_m, mn, bv_k, kn, ".res"))
+        && text_has(bv_y, yn, 0, "bats-memo 1\n")): bool
+      val affected = (if whole then reads_changed(bv_y, yn, 0, chg, clen) else true): bool
+      val () = $A.drop<byte>(fz_y, bv_y)
+      val () = $A.free<byte>($A.thaw<byte>(fz_y))
+      val () = $A.drop<byte>(fz_m, bv_m)
+      val () = $A.free<byte>($A.thaw<byte>(fz_m))
+      val () = $A.drop<byte>(fz_k, bv_k)
+      val () = $A.free<byte>($A.thaw<byte>(fz_k))
+      val () = $A.drop<byte>(fz_t, bv_t)
+      val () = $A.free<byte>($A.thaw<byte>(fz_t))
+    in affected end
+  end
+end
+
+(* Whether the fixture is reached by the changed paths chg[0, clen): one of its own files or its
+   module is one, or its memo entry reads one, or it has no entry. The snippet is put into the
+   app's module for the key (as a run does) and the module put back. *)
+fn list_member {cfg_cap:pos}{mv_cap:pos}{bv_f_cap:pos}{chg_cap:pos}{cc:pos} {l:agz}{lm:agz}{lx:agz}{lg:agz}{lc:agz}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}{cfg_len:nat | cfg_len <= cfg_cap}{mlen:nat | mlen <= bv_f_cap}{clen:nat | clen <= chg_cap}{cn:nat | cn <= cc}
+  (cfg: !$A.borrow(byte, l, cfg_cap), cfg_len: int cfg_len, w: settings, mv: !$A.borrow(byte, lm, mv_cap), mv_len: int mv_len, a: int a, e: int e,
+   bv_f: !$A.borrow(byte, lx, bv_f_cap), mlen: int mlen, at: int,
+   chg: !$A.borrow(byte, lg, chg_cap), clen: int clen, cwd: !$A.borrow(byte, lc, cc), cn: int cn): bool =
+  if own_changed(cfg, cfg_len, w, mv, mv_len, a, e, bv_f, mlen, chg, clen, cwd, cn) then true
+  else let
+    val spliced = splice_snippet(cfg, cfg_len, w, mv, mv_len, a, e, bv_f, mlen, at)
+    var here0 : $B.builder_v = $B.create()
+    val () = cwd_into(here0)
+    val here = here0
+    var back0 : $B.builder_v = $B.create()
+    val () = cwd_into(back0)
+    val back = back0
+    var app0 : $B.builder_v = $B.create()
+    val () = put_cfg(cfg, cfg_len, w.work, app0)
+    val () = bput_v(app0, "/app")
+    val app = app0
+    val known = ($B.length(here) > 0): bool
+    val inside = (if known then chdir_path(app) else let val () = $B.builder_free(app) in false end): bool
+    val () = $B.builder_free(here)
+    val r = (if spliced <> 0 then true else if inside then list_in_app(cfg, cfg_len, w, mv, mv_len, a, e, bv_f, mlen, chg, clen) else true): bool
+    val _ = (if inside then chdir_path(back) else let val () = $B.builder_free(back) in false end)
+    val () = restore_copy(cfg, cfg_len, w, bv_f, mlen, true)
+  in r end
+
 (* Runs the fixture whose name is mv[a, e) (accept/<name> or reject/<name>)
    in the checked copy, and says how it went *)
 fn run_member {cfg_cap:pos}{mv_cap:pos} {l:agz}{lm:agz}{cfg_len:nat | cfg_len <= cfg_cap}{mv_len:nat | mv_len <= mv_cap}{a,e:nat | a <= e; e <= mv_len}
@@ -2199,6 +2372,11 @@ fn run_member {cfg_cap:pos}{mv_cap:pos} {l:agz}{lm:agz}{cfg_len:nat | cfg_len <=
   val is_accept = text_has(mv, e, a, "accept/")
   val is_bless = (case+ w.mode of
     | FixturesBless() => true
+    | FixturesVerify() => false
+    | FixturesList() => false): bool
+  val is_list = (case+ w.mode of
+    | FixturesList() => true
+    | FixturesBless() => false
     | FixturesVerify() => false): bool
   (* the module and the line the snippet goes before *)
   val @(fa, flen, file_read) = read_file_text(fixture_path(cfg, cfg_len, w, mv, mv_len, a, e, "file"))
@@ -2220,8 +2398,13 @@ fn run_member {cfg_cap:pos}{mv_cap:pos} {l:agz}{lm:agz}{cfg_len:nat | cfg_len <=
   val missing = (~file_read || ~before_read || ~snippet_read || (~expect_read && ~is_accept && ~is_bless)): bool
 in
   if missing then let
-    val () = fail_member(mv, mv_len, a, e)
-    val () = println! (": a file of the fixture (file, before, snippet.bats, expect) cannot be read")
+    (* listing: what cannot be read cannot be known, so it is listed *)
+    val () = (if is_list then let
+        val () = say_member(mv, mv_len, a, e)
+      in println! () end
+      else let
+        val () = fail_member(mv, mv_len, a, e)
+      in println! (": a file of the fixture (file, before, snippet.bats, expect) cannot be read") end)
     val () = $A.drop<byte>(fz_f, bv_f)
     val () = $A.free<byte>($A.thaw<byte>(fz_f))
     val () = $A.drop<byte>(fz_b, bv_b)
@@ -2248,17 +2431,47 @@ in
         in r end): int
   in
     if at <= 0 then let
-      val () = fail_member(mv, mv_len, a, e)
-      val () = (if at < 0 then println! (": the module ", "cannot be read in the checked copy") else let
+      val () = (if is_list then let
+          val () = say_member(mv, mv_len, a, e)
+        in println! () end
+        else let
+          val () = fail_member(mv, mv_len, a, e)
+        in (if at < 0 then println! (": the module ", "cannot be read in the checked copy") else let
           val () = print! (": no line \"")
           val () = print_borrow(bv_b, 0, blen, blen)
           val () = print! ("\" in ")
           val () = print_borrow(bv_f, 0, mlen, mlen)
-        in println! () end)
+        in println! () end) end)
       val () = $A.drop<byte>(fz_f, bv_f)
       val () = $A.free<byte>($A.thaw<byte>(fz_f))
       val () = $A.drop<byte>(fz_p, bv_p)
       val () = $A.free<byte>($A.thaw<byte>(fz_p))
+      val () = $A.drop<byte>(fz_b, bv_b)
+      val () = $A.free<byte>($A.thaw<byte>(fz_b))
+      val () = $A.drop<byte>(fz_s, bv_s)
+      val () = $A.free<byte>($A.thaw<byte>(fz_s))
+      val () = $A.drop<byte>(fz_x, bv_x)
+      val () = $A.free<byte>($A.thaw<byte>(fz_x))
+    in () end
+    else if is_list then let
+      val () = $A.drop<byte>(fz_p, bv_p)
+      val () = $A.free<byte>($A.thaw<byte>(fz_p))
+      val @(ca, clen, _) = path_read(work_text(cfg, cfg_len, w, "changed"))
+      val @(fz_c, bv_c) = $A.freeze<byte>(ca)
+      var cw : $B.builder_v = $B.create()
+      val () = cwd_into(cw)
+      val @(wa, wn) = $B.into_arr(cw)
+      val @(fz_w, bv_w) = $A.freeze<byte>(wa)
+      val reached = list_member(cfg, cfg_len, w, mv, mv_len, a, e, bv_f, mlen, at, bv_c, clen, bv_w, wn)
+      val () = (if reached then let
+          val () = say_member(mv, mv_len, a, e)
+        in println! () end else ())
+      val () = $A.drop<byte>(fz_w, bv_w)
+      val () = $A.free<byte>($A.thaw<byte>(fz_w))
+      val () = $A.drop<byte>(fz_c, bv_c)
+      val () = $A.free<byte>($A.thaw<byte>(fz_c))
+      val () = $A.drop<byte>(fz_f, bv_f)
+      val () = $A.free<byte>($A.thaw<byte>(fz_f))
       val () = $A.drop<byte>(fz_b, bv_b)
       val () = $A.free<byte>($A.thaw<byte>(fz_b))
       val () = $A.drop<byte>(fz_s, bv_s)
@@ -2407,6 +2620,16 @@ fn opt_bad (o: options, kind: int, s: xi, e: xi): options =
     memo_s= o.memo_s, memo_e= o.memo_e, cold= o.cold, prune= o.prune, only= o.only, mode= o.mode,
     bad_kind= kind, bad_s= s, bad_e= e}
 
+fn is_listing (o: options): bool = (case+ o.mode of
+  | FixturesList() => true
+  | FixturesBless() => false
+  | FixturesVerify() => false)
+
+fn is_blessing (o: options): bool = (case+ o.mode of
+  | FixturesBless() => true
+  | FixturesList() => false
+  | FixturesVerify() => false)
+
 fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
   (bv: !$A.borrow(byte, l, 4096), t: int t, p: int p, o: options): options =
   if p >= t then o
@@ -2423,9 +2646,16 @@ fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
     else if arg_is(bv, p, e, "--prune") then let
       val o2 = opt_flags(o, o.cold, 1, o.only, o.mode)
     in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
-    else if arg_is(bv, p, e, "--bless") then let
-      val o2 = opt_flags(o, o.cold, o.prune, o.only, FixturesBless())
-    in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end
+    else if arg_is(bv, p, e, "--bless") then
+      (if is_listing(o) then opt_bad(o, 4, p, e)
+      else let
+        val o2 = opt_flags(o, o.cold, o.prune, o.only, FixturesBless())
+      in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end)
+    else if arg_is(bv, p, e, "--list-affected") then
+      (if is_blessing(o) then opt_bad(o, 4, p, e)
+      else let
+        val o2 = opt_flags(o, o.cold, o.prune, o.only, FixturesList())
+      in (if nxt <= t then parse_options(bv, t, nxt, o2) else o2) end)
     else if valued then
       (if nxt >= t then opt_bad(o, 2, p, e)
       else let
@@ -2439,7 +2669,9 @@ fun parse_options {l:agz}{t:nat | t <= 4096}{p:nat | p <= t} .<t - p>.
         if ve + 1 <= t then parse_options(bv, t, ve + 1, o2) else o2
       end)
     else if e - p >= 2 && peek(bv, p, 4096) = 45 && peek(bv, p + 1, 4096) = 45 then opt_bad(o, 1, p, e)
-    else if o.dir_s >= 0 then opt_bad(o, 3, p, e)
+    else if o.dir_s >= 0 then
+      (* after --list-affected the words are the changed paths (collect_changed) *)
+      (if is_listing(o) then (if nxt <= t then parse_options(bv, t, nxt, o) else o) else opt_bad(o, 3, p, e))
     else let
       val o2 = opt_dir(o, p, e)
     in
@@ -2527,6 +2759,31 @@ fun members_loop {cfg_cap:pos}{mv_cap:pos} {lc:agz}{lm:agz}{l:agz}{mlen:nat | ml
     else members_loop(cfg, cfg_len, w, mv, mlen, e + 1, bv, t, o, run, (if take then n + 1 else n))
   end
 
+(* The words of the arguments bv[p, t) after --list-affected and before the next option, each as
+   the project names it (norm_into), a line each, appended to out: the changed paths. The
+   directory of the fixtures is the first word and is given before the option. *)
+fun collect_changed {l:agz}{lc:agz}{cc:pos}{t:nat | t <= 4096}{p:nat | p <= t}{cn:nat | cn <= cc} .<t - p>.
+  (bv: !$A.borrow(byte, l, 4096), t: int t, p: int p, on: bool, cwd: !$A.borrow(byte, lc, cc), cn: int cn,
+   out: !$B.builder_v >> $B.builder_v): void =
+  if p >= t then ()
+  else let
+    val e = word_stop(bv, t, p)
+    val is_opt = (e - p >= 2 && peek(bv, p, 4096) = 45 && peek(bv, p + 1, 4096) = 45): bool
+    val on2 = (if arg_is(bv, p, e, "--list-affected") then true else if is_opt then false else on): bool
+    val valued = (arg_is(bv, p, e, "--only") || arg_is(bv, p, e, "--work") || arg_is(bv, p, e, "--repository")
+      || arg_is(bv, p, e, "--memo")): bool
+    val () = (if on && ~is_opt && e > p then let
+        var raw : $B.builder_v = $B.create()
+        val () = copy_to_builder_v(bv, p, e, 4096, raw)
+        val nb = norm_builder(raw, cwd, cn)
+        val () = append_builder(out, nb)
+      in put_char_v(out, 10) end else ())
+    val nxt = e + 1
+    val skip = (if valued then (if nxt < t then word_stop(bv, t, nxt) + 1 else nxt) else nxt): [r:int | p < r] int r
+  in
+    if skip <= t then collect_changed(bv, t, skip, on2, cwd, cn, out) else ()
+  end
+
 (* A directory made by mktemp -d, as a builder; empty when it cannot be *)
 fn make_work_dir (out: !$B.builder_v >> $B.builder_v): void = let
   val (nul_x | exec) = $P.path_of_string_proved("sh")
@@ -2559,13 +2816,17 @@ in prerr_builder(b) end
 fn prerr_args {l:agz} (bv: !$A.borrow(byte, l, 4096), s: xi, e: xi): void = prerr_seg(bv, s, e, 4096)
 
 fn usage (): void = let
-  val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--bless] [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>]\n")
+  val () = prerr! ("usage: bats fixtures <dir> [--only <member>]... [--bless] [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>] [--list-affected <path>...]\n")
 in set_exit_code(2) end
 
 (* Runs the fixtures: the chosen ones of <dir> against a copy of the
    project in <work>/app *)
 fn fixtures_with {cfg_cap:pos} {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t}{cfg_len:nat | cfg_len <= cfg_cap}
   (cfg: !$A.borrow(byte, lc, cfg_cap), cfg_len: int cfg_len, w: settings, bv: !$A.borrow(byte, l, 4096), t: int t, o: int o): void = let
+  val listing = (case+ w.mode of
+    | FixturesList() => true
+    | FixturesBless() => false
+    | FixturesVerify() => false): bool
   var work : $B.builder_v = $B.create()
   val () = put_cfg(cfg, cfg_len, w.work, work)
   var dir : $B.builder_v = $B.create()
@@ -2595,7 +2856,7 @@ fn fixtures_with {cfg_cap:pos} {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t
   else let
     val chosen_count = members_loop(cfg, cfg_len, w, bv_m, mlen, 0, bv, t, o, false, 0)
   in
-    if chosen_count = 0 then println! ("fixtures: 0 ok, 0 failed")
+    if chosen_count = 0 then (if listing then () else println! ("fixtures: 0 ok, 0 failed"))
     else let
       (* the app: a copy of the project, checked whole *)
       var work2 : $B.builder_v = $B.create()
@@ -2629,14 +2890,26 @@ fn fixtures_with {cfg_cap:pos} {lc:agz}{l:agz}{t:nat | t <= 4096}{o:nat | o <= t
       in () end
       else let
         val () = path_remove(work_text(cfg, cfg_len, w, "memo-used"))
+        (* --list-affected: the changed paths, as the project names them, a line each *)
+        var changed : $B.builder_v = $B.create()
+        var cw : $B.builder_v = $B.create()
+        val () = (if listing then cwd_into(cw) else ())
+        val @(cwa, cwn) = $B.into_arr(cw)
+        val @(fz_cw, bv_cw) = $A.freeze<byte>(cwa)
+        val () = (if listing then collect_changed(bv, t, o, false, bv_cw, cwn, changed) else ())
+        val _ = path_write(work_text(cfg, cfg_len, w, "changed"), changed)
+        val () = $A.drop<byte>(fz_cw, bv_cw)
+        val () = $A.free<byte>($A.thaw<byte>(fz_cw))
         val ran = members_loop(cfg, cfg_len, w, bv_m, mlen, 0, bv, t, o, true, 0)
         val () = (if w.prune <> 0 then memo_prune(cfg, cfg_len, w) else ())
         val () = (case+ w.mode of
           | FixturesBless() => println! ("bless: ", !g_wrote, " written, ", !g_left, " left as they were")
-          | FixturesVerify() => ())
-        val () = print! ("fixtures: ", !g_passed, " ok, ", !g_failed, " failed")
-        val () = (if !g_memo > 0 then print! (" (", !g_memo, " from the memo)") else ())
-        val () = println! ()
+          | FixturesVerify() => ()
+          | FixturesList() => ())
+        val () = (if listing then () else let
+            val () = print! ("fixtures: ", !g_passed, " ok, ", !g_failed, " failed")
+            val () = (if !g_memo > 0 then print! (" (", !g_memo, " from the memo)") else ())
+          in println! () end)
       in (if !g_failed > 0 then set_exit_code(1) else ()) end
     end
   end): void
@@ -2667,11 +2940,15 @@ in
   if o.bad_kind <> 0 then let
     val () = (if o.bad_kind = 1 then prerr! ("error: bats fixtures: unknown option ")
       else if o.bad_kind = 2 then prerr! ("error: bats fixtures: no value after ")
+      else if o.bad_kind = 4 then prerr! ("error: bats fixtures: --bless writes expects and --list-affected writes nothing, so not both: ")
       else prerr! ("error: bats fixtures: a second directory, "))
     val () = prerr_args(bv, o.bad_s, o.bad_e)
     val () = prerr_newline()
   in usage() end
   else if o.dir_s < 0 then usage()
+  else if o.prune <> 0 && is_listing(o) then let
+    val () = prerr! ("error: bats fixtures: --list-affected runs no fixture, so there is nothing for --prune to keep: not with --prune\n")
+  in set_exit_code(2) end
   else if o.prune <> 0 && o.only <> 0 then let
     val () = prerr! ("error: bats fixtures: --prune removes what no fixture of the run used, so it needs the whole set: not with --only\n")
   in set_exit_code(2) end
