@@ -14,7 +14,7 @@ git_in() { git -C "$TMP/repo" -c user.name=t -c user.email=t@example.com "$@"; }
 # the pull request edits line 31 of src/a.txt, main line 3 of src/b.txt: far apart, so their merge is clean
 edit_a() { { seq 1 30; echo "$1"; seq 32 40; } > "$TMP/repo/src/a.txt"; }
 edit_b() { { seq 101 102; echo "$1"; seq 104 140; } > "$TMP/repo/src/b.txt"; }
-regenerate() { (cd "$TMP/repo" && scripts/bootstrap-c.sh); }
+regenerate() { [ -x "$TMP/repo/scripts/bootstrap-c.sh" ] || return 0; (cd "$TMP/repo" && scripts/bootstrap-c.sh); }
 
 # main with the stand-in for scripts/bootstrap-c.sh: bootstrap/c is a function of src
 start() {
@@ -26,6 +26,16 @@ start() {
   seq 1 40 > "$TMP/repo/src/a.txt"
   seq 101 140 > "$TMP/repo/src/b.txt"
   regenerate
+  git_in add -A
+  git_in commit -q -m base
+}
+# main of a repository with no scripts/ directory and no bootstrap/c (pwa, bridge, capacitor-plugins; bats#592)
+start_plain() {
+  rm -rf "$TMP/repo"
+  mkdir -p "$TMP/repo/src"
+  git -C "$TMP/repo" init -q -b main
+  seq 1 40 > "$TMP/repo/src/a.txt"
+  seq 101 140 > "$TMP/repo/src/b.txt"
   git_in add -A
   git_in commit -q -m base
 }
@@ -75,6 +85,22 @@ expect repository-from-environment 0 "OK: $head"
 (cd "$TMP/repo" && env -u BATS_REPOSITORY "$BATS" merge-proof "$reviewed" "$head") > "$TMP/out" 2> "$TMP/err"; status=$?
 [ "$status" -eq 2 ] || fail "no repository: status $status, wanted 2"
 echo "ok   no-repository (status 2)"
+
+# 1b. a clean main merge in a repository without scripts/bootstrap-c.sh: proofs 1 to 3 decide, no repository is named (bats#592)
+start_plain; git_in update-ref refs/remotes/origin/main HEAD
+[ ! -e "$TMP/repo/scripts" ] && [ ! -e "$TMP/repo/bootstrap" ] || fail "no-bootstrap-script: the fixture has scripts/ or bootstrap/"
+pr_commit "PR CHANGE"; main_commit edit_b "MAIN CHANGE"
+git_in checkout -q pr; git_in merge -q --no-edit main > /dev/null; head=$(git_in rev-parse HEAD)
+(cd "$TMP/repo" && env -u BATS_REPOSITORY "$BATS" merge-proof "$reviewed" "$head") > "$TMP/out" 2> "$TMP/err"; status=$?
+expect no-bootstrap-script 0 "OK: $head is the reviewed $reviewed"
+[ "$(wc -l < "$TMP/out")" -eq 1 ] || fail "no-bootstrap-script: more than one line"
+[ ! -s "$TMP/err" ] || fail "no-bootstrap-script: wrote to stderr"
+# and the proofs before proof 4 still decide there: the same repository with main's change already in the pull request's hunk
+start_plain; git_in update-ref refs/remotes/origin/main HEAD
+pr_commit "SAME CHANGE"; main_commit edit_a "SAME CHANGE"
+git_in checkout -q pr; git_in merge -q --no-edit main > /dev/null; head=$(git_in rev-parse HEAD)
+(cd "$TMP/repo" && env -u BATS_REPOSITORY "$BATS" merge-proof "$reviewed" "$head") > "$TMP/out" 2> "$TMP/err"; status=$?
+expect no-bootstrap-script-changed-hunk 1 "NOT OK: the diff of the head against main differs"
 
 # 2. the pull request's diff changed: main already has the pull request's own change, so the merge is clean and the diff shrinks
 start; git_in update-ref refs/remotes/origin/main HEAD
