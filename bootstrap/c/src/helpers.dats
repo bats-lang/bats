@@ -5025,9 +5025,9 @@ in ok end
    (an entry is read only inside the first u bytes, which are the bytes
    written, and u is at most the array's size) and the termination of every
    loop. What is not: a slot is an int read back from memory, which has no
-   index in its type (the array package has no array of indexed ints:
-   bats-lang/array#49), so slot_read takes a value outside [0, u] to be 0, an
-   empty slot, as with_env's table_read does; it cannot happen, since only
+   index in its type (this table is a plain int array, not array's iarr),
+   so slot_read takes a value outside [0, u] to be 0, an
+   empty slot; it cannot happen, since only
    dg_insert writes a slot, with an offset it has just written an entry at,
    and a slot read as empty is a miss, which digests the file again. *)
 
