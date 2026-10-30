@@ -98,6 +98,18 @@ got=$(with_env "$TMP/reset.env" sh -c 'env | grep -c "^V[0-9]*=b$"')
 [ "$got" = '1024' ] || fail "1024 variables set again do not all hold their last value: $got"
 got=$(with_env "$TMP/reset.env" sh -c 'env | grep -c "^V[0-9]*=a$"')
 [ "$got" = '0' ] || fail "a variable holds its first value after being set again: $got"
+# the name table at its bounds (bats-lang/bats#507): 1023 names of 45 bytes
+# and one of 255 bytes (1024 entries, the most), 64 of them set again (their
+# chains are searched), all in one file; the variables the command sees are
+# the same as the base commit's (the digest was made by the base commit's binary)
+python3 -c "
+import sys
+names = ['LONGNAME_%04d_' % i + 'k' * 31 for i in range(1023)] + ['L' * 255]
+out = ''.join('%s=first%d\n' % (n, i) for i, n in enumerate(names))
+out += ''.join('%s=second%d\n' % (n, i) for i, n in enumerate(names[:64]))
+sys.stdout.write(out)" > "$TMP/bounds.env"
+got=$(with_env "$TMP/bounds.env" sh -c 'env | grep -E "^(LONGNAME_|LLLL)" | sort | sha256sum | cut -d" " -f1')
+[ "$got" = 'db86f923e96bbd677980c91734bfc6b04680fffd041ae568a69a5b9eb7233db5' ] || fail "the name table at its bounds: $got"
 python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(1025)))" > "$TMP/over-thousand.env"
 slow 5 "$BATS" with-env "$TMP/over-thousand.env" true; [ $? -eq 2 ] || fail "1025 variables are not refused"
 python3 -c "import sys; sys.stdout.write(''.join('V%d=x\n' % i for i in range(9000)))" > "$TMP/many.env"
