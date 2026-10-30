@@ -4896,13 +4896,13 @@ fun _collapse_lines {la,lb:agz}{k:nat | k <= 65536}{i:nat | i <= k}{j:nat | j <=
    len is the length so far, and the length of all of it is the answer *)
 fun _interface_chunks {lb,lc:agz}{r:int} .<max(r, 0)>.
   (fd: !$F.fd, buf: !$A.arr(byte, lb, 65536), out: !$A.arr(byte, lc, 65536),
-   c: !$SHA.ctx, r: int r, prev: int, len: int, squeeze: bool): int =
+   c: !$SHA.proved_ctx, r: int r, prev: int, len: int, squeeze: bool): int =
   if r <= 0 then len
   else let
     val k = (case+ $F.file_read(fd, buf, 65536) of
       | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 65536] int k
     val m = _collapse_lines(buf, out, k, 0, 0, prev, squeeze)
-    val () = $SHA.update(c, out, m)
+    val () = $SHA.proved_update(c, out, m)
     val last = (if k > 0 then peek_arr(buf, k - 1, 65536) else prev): int
   in
     if k <= 0 then len else _interface_chunks(fd, buf, out, c, r - k, last, len + m, squeeze)
@@ -4918,19 +4918,19 @@ fn interface_digest {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}
   | ~$R.ok(fd) => let
       val buf = $A.alloc<byte>(65536)
       val out = $A.alloc<byte>(65536)
-      val c = $SHA.init()
+      val c = $SHA.proved_init()
       val size = (case+ $F.fd_size(fd) of
         | ~$R.ok(s) => s | ~$R.err(_) => 0): [s:nat] int s
       (* a tag first: the text was squeezed (C) or is as it is (R), so
          the digest of one is never that of the other *)
       val () = poke_arr(out, 0, 65536, (if squeeze then 67 else 82))
-      val () = $SHA.update(c, out, 1)
+      val () = $SHA.proved_update(c, out, 1)
       val len = _interface_chunks(fd, buf, out, c, size, 0, 1, squeeze)
       val () = $A.free<byte>(buf)
       val () = $A.free<byte>(out)
       val () = $R.discard<int><$F.io_error>($F.file_close(fd))
       val hex = $A.alloc<byte>(64)
-      val () = $SHA.finish(c, hex)
+      val () = $SHA.proved_finish(c, hex)
       val @(fh, bh) = $A.freeze<byte>(hex)
       val () = (if want_hash then copy_to_builder_v(bh, 0, 64, 64, b) else put_int_v(b, len))
       val () = $A.drop<byte>(fh, bh)
@@ -5449,12 +5449,12 @@ in @(p2, h) end
 (* Feeds the r bytes left of the file fd to c, a chunk at a time, until
    they are read or the file ends first *)
 fun _hash_chunks {lb:agz}{r:int} .<max(r, 0)>.
-  (fd: !$F.fd, buf: !$A.arr(byte, lb, 65536), c: !$SHA.ctx, r: int r): void =
+  (fd: !$F.fd, buf: !$A.arr(byte, lb, 65536), c: !$SHA.proved_ctx, r: int r): void =
   if r <= 0 then ()
   else let
     val k = (case+ $F.file_read(fd, buf, 65536) of
       | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 65536] int k
-    val () = $SHA.update(c, buf, k)
+    val () = $SHA.proved_update(c, buf, k)
   in if k <= 0 then () else _hash_chunks(fd, buf, c, r - k) end
 
 (* Appends the sha256 of the file at the NUL-terminated path p to out,
@@ -5468,14 +5468,14 @@ implement put_file_sha256_m {lp}{n}{m} (p, m, out) =
   case+ file_open_m(p, m, $F.ReadOnly(), $F.OpenExisting(), 0) of
   | ~$R.ok(afd) => let
       val buf = $A.alloc<byte>(65536)
-      val c = $SHA.init()
+      val c = $SHA.proved_init()
       val size = (case+ $F.fd_size(afd) of
         | ~$R.ok(s) => s | ~$R.err(_) => 0): [s:nat] int s
       val () = _hash_chunks(afd, buf, c, size)
       val () = $A.free<byte>(buf)
       val () = $R.discard<int><$F.io_error>($F.file_close(afd))
       val hex = $A.alloc<byte>(64)
-      val () = $SHA.finish(c, hex)
+      val () = $SHA.proved_finish(c, hex)
       val @(fh, bh) = $A.freeze<byte>(hex)
       val () = copy_to_builder_v(bh, 0, 64, 64, out)
       val () = $A.drop<byte>(fh, bh)

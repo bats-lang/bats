@@ -57,11 +57,11 @@ staload "_bats_inputs.sats"
 (* The sha256 of the text, as 64 hex digits *)
 fn key_of (text: $B.builder_v): [l:agz] $A.arr(byte, l, 64) = let
   val @(ta, tl) = $B.into_arr(text)
-  val c = $SHA.init()
-  val () = $SHA.update(c, ta, tl)
+  val c = $SHA.proved_init()
+  val () = $SHA.proved_update(c, ta, tl)
   val () = $A.free<byte>(ta)
   val digest = $A.alloc<byte>(64)
-  val () = $SHA.finish(c, digest)
+  val () = $SHA.proved_finish(c, digest)
 in digest end
 
 (* The context of a judgment: bats's inputs and the listing of the .bats
@@ -76,12 +76,12 @@ implement valid_context (listing, lm) = let
   val () = bput_v(h, bats_inputs_sha256())
   val () = put_char_v(h, 10)
   val @(ha, hl) = $B.into_arr(h)
-  val c = $SHA.init()
-  val () = $SHA.update(c, ha, hl)
+  val c = $SHA.proved_init()
+  val () = $SHA.proved_update(c, ha, hl)
   val () = $A.free<byte>(ha)
-  val () = $SHA.update(c, listing, lm)
+  val () = $SHA.proved_update(c, listing, lm)
   val digest = $A.alloc<byte>(64)
-  val () = $SHA.finish(c, digest)
+  val () = $SHA.proved_finish(c, digest)
 in digest end
 
 (* The path p[0, first NUL) with / as %, after the directory of the

@@ -1,0 +1,13 @@
+[package]
+name = "proved-sha256"
+kind = "bin"
+
+[dependencies]
+"array" = ""
+"arith" = ""
+"builder" = ""
+"env" = ""
+"file" = ""
+"list" = ""
+"process" = ""
+"result" = ""
