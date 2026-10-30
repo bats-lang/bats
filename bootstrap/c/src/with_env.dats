@@ -315,19 +315,7 @@ fn put_value {l:agz}{n:pos}{v:nat | v <= n}{e:nat | e <= n}
     else put_expanded(bv, a, t, n, out)
   end
 
-(* Which line sets which variable, found in one pass over the file: a table
-   of ints, an entry per variable (five ints at 5 * k: where its name is,
-   where it ends, where the value of its last line starts, where that
-   line ends, and the next entry of its bucket, counted from 1) and, after
-   the 1024 entries, 1024 buckets holding the latest entry of each hash of
-   a name, counted from 1 (0 is none). A line that sets a variable already
-   in the table replaces that entry's value, so the time is that of the
-   file and its chains, not of its lines squared. A file that sets more
-   than 1024 variables is refused (the table_put that would add the 1025th
-   answers 1025): an argument of the process package is an array of 512
-   KiB, so a variable costs about 130 KiB of memory and a tenth of a
-   millisecond, and a file of 64 KiB can name 7000 of them, which took 1 GB
-   and 3 seconds. *)
+(* Which line sets which variable, in one pass over the file, at most 1024 variables (keyword: iarr table) *)
 
 (* The hash of bv[p, b), below 1024, h being the hash so far *)
 fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
@@ -337,21 +325,9 @@ fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
   else if p >= b then h
   else hash_span(bv, p + 1, b, n, nmod(h * 31 + $AR.low_byte(read_byte(bv, p, n)), 1024))
 
-(* The table is two arrays of array's iarr (bats-lang/array#49, keyword:
-   iarr table), each with its bound in the type (ALLIN), so a cell is read
-   back with the bound it was written under and nothing is clamped:
-   lines (2048 cells, each within [0, n]) holds, for the entry k counted
-   from 0, where its line starts (cell 2k) and where it ends (cell 2k + 1);
-   links (2048 cells, each within [0, 1024]) holds the next entry of its
-   bucket, counted from 1 (cell k; 0 is none), and after those 1024 cells
-   the latest entry of each bucket (cell 1024 + hash, counted from 1). The
-   name and the value of an entry are found again by line_assignment on its
-   line, whose result carries the order a <= b <= n in its type, so no
-   relation between two cells (a name's end past its start) has to be kept
-   in the table. *)
+(* The table is two iarrs, lines and links, each cell bounded by ALLIN, no clamp (keyword: iarr table) *)
 
-(* A table array of 2048 cells, all 0, within [0, hi]: zeroed cells are
-   within any bound that holds 0 (array's allin_zeros) *)
+(* A table array of 2048 zero cells within [0, hi] (allin_zeros) (keyword: iarr table) *)
 prfn zeros_within {hi:int | 0 <= hi}{cs:$A.cells}{n:nat} (zeros: $A.ZEROS(cs, n)): $A.ALLIN(cs, 0, hi) =
   $A.allin_zeros{cs}{0,hi}{n}(zeros)
 
@@ -359,10 +335,7 @@ fn table_alloc {hi:int | 0 <= hi; hi <= 2147483647} (): [l:agz][cs:$A.cells] ($A
   val (_, zeros | cells) = $A.iarr_alloc(2048)
 in (zeros_within{hi}(zeros) | cells) end
 
-(* The entry (counted from 1) from entry k on along its chain whose name is
-   bv[a, b), or 0; at most fuel entries are looked at. The fuel is at most
-   1024, the table's entries (table_put passes the count it holds): a link
-   is always to an earlier entry, so a chain has no more entries than that. *)
+(* The entry (counted from 1) along the chain from entry k whose name is bv[a, b), or 0, in at most fuel steps (keyword: chain fuel) *)
 fun chain_find {l:agz}{n:pos | n <= 65537}{ll,lk:agz}{cl,ck:$A.cells}{k:nat | k <= 1024}
   {a,b:nat | a <= b; b <= n}{f:nat | f <= 1024} .<f>.
   (pfl: $A.ALLIN(cl, 0, n), pfk: $A.ALLIN(ck, 0, 1024) |
