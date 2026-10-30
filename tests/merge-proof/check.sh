@@ -132,6 +132,13 @@ git_in checkout -q pr; git_in merge -q --no-edit main > /dev/null; head=$(git_in
 prove "$reviewed" "$head" --repository unused
 expect stale-bootstrap 1 "NOT OK: bootstrap/c is stale"
 contains stale-bootstrap "bootstrap/c/generated"
+# the same stale head, run from a subdirectory of the repository: git's pathspecs are rooted, so proof 4 is not skipped and no OK is printed (bats#592)
+git_in reset -q --hard "$head"
+(cd "$TMP/repo/src" && "$BATS" merge-proof "$reviewed" "$head" --repository unused) > "$TMP/out" 2> "$TMP/err"; status=$?
+[ "$status" -eq 2 ] || fail "stale-bootstrap-from-subdirectory: status $status, wanted 2"
+grep -q '^OK' "$TMP/out" && fail "stale-bootstrap-from-subdirectory: an OK line was printed"
+grep -qF "scripts/bootstrap-c.sh did not run to its end" "$TMP/err" || fail "stale-bootstrap-from-subdirectory: stderr lacks 'scripts/bootstrap-c.sh did not run to its end'"
+echo "ok   stale-bootstrap-from-subdirectory (status 2)"
 
 # 5. a third parent
 start; git_in update-ref refs/remotes/origin/main HEAD

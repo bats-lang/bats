@@ -219,13 +219,13 @@ fn bootstrap_script_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + 
     else let
       val buf = $A.alloc<byte>(4096)
       val @(status, kept) = git_capture(
-        word("status", word("--porcelain", word("--", word("bootstrap/c", $L.list_vt_nil())))), buf)
+        word("status", word("--porcelain", word("--", word(":(top)bootstrap/c", $L.list_vt_nil())))), buf)
       val () = $A.free<byte>(buf)
     in
       if status <> 0 then git_error("git status did not answer")
       else if kept > 0 then let
         val () = not_ok("bootstrap/c is stale: regenerating it from the head's sources changes")
-        val _ = git_show(word("status", word("--porcelain", word("--", word("bootstrap/c", $L.list_vt_nil())))))
+        val _ = git_show(word("status", word("--porcelain", word("--", word(":(top)bootstrap/c", $L.list_vt_nil())))))
       in () end
       else ok_line(ids, len, parents, other_at)
     end
@@ -238,8 +238,8 @@ fn bootstrap_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 40
    parents: !$A.borrow(byte, lp, 4096), other_at: int o): void = let
   val listing = $A.alloc<byte>(4096)
   val @(status, kept) = git_capture(
-    word("ls-tree", word("--name-only", $L.list_vt_cons(wrapped_arg("", ids, len + 1, 2 * len + 1, ""),
-      word("--", word("scripts/bootstrap-c.sh", $L.list_vt_nil()))))), listing)
+    word("ls-tree", word("--full-tree", word("--name-only", $L.list_vt_cons(wrapped_arg("", ids, len + 1, 2 * len + 1, ""),
+      word("--", word("scripts/bootstrap-c.sh", $L.list_vt_nil())))))), listing)
   val () = $A.free<byte>(listing)
 in
   if status <> 0 then git_error("git did not list the head's scripts/bootstrap-c.sh")
