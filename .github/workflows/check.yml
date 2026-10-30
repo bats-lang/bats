@@ -136,10 +136,8 @@ jobs:
           bats build --repository ~/repository
 
       - name: Fixture tests
-        run: |
-          for t in tests/*/check.sh; do
-            "$t" dist/debug/bats ~/repository
-          done
+        # fixture-times: each group and each ok case prints its seconds as it ends, and the ten slowest groups are summarised (bats-lang/bats#595)
+        run: tests/run-fixtures.sh dist/debug/bats ~/repository
 
       # The manifest test is written in bats (bats#446): built, then run on the compiler under test
       - name: Build the toml-fields test
