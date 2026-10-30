@@ -329,25 +329,6 @@ fn put_value {l:agz}{n:pos}{v:nat | v <= n}{e:nat | e <= n}
    millisecond, and a file of 64 KiB can name 7000 of them, which took 1 GB
    and 3 seconds. *)
 
-(* The ints of the table are written as they come and read back through
-   table_read, the one place that checks anything: a value read from
-   memory has no index in its type (the array package has no array of
-   indexed ints: bats-lang/array#49), so it is taken to be 0 unless it is
-   in [0, m], which it always is, having been written from a position of
-   the file or an entry's number. Every other use of a position, an
-   entry's number or a table index is proved by its type. *)
-fn table_read {lt:agz}{p:nat | p < 6144}{lo,m:nat | lo <= m}
-  (tab: !$A.arr(int, lt, 6144), p: int p, lo: int lo, m: int m): [r:nat | lo <= r; r <= m] int r = let
-  val v = g1ofg0($A.get<int>(tab, p))
-in
-  if v < lo then lo
-  else if v > m then lo
-  else v
-end
-
-fn table_write {lt:agz}{p:nat | p < 6144}
-  (tab: !$A.arr(int, lt, 6144), p: int p, v: int): void = $A.set<int>(tab, p, v)
-
 (* The hash of bv[p, b), below 1024, h being the hash so far *)
 fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
   (bv: !$A.borrow(byte, l, n), p: int p, b: int, n: int n, h: int h)
@@ -356,66 +337,96 @@ fun hash_span {l:agz}{n:pos}{p:nat | p <= n}{h:nat | h < 1024} .<n - p>.
   else if p >= b then h
   else hash_span(bv, p + 1, b, n, nmod(h * 31 + $AR.low_byte(read_byte(bv, p, n)), 1024))
 
+(* The table is two arrays of array's iarr (bats-lang/array#49, keyword:
+   iarr table), each with its bound in the type (ALLIN), so a cell is read
+   back with the bound it was written under and nothing is clamped:
+   lines (2048 cells, each within [0, n]) holds, for the entry k counted
+   from 0, where its line starts (cell 2k) and where it ends (cell 2k + 1);
+   links (2048 cells, each within [0, 1024]) holds the next entry of its
+   bucket, counted from 1 (cell k; 0 is none), and after those 1024 cells
+   the latest entry of each bucket (cell 1024 + hash, counted from 1). The
+   name and the value of an entry are found again by line_assignment on its
+   line, whose result carries the order a <= b <= n in its type, so no
+   relation between two cells (a name's end past its start) has to be kept
+   in the table. *)
+
+(* A table array of 2048 cells, all 0, within [0, hi]: zeroed cells are
+   within any bound that holds 0 (array's allin_zeros) *)
+prfn zeros_within {hi:int | 0 <= hi}{cs:$A.cells}{n:nat} (zeros: $A.ZEROS(cs, n)): $A.ALLIN(cs, 0, hi) =
+  $A.allin_zeros{cs}{0,hi}{n}(zeros)
+
+fn table_alloc {hi:int | 0 <= hi; hi <= 2147483647} (): [l:agz][cs:$A.cells] ($A.ALLIN(cs, 0, hi) | $A.iarr(l, 2048, cs)) = let
+  val (_, zeros | cells) = $A.iarr_alloc(2048)
+in (zeros_within{hi}(zeros) | cells) end
+
 (* The entry (counted from 1) from entry k on along its chain whose name is
    bv[a, b), or 0; at most fuel entries are looked at. The fuel is at most
    1024, the table's entries (table_put passes the count it holds): a link
    is always to an earlier entry, so a chain has no more entries than that. *)
-fun chain_find {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024}{a,b:nat | a <= b; b <= n}{f:nat | f <= 1024} .<f>.
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
-   a: int a, b: int b, fuel: int f): [r:nat | r <= 1024] int r =
+fun chain_find {l:agz}{n:pos | n <= 65537}{ll,lk:agz}{cl,ck:$A.cells}{k:nat | k <= 1024}
+  {a,b:nat | a <= b; b <= n}{f:nat | f <= 1024} .<f>.
+  (pfl: $A.ALLIN(cl, 0, n), pfk: $A.ALLIN(ck, 0, 1024) |
+   bv: !$A.borrow(byte, l, n), n: int n, lines: !$A.iarr(ll, 2048, cl), links: !$A.iarr(lk, 2048, ck),
+   k: int k, a: int a, b: int b, fuel: int f): [r:nat | r <= 1024] int r =
   if k <= 0 then 0
   else if fuel <= 0 then 0
   else let
-    val base = 5 * (k - 1)
-    val entry_at = table_read(tab, base, 0, n)
-    val entry_to = table_read(tab, base + 1, entry_at, n)
+    val line_start = $A.iarr_get_in(pfl | lines, 2 * (k - 1))
+    val line_end = $A.iarr_get_in(pfl | lines, 2 * (k - 1) + 1)
+    val x = line_assignment(bv, line_start, line_end, n)
   in
-    if same_span(bv, entry_at, entry_to, a, b, 0, n) then k
-    else chain_find(bv, n, tab, table_read(tab, base + 4, 0, 1024), a, b, fuel - 1)
+    if x.found && same_span(bv, x.name_at, x.name_to, a, b, 0, n) then k
+    else chain_find(pfl, pfk | bv, n, lines, links, $A.iarr_get_in(pfk | links, k - 1), a, b, fuel - 1)
   end
 
-(* The assignment x, on a line ending at e, put in the table that holds
-   count entries: the number it holds then (1025 for a table that would
-   hold more than 1024) *)
-fn table_put {l:agz}{n:pos}{lt:agz}{e:nat | e <= n}{c:nat | c <= 1024}
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144),
-   x: assignment(n), e: int e, count: int c): [r:nat | r <= 1025] int r = let
+(* The assignment x, on the line bv[s, e), put in the table that holds
+   count entries: the table then and the number of entries it holds (1025
+   for a table that would hold more than 1024) *)
+fn table_put {l:agz}{n:pos | n <= 65537}{ll,lk:agz}{cl,ck:$A.cells}{s:nat | s <= n}{e:nat | e <= n}{c:nat | c <= 1024}
+  (pfl: $A.ALLIN(cl, 0, n), pfk: $A.ALLIN(ck, 0, 1024) |
+   bv: !$A.borrow(byte, l, n), n: int n, lines: $A.iarr(ll, 2048, cl), links: $A.iarr(lk, 2048, ck),
+   x: assignment(n), s: int s, e: int e, count: int c)
+  : [cl2,ck2:$A.cells][r:nat | r <= 1025]
+    ($A.ALLIN(cl2, 0, n), $A.ALLIN(ck2, 0, 1024) | @($A.iarr(ll, 2048, cl2), $A.iarr(lk, 2048, ck2), int r)) = let
   val bucket = hash_span(bv, x.name_at, x.name_to, n, 0)
-  val slot = 5120 + bucket
-  val head = table_read(tab, slot, 0, 1024)
-  val found = chain_find(bv, n, tab, head, x.name_at, x.name_to, count)
+  val head = $A.iarr_get_in(pfk | links, 1024 + bucket)
+  val found = chain_find(pfl, pfk | bv, n, lines, links, head, x.name_at, x.name_to, count)
 in
   if found > 0 then let
-    val base = 5 * (found - 1)
-    val () = table_write(tab, base + 2, x.value_at)
-    val () = table_write(tab, base + 3, e)
-  in count end
-  else if count >= 1024 then 1025
+    val (pfl2 | lines2) = $A.iarr_set_in(pfl | lines, 2 * (found - 1), s)
+    val (pfl3 | lines3) = $A.iarr_set_in(pfl2 | lines2, 2 * (found - 1) + 1, e)
+  in (pfl3, pfk | @(lines3, links, count)) end
+  else if count >= 1024 then (pfl, pfk | @(lines, links, 1025))
   else let
-    val base = 5 * count
-    val () = table_write(tab, base, x.name_at)
-    val () = table_write(tab, base + 1, x.name_to)
-    val () = table_write(tab, base + 2, x.value_at)
-    val () = table_write(tab, base + 3, e)
-    val () = table_write(tab, base + 4, head)
-    val () = table_write(tab, slot, count + 1)
-  in count + 1 end
+    val (pfl2 | lines2) = $A.iarr_set_in(pfl | lines, 2 * count, s)
+    val (pfl3 | lines3) = $A.iarr_set_in(pfl2 | lines2, 2 * count + 1, e)
+    val (pfk2 | links2) = $A.iarr_set_in(pfk | links, count, head)
+    val (pfk3 | links3) = $A.iarr_set_in(pfk2 | links2, 1024 + bucket, count + 1)
+  in (pfl3, pfk3 | @(lines3, links3, count + 1)) end
 end
 
 (* The lines of bv[s, size) put in the table that holds count entries: the
-   number it holds then *)
-fun table_fill {l:agz}{n:pos}{lt:agz}{s:nat | s <= n}{c:nat | c <= 1024} .<n - s>.
-  (bv: !$A.borrow(byte, l, n), s: int s, size: int, n: int n,
-   tab: !$A.arr(int, lt, 6144), count: int c): [r:nat | r <= 1025] int r =
-  if s >= size then count
+   table then and the number of entries it holds *)
+fun table_fill {l:agz}{n:pos | n <= 65537}{ll,lk:agz}{cl,ck:$A.cells}{s:nat | s <= n}{c:nat | c <= 1024} .<n - s>.
+  (pfl: $A.ALLIN(cl, 0, n), pfk: $A.ALLIN(ck, 0, 1024) |
+   bv: !$A.borrow(byte, l, n), s: int s, size: int, n: int n,
+   lines: $A.iarr(ll, 2048, cl), links: $A.iarr(lk, 2048, ck), count: int c)
+  : [cl2,ck2:$A.cells][r:nat | r <= 1025]
+    ($A.ALLIN(cl2, 0, n), $A.ALLIN(ck2, 0, 1024) | @($A.iarr(ll, 2048, cl2), $A.iarr(lk, 2048, ck2), int r)) =
+  if s >= size then (pfl, pfk | @(lines, links, count))
   else let
     val e = find_byte(bv, s, n, size, 10)
     val x = line_assignment(bv, s, e, n)
-    val count2 = (if x.found then table_put(bv, n, tab, x, e, count) else count): [r:nat | r <= 1025] int r
   in
-    if count2 > 1024 then count2
-    else if e + 1 > n then count2
-    else table_fill(bv, e + 1, size, n, tab, count2)
+    if x.found then let
+      val (pfl2, pfk2 | @(lines2, links2, count2)) = table_put(pfl, pfk | bv, n, lines, links, x, s, e, count)
+    in
+      if count2 > 1024 then (pfl2, pfk2 | @(lines2, links2, count2))
+      else if e + 1 > n then (pfl2, pfk2 | @(lines2, links2, count2))
+      else table_fill(pfl2, pfk2 | bv, e + 1, size, n, lines2, links2, count2)
+    end
+    else if e + 1 > n then (pfl, pfk | @(lines, links, count))
+    else table_fill(pfl, pfk | bv, e + 1, size, n, lines, links, count)
   end
 
 (* Whether bv[a, b) is PATH *)
@@ -440,46 +451,50 @@ fun arguments_free {n:nat} .<n>. (xs: $L.list_vt($P.arg_entry, n)): void =
    bytes, or the entries would take more than the budget, the number of
    that entry and what has been made so far; else ~1. The value of PATH, when
    the file sets it, is also appended to path_out and the answer says so. *)
-fun entries_make {l:agz}{n:pos}{lt:agz}{k:nat | k <= 1024} .<k>.
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), k: int k,
+fun entries_make {l:agz}{n:pos | n <= 65537}{ll,lk:agz}{cl,ck:$A.cells}{k:nat | k <= 1024} .<k>.
+  (pfl: $A.ALLIN(cl, 0, n), pfk: $A.ALLIN(ck, 0, 1024) |
+   bv: !$A.borrow(byte, l, n), n: int n, lines: !$A.iarr(ll, 2048, cl), links: !$A.iarr(lk, 2048, ck), k: int k,
    budget: int, acc: $L.listv($P.arg_entry), has_path: bool, path_out: !$B.builder_v >> $B.builder_v)
   : @([b:int | ~1 <= b; b < 1024] int b, bool, $L.listv($P.arg_entry)) =
   if k <= 0 then @(~1, has_path, acc)
   else let
-    val base = 5 * (k - 1)
-    val name_at = table_read(tab, base, 0, n)
-    val name_to = table_read(tab, base + 1, name_at, n)
-    val value_at = table_read(tab, base + 2, 0, n)
-    val line_end = table_read(tab, base + 3, 0, n)
-    var entry : $B.builder_v = $B.create()
-    val () = put_range(bv, name_at, name_to, n, entry)
-    val () = put_char_v(entry, 61)
-    val made = put_value(bv, value_at, line_end, n, entry)
-    val size = builder_size(entry)
-    val fits = (size <= 131071 && size + 1 <= budget): bool
-    val made_entry = mk_arg(entry)
+    val line_start = $A.iarr_get_in(pfl | lines, 2 * (k - 1))
+    val line_end = $A.iarr_get_in(pfl | lines, 2 * (k - 1) + 1)
+    val x = line_assignment(bv, line_start, line_end, n)
   in
-    if made && fits then let
-      val is_path = is_path_name(bv, name_at, name_to, n)
-      val () = (if is_path then let
-          val _ = put_value(bv, value_at, line_end, n, path_out)
-        in () end else ())
-    in entries_make(bv, n, tab, k - 1, budget - size - 1, $L.list_vt_cons(made_entry, acc),
-         (if is_path then true else has_path), path_out) end
+    if ~x.found then entries_make(pfl, pfk | bv, n, lines, links, k - 1, budget, acc, has_path, path_out)
     else let
-      val @(made_a, _) = made_entry
-      val () = $A.free<byte>(made_a)
-    in @(k - 1, has_path, acc) end
+      var entry : $B.builder_v = $B.create()
+      val () = put_range(bv, x.name_at, x.name_to, n, entry)
+      val () = put_char_v(entry, 61)
+      val made = put_value(bv, x.value_at, line_end, n, entry)
+      val size = builder_size(entry)
+      val fits = (size <= 131071 && size + 1 <= budget): bool
+      val made_entry = mk_arg(entry)
+    in
+      if made && fits then let
+        val is_path = is_path_name(bv, x.name_at, x.name_to, n)
+        val () = (if is_path then let
+            val _ = put_value(bv, x.value_at, line_end, n, path_out)
+          in () end else ())
+      in entries_make(pfl, pfk | bv, n, lines, links, k - 1, budget - size - 1, $L.list_vt_cons(made_entry, acc),
+           (if is_path then true else has_path), path_out) end
+      else let
+        val @(made_a, _) = made_entry
+        val () = $A.free<byte>(made_a)
+      in @(k - 1, has_path, acc) end
+    end
   end
 
 (* The NAME=VALUE entries of the table's first count entries; ~2 for a table
    that holds more than 1024 *)
-fn entries_made {l:agz}{n:pos}{lt:agz}{c:nat | c <= 1025}
-  (bv: !$A.borrow(byte, l, n), n: int n, tab: !$A.arr(int, lt, 6144), count: int c,
+fn entries_made {l:agz}{n:pos | n <= 65537}{ll,lk:agz}{cl,ck:$A.cells}{c:nat | c <= 1025}
+  (pfl: $A.ALLIN(cl, 0, n), pfk: $A.ALLIN(ck, 0, 1024) |
+   bv: !$A.borrow(byte, l, n), n: int n, lines: !$A.iarr(ll, 2048, cl), links: !$A.iarr(lk, 2048, ck), count: int c,
    has_path: bool, path_out: !$B.builder_v >> $B.builder_v)
   : @([b:int | ~2 <= b; b < 1024] int b, bool, $L.listv($P.arg_entry)) =
   if count > 1024 then @(~2, has_path, $L.list_vt_nil())
-  else entries_make(bv, n, tab, count, 524287, $L.list_vt_nil(), has_path, path_out)
+  else entries_make(pfl, pfk | bv, n, lines, links, count, 524287, $L.list_vt_nil(), has_path, path_out)
 
 (* The NUL-terminated arguments of bv[p, total) as entries, reversed onto acc *)
 fun arguments {l:agz}{p:nat | p <= 4096} .<4096 - p>.
@@ -709,13 +724,16 @@ in
 end
 
 (* The name of entry bad of the table, appended to out; nothing for ~1 *)
-fn bad_name_put {l:agz}{lt:agz}{bad:int | bad < 1024}
-  (bv: !$A.borrow(byte, l, 65537), tab: !$A.arr(int, lt, 6144), bad: int bad,
+fn bad_name_put {l:agz}{ll:agz}{cl:$A.cells}{bad:int | bad < 1024}
+  (pfl: $A.ALLIN(cl, 0, 65537) |
+   bv: !$A.borrow(byte, l, 65537), lines: !$A.iarr(ll, 2048, cl), bad: int bad,
    out: !$B.builder_v >> $B.builder_v): void =
   if bad < 0 then ()
   else let
-    val name_at = table_read(tab, 5 * bad, 0, 65537)
-  in put_range(bv, name_at, table_read(tab, 5 * bad + 1, name_at, 65537), 65537, out) end
+    val line_start = $A.iarr_get_in(pfl | lines, 2 * bad)
+    val line_end = $A.iarr_get_in(pfl | lines, 2 * bad + 1)
+    val x = line_assignment(bv, line_start, line_end, 65537)
+  in put_range(bv, x.name_at, x.name_to, 65537, out) end
 
 (* Says that the value of the variable name, set in the file at
    bv[file_at, file_to), cannot be made *)
@@ -761,20 +779,23 @@ in
              " (it must be readable and at most 64 KiB)", 2) end
         else let
           val @(fz_c, bv_c) = $A.freeze<byte>(content)
-          val tab = $A.alloc<int>(6144): [lt:agz] $A.arr(int, lt, 6144)
+          val (pfl0 | lines0) = table_alloc{65537}()
+          val (pfk0 | links0) = table_alloc{1024}()
           val nul_at = nul_line(bv_c, size, 65537)
-          val count = table_fill(bv_c, 0, (if nul_at > 0 then 0 else size), 65537, tab, 0)
+          val (pfl, pfk | @(lines, links, count)) =
+            table_fill(pfl0, pfk0 | bv_c, 0, (if nul_at > 0 then 0 else size), 65537, lines0, links0, 0)
           var path_text : $B.builder_v = $B.create()
-          val @(bad, has_path, extras) = entries_made(bv_c, 65537, tab, count, false, path_text)
+          val @(bad, has_path, extras) = entries_made(pfl, pfk | bv_c, 65537, lines, links, count, false, path_text)
           val known = (if has_path then true else put_environment_path(path_text)): bool
           val () = (if builder_size(path_text) = 0 then bput_v(path_text, "/usr/bin:/bin") else ())
           val @(search_a, search_len) = $B.into_arr(path_text)
           var bad_name : $B.builder_v = $B.create()
-          val () = bad_name_put(bv_c, tab, bad, bad_name)
+          val () = bad_name_put(pfl | bv_c, lines, bad, bad_name)
           val @(bad_a, bad_len) = $B.into_arr(bad_name)
           val () = $A.drop<byte>(fz_c, bv_c)
           val () = $A.free<byte>($A.thaw<byte>(fz_c))
-          val () = $A.free<int>(tab)
+          val () = $A.iarr_free(lines)
+          val () = $A.iarr_free(links)
           val () = (if nul_at > 0 then let
               val () = arguments_free(extras)
               val () = $A.free<byte>(search_a)

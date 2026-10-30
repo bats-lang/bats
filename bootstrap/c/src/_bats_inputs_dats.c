@@ -194,7 +194,7 @@ ATSINSflab(__patsflab_bats_inputs_sha256):
 /*
 emit_instr: loc0 = build/src/_bats_inputs.dats: 168(line=7, offs=35) -- 234(line=7, offs=101)
 */
-ATSINSmove(tmpret0, ATSPMVstring("29bbaa0d7b3fae62540c161875372eb10f4a628a85084dc5ca1448b18548c8e1")) ;
+ATSINSmove(tmpret0, ATSPMVstring("fe73d1a32a6329e3e6e0a76bc2c378467630b6a381b333080f312922d963b138")) ;
 ATSfunbody_end()
 ATSreturn(tmpret0) ;
 } /* end of [build_057_src_057__bats_inputs_056_sats__bats_inputs_sha256] */
