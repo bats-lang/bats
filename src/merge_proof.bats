@@ -180,8 +180,21 @@ fn checked_out {ls:agz}{l:nat | 2 * l + 2 <= 4096}
   val () = $A.free<byte>($A.thaw<byte>(fz))
 in same end
 
-(* The bootstrap proof: regenerating leaves bootstrap/c unchanged (keyword: merge-proof) *)
-fn bootstrap_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
+(* The verdict line of a head that passed every proof it is judged by (keyword: merge-proof) *)
+fn ok_line {ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
+  (ids: !$A.borrow(byte, ls, 4096), len: int l,
+   parents: !$A.borrow(byte, lp, 4096), other_at: int o): void = let
+  val () = print! ("OK: ")
+  val () = print_span(ids, len + 1, len, 0)
+  val () = print! (" is the reviewed ")
+  val () = print_span(ids, 0, len, 0)
+  val () = print! (" and a merge of main ")
+  val () = print_span(parents, other_at, len, 0)
+  val () = print_newline()
+in () end
+
+(* The bootstrap proof of a repository whose head has scripts/bootstrap-c.sh: regenerating leaves bootstrap/c unchanged (keyword: merge-proof) *)
+fn bootstrap_script_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
   (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
    ids: !$A.borrow(byte, ls, 4096), len: int l,
    parents: !$A.borrow(byte, lp, 4096), other_at: int o): void =
@@ -199,25 +212,33 @@ fn bootstrap_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 40
     else let
       val buf = $A.alloc<byte>(4096)
       val @(status, kept) = git_capture(
-        word("status", word("--porcelain", word("--", word("bootstrap/c", $L.list_vt_nil())))), buf)
+        word("status", word("--porcelain", word("--", word(":(top)bootstrap/c", $L.list_vt_nil())))), buf)
       val () = $A.free<byte>(buf)
     in
       if status <> 0 then git_error("git status did not answer")
       else if kept > 0 then let
         val () = not_ok("bootstrap/c is stale: regenerating it from the head's sources changes")
-        val _ = git_show(word("status", word("--porcelain", word("--", word("bootstrap/c", $L.list_vt_nil())))))
+        val _ = git_show(word("status", word("--porcelain", word("--", word(":(top)bootstrap/c", $L.list_vt_nil())))))
       in () end
-      else let
-        val () = print! ("OK: ")
-        val () = print_span(ids, len + 1, len, 0)
-        val () = print! (" is the reviewed ")
-        val () = print_span(ids, 0, len, 0)
-        val () = print! (" and a merge of main ")
-        val () = print_span(parents, other_at, len, 0)
-        val () = print_newline()
-      in () end
+      else ok_line(ids, len, parents, other_at)
     end
   end
+
+(* Proof 4 applies only to a head whose tree has scripts/bootstrap-c.sh, git's answer and not a guess from the repository's name (keyword: merge-proof) *)
+fn bootstrap_proof {lc,ls,lp:agz}{l:nat | 2 * l + 2 <= 4096}{o:nat | o + l <= 4096}
+  (cmd: !$A.borrow(byte, lc, 4096), argv0_to: int, repo_at: pos_t, repo_to: int,
+   ids: !$A.borrow(byte, ls, 4096), len: int l,
+   parents: !$A.borrow(byte, lp, 4096), other_at: int o): void = let
+  val listing = $A.alloc<byte>(4096)
+  val @(status, kept) = git_capture(
+    word("ls-tree", word("--full-tree", word("--name-only", $L.list_vt_cons(wrapped_arg("", ids, len + 1, 2 * len + 1, ""),
+      word("--", word("scripts/bootstrap-c.sh", $L.list_vt_nil())))))), listing)
+  val () = $A.free<byte>(listing)
+in
+  if status <> 0 then git_error("git did not list the head's scripts/bootstrap-c.sh")
+  else if kept > 0 then bootstrap_script_proof(cmd, argv0_to, repo_at, repo_to, ids, len, parents, other_at)
+  else ok_line(ids, len, parents, other_at)
+end
 
 (* The git that writes a diff against main into a file (keyword: merge-proof) *)
 fn write_diff_args {ld,ls:agz}{l:nat | 2 * l + 2 <= 4096}{sn:nat}
