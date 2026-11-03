@@ -218,7 +218,14 @@ runs:
         # a bats that does not know the command prints its usage and exits 0:
         # only a single NAME=VALUE line reaches the environment
         bats clone-repository "$REPOSITORY_COMMIT" --repository "$REPOSITORY_DIR" > "$RUNNER_TEMP/clone.env"
-        awk 'NR == 1 && /^BATS_REPOSITORY=[^=]+$/ { ok = 1 } END { exit !(ok && NR == 1) }' "$RUNNER_TEMP/clone.env" \
+        # env-line (bats#510, setup-action.md): the program between the markers is run on good
+        # and bad lines by tests/setup-action/check.sh; the line is one NAME=VALUE, no CR, no second =
+        awk '
+          # env-line-repository begin
+          NR == 1 && /^BATS_REPOSITORY=[^=\r]+$/ { ok = 1 }
+          END { exit !(ok && NR == 1) }
+          # env-line-repository end
+        ' "$RUNNER_TEMP/clone.env" \
           || { echo "::error::setup-bats: bats clone-repository did not print BATS_REPOSITORY=<dir>: is the bats built from a commit that has it (bats#283)?"; exit 1; }
         cat "$RUNNER_TEMP/clone.env" >> "$GITHUB_ENV"
 
@@ -234,6 +241,13 @@ runs:
       run: |
         set -eu
         bats record-commit "$COMMIT" > "$RUNNER_TEMP/commit.env"
-        awk 'NR == 1 && /^BATS_COMMIT=[0-9a-f]+$/ && length($0) == 52 { ok = 1 } END { exit !(ok && NR == 1) }' "$RUNNER_TEMP/commit.env" \
+        # env-line (bats#510, setup-action.md): the program between the markers is run on good
+        # and bad lines by tests/setup-action/check.sh; BATS_COMMIT= and 40 lowercase hex digits
+        awk '
+          # env-line-commit begin
+          NR == 1 && /^BATS_COMMIT=[0-9a-f]+$/ && length($0) == 52 { ok = 1 }
+          END { exit !(ok && NR == 1) }
+          # env-line-commit end
+        ' "$RUNNER_TEMP/commit.env" \
           || { echo "::error::setup-bats: bats record-commit did not print BATS_COMMIT=<commit>: is the bats built from a commit that has it (bats#283)?"; exit 1; }
         cat "$RUNNER_TEMP/commit.env" >> "$GITHUB_ENV"
