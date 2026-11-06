@@ -55,6 +55,22 @@ int main(int argc, char **argv) {
 C
 ${CC:-cc} -o "$TMP/hog" "$TMP/hog.c"
 
+# a program that fails as patsopt does with many unsolved constraints
+# (bats-lang/bats#524): a first line of known text, then 950 KB more on
+# stderr, written by this process itself (so a pipe closed early kills it
+# with SIGPIPE, as it would patsopt), exit status 1, nothing allocated
+cat > "$TMP/noisy.c" <<'C'
+#include <stdio.h>
+int main(void) {
+  int i;
+  fputs("first line of patsopt's complaint\n", stderr);
+  for (i = 0; i < 10000; i++)
+    fputs("unsolved constraint: a padded line of patsopt's complaint, long enough to pass the capture\n", stderr);
+  return 1;
+}
+C
+${CC:-cc} -o "$TMP/noisy-bin" "$TMP/noisy.c"
+
 # the stand-in patsopt: notes the name of its parent (bats, or sh when
 # the cap started it), then does what FAKE says, else runs the real one
 cat > "$H/.bats/ats2/bin/patsopt" <<SH
@@ -74,6 +90,7 @@ case "\${FAKE:-}" in
   sleep) exec sleep 60 ;;
   hog) exec "$TMP/hog" hog ;;
   abort) exec "$TMP/hog" abort ;;
+  noisy) exec "$TMP/noisy-bin" ;;
 esac
 exec "$REAL/bin/patsopt" "\$@"
 SH
@@ -85,7 +102,7 @@ project() { # <directory>: a project of one binary, named p
   printf '[package]\nname = "p"\nkind = "bin"\n' > "$1/bats.toml"
   printf 'implement main0 () = println! (1)\n' > "$1/src/bin/p.bats"
 }
-for d in plain empty generous time mem broken warn depgen; do project "$TMP/$d"; done
+for d in plain empty generous time mem broken warn depgen noisy; do project "$TMP/$d"; done
 printf '#include "share/atspre_staload.hats"\n\nval x: int = "s"\nimplement main0 () = ()\n' > "$TMP/broken/src/bin/p.bats"
 
 # run <directory> <log>: check in the directory with the environment given
@@ -173,6 +190,18 @@ run broken env BATS_PATSOPT_TIMEOUT_S=600 BATS_PATSOPT_MEM_MB=8192
 [ $rc = 1 ] || fail "a patsopt error under caps had status $rc, not 1" broken
 grep -q "error: patsopt error:" "$TMP/broken.log" || fail "a patsopt error under caps was not reported as one" broken
 if grep -q "time cap\|memory cap" "$TMP/broken.log"; then fail "a patsopt error under caps was blamed on a cap" broken; fi
+
+# a patsopt error with a very long stderr (over 600 KB) that allocates
+# nothing is patsopt's own error with its text, under the memory cap and
+# under both (bats-lang/bats#524: bats stopped reading at about 500000
+# bytes, patsopt died of SIGPIPE, and the signal was taken for the cap)
+for caps in "BATS_PATSOPT_MEM_MB=8192" "BATS_PATSOPT_TIMEOUT_S=600 BATS_PATSOPT_MEM_MB=8192"; do
+  run noisy env FAKE=noisy $caps
+  [ $rc = 1 ] || fail "a patsopt error with a long stderr under $caps had status $rc, not 1" noisy
+  grep -q "error: patsopt error:" "$TMP/noisy.log" || fail "a patsopt error with a long stderr under $caps was not reported as one" noisy
+  grep -q "first line of patsopt's complaint" "$TMP/noisy.log" || fail "a patsopt error with a long stderr under $caps lost its text" noisy
+  if grep -q "time cap\|memory cap" "$TMP/noisy.log"; then fail "a long stderr under $caps was blamed on a cap" noisy; fi
+done
 
 # what is not a count is said, and patsopt runs uncapped
 run warn env BATS_PATSOPT_TIMEOUT_S=soon BATS_PATSOPT_MEM_MB=0
