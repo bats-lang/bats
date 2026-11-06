@@ -2350,6 +2350,23 @@ fn tool_output_wide {lo:agz}{sn:nat | sn < $B.BUILDER_CAP}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn check_emitted_flaws {lo,li:agz}{no:pos}{om:nat | om <= no; om <= 524288}{ni:pos}{im:nat | im <= ni; im <= 524288}
   (out_bv: !$A.borrow(byte, lo, no), out_len: int om, in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
 
