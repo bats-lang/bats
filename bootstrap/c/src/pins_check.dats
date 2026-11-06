@@ -664,7 +664,7 @@ fun names_has {l:agz}{m:nat | m <= 65536}{p:nat | p <= m}{sn:nat} .<m - p>.
   else if span_is(names, p, line_end(names, p, m), path) then true
   else names_has(names, next_line(names, p, m), m, path)
 
-(* Each changed path that is not one of the five a pin move touches is said *)
+(* Each changed path that is not one of the six a pin move touches is said *)
 fun names_check {l:agz}{m:nat | m <= 65536}{p:nat | p <= m} .<m - p>.
   (names: !$A.borrow(byte, l, 65536), p: int p, m: int m): void =
   if p >= m then ()
@@ -672,11 +672,12 @@ fun names_check {l:agz}{m:nat | m <= 65536}{p:nat | p <= m} .<m - p>.
     val e = line_end(names, p, m)
     val allowed = (span_is(names, p, e, ".github/bats-version") || span_is(names, p, e, ".github/repository-version")
       || span_is(names, p, e, "bats.lock") || span_is(names, p, e, ".github/workflows/relock.yml")
-      || span_is(names, p, e, ".github/workflows/publish.yml")): bool
+      || span_is(names, p, e, ".github/workflows/publish.yml")
+      || span_is(names, p, e, ".github/workflows/check.yml")): bool
     val () = (if allowed then () else let
         val () = not_ok_head("the diff")
         val () = print_borrow(names, p, e, m)
-      in println! (" is not a pin file (only .github/bats-version, .github/repository-version, bats.lock, .github/workflows/relock.yml and .github/workflows/publish.yml are)") end)
+      in println! (" is not a pin file (only .github/bats-version, .github/repository-version, bats.lock, .github/workflows/relock.yml, .github/workflows/publish.yml and .github/workflows/check.yml are)") end)
   in names_check(names, next_line(names, p, m), m) end
 
 (* ------------------------------------------------------------------ *)
@@ -700,7 +701,9 @@ fn prove {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void = let
         then workflow_file(cmd, ".github/workflows/relock.yml") else 0): int
       val from_publish = (if names_has(names, 0, kept, ".github/workflows/publish.yml")
         then workflow_file(cmd, ".github/workflows/publish.yml") else 0): int
-      val resolved = from_compiler + from_repository + from_relock + from_publish
+      val from_check = (if names_has(names, 0, kept, ".github/workflows/check.yml")
+        then workflow_file(cmd, ".github/workflows/check.yml") else 0): int
+      val resolved = from_compiler + from_repository + from_relock + from_publish + from_check
       val () = (if names_has(names, 0, kept, "bats.lock") then lock_file(cmd) else ())
       val () = (if !g_require_at >= 0 && resolved = 0 && !g_failures = 0
         then not_ok("--require-contains", "no moved pin is in a checkout that has the required commit, so none could be shown to contain it")
