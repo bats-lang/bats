@@ -134,6 +134,21 @@ prove; expect workflow-comment-line 0 "OK: main...pr changes only pins"
 start; echo "$c2" > "$TMP/app/.github/bats-version"; echo extra >> "$TMP/app/.github/workflows/relock.yml"
 prove; expect workflow-line-not-a-pin 1 "NOT OK: .github/workflows/relock.yml: a changed line holds no pin of 40 hex digits: +extra"
 
+# check.yml (bats#604): a library's caller of package-check.yml, whose pin every relock moves, is a workflow file
+set_check() { # <commit> [extra line]
+  printf 'jobs:\n  check:\n    uses: bats-lang/repository-prototype/.github/workflows/package-check.yml@%s # repository-prototype main %s\n' "$1" "${1:0:7}" > "$TMP/app/.github/workflows/check.yml"
+}
+start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -b pr
+set_check "$r2"
+prove; expect check-yml-pin-move 0 "OK: main...pr changes only pins"
+grep -qx "ok   .github/workflows/check.yml" "$TMP/out" || fail "check-yml-pin-move: no ok line for check.yml"
+start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -b pr
+set_check "$nothing"
+prove; expect check-yml-pin-does-not-exist 1 "NOT OK: .github/workflows/check.yml: the pin $nothing is not a commit of $TMP/repo"
+start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -b pr
+echo "    extra: line" >> "$TMP/app/.github/workflows/check.yml"
+prove; expect check-yml-line-not-a-pin 1 "NOT OK: .github/workflows/check.yml: a changed line holds no pin of 40 hex digits: +    extra: line"
+
 # a pin file that is not a pin, or holds more than one line, or is deleted
 start; echo "main" > "$TMP/app/.github/bats-version"
 prove; expect pin-not-hex 1 "NOT OK: .github/bats-version: the new line is not a pin of 40 hex digits"
