@@ -138,14 +138,14 @@ prove; expect workflow-line-not-a-pin 1 "NOT OK: .github/workflows/relock.yml: a
 set_check() { # <commit> [extra line]
   printf 'jobs:\n  check:\n    uses: bats-lang/repository-prototype/.github/workflows/package-check.yml@%s # repository-prototype main %s\n' "$1" "${1:0:7}" > "$TMP/app/.github/workflows/check.yml"
 }
-start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -b pr
+start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr
 set_check "$r2"
 prove; expect check-yml-pin-move 0 "OK: main...pr changes only pins"
 grep -qx "ok   .github/workflows/check.yml" "$TMP/out" || fail "check-yml-pin-move: no ok line for check.yml"
-start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -b pr
+start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr
 set_check "$nothing"
 prove; expect check-yml-pin-does-not-exist 1 "NOT OK: .github/workflows/check.yml: the pin $nothing is not a commit of $TMP/repo"
-start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -b pr
+start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr
 echo "    extra: line" >> "$TMP/app/.github/workflows/check.yml"
 prove; expect check-yml-line-not-a-pin 1 "NOT OK: .github/workflows/check.yml: a changed line holds no pin of 40 hex digits: +    extra: line"
 
