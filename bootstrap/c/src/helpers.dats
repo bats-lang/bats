@@ -2093,8 +2093,25 @@ fn read_prelude {li:agz}{ni:pos}{im:nat | im <= ni; im <= 524288} (in_bv: !$A.bo
   val () = $A.free<byte>($A.thaw<byte>(fz_p))
 in n end
 
+(* Everything left to read from fd, read and dropped (bats-lang/bats#524):
+   a child whose pipe is closed while it still writes dies of SIGPIPE, and
+   a run so ended was taken for the memory cap's. At most fuel reads of 4096
+   bytes (64 GiB for the fuel drain_fd gives), so the loop is total. *)
+fun discard_fd {f:nat} .<f>.
+  (fd: !$F.fd, fuel: int f): void =
+  if fuel <= 0 then () else let
+    val buf = $A.alloc<byte>(4096)
+    val k = (case+ $F.file_read(fd, buf, 4096) of
+      | ~$R.ok(k) => k | ~$R.err(_) => 0): [k:nat | k <= 4096] int k
+    val () = $A.free<byte>(buf)
+  in
+    if k <= 0 then () else discard_fd(fd, fuel - 1)
+  end
+
 (* Everything left to read from fd appended to out, up to about 500000
-   bytes (Rust reads patsopt's whole stderr); total bytes read so far *)
+   bytes (Rust reads patsopt's whole stderr), the rest read to the end and
+   dropped so the child never writes to a closed pipe; total bytes read so
+   far *)
 fun drain_fd {t:nat | t <= 500000} .<500000 - t>.
   (fd: !$F.fd, out: !$B.builder_v >> $B.builder_v, total: int t): void = let
   val buf = $A.alloc<byte>(4096)
@@ -2106,7 +2123,7 @@ fun drain_fd {t:nat | t <= 500000} .<500000 - t>.
   val () = $A.free<byte>($A.thaw<byte>(fz_b))
 in
   if k <= 0 then ()
-  else if total + k > 500000 then ()
+  else if total + k > 500000 then discard_fd(fd, 16777216)
   else drain_fd(fd, out, total + k)
 end
 
