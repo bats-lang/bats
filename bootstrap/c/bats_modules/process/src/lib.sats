@@ -231,6 +231,30 @@ fn spawn_inherit_env_proved
   : $R.result(spawn_pipes(sin, sout, serr), int)
 
 
+fn exec_inherit_env_with
+  {lp:agz}{np:pos}{cs:$A.cells}{k:nat | k < np}
+  (nul: NUL_AT(cs, np, k) | path: !$A.cborrow(lp, np, cs),
+   argv: $L.listv(arg_entry),
+   extra: $L.listv(arg_entry))
+  : [e:pos] int e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

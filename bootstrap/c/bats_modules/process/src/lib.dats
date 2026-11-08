@@ -74,6 +74,49 @@ static void _exec_search(const char *file, char *const argv[], char *const envp[
   }
 }
 
+/* exec-replace: the parent environment with the extra entries added or replacing. */
+static char **_merged_environ(const char **extra, int ei) {
+  size_t n = 0, k = 0, j;
+  int e;
+  char **envv;
+  while (environ[n]) n++;
+  envv = (char **)malloc((n + (size_t)ei + 1) * sizeof(char *));
+  if (!envv) return (char **)0;
+  for (j = 0; j < n; j++) {
+    size_t len = strcspn(environ[j], "=");
+    int replaced = 0;
+    for (e = 0; e < ei; e++)
+      if (strncmp(extra[e], environ[j], len) == 0 && extra[e][len] == '=') replaced = 1;
+    if (!replaced) envv[k++] = environ[j];
+  }
+  for (e = 0; e < ei; e++) envv[k++] = (char *)extra[e];
+  envv[k] = (char *)0;
+  return envv;
+}
+
+/* exec-replace: execve with the PATH search, returns only the errno on failure. */
+static int _proc_exec(const char *path, const char *argv_buf, int argv_count,
+                      const char *extra_buf, int extra_count) {
+  int i, e;
+  const char *p;
+  char **envv;
+  const char **argv_ptrs = (const char **)malloc(((size_t)(argv_count > 0 ? argv_count : 0) + 1) * sizeof(char *));
+  const char **extra_ptrs = (const char **)malloc(((size_t)(extra_count > 0 ? extra_count : 0) + 1) * sizeof(char *));
+  if (!argv_ptrs || !extra_ptrs) { free(argv_ptrs); free(extra_ptrs); return ENOMEM; }
+  p = argv_buf;
+  for (i = 0; i < argv_count; i++) { argv_ptrs[i] = p; p += strlen(p) + 1; }
+  argv_ptrs[argv_count] = (const char *)0;
+  p = extra_buf;
+  for (i = 0; i < extra_count; i++) { extra_ptrs[i] = p; p += strlen(p) + 1; }
+  extra_ptrs[extra_count] = (const char *)0;
+  envv = _merged_environ(extra_ptrs, extra_count);
+  if (!envv) { free(argv_ptrs); free(extra_ptrs); return ENOMEM; }
+  _exec_search(path, (char *const *)argv_ptrs, envv);
+  e = errno;
+  free(envv); free(argv_ptrs); free(extra_ptrs);
+  return e > 0 ? e : 1;
+}
+
 /* Global to pass result back (avoids returning struct by value issues) */
 static _spawn_result_t _spawn_res;
 
@@ -162,10 +205,7 @@ static int _proc_spawn(
 
   char **envv = (char **)0;
   if (inherit) {
-    size_t n = 0, k = 0, j;
-    int e;
-    while (environ[n]) n++;
-    envv = (char **)malloc((n + (size_t)ei + 1) * sizeof(char *));
+    envv = _merged_environ(envp_ptrs, ei);
     if (!envv) {
       free(argv_ptrs); free(envp_ptrs);
       close(exec_err[0]); close(exec_err[1]);
@@ -174,15 +214,6 @@ static int _proc_spawn(
       if (stderr_pipe[0] >= 0) { close(stderr_pipe[0]); close(stderr_pipe[1]); }
       return -ENOMEM;
     }
-    for (j = 0; j < n; j++) {
-      size_t len = strcspn(environ[j], "=");
-      int replaced = 0;
-      for (e = 0; e < ei; e++)
-        if (strncmp(envp_ptrs[e], environ[j], len) == 0 && envp_ptrs[e][len] == '=') replaced = 1;
-      if (!replaced) envv[k++] = environ[j];
-    }
-    for (e = 0; e < ei; e++) envv[k++] = (char *)envp_ptrs[e];
-    envv[k] = (char *)0;
   }
 
   int pid = fork();
@@ -501,6 +532,14 @@ static int _proc_wait_outcome(int pid, int nohang, int *number) {
 
 
 
+
+
+
+
+
+
+
+(* exec-replace: replaces this process, returns only an errno; detail in CLAUDE.md. *)
 
 
 
@@ -847,3 +886,22 @@ implement spawn_inherit_env_with_proved {sin}{sout}{serr}{lp}{np}{cs}{k}
   val () = $A.drop<byte>(fz_e, bv_e)
   val () = $A.free<byte>($A.thaw<byte>(fz_e))
 in r end
+
+implement exec_inherit_env_with {lp}{np}{cs}{k} (nul | path, argv, extra) = let
+  val @(argv_b, argc, argv_fits) = _build_from_list(argv)
+  val @(argv_arr, _) = $B.into_arr(argv_b)
+  val @(fz_a, bv_a) = $A.freeze<byte>(argv_arr)
+  val @(extra_b, extra_c, extra_fits) = _build_from_list(extra)
+  val @(extra_arr, _) = $B.into_arr(extra_b)
+  val @(fz_e, bv_e) = $A.freeze<byte>(extra_arr)
+  val e = (if argv_fits && extra_fits then
+     $extfcall([e:pos] int e, "_proc_exec",
+      $UNSAFE.castvwtp1{ptr}(path),
+      $UNSAFE.castvwtp1{ptr}(bv_a), argc,
+      $UNSAFE.castvwtp1{ptr}(bv_e), extra_c) 
+    else E2BIG): [e:pos] int e
+  val () = $A.drop<byte>(fz_a, bv_a)
+  val () = $A.free<byte>($A.thaw<byte>(fz_a))
+  val () = $A.drop<byte>(fz_e, bv_e)
+  val () = $A.free<byte>($A.thaw<byte>(fz_e))
+in e end
