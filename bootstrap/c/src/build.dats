@@ -587,6 +587,34 @@ implement write_native_runtime_h (dir, dlen) = let
   val r3 = stub(dir, dlen, "sys/types.cats")
 in rc + r0 + r1 + r2 + r3 end
 
+(* For a native pass of a project whose bats.toml says seed = true, the header
+   `--to-c` writes and its stubs go to build/.bats_seed, where run_patsopt compiles
+   each C against them alone (check_seed_header, runtime-header keyword, bats#624):
+   whether the C is checked so. A header that cannot be written fails the build. *)
+fn prepare_seed_header (build_target: target): bool =
+  case+ build_target of
+  | Wasm() => false
+  | Native() =>
+    (* the seed's C has no $UNITTEST blocks, whose closures the header does not declare *)
+    if is_test_mode() then false
+    else if ~read_seed_flag() then false
+    else let
+      var mb : $B.builder_v = $B.create()
+      val () = bput_v(mb, "build/.bats_seed")
+      val made = run_mkdir(mb)
+      val dir = str_to_arr4096("build/.bats_seed")
+      val @(fz_d, bv_d) = $A.freeze<byte>(dir)
+      val wrote = (if made = 0 then write_native_runtime_h(bv_d, 16) else made): int
+      val () = $A.drop<byte>(fz_d, bv_d)
+      val () = $A.free<byte>($A.thaw<byte>(fz_d))
+    in
+      if wrote = 0 then true
+      else let
+        val () = set_build_err()
+        val () = prerr! ("error: the runtime header could not be written to build/.bats_seed, so the C cannot be checked against it\n")
+      in false end
+    end
+
 (* Write WASM freestanding runtime header *)
 
 
@@ -1266,6 +1294,8 @@ in
          this mark's build/ in place and the ATS2 toolchain is known. *)
       val mode_mark = target_mark(build_target, is_test_mode())
       val () = stamp_check(bv_patshome, phlen, mode_mark)
+      (* a seed project's native C is compiled against the runtime header alone as well *)
+      val () = set_seed_check(prepare_seed_header(build_target))
 
       (* Read old target marker to detect target change, then write new one.
          target_changed is passed to preprocess_one to force reprocessing.
@@ -3197,7 +3227,9 @@ in
                 val () = $A.cborrow_drop(fz_cpe, bv_cpe)
                 val () = $A.barr_free($A.barr_thaw(fz_cpe))
                 (* but not the other targets' and modes' caches (cache_swap):
-                   only this build's C *)
+                   only this build's C, and not the runtime header a check
+                   compiled it against (build/.bats_seed, bats#624): the seed
+                   writes its own header below *)
                 val (nul_rme | rm_exec) = $P.path_of_string_proved("rm")
                 val @(fz_rme, bv_rme) = $A.barr_freeze(rm_exec)
                 var rma1 = $B.create() val () = bput_v(rma1, "rm")
@@ -3205,8 +3237,11 @@ in
                 var rma3 = $B.create()
                 val () = copy_to_builder_v(to_c, 0, tclen, 4096, rma3)
                 val () = bput_v(rma3, "/.stash")
+                var rma4 = $B.create()
+                val () = copy_to_builder_v(to_c, 0, tclen, 4096, rma4)
+                val () = bput_v(rma4, "/.bats_seed")
                 val rm_argv = $L.list_vt_cons(mk_arg(rma1), $L.list_vt_cons(mk_arg(rma2),
-                  $L.list_vt_cons(mk_arg(rma3), $L.list_vt_nil())))
+                  $L.list_vt_cons(mk_arg(rma3), $L.list_vt_cons(mk_arg(rma4), $L.list_vt_nil()))))
                 val _ = run_cmd(nul_rme | bv_rme, rm_argv)
                 val () = $A.cborrow_drop(fz_rme, bv_rme)
                 val () = $A.barr_free($A.barr_thaw(fz_rme))

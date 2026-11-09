@@ -920,10 +920,60 @@ fn closure_key_write {ll,lo:agz}{nl,no:pos}{lm:nat | lm <= nl; lm <= 524288}{om:
 
 
 
+
+
+
+
+
+fn set_seed_check (on: bool): void
+
+
+
+
+
+
+
+
+
+
+fn check_seed_header {lo:agz}{no:pos}{om:nat | om <= no}
+  (out_bv: !$A.borrow(byte, lo, no), out_len: int om): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn run_patsopt {lph:agz}{lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
    in_bv: !$A.borrow(byte, li, ni), in_len: int im): int
+
 
 
 

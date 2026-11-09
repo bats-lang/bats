@@ -908,6 +908,55 @@ fn memo_record {lph,ln,lo,li:agz}{nn:pos}{nl:nat | nl <= nn}{no,ni:pos}{om:nat |
 in end
 
 (* ============================================================
+   The seed's runtime header (runtime-header keyword, bats#624)
+   ============================================================ *)
+
+(* Whether the C of this pass is also compiled against the runtime header
+   `bats build --to-c` writes, alone: set by do_build for the native pass of
+   a project whose bats.toml says seed = true (build/.bats_seed holds the header) *)
+val g_seed_check = ref<bool>(false)
+
+#pub fn set_seed_check (on: bool): void
+
+implement set_seed_check (on) = !g_seed_check := on
+
+(* The C out[0, out_len) (a NUL-terminated path) compiled for its syntax with the
+   flags of the seed's Makefile and no header but the runtime header, as the seed is
+   built from bootstrap/c: an undeclared name (a prelude function the header lacks,
+   atspre_exit or atspre_FILE_stdout) is reported with the C's path, its line and the
+   name, and the build fails, at check as at build. -Werror=implicit-function-declaration
+   because older compilers only warn of a call to an undeclared function. 0 when it
+   compiles or the pass is not checked, else 1 *)
+#pub fn check_seed_header {lo:agz}{no:pos}{om:nat | om <= no}
+  (out_bv: !$A.borrow(byte, lo, no), out_len: int om): int
+
+implement check_seed_header {lo}{no}{om} (out_bv, out_len) =
+  if ~(!g_seed_check) then 0 else let
+    val (nul_x | exec) = $P.path_of_string_proved("clang")
+    val @(fz_x, bv_x) = $A.barr_freeze(exec)
+    var a1 = $B.create() val () = bput_v(a1, "clang")
+    var a2 = $B.create() val () = bput_v(a2, "-fsyntax-only")
+    var a3 = $B.create() val () = bput_v(a3, "-Werror=implicit-function-declaration")
+    var a4 = $B.create() val () = bput_v(a4, "-D_ATS_CCOMP_HEADER_NONE_")
+    var a5 = $B.create() val () = bput_v(a5, "-D_ATS_CCOMP_EXCEPTION_NONE_")
+    var a6 = $B.create() val () = bput_v(a6, "-D_ATS_CCOMP_PRELUDE_NONE_")
+    var a7 = $B.create() val () = bput_v(a7, "-D_ATS_CCOMP_RUNTIME_NONE_")
+    var a8 = $B.create() val () = bput_v(a8, "-include")
+    var a9 = $B.create() val () = bput_v(a9, "build/.bats_seed/_bats_native_runtime.h")
+    var a10 = $B.create() val () = bput_v(a10, "-Ibuild/.bats_seed/_bats_native_stubs")
+    val rc = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2),
+      $L.list_vt_cons(mk_arg(a3), $L.list_vt_cons(mk_arg(a4), $L.list_vt_cons(mk_arg(a5),
+      $L.list_vt_cons(mk_arg(a6), $L.list_vt_cons(mk_arg(a7), $L.list_vt_cons(mk_arg(a8),
+      $L.list_vt_cons(mk_arg(a9), $L.list_vt_cons(mk_arg(a10),
+      $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_nil()))))))))))))
+    val () = $A.cborrow_drop(fz_x, bv_x)
+    val () = $A.barr_free($A.barr_thaw(fz_x))
+    val () = (if rc <> 0 then let
+        val () = prerr! ("error: the C does not compile against _bats_native_runtime.h alone, as the seed in bootstrap/c is built; use only what the header declares\n")
+      in set_build_err() end else ())
+  in (if rc = 0 then 0 else 1) end
+
+(* ============================================================
    patsopt, through the cache
    ============================================================ *)
 
@@ -992,7 +1041,8 @@ implement run_patsopt (ph, phlen, out_bv, out_len, in_bv, in_len) =
   val () = $A.free<byte>($A.thaw<byte>(fz_ra))
   val rc2 = (if rc <> 0 then rc
     else let
-      val flawed = check_emitted_flaws(out_bv, out_len, in_bv, in_len)
+      val flawed0 = check_emitted_flaws(out_bv, out_len, in_bv, in_len)
+      val flawed = (if flawed0 <> 0 then flawed0 else check_seed_header(out_bv, out_len)): int
       val () = (if flawed <> 0 then remove_output_m(out_bv, out_len, out_len) else ())
     in flawed end): int
   (* kept only when patsopt passed, and what follows it too *)
