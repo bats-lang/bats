@@ -46,10 +46,6 @@ rm -f "$TMP/c/.bats_stamp" "$TMP/c/.bats_stamp.new" "$TMP/c/.bats_cc" "$TMP/c/.b
 # files, there when the project's build/ was
 rm -rf "$TMP/c/.bats_valid"
 
-# The runtime header a check compiled the C against (bats#624) is the one --to-c
-# writes at the top of the seed, so its copy under build/ is not part of it
-rm -rf "$TMP/c/.bats_seed"
-
 # Each C and object has a key beside it (bats#254) that hashes patsopt's
 # raw C, which names this machine's paths; the seed's Makefile uses none
 find "$TMP/c" -name '*.key' -exec rm -f {} +
