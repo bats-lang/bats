@@ -271,8 +271,8 @@ fn shards_of {l:agz}{k:nat | k <= 8192} (pins: !$A.arr(byte, l, 8192), k: int k)
   val n = lookup(pins, k, nm, 6, 0)
   val () = $A.free<byte>(nm)
 in
-  if n >= 1 then (if n <= 64 then n else let val () = say_and_stop("shards must be 1 to 64") in exit(1) end)
-  else let val () = say_and_stop("the pins file has no line \"shards <count>\"") in exit(1) end
+  if n >= 1 then (if n <= 64 then n else let val () = say_and_stop("shards must be 1 to 64") in 0 end)
+  else let val () = say_and_stop("the pins file has no line \"shards <count>\"") in 0 end
 end
 
 (* The path <tests dir>/<name><suffix> *)
@@ -582,7 +582,7 @@ fn run {la:agz}{ka:nat | ka <= 8192} (args: !$A.arr(byte, la, 8192), ka: int ka)
   val () = println! ()
   val () = $A.free<byte>(pins)
   val status = run_or_stop(cmd, found)
-in (if status = 0 then () else exit(status)) end
+in (if status = 0 then () else exit_void(status)) end
 
 fn dispatch {l:agz}{k:nat | k <= 8192} (args: !$A.arr(byte, l, 8192), k: int k): void =
   if arg_is(args, k, 1, "plan") then plan(args, k)
