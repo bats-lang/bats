@@ -206,10 +206,10 @@ jobs:
           include-hidden-files: true
           if-no-files-found: ignore
 
-  # The shards of the fixture groups (bats#619, keyword: fixture-shards): the tool is a bats
-  # program (tests/fixture-shards, its usage is in its first comment), built here with the seed,
-  # which checks tests/fixture-shards/shards.txt against the groups there are, prints the
-  # groups of every shard and writes the matrix of the `fixtures` jobs
+  # The shards of the fixture groups (bats#619, keyword: fixture-shards): the tool is the
+  # subcommand `bats fixture-shards` (src/fixture_shards.bats, bats#621) of the seed, which
+  # checks src/fixture_shards.txt against the groups there are, prints the groups of every
+  # shard and writes the matrix of the `fixtures` jobs
   plan:
     needs: affected
     if: ${{ (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
@@ -226,22 +226,9 @@ jobs:
           mkdir -p ~/bats-bin
           cp ~/seed/debug/bats ~/bats-bin/bats
 
-      - name: Install ATS2
-        run: ~/bats-bin/bats ats2 install
-
-      - name: Fetch the package repository
-        run: |
-          git init -q ~/repository
-          git -C ~/repository fetch -q --depth 1 https://github.com/bats-lang/repository-prototype.git "$(tr -d '[:space:]' < .github/repository-version)"
-          git -C ~/repository checkout -q FETCH_HEAD
-
-      - name: Build the fixture-shards tool
-        working-directory: tests/fixture-shards
-        run: ~/bats-bin/bats build --repository ~/repository
-
       - name: The shards, and every group in exactly one
         id: plan
-        run: tests/fixture-shards/dist/debug/fixture_shards plan tests/fixture-shards/shards.txt tests "$GITHUB_OUTPUT"
+        run: ~/bats-bin/bats fixture-shards plan src/fixture_shards.txt tests "$GITHUB_OUTPUT"
 
   # One job for each shard (a matrix over the shards `plan` listed), each on its own runner:
   # it builds the compiler and runs its groups with tests/run-fixtures.sh, whose first line
@@ -293,13 +280,9 @@ jobs:
           export PATH=~/bats-bin:$PATH
           bats build --repository ~/repository
 
-      - name: Build the fixture-shards tool
-        working-directory: tests/fixture-shards
-        run: ~/bats-bin/bats build --repository ~/repository
-
       - name: Fixture tests of shard ${{ matrix.shard }}
         # fixture-times: each group and each ok case prints its seconds as it ends, and the ten slowest groups are summarised (bats-lang/bats#595)
-        run: tests/fixture-shards/dist/debug/fixture_shards run tests/fixture-shards/shards.txt tests ${{ matrix.shard }} dist/debug/bats ~/repository
+        run: dist/debug/bats fixture-shards run src/fixture_shards.txt tests ${{ matrix.shard }} dist/debug/bats ~/repository
 
       - name: Upload the temp directories of failed test scripts
         if: failure()
