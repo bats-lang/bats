@@ -135,6 +135,11 @@ jobs:
           export PATH=~/bats-bin:$PATH
           bats build --repository ~/repository
 
+      - name: bats test
+        run: |
+          export PATH=~/bats-bin:$PATH
+          bats test --repository ~/repository
+
       # The manifest test is written in bats (bats#446): built, then run on the compiler under test
       - name: Build the toml-fields test
         working-directory: tests/toml-fields
