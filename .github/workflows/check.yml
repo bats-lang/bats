@@ -76,15 +76,15 @@ jobs:
           ~/bats-bin/bats affected "$BASE" HEAD >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
 
-  check:
+  # The groups of fixture tests (tests/<group>/check.sh) run in the `fixtures` jobs below, one
+  # job for each shard `plan` lists (bats#619, keyword: fixture-shards); this job builds the
+  # compiler, runs the tests written in bats and verifies bootstrap/c. The required `check`
+  # is the aggregate at the end, which passes only when every job passed
+  build:
     needs: affected
-    if: ${{ always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
+    if: ${{ (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
     runs-on: ubuntu-24.04
     steps:
-      # the required check must not pass because the cheap job failed
-      - name: The cheap job passed
-        run: test "${{ needs.affected.result }}" = success
-
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       # A failing test script keeps its temp directory there (tests/keep-on-fail.sh,
@@ -134,10 +134,6 @@ jobs:
         run: |
           export PATH=~/bats-bin:$PATH
           bats build --repository ~/repository
-
-      - name: Fixture tests
-        # fixture-times: each group and each ok case prints its seconds as it ends, and the ten slowest groups are summarised (bats-lang/bats#595)
-        run: tests/run-fixtures.sh dist/debug/bats ~/repository
 
       # The manifest test is written in bats (bats#446): built, then run on the compiler under test
       - name: Build the toml-fields test
@@ -209,6 +205,125 @@ jobs:
             tests/proved-sha256/work
           include-hidden-files: true
           if-no-files-found: ignore
+
+  # The shards of the fixture groups (bats#619, keyword: fixture-shards): the tool is a bats
+  # program (tests/fixture-shards, its usage is in its first comment), built here with the seed,
+  # which checks tests/fixture-shards/shards.txt against the groups there are, prints the
+  # groups of every shard and writes the matrix of the `fixtures` jobs
+  plan:
+    needs: affected
+    if: ${{ (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
+    runs-on: ubuntu-24.04
+    outputs:
+      shards: ${{ steps.plan.outputs.shards }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Build seed compiler from bootstrap/c
+        run: |
+          cp -R bootstrap/c ~/seed
+          make -j$(nproc) -C ~/seed debug/bats
+          mkdir -p ~/bats-bin
+          cp ~/seed/debug/bats ~/bats-bin/bats
+
+      - name: Install ATS2
+        run: ~/bats-bin/bats ats2 install
+
+      - name: Fetch the package repository
+        run: |
+          git init -q ~/repository
+          git -C ~/repository fetch -q --depth 1 https://github.com/bats-lang/repository-prototype.git "$(tr -d '[:space:]' < .github/repository-version)"
+          git -C ~/repository checkout -q FETCH_HEAD
+
+      - name: Build the fixture-shards tool
+        working-directory: tests/fixture-shards
+        run: ~/bats-bin/bats build --repository ~/repository
+
+      - name: The shards, and every group in exactly one
+        id: plan
+        run: tests/fixture-shards/dist/debug/fixture_shards plan tests/fixture-shards/shards.txt tests "$GITHUB_OUTPUT"
+
+  # One job for each shard (a matrix over the shards `plan` listed), each on its own runner:
+  # it builds the compiler and runs its groups with tests/run-fixtures.sh, whose first line
+  # of output is the list of the groups of the shard and which names the group that failed
+  fixtures:
+    name: fixtures (shard ${{ matrix.shard }})
+    needs: [affected, plan]
+    if: ${{ (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # A failing test script keeps its temp directory there (tests/keep-on-fail.sh,
+      # bats#478) and the last step uploads it
+      - name: Directory for the evidence of failed test scripts
+        run: echo "BATS_KEPT_DIR=$RUNNER_TEMP/kept" >> "$GITHUB_ENV"
+
+      - name: Install libgmp-dev and wasm-ld (wasm fixtures)
+        run: sudo apt-get install -y -q libgmp-dev lld
+
+      - name: Build seed compiler from bootstrap/c
+        run: |
+          cp -R bootstrap/c ~/seed
+          make -j$(nproc) -C ~/seed debug/bats
+          mkdir -p ~/bats-bin
+          cp ~/seed/debug/bats ~/bats-bin/bats
+
+      - name: Install ATS2
+        run: ~/bats-bin/bats ats2 install
+
+      - name: Fetch deps from lock
+        run: |
+          git init -q ~/repository
+          git -C ~/repository fetch -q --depth 1 https://github.com/bats-lang/repository-prototype.git "$(tr -d '[:space:]' < .github/repository-version)"
+          git -C ~/repository checkout -q FETCH_HEAD
+          mkdir -p bats_modules
+          awk '!seen[$1]++ { print $1, $2 }' bats.lock | while read name version; do
+            dir="bats_modules/$name"
+            mkdir -p "$dir"
+            unzip -o ~/repository/"$name"/"${name}_${version}.bats" -d "$dir"
+          done
+
+      - name: bats build
+        run: |
+          export PATH=~/bats-bin:$PATH
+          bats build --repository ~/repository
+
+      - name: Build the fixture-shards tool
+        working-directory: tests/fixture-shards
+        run: ~/bats-bin/bats build --repository ~/repository
+
+      - name: Fixture tests of shard ${{ matrix.shard }}
+        # fixture-times: each group and each ok case prints its seconds as it ends, and the ten slowest groups are summarised (bats-lang/bats#595)
+        run: tests/fixture-shards/dist/debug/fixture_shards run tests/fixture-shards/shards.txt tests ${{ matrix.shard }} dist/debug/bats ~/repository
+
+      - name: Upload the temp directories of failed test scripts
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: kept-fixtures-${{ matrix.shard }}
+          path: ${{ runner.temp }}/kept
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  # The one check the branch rules require: green only when every job above is green
+  # (repository-prototype's check-aggregate, #328, called by commit, as quire calls it; a
+  # composite action runs inside this job, so the check keeps the name `check`). Skipped
+  # when the change is inert or the pull request is a draft, as before
+  check:
+    needs: [affected, plan, build, fixtures]
+    if: ${{ always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft) && (needs.affected.result != 'success' || needs.affected.outputs.inert != 'true') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Every job passed
+        uses: bats-lang/repository-prototype/.github/actions/check-aggregate@c190c73390d21dcf2586c2a452de08122d6608bb # repository-prototype main c190c73
+        with:
+          jobs: affected plan build fixtures
+          results: ${{ toJSON(needs) }}
 
   # The setup action other bats repositories call by commit
   # (bats-lang/bats#274), run on a tiny project from the commit under test
