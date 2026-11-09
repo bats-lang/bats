@@ -1,12 +1,13 @@
-(* fixture-shards -- which of the fixture groups (tests/<group>/check.sh) a job of check.yml runs (bats#619; keyword: fixture-shards).
-   fixture_shards plan <pins file> <tests dir> <output file>
+(* fixture_shards -- which of the fixture groups (tests/<group>/check.sh) a job of check.yml runs (bats#619, bats#621; keyword: fixture-shards).
+   bats fixture-shards plan <pins file> <tests dir> <output file>
      checks the pins file, prints the groups of every shard, fails unless each group is in exactly one shard,
      and appends the line shards=[1,2,...] to the output file ($GITHUB_OUTPUT): the matrix of the jobs.
-   fixture_shards run <pins file> <tests dir> <shard> <bats> <repository>
+   bats fixture-shards run <pins file> <tests dir> <shard> <bats> <repository>
      prints the groups of that shard as its first line and runs them with <tests dir>/run-fixtures.sh.
    A group is in the shard the pins file gives it (a line "<group> <shard>"), else in shard
-   (sum of the bytes of its name) mod (shards) + 1. The first line of the file is "shards <count>". *)
-#target native
+   (sum of the bytes of its name) mod (shards) + 1. The first line of the file is "shards <count>".
+   The pins file is src/fixture_shards.txt. The code below reads its arguments with argv[0] = fixture-shards
+   (the command line from the subcommand on), so "plan" and "run" are argument 1. *)
 #include "share/atspre_staload.hats"
 
 #use array as A
@@ -270,8 +271,8 @@ fn shards_of {l:agz}{k:nat | k <= 8192} (pins: !$A.arr(byte, l, 8192), k: int k)
   val n = lookup(pins, k, nm, 6, 0)
   val () = $A.free<byte>(nm)
 in
-  if n >= 1 then (if n <= 64 then n else let val () = say_and_stop("shards must be 1 to 64") in exit(1) end)
-  else let val () = say_and_stop("the pins file has no line \"shards <count>\"") in exit(1) end
+  if n >= 1 then (if n <= 64 then n else let val () = say_and_stop("shards must be 1 to 64") in 0 end)
+  else let val () = say_and_stop("the pins file has no line \"shards <count>\"") in 0 end
 end
 
 (* The path <tests dir>/<name><suffix> *)
@@ -580,20 +581,44 @@ fn run {la:agz}{ka:nat | ka <= 8192} (args: !$A.arr(byte, la, 8192), ka: int ka)
       in found end): int
   val () = println! ()
   val () = $A.free<byte>(pins)
-  val () = fileref_flush(stdout_ref)
   val status = run_or_stop(cmd, found)
-in (if status = 0 then () else exit(status)) end
+in (if status = 0 then () else exit_void(status)) end
 
 fn dispatch {l:agz}{k:nat | k <= 8192} (args: !$A.arr(byte, l, 8192), k: int k): void =
   if arg_is(args, k, 1, "plan") then plan(args, k)
   else if arg_is(args, k, 1, "run") then run(args, k)
   else let
-    val () = println! ("usage: fixture_shards plan <pins file> <tests dir> <output file>")
-    val () = println! ("       fixture_shards run <pins file> <tests dir> <shard> <bats> <repository>")
+    val () = println! ("usage: bats fixture-shards plan <pins file> <tests dir> <output file>")
+    val () = println! ("       bats fixture-shards run <pins file> <tests dir> <shard> <bats> <repository>")
   in exit_void(2) end
 
-implement main0 () = let
+(* The command line from argument p on, as the arguments of a program named by it: dst[0, ...) *)
+fun shift_args {l:agz}{ld:agz}{k:nat | k <= 8192}{p:nat | p <= k}{j:nat | j <= 8192} .<k - p>.
+  (src: !$A.arr(byte, l, 8192), dst: !$A.arr(byte, ld, 8192), k: int k, p: int p, j: int j): [r:nat | j <= r; r <= 8192] int r =
+  if p >= k then j
+  else if j >= 8192 then j
+  else let
+    val () = $A.set<byte>(dst, j, $A.int2byte($AR.low_byte(byte2int0($A.get<byte>(src, p)))))
+  in shift_args(src, dst, k, p + 1, j + 1) end
+
+(* dispatch on the command line from argument 1 on *)
+fn dispatch_shifted {l:agz}{k:nat | k <= 8192} (args: !$A.arr(byte, l, 8192), k: int k): void = let
+  val rest = $A.alloc<byte>(8192)
+  val kr = shift_args(args, rest, k, arg_start(args, k, 0, 1), 0)
+  val () = dispatch(rest, kr)
+in $A.free<byte>(rest) end
+
+(* The command line is dispatched when it names fixture-shards *)
+fn dispatch_if {l:agz}{k:nat | k <= 8192} (named: bool, args: !$A.arr(byte, l, 8192), k: int k): void =
+  if named then dispatch_shifted(args, k) else ()
+
+(* Runs bats fixture-shards when that is the command given and answers true; false for any other command *)
+#pub fn fixture_shards_main (): bool
+
+implement fixture_shards_main () = let
   val args = $A.alloc<byte>(8192)
   val k = (case+ $E.args_read(args, 8192) of | ~$R.some(k) => k | ~$R.none() => 0): [k:nat | k <= 8192] int k
-  val () = dispatch(args, k)
-in $A.free<byte>(args) end
+  val handled = arg_is(args, k, 1, "fixture-shards")
+  val () = dispatch_if(handled, args, k)
+  val () = $A.free<byte>(args)
+in handled end
