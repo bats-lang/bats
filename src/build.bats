@@ -68,15 +68,9 @@ in
       val () = bput_v(hb, "staload \"./")
       val () = copy_to_builder_v(sats_bv, bn_start, bn_end, ss, hb)
       val () = bput_v(hb, "\"\n")
-      (* in test mode also under an alias, which the implementation of __bats_test names (see the emitter) *)
-      val () = (if is_test_mode() then let
-          val () = bput_v(hb, "staload BATS_SELF = \"./")
-          val () = copy_to_builder_v(sats_bv, bn_start, bn_end, ss, hb)
-        in bput_v(hb, "\"\n") end else ())
       val () = $B.rope_append(dats, hb)
-      val @(emit_lines, safety_errors) =
+      val @(pre_lines, safety_errors) =
         do_emit(bv_src, m, xs, build_target, is_unsafe, sats, dats)
-      val pre_lines = (if is_test_mode() then emit_lines + 1 else emit_lines): int
       val () = spans_free(xs)
       val () = $A.drop<byte>(fz_src, bv_src)
       val () = whole_free(ar, $A.thaw<byte>(fz_src))

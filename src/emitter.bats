@@ -538,16 +538,14 @@ fun put_dispatch {l:agz}{nt:pos}{m:nat | m <= nt}{p:nat | p <= m} .<m - p>.
   end
 
 (* When there are k > 0 tests t[0, tlen): the declaration of
-   __bats_test to sats, its implementation to dats. The implementation names the module's own sats (the alias
-   BATS_SELF the dats staloads in test mode), since a module with tests that staloads another one's sats sees
-   two declarations of __bats_test and an unqualified implement binds to the later one (keyword: test dispatch) *)
+   __bats_test to sats, its implementation to dats *)
 fn put_dispatch_decl {l:agz}{nt:pos}{tlen:nat | tlen <= nt}
   (k: int, t: !$A.borrow(byte, l, nt), tlen: int tlen,
    sats: !$B.rope, dats: !$B.rope): void =
   if k <= 0 then ()
   else let
     val () = rbput(sats, "\nfun __bats_test (i: int): bool\n")
-    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement $BATS_SELF.__bats_test (i) =\n  ")
+    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
     val () = put_dispatch(t, tlen, 0, tlen, 0, dats)
   in rbput(dats, "false\n") end
 
