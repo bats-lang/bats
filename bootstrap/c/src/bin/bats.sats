@@ -35,12 +35,7 @@ staload "affected.sats"
 staload "merge_proof.sats"
 staload "pins_check.sats"
 staload "check_push.sats"
-staload "fixture_shards.sats"
 staload "_bats_inputs.sats"
-
-
-
-
 
 
 

@@ -36,7 +36,6 @@ staload "affected.sats"
 staload "merge_proof.sats"
 staload "pins_check.sats"
 staload "check_push.sats"
-staload "fixture_shards.sats"
 staload "_bats_inputs.sats"
 
 (* The subcommands *)
@@ -137,10 +136,6 @@ fn print_usage(): void = let
   val () = println! ("                               Print OK when base...head moves only pins that exist, ahead, with the sidecars' sha256 (keyword: pins-check)")
   val () = println! ("  check-push [--repository <dir>]")
   val () = println! ("                               Run the first-minute checks of a push: the locks against the pinned package repository, the compiler against its pin, BATS_PATSOPT_MEM_MB (keyword: check-push)")
-  val () = println! ("  fixture-shards plan <pins file> <tests dir> <output file>")
-  val () = println! ("                               Check the pins file of the fixture groups, print the groups of every shard and append shards=[1,2,...] to the output file (keyword: fixture-shards)")
-  val () = println! ("  fixture-shards run <pins file> <tests dir> <shard> <bats> <repository>")
-  val () = println! ("                               Run the fixture groups of one shard with <tests dir>/run-fixtures.sh (keyword: fixture-shards)")
   val () = println! ("  completions <shell>          Generate shell completions (bash, zsh, fish)")
   val () = println! ("  fixtures <dir> [--only <member>]... [--bless] [--cold] [--work <dir>] [--memo <dir>] [--prune] [--repository <dir>] [--list-affected <path>...]")
   val () = println! ("                               Run the accept and reject fixtures of <dir> against a copy of the project;")
@@ -786,7 +781,7 @@ implement __BATS_main0 () = let
   (* bats with-env runs the command it is given; argv[1] is read before
      bats's own arguments are, so the command's own flags (--help, --) are
      its alone *)
-  val () = (if with_env_main () then () else if fixtures_main () then () else if pins_main () then () else if affected_main () then () else if merge_proof_main () then () else if pins_check_main () then () else if check_push_main () then () else if fixture_shards_main () then () else bats_main ())
+  val () = (if with_env_main () then () else if fixtures_main () then () else if pins_main () then () else if affected_main () then () else if merge_proof_main () then () else if pins_check_main () then () else if check_push_main () then () else bats_main ())
 in
   if has_build_err () then exit_void (if get_cap_exit () <> 0 then get_cap_exit () else 1)
   else if get_exit_code () <> 0 then exit_void (get_exit_code ())
