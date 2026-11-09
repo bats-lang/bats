@@ -1185,6 +1185,12 @@ staload "merge_proof.sats"
 
 
 
+
+
+
+
+
+
 fn prcheck_main (): bool
 
 
@@ -1220,6 +1226,18 @@ fn prcheck_main (): bool
 
 fn prcheck_fixture {a,b,c:nat | a < 4096; b < 4096; c < 4096}
   (diff: string a, body: string b, ticket: string c, checks: int, exempt: bool): int
+
+
+fn prcheck_fixture_resolved {a,b,c:nat | a < 4096; b < 4096; c < 4096}
+  (diff: string a, body: string b, ticket: string c, checks: int, found: bool): int
+
+
+
+
+
+
+
+
 
 
 
