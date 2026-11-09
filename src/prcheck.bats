@@ -22,6 +22,9 @@ val g_on = ref<int>(0)
 val g_hits = ref<int>(0)
 val g_width = ref<int>(100)
 val g_resolve = ref<bool>(false)
+
+(* Whether the pull request is from a relock/ branch: the daily relock has no ticket of its own, so checks 8 and 10 leave it alone (keyword: prcheck) *)
+val g_exempt = ref<bool>(false)
 val g_path_at = ref<pos_t>(~1)
 val g_path_to = ref<pos_t>(0)
 val g_kind = ref<int>(0)
@@ -153,6 +156,24 @@ fun has_word_ci {l:agz}{n:pos}{e:nat | e <= n}{p:int}{sn:nat} .<max(e - p, 0)>.
   else if lit_ci(bv, p, e, s, sn, 0) && ~is_word(peek(bv, p - 1, e)) && ~is_word(peek(bv, p + sn, e)) then true
   else has_word_ci(bv, p + 1, e, s, sn)
 
+(* Whether the word s is in bv[p, e) as a pointer: nothing but a stop (, . ; : ) or the end of the text follows it, as in
+   "the lock below." and not as in "below the handles", where it says where a thing is *)
+fun has_pointer_ci {l:agz}{n:pos}{e:nat | e <= n}{p:int}{sn:nat} .<max(e - p, 0)>.
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, s: string sn, sn: int sn): bool =
+  if p >= e then false
+  else if lit_ci(bv, p, e, s, sn, 0) && ~is_word(peek(bv, p - 1, e)) && ~is_word(peek(bv, p + sn, e)) then let
+    val q = skip_blank(bv, p + sn, e)
+    val c = peek(bv, q, e)
+  in
+    if q >= e || c = 44 || c = 46 || c = 59 || c = 58 || c = 41 || c = 42 then true
+    else has_pointer_ci(bv, p + 1, e, s, sn)
+  end
+  else has_pointer_ci(bv, p + 1, e, s, sn)
+
+fn pointer_ci {l:agz}{n:pos}{e:nat | e <= n}{p:int}{sn:nat}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, s: string sn): bool =
+  has_pointer_ci(bv, p, e, s, g1u2i(string1_length(s)))
+
 fn word_ci {l:agz}{n:pos}{e:nat | e <= n}{p:int}{sn:nat}
   (bv: !$A.borrow(byte, l, n), p: int p, e: int e, s: string sn): bool =
   has_word_ci(bv, p, e, s, g1u2i(string1_length(s)))
@@ -234,7 +255,7 @@ fn status_in {l:agz}{n:pos}{e:nat | e <= n}{a:int}
   else if has_run_id(bv, a, e) then "a comment names a run id: the run is not the reason"
   else if verdict_opener(bv, a, e) then "a comment opens with a verdict word (Flake:, Status:): it says why"
   else if word_ci(bv, a, e, "currently") || word_ci(bv, a, e, "temporarily") || word_ci(bv, a, e, "as of")
-    || word_ci(bv, a, e, "for now") || word_ci(bv, a, e, "at the moment") || word_ci(bv, a, e, "no longer")
+    || word_ci(bv, a, e, "for now") || word_ci(bv, a, e, "at the moment")
     then "a comment states the status of the code: it says what is true, in one line, with its keyword"
   else ""
 
@@ -244,8 +265,8 @@ fn pointer_in {l:agz}{n:pos}{e:nat | e <= n}{a:int}
   if has_text(bv, a, e, "CLAUDE.md") then "names CLAUDE.md: a comment carries its reason and a keyword"
   else if has_text(bv, a, e, ".claude/rules") then "names a rule file: a comment carries its reason and a keyword"
   else if word_ci(bv, a, e, "section") then "names a section: a comment carries its reason and a keyword"
-  else if word_ci(bv, a, e, "below") then "points below: a comment carries its reason and a keyword"
-  else if word_ci(bv, a, e, "above") then "points above: a comment carries its reason and a keyword"
+  else if pointer_ci(bv, a, e, "below") then "points below: a comment carries its reason and a keyword"
+  else if pointer_ci(bv, a, e, "above") then "points above: a comment carries its reason and a keyword"
   else ""
 
 (* ------------------------------------------------------------------ *)
@@ -352,57 +373,61 @@ end
 (* ------------------------------------------------------------------ *)
 (* Check 9: a rule file's paths: cover the files its text names (keyword: prcheck) *)
 
-(* Whether the glob bv[pi, pe) matches the path bv[ti, te): ** is any run, * any run without a /, anything else itself.
+(* Whether the glob gb[pi, pe) matches the path tb[ti, te): ** is any run, * any run without a /, anything else itself.
    gmatch reads the glob at pi and the text at ti; gtry lets the star before pi take the text from ti on. *)
-fun gmatch {l:agz}{n:pos}{m:nat | m <= n}{pi,pe,ti,te:nat | pi <= pe; ti <= te; pe <= m; te <= m} .<pe - pi, 0, te - ti>.
-  (bv: !$A.borrow(byte, l, n), pi: int pi, pe: int pe, ti: int ti, te: int te, m: int m): bool =
+fun gmatch {lg:agz}{ng:pos}{mg:nat | mg <= ng}{lt:agz}{nt:pos}{mt:nat | mt <= nt}{pi,pe,ti,te:nat | pi <= pe; ti <= te; pe <= mg; te <= mt} .<pe - pi, 0, te - ti>.
+  (gb: !$A.borrow(byte, lg, ng), pi: int pi, pe: int pe, mg: int mg,
+   tb: !$A.borrow(byte, lt, nt), ti: int ti, te: int te, mt: int mt): bool =
   if pi >= pe then ti >= te
-  else if peek(bv, pi, m) = 42 then
+  else if peek(gb, pi, mg) = 42 then
     (if pi + 1 < pe then
-      (if peek(bv, pi + 1, m) = 42 then gtry(bv, pi + 2, pe, ti, te, m, true)
-      else gtry(bv, pi + 1, pe, ti, te, m, false))
-    else gtry(bv, pi + 1, pe, ti, te, m, false))
+      (if peek(gb, pi + 1, mg) = 42 then gtry(gb, pi + 2, pe, mg, tb, ti, te, mt, true)
+      else gtry(gb, pi + 1, pe, mg, tb, ti, te, mt, false))
+    else gtry(gb, pi + 1, pe, mg, tb, ti, te, mt, false))
   else if ti < te then
-    (if peek(bv, pi, m) = peek(bv, ti, m) then gmatch(bv, pi + 1, pe, ti + 1, te, m) else false)
+    (if peek(gb, pi, mg) = peek(tb, ti, mt) then gmatch(gb, pi + 1, pe, mg, tb, ti + 1, te, mt) else false)
   else false
 
-and gtry {l:agz}{n:pos}{m:nat | m <= n}{pi,pe,ti,te:nat | pi <= pe; ti <= te; pe <= m; te <= m} .<pe - pi, 1, te - ti>.
-  (bv: !$A.borrow(byte, l, n), pi: int pi, pe: int pe, ti: int ti, te: int te, m: int m, deep: bool): bool =
-  if gmatch(bv, pi, pe, ti, te, m) then true
+and gtry {lg:agz}{ng:pos}{mg:nat | mg <= ng}{lt:agz}{nt:pos}{mt:nat | mt <= nt}{pi,pe,ti,te:nat | pi <= pe; ti <= te; pe <= mg; te <= mt} .<pe - pi, 1, te - ti>.
+  (gb: !$A.borrow(byte, lg, ng), pi: int pi, pe: int pe, mg: int mg,
+   tb: !$A.borrow(byte, lt, nt), ti: int ti, te: int te, mt: int mt, deep: bool): bool =
+  if gmatch(gb, pi, pe, mg, tb, ti, te, mt) then true
   else if ti >= te then false
-  else if ~deep && peek(bv, ti, m) = 47 then false
-  else gtry(bv, pi, pe, ti + 1, te, m, deep)
+  else if ~deep && peek(tb, ti, mt) = 47 then false
+  else gtry(gb, pi, pe, mg, tb, ti + 1, te, mt, deep)
 
 (* gmatch for a glob whose bounds are not known to be inside the file: false when they are not *)
-fn glob_matches {l:agz}{n:pos}{m:nat | m <= n}{first,last:int}{ts,te:nat | ts <= te; te <= m}
-  (bv: !$A.borrow(byte, l, n), first: int first, last: int last, ts: int ts, te: int te, m: int m): bool =
+fn glob_matches {lg:agz}{ng:pos}{mg:nat | mg <= ng}{lt:agz}{nt:pos}{mt:nat | mt <= nt}{first,last:int}{ts,te:nat | ts <= te; te <= mt}
+  (gb: !$A.borrow(byte, lg, ng), first: int first, last: int last, mg: int mg,
+   tb: !$A.borrow(byte, lt, nt), ts: int ts, te: int te, mt: int mt): bool =
   if first >= 0 then
-    (if first <= last then (if last <= m then gmatch(bv, first, last, ts, te, m) else false) else false)
+    (if first <= last then (if last <= mg then gmatch(gb, first, last, mg, tb, ts, te, mt) else false) else false)
   else false
 
-(* Whether a glob of the list under paths: in the front matter of the rule file bv[0, m) matches the path bv[ts, te).
+(* Whether a glob of the list under paths: in the front matter of the rule file gb[0, mg) matches the path tb[ts, te).
    A list item is a line "- glob" (quotes dropped); the list ends at the first line that is not one. *)
-fun covered_by {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{ts,te:nat | ts <= te; te <= m} .<m - p>.
-  (bv: !$A.borrow(byte, l, n), p: int p, m: int m, ts: int ts, te: int te, inside: bool): bool =
-  if p >= m then false
+fun covered_by {lg:agz}{ng:pos}{mg:nat | mg <= ng}{p:nat | p <= mg}{lt:agz}{nt:pos}{mt:nat | mt <= nt}{ts,te:nat | ts <= te; te <= mt} .<mg - p>.
+  (gb: !$A.borrow(byte, lg, ng), p: int p, mg: int mg,
+   tb: !$A.borrow(byte, lt, nt), ts: int ts, te: int te, mt: int mt, inside: bool): bool =
+  if p >= mg then false
   else let
-    val e = line_end(bv, p, m)
-    val a = skip_blank(bv, p, e)
-    val next = next_line(bv, p, m)
+    val e = line_end(gb, p, mg)
+    val a = skip_blank(gb, p, e)
+    val next = next_line(gb, p, mg)
   in
-    if starts_ci(bv, a, e, "paths:") then covered_by(bv, next, m, ts, te, true)
-    else if inside && peek(bv, a, e) = 45 && is_blank(peek(bv, a + 1, e)) then let
-      val gs = skip_blank(bv, a + 2, e)
-      val q = peek(bv, gs, e)
+    if starts_ci(gb, a, e, "paths:") then covered_by(gb, next, mg, tb, ts, te, mt, true)
+    else if inside && peek(gb, a, e) = 45 && is_blank(peek(gb, a + 1, e)) then let
+      val gs = skip_blank(gb, a + 2, e)
+      val q = peek(gb, gs, e)
       val quoted = (q = 34 || q = 39): bool
       val first = (if quoted then gs + 1 else gs): pos_t
-      val last = (if quoted then char_end(bv, first, e, q) else e): pos_t
+      val last = (if quoted then char_end(gb, first, e, q) else e): pos_t
     in
-      if glob_matches(bv, first, last, ts, te, m) then true
-      else covered_by(bv, next, m, ts, te, inside)
+      if glob_matches(gb, first, last, mg, tb, ts, te, mt) then true
+      else covered_by(gb, next, mg, tb, ts, te, mt, inside)
     end
     else if inside && a < e then false
-    else covered_by(bv, next, m, ts, te, inside)
+    else covered_by(gb, next, mg, tb, ts, te, mt, inside)
   end
 
 (* Whether bv[p, b) holds only the characters of a path *)
@@ -442,10 +467,10 @@ fn path_like {l:agz}{n:pos}{m:nat | m <= n}{a,b:int}
   (bv: !$A.borrow(byte, l, n), a: int a, b: int b, m: int m): bool =
   if a >= 0 then (if a <= b then (if b <= m then path_like_in(bv, a, b, m) else false) else false) else false
 
-(* The paths between backticks on the line bv[p, e) that no glob covers, each said; how many *)
-fun uncovered_in_line {l:agz}{n:pos}{m:nat | m <= n}{e:nat | e <= m}{p:nat | p <= e}{lw:agz}{nw:pos}{wm:nat | wm <= nw} .<e - p>.
-  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, m: int m,
-   shown: !$A.borrow(byte, lw, nw), at: pos_t, to: pos_t, wmax: int wm, count: int): int = let
+(* The paths between backticks on the added line bv[p, e) that no glob of the rule file rb[0, rm) covers, each said; how many *)
+fun uncovered_in_line {l:agz}{n:pos}{m:nat | m <= n}{e:nat | e <= m}{p:nat | p <= e}{lr:agz}{nr:pos}{rm:nat | rm <= nr} .<e - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, m: int m, rb: !$A.borrow(byte, lr, nr), rm: int rm,
+   at: pos_t, to: pos_t, line: int, count: int): int = let
   val q = char_end(bv, p, e, 96)
 in
   if q >= e then count
@@ -453,52 +478,45 @@ in
     val r = char_end(bv, q + 1, e, 96)
   in
     if r >= e then count
-    else if q + 1 <= r && path_like(bv, q + 1, r, m) && ~covered_by(bv, 0, m, q + 1, r, false) then let
+    else if q + 1 <= r && path_like(bv, q + 1, r, m) && ~covered_by(rb, 0, rm, bv, q + 1, r, m, false) then let
       val () = hit(9)
       val () = print! ("check 9: ")
-      val () = print_borrow(shown, at, to, wmax)
+      val () = print_borrow(bv, at, to, m)
+      val () = print! (":")
+      val () = print! (line)
       val () = print! (": the text names ")
       val () = print_borrow(bv, q + 1, r, m)
       val () = print! (", which no glob of paths: covers")
       val () = print_newline()
-    in uncovered_in_line(bv, r + 1, e, m, shown, at, to, wmax, count + 1) end
-    else uncovered_in_line(bv, r + 1, e, m, shown, at, to, wmax, count)
+    in uncovered_in_line(bv, r + 1, e, m, rb, rm, at, to, line, count + 1) end
+    else uncovered_in_line(bv, r + 1, e, m, rb, rm, at, to, line, count)
   end
 end
 
-(* The lines bv[p, m) of the rule file, each checked *)
-fun rule_lines {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{lw:agz}{nw:pos}{wm:nat | wm <= nw} .<m - p>.
-  (bv: !$A.borrow(byte, l, n), p: int p, m: int m,
-   shown: !$A.borrow(byte, lw, nw), at: pos_t, to: pos_t, wmax: int wm, count: int): int =
-  if p >= m then count
+(* Check 9 for the line bv[s, e) a diff adds to the rule file the diff header names at bv[at, to): its paths: are read from
+   the working tree, and only the text a pull request adds is judged, so a rule file's older text is not charged to it *)
+fn check_rule_line {l:agz}{n:pos}{m:nat | m <= n}{at,to:nat | at <= to; to <= m}{s:nat}{e:nat | s <= e; e <= m}
+  (bv: !$A.borrow(byte, l, n), at: int at, to: int to, m: int m, s: int s, e: int e, line: int): void =
+  if find_sub(bv, s, e, "`", 1) < 0 then ()
   else let
-    val e = line_end(bv, p, m)
-    val c = uncovered_in_line(bv, p, e, m, shown, at, to, wmax, count)
-  in
-    if e >= m then c else rule_lines(bv, e + 1, m, shown, at, to, wmax, c)
-  end
-
-(* Check 9 for the rule file the diff names at bv[at, to), read from the working tree *)
-fn check_rule_file {l:agz}{n:pos}{m:nat | m <= n}{at,to:nat | at <= to; to <= m}
-  (bv: !$A.borrow(byte, l, n), at: int at, to: int to, m: int m): void = let
-  var path : $B.builder_v = $B.create()
-  val () = copy_to_builder_v(bv, at, to, m, path)
-  val () = put_char_v(path, 0)
-  val @(path_a, path_len) = $B.into_arr(path)
-  val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
-  val () = (case+ read_whole_m(bv_p, path_len) of
-    | ~whole_err(_) => found_in(bv, m, 9, 0, "the rule file cannot be read from the working tree")
-    | ~whole_ok(ar, piece, size, length) => let
-        val @(fz, rb) = $A.freeze<byte>(piece)
-        val no_paths = (find_sub(rb, 0, length, "paths:", 6) < 0)
-        val () = (if no_paths then found_in(bv, m, 9, 0, "the rule file has no paths: list") else ())
-        val _ = (if no_paths then 0 else rule_lines(rb, 0, length, bv, at, to, m, 0))
-        val () = $A.drop<byte>(fz, rb)
-        val () = whole_free(ar, $A.thaw<byte>(fz))
-      in () end)
-  val () = $A.drop<byte>(fz_p, bv_p)
-  val () = $A.free<byte>($A.thaw<byte>(fz_p))
-in () end
+    var path : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(bv, at, to, m, path)
+    val () = put_char_v(path, 0)
+    val @(path_a, path_len) = $B.into_arr(path)
+    val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
+    val () = (case+ read_whole_m(bv_p, path_len) of
+      | ~whole_err(_) => found_in(bv, m, 9, line, "the rule file cannot be read from the working tree")
+      | ~whole_ok(ar, piece, size, length) => let
+          val @(fz, rb) = $A.freeze<byte>(piece)
+          val no_paths = (find_sub(rb, 0, length, "paths:", 6) < 0)
+          val () = (if no_paths then found_in(bv, m, 9, line, "the rule file has no paths: list") else ())
+          val _ = (if no_paths then 0 else uncovered_in_line(bv, s, e, m, rb, length, at, to, line, 0))
+          val () = $A.drop<byte>(fz, rb)
+          val () = whole_free(ar, $A.thaw<byte>(fz))
+        in () end)
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in () end
 
 (* ------------------------------------------------------------------ *)
 (* The added line (keyword: prcheck) *)
@@ -608,12 +626,26 @@ fn added_line {l:agz}{n:pos}{m:nat | m <= n}{s:nat}{e:nat | s <= e; e <= m}{lc:a
     in
       if q1 < e then (if q2 < e then text_checks(bv, m, q1 + 1, q2, line, cmd, repo_at, repo_to) else ()) else ()
     end else ())
+  (* check 9: the paths a rule file's added text names *)
+  val at = !g_path_at
+  val to = !g_path_to
+  val () = (if check_on(9) then
+      (if at >= 0 then
+        (if at <= to then
+          (if to <= m then
+            (if find_sub(bv, at, to, ".claude/rules/", 14) >= 0 then
+              (if ends_with(bv, at, to, m, ".md") then check_rule_line(bv, at, to, m, s, e, line) else ())
+            else ())
+          else ())
+        else ())
+      else ())
+    else ())
   (* check 4: sed and awk in a script or workflow *)
   val () = (if check_on(4) && ~(!g_exhausted) && kind = 3 && (word_ci(bv, s, e, "sed") || word_ci(bv, s, e, "awk")) then
       found_in(bv, m, 4, line, "sed or awk is code of ours that is not bats: the pull request body needs a line Exhausted: <avenue>")
     else ())
   (* check 7: what a test asserts *)
-  val () = (if !g_test && check_on(7) then let
+  val () = (if !g_test && check_on(7) && kind = 2 then let
       val () = (if has_expect_literal(bv, s, e) then found_in(bv, m, 7, line, "expect() of a literal asserts nothing") else ())
       val () = (if has_text(bv, s, e, "waitForTimeout") then found_in(bv, m, 7, line, "waitForTimeout is a fixed sleep: wait for the event") else ())
       val () = (if fixed_duration(bv, s, e) then found_in(bv, m, 7, line, "a fixed duration is asserted: a time bound is a flake") else ())
@@ -657,10 +689,6 @@ in
     (* check 6: check-pins reads the whole file in the working tree *)
     val () = (if check_on(6) && workflow_path(bv, at, to, m) then
         (if pins_findings_in_path(bv, at, to, m) <> 0 then hit(6) else ())
-      else ())
-    (* check 9 *)
-    val () = (if check_on(9) && find_sub(bv, at, to, ".claude/rules/", 14) >= 0 && ends_with(bv, at, to, m, ".md") then
-        check_rule_file(bv, at, to, m)
       else ())
   in () end
 end
@@ -907,10 +935,10 @@ fn run_checks {ld,lb,lt,lc:agz}{nd,nb,nt:pos}{dm:nat | dm <= nd}{bm:nat | bm <= 
   val closing = has_flag(flags, 1)
   val no_ticket = has_flag(flags, 2)
   val () = (!g_exhausted := has_flag(flags, 4))
-  val () = (if check_on(8) && ~closing && ~no_ticket then
+  val () = (if check_on(8) && ~closing && ~no_ticket && ~(!g_exempt) then
       found_text(8, "body", "This PR closes no ticket. Either it is not finished (finish it on this PR), or the ticket should be broken up first: file the pieces as tickets, then this PR fixes one of them. The body needs a line Fixes #<n>, or No ticket: <reason>.")
     else ())
-  val () = (if check_on(10) && ~no_ticket then
+  val () = (if check_on(10) && ~no_ticket && ~(!g_exempt) then
       (if has_ticket then check_done_when(bv_b, bm, bv_t, tm)
       else found_text(10, "ticket", "the pull request closes a ticket and the ticket text is not given (--ticket)"))
     else ())
@@ -932,7 +960,7 @@ val g_checks_given = ref<bool>(false)
 val g_width_given = ref<bool>(false)
 
 fn usage_error (): void = let
-  val () = prerr! ("usage: bats prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--resolve]")
+  val () = prerr! ("usage: bats prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--branch <name>] [--resolve]")
   val () = prerr_newline()
   val () = prerr! ("  --diff: git diff -U0 --no-renames <base>...<head> (without the generated bootstrap/c); --body: the pull request body;")
   val () = prerr_newline()
@@ -1001,6 +1029,9 @@ fun options {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
           val () = (!g_ticket_at := value_at)
           val () = (!g_ticket_to := value_to)
         in options(cmd, value_to + 1, total) end)
+      else if flag_is(cmd, p, z, "--branch") then let
+        val () = (if lit_here(cmd, value_at, value_to, "relock/", 7, 0) then (!g_exempt := true) else ())
+      in options(cmd, value_to + 1, total) end
       else if flag_is(cmd, p, z, "--repo") then
         (if !g_repo_at >= 0 then false else let
           val () = (!g_repo_at := value_at)
@@ -1239,6 +1270,20 @@ fn test_check_2_status_word (): bool =
 fn test_check_3_names_a_place (): bool =
   run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* see the section of CLAUDE.md *)\n", body_ok, ticket_ok, 8) = 8
 
+(* Check 3: below that points (the nearest to the accepted form) is rejected, below that says where a thing is is not *)
+fn test_check_3_pointer_below_rejected (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* the lock is taken below. *)\n", body_ok, ticket_ok, 8) = 8
+
+fn test_check_3_place_below_accepted (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* the strip lies below the handles *)\n", body_ok, ticket_ok, 8) = 0
+
+(* Check 7 reads JavaScript and TypeScript tests: a Python checker that names waitForTimeout is not a test that sleeps *)
+fn test_check_7_python_checker_accepted (): bool =
+  run_fixture("diff --git a/tests/static/waits.py b/tests/static/waits.py\n@@ -1,0 +2 @@\n+NAME = \"waitForTimeout\"\n", "Exhausted: none\nFixes #1\n", ticket_ok, 128) = 0
+
+fn test_check_7_wait_for_timeout_rejected (): bool =
+  run_fixture("diff --git a/e2e/a.spec.ts b/e2e/a.spec.ts\n@@ -0,0 +1 @@\n+  await page.waitForTimeout(500);\n", body_ok, ticket_ok, 128) = 128
+
 (* Check 4: a new shell script without the body's Exhausted: line, and the same with it *)
 fn test_check_4_shell_of_ours (): bool =
   run_fixture("diff --git a/scripts/x.sh b/scripts/x.sh\nnew file mode 100755\n@@ -0,0 +1 @@\n+echo hi\n", body_ok, ticket_ok, 16) = 16
@@ -1274,19 +1319,31 @@ fn test_check_8_no_closing_line (): bool = run_fixture(diff_ok, "Some text\n", t
 
 fn test_check_8_refs_never_close (): bool = run_fixture(diff_ok, "Refs #3\n", ticket_ok, 256) = 256
 
+fn test_check_8_relock_branch_exempt (): bool = let
+  val () = (!g_exempt := true)
+  val hits = run_fixture(diff_ok, "The daily relock\n", ticket_ok, 256)
+  val () = (!g_exempt := false)
+in hits = 0 end
+
 fn test_check_8_no_ticket_line_accepted (): bool = run_fixture(diff_ok, "No ticket: a typo\n", ticket_ok, 256) = 0
 
-(* Check 9: a rule file whose text names a file its paths: do not cover, and one whose paths: do *)
+(* Check 9: a line a diff adds to a rule file that names a file its paths: do not cover, one whose paths: do, and older text *)
 fn test_check_9_uncovered_path (): bool =
   plant("build/prcheck-tests/.claude/rules", "build/prcheck-tests/.claude/rules/uncovered.md",
     "---\npaths:\n  - src/prcheck.bats\n---\n\nIt reads `src/prcheck.bats` and `scripts/other.sh`.\n")
-  && run_fixture("diff --git a/build/prcheck-tests/.claude/rules/uncovered.md b/build/prcheck-tests/.claude/rules/uncovered.md\n@@ -0,0 +1 @@\n+x\n",
+  && run_fixture("diff --git a/build/prcheck-tests/.claude/rules/uncovered.md b/build/prcheck-tests/.claude/rules/uncovered.md\n@@ -0,0 +1 @@\n+It reads `scripts/other.sh`.\n",
     body_ok, ticket_ok, 512) = 512
 
 fn test_check_9_covered_accepted (): bool =
   plant("build/prcheck-tests/.claude/rules", "build/prcheck-tests/.claude/rules/uncovered.md",
     "---\npaths:\n  - src/prcheck.bats\n  - tests/prcheck/**\n---\n\nIt reads `src/prcheck.bats` and `tests/prcheck/run.sh`.\n")
-  && run_fixture("diff --git a/build/prcheck-tests/.claude/rules/uncovered.md b/build/prcheck-tests/.claude/rules/uncovered.md\n@@ -0,0 +1 @@\n+x\n",
+  && run_fixture("diff --git a/build/prcheck-tests/.claude/rules/uncovered.md b/build/prcheck-tests/.claude/rules/uncovered.md\n@@ -0,0 +1 @@\n+It reads `tests/prcheck/run.sh`.\n",
+    body_ok, ticket_ok, 512) = 0
+
+fn test_check_9_older_text_not_charged (): bool =
+  plant("build/prcheck-tests/.claude/rules", "build/prcheck-tests/.claude/rules/uncovered.md",
+    "---\npaths:\n  - src/prcheck.bats\n---\n\nOlder text reads `scripts/other.sh`.\nA new line.\n")
+  && run_fixture("diff --git a/build/prcheck-tests/.claude/rules/uncovered.md b/build/prcheck-tests/.claude/rules/uncovered.md\n@@ -7,0 +8 @@\n+A new line.\n",
     body_ok, ticket_ok, 512) = 0
 
 (* Check 10: a Done when line that is no one of the four forms, and a body without a row for each line *)

@@ -128,7 +128,7 @@ fn print_usage(): void = let
   val () = println! ("                               Print OK when base...head moves only pins that exist, ahead, with the sidecars' sha256 (keyword: pins-check)")
   val () = println! ("  check-push [--repository <dir>]")
   val () = println! ("                               Run the first-minute checks of a push: the locks against the pinned package repository, the compiler against its pin, BATS_PATSOPT_MEM_MB (keyword: check-push)")
-  val () = println! ("  prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--resolve]")
+  val () = println! ("  prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--branch <name>] [--resolve]")
   val () = println! ("                               Fail a pull request for what reviews keep finding by hand: comment rules, shell of ours, symlinks, floating pins, test assertions, the closing line, rule paths, the ticket's Done when (keyword: prcheck)")
   val () = println! ("  fixture-shards plan <pins file> <tests dir> <output file>")
   val () = println! ("                               Check the pins file of the fixture groups, print the groups of every shard and append shards=[1,2,...] to the output file (keyword: fixture-shards)")
