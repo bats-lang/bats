@@ -32,9 +32,23 @@ fn test_accepting (): bool = run_fixture(diff_ok, body_ok, ticket_ok, 1470) = 0
 fn test_check_1_comment_over_lines (): bool =
   run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* a comment that goes\n", body_ok, ticket_ok, 2) = 2
 
+(* Check 1: a closed comment over the width is rejected, and one of exactly the width is not *)
+fn test_check_1_comment_over_width (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *)\n", body_ok, ticket_ok, 2) = 2
+
+fn test_check_1_comment_at_width_accepted (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *)\n", body_ok, ticket_ok, 2) = 0
+
 (* Check 2: a date and a verdict opener in a comment *)
 fn test_check_2_status_word (): bool =
   run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* Flake: it failed on 2026-11-09 *)\n", body_ok, ticket_ok, 4) = 4
+
+(* Check 2: a run id and a status word in a comment *)
+fn test_check_2_run_id (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* it passed on run 1234567 *)\n", body_ok, ticket_ok, 4) = 4
+
+fn test_check_2_status_word_currently (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* this is currently off *)\n", body_ok, ticket_ok, 4) = 4
 
 (* Check 3: a comment that names a section of CLAUDE.md *)
 fn test_check_3_names_a_place (): bool =
@@ -62,6 +76,10 @@ fn test_check_4_exhausted_allows (): bool =
   run_fixture("diff --git a/scripts/x.sh b/scripts/x.sh\nnew file mode 100755\n@@ -0,0 +1 @@\n+echo hi\n",
     "Fixes #3\nExhausted: the bats process package has no pipe\n", ticket_ok, 16) = 0
 
+(* Check 4: sed in a workflow file *)
+fn test_check_4_sed_in_workflow (): bool =
+  run_fixture("diff --git a/.github/workflows/x.yml b/.github/workflows/x.yml\n@@ -0,0 +1 @@\n+      - run: sed -i s/a/b/ f\n", body_ok, ticket_ok, 16) = 16
+
 (* Check 5: a symlink added *)
 fn test_check_5_symlink (): bool =
   run_fixture("diff --git a/link b/link\nnew file mode 120000\n@@ -0,0 +1 @@\n+target\n", body_ok, ticket_ok, 32) = 32
@@ -83,6 +101,10 @@ fn test_check_7_assertion_of_a_literal (): bool =
 
 fn test_check_7_expect_of_a_value_accepted (): bool =
   run_fixture("diff --git a/e2e/a.spec.ts b/e2e/a.spec.ts\n@@ -0,0 +1 @@\n+  expect(await page.title()).toBe('x');\n", body_ok, ticket_ok, 128) = 0
+
+(* Check 7: a fixed duration bound in a test *)
+fn test_check_7_fixed_duration (): bool =
+  run_fixture("diff --git a/e2e/a.spec.ts b/e2e/a.spec.ts\n@@ -0,0 +1 @@\n+  expect(Date.now() - start).toBeLessThan(500);\n", body_ok, ticket_ok, 128) = 128
 
 (* Check 8: a body with no closing line, and one with only Refs *)
 fn test_check_8_no_closing_line (): bool = run_fixture(diff_ok, "Some text\n", ticket_ok, 256) = 256
