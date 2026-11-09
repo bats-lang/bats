@@ -1728,6 +1728,9 @@ implement do_check() = let
   val () = do_build_plain(Debug(), Native())
   val () = do_build_plain(Debug(), Wasm())
   val () = set_test_mode(false)
+  (* A seed project's C is built again without the $UNITTEST blocks, which the seed does not
+     have, and compiled against the runtime header alone (runtime-header keyword, bats#624) *)
+  val () = (if read_seed_flag() then do_build_plain(Debug(), Native()) else ())
 in
   (* The error is already reported, as Rust's check reports it *)
   if has_build_err() then ()

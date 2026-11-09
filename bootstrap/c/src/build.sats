@@ -587,6 +587,34 @@ fn write_native_runtime_h {l:agz}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn write_wasm_runtime_h(): int
 
 
@@ -1174,6 +1202,8 @@ fn do_build {lt:agz}
 
 
 fn do_build_plain(release: profile, build_target: target): void
+
+
 
 
 

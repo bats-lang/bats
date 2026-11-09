@@ -3129,7 +3129,32 @@ fn project_kind (): $R.option(package_kind)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn read_unsafe_flag(): bool
+
+
+
+
+
+
+fn read_seed_flag(): bool
 
 
 
