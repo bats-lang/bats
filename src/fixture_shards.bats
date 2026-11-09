@@ -581,7 +581,6 @@ fn run {la:agz}{ka:nat | ka <= 8192} (args: !$A.arr(byte, la, 8192), ka: int ka)
       in found end): int
   val () = println! ()
   val () = $A.free<byte>(pins)
-  val () = fileref_flush(stdout_ref)
   val status = run_or_stop(cmd, found)
 in (if status = 0 then () else exit(status)) end
 
