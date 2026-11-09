@@ -1107,6 +1107,28 @@ fn named_file {lc:agz}{at,to:int}{sn:nat}
 
 
 
+fn pins_findings_in_path {l:agz}{n:pos}{m:nat | m <= n}{at,to:nat | at <= to; to <= m}
+  (bv: !$A.borrow(byte, l, n), at: int at, to: int to, m: int m): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

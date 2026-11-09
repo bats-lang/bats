@@ -136,7 +136,7 @@ mainats_0_void() ;
 #endif // end of [QUALIFIED]
 
 /*
-build/_bats_entry_bats.dats: 1471(line=44, offs=17) -- 1491(line=44, offs=37)
+build/_bats_entry_bats.dats: 1535(line=46, offs=17) -- 1555(line=46, offs=37)
 */
 /*
 local: 
@@ -153,11 +153,11 @@ mainats_0_void()
 /* tmpvardeclst(end) */
 ATSfunbody_beg()
 /*
-emit_instr: loc0 = build/_bats_entry_bats.dats: 1465(line=44, offs=11) -- 1491(line=44, offs=37)
+emit_instr: loc0 = build/_bats_entry_bats.dats: 1529(line=46, offs=11) -- 1555(line=46, offs=37)
 */
 ATSINSflab(__patsflab_main_0_void):
 /*
-emit_instr: loc0 = build/_bats_entry_bats.dats: 1476(line=44, offs=22) -- 1491(line=44, offs=37)
+emit_instr: loc0 = build/_bats_entry_bats.dats: 1540(line=46, offs=22) -- 1555(line=46, offs=37)
 */
 ATSINSmove_void(tmpret0, build_057_src_057_bin_057_bats_056_sats____BATS_main0()) ;
 
@@ -309,6 +309,14 @@ ATSdynloadflag_init(build_057_src_057_pins_check_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
 build_057_src_057_pins_check_056_dats__dynload(/*void*/) ;
+ATSdynloadflag_init(build_057_src_057_prcheck_056_dats__dynloadflag) ;
+ATSextern()
+atsvoid_t0ype
+build_057_src_057_prcheck_056_dats__dynload(/*void*/) ;
+ATSdynloadflag_init(build_057_src_057_prcheck_tests_056_dats__dynloadflag) ;
+ATSextern()
+atsvoid_t0ype
+build_057_src_057_prcheck_tests_056_dats__dynload(/*void*/) ;
 ATSdynloadflag_init(build_057_src_057_recursion_056_dats__dynloadflag) ;
 ATSextern()
 atsvoid_t0ype
@@ -394,6 +402,8 @@ ATSdynloadfcall(build_057_src_057_merge_proof_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_overrides_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_pins_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_pins_check_056_dats__dynload) ;
+ATSdynloadfcall(build_057_src_057_prcheck_056_dats__dynload) ;
+ATSdynloadfcall(build_057_src_057_prcheck_tests_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_recursion_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_setup_056_dats__dynload) ;
 ATSdynloadfcall(build_057_src_057_stamp_056_dats__dynload) ;
