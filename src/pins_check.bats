@@ -462,14 +462,17 @@ fun spaces_end {l:agz}{n:pos}{e:nat | e <= n}{p:nat | p <= e} .<e - p>.
   else if peek(bv, p, e) = 32 then spaces_end(bv, p + 1, e)
   else p
 
-(* Whether the changed line bv[p, e) (p after its +/-) is `uses: <owner>/<repo>/<path>@<40 hex> # <comment>` and nothing else, the pin starting at t
+(* Whether the changed line bv[p, e) (p after its +/-) is `uses: <owner>/<repo>/<path>@<40 hex> # <comment>` (after an optional `- ` of a step) and nothing else, the pin starting at t
    (keyword: pins-check uses line) *)
 fn uses_pin_line {l:agz}{n:pos}{e:nat | e <= n}{p:nat | p <= e}{t:nat}
   (bv: !$A.borrow(byte, l, n), p: int p, e: int e, t: int t): bool = let
   val q = spaces_end(bv, p, e)
+  val u = (if lit_here(bv, q, e, "uses: ", 6, 0) then q
+    else if lit_here(bv, q, e, "- uses: ", 8, 0) then q + 2
+    else ~1): int
 in
-  if ~lit_here(bv, q, e, "uses: ", 6, 0) then false
-  else if t < q + 6 + 2 then false
+  if u < 0 then false
+  else if t < u + 6 + 2 then false
   else if peek(bv, t - 1, e) <> 64 then false
   else if t + 44 > e then false
   else lit_here(bv, t + 40, e, " # ", 3, 0)

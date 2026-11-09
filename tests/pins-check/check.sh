@@ -158,6 +158,11 @@ for wf in deploy mutation; do
   wf_start; set_wf "$c2"
   prove; expect "$wf-yml-pin-move" 0 "OK: main...pr changes only pins"
   grep -qx "ok   .github/workflows/$wf.yml" "$TMP/out" || fail "$wf-yml-pin-move: no ok line for $wf.yml"
+  # the step form, `- uses:` of a third-party action (quire's deploy.yml line 23, mutation.yml lines 24 and 39), as check.yml accepts it
+  set_step() { printf 'jobs:\n  build:\n    steps:\n      - uses: actions/checkout@%s # v7.0.1\n' "$1" > "$TMP/app/.github/workflows/$wf.yml"; }
+  start; set_step "$c1"; commit_in app "$wf" > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr; set_step "$c2"
+  prove; expect "$wf-yml-step-pin-move" 0 "OK: main...pr changes only pins"
+  grep -qx "ok   .github/workflows/$wf.yml" "$TMP/out" || fail "$wf-yml-step-pin-move: no ok line for $wf.yml"
   wf_start; set_wf "$nothing"
   prove; expect "$wf-yml-pin-does-not-exist" 1 "NOT OK: .github/workflows/$wf.yml: the pin $nothing is not a commit of $TMP/compiler"
   wf_start; set_wf "$c2"; echo "    extra: line" >> "$TMP/app/.github/workflows/$wf.yml"
