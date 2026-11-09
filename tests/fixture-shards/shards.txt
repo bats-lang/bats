@@ -1,0 +1,16 @@
+# The shards of the fixture groups (bats#619, keyword: fixture-shards).
+# A group of 100 s or more in the last green main run (run 42551412663) is put in a shard here; every other group is in
+# shard (sum of the bytes of its name) mod (shards) + 1. A new group needs no line.
+shards 4
+ats2-install 4
+build-content-keys 4
+build-headers 4
+build-stamp 3
+build-toolchain-path 2
+capture-outcome 2
+check-memo 1
+check-push 2
+check-validated 3
+fixtures 4
+many-modules 4
+names-graph 3
