@@ -1106,6 +1106,28 @@ fun check_files {lc:agz}{p:nat | p <= 4096}{lf:int} .<4096 - p>.
     else check_files(cmd, z + 1, total, ats2_named, list_from, worse)
   end
 
+(* The status of check-pins for the file bv[at, to) names, read from the working tree: 0 clean, 1 findings, 2 unreadable
+   (public: bats prcheck calls check-pins so, and does not copy it; keyword: prcheck) *)
+
+
+
+implement pins_findings_in_path (bv, at, to, m) =
+  if to - at >= 4096 then 2
+  else let
+    fun fill {l:agz}{n:pos}{m:nat | m <= n}{lc:agz}{at,to:nat | at <= to; to <= m}{i:nat} .<max(to - at - i, 0)>.
+      (bv: !$A.borrow(byte, l, n), cmd: !$A.arr(byte, lc, 4096), at: int at, to: int to, m: int m, i: int i): void =
+      if at + i >= to then poke_arr(cmd, i, 4096, 0)
+      else let
+        val () = poke_arr(cmd, i, 4096, peek(bv, at + i, m))
+      in fill(bv, cmd, at, to, m, i + 1) end
+    val cmd = $A.alloc<byte>(4096)
+    val () = fill(bv, cmd, at, to, m, 0)
+    val @(fz, cv) = $A.freeze<byte>(cmd)
+    val status = check_file(cv, 0, to - at, false, 0, to - at + 1)
+    val () = $A.drop<byte>(fz, cv)
+    val () = $A.free<byte>($A.thaw<byte>(fz))
+  in status end
+
 (* Where the arguments after check-pins start, or ~1 when argv[1] is not check-pins *)
 fn arguments_at {l:agz}{t:nat | t <= 4096} (cmd: !$A.borrow(byte, l, 4096), total: int t)
   : [r:int | r == ~1 || (0 <= r && r <= 4096)] int r = let
