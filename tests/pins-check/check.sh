@@ -149,6 +149,28 @@ start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q 
 echo "    extra: line" >> "$TMP/app/.github/workflows/check.yml"
 prove; expect check-yml-line-not-a-pin 1 "NOT OK: .github/workflows/check.yml: a changed line holds no pin of 40 hex digits: +    extra: line"
 
+# deploy.yml and mutation.yml (bats#615): the setup action's pin of a workflow is the only kind of line they may change
+for wf in deploy mutation; do
+  set_wf() { # <commit> [comment]
+    printf 'jobs:\n  build:\n    steps:\n      - name: Set up bats\n        uses: bats-lang/bats/.github/actions/setup@%s # %s\n' "$1" "${2-bats main ${1:0:7}}" > "$TMP/app/.github/workflows/$wf.yml"
+  }
+  wf_start() { start; set_wf "$c1"; commit_in app "$wf" > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr; }
+  wf_start; set_wf "$c2"
+  prove; expect "$wf-yml-pin-move" 0 "OK: main...pr changes only pins"
+  grep -qx "ok   .github/workflows/$wf.yml" "$TMP/out" || fail "$wf-yml-pin-move: no ok line for $wf.yml"
+  wf_start; set_wf "$nothing"
+  prove; expect "$wf-yml-pin-does-not-exist" 1 "NOT OK: .github/workflows/$wf.yml: the pin $nothing is not a commit of $TMP/compiler"
+  wf_start; set_wf "$c2"; echo "    extra: line" >> "$TMP/app/.github/workflows/$wf.yml"
+  prove; expect "$wf-yml-line-not-a-pin" 1 "NOT OK: .github/workflows/$wf.yml: a changed line holds no pin of 40 hex digits: +    extra: line"
+  # the nearest input: a line that holds a pin and is not a uses line (check.yml and relock.yml accept it, these two do not)
+  wf_start; set_wf "$c2"; echo "      ref: $c2" >> "$TMP/app/.github/workflows/$wf.yml"
+  prove; expect "$wf-yml-other-line-with-a-pin" 1 "a changed line is not a \`uses: <owner>/<repo>/<path>@<40 hex> # <comment>\` line: +      ref: $c2"
+  wf_start; printf 'jobs:\n  build:\n    steps:\n      - name: Set up bats\n        uses: bats-lang/bats/.github/actions/setup@%s\n' "$c2" > "$TMP/app/.github/workflows/$wf.yml"
+  prove; expect "$wf-yml-uses-without-comment" 1 "a changed line is not a \`uses: <owner>/<repo>/<path>@<40 hex> # <comment>\` line: +        uses:"
+  wf_start; printf 'jobs:\n  build:\n    steps:\n      - name: Set up bats\n        uses: bats-lang/bats/.github/actions/setup@%s # bats main\n        run: %s\n' "$c2" "$c2" > "$TMP/app/.github/workflows/$wf.yml"
+  prove; expect "$wf-yml-run-with-a-pin" 1 "a changed line is not a \`uses: <owner>/<repo>/<path>@<40 hex> # <comment>\` line: +        run: $c2"
+done
+
 # text-lint.yml (bats#614): the pin of text-lint-check.yml and its tools-ref copy, one commit, are the only lines it may change
 set_text_lint() { # <uses commit> <tools-ref commit> [comment]
   printf 'name: text-lint\njobs:\n  text-lint:\n    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@%s # %s\n    with:\n      tools-ref: %s\n' "$1" "${3-repository-prototype main ${1:0:7}}" "$2" > "$TMP/app/.github/workflows/text-lint.yml"

@@ -462,19 +462,32 @@ fun spaces_end {l:agz}{n:pos}{e:nat | e <= n}{p:nat | p <= e} .<e - p>.
   else if peek(bv, p, e) = 32 then spaces_end(bv, p + 1, e)
   else p
 
+(* Whether the changed line bv[p, e) (p after its +/-) is `uses: <owner>/<repo>/<path>@<40 hex> # <comment>` and nothing else, the pin starting at t
+   (keyword: pins-check uses line) *)
+fn uses_pin_line {l:agz}{n:pos}{e:nat | e <= n}{p:nat | p <= e}{t:nat}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, t: int t): bool = let
+  val q = spaces_end(bv, p, e)
+in
+  if ~lit_here(bv, q, e, "uses: ", 6, 0) then false
+  else if t < q + 6 + 2 then false
+  else if peek(bv, t - 1, e) <> 64 then false
+  else if t + 44 > e then false
+  else lit_here(bv, t + 40, e, " # ", 3, 0)
+end
+
 (* Each changed line of the hunks bv[p, m), a comment line (the first byte that is no space is #) being no code: the sum of the answers of pin_commit for the new lines of the compiler's or the package repository's
    workflows, in the form 1 when the required commit was looked for *)
 fun workflow_lines {lc,lb:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{sn:nat | sn < $B.BUILDER_CAP} .<m - p>.
-  (cmd: !$A.borrow(byte, lc, 4096), path: string sn, bv: !$A.borrow(byte, lb, n), p: int p, m: int m, resolved: int): int =
+  (cmd: !$A.borrow(byte, lc, 4096), path: string sn, strict: bool, bv: !$A.borrow(byte, lb, n), p: int p, m: int m, resolved: int): int =
   if p >= m then resolved
   else let
     val e = line_end(bv, p, m)
     val c = peek(bv, p, m)
     val next = next_line(bv, p, m)
   in
-    if c <> 43 && c <> 45 then workflow_lines(cmd, path, bv, next, m, resolved)
-    else if e < p + 1 then workflow_lines(cmd, path, bv, next, m, resolved)
-    else if peek(bv, spaces_end(bv, p + 1, e), e) = 35 then workflow_lines(cmd, path, bv, next, m, resolved)
+    if c <> 43 && c <> 45 then workflow_lines(cmd, path, strict, bv, next, m, resolved)
+    else if e < p + 1 then workflow_lines(cmd, path, strict, bv, next, m, resolved)
+    else if peek(bv, spaces_end(bv, p + 1, e), e) = 35 then workflow_lines(cmd, path, strict, bv, next, m, resolved)
     else let
       val t = find_pin_token(bv, p + 1, e)
     in
@@ -482,19 +495,24 @@ fun workflow_lines {lc,lb:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{sn:nat | s
         val () = not_ok_head(path)
         val () = print! ("a changed line holds no pin of 40 hex digits: ")
         val () = say_line(bv, p, e, m)
-      in workflow_lines(cmd, path, bv, next, m, resolved) end
-      else if c = 45 then workflow_lines(cmd, path, bv, next, m, resolved)
+      in workflow_lines(cmd, path, strict, bv, next, m, resolved) end
+      else if strict && ~uses_pin_line(bv, p + 1, e, t) then let
+        val () = not_ok_head(path)
+        val () = print! ("a changed line is not a `uses: <owner>/<repo>/<path>@<40 hex> # <comment>` line: ")
+        val () = say_line(bv, p, e, m)
+      in workflow_lines(cmd, path, strict, bv, next, m, resolved) end
+      else if c = 45 then workflow_lines(cmd, path, strict, bv, next, m, resolved)
       else let
         val which = (if contains_text(bv, p + 1, e, "bats-lang/repository-prototype/") then 1
           else if contains_text(bv, p + 1, e, "bats-lang/bats/") then 0
           else ~1): int
         val here = (if which >= 0 then pin_commit(cmd, path, which, bv, t, m) else 0): int
         val counted = (if here = 2 then 1 else 0): int
-      in workflow_lines(cmd, path, bv, next, m, resolved + counted) end
+      in workflow_lines(cmd, path, strict, bv, next, m, resolved + counted) end
     end
   end
 
-fn workflow_file {lc:agz}{sn:nat | sn < $B.BUILDER_CAP}(cmd: !$A.borrow(byte, lc, 4096), path: string sn): int = let
+fn workflow_file {lc:agz}{sn:nat | sn < $B.BUILDER_CAP}(cmd: !$A.borrow(byte, lc, 4096), path: string sn, strict: bool): int = let
   val buf = $A.alloc<byte>(65536)
   val @(status, kept, longer) = diff_of(cmd, path, buf)
   val @(fz, bv) = $A.freeze<byte>(buf)
@@ -505,7 +523,7 @@ fn workflow_file {lc:agz}{sn:nat | sn < $B.BUILDER_CAP}(cmd: !$A.borrow(byte, lc
     else if longer then let
       val () = not_ok(path, "the diff is longer than a pin move is")
     in 0 end
-    else workflow_lines(cmd, path, bv, body_start(bv, 0, kept), kept, 0)): int
+    else workflow_lines(cmd, path, strict, bv, body_start(bv, 0, kept), kept, 0)): int
   val () = (if !g_failures = before && get_exit_code() = 0 then println! ("ok   ", path) else ())
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
@@ -762,7 +780,7 @@ fun names_has {l:agz}{m:nat | m <= 65536}{p:nat | p <= m}{sn:nat} .<m - p>.
   else if span_is(names, p, line_end(names, p, m), path) then true
   else names_has(names, next_line(names, p, m), m, path)
 
-(* Each changed path that is not one of the seven a pin move touches is said *)
+(* Each changed path that is not one of the nine a pin move touches is said *)
 fun names_check {l:agz}{m:nat | m <= 65536}{p:nat | p <= m} .<m - p>.
   (names: !$A.borrow(byte, l, 65536), p: int p, m: int m): void =
   if p >= m then ()
@@ -772,11 +790,13 @@ fun names_check {l:agz}{m:nat | m <= 65536}{p:nat | p <= m} .<m - p>.
       || span_is(names, p, e, "bats.lock") || span_is(names, p, e, ".github/workflows/relock.yml")
       || span_is(names, p, e, ".github/workflows/publish.yml")
       || span_is(names, p, e, ".github/workflows/check.yml")
+      || span_is(names, p, e, ".github/workflows/deploy.yml")
+      || span_is(names, p, e, ".github/workflows/mutation.yml")
       || span_is(names, p, e, ".github/workflows/text-lint.yml")): bool
     val () = (if allowed then () else let
         val () = not_ok_head("the diff")
         val () = print_borrow(names, p, e, m)
-      in println! (" is not a pin file (only .github/bats-version, .github/repository-version, bats.lock, .github/workflows/relock.yml, .github/workflows/publish.yml, .github/workflows/check.yml and .github/workflows/text-lint.yml are)") end)
+      in println! (" is not a pin file (only .github/bats-version, .github/repository-version, bats.lock, .github/workflows/relock.yml, .github/workflows/publish.yml, .github/workflows/check.yml, .github/workflows/deploy.yml, .github/workflows/mutation.yml and .github/workflows/text-lint.yml are)") end)
   in names_check(names, next_line(names, p, m), m) end
 
 (* ------------------------------------------------------------------ *)
@@ -797,14 +817,18 @@ fn prove {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void = let
       val from_repository = (if names_has(names, 0, kept, ".github/repository-version")
         then pin_file(cmd, ".github/repository-version", 1) else 0): int
       val from_relock = (if names_has(names, 0, kept, ".github/workflows/relock.yml")
-        then workflow_file(cmd, ".github/workflows/relock.yml") else 0): int
+        then workflow_file(cmd, ".github/workflows/relock.yml", false) else 0): int
       val from_publish = (if names_has(names, 0, kept, ".github/workflows/publish.yml")
-        then workflow_file(cmd, ".github/workflows/publish.yml") else 0): int
+        then workflow_file(cmd, ".github/workflows/publish.yml", false) else 0): int
       val from_check = (if names_has(names, 0, kept, ".github/workflows/check.yml")
-        then workflow_file(cmd, ".github/workflows/check.yml") else 0): int
+        then workflow_file(cmd, ".github/workflows/check.yml", false) else 0): int
+      val from_deploy = (if names_has(names, 0, kept, ".github/workflows/deploy.yml")
+        then workflow_file(cmd, ".github/workflows/deploy.yml", true) else 0): int
+      val from_mutation = (if names_has(names, 0, kept, ".github/workflows/mutation.yml")
+        then workflow_file(cmd, ".github/workflows/mutation.yml", true) else 0): int
       val from_text_lint = (if names_has(names, 0, kept, ".github/workflows/text-lint.yml")
         then text_lint_file(cmd) else 0): int
-      val resolved = from_compiler + from_repository + from_relock + from_publish + from_check + from_text_lint
+      val resolved = from_compiler + from_repository + from_relock + from_publish + from_check + from_deploy + from_mutation + from_text_lint
       val () = (if names_has(names, 0, kept, "bats.lock") then lock_file(cmd) else ())
       val () = (if !g_require_at >= 0 && resolved = 0 && !g_failures = 0
         then not_ok("--require-contains", "no moved pin is in a checkout that has the required commit, so none could be shown to contain it")
