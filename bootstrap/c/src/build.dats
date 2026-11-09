@@ -3227,7 +3227,9 @@ in
                 val () = $A.cborrow_drop(fz_cpe, bv_cpe)
                 val () = $A.barr_free($A.barr_thaw(fz_cpe))
                 (* but not the other targets' and modes' caches (cache_swap):
-                   only this build's C *)
+                   only this build's C, and not the runtime header a check
+                   compiled it against (build/.bats_seed, bats#624): the seed
+                   writes its own header below *)
                 val (nul_rme | rm_exec) = $P.path_of_string_proved("rm")
                 val @(fz_rme, bv_rme) = $A.barr_freeze(rm_exec)
                 var rma1 = $B.create() val () = bput_v(rma1, "rm")
@@ -3235,8 +3237,11 @@ in
                 var rma3 = $B.create()
                 val () = copy_to_builder_v(to_c, 0, tclen, 4096, rma3)
                 val () = bput_v(rma3, "/.stash")
+                var rma4 = $B.create()
+                val () = copy_to_builder_v(to_c, 0, tclen, 4096, rma4)
+                val () = bput_v(rma4, "/.bats_seed")
                 val rm_argv = $L.list_vt_cons(mk_arg(rma1), $L.list_vt_cons(mk_arg(rma2),
-                  $L.list_vt_cons(mk_arg(rma3), $L.list_vt_nil())))
+                  $L.list_vt_cons(mk_arg(rma3), $L.list_vt_cons(mk_arg(rma4), $L.list_vt_nil()))))
                 val _ = run_cmd(nul_rme | bv_rme, rm_argv)
                 val () = $A.cborrow_drop(fz_rme, bv_rme)
                 val () = $A.barr_free($A.barr_thaw(fz_rme))

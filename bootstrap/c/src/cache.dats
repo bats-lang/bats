@@ -942,9 +942,28 @@ implement set_seed_check (on) = !g_seed_check := on
 
 implement check_seed_header {lo}{no}{om} (out_bv, out_len) =
   if ~(!g_seed_check) then 0 else let
-    val rc = sh_script("out=$(clang -fsyntax-only -Werror=implicit-function-declaration -D_ATS_CCOMP_HEADER_NONE_ -D_ATS_CCOMP_EXCEPTION_NONE_ -D_ATS_CCOMP_PRELUDE_NONE_ -D_ATS_CCOMP_RUNTIME_NONE_ -include build/.bats_seed/_bats_native_runtime.h -Ibuild/.bats_seed/_bats_native_stubs \"$1\" 2>&1) && exit 0; echo \"error: $1 does not compile against _bats_native_runtime.h alone, as the seed in bootstrap/c is built; use only what the header declares\" >&2; echo \"$out\" | grep -E 'error|undeclared' | head -20 >&2; exit 1",
-      $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_nil()))
-    val () = (if rc <> 0 then set_build_err() else ())
+    val (nul_x | exec) = $P.path_of_string_proved("clang")
+    val @(fz_x, bv_x) = $A.barr_freeze(exec)
+    var a1 = $B.create() val () = bput_v(a1, "clang")
+    var a2 = $B.create() val () = bput_v(a2, "-fsyntax-only")
+    var a3 = $B.create() val () = bput_v(a3, "-Werror=implicit-function-declaration")
+    var a4 = $B.create() val () = bput_v(a4, "-D_ATS_CCOMP_HEADER_NONE_")
+    var a5 = $B.create() val () = bput_v(a5, "-D_ATS_CCOMP_EXCEPTION_NONE_")
+    var a6 = $B.create() val () = bput_v(a6, "-D_ATS_CCOMP_PRELUDE_NONE_")
+    var a7 = $B.create() val () = bput_v(a7, "-D_ATS_CCOMP_RUNTIME_NONE_")
+    var a8 = $B.create() val () = bput_v(a8, "-include")
+    var a9 = $B.create() val () = bput_v(a9, "build/.bats_seed/_bats_native_runtime.h")
+    var a10 = $B.create() val () = bput_v(a10, "-Ibuild/.bats_seed/_bats_native_stubs")
+    val rc = run_cmd(nul_x | bv_x, $L.list_vt_cons(mk_arg(a1), $L.list_vt_cons(mk_arg(a2),
+      $L.list_vt_cons(mk_arg(a3), $L.list_vt_cons(mk_arg(a4), $L.list_vt_cons(mk_arg(a5),
+      $L.list_vt_cons(mk_arg(a6), $L.list_vt_cons(mk_arg(a7), $L.list_vt_cons(mk_arg(a8),
+      $L.list_vt_cons(mk_arg(a9), $L.list_vt_cons(mk_arg(a10),
+      $L.list_vt_cons(path_arg_m(out_bv, out_len), $L.list_vt_nil()))))))))))))
+    val () = $A.cborrow_drop(fz_x, bv_x)
+    val () = $A.barr_free($A.barr_thaw(fz_x))
+    val () = (if rc <> 0 then let
+        val () = prerr! ("error: the C does not compile against _bats_native_runtime.h alone, as the seed in bootstrap/c is built; use only what the header declares\n")
+      in set_build_err() end else ())
   in (if rc = 0 then 0 else 1) end
 
 (* ============================================================

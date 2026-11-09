@@ -950,6 +950,25 @@ fn check_seed_header {lo:agz}{no:pos}{om:nat | om <= no}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn run_patsopt {lph:agz}{lo:agz}{li:agz}{no,ni:pos}{om:nat | om <= no; om <= 524288}{im:nat | im <= ni; im <= 524288}
   (ph: !$A.borrow(byte, lph, 12288), phlen: int,
    out_bv: !$A.borrow(byte, lo, no), out_len: int om,
