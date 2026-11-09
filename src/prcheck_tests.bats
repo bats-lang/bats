@@ -43,6 +43,13 @@ fn test_check_1_comment_at_width_accepted (): bool =
 fn test_check_2_status_word (): bool =
   run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* Flake: it failed on 2026-11-09 *)\n", body_ok, ticket_ok, 4) = 4
 
+(* Check 2: the verdict opener alone (no date, run id or status word) is rejected, and the word Flake not as the opener is not *)
+fn test_check_2_verdict_opener (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* Flake: the harness *)\n", body_ok, ticket_ok, 4) = 4
+
+fn test_check_2_flake_not_opener_accepted (): bool =
+  run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* the harness has a Flake in it *)\n", body_ok, ticket_ok, 4) = 0
+
 (* Check 2: a run id and a status word in a comment *)
 fn test_check_2_run_id (): bool =
   run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* it passed on run 1234567 *)\n", body_ok, ticket_ok, 4) = 4
@@ -60,6 +67,13 @@ fn test_check_3_pointer_below_rejected (): bool =
 
 fn test_check_3_place_below_accepted (): bool =
   run_fixture("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* the strip lies below the handles *)\n", body_ok, ticket_ok, 8) = 0
+
+(* Check 3 with --resolve: an injected resolver answers not found (rejected) or found (accepted) for the #<n> of a comment *)
+fn test_check_3_unresolved_issue_rejected (): bool =
+  prcheck_fixture_resolved("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* the cause is #12 *)\n", body_ok, ticket_ok, 8, false) = 8
+
+fn test_check_3_resolved_issue_accepted (): bool =
+  prcheck_fixture_resolved("diff --git a/src/x.bats b/src/x.bats\n@@ -1,0 +2 @@\n+(* the cause is #12 *)\n", body_ok, ticket_ok, 8, true) = 0
 
 (* Check 7 reads JavaScript and TypeScript tests: a Python checker that names waitForTimeout is not a test that sleeps *)
 fn test_check_7_python_checker_accepted (): bool =

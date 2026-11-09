@@ -23,6 +23,9 @@ val g_hits = ref<int>(0)
 val g_width = ref<int>(100)
 val g_resolve = ref<bool>(false)
 
+(* The resolver a test injects (keyword: prcheck tests): 0 asks gh as the command does, 1 answers that every #<n> is found, 2 that none is *)
+val g_resolver = ref<int>(0)
+
 (* Whether the pull request is from a relock/ branch: the daily relock has no ticket of its own, so checks 8 and 10 leave it alone (keyword: prcheck) *)
 val g_exempt = ref<bool>(false)
 val g_path_at = ref<pos_t>(~1)
@@ -317,7 +320,10 @@ fun refs_in {l:agz}{n:pos}{e:nat | e <= n}{p:int}{lc:agz} .<max(e - p, 0)>.
     val d = digits_end(bv, p + 1, e)
     val ns = name_start(bv, p, e)
     val num = number_of(bv, p + 1, e, 0, 0)
-    val exists = (if d - (p + 1) > 7 then false else issue_exists(issue_path(bv, ns, p, e, num, cmd, repo_at, repo_to)))
+    val exists = (if d - (p + 1) > 7 then false
+      else if !g_resolver = 1 then true
+      else if !g_resolver = 2 then false
+      else issue_exists(issue_path(bv, ns, p, e, num, cmd, repo_at, repo_to)))
   in
     refs_in(bv, d, e, cmd, repo_at, repo_to, (if exists then missing else missing + 1))
   end
@@ -1214,17 +1220,24 @@ in handled end
 #pub fn prcheck_fixture {a,b,c:nat | a < 4096; b < 4096; c < 4096}
   (diff: string a, body: string b, ticket: string c, checks: int, exempt: bool): int
 
-implement prcheck_fixture (diff, body, ticket, checks, exempt) = let
+(* The same with the references of comments looked up (--resolve) by an injected resolver that finds every #<n> (found) or none *)
+#pub fn prcheck_fixture_resolved {a,b,c:nat | a < 4096; b < 4096; c < 4096}
+  (diff: string a, body: string b, ticket: string c, checks: int, found: bool): int
+
+fn fixture_run {a,b,c:nat | a < 4096; b < 4096; c < 4096}
+  (diff: string a, body: string b, ticket: string c, checks: int, exempt: bool, resolver: int): int = let
   val @(fz_d, bv_d) = $A.freeze<byte>(str_to_arr4096(diff))
   val @(fz_b, bv_b) = $A.freeze<byte>(str_to_arr4096(body))
   val @(fz_t, bv_t) = $A.freeze<byte>(str_to_arr4096(ticket))
   val @(fz_c, bv_c) = $A.freeze<byte>(str_to_arr4096(""))
   val () = (!g_on := checks)
   val () = (!g_exempt := exempt)
-  val () = (!g_resolve := false)
+  val () = (!g_resolve := (resolver > 0))
+  val () = (!g_resolver := resolver)
   val () = (!g_width := 100)
   val hits = run_checks(bv_d, g1u2i(string1_length(diff)), bv_b, g1u2i(string1_length(body)),
     bv_t, g1u2i(string1_length(ticket)), true, bv_c, ~1, 0)
+  val () = (!g_resolver := 0)
   val () = $A.drop<byte>(fz_d, bv_d)
   val () = $A.drop<byte>(fz_b, bv_b)
   val () = $A.drop<byte>(fz_t, bv_t)
@@ -1234,6 +1247,11 @@ implement prcheck_fixture (diff, body, ticket, checks, exempt) = let
   val () = $A.free<byte>($A.thaw<byte>(fz_t))
   val () = $A.free<byte>($A.thaw<byte>(fz_c))
 in hits end
+
+implement prcheck_fixture (diff, body, ticket, checks, exempt) = fixture_run(diff, body, ticket, checks, exempt, 0)
+
+implement prcheck_fixture_resolved (diff, body, ticket, checks, found) =
+  fixture_run(diff, body, ticket, checks, false, (if found then 1 else 2))
 
 (* The file at path (and the directory dir) with the text, in the working tree *)
 #pub fn prcheck_plant {d,p,t:nat | p < 4096} (dir: string d, path: string p, text: string t): bool
