@@ -149,6 +149,40 @@ start; set_check "$r1"; commit_in app check > /dev/null; git_in app checkout -q 
 echo "    extra: line" >> "$TMP/app/.github/workflows/check.yml"
 prove; expect check-yml-line-not-a-pin 1 "NOT OK: .github/workflows/check.yml: a changed line holds no pin of 40 hex digits: +    extra: line"
 
+# text-lint.yml (bats#614): the pin of text-lint-check.yml and its tools-ref copy, one commit, are the only lines it may change
+set_text_lint() { # <uses commit> <tools-ref commit> [comment]
+  printf 'name: text-lint\njobs:\n  text-lint:\n    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@%s # %s\n    with:\n      tools-ref: %s\n' "$1" "${3-repository-prototype main ${1:0:7}}" "$2" > "$TMP/app/.github/workflows/text-lint.yml"
+}
+text_lint_start() { start; set_text_lint "${1-$r1}" "${2-$r1}"; commit_in app text-lint > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr; }
+text_lint_start; set_text_lint "$r2" "$r2"
+prove; expect text-lint-pin-move 0 "OK: main...pr changes only pins"
+grep -qx "ok   .github/workflows/text-lint.yml" "$TMP/out" || fail "text-lint-pin-move: no ok line for text-lint.yml"
+text_lint_start; set_text_lint "$r2" "$r2" "a comment of another spelling"
+prove; expect text-lint-pin-move-other-comment 0 "OK: main...pr changes only pins"
+text_lint_start "$r1" "$r2"; set_text_lint "$r2" "$r1"
+prove; expect text-lint-tools-ref-differs 1 "NOT OK: .github/workflows/text-lint.yml: the tools-ref is not the commit of the text-lint-check.yml pin"
+text_lint_start; set_text_lint "$r1" "$r2"
+prove; expect text-lint-only-tools-ref-moved 1 "NOT OK: .github/workflows/text-lint.yml: a pin move adds exactly one uses line"
+text_lint_start; set_text_lint "$nothing" "$nothing"
+prove; expect text-lint-pin-does-not-exist 1 "NOT OK: .github/workflows/text-lint.yml: the pin $nothing is not a commit of $TMP/repo"
+text_lint_start; set_text_lint "$r2" "$r2"; echo "    extra: line" >> "$TMP/app/.github/workflows/text-lint.yml"
+prove; expect text-lint-extra-line 1 "NOT OK: .github/workflows/text-lint.yml: a changed line is neither the text-lint-check.yml pin nor its tools-ref: +    extra: line"
+# the nearest inputs: lines spelled like the two, and the lines relock.yml and check.yml may carry
+text_lint_start; set_text_lint "$r2" "$r2"; echo "# a comment about the pin" >> "$TMP/app/.github/workflows/text-lint.yml"
+prove; expect text-lint-comment-line 1 "a changed line is neither the text-lint-check.yml pin nor its tools-ref: +# a comment about the pin"
+text_lint_start; set_text_lint "$r2" "$r2"
+printf '    uses: bats-lang/repository-prototype/.github/workflows/package-check.yml@%s # repository-prototype main %s\n' "$r2" "${r2:0:7}" >> "$TMP/app/.github/workflows/text-lint.yml"
+prove; expect text-lint-other-workflow-pin 1 "a changed line is neither the text-lint-check.yml pin nor its tools-ref: +    uses: bats-lang/repository-prototype/.github/workflows/package-check.yml@"
+text_lint_start; set_text_lint "$r2" "$r2"
+echo "      other-ref: $r2" >> "$TMP/app/.github/workflows/text-lint.yml"
+prove; expect text-lint-other-input-with-a-pin 1 "a changed line is neither the text-lint-check.yml pin nor its tools-ref: +      other-ref: $r2"
+text_lint_start; printf 'name: text-lint\njobs:\n  text-lint:\n    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@%s\n    with:\n      tools-ref: %s\n' "$r2" "$r2" > "$TMP/app/.github/workflows/text-lint.yml"
+prove; expect text-lint-uses-without-comment 1 "a changed line is neither the text-lint-check.yml pin nor its tools-ref: +    uses:"
+text_lint_start; printf 'name: text-lint\njobs:\n  text-lint:\n    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@%s # repository-prototype main %s\n    with:\n      tools-ref: %s # same\n' "$r2" "${r2:0:7}" "$r2" > "$TMP/app/.github/workflows/text-lint.yml"
+prove; expect text-lint-tools-ref-with-comment 1 "a changed line is neither the text-lint-check.yml pin nor its tools-ref: +      tools-ref: $r2 # same"
+text_lint_start; git_in app rm -q .github/workflows/text-lint.yml
+prove; expect text-lint-deleted 1 "NOT OK: .github/workflows/text-lint.yml: a pin move adds exactly one uses line"
+
 # a pin file that is not a pin, or holds more than one line, or is deleted
 start; echo "main" > "$TMP/app/.github/bats-version"
 prove; expect pin-not-hex 1 "NOT OK: .github/bats-version: the new line is not a pin of 40 hex digits"
