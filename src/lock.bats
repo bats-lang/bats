@@ -3093,30 +3093,48 @@ fn check_file {pn:pos}{pm:nat | pm <= pn; pm <= 524288} {lp,lx:agz}
     val () = $A.free<byte>($A.thaw<byte>(fz_k))
   in c end
 
-(* Whether the bats.toml at the NUL-terminated path in pa sets
-   unsafe = true *)
-fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m): bool =
+(* Whether the bats.toml at the NUL-terminated path in pa sets the key of
+   [package] to true *)
+fn toml_package_true {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288}{lk:agz}{nk:pos}
+  (pa: $A.arr(byte, lp, n), m: int m, key: !$A.borrow(byte, lk, nk), klen: int nk): bool =
   case+ read_toml(pa, m) of
   | ~$R.err(f) => let val () = toml_failure_free(f) in false end
   | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'a', 'c', 'k', 'a', 'g', 'e')
       val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
-      var key_c = @[char][6]('u', 'n', 's', 'a', 'f', 'e')
-      val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 6))
       val vb = $A.alloc<byte>(16)
-      val vl = (case+ $T.get(doc, bv_s, 7, bv_k, 6, vb, 16) of
+      val vl = (case+ $T.get(doc, bv_s, 7, key, klen, vb, 16) of
         | ~$R.some(x) => x | ~$R.none() => 0): int
       val @(fz_v, bv_v) = $A.freeze<byte>(vb)
       var t_c = @[char][4]('t', 'r', 'u', 'e')
       val yes = (if vl = 4 then lit_at(bv_v, 0, 16, t_c, 4) else false): bool
       val () = $A.drop<byte>(fz_v, bv_v)
       val () = $A.free<byte>($A.thaw<byte>(fz_v))
-      val () = $A.drop<byte>(fz_k, bv_k)
-      val () = $A.free<byte>($A.thaw<byte>(fz_k))
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
       val () = $T.toml_free(doc)
     in yes end
+
+(* Whether the bats.toml at the NUL-terminated path in pa sets
+   unsafe = true *)
+fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m): bool = let
+  var key_c = @[char][6]('u', 'n', 's', 'a', 'f', 'e')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 6))
+  val yes = toml_package_true(pa, m, bv_k, 6)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in yes end
+
+(* Whether the bats.toml at the NUL-terminated path in pa sets
+   seed = true: the project ships a C seed built with the runtime
+   header alone (runtime-header keyword, bats#624) *)
+fn toml_seed {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp, n), m: int m): bool = let
+  var key_c = @[char][4]('s', 'e', 'e', 'd')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 4))
+  val yes = toml_package_true(pa, m, bv_k, 4)
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in yes end
 
 (* The unsafe flag of the whole bats.toml: one reader for emission and validation, so a large manifest cannot split them (manifest) *)
 #pub fn read_unsafe_flag(): bool
@@ -3124,6 +3142,13 @@ fn toml_unsafe {lp:agz}{n:pos}{m:nat | m <= n; m <= 524288} (pa: $A.arr(byte, lp
 implement read_unsafe_flag() = let
   val @(toml_path, toml_path_len) = str_into_arr("bats.toml")
 in toml_unsafe(toml_path, toml_path_len) end
+
+(* Whether the project's bats.toml sets seed = true *)
+#pub fn read_seed_flag(): bool
+
+implement read_seed_flag() = let
+  val @(toml_path, toml_path_len) = str_into_arr("bats.toml")
+in toml_seed(toml_path, toml_path_len) end
 
 (* The package root of the dependency file p[0, pl) =
    ./bats_modules/<pkg>/src/...: the end of ./bats_modules/<pkg> *)
