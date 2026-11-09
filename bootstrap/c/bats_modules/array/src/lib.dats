@@ -1,4 +1,5 @@
 staload "./lib.sats"
+staload BATS_SELF = "./lib.sats"
 (* array -- linear memory safety library for bats *)
 (* Typed arrays with linear ownership -- no raw pointers. *)
 (* Typed arrays with linear ownership. *)

@@ -1,4 +1,5 @@
 staload "./overrides.sats"
+staload BATS_SELF = "./overrides.sats"
 staload "arith/src/lib.dats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"

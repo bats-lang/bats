@@ -1,4 +1,5 @@
 staload "./lock.sats"
+staload BATS_SELF = "./lock.sats"
 staload "array/src/lib.dats"
 staload "arith/src/lib.dats"
 staload "builder/src/lib.dats"

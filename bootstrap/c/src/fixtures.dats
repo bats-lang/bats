@@ -1,4 +1,5 @@
 staload "./fixtures.sats"
+staload BATS_SELF = "./fixtures.sats"
 staload "arith/src/lib.dats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"

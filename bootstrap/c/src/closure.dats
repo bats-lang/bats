@@ -1,4 +1,5 @@
 staload "./closure.sats"
+staload BATS_SELF = "./closure.sats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"
 staload "file/src/lib.dats"

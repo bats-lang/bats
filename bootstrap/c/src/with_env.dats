@@ -1,4 +1,5 @@
 staload "./with_env.sats"
+staload BATS_SELF = "./with_env.sats"
 staload "arith/src/lib.dats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"

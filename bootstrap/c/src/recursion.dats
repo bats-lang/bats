@@ -1,4 +1,5 @@
 staload "./recursion.sats"
+staload BATS_SELF = "./recursion.sats"
 staload "arith/src/lib.dats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"

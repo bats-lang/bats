@@ -1,4 +1,5 @@
 staload "./lexer.sats"
+staload BATS_SELF = "./lexer.sats"
 staload "array/src/lib.dats"
 staload "arith/src/lib.dats"
 staload "builder/src/lib.dats"
