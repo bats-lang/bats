@@ -277,6 +277,30 @@ for kind in absent empty; do
 done
 ok "three runs at once for one target, absent or empty: all succeed, one clone, nothing nested, no sibling left"
 
+# the interleaving behind the flake of bats#637 (round 5 of the loop above): a run looks for
+# a clone in the target (none: it is empty or absent), and a rival's clone is moved in before
+# the run lists the target for the occupied check, which then saw a directory with files in
+# it, and refused a clone as "neither an empty directory nor a clone". A stand-in ls, for the
+# listing of the target only, moves a finished clone in place of the empty target just before
+# it lists, which is that moment every time. The run must take the clone as a clone (at the
+# commit already), not refuse it.
+mkdir -p "$TMP/occfake" "$TMP/occ"
+"$BATS" clone-repository "$first" --repository "$TMP/occ/ready" > /dev/null 2>&1 || fail "the clone for the occupied check could not be made"
+mkdir "$TMP/occ/target"
+cat > "$TMP/occfake/ls" <<SH
+#!/bin/sh
+if [ "\$1" = -A ] && [ "\$3" = "$TMP/occ/target" ] && [ -d "\$3" ] && [ -z "\$(\$REAL_LS -A -- "\$3")" ] && [ -d "$TMP/occ/ready" ]; then
+  rmdir -- "\$3"; mv -- "$TMP/occ/ready" "\$3"
+fi
+exec \$REAL_LS "\$@"
+SH
+chmod +x "$TMP/occfake/ls"
+REAL_LS=$(command -v ls) PATH="$TMP/occfake:$PATH" "$BATS" clone-repository "$first" --repository "$TMP/occ/target" > /dev/null 2> "$TMP/occ/err" || { cat "$TMP/occ/err"; fail "a clone moved in between the look for a clone and the occupied check was refused"; }
+[ ! -e "$TMP/occ/ready" ] || fail "the stand-in ls did not move the rival's clone in"
+[ "$(git -C "$TMP/occ/target" rev-parse HEAD)" = "$first" ] || fail "the target is not at the commit after a clone moved in at the occupied check"
+[ -z "$(ls -A "$TMP/occ" | grep '\.new\.')" ] || fail "a clone moved in at the occupied check left a sibling: $(ls -A "$TMP/occ")"
+ok "a clone that appears between the look for a clone and the occupied check is taken as a clone"
+
 # the target is looked at as a directory and read for its mode, and in between another run
 # can take it (bats#580: ls failed, the mode was empty, and the run took every permission
 # from its own sibling, which it then could not remove). A stand-in ls, for the mode read
