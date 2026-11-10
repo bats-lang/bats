@@ -1,4 +1,5 @@
 staload "./lib.sats"
+staload BATS_SELF = "./lib.sats"
 staload "array/src/lib.dats"
 staload "arith/src/lib.dats"
 (* sha256 -- SHA-256 and SHA-1 (FIPS 180-4) in Bats

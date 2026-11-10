@@ -1,4 +1,5 @@
 staload "./merge_proof.sats"
+staload BATS_SELF = "./merge_proof.sats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"
 staload "env/src/lib.dats"

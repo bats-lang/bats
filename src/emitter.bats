@@ -545,7 +545,7 @@ fn put_dispatch_decl {l:agz}{nt:pos}{tlen:nat | tlen <= nt}
   if k <= 0 then ()
   else let
     val () = rbput(sats, "\nfun __bats_test (i: int): bool\n")
-    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
+    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement $BATS_SELF.__bats_test (i) =\n  ")
     val () = put_dispatch(t, tlen, 0, tlen, 0, dats)
   in rbput(dats, "false\n") end
 
@@ -565,8 +565,8 @@ fn put_test_dispatch {ls:agz}{ns:pos}{k:nat}
 in $A.free<byte>($A.thaw<byte>(fz_t)) end
 
 (* Top-level emit: the module's .sats text appended to sats, its .dats
-   text to dats (which holds its self-staload line); @(the lines of the
-   dats prelude, self-staload included, the number of errors) *)
+   text to dats (which holds its two self-staload lines); @(the lines of the
+   dats prelude, both self-staloads included, the number of errors) *)
 #pub fn do_emit {ls:agz}{ns:pos}{k:nat}
   (src: !$A.borrow(byte, ls, ns), src_max: int ns, xs: !spans(ns, k),
    build_target: target, is_unsafe: bool, sats: !$B.rope, dats: !$B.rope
@@ -582,4 +582,4 @@ implement do_emit (src, src_max, xs, build_target, is_unsafe, sats, dats) = let
   (* The entry point was renamed in the dats (emit_code_v); declare it *)
   val () = put_main0_decl(sats)
   val () = put_test_dispatch(src, src_max, xs, sats, dats)
-in @(dep_count + 1, emit_errors) end
+in @(dep_count + 2, emit_errors) end

@@ -1,4 +1,5 @@
 staload "./build.sats"
+staload BATS_SELF = "./build.sats"
 staload "array/src/lib.dats"
 staload "arith/src/lib.dats"
 staload "builder/src/lib.dats"
@@ -77,6 +78,10 @@ in
       val bn_start = find_basename_start(sats_bv, 0, ss, ~1)
       val bn_end = find_null_bv_from(sats_bv, bn_start, ss)
       val () = bput_v(hb, "staload \"./")
+      val () = copy_to_builder_v(sats_bv, bn_start, bn_end, ss, hb)
+      val () = bput_v(hb, "\"\n")
+      (* and under BATS_SELF, so the module's __bats_test implementation names its own declaration (keyword: test dispatch) *)
+      val () = bput_v(hb, "staload BATS_SELF = \"./")
       val () = copy_to_builder_v(sats_bv, bn_start, bn_end, ss, hb)
       val () = bput_v(hb, "\"\n")
       val () = $B.rope_append(dats, hb)

@@ -68,6 +68,10 @@ in
       val () = bput_v(hb, "staload \"./")
       val () = copy_to_builder_v(sats_bv, bn_start, bn_end, ss, hb)
       val () = bput_v(hb, "\"\n")
+      (* and under BATS_SELF, so the module's __bats_test implementation names its own declaration (keyword: test dispatch) *)
+      val () = bput_v(hb, "staload BATS_SELF = \"./")
+      val () = copy_to_builder_v(sats_bv, bn_start, bn_end, ss, hb)
+      val () = bput_v(hb, "\"\n")
       val () = $B.rope_append(dats, hb)
       val @(pre_lines, safety_errors) =
         do_emit(bv_src, m, xs, build_target, is_unsafe, sats, dats)
