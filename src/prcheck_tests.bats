@@ -158,4 +158,51 @@ fn test_check_10_fewer_rows (): bool =
 
 fn test_check_10_no_done_when (): bool = run_fixture(diff_ok, body_ok, "# T\n\nbody\n", 1024) = 1024
 
+(* --checklist (keyword: prcheck checklist): the line of each check is its rule, the text its finding uses; a subset prints only
+   its lines (exit 0); an unknown number and a file option given with --checklist are exit 2 *)
+fn test_checklist_rule_1 (): bool =
+  prcheck_rule_is(1, "a comment goes on over more than one line: it is one line with its keyword")
+
+fn test_checklist_rule_2 (): bool =
+  prcheck_rule_is(2, "a comment states the status of the code: it says what is true, in one line, with its keyword")
+
+fn test_checklist_rule_3 (): bool =
+  prcheck_rule_is(3, "a comment names no CLAUDE.md, rule file, section or place above or below: it carries its reason and a keyword")
+
+fn test_checklist_rule_4 (): bool =
+  prcheck_rule_is(4, "code of ours that is not bats (a script, sed or awk) needs a line Exhausted: <avenue> in the pull request body")
+
+fn test_checklist_rule_5 (): bool = prcheck_rule_is(5, "a symlink escapes the checkout and the review: none is added")
+
+fn test_checklist_rule_6 (): bool =
+  prcheck_rule_is(6, "a workflow or action file has no floating pin (a runner, action or version that moves): check-pins reads it")
+
+fn test_checklist_rule_7 (): bool =
+  prcheck_rule_is(7, "a test asserts no literal, sleeps for no fixed time and bounds no duration with a number")
+
+fn test_checklist_rule_8 (): bool =
+  prcheck_rule_is(8, "This PR closes no ticket. Either it is not finished (finish it on this PR), or the ticket should be broken up first: file the pieces as tickets, then this PR fixes one of them. The body needs a line Fixes #<n>, or No ticket: <reason>.")
+
+fn test_checklist_rule_9 (): bool =
+  prcheck_rule_is(9, "the paths: of a rule file cover every file its added text names")
+
+fn test_checklist_rule_10 (): bool =
+  prcheck_rule_is(10, "each line of the ticket's Done when is a COMMAND:, MEASURE:, TEST: or SEARCH: line, and the body has a row in ## Done when results for each")
+
+(* The nearest wrong text is not the rule: the rule of check 5 with its last word cut *)
+fn test_checklist_rule_not_a_prefix (): bool =
+  ~prcheck_rule_is(5, "a symlink escapes the checkout and the review: none is")
+
+fn test_checklist_all_checks_exit_0 (): bool = prcheck_checklist_fixture(2046, false) = 0
+
+fn test_checklist_subset_exit_0 (): bool = prcheck_checklist_fixture(10, false) = 0
+
+fn test_checklist_unknown_number (): bool = prcheck_checks_fixture("1 2 11") = ~1
+
+fn test_checklist_known_numbers (): bool = prcheck_checks_fixture("1 2 3 4 5 6 7 8 9 10") = 2046
+
+fn test_checklist_with_diff (): bool = prcheck_checklist_fixture(2046, true) = 2
+
+fn test_checklist_no_check_on (): bool = prcheck_checklist_fixture(0, false) = 2
+
 end

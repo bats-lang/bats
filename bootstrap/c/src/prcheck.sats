@@ -1191,6 +1191,42 @@ staload "merge_proof.sats"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 fn prcheck_main (): bool
 
 
@@ -1252,6 +1288,43 @@ fn prcheck_fixture_resolved {a,b,c:nat | a < 4096; b < 4096; c < 4096}
 
 
 
+
+
+
+
+
+
+
+
+
+fn prcheck_rule_is {s:nat} (k: int, text: string s): bool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn prcheck_checklist_fixture (checks: int, given: bool): int
+
+
+
+
+
+
+
+
+fn prcheck_checks_fixture {s:nat | s < 4096} (text: string s): int
 
 
 
