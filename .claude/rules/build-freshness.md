@@ -18,36 +18,7 @@ dependency's files keep their archive's older mtimes, `tests/source-replaced`); 
 written only when its bytes change, and then `build/.sats_changed` is written. Nothing reads a time
 to decide what is fresh (bats#254: a build and its inputs are made in one whole second, a stash is
 moved with its mtimes, a file is touched or replaced with an old time; each gave a build that did
-the work again, or not at all). A module's C and its object each have a key beside them, `<C>.key`
-and `<object>.key`, written after the tool passed and removed before it runs: for a C the check
-memo's key (check-memo.md: the sizes and sha256s of the files patsopt read for the module, its
-`.dats` and every `.sats`, `.hats` and staloaded dependency `.dats` it reaches, and the names of the
-project's `.sats` and `.hats`), and in a build also `build/.sats_changed` (bats#323: a template body
-changed in a dependency's `.dats`, its `.sats` the same, is instantiated again in the C of every
-module that staloads that `.dats`, which the key of the module's own `.dats` and the stamp did not
-see, so a dependent's C and object kept the old body), for an object the sha256 of its C, and for a
-native object also a line naming its profile, debug or release (bats#320: the two profiles share
-`build/`, a native object's cc flags are the profile's, `-g -O0` or `-O2`, and a release object was
-reused by a debug build and the reverse), so a build of the other profile makes the object again,
-and the preprocessed text of its C (below); the C's key and a wasm object's name no profile, since
-patsopt's C is the same in both and the wasm cc flags are fixed (`-O2`, no `-g`), so a wasm object
-is kept across debug and release builds (the other flags, the target and the mode are in
-`build/.bats_stamp`, which drops a `build/` that differs). An output is fresh when it is there and
-its key equals the one its inputs give now; the sizes are compared first, and a different size is a
-changed file with nothing hashed. A key that is missing, short or garbled makes its output again.
-`build/.sats_changed` is written whenever an emitted `.sats` changes, with new bytes each time (the
-sha256 of what it held), so in a build a change to a `.sats` rebuilds every module's C, as before (a
-check and a test do not read it: see check-memo.md), and a body-only change rebuilds its own module
-and the modules that staload its `.dats` (a dependent of a library), no others (`tests/sats-change`,
-`tests/build-content-keys`). The same keys serve the dependencies under a namespace (bridge, dom),
-the extra modules of a dependency, the wasm objects, the binary's own module and the entry's object
-(the entry's C is made again by every build, and an object is made again only when that C differs).
-The cost: every no-change check reads and hashes each module's `.dats`, each C once, and the
-preprocessed text of each object once (the run's digest table below); the tests are
-`tests/build-content-keys`, which plays the no-change runs after a cold one with no settling, every
-file of `build/` given a time in the future and long ago, a changed body of the same size, a changed
-`.sats`, and a garbled or missing key.
-
+the work again, or not at all).
 ## What of bats.toml reaches build/ (bats#381)
 
 A `build/` is restored by content, so what matters of `bats.toml` is whether a field changes what bats writes into `build/` (the emitted modules, the C, the objects, the link) with the sources the same, and what judges it. Two ceilings remain, and both are an error, never a cut copy (keyword: toml-parse-whole; bats#463, toml#46): so neither limit cuts the document silently (the old `parse` copied 65536 bytes and kept 256 entries and said nothing). Before this, `upload`, the docs and the version writer read the first 8192 bytes, `read_toml` the first 65536 without saying so, emission the first 4096 for `unsafe`, and `bats add` the first 4096 and wrote them back over the file. The whole document is parsed first, and a syntax error anywhere is an error of every command, since nothing of it is cached. Target and mode are not fields: they come from the command line and the `#target` lines of the sources, and are the stamp's `mark` line.
@@ -88,29 +59,6 @@ The macOS SDK and sysroot are not in the exception: `SDKROOT`, `DEVELOPER_DIR` a
 targets are hashed into the stamp (`put_cc_environment`), so another SDK path drops `build/`; bats
 passes no `-isysroot`. A header an SDK provides is in the listing as found.
 
-**What the compile reads or looks for, and what each is keyed on.**
-
-* The C: its size and sha256 (`kept_size`, `kept_hash`).
-* Every line of every header, comments and blank lines included (a native `-g` object's lines): the
-  size and sha256 of the text, `clang -E -P -frewrite-includes` with the object's own flags. `-P`
-  drops the line markers, the only lines of that text that hold an absolute path. `-P` alone prints
-  a gap of more than eight lines as one newline (20 blank lines: 2 lines of output), so a longer
-  comment would not be in its text; `-P -frewrite-includes` prints all of them.
-* Every conditional, `__has_include` and `__has_include_next` included: `-frewrite-includes`
-  writes the outcome of each (`#if 1 /* evaluated by -frewrite-includes */`, or `0`), so a new file
-  that flips a branch changes the text.
-* `-include FILE`: its bytes are inlined in the text and `-H` does not list it, nor what it
-  includes. bats passes `-include` only for `build/_bats_wasm_runtime.h`, a file bats writes that
-  holds no `#include`; `-imacros` is passed nowhere. A change that adds either must key its bytes.
-* `#embed` (clang 18.1.3 rejects it), `-fprofile-use` and sanitizer lists: bats emits and passes
-  none.
-* The path each header was found at (a debug object, a `__FILE__` string): the listing, below.
-* Flags, environment, compiler, profile: the profile line of the key and the stamp
-  (`put_cc_environment` hashes `CPATH`, `C_INCLUDE_PATH`, `SDKROOT`, `DEVELOPER_DIR` and the
-  rest, so a changed value of the search path's environment drops `build/`). bats has no
-  per-project `-I`: its project directories are the including file's and, for wasm,
-  `build/_bats_wasm_stubs`.
-
 * R8. Why not a header's directory by its place in `-v`'s search list: it is injective only while
   the list keeps its shape. A directory created before the one that held the header, with the same
   bytes, takes the same number (`-isystem A -isystem B` with `x.h` in B, then `-isystem A -isystem D
@@ -146,16 +94,3 @@ second pass over megabytes of text and needs the compiler's install directory. R
 (Ubuntu 1:18.1.3-1ubuntu1) and gcc 13.3 (for `-H`'s form only) on Linux; the macOS branches were
 not run, and R3 and R7 are the rule for a clang whose output differs from what was run.
 
-**Each file is digested once for a build (bats#398).** The native and the wasm key of a C (a wasm
-bin's build makes both for the dependencies' C) both ask for the file's size and sha256 through the
-run's digest table (`kept_size`, `kept_hash`, the table of check-memo.md), so the second key of a C
-finds the line in the table (`digest_entry`); the preprocessed text is not in the table, since it is
-made again for each key; the digest is not passed between the keys. A C's lines in an object's key
-are its size and its sha256 (`kept_size`, `kept_hash`), the same for the native and the wasm key.
-`-v` says `~ digested <path>` for each file really read, which `tests/build-content-keys` counts (a
-C once in a build) and `tests/build-headers` (the entry's C once). The table is emptied at the start
-of every build (`digests_forget` in `do_build`, after `cache_swap`), so a C seen by an earlier build
-of the process, or of the other mark (its `build/` is another set of files), is read again; within a
-build a C is written by patsopt before it is first asked for. So a check, which builds the native
-mark and then the wasm one, digests a dependency's C once in each, not once in all: the two marks'
-`build/` are different files.
