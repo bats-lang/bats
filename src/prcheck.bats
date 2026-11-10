@@ -978,11 +978,15 @@ val g_repo_to = ref<pos_t>(0)
 val g_checks_given = ref<bool>(false)
 val g_width_given = ref<bool>(false)
 val g_checklist = ref<bool>(false)
+val g_review_at = ref<pos_t>(~1)
+val g_review_to = ref<pos_t>(0)
 
 fn usage_error (): void = let
   val () = prerr! ("usage: bats prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--branch <name>] [--resolve]")
   val () = prerr_newline()
   val () = prerr! ("       bats prcheck --checklist [--checks \"1 2 ..\"]: print one line, <n>. <the rule>, for each check that is on; no --diff, --body, --ticket or --resolve")
+  val () = prerr_newline()
+  val () = prerr! ("       bats prcheck --review <file> [--checks \"1 2 ..\"]: exit 1 unless the review has Reviewer: and Cost: lines and, for each check that is on, the line <n>. <the rule>: checked, ok")
   val () = prerr_newline()
   val () = prerr! ("  --diff: git diff -U0 --no-renames <base>...<head> (without the generated bootstrap/c); --body: the pull request body;")
   val () = prerr_newline()
@@ -1053,6 +1057,11 @@ fun options {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
         (if !g_ticket_at >= 0 then false else let
           val () = (!g_ticket_at := value_at)
           val () = (!g_ticket_to := value_to)
+        in options(cmd, value_to + 1, total) end)
+      else if flag_is(cmd, p, z, "--review") then
+        (if !g_review_at >= 0 then false else let
+          val () = (!g_review_at := value_at)
+          val () = (!g_review_to := value_to)
         in options(cmd, value_to + 1, total) end)
       else if flag_is(cmd, p, z, "--branch") then let
         val () = (if lit_here(cmd, value_at, value_to, "relock/", 7, 0) then (!g_exempt := true) else ())
@@ -1162,13 +1171,137 @@ fun checklist_from {k:nat | k <= 11} .<11 - k>. (k: int k): void =
 (* The exit code of --checklist for the checks that are on: 2 when a file option came with it (given) or no check is on *)
 fn checklist_code (on: int, given: bool): int = if given then 2 else if on = 0 then 2 else 0
 
+(* ------------------------------------------------------------------ *)
+(* --review (keyword: prcheck review): the check a review is run through before it is posted. The review has a line
+   <n>. <the rule> then ": checked, ok" or ": <the finding>" for each check that is on, a Reviewer: line naming the model and
+   a Cost: line (tokens and minutes); the rule is the text of --checklist now, so a review made from an older list is stale. *)
+
+val g_review_bad = ref<int>(0)
+
+(* The start of the first line of bv[p, m) that is the line of check k: the number as it is written (1 is not 01 or 10), a dot, a blank *)
+fun review_line {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m, k: int): [r:int | ~1 <= r; r < m] int r = let
+  val e = line_end(bv, p, m)
+  val d = digits_end(bv, p, e)
+  val width = (if k >= 10 then 2 else 1): int
+in
+  if p >= m then ~1
+  else if d - p = width && number_of(bv, p, e, 0, 0) = k && peek(bv, d, e) = 46 && peek(bv, d + 1, e) = 32 then p
+  else if e >= m then ~1
+  else review_line(bv, e + 1, m, k)
+end
+
+(* Whether a line of bv[p, m) starts with the sn bytes of s and has text after them *)
+fun review_key {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{sn:nat} .<m - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m, s: string sn, sn: int sn): bool = let
+  val e = line_end(bv, p, m)
+in
+  if p >= m then false
+  else if lit_here(bv, p, e, s, sn, 0) && skip_blank(bv, p + sn, e) < e then true
+  else if e >= m then false
+  else review_key(bv, e + 1, m, s, sn)
+end
+
+(* The end of bv[a, q) without the blanks and carriage returns at its end *)
+fun trim_end {l:agz}{n:pos}{e:nat | e <= n}{a:int}{q:nat | q <= e} .<q>.
+  (bv: !$A.borrow(byte, l, n), a: int a, q: int q, e: int e): [r:int] int r =
+  if q <= 0 then q
+  else if q <= a then q
+  else if is_blank(peek(bv, q - 1, e)) || peek(bv, q - 1, e) = 13 then trim_end(bv, a, q - 1, e)
+  else q
+
+fn review_missing (what: string): void = let
+  val () = (!g_review_bad := !g_review_bad + 1)
+  val () = print! ("review: no line ", what)
+in print_newline() end
+
+(* Where the rule starts on the line of check k that starts at p: after the number, the dot and the blank *)
+fn after_number {p:int} (p: int p, k: int): [x:int] int x = if k >= 10 then p + 4 else p + 3
+
+(* The length of s as an int of that value *)
+fn text_len {sn:nat} (s: string sn): int sn = g1u2i(string1_length(s))
+
+(* The position after the rule of check k when bv[q, e) starts with it, else ~1 *)
+fn rule_end {l:agz}{n:pos}{e:nat | e <= n}{q:int}
+  (bv: !$A.borrow(byte, l, n), q: int q, e: int e, k: int): [r:int] int r = let
+  val r = rule_of(k)
+  val len = text_len(r)
+in
+  if lit_here(bv, q, e, r, len, 0) then q + len else ~1
+end
+
+(* The line of check k in the review: ok, or a finding said on stdout *)
+fn review_entry {l:agz}{n:pos}{m:nat | m <= n}
+  (bv: !$A.borrow(byte, l, n), m: int m, k: int): void = let
+  val p = review_line(bv, 0, m, k)
+in
+  if p < 0 then let
+    val () = (!g_review_bad := !g_review_bad + 1)
+    val () = print! ("check ", k, ": review: no line for it")
+  in print_newline() end
+  else let
+    val e = line_end(bv, p, m)
+    val q = after_number(p, k)
+    val re = rule_end(bv, q, e, k)
+  in
+    if re < 0 || ~(peek(bv, re, e) = 58 && peek(bv, re + 1, e) = 32) then let
+      val () = (!g_review_bad := !g_review_bad + 1)
+      val () = print! ("check ", k, ": review: the line is not the rule as the list has it now (a stale list)")
+    in print_newline() end
+    else let
+      val a = re + 2
+      val b = trim_end(bv, a, e, e)
+    in
+      if b - a = 11 && lit_here(bv, a, e, "checked, ok", 11, 0) then ()
+      else let
+        val () = (!g_review_bad := !g_review_bad + 1)
+        val () = print! ("check ", k, ": review: a finding in place of checked, ok: ")
+        val () = (if b > a then print_borrow(bv, a, b, m) else ())
+      in print_newline() end
+    end
+  end
+end
+
+fun review_entries {l:agz}{n:pos}{m:nat | m <= n}{k:nat | k <= 11} .<11 - k>.
+  (bv: !$A.borrow(byte, l, n), m: int m, k: int k): void =
+  if k >= 11 then ()
+  else let
+    val () = (if check_on(k) then review_entry(bv, m, k) else ())
+  in review_entries(bv, m, k + 1) end
+
+(* The number of findings of the review bv[0, m): 0 when it has a line for each check that is on, all ok *)
+fn review_run {l:agz}{n:pos}{m:nat | m <= n}
+  (bv: !$A.borrow(byte, l, n), m: int m): int = let
+  val () = (!g_review_bad := 0)
+  val () = (if review_key(bv, 0, m, "Reviewer:", 9) then () else review_missing("Reviewer: <the model>"))
+  val () = (if review_key(bv, 0, m, "Cost:", 5) then () else review_missing("Cost: <tokens and minutes>"))
+  val () = review_entries(bv, m, 1)
+in !g_review_bad end
+
+(* The exit code of --review for the checks that are on: 2 when another mode's option came with it (given) or no check is on *)
+fn review_code (on: int, given: bool): int = if given then 2 else if on = 0 then 2 else 0
+
+fn run_review {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void =
+  (case+ read_span(cmd, !g_review_at, !g_review_to) of
+  | ~whole_err(_) => unreadable("--review")
+  | ~whole_ok(ar, piece, size, len) => let
+      val @(fz, bv) = $A.freeze<byte>(piece)
+      val bad = review_run(bv, len)
+      val () = (if bad = 0 then println! ("bats prcheck: review ok") else set_exit_code(1))
+      val () = $A.drop<byte>(fz, bv)
+    in whole_free(ar, $A.thaw<byte>(fz)) end)
+
 (* Reads the files the command names and runs the checks *)
-fn run_prcheck {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void = let
+fn run_prcheck{lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void = let
   val () = (if ~(!g_checks_given) then config_checks() else ())
   val () = (if ~(!g_width_given) then config_width() else ())
   val given = (!g_diff_at >= 0 || !g_body_at >= 0 || !g_ticket_at >= 0 || !g_resolve): bool
 in
-  if !g_checklist then
+  if !g_review_at >= 0 then
+    (if review_code(!g_on, given || !g_checklist) = 0 then run_review(cmd)
+    else if given || !g_checklist then usage_error()
+    else no_checks())
+  else if !g_checklist then
     (if checklist_code(!g_on, given) = 0 then checklist_from(1)
     else if given then usage_error()
     else no_checks())
@@ -1315,6 +1448,17 @@ implement prcheck_checklist_fixture (checks, given) = let
   val code = checklist_code(checks, given)
   val () = (if code = 0 then checklist_from(1) else ())
 in code end
+
+(* What --review does for a review held in memory with the checks (a bit for each): 0 when it is complete and all ok, else 1 *)
+#pub fn prcheck_review_fixture {s:nat | s < 4096} (review: string s, checks: int): int
+
+implement prcheck_review_fixture (review, checks) = let
+  val @(fz, bv) = $A.freeze<byte>(str_to_arr4096(review))
+  val () = (!g_on := checks)
+  val bad = review_run(bv, g1u2i(string1_length(review)))
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in if bad = 0 then 0 else 1 end
 
 (* The mask of the checks the text names ("1 2 10"), or ~1 when it names a number that is no check *)
 #pub fn prcheck_checks_fixture {s:nat | s < 4096} (text: string s): int
