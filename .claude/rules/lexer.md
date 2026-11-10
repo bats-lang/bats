@@ -24,6 +24,4 @@ A string literal whose last byte is an escaping backslash is an unterminated str
 
 What allocates must be linear outside `$UNSAFE`, since wasm has no garbage collector and a non-linear boxed value is never freed. The Rust bats let them all through (`tests/linear-heap`).
 
-an identifier is looked for only in the table of its first letter (bats#368): it was looked for in the three whole lists, word by word, which was 54 G of the 80 G instructions that lexing quire's 158 files took.
-
 `lit_at` makes no array for the literal: the lexer calls it for every keyword test, so a cost per call is a cost per source byte.

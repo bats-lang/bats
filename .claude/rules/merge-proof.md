@@ -8,9 +8,6 @@ paths:
 
 The owner's ruling of 2026-10-20: an approving review stays authoritative when the only change since is a merge of main. `bats merge-proof <reviewed-sha> <head> [--repository <dir>]` checks that, in a checkout of the head, run at its root (the repository is `--repository`, else `BATS_REPOSITORY`; the regeneration needs it). It is a subcommand written in bats (`src/merge_proof.bats`, run before bats's own arguments are read, as `affected` is; quire#646). Its answer is the head-naming review of a gated repository's brief: the reviewer pastes the output.
 
-2. a conflict resolved by hand is the one thing the ruling leaves to a person.
-4. the test is git's answer, not the repository's name.
-
 The order puts the cheap proofs first and the regeneration, which builds the compiler's C, last.
 
 ## Research

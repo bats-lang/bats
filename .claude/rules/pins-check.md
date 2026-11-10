@@ -11,7 +11,6 @@ paths:
 ## The checks
 
 2. If neither is an ancestor of the other, the two have **diverged**: a `note:` line, not a finding. Why: the old pin of many of the pull requests measured below (every pin move from the bats pin of 2026-10-16) was a commit that is on no branch of bats's main (it was dropped when main was rewritten), so no pin after it can descend from it; GitHub's compare API has the same three outcomes (`ahead`, `behind`, `diverged`, with `identical`), and only `behind` is a regression.
-4. the sha256 equals the sidecar of the package repository **at the commit of the head's `.github/repository-version`** (read with `git show`, never from the files the clone has checked out: the same check as `bats check-push` check 1, whose `check_entry` it calls).
 5. Without the option nothing is asked of the fix: the relock picked a pin that was the newest when it ran, and only the fix the reviewer names is the question.
 
 ## Decisions

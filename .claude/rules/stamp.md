@@ -9,21 +9,6 @@ paths:
 
 `build/` carries a stamp of who made it, and is kept only when the running bats would write the same
 one (`src/stamp.bats`, bats-lang/bats#267).
-Darwin names were not run on a Mac; `SOURCE_DATE_EPOCH` is not in the list, since clang reads it
-only for `__DATE__` and `__TIME__`, which no emitted C uses, and a reproducible-build setup sets it
-per commit, which would drop `build/` on every commit; `LLD_IN_TEST`, `LLD_VERSION` and
-`LLVM_OVERRIDE_PRODUCER` are not, since no object or link bats makes reads them, and wasm-ld reads
-none of the list), `libs` and `link` (below), 
-No line holds a path
-(each line is a digest, or a template that writes the ATS2 home as `$(PATSHOME)`), so a `build/`
-copied to another directory, or made on another machine with the same
-bats, ATS2 and C compiler, keeps (bats-lang/bats#250 made the C path-independent), and so do its
-objects: the key file of an object (`<object>.key`) holds only the sizes and sha256s of its C, of
-its preprocessed text with the listing of where each header was found (`<object>.i`, made and
-removed within the run), and of this stamp; the listing writes the ATS2 home and the compiler's
-resource directory as the placeholders `A` and `C` and every other path as clang printed it, so the
-toolchain moving is not a change and a header found at another path is (build-freshness.md,
-`tests/build-toolchain-path`).
 This replaces the
 hand-bumped `build/.bats_cache_id` (`cache_buster_id`), which went with the removal of every `.o`
 that it and a changed target caused: with the stamp that removal is dead, since `build/` is empty or

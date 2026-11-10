@@ -14,8 +14,6 @@ Name, by research: `check-pins` follows the script it replaces and the repositor
 
 * `apt-get install` is allowed (the runner image is pinned).
 * `peerDependencies` are the package's API, not an install, and are not read. It is read by lines, not parsed (the json package would add a dependency to the compiler).
-* the ATS2 pin is in `src/ats2.bats` alone, bats#283.
-
 ## Exceptions
 
 `# unpinned: <reason>` on the line of an input, or above it (on a comment line, with only comment lines between), is accepted and listed on stdout (`file:line: unpinned: <reason>`), so each is a decision somebody wrote. An exception with no reason, or one that exempts nothing (a stale decision: a blank line, a code line that is clean, or the end of the file after it), is a failure, as linters that report unused suppressions do (ESLint's `--report-unused-disable-directives`). A `package.json` has no comments, so its exception is a marker file in the directory (below, keyword: check-pins-fixture).

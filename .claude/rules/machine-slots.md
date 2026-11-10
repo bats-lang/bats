@@ -7,7 +7,7 @@ paths:
 
 # Machine slots
 
-the files and convention of gen-pwa test's `PWA_TEST_SLOTS` and `PWA_TEST_LOCK_DIR` (bats-lang/pwa#82), so one directory given to both is one pool. The Rust bats had no machine-wide limit (`tests/machine-slots`).
+The Rust bats had no machine-wide limit (`tests/machine-slots`).
 
 **Refused (bats-lang/bats#464).** Running on without the slot would drop the machine's cap, which is what `BATS_SLOTS` is for, so the run stops instead.
 
