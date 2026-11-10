@@ -1,4 +1,5 @@
 staload "./lib.sats"
+staload BATS_SELF = "./lib.sats"
 (* arith -- freestanding arithmetic for ATS2 *)
 (* g0/g1 arithmetic, comparisons, bitwise, type coercion *)
 

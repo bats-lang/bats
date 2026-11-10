@@ -1,4 +1,5 @@
 staload "./lib.sats"
+staload BATS_SELF = "./lib.sats"
 (* result -- linear result and option types *)
 (* Must pattern-match to consume. Errors cannot be ignored. *)
 

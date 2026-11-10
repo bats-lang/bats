@@ -1,4 +1,5 @@
 staload "./emitter.sats"
+staload BATS_SELF = "./emitter.sats"
 staload "array/src/lib.dats"
 staload "arith/src/lib.dats"
 staload "builder/src/lib.dats"
@@ -550,7 +551,7 @@ fn put_dispatch_decl {l:agz}{nt:pos}{tlen:nat | tlen <= nt}
   if k <= 0 then ()
   else let
     val () = rbput(sats, "\nfun __bats_test (i: int): bool\n")
-    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement __bats_test (i) =\n  ")
+    val () = rbput(dats, "\n(* bats test: the i-th test of this module *)\nimplement $BATS_SELF.__bats_test (i) =\n  ")
     val () = put_dispatch(t, tlen, 0, tlen, 0, dats)
   in rbput(dats, "false\n") end
 
@@ -570,8 +571,8 @@ fn put_test_dispatch {ls:agz}{ns:pos}{k:nat}
 in $A.free<byte>($A.thaw<byte>(fz_t)) end
 
 (* Top-level emit: the module's .sats text appended to sats, its .dats
-   text to dats (which holds its self-staload line); @(the lines of the
-   dats prelude, self-staload included, the number of errors) *)
+   text to dats (which holds its two self-staload lines); @(the lines of the
+   dats prelude, both self-staloads included, the number of errors) *)
 
 
 
@@ -587,4 +588,4 @@ implement do_emit (src, src_max, xs, build_target, is_unsafe, sats, dats) = let
   (* The entry point was renamed in the dats (emit_code_v); declare it *)
   val () = put_main0_decl(sats)
   val () = put_test_dispatch(src, src_max, xs, sats, dats)
-in @(dep_count + 1, emit_errors) end
+in @(dep_count + 2, emit_errors) end

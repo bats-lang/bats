@@ -1,4 +1,5 @@
 staload "./prcheck_tests.sats"
+staload BATS_SELF = "./prcheck_tests.sats"
 (* prcheck_tests -- the tests of bats prcheck (bats-lang/bats#424; keyword: prcheck tests) *)
 
 #include "share/atspre_staload.hats"

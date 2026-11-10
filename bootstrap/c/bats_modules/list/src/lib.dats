@@ -1,4 +1,5 @@
 staload "./lib.sats"
+staload BATS_SELF = "./lib.sats"
 (* list -- singly-linked linear lists *)
 
 #include "share/atspre_staload.hats"

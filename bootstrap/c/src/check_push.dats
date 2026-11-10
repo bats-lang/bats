@@ -1,4 +1,5 @@
 staload "./check_push.sats"
+staload BATS_SELF = "./check_push.sats"
 staload "array/src/lib.dats"
 staload "builder/src/lib.dats"
 staload "env/src/lib.dats"
