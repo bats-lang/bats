@@ -37,9 +37,7 @@ CI builds the compiler from `bootstrap/c`, regenerates, and fails if the result 
 ## Architecture
 
 Entry point: `src/bin/bats.bats`
-Shared modules: `src/helpers.bats`, `src/lexer.bats`, `src/emitter.bats`, `src/build.bats`, `src/docs.bats`, `src/commands.bats`, `src/lock.bats`, `src/recursion.bats`, `src/overrides.bats`, `src/closure.bats`, `src/cache.bats`, `src/facts.bats`, `src/inputs.bats`, `src/pins.bats`, `src/affected.bats`, `src/merge_proof.bats`, `src/pins_check.bats`, `src/check_push.bats`, `src/built.bats`
 
-Dependencies: argparse, array, arith, builder, env, file, path, process, result, sha256, str, toml
 
 ## Workflow
 
@@ -61,7 +59,7 @@ Each divergence is kept with the notes of the area it is in, in `.claude/rules/`
 
 ## Safety Enforcement
 
-Unsafe constructs (`castfn`, `$extfcall`, `$extval`, `$extype`, `$extkind`, `praxi`, `extern`, `assume`, `mac#`, `ext#`, `while` (`while*` with a metric is fine), `fun`, `fnx`, a `fun` group's `and` member or `fix` without termination metric (the `fun` of an arrow, `=<fun>`, is a function kind, not a declaration), `val rec`, `#pub prfun`/`prfn` without `primplement`, and what allocates without being linear: a `datatype` whose constructor carries data, a boxed tuple, record or list, a `cloref` or `cloptr` closure, a `lam` whose arrow does not make it a plain function or a linear closure, a `ref` made inside a function, a prelude word that builds a non-linear list, option or stream, libats/ML) are detected by the lexer (`SConstruct`, or a rejected `SPub`) and **enforced** before patsopt runs (`validate_project` in `src/lock.bats`, Rust's `preprocess_all`), as are the rules that no `implement` is on a call cycle (`src/recursion.bats`) that no `implement` replaces what another package implements, and that an `implement` of another package's template is for a type of the implementing package, a warning until `BATS_ORPHAN_ERROR` (`src/overrides.bats`). They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
+Unsafe constructs are detected by the lexer and **enforced** before patsopt runs, as are the rules that no `implement` is on a call cycle that no `implement` replaces what another package implements, and that an `implement` of another package's template is for a type of the implementing package. They, and `%{ ... %}` blocks, are rejected outside `$UNSAFE begin...end` blocks in ALL packages — both safe and unsafe. `$UNSAFE begin...end` blocks themselves are rejected in `unsafe = false` packages.
 
 ## Problem Resolution
 

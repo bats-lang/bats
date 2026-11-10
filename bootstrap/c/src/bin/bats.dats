@@ -155,6 +155,19 @@ fn print_usage(): void = let
   val () = println! ("                               --bless writes each reject's expect from its observed error (read it in the PR diff)")
   val () = println! ("  with-env <env-file> <command> [args...]")
   val () = println! ("                               Run a command with the variables of a dotenv file")
+  val () = println! ("")
+  val () = println! ("environment:")
+  val () = println! ("  BATS_REPOSITORY              The package repository when --repository is not given; the flag wins")
+  val () = println! ("  BATS_COMMIT                  The commit the _bats_facts and _bats_built modules name (default HEAD)")
+  val () = println! ("  BATS_COLD                    Anything but 0: check and build ignore every memo key and write them again (as --cold)")
+  val () = println! ("  BATS_SLOTS                   1 to 64: check, build, test and run's build hold one of that many machine slots (flock on BATS_LOCK_DIR/slot-<i>.lock)")
+  val () = println! ("  BATS_LOCK_DIR                The directory of the machine slots (default ~/.cache/bats)")
+  val () = println! ("  BATS_CACHE_DIR               The shared cache of patsopt's C, kept under a key of what patsopt reads")
+  val () = println! ("  BATS_CACHE_MAX_MB            The size limit of the shared cache in whole megabytes (default 2048); the least recently used entries go first")
+  val () = println! ("  BATS_PATSOPT_TIMEOUT_S       Wall clock seconds a patsopt run may take; a run the cap ends exits 124")
+  val () = println! ("  BATS_PATSOPT_MEM_MB          Address space in megabytes a patsopt run may take; a run the cap ends exits 125")
+  val () = println! ("  BATS_MEMO_DIR                The fixtures' memo when --memo is not given (default $XDG_CACHE_HOME/bats/fixtures, else ~/.cache/bats/fixtures)")
+  val () = println! ("  BATS_ORPHAN_ERROR            1 (anything but 0): an implement of another package's template for a type it does not own is an error, else a warning")
 in end
 
 (* Copies src[s + i, e) to dst[i..], for bats run's arguments after
