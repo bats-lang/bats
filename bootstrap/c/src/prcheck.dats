@@ -105,6 +105,14 @@ fun skip_blank {l:agz}{n:pos}{e:nat | e <= n}{p:int} .<max(e - p, 0)>.
   else if is_blank(peek(bv, p, e)) then skip_blank(bv, p + 1, e)
   else p
 
+(* The end of bv[a, q) without the blanks and carriage returns at its end *)
+fun trim_end {l:agz}{n:pos}{e:nat | e <= n}{a:int}{q:nat | q <= e} .<q>.
+  (bv: !$A.borrow(byte, l, n), a: int a, q: int q, e: int e): [r:int] int r =
+  if q <= 0 then q
+  else if q <= a then q
+  else if is_blank(peek(bv, q - 1, e)) || peek(bv, q - 1, e) = 13 then trim_end(bv, a, q - 1, e)
+  else q
+
 (* The first byte ch at or after p of bv[0, e), or e *)
 fun char_end {l:agz}{n:pos}{e:nat | e <= n}{p:int} .<max(e - p, 0)>.
   (bv: !$A.borrow(byte, l, n), p: int p, e: int e, ch: int): [r:int | p <= r; r <= max(p, e)] int r =
@@ -993,7 +1001,7 @@ val g_review_to = ref<pos_t>(0)
 fn usage_error (): void = let
   val () = prerr! ("usage: bats prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--branch <name>] [--resolve]")
   val () = prerr_newline()
-  val () = prerr! ("       bats prcheck --checklist [--checks \"1 2 ..\"]: print one line, <n>. <the rule>, for each check that is on; no --diff, --body, --ticket or --resolve")
+  val () = prerr! ("       bats prcheck --checklist [--checks \"1 2 ..\"]: print one line, <n>. <the rule>, for each check that is on, then (bats.toml [prcheck] keywords, at most 4096 bytes) <heading>: <first sentence> for each CLAUDE.md heading that holds a keyword and the main-merge line; no --diff, --body, --ticket or --resolve")
   val () = prerr_newline()
   val () = prerr! ("       bats prcheck --review <file> [--checks \"1 2 ..\"]: exit 1 unless the review has Reviewer: and Cost: lines and, for each check that is on, the line <n>. <the rule>: checked, ok")
   val () = prerr_newline()
@@ -1103,13 +1111,13 @@ fun options {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
   end
 
 (* The [prcheck] value of key in bats.toml: its length in vbuf, or ~1 when the file or the key is not there *)
-fn config_value {lk:agz}{nk:pos}{lv:agz}
-  (key: !$A.borrow(byte, lk, nk), klen: int nk, vbuf: !$A.arr(byte, lv, 256)): [k:int | ~1 <= k; k <= 256] int k =
+fn config_value {lk:agz}{nk:pos}{lv:agz}{mo:pos}
+  (key: !$A.borrow(byte, lk, nk), klen: int nk, vbuf: !$A.arr(byte, lv, mo), max: int mo): [k:int | ~1 <= k; k <= mo] int k =
   (case+ read_manifest() of
   | ~$R.ok(doc) => let
       var sec_c = @[char][7]('p', 'r', 'c', 'h', 'e', 'c', 'k')
       val @(fz_s, bv_s) = $A.freeze<byte>($S.from_char_array(sec_c, 7))
-      val vr = $T.get(doc, bv_s, 7, key, klen, vbuf, 256)
+      val vr = $T.get(doc, bv_s, 7, key, klen, vbuf, max)
       val () = $A.drop<byte>(fz_s, bv_s)
       val () = $A.free<byte>($A.thaw<byte>(fz_s))
       val () = $T.toml_free(doc)
@@ -1125,7 +1133,7 @@ fn config_checks (): void = let
   var key_c = @[char][6]('c', 'h', 'e', 'c', 'k', 's')
   val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 6))
   val vbuf = $A.alloc<byte>(256)
-  val n = config_value(bv_k, 6, vbuf)
+  val n = config_value(bv_k, 6, vbuf, 256)
   val @(fz_v, bv_v) = $A.freeze<byte>(vbuf)
   val () = (if n >= 0 then let
       val @(ok, mask) = parse_checks(bv_v, 0, n, 0, 0)
@@ -1140,7 +1148,7 @@ fn config_width (): void = let
   var key_c = @[char][5]('w', 'i', 'd', 't', 'h')
   val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 5))
   val vbuf = $A.alloc<byte>(256)
-  val n = config_value(bv_k, 5, vbuf)
+  val n = config_value(bv_k, 5, vbuf, 256)
   val @(fz_v, bv_v) = $A.freeze<byte>(vbuf)
   val () = (if n >= 1 then (if digits_end(bv_v, 0, n) = n then (!g_width := number_of(bv_v, 0, n, 0, 0)) else ()) else ())
   val () = $A.drop<byte>(fz_v, bv_v)
@@ -1181,6 +1189,257 @@ fun checklist_from {k:nat | k <= 11} .<11 - k>. (k: int k): void =
 fn checklist_code (on: int, given: bool): int = if given then 2 else if on = 0 then 2 else 0
 
 (* ------------------------------------------------------------------ *)
+(* The entries of CLAUDE.md in --checklist (keyword: prcheck checklist keywords): a rule is listed when its heading holds a word
+   of the [prcheck] keywords (bats.toml, at most 4096 bytes: a longer value reads as none); then the main-merge line. *)
+
+val g_heading_hits = ref<int>(0)
+
+(* A byte of a keyword: no blank, comma, bracket or quote, so ["a", "b"] and a b are the same two words *)
+fn is_kw_char (b: int): bool = b > 32 && b <> 44 && b <> 91 && b <> 93 && b <> 34 && b <> 39
+
+(* The first keyword byte at or after p of kv[0, m), or m *)
+fun word_start {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+  (kv: !$A.borrow(byte, l, n), p: int p, m: int m): [r:nat | p <= r; r <= m] int r =
+  if p >= m then p
+  else if is_kw_char(peek(kv, p, m)) then p
+  else word_start(kv, p + 1, m)
+
+(* The end of the word that starts at p *)
+fun word_end {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p < m} .<m - p>.
+  (kv: !$A.borrow(byte, l, n), p: int p, m: int m): [r:nat | p < r; r <= m] int r =
+  if p + 1 >= m then m
+  else if is_kw_char(peek(kv, p + 1, m)) then word_end(kv, p + 1, m)
+  else p + 1
+
+(* How many words kv[p, m) holds *)
+fun words_in {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+  (kv: !$A.borrow(byte, l, n), p: int p, m: int m): int = let
+  val a = word_start(kv, p, m)
+in
+  if a >= m then 0 else 1 + words_in(kv, word_end(kv, a, m), m)
+end
+
+(* Whether kv[k, kb) equals bv from k + d on, in any case (bv is read up to e) *)
+fun same_ci {l:agz}{n:pos}{e:nat | e <= n}{lk:agz}{nk:pos}{kb:nat | kb <= nk}{d,k:int} .<max(kb - k, 0)>.
+  (bv: !$A.borrow(byte, l, n), e: int e, d: int d, kv: !$A.borrow(byte, lk, nk), kb: int kb, k: int k): bool =
+  if k >= kb then true
+  else if lower(peek(bv, k + d, e)) = lower(peek(kv, k, kb)) then same_ci(bv, e, d, kv, kb, k + 1)
+  else false
+
+(* Whether the word kv[ka, kb) is in bv[i, e), in any case *)
+fun has_kw {l:agz}{n:pos}{e:nat | e <= n}{lk:agz}{nk:pos}{ka:nat}{kb:nat | ka < kb; kb <= nk}{i:int} .<max(e - i, 0)>.
+  (bv: !$A.borrow(byte, l, n), e: int e, i: int i, kv: !$A.borrow(byte, lk, nk), ka: int ka, kb: int kb): bool =
+  if i + (kb - ka) > e then false
+  else if same_ci(bv, e, i - ka, kv, kb, ka) then true
+  else has_kw(bv, e, i + 1, kv, ka, kb)
+
+(* Whether one of the words of kv[p, km) is in bv[ts, e) *)
+fun any_kw {l:agz}{n:pos}{e:nat | e <= n}{lk:agz}{nk:pos}{km:nat | km <= nk}{ts:int}{p:nat | p <= km} .<km - p>.
+  (bv: !$A.borrow(byte, l, n), e: int e, ts: int ts, kv: !$A.borrow(byte, lk, nk), p: int p, km: int km): bool = let
+  val a = word_start(kv, p, km)
+in
+  if a >= km then false
+  else let
+    val b = word_end(kv, a, km)
+  in
+    if has_kw(bv, e, ts, kv, a, b) then true else any_kw(bv, e, ts, kv, b, km)
+  end
+end
+
+(* The end of the run of # at p *)
+fun hash_end {l:agz}{n:pos}{e:nat | e <= n}{p:int} .<max(e - p, 0)>.
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e): [r:int | p <= r; r <= max(p, e)] int r =
+  if p >= e then p
+  else if peek(bv, p, e) = 35 then hash_end(bv, p + 1, e)
+  else p
+
+(* The start of the text of the heading on the line bv[p, e): one to six #, a blank, the text; ~1 for any other line *)
+fn heading_at {l:agz}{n:pos}{e:nat | e <= n}{p:int}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e): [r:int] int r = let
+  val h = hash_end(bv, p, e)
+in
+  if h > p && h - p <= 6 && peek(bv, h, e) = 32 then skip_blank(bv, h, e) else ~1
+end
+
+(* Whether the line bv[p, e) opens or closes a code fence *)
+fn is_fence {l:agz}{n:pos}{e:nat | e <= n}{p:int}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e): bool = let
+  val q = skip_blank(bv, p, e)
+in
+  lit_here(bv, q, e, "```", 3, 0) || lit_here(bv, q, e, "~~~", 3, 0)
+end
+
+(* Whether the line at ls ends a paragraph: it is blank, a heading or a fence *)
+fn line_stops {l:agz}{n:pos}{m:nat | m <= n}{ls:nat | ls < m}
+  (bv: !$A.borrow(byte, l, n), ls: int ls, m: int m): bool = let
+  val e = line_end(bv, ls, m)
+  val q = skip_blank(bv, ls, e)
+in
+  q >= e || heading_at(bv, ls, e) >= 0 || is_fence(bv, ls, e)
+end
+
+(* The start of the first line at or after p that is not blank, or m *)
+fun first_para {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m} .<m - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m): [r:nat | p <= r; r <= m] int r =
+  if p >= m then p
+  else let
+    val e = line_end(bv, p, m)
+    val q = skip_blank(bv, p, e)
+  in
+    if q >= e then (if e >= m then m else first_para(bv, e + 1, m)) else p
+  end
+
+fn sentence_ends (d: int): bool = d = 0 || d = 10 || d = 13 || d = 32
+
+(* The first sentence of the paragraph at q into out: a line break is a blank, a . before a blank ends it *)
+fun sentence {l:agz}{n:pos}{m:nat | m <= n}{q:nat | q <= m} .<m - q>.
+  (bv: !$A.borrow(byte, l, n), q: int q, m: int m, out: !$B.builder_v >> $B.builder_v): void =
+  if q >= m then ()
+  else let
+    val c = peek(bv, q, m)
+  in
+    if c = 46 && sentence_ends(peek(bv, q + 1, m)) then put_char_v(out, 46)
+    else if c = 10 then
+      (if q + 1 >= m then ()
+      else if line_stops(bv, q + 1, m) then ()
+      else let
+        val () = put_char_v(out, 32)
+      in sentence(bv, skip_blank(bv, q + 1, m), m, out) end)
+    else if c = 13 then sentence(bv, q + 1, m, out)
+    else let
+      val () = put_char_v(out, c)
+    in sentence(bv, q + 1, m, out) end
+  end
+
+(* The line <heading>: <the first sentence of its section> for the heading text bv[ts, te) of the line at p *)
+fn emit_entry {l:agz}{n:pos}{m:nat | m <= n}{p:nat | p < m}{ts,te:int}
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m, ts: int ts, te: int te, out: !$B.builder_v >> $B.builder_v): void = let
+  val () = copy_to_builder_v(bv, ts, te, m, out)
+  val () = bput_v(out, ": ")
+  val s = first_para(bv, next_line(bv, p, m), m)
+  val () = (if s < m then (if line_stops(bv, s, m) then () else sentence(bv, skip_blank(bv, s, m), m, out)) else ())
+in put_newline_v(out) end
+
+(* Each heading of bv[p, m) outside a code fence that holds a word of kv[ka, kb): counted, and its entry into out when emit *)
+fun scan {l:agz}{n:pos}{m:nat | m <= n}{lk:agz}{nk:pos}{kb:nat | kb <= nk}{ka:nat | ka <= kb}{p:nat | p <= m} .<m - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, m: int m, fence: bool, emit: bool,
+   kv: !$A.borrow(byte, lk, nk), ka: int ka, kb: int kb, out: !$B.builder_v >> $B.builder_v): void =
+  if p >= m then ()
+  else let
+    val e = line_end(bv, p, m)
+    val nxt = next_line(bv, p, m)
+  in
+    if is_fence(bv, p, e) then scan(bv, nxt, m, ~fence, emit, kv, ka, kb, out)
+    else if fence then scan(bv, nxt, m, fence, emit, kv, ka, kb, out)
+    else let
+      val ts = heading_at(bv, p, e)
+    in
+      if ts < 0 then scan(bv, nxt, m, fence, emit, kv, ka, kb, out)
+      else let
+        val () = (if any_kw(bv, e, ts, kv, ka, kb) then let
+            val () = (!g_heading_hits := !g_heading_hits + 1)
+          in (if emit then emit_entry(bv, p, m, ts, trim_end(bv, ts, e, e), out) else ()) end
+          else ())
+      in scan(bv, nxt, m, fence, emit, kv, ka, kb, out) end
+    end
+  end
+
+(* The error for the keyword kv[a, b) that no heading holds *)
+fn say_lost {lk:agz}{nk:pos}{km:nat | km <= nk}{a,b:int}
+  (hit: bool, kv: !$A.borrow(byte, lk, nk), a: int a, b: int b, km: int km, out: !$B.builder_v >> $B.builder_v): void =
+  if hit then ()
+  else let
+    val () = bput_v(out, "error: bats prcheck: the keyword `")
+    val () = copy_to_builder_v(kv, a, b, km, out)
+    val () = bput_v(out, "` of [prcheck] keywords is in no heading of CLAUDE.md")
+  in put_newline_v(out) end
+
+(* acc and how many words of kv[p, km) are in no heading of bv[0, m): each said into out *)
+fun check_words {l:agz}{n:pos}{m:nat | m <= n}{lk:agz}{nk:pos}{km:nat | km <= nk}{p:nat | p <= km} .<km - p>.
+  (bv: !$A.borrow(byte, l, n), m: int m, kv: !$A.borrow(byte, lk, nk), p: int p, km: int km,
+   out: !$B.builder_v >> $B.builder_v, acc: int): int = let
+  val a = word_start(kv, p, km)
+in
+  if a >= km then acc
+  else let
+    val b = word_end(kv, a, km)
+    val () = (!g_heading_hits := 0)
+    val () = scan(bv, 0, m, false, false, kv, a, b, out)
+    val hit = !g_heading_hits > 0
+    val () = say_lost(hit, kv, a, b, km, out)
+    val lost = (if hit then 0 else 1): int
+  in check_words(bv, m, kv, b, km, out, acc + lost) end
+end
+
+(* The entries for the words of kv[0, km) over CLAUDE.md bv[0, m): the exit code, 2 with the errors in out instead of them *)
+fn claude_entries {l:agz}{n:pos}{m:nat | m <= n}{lk:agz}{nk:pos}{km:nat | km <= nk}
+  (bv: !$A.borrow(byte, l, n), m: int m, kv: !$A.borrow(byte, lk, nk), km: int km,
+   out: !$B.builder_v >> $B.builder_v): int = let
+  val lost = check_words(bv, m, kv, 0, km, out, 0)
+in
+  if lost > 0 then 2
+  else let
+    val () = scan(bv, 0, m, false, true, kv, 0, km, out)
+    val () = bput_v(out, "main-merge: a merge of main is allowed for a conflict or a needed fix, never to get a fresh run.")
+    val () = put_newline_v(out)
+  in 0 end
+end
+
+(* As claude_entries for the file at path, read whole; 2 saying so when it cannot be read *)
+fn claude_file {lk:agz}{nk:pos}{km:nat | km <= nk}{sp:nat}
+  (path: string sp, kv: !$A.borrow(byte, lk, nk), km: int km, out: !$B.builder_v >> $B.builder_v): int = let
+  val @(pa, pl) = str_into_arr(path)
+  val @(fz_p, bv_p) = $A.freeze<byte>(pa)
+  val whole = read_whole_m(bv_p, pl)
+  val () = $A.drop<byte>(fz_p, bv_p)
+  val () = $A.free<byte>($A.thaw<byte>(fz_p))
+in
+  (case+ whole of
+  | ~whole_err(_) => let
+      val () = bput_v(out, "error: bats prcheck: cannot read CLAUDE.md, which the [prcheck] keywords are read from")
+      val () = put_newline_v(out)
+    in 2 end
+  | ~whole_ok(ar, piece, size, len) => let
+      val @(fz_c, bv_c) = $A.freeze<byte>(piece)
+      val code = claude_entries(bv_c, len, kv, km, out)
+      val () = $A.drop<byte>(fz_c, bv_c)
+      val () = whole_free(ar, $A.thaw<byte>(fz_c))
+    in code end)
+end
+
+(* The entries for the keywords of length n (~1: the table has none; no word: the same); the exit code, as claude_file *)
+fn claude_extra {lk:agz}{nk:pos}{n:int | ~1 <= n; n <= nk}{sp:nat}
+  (path: string sp, kv: !$A.borrow(byte, lk, nk), n: int n, out: !$B.builder_v >> $B.builder_v): int =
+  if n < 0 then 0
+  else if words_in(kv, 0, n) = 0 then 0
+  else claude_file(path, kv, n, out)
+
+(* --checklist: the lines of the checks that are on, then the entries of CLAUDE.md; only the errors when it is exit 2 *)
+fn run_checklist (): void = let
+  var key_c = @[char][8]('k', 'e', 'y', 'w', 'o', 'r', 'd', 's')
+  val @(fz_k, bv_k) = $A.freeze<byte>($S.from_char_array(key_c, 8))
+  val vbuf = $A.alloc<byte>(4096)
+  val n = config_value(bv_k, 8, vbuf, 4096)
+  val @(fz_v, bv_v) = $A.freeze<byte>(vbuf)
+  var out : $B.builder_v = $B.create()
+  val code = claude_extra("CLAUDE.md", bv_v, n, out)
+  val @(oa, ol) = $B.into_arr(out)
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val () = (if code = 0 then let
+      val () = checklist_from(1)
+    in print_borrow(bv_o, 0, ol, ol) end
+    else let
+      val () = prerr_seg(bv_o, 0, ol, ol)
+    in set_exit_code(code) end)
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_v, bv_v)
+  val () = $A.free<byte>($A.thaw<byte>(fz_v))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in () end
+
+(* ------------------------------------------------------------------ *)
 (* --review (keyword: prcheck review): the check a review is run through before it is posted. The review has a line
    <n>. <the rule> then ": checked, ok" or ": <the finding>" for each check that is on, a Reviewer: line naming the model and
    a Cost: line (tokens and minutes); the rule is the text of --checklist now, so a review made from an older list is stale. *)
@@ -1210,14 +1469,6 @@ in
   else if e >= m then false
   else review_key(bv, e + 1, m, s, sn)
 end
-
-(* The end of bv[a, q) without the blanks and carriage returns at its end *)
-fun trim_end {l:agz}{n:pos}{e:nat | e <= n}{a:int}{q:nat | q <= e} .<q>.
-  (bv: !$A.borrow(byte, l, n), a: int a, q: int q, e: int e): [r:int] int r =
-  if q <= 0 then q
-  else if q <= a then q
-  else if is_blank(peek(bv, q - 1, e)) || peek(bv, q - 1, e) = 13 then trim_end(bv, a, q - 1, e)
-  else q
 
 fn review_missing (what: string): void = let
   val () = (!g_review_bad := !g_review_bad + 1)
@@ -1311,7 +1562,7 @@ in
     else if given || !g_checklist then usage_error()
     else no_checks())
   else if !g_checklist then
-    (if checklist_code(!g_on, given) = 0 then checklist_from(1)
+    (if checklist_code(!g_on, given) = 0 then run_checklist()
     else if given then usage_error()
     else no_checks())
   else if !g_diff_at < 0 || !g_body_at < 0 then usage_error()
@@ -1457,6 +1708,26 @@ implement prcheck_checklist_fixture (checks, given) = let
   val code = checklist_code(checks, given)
   val () = (if code = 0 then checklist_from(1) else ())
 in code end
+
+(* What --checklist adds from the CLAUDE.md at path for keywords (given: the table has them): the exit code, 9 when the text
+   it writes (the errors, for exit 2) is not expected *)
+
+
+
+implement prcheck_claude_fixture (path, keywords, given, expected) = let
+  val @(fz_k, bv_k) = $A.freeze<byte>(str_to_arr4096(keywords))
+  var out : $B.builder_v = $B.create()
+  val code = claude_extra(path, bv_k,
+    (if given then g1u2i(string1_length(keywords)) else ~1): [k:int | ~1 <= k; k <= 4096] int k, out)
+  val @(oa, ol) = $B.into_arr(out)
+  val @(fz_o, bv_o) = $A.freeze<byte>(oa)
+  val el = g1u2i(string1_length(expected))
+  val same = (ol = el && lit_here(bv_o, 0, ol, expected, el, 0)): bool
+  val () = $A.drop<byte>(fz_o, bv_o)
+  val () = $A.free<byte>($A.thaw<byte>(fz_o))
+  val () = $A.drop<byte>(fz_k, bv_k)
+  val () = $A.free<byte>($A.thaw<byte>(fz_k))
+in if same then code else 9 end
 
 (* What --review does for a review held in memory with the checks (a bit for each): 0 when it is complete and all ok, else 1 *)
 
