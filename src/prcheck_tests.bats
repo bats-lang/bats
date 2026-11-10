@@ -205,6 +205,54 @@ fn test_checklist_with_diff (): bool = prcheck_checklist_fixture(2046, true) = 2
 
 fn test_checklist_no_check_on (): bool = prcheck_checklist_fixture(0, false) = 2
 
+(* --checklist's entries from CLAUDE.md (keyword: prcheck checklist keywords): the file is planted, then read as the command reads it *)
+val claude_text = "# T\n\n## Comments name their area by keyword\n\nA comment states its reason in one\nline. More text.\n\n## CI is pinned\n\nEvery input is pinned. Pins move by pull request.\n\n```\n# Not a heading\n```\n\n## Tests\n\nA test fails first.\n"
+
+fn claude_run {k,e:nat | k < 4096} (keywords: string k, given: bool, expected: string e): int =
+  if plant("build/prcheck-tests/claude", "build/prcheck-tests/claude/CLAUDE.md", claude_text)
+  then prcheck_claude_fixture("build/prcheck-tests/claude/CLAUDE.md", keywords, given, expected) else 99
+
+(* A heading with a keyword is printed with the first sentence of its section, its lines joined *)
+fn test_claude_heading_with_keyword_printed (): bool =
+  claude_run("[\"comments\"]", true, "Comments name their area by keyword: A comment states its reason in one line.\nmain-merge: a merge of main is allowed for a conflict or a needed fix, never to get a fresh run.\n") = 0
+
+(* A heading without the keyword is not printed *)
+fn test_claude_heading_without_keyword_not_printed (): bool =
+  claude_run("[\"pinned\"]", true, "CI is pinned: Every input is pinned.\nmain-merge: a merge of main is allowed for a conflict or a needed fix, never to get a fresh run.\n") = 0
+
+fn test_claude_keyword_in_any_case (): bool =
+  claude_run("[\"TESTS\"]", true, "Tests: A test fails first.\nmain-merge: a merge of main is allowed for a conflict or a needed fix, never to get a fresh run.\n") = 0
+
+fn test_claude_two_keywords_in_document_order (): bool =
+  claude_run("[\"tests\", \"pinned\"]", true, "CI is pinned: Every input is pinned.\nTests: A test fails first.\nmain-merge: a merge of main is allowed for a conflict or a needed fix, never to get a fresh run.\n") = 0
+
+(* No keywords in the table: nothing is added to the lines of the checks *)
+fn test_claude_no_keywords_no_entries (): bool =
+  claude_run("[]", false, "") = 0
+
+fn test_claude_empty_keywords_no_entries (): bool =
+  claude_run("[]", true, "") = 0
+
+(* The main-merge line comes after the entries *)
+fn test_claude_main_merge_line (): bool =
+  claude_run("[\"tests\"]", true, "Tests: A test fails first.\nmain-merge: a merge of main is allowed for a conflict or a needed fix, never to get a fresh run.\n") = 0
+
+(* The nearest wrong output, the entries without the main-merge line, is not the output *)
+fn test_claude_main_merge_line_required (): bool =
+  claude_run("[\"tests\"]", true, "Tests: A test fails first.\n") = 9
+
+(* A keyword that no heading holds is exit 2 naming it, with no entry *)
+fn test_claude_keyword_in_no_heading_exit_2 (): bool =
+  claude_run("[\"tests\", \"nothing\"]", true, "error: bats prcheck: the keyword `nothing` of [prcheck] keywords is in no heading of CLAUDE.md\n") = 2
+
+(* A line that starts with # inside a code fence is no heading *)
+fn test_claude_keyword_only_in_a_fence_exit_2 (): bool =
+  claude_run("[\"heading\"]", true, "error: bats prcheck: the keyword `heading` of [prcheck] keywords is in no heading of CLAUDE.md\n") = 2
+
+(* A CLAUDE.md that is not there is exit 2 saying so *)
+fn test_claude_missing_file_exit_2 (): bool =
+  prcheck_claude_fixture("build/prcheck-tests/claude/absent/CLAUDE.md", "[\"tests\"]", true, "error: bats prcheck: cannot read CLAUDE.md, which the [prcheck] keywords are read from\n") = 2
+
 (* --review (keyword: prcheck review): checks 1, 2 and 5 are on (mask 38); a complete review exits 0, any other exits 1 *)
 
 fn test_review_every_line_exit_0 (): bool =
