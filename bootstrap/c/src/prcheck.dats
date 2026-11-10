@@ -227,6 +227,19 @@ fn found_text {k:nat} (k: int k, place: string, why: string): void = let
   val () = print! ("check ", k, ": ", place, ": ", why)
 in print_newline() end
 
+(* The one-line rule of check k: the text of its finding and of bats prcheck --checklist, one copy (keyword: prcheck checklist) *)
+fn rule_of (k: int): [sn:nat] string sn =
+  if k = 1 then "a comment goes on over more than one line: it is one line with its keyword"
+  else if k = 2 then "a comment states the status of the code: it says what is true, in one line, with its keyword"
+  else if k = 3 then "a comment names no CLAUDE.md, rule file, section or place above or below: it carries its reason and a keyword"
+  else if k = 4 then "code of ours that is not bats (a script, sed or awk) needs a line Exhausted: <avenue> in the pull request body"
+  else if k = 5 then "a symlink escapes the checkout and the review: none is added"
+  else if k = 6 then "a workflow or action file has no floating pin (a runner, action or version that moves): check-pins reads it"
+  else if k = 7 then "a test asserts no literal, sleeps for no fixed time and bounds no duration with a number"
+  else if k = 8 then "This PR closes no ticket. Either it is not finished (finish it on this PR), or the ticket should be broken up first: file the pieces as tickets, then this PR fixes one of them. The body needs a line Fixes #<n>, or No ticket: <reason>."
+  else if k = 9 then "the paths: of a rule file cover every file its added text names"
+  else "each line of the ticket's Done when is a COMMAND:, MEASURE:, TEST: or SEARCH: line, and the body has a row in ## Done when results for each"
+
 (* ------------------------------------------------------------------ *)
 (* Checks 2 and 3: what an added comment or test message may not say (keyword: prcheck) *)
 
@@ -268,17 +281,17 @@ fn status_in {l:agz}{n:pos}{e:nat | e <= n}{a:int}
   else if verdict_opener(bv, a, e) then "a comment opens with a verdict word (Flake:, Status:): it says why"
   else if word_ci(bv, a, e, "currently") || word_ci(bv, a, e, "temporarily") || word_ci(bv, a, e, "as of")
     || word_ci(bv, a, e, "for now") || word_ci(bv, a, e, "at the moment")
-    then "a comment states the status of the code: it says what is true, in one line, with its keyword"
+    then rule_of(2)
   else ""
 
 (* The message of check 3 for the text bv[a, e), or "" when it names none of the places a comment may not *)
 fn pointer_in {l:agz}{n:pos}{e:nat | e <= n}{a:int}
   (bv: !$A.borrow(byte, l, n), a: int a, e: int e): [sn:nat] string sn =
-  if has_text(bv, a, e, "CLAUDE.md") then "names CLAUDE.md: a comment carries its reason and a keyword"
-  else if has_text(bv, a, e, ".claude/rules") then "names a rule file: a comment carries its reason and a keyword"
-  else if word_ci(bv, a, e, "section") then "names a section: a comment carries its reason and a keyword"
-  else if pointer_ci(bv, a, e, "below") then "points below: a comment carries its reason and a keyword"
-  else if pointer_ci(bv, a, e, "above") then "points above: a comment carries its reason and a keyword"
+  if has_text(bv, a, e, "CLAUDE.md") then rule_of(3)
+  else if has_text(bv, a, e, ".claude/rules") then rule_of(3)
+  else if word_ci(bv, a, e, "section") then rule_of(3)
+  else if pointer_ci(bv, a, e, "below") then rule_of(3)
+  else if pointer_ci(bv, a, e, "above") then rule_of(3)
   else ""
 
 (* ------------------------------------------------------------------ *)
@@ -499,7 +512,7 @@ in
       val () = print_borrow(bv, at, to, m)
       val () = print! (":")
       val () = print! (line)
-      val () = print! (": the text names ")
+      val () = print! (": ", rule_of(9), ": the text names ")
       val () = print_borrow(bv, q + 1, r, m)
       val () = print! (", which no glob of paths: covers")
       val () = print_newline()
@@ -588,11 +601,11 @@ fn comment_shape {l:agz}{n:pos}{m:nat | m <= n}{s:int}{e:nat | s <= e; e <= m}{c
   val unclosed = (if line_style then false
     else if kind = 1 then find_sub(bv, cs + 2, e, "*)", 2) < 0
     else find_sub(bv, cs + 2, e, "*/", 2) < 0): bool
-  val () = (if unclosed then found_in(bv, m, 1, line, "a comment goes on over more than one line: it is one line with its keyword") else ())
+  val () = (if unclosed then found_in(bv, m, 1, line, rule_of(1)) else ())
   val () = (if line_style && only then
       (if !g_run_end = line - 1 then let
           val () = (!g_run_len := !g_run_len + 1)
-        in (if !g_run_len = 2 then found_in(bv, m, 1, line, "a comment goes on over more than one line: it is one line with its keyword") else ()) end
+        in (if !g_run_len = 2 then found_in(bv, m, 1, line, rule_of(1)) else ()) end
       else (!g_run_len := 1))
     else ())
   val () = (if line_style && only then (!g_run_end := line) else ())
@@ -657,13 +670,13 @@ fn added_line {l:agz}{n:pos}{m:nat | m <= n}{s:nat}{e:nat | s <= e; e <= m}{lc:a
     else ())
   (* check 4: sed and awk in a script or workflow *)
   val () = (if check_on(4) && ~(!g_exhausted) && kind = 3 && (word_ci(bv, s, e, "sed") || word_ci(bv, s, e, "awk")) then
-      found_in(bv, m, 4, line, "sed or awk is code of ours that is not bats: the pull request body needs a line Exhausted: <avenue>")
+      found_in(bv, m, 4, line, rule_of(4))
     else ())
   (* check 7: what a test asserts *)
   val () = (if !g_test && check_on(7) && kind = 2 then let
-      val () = (if has_expect_literal(bv, s, e) then found_in(bv, m, 7, line, "expect() of a literal asserts nothing") else ())
-      val () = (if has_text(bv, s, e, "waitForTimeout") then found_in(bv, m, 7, line, "waitForTimeout is a fixed sleep: wait for the event") else ())
-      val () = (if fixed_duration(bv, s, e) then found_in(bv, m, 7, line, "a fixed duration is asserted: a time bound is a flake") else ())
+      val () = (if has_expect_literal(bv, s, e) then found_in(bv, m, 7, line, rule_of(7)) else ())
+      val () = (if has_text(bv, s, e, "waitForTimeout") then found_in(bv, m, 7, line, rule_of(7)) else ())
+      val () = (if fixed_duration(bv, s, e) then found_in(bv, m, 7, line, rule_of(7)) else ())
     in () end else ())
 in () end
 
@@ -703,7 +716,7 @@ in
   else let
     (* check 6: check-pins reads the whole file in the working tree *)
     val () = (if check_on(6) && workflow_path(bv, at, to, m) then
-        (if pins_findings_in_path(bv, at, to, m) <> 0 then hit(6) else ())
+        (if pins_findings_in_path(bv, at, to, m) <> 0 then found_in(bv, m, 6, 0, rule_of(6)) else ())
       else ())
   in () end
 end
@@ -726,7 +739,7 @@ fn header_line {l:agz}{n:pos}{m:nat | m <= n}{p:int}{e:nat | e <= m}
   in () end
   else if lit_here(bv, p, e, "new file mode ", 14, 0) then let
     val () = (if lit_here(bv, p, e, "new file mode 120000", 20, 0) then
-        (if check_on(5) then found_in(bv, m, 5, 0, "a symlink is added: it escapes the checkout and the review") else ())
+        (if check_on(5) then found_in(bv, m, 5, 0, rule_of(5)) else ())
       else ())
     val at = !g_path_at
     val to = !g_path_to
@@ -734,11 +747,11 @@ fn header_line {l:agz}{n:pos}{m:nat | m <= n}{p:int}{e:nat | e <= m}
     if check_on(4) && ~(!g_exhausted) && at >= 0
       && (ends_with(bv, at, to, m, ".sh") || ends_with(bv, at, to, m, ".py")
         || ends_with(bv, at, to, m, ".awk") || ends_with(bv, at, to, m, ".sed")) then
-      found_in(bv, m, 4, 0, "a script of ours that is not bats: the pull request body needs a line Exhausted: <avenue>")
+      found_in(bv, m, 4, 0, rule_of(4))
     else ()
   end
   else if lit_here(bv, p, e, "new mode 120000", 15, 0) then
-    (if check_on(5) then found_in(bv, m, 5, 0, "a file becomes a symlink: it escapes the checkout and the review") else ())
+    (if check_on(5) then found_in(bv, m, 5, 0, rule_of(5)) else ())
   else if lit_here(bv, p, e, "deleted file mode ", 18, 0) then (!g_deleted := true)
   else if lit_here(bv, p, e, "@@ ", 3, 0) then let
     val start = hunk_start(bv, p, e)
@@ -915,11 +928,11 @@ in
   else let
     val @(items, bad) = section_items(bv_t, s, tm, 0, 0)
     val () = (if items = 0 then found_text(10, "ticket", "the Done when has no list items") else ())
-    val () = (if bad > 0 then found_text(10, "ticket", "a line of the Done when is not one of COMMAND: (a command in backticks), MEASURE: (a number), TEST: (a name), SEARCH: (git grep -n)") else ())
+    val () = (if bad > 0 then found_text(10, "ticket", rule_of(10)) else ())
     val r = section_start(bv_b, 0, bm, "## done when results")
   in
     if r < 0 then found_text(10, "body", "the pull request body has no ## Done when results section")
-    else if section_rows(bv_b, r, bm, 0) < items then found_text(10, "body", "the Done when results have fewer rows than the ticket has lines")
+    else if section_rows(bv_b, r, bm, 0) < items then found_text(10, "body", rule_of(10))
     else ()
   end
 end
@@ -951,7 +964,7 @@ fn run_checks {ld,lb,lt,lc:agz}{nd,nb,nt:pos}{dm:nat | dm <= nd}{bm:nat | bm <= 
   val no_ticket = has_flag(flags, 2)
   val () = (!g_exhausted := has_flag(flags, 4))
   val () = (if check_on(8) && ~closing && ~no_ticket && ~(!g_exempt) then
-      found_text(8, "body", "This PR closes no ticket. Either it is not finished (finish it on this PR), or the ticket should be broken up first: file the pieces as tickets, then this PR fixes one of them. The body needs a line Fixes #<n>, or No ticket: <reason>.")
+      found_text(8, "body", rule_of(8))
     else ())
   val () = (if check_on(10) && ~no_ticket && ~(!g_exempt) then
       (if has_ticket then check_done_when(bv_b, bm, bv_t, tm)
@@ -973,9 +986,12 @@ val g_repo_at = ref<pos_t>(~1)
 val g_repo_to = ref<pos_t>(0)
 val g_checks_given = ref<bool>(false)
 val g_width_given = ref<bool>(false)
+val g_checklist = ref<bool>(false)
 
 fn usage_error (): void = let
   val () = prerr! ("usage: bats prcheck --diff <file> --body <file> [--ticket <file>] [--checks \"1 2 ..\"] [--width <n>] [--repo <owner/name>] [--branch <name>] [--resolve]")
+  val () = prerr_newline()
+  val () = prerr! ("       bats prcheck --checklist [--checks \"1 2 ..\"]: print one line, <n>. <the rule>, for each check that is on; no --diff, --body, --ticket or --resolve")
   val () = prerr_newline()
   val () = prerr! ("  --diff: git diff -U0 --no-renames <base>...<head> (without the generated bootstrap/c); --body: the pull request body;")
   val () = prerr_newline()
@@ -1022,6 +1038,9 @@ fun options {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
     if z + 1 > 4096 then false
     else if flag_is(cmd, p, z, "--resolve") then let
       val () = (!g_resolve := true)
+    in options(cmd, z + 1, total) end
+    else if flag_is(cmd, p, z, "--checklist") then let
+      val () = (!g_checklist := true)
     in options(cmd, z + 1, total) end
     else let
       val value_at = z + 1
@@ -1137,17 +1156,34 @@ in whole end
 fn read_ticket {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): whole_file =
   if !g_ticket_at >= 0 then read_span(cmd, !g_ticket_at, !g_ticket_to) else read_span(cmd, !g_body_at, !g_body_to)
 
+fn no_checks (): void = let
+  val () = prerr! ("error: bats prcheck: no check is on: give --checks or set checks in the [prcheck] table of bats.toml")
+  val () = prerr_newline()
+in set_exit_code(2) end
+
+(* --checklist (keyword: prcheck checklist): a line <n>. <rule> for each check that is on, from check k up to 10 *)
+fun checklist_from {k:nat | k <= 11} .<11 - k>. (k: int k): void =
+  if k >= 11 then ()
+  else let
+    val () = (if check_on(k) then println! (k, ". ", rule_of(k)) else ())
+  in checklist_from(k + 1) end
+
+(* The exit code of --checklist for the checks that are on: 2 when a file option came with it (given) or no check is on *)
+fn checklist_code (on: int, given: bool): int = if given then 2 else if on = 0 then 2 else 0
+
 (* Reads the files the command names and runs the checks *)
 fn run_prcheck {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void = let
   val () = (if ~(!g_checks_given) then config_checks() else ())
   val () = (if ~(!g_width_given) then config_width() else ())
+  val given = (!g_diff_at >= 0 || !g_body_at >= 0 || !g_ticket_at >= 0 || !g_resolve): bool
 in
-  if !g_diff_at < 0 || !g_body_at < 0 then usage_error()
+  if !g_checklist then
+    (if checklist_code(!g_on, given) = 0 then checklist_from(1)
+    else if given then usage_error()
+    else no_checks())
+  else if !g_diff_at < 0 || !g_body_at < 0 then usage_error()
   else if !g_resolve && !g_repo_at < 0 then usage_error()
-  else if !g_on = 0 then let
-    val () = prerr! ("error: bats prcheck: no check is on: give --checks or set checks in the [prcheck] table of bats.toml")
-    val () = prerr_newline()
-  in set_exit_code(2) end
+  else if !g_on = 0 then no_checks()
   else
     (case+ read_span(cmd, !g_diff_at, !g_diff_to) of
     | ~whole_err(_) => unreadable("--diff")
@@ -1261,6 +1297,43 @@ implement prcheck_fixture (diff, body, ticket, checks, exempt) = fixture_run(dif
 
 implement prcheck_fixture_resolved (diff, body, ticket, checks, found) =
   fixture_run(diff, body, ticket, checks, false, (if found then 1 else 2))
+
+(* Whether the rule of check k is exactly text (keyword: prcheck checklist) *)
+
+
+fun same_text {n,m:nat}{i:nat | i <= n} .<n - i>.
+  (a: string n, b: string m, n: int n, m: int m, i: int i): bool =
+  if i >= n then true
+  else if i >= m then false
+  else if char2int0(string_get_at(a, i)) = char2int0(string_get_at(b, i)) then same_text(a, b, n, m, i + 1)
+  else false
+
+implement prcheck_rule_is (k, text) = let
+  val r = rule_of(k)
+  val n = g1u2i(string1_length(r))
+  val m = g1u2i(string1_length(text))
+in
+  if n = m then same_text(r, text, n, m, 0) else false
+end
+
+(* What --checklist does for the checks (a bit for each, as --checks gives them): the exit code, the lines on stdout *)
+
+
+implement prcheck_checklist_fixture (checks, given) = let
+  val () = (!g_on := checks)
+  val code = checklist_code(checks, given)
+  val () = (if code = 0 then checklist_from(1) else ())
+in code end
+
+(* The mask of the checks the text names ("1 2 10"), or ~1 when it names a number that is no check *)
+
+
+implement prcheck_checks_fixture (text) = let
+  val @(fz, bv) = $A.freeze<byte>(str_to_arr4096(text))
+  val @(ok, mask) = parse_checks(bv, 0, g1u2i(string1_length(text)), 0, 0)
+  val () = $A.drop<byte>(fz, bv)
+  val () = $A.free<byte>($A.thaw<byte>(fz))
+in if ok then mask else ~1 end
 
 (* The file at path (and the directory dir) with the text, in the working tree *)
 
