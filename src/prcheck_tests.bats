@@ -205,4 +205,34 @@ fn test_checklist_with_diff (): bool = prcheck_checklist_fixture(2046, true) = 2
 
 fn test_checklist_no_check_on (): bool = prcheck_checklist_fixture(0, false) = 2
 
+(* --review (keyword: prcheck review): checks 1, 2 and 5 are on (mask 38); a complete review exits 0, any other exits 1 *)
+
+fn test_review_every_line_exit_0 (): bool =
+  prcheck_review_fixture("Reviewer: claude-opus-4\nCost: 41000 tokens, 6 minutes\n\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n2. a comment states the status of the code: it says what is true, in one line, with its keyword: checked, ok\n5. a symlink escapes the checkout and the review: none is added: checked, ok\n", 38) = 0
+
+fn test_review_line_missing_exit_1 (): bool =
+  prcheck_review_fixture("Reviewer: claude-opus-4\nCost: 41000 tokens, 6 minutes\n\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n5. a symlink escapes the checkout and the review: none is added: checked, ok\n", 38) = 1
+
+fn test_review_finding_exit_1 (): bool =
+  prcheck_review_fixture("Reviewer: claude-opus-4\nCost: 41000 tokens, 6 minutes\n\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n2. a comment states the status of the code: it says what is true, in one line, with its keyword: src/x.bats:5 states a date\n5. a symlink escapes the checkout and the review: none is added: checked, ok\n", 38) = 1
+
+fn test_review_stale_list_exit_1 (): bool =
+  prcheck_review_fixture("Reviewer: claude-opus-4\nCost: 41000 tokens, 6 minutes\n\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n2. a comment states a date or a run: checked, ok\n5. a symlink escapes the checkout and the review: none is added: checked, ok\n", 38) = 1
+
+(* The nearest wrong forms: no Reviewer: line, no Cost: line, ok with a full stop, the line of check 10 for check 1 *)
+fn test_review_no_reviewer_exit_1 (): bool =
+  prcheck_review_fixture("Cost: 1 minute\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n", 2) = 1
+
+fn test_review_no_cost_exit_1 (): bool =
+  prcheck_review_fixture("Reviewer: claude-opus-4\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n", 2) = 1
+
+fn test_review_ok_with_full_stop_exit_1 (): bool =
+  prcheck_review_fixture("Reviewer: m\nCost: 1\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok.\n", 2) = 1
+
+fn test_review_line_of_check_10_is_not_check_1 (): bool =
+  prcheck_review_fixture("Reviewer: m\nCost: 1\n10. a comment goes on over more than one line: it is one line with its keyword: checked, ok\n", 2) = 1
+
+fn test_review_trailing_blank_exit_0 (): bool =
+  prcheck_review_fixture("Reviewer: m\nCost: 1\n1. a comment goes on over more than one line: it is one line with its keyword: checked, ok  \r\n", 2) = 0
+
 end
