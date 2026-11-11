@@ -802,7 +802,7 @@ fun names_has {l:agz}{m:nat | m <= 65536}{p:nat | p <= m}{sn:nat} .<m - p>.
   else if span_is(names, p, line_end(names, p, m), path) then true
   else names_has(names, next_line(names, p, m), m, path)
 
-(* Each changed path that is not one of the nine a pin move touches is said *)
+(* Each changed path that is not one of the ten a pin move touches is said *)
 fun names_check {l:agz}{m:nat | m <= 65536}{p:nat | p <= m} .<m - p>.
   (names: !$A.borrow(byte, l, 65536), p: int p, m: int m): void =
   if p >= m then ()
