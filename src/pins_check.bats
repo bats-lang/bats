@@ -551,12 +551,26 @@ in
   else p + len
 end
 
-(* The pin of the line bv[p, e) when it is `uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@<40 hex> # <comment>`
+(* The start of the 40 lowercase hex digits of `uses: bats-lang/repository-prototype/.github/workflows/<wf>@<40 hex>` at p, or ~1 *)
+fn pin_after_wf {l:agz}{n:pos}{e:nat | e <= n}{p:nat}{sw:nat}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, wf: string sw): [r:int | r == ~1 || (0 <= r && r + 40 <= e)] int r = let
+  val head = "uses: bats-lang/repository-prototype/.github/workflows/"
+  val hl = g1u2i(string1_length(head))
+  val wl = g1u2i(string1_length(wf))
+in
+  if p + hl + wl + 41 > e then ~1
+  else if ~starts_at(bv, p, e, head) then ~1
+  else if ~lit_here(bv, p + hl, e, wf, wl, 0) then ~1
+  else if peek(bv, p + hl + wl, e) <> 64 then ~1
+  else if ~hex_run(bv, p + hl + wl + 1, e, 0, 40) then ~1
+  else p + hl + wl + 1
+end
+
+(* The pin of the line bv[p, e) when it is `uses: bats-lang/repository-prototype/.github/workflows/<wf>@<40 hex> # <comment>`
    (indented by spaces, a comment of at least one byte), else ~1 *)
-fn text_lint_uses {l:agz}{n:pos}{e:nat | e <= n}{p:nat | p <= e}
-  (bv: !$A.borrow(byte, l, n), p: int p, e: int e): [r:int | r == ~1 || (0 <= r && r + 40 <= e)] int r = let
-  val at = pin_after(bv, spaces_end(bv, p, e), e,
-    "uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@")
+fn reusable_uses {l:agz}{n:pos}{e:nat | e <= n}{p:nat | p <= e}{sw:nat}
+  (bv: !$A.borrow(byte, l, n), p: int p, e: int e, wf: string sw): [r:int | r == ~1 || (0 <= r && r + 40 <= e)] int r = let
+  val at = pin_after_wf(bv, spaces_end(bv, p, e), e, wf)
 in
   if at < 0 then ~1
   else if at + 44 > e then ~1
@@ -574,53 +588,58 @@ in
   else at
 end
 
-(* What the changed lines of text-lint.yml add up to: one new uses line and one new tools-ref line, the same commit.
+(* What the changed lines of a caller of one reusable workflow wf add up to: one new uses line and one new tools-ref line, the same commit.
    up and rp are the starts of the pins of the new lines (nup and nrp of them); resolved is the sum of the answers of pin_commit *)
-fn text_lint_end {lb:agz}{n:pos}{m:nat | m <= n}{sn:nat | sn < $B.BUILDER_CAP}{up,rp:int}
-  (path: string sn, bv: !$A.borrow(byte, lb, n), m: int m, up: int up, nup: int, rp: int rp, nrp: int, resolved: int): int =
+fn reusable_end {lb:agz}{n:pos}{m:nat | m <= n}{sn:nat | sn < $B.BUILDER_CAP}{up,rp:int}
+  (path: string sn, wf: string, bv: !$A.borrow(byte, lb, n), m: int m, up: int up, nup: int, rp: int rp, nrp: int, resolved: int): int =
   if nup <> 1 || nrp <> 1 then let
-    val () = not_ok(path, "a pin move adds exactly one uses line of text-lint-check.yml and one tools-ref line")
+    val () = not_ok_head(path)
+    val () = print! ("a pin move adds exactly one uses line of ", wf, " and one tools-ref line")
+    val () = print_newline()
   in 0 end
   else if ~span_eq(bv, up, rp, m, 40, 0) then let
-    val () = not_ok(path, "the tools-ref is not the commit of the text-lint-check.yml pin")
+    val () = not_ok_head(path)
+    val () = print! ("the tools-ref is not the commit of the ", wf, " pin")
+    val () = print_newline()
   in 0 end
   else resolved
 
 (* Each changed line of the hunks bv[p, m): the uses line or the tools-ref line, whatever its sign (a comment is no exception);
    a new line's pin is looked up in the package repository *)
-fun text_lint_lines {lc,lb:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{sn:nat | sn < $B.BUILDER_CAP}{up,rp:int} .<m - p>.
-  (cmd: !$A.borrow(byte, lc, 4096), path: string sn, bv: !$A.borrow(byte, lb, n), p: int p, m: int m,
+fun reusable_lines {lc,lb:agz}{n:pos}{m:nat | m <= n}{p:nat | p <= m}{sn:nat | sn < $B.BUILDER_CAP}{sw:nat}{up,rp:int} .<m - p>.
+  (cmd: !$A.borrow(byte, lc, 4096), path: string sn, wf: string sw, bv: !$A.borrow(byte, lb, n), p: int p, m: int m,
    up: int up, nup: int, rp: int rp, nrp: int, resolved: int): int =
-  if p >= m then text_lint_end(path, bv, m, up, nup, rp, nrp, resolved)
+  if p >= m then reusable_end(path, wf, bv, m, up, nup, rp, nrp, resolved)
   else let
     val e = line_end(bv, p, m)
     val c = peek(bv, p, m)
     val next = next_line(bv, p, m)
   in
-    if c <> 43 && c <> 45 then text_lint_lines(cmd, path, bv, next, m, up, nup, rp, nrp, resolved)
-    else if e < p + 1 then text_lint_lines(cmd, path, bv, next, m, up, nup, rp, nrp, resolved)
+    if c <> 43 && c <> 45 then reusable_lines(cmd, path, wf, bv, next, m, up, nup, rp, nrp, resolved)
+    else if e < p + 1 then reusable_lines(cmd, path, wf, bv, next, m, up, nup, rp, nrp, resolved)
     else let
-      val u = text_lint_uses(bv, p + 1, e)
+      val u = reusable_uses(bv, p + 1, e, wf)
       val r = text_lint_tools_ref(bv, p + 1, e)
     in
       if u < 0 && r < 0 then let
         val () = not_ok_head(path)
-        val () = print! ("a changed line is neither the text-lint-check.yml pin nor its tools-ref: ")
+        val () = print! ("a changed line is neither the ", wf, " pin nor its tools-ref: ")
         val () = say_line(bv, p, e, m)
-      in text_lint_lines(cmd, path, bv, next, m, up, nup, rp, nrp, resolved) end
-      else if c = 45 then text_lint_lines(cmd, path, bv, next, m, up, nup, rp, nrp, resolved)
+      in reusable_lines(cmd, path, wf, bv, next, m, up, nup, rp, nrp, resolved) end
+      else if c = 45 then reusable_lines(cmd, path, wf, bv, next, m, up, nup, rp, nrp, resolved)
       else let
         val here = (if u >= 0 then pin_commit(cmd, path, 1, bv, u, m) else 0): int
         val counted = (if here = 2 then 1 else 0): int
       in
-        if u >= 0 then text_lint_lines(cmd, path, bv, next, m, u, nup + 1, rp, nrp, resolved + counted)
-        else text_lint_lines(cmd, path, bv, next, m, up, nup, r, nrp + 1, resolved + counted)
+        if u >= 0 then reusable_lines(cmd, path, wf, bv, next, m, u, nup + 1, rp, nrp, resolved + counted)
+        else reusable_lines(cmd, path, wf, bv, next, m, up, nup, r, nrp + 1, resolved + counted)
       end
     end
   end
 
-fn text_lint_file {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): int = let
-  val path = ".github/workflows/text-lint.yml"
+(* The caller path of one reusable workflow wf: its changed lines are the pin of wf and the tools-ref copy (keyword: pins-check text-lint pin) *)
+fn reusable_file {lc:agz}{sn:nat | sn < $B.BUILDER_CAP}{sw:nat}
+  (cmd: !$A.borrow(byte, lc, 4096), path: string sn, wf: string sw): int = let
   val buf = $A.alloc<byte>(65536)
   val @(status, kept, longer) = diff_of(cmd, path, buf)
   val @(fz, bv) = $A.freeze<byte>(buf)
@@ -631,7 +650,7 @@ fn text_lint_file {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): int = let
     else if longer then let
       val () = not_ok(path, "the diff is longer than a pin move is")
     in 0 end
-    else text_lint_lines(cmd, path, bv, body_start(bv, 0, kept), kept, ~1, 0, ~1, 0, 0)): int
+    else reusable_lines(cmd, path, wf, bv, body_start(bv, 0, kept), kept, ~1, 0, ~1, 0, 0)): int
   val () = (if !g_failures = before && get_exit_code() = 0 then println! ("ok   ", path) else ())
   val () = $A.drop<byte>(fz, bv)
   val () = $A.free<byte>($A.thaw<byte>(fz))
@@ -795,11 +814,12 @@ fun names_check {l:agz}{m:nat | m <= 65536}{p:nat | p <= m} .<m - p>.
       || span_is(names, p, e, ".github/workflows/check.yml")
       || span_is(names, p, e, ".github/workflows/deploy.yml")
       || span_is(names, p, e, ".github/workflows/mutation.yml")
-      || span_is(names, p, e, ".github/workflows/text-lint.yml")): bool
+      || span_is(names, p, e, ".github/workflows/text-lint.yml")
+      || span_is(names, p, e, ".github/workflows/canonical-files.yml")): bool
     val () = (if allowed then () else let
         val () = not_ok_head("the diff")
         val () = print_borrow(names, p, e, m)
-      in println! (" is not a pin file (only .github/bats-version, .github/repository-version, bats.lock, .github/workflows/relock.yml, .github/workflows/publish.yml, .github/workflows/check.yml, .github/workflows/deploy.yml, .github/workflows/mutation.yml and .github/workflows/text-lint.yml are)") end)
+      in println! (" is not a pin file (only .github/bats-version, .github/repository-version, bats.lock, .github/workflows/relock.yml, .github/workflows/publish.yml, .github/workflows/check.yml, .github/workflows/deploy.yml, .github/workflows/mutation.yml, .github/workflows/text-lint.yml and .github/workflows/canonical-files.yml are)") end)
   in names_check(names, next_line(names, p, m), m) end
 
 (* ------------------------------------------------------------------ *)
@@ -830,8 +850,10 @@ fn prove {lc:agz}(cmd: !$A.borrow(byte, lc, 4096)): void = let
       val from_mutation = (if names_has(names, 0, kept, ".github/workflows/mutation.yml")
         then workflow_file(cmd, ".github/workflows/mutation.yml", true) else 0): int
       val from_text_lint = (if names_has(names, 0, kept, ".github/workflows/text-lint.yml")
-        then text_lint_file(cmd) else 0): int
-      val resolved = from_compiler + from_repository + from_relock + from_publish + from_check + from_deploy + from_mutation + from_text_lint
+        then reusable_file(cmd, ".github/workflows/text-lint.yml", "text-lint-check.yml") else 0): int
+      val from_canonical = (if names_has(names, 0, kept, ".github/workflows/canonical-files.yml")
+        then reusable_file(cmd, ".github/workflows/canonical-files.yml", "canonical-files-check.yml") else 0): int
+      val resolved = from_compiler + from_repository + from_relock + from_publish + from_check + from_deploy + from_mutation + from_text_lint + from_canonical
       val () = (if names_has(names, 0, kept, "bats.lock") then lock_file(cmd) else ())
       val () = (if !g_require_at >= 0 && resolved = 0 && !g_failures = 0
         then not_ok("--require-contains", "no moved pin is in a checkout that has the required commit, so none could be shown to contain it")

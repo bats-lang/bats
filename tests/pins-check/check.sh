@@ -210,6 +210,24 @@ prove; expect text-lint-tools-ref-with-comment 1 "a changed line is neither the 
 text_lint_start; git_in app rm -q .github/workflows/text-lint.yml
 prove; expect text-lint-deleted 1 "NOT OK: .github/workflows/text-lint.yml: a pin move adds exactly one uses line"
 
+# canonical-files.yml (bats#649): the same caller form as text-lint.yml, with the pin of canonical-files-check.yml
+set_canonical() { # <uses commit> <tools-ref commit>
+  printf 'name: canonical-files\njobs:\n  canonical-files:\n    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml@%s # repository-prototype main %s\n    with:\n      tools-ref: %s\n' "$1" "${1:0:7}" "$2" > "$TMP/app/.github/workflows/canonical-files.yml"
+}
+canonical_start() { start; set_canonical "$r1" "$r1"; commit_in app canonical-files > /dev/null; git_in app checkout -q -B main; git_in app checkout -q -B pr; }
+canonical_start; set_canonical "$r2" "$r2"
+prove; expect canonical-files-pin-move 0 "OK: main...pr changes only pins"
+grep -qx "ok   .github/workflows/canonical-files.yml" "$TMP/out" || fail "canonical-files-pin-move: no ok line for canonical-files.yml"
+canonical_start; set_canonical "$r2" "$r2"; echo "      extra: step" >> "$TMP/app/.github/workflows/canonical-files.yml"
+prove; expect canonical-files-extra-line 1 "NOT OK: .github/workflows/canonical-files.yml: a changed line is neither the canonical-files-check.yml pin nor its tools-ref: +      extra: step"
+canonical_start; set_canonical "$r1" "$r2"
+prove; expect canonical-files-only-tools-ref-moved 1 "NOT OK: .github/workflows/canonical-files.yml: a pin move adds exactly one uses line of canonical-files-check.yml"
+canonical_start; set_canonical "$r2" "$r2"; sed -i 's/^name: canonical-files/name: canonical-files-x/' "$TMP/app/.github/workflows/canonical-files.yml"
+prove; expect canonical-files-name-changed 1 "a changed line is neither the canonical-files-check.yml pin nor its tools-ref: +name: canonical-files-x"
+canonical_start; set_canonical "$r2" "$r2"
+printf '    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@%s # repository-prototype main %s\n' "$r2" "${r2:0:7}" >> "$TMP/app/.github/workflows/canonical-files.yml"
+prove; expect canonical-files-other-workflow-pin 1 "a changed line is neither the canonical-files-check.yml pin nor its tools-ref: +    uses: bats-lang/repository-prototype/.github/workflows/text-lint-check.yml@"
+
 # a pin file that is not a pin, or holds more than one line, or is deleted
 start; echo "main" > "$TMP/app/.github/bats-version"
 prove; expect pin-not-hex 1 "NOT OK: .github/bats-version: the new line is not a pin of 40 hex digits"
