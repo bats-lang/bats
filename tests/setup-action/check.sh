@@ -153,4 +153,75 @@ mutant commit upper-case-allowed '[0-9a-f]' '[0-9a-fA-F]'
 mutant commit any-letter-allowed '[0-9a-f]' '[0-9a-z]'
 mutant commit no-end-anchor '+$/' '+/'
 mutant commit no-start-anchor '/^BATS_COMMIT' '/BATS_COMMIT'
+
+# The apt step (bats#651, keyword: apt-retry): the text between `# apt-retry begin` and
+# `# apt-retry end` of the action runs here with stand-ins for sudo, sleep and apt-get, the
+# apt-get one failing as a runner that cannot resolve the Ubuntu mirrors does.
+{
+  inside=0
+  while IFS= read -r line || [ -n "$line" ]; do
+    trimmed=${line#"${line%%[![:space:]]*}"}
+    case $trimmed in
+      "# apt-retry begin") inside=1; continue ;;
+      "# apt-retry end") inside=0; continue ;;
+    esac
+    if [ "$inside" -eq 1 ]; then printf '%s\n' "${line#        }"; fi
+  done < "$ACTION"
+} > "$TMP/apt.sh"
+[ -s "$TMP/apt.sh" ] || fail "the action holds no apt-retry program"
+mkdir -p "$TMP/stand-in"
+printf '#!/bin/sh\nexec "$@"\n' > "$TMP/stand-in/sudo"
+printf '#!/bin/sh\necho "$1" >> "$APT_TMP/sleeps"\n' > "$TMP/stand-in/sleep"
+cat > "$TMP/stand-in/apt-get" <<'APT'
+#!/bin/sh
+# apt-get install -y -q <package>: fails FAIL_COUNT times for FAIL_PACKAGE, as a DNS outage does
+for package; do :; done
+echo "$package" >> "$APT_TMP/calls"
+n=$(grep -c -x "$package" "$APT_TMP/calls")
+if [ "$package" = "$FAIL_PACKAGE" ] && [ "$n" -le "$FAIL_COUNT" ]; then
+  echo "W: Temporary failure resolving 'azure.archive.ubuntu.com'" >&2
+  exit 100
+fi
+APT
+chmod +x "$TMP/stand-in/sudo" "$TMP/stand-in/sleep" "$TMP/stand-in/apt-get"
+
+# apt_run <program> <fail package> <fail count>: the exit status; stdout in $TMP/apt.out, calls in $TMP/apt/calls
+apt_run() {
+  rm -rf "$TMP/apt"; mkdir -p "$TMP/apt"
+  status=0
+  APT_TMP="$TMP/apt" FAIL_PACKAGE=$2 FAIL_COUNT=$3 ATTEMPTS=5 PATH="$TMP/stand-in:$PATH" \
+    sh "$1" > "$TMP/apt.out" 2> "$TMP/apt.err" || status=$?
+  [ -f "$TMP/apt/calls" ] || : > "$TMP/apt/calls"
+}
+apt_calls() { tr '\n' ' ' < "$TMP/apt/calls"; }
+apt_cases() { # <program> <label>: 0 when every case has its verdict; the first wrong one is named
+  apt_run "$1" none 0
+  [ "$status" -eq 0 ] && [ "$(apt_calls)" = "libgmp-dev lld " ] || { echo "$2: a clean run"; return 1; }
+  apt_run "$1" libgmp-dev 1
+  [ "$status" -eq 0 ] && [ "$(apt_calls)" = "libgmp-dev libgmp-dev lld " ] \
+    && grep -qx "setup-bats: the install of libgmp-dev failed on attempt 1 of 5" "$TMP/apt.out" || { echo "$2: libgmp-dev fails on the first attempt"; return 1; }
+  apt_run "$1" lld 4
+  [ "$status" -eq 0 ] && [ "$(apt_calls)" = "libgmp-dev lld lld lld lld lld " ] || { echo "$2: lld fails four times"; return 1; }
+  apt_run "$1" lld 99
+  [ "$status" -eq 1 ] && [ "$(apt_calls)" = "libgmp-dev lld lld lld lld lld " ] \
+    && grep -qx "setup-bats: the install of lld failed on attempt 5 of 5" "$TMP/apt.out" \
+    && grep -qx "::error::setup-bats: the install of lld failed on every one of 5 attempts" "$TMP/apt.out" || { echo "$2: lld fails every attempt"; return 1; }
+  apt_run "$1" libgmp-dev 99
+  [ "$status" -eq 1 ] && [ "$(apt_calls)" = "libgmp-dev libgmp-dev libgmp-dev libgmp-dev libgmp-dev " ] \
+    && grep -qx "setup-bats: the install of libgmp-dev failed on attempt 3 of 5" "$TMP/apt.out" || { echo "$2: libgmp-dev fails every attempt"; return 1; }
+}
+apt_cases "$TMP/apt.sh" apt-retry || fail "the apt program gives a wrong answer"
+echo "ok   the apt program: a mirror that fails the first attempt, four attempts, every attempt"
+apt_mutant() { # <label> <old> <new>
+  text_replace "$2" "$3" < "$TMP/apt.sh" > "$TMP/apt-mutant.sh"
+  if cmp -s "$TMP/apt.sh" "$TMP/apt-mutant.sh"; then fail "apt mutant $1 changed nothing"; fi
+  if apt_cases "$TMP/apt-mutant.sh" "$1" > "$TMP/apt-mutant.log"; then fail "apt mutant $1 passed every case"; fi
+  echo "ok   apt mutant $1 is caught by '$(cat "$TMP/apt-mutant.log")'"
+}
+apt_mutant no-retry '"$attempt" -ge "$ATTEMPTS"' '"$attempt" -ge 1'
+apt_mutant one-more-attempt '"$attempt" -ge "$ATTEMPTS"' '"$attempt" -gt "$ATTEMPTS"'
+apt_mutant only-first-package 'libgmp-dev lld; do' 'libgmp-dev; do'
+apt_mutant no-package-name 'the install of $package failed on attempt' 'the install failed on attempt'
+apt_mutant no-attempt-number 'on attempt $attempt of' 'on attempt of'
+
 echo "setup-action: ok"
