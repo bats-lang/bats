@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   relock:
-    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@2c1e6b518f913073cea8e1d34bdb7fc81f376368 # repository-prototype main 2c1e6b5
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@189241c38f2fbed759f4b8a1d579b09731a0a0ed # repository-prototype main 189241c
     secrets: inherit
     with:
       # bootstrap/c is the C of the compiler and its locked packages, so a

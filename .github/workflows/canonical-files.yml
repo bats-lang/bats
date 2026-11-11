@@ -14,6 +14,6 @@ permissions:
 
 jobs:
   canonical-files:
-    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml@3d260601c3f6728462120cd3fe4c569e79e25eb5 # repository-prototype main 3d26060
+    uses: bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml@189241c38f2fbed759f4b8a1d579b09731a0a0ed # repository-prototype main 189241c
     with:
-      tools-ref: 3d260601c3f6728462120cd3fe4c569e79e25eb5
+      tools-ref: 189241c38f2fbed759f4b8a1d579b09731a0a0ed

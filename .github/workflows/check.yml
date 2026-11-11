@@ -308,7 +308,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Every job passed
-        uses: bats-lang/repository-prototype/.github/actions/check-aggregate@c190c73390d21dcf2586c2a452de08122d6608bb # repository-prototype main c190c73
+        uses: bats-lang/repository-prototype/.github/actions/check-aggregate@189241c38f2fbed759f4b8a1d579b09731a0a0ed # repository-prototype main 189241c
         with:
           jobs: affected plan build fixtures
           results: ${{ toJSON(needs) }}
