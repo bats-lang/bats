@@ -960,9 +960,9 @@ end
 
 (* The number of findings of the workflow or action bv[0, nbytes) named cmd[file_at, file_to) as a bats-lang pin by commit that the
    relock caller named cmd[relock_at, ...) lists in no workflow-pins (keyword: relock-pins, bats#653); none without a relock caller *)
-fn unlisted_pins {l:agz}{n:pos}{nbytes:nat | nbytes <= n}{lc:agz}
+fn unlisted_pins {l:agz}{n:pos}{nbytes:nat | nbytes <= n}{lc:agz}{ra:int}
   (bv: !$A.borrow(byte, l, n), nbytes: int nbytes, n: int n,
-   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, relock_at: int): int =
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, relock_at: int ra): int =
   if relock_at < 0 then 0
   else if relock_at > 4096 then 0
   else let
@@ -1180,7 +1180,7 @@ fn check_text {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}{lf:int}
   in missing_sha + missing_url end
   else let
     val relock = (if list_from < 0 then ~1 else if list_from > 4096 then ~1
-      else relock_among(cmd, list_from, total)): int
+      else relock_among(cmd, list_from, total)): [r:int] int r
     val walked = yaml_lines(bv, 0, nbytes, n, cmd, file_at, file_to, 1, ats2_named, @(0, 0, 0, 0, 0, 0))
   in walked + unlisted_pins(bv, nbytes, n, cmd, file_at, file_to, relock) end
 
