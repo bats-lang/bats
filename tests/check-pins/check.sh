@@ -664,6 +664,17 @@ rm "$G3/tests/npm/current/package.json"
 grep -q "^tests/npm/current/check-pins-fixture:1: check-pins-fixture covers no package.json" "$TMP/out" || fail "--discover does not name the stale marker"
 echo "ok   fixture-marker-discover (listed, refused without the marker, refused when stale)"
 
+# a bats-lang pin by commit that the relock caller lists in no workflow-pins is refused (bats#653, quire#1118); pin-copies is no list of pins
+R="$(dirname "$0")/relock"
+if "$BATS" check-pins "$R/unlisted/check.yml" "$R/unlisted/relock.yml" > "$TMP/out" 2>&1; then fail "a pin in no workflow-pins passed"; fi
+grep -q "unlisted/check.yml:3: uses 'bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml' is pinned by commit and is in no workflow-pins list" "$TMP/out" || fail "the unlisted pin was refused for another reason or at another line"
+if grep -q "relock.yml:" "$TMP/out"; then fail "the listed pin of relock.yml was refused"; fi
+echo "ok   relock-unlisted (refused, naming file, line and workflow-pins)"
+"$BATS" check-pins "$R/listed/check.yml" "$R/listed/relock.yml" > "$TMP/out" 2>&1 || fail "a pin in workflow-pins was refused"
+[ ! -s "$TMP/out" ] || fail "a listed pin passed with output"
+"$BATS" check-pins "$R/unlisted/check.yml" > "$TMP/out" 2>&1 || fail "a file named alone, with no relock caller, was refused"
+echo "ok   relock-listed (passes; no relock caller named, no rule)"
+
 # this repository's own workflows and actions are clean
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins .github/workflows/*.yml .github/actions/*/action.yml src/ats2.bats > "$TMP/out" 2>&1) || fail "this repository's workflows are refused"
 (cd "$(dirname "$0")/../.." && "$BATS" check-pins --discover > "$TMP/out" 2>&1) || fail "this repository is refused by --discover"
