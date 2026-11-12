@@ -60,6 +60,11 @@ inputs:
   patsopt-mem-mb:
     description: "BATS_PATSOPT_MEM_MB: megabytes of address space one patsopt run may use."
     default: '4096'
+  install-only:
+    description: >-
+      "true": install libgmp-dev and lld and nothing else (the jobs that build
+      the compiler by hand, bats#651). Every other input is then unused.
+    default: 'false'
 
 outputs:
   bats-version:
@@ -83,6 +88,7 @@ runs:
     # variables, never spliced into the script.
     - name: Read the pins
       id: pins
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ inputs.working-directory }}
@@ -136,14 +142,41 @@ runs:
     # build computes in C int and accepts false statements (bats-lang/quire#594,
     # bats#261). A run that runs away is ended by the caps, naming its
     # module (bats#263)
-    - name: Install libgmp-dev and lld, and set the patsopt caps
+    # Each package is tried ATTEMPTS times, because a resolver outage of
+    # the runner (bats#651) is over in a minute; a failure names the package
+    # and the attempt on standard output. The program between the markers is
+    # the text tests/setup-action/check.sh runs (keyword: apt-retry).
+    # install-only (the repository's own jobs) stops after it.
+    - name: Install libgmp-dev and lld
+      shell: bash
+      env:
+        ATTEMPTS: '5'
+      run: |
+        # apt-retry begin
+        set -eu
+        for package in libgmp-dev lld; do
+          attempt=1
+          while :; do
+            if sudo apt-get install -y -q "$package"; then break; fi
+            echo "setup-bats: the install of $package failed on attempt $attempt of $ATTEMPTS"
+            if [ "$attempt" -ge "$ATTEMPTS" ]; then
+              echo "::error::setup-bats: the install of $package failed on every one of $ATTEMPTS attempts"
+              exit 1
+            fi
+            sleep $((attempt * 15))
+            attempt=$((attempt + 1))
+          done
+        done
+        # apt-retry end
+
+    - name: Set the patsopt caps
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       env:
         TIMEOUT_S: ${{ inputs.patsopt-timeout-s }}
         MEM_MB: ${{ inputs.patsopt-mem-mb }}
       run: |
         set -eu
-        sudo apt-get install -y -q libgmp-dev lld
         echo "BATS_PATSOPT_TIMEOUT_S=$TIMEOUT_S" >> "$GITHUB_ENV"
         echo "BATS_PATSOPT_MEM_MB=$MEM_MB" >> "$GITHUB_ENV"
 
@@ -153,6 +186,7 @@ runs:
     # ATS2 is needed yet (bats#283); the commit must be one with that
     # change.
     - name: Build bats from the bootstrap C of the pinned commit
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       env:
         BATS_COMMIT_BUILT: ${{ steps.pins.outputs.bats }}
@@ -184,6 +218,7 @@ runs:
     # (setup-action.md, "Shell that remains"): a compiler that predates
     # --discover cannot say that it does.
     - name: Check the pins of the calling repository
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       env:
         BATS_COMMIT_BUILT: ${{ steps.pins.outputs.bats }}
@@ -205,10 +240,12 @@ runs:
     # that does not match the project; only a relock moves them. What bats
     # prints as NAME=VALUE is the environment of the later steps.
     - name: Install ATS2 (patsopt)
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       run: bats ats2 install
 
     - name: Clone the package repository at its pinned commit
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       env:
         REPOSITORY_COMMIT: ${{ steps.pins.outputs.repository }}
@@ -234,6 +271,7 @@ runs:
     # later step. A pull request's head is the merge's second parent, so the
     # commit is in the checkout only two commits deep (fetch-depth: 2)
     - name: Name the commit built from
+      if: ${{ inputs.install-only != 'true' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
