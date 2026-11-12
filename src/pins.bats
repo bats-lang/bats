@@ -578,6 +578,10 @@ fn print_finding {l:agz}{n:pos}{lc:agz}
       val () = prerr! ("dependency ")
       val () = prerr_seg(bv, a, b, n)
     in prerr! (" is not at an exact version: no range, tag or *") end
+    else if code = 20 then let
+      val () = prerr! ("uses '")
+      val () = prerr_seg(bv, a, b, n)
+    in prerr! ("' is pinned by commit and is in no workflow-pins list of the relock caller (relock.yml): the daily relock never moves it") end
     else if code = 11 then prerr! ("unpinned: the exception exempts nothing: remove it")
     else if code = 12 then prerr! ("unpinned: an exception needs a reason after the colon")
     else if code = 13 then prerr! ("ATS2_SHA256 is not a SHA-256 (#define ATS2_SHA256 followed by 64 lowercase hex digits in quotes)")
@@ -866,6 +870,120 @@ fun ats2_among {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
     else ats2_among(cmd, z + 1, total)
   end
 
+(* Where the argument named relock.yml among cmd[p, total) starts, or ~1 for none (keyword: relock-pins) *)
+fun relock_among {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
+  (cmd: !$A.borrow(byte, lc, 4096), p: int p, total: int): [r:int | r == ~1 || (0 <= r && r <= 4096)] int r =
+  if p >= total then ~1
+  else let
+    val z = find_nul(cmd, p)
+  in
+    if named_file(cmd, p, z, "relock.yml", 10) then p
+    else if z + 1 > 4096 then ~1
+    else relock_among(cmd, z + 1, total)
+  end
+
+(* Whether v[a1, b1) and r[a2, b2) are the same text *)
+fun text_equal {l1:agz}{n1:pos}{l2:agz}{n2:pos}{a1,b1,a2,b2:nat | a1 <= b1; b1 <= n1; a2 <= b2; b2 <= n2} .<b1 - a1>.
+  (v1: !$A.borrow(byte, l1, n1), a1: int a1, b1: int b1, n1: int n1,
+   v2: !$A.borrow(byte, l2, n2), a2: int a2, b2: int b2, n2: int n2): bool =
+  if a1 >= b1 then a2 >= b2
+  else if a2 >= b2 then false
+  else if read_byte(v1, a1, n1) <> read_byte(v2, a2, n2) then false
+  else text_equal(v1, a1 + 1, b1, n1, v2, a2 + 1, b2, n2)
+
+(* Whether the workflow-pins block among the lines of the relock caller r[p, nb) lists the name v[a, b); key_indent is the
+   indent of the workflow-pins key whose block is open, or ~1 for none: the block is the lines indented deeper than the key *)
+fun listed_from {l:agz}{n:pos}{lr:agz}{nr:pos}{a,b:nat | a <= b; b <= n}{p,nb:nat | p <= nb; nb <= nr} .<nb - p>.
+  (v: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n,
+   r: !$A.borrow(byte, lr, nr), p: int p, nb: int nb, nr: int nr, key_indent: int): bool = let
+  val le = line_end(r, p, nb, nr)
+  val cs = skip_blank(r, p, le, nr)
+  val in_block = (if key_indent < 0 then false else if cs >= le then false else cs - p > key_indent): bool
+  val hit = (if in_block then text_equal(v, a, b, n, r, cs, trim_end(r, cs, le, nr), nr) else false): bool
+  val opens = (if in_block then false else if cs >= le then false
+    else lit_from(r, cs, le, nr, "workflow-pins:", 14, 0)): bool
+  val key2 = (if in_block then key_indent else if cs >= le then key_indent else if opens then cs - p else ~1): int
+in
+  if hit then true
+  else if le >= nb then false
+  else listed_from(v, a, b, n, r, le + 1, nb, nr, key2)
+end
+
+(* 1 and the finding when the uses: value v[a, b) is a bats-lang pin by commit that the relock caller r[0, rnb) lists in no workflow-pins *)
+fn pin_judge {l:agz}{n:pos}{lr:agz}{nr:pos}{lc:agz}{rnb:nat | rnb <= nr}{a,b:nat | a <= b; b <= n}
+  (bv: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n,
+   rv: !$A.borrow(byte, lr, nr), rnb: int rnb, nr: int nr,
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, number: int): int =
+  if ~is_pinned(bv, a, b, n) then 0
+  else if ~lit_from(bv, a, b, n, "bats-lang/", 10, 0) then 0
+  else let
+    val at = find_byte(bv, a, b, n, 64)
+  in
+    if listed_from(bv, a, at, n, rv, 0, rnb, nr, ~1) then 0
+    else let
+      val () = print_finding(bv, n, cmd, file_at, file_to, number, 20, a, at)
+    in 1 end
+  end
+
+(* The number of findings of the line bv[ls, le) as a uses: of a pin the relock caller does not list *)
+fn pin_line {l:agz}{n:pos}{lr:agz}{nr:pos}{lc:agz}{rnb:nat | rnb <= nr}{ls,le:nat | ls <= le; le <= n}
+  (bv: !$A.borrow(byte, l, n), ls: int ls, le: int le, n: int n,
+   rv: !$A.borrow(byte, lr, nr), rnb: int rnb, nr: int nr,
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, number: int): int = let
+  val k = uses_value(bv, ls, le, n)
+in
+  if k < 0 then 0
+  else let
+    val v = skip_blank(bv, k, le, n)
+    val c = find_comment(bv, v, v, le, n)
+    val e = trim_end(bv, v, c, n)
+  in
+    if e - v >= 2 then
+      (if read_byte(bv, v, n) = read_byte(bv, e - 1, n) && is_quote(read_byte(bv, v, n))
+      then pin_judge(bv, v + 1, e - 1, n, rv, rnb, nr, cmd, file_at, file_to, number)
+      else pin_judge(bv, v, e, n, rv, rnb, nr, cmd, file_at, file_to, number))
+    else pin_judge(bv, v, e, n, rv, rnb, nr, cmd, file_at, file_to, number)
+  end
+end
+
+(* The number of findings among the lines of bv[p, nb) as pins the relock caller does not list, found so far *)
+fun pin_lines {l:agz}{n:pos}{lr:agz}{nr:pos}{lc:agz}{rnb:nat | rnb <= nr}{p,nb:nat | p <= nb; nb <= n} .<nb - p>.
+  (bv: !$A.borrow(byte, l, n), p: int p, nb: int nb, n: int n,
+   rv: !$A.borrow(byte, lr, nr), rnb: int rnb, nr: int nr,
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, number: int, found: int): int = let
+  val le = line_end(bv, p, nb, n)
+  val here = found + pin_line(bv, p, le, n, rv, rnb, nr, cmd, file_at, file_to, number)
+in
+  if le >= nb then here
+  else pin_lines(bv, le + 1, nb, n, rv, rnb, nr, cmd, file_at, file_to, number + 1, here)
+end
+
+(* The number of findings of the workflow or action bv[0, nbytes) named cmd[file_at, file_to) as a bats-lang pin by commit that the
+   relock caller named cmd[relock_at, ...) lists in no workflow-pins (keyword: relock-pins, bats#653); none without a relock caller *)
+fn unlisted_pins {l:agz}{n:pos}{nbytes:nat | nbytes <= n}{lc:agz}{ra:int}
+  (bv: !$A.borrow(byte, l, n), nbytes: int nbytes, n: int n,
+   cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, relock_at: int ra): int =
+  if relock_at < 0 then 0
+  else if relock_at > 4096 then 0
+  else let
+    val relock_to = find_nul(cmd, relock_at)
+    var path : $B.builder_v = $B.create()
+    val () = copy_to_builder_v(cmd, relock_at, relock_to, 4096, path)
+    val () = put_char_v(path, 0)
+    val @(path_a, path_len) = $B.into_arr(path)
+    val @(fz_p, bv_p) = $A.freeze<byte>(path_a)
+    val count = (case+ read_whole_m(bv_p, path_len) of
+      | ~whole_err(_) => 0
+      | ~whole_ok(ar, piece, m, rbytes) => let
+          val @(fz, rv) = $A.freeze<byte>(piece)
+          val made = pin_lines(bv, 0, nbytes, n, rv, rbytes, m, cmd, file_at, file_to, 1, 0)
+          val () = $A.drop<byte>(fz, rv)
+          val () = whole_free(ar, $A.thaw<byte>(fz))
+        in made end): int
+    val () = $A.drop<byte>(fz_p, bv_p)
+    val () = $A.free<byte>($A.thaw<byte>(fz_p))
+  in count end
+
 (* Whether the file name is in the directory cmd[file_at, dir_to) (the path of the directory ends with its slash, or is empty for the current directory) *)
 fn file_in {lc:agz}{sn:nat}
   (cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, dir_to: pos_t, name: string sn, name_len: int sn): bool = let
@@ -1060,7 +1178,11 @@ fn check_text {l:agz}{n:pos}{lc:agz}{nbytes:nat | nbytes <= n}{lf:int}
         val () = print_finding(bv, n, cmd, file_at, file_to, 1, 14, 0, 0)
       in 1 end): int
   in missing_sha + missing_url end
-  else yaml_lines(bv, 0, nbytes, n, cmd, file_at, file_to, 1, ats2_named, @(0, 0, 0, 0, 0, 0))
+  else let
+    val relock = (if list_from < 0 then ~1 else if list_from > 4096 then ~1
+      else relock_among(cmd, list_from, total)): [r:int] int r
+    val walked = yaml_lines(bv, 0, nbytes, n, cmd, file_at, file_to, 1, ats2_named, @(0, 0, 0, 0, 0, 0))
+  in walked + unlisted_pins(bv, nbytes, n, cmd, file_at, file_to, relock) end
 
 (* The status of the file named cmd[file_at, file_to): 0 clean, 1 findings, 2 unreadable *)
 fn check_file {lc:agz}{lf:int}
