@@ -878,7 +878,7 @@ fun ats2_among {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
     else ats2_among(cmd, z + 1, total)
   end
 
-(* Where the argument named relock.yml among cmd[p, total) starts, or ~1 for none (keyword: relock-pins) *)
+(* Where the argument named relock.yml among cmd[p, total) starts, or ~1 for none (keyword: check-pins) *)
 fun relock_among {lc:agz}{p:nat | p <= 4096} .<4096 - p>.
   (cmd: !$A.borrow(byte, lc, 4096), p: int p, total: int): [r:int | r == ~1 || (0 <= r && r <= 4096)] int r =
   if p >= total then ~1
@@ -899,8 +899,7 @@ fun text_equal {l1:agz}{n1:pos}{l2:agz}{n2:pos}{a1,b1,a2,b2:nat | a1 <= b1; b1 <
   else if read_byte(v1, a1, n1) <> read_byte(v2, a2, n2) then false
   else text_equal(v1, a1 + 1, b1, n1, v2, a2 + 1, b2, n2)
 
-(* Whether the workflow-pins block among the lines of the relock caller r[p, nb) lists the name v[a, b); key_indent is the
-   indent of the workflow-pins key whose block is open, or ~1 for none: the block is the lines indented deeper than the key *)
+(* Whether the workflow-pins block among the relock caller's lines r[p, nb) lists the name v[a, b), key_indent the open key's indent or ~1 (keyword: check-pins) *)
 fun listed_from {l:agz}{n:pos}{lr:agz}{nr:pos}{a,b:nat | a <= b; b <= n}{p,nb:nat | p <= nb; nb <= nr} .<nb - p>.
   (v: !$A.borrow(byte, l, n), a: int a, b: int b, n: int n,
    r: !$A.borrow(byte, lr, nr), p: int p, nb: int nb, nr: int nr, key_indent: int): bool = let
@@ -966,8 +965,7 @@ in
   else pin_lines(bv, le + 1, nb, n, rv, rnb, nr, cmd, file_at, file_to, number + 1, here)
 end
 
-(* The number of findings of the workflow or action bv[0, nbytes) named cmd[file_at, file_to) as a bats-lang pin by commit that the
-   relock caller named cmd[relock_at, ...) lists in no workflow-pins (keyword: relock-pins, bats#653); none without a relock caller *)
+(* The findings of bv[0, nbytes) for a bats-lang pin by commit that the relock caller cmd[relock_at, ...) lists in no workflow-pins (keyword: check-pins) *)
 fn unlisted_pins {l:agz}{n:pos}{nbytes:nat | nbytes <= n}{lc:agz}{ra:int}
   (bv: !$A.borrow(byte, l, n), nbytes: int nbytes, n: int n,
    cmd: !$A.borrow(byte, lc, 4096), file_at: pos_t, file_to: pos_t, relock_at: int ra): int =
