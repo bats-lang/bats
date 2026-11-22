@@ -1,0 +1,7 @@
+jobs:
+  relock:
+    uses: bats-lang/repository-prototype/.github/workflows/relock-pins.yml@11d5960a326750d5838078e36cf38b85af677262 # repository-prototype main 11d5960
+    with:
+      workflow-pins: |
+        bats-lang/repository-prototype/.github/workflows/relock-pins.yml
+        bats-lang/repository-prototype/.github/workflows/canonical-files-check.yml
